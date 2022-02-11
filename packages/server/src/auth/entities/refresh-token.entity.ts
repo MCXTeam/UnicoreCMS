@@ -39,6 +39,9 @@ export class RefreshToken {
   @JoinColumn()
   user: User;
 
+  @Column()
+  expires: Date;
+
   @UpdateDateColumn()
   updated: Date;
 

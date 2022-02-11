@@ -5,6 +5,7 @@ import { NewsModule } from './news/news.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { LogModule } from './logs/logs.module';
 import { ConfigModule } from './config/config.module';
+import { WebhookModule } from './webhook/webhook.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { ConfigModule } from './config/config.module';
     DashboardModule,
     LogModule,
     ConfigModule,
+    WebhookModule
   ],
 })
 export class AdminModule {}

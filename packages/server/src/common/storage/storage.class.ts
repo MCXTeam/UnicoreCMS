@@ -5,7 +5,7 @@ import { DiskStorageOptions } from 'multer';
 import { diskStorage } from 'multer';
 import { Request } from 'express';
 
-const destination = './storage';
+const destination = '../../storage';
 
 export class StorageManager {
   /**

@@ -1,8 +1,5 @@
-import { applyDecorators } from '@nestjs/common';
-import { Permission } from '../enums/permissions.enum';
+import { SetMetadata } from '@nestjs/common';
+import { PermissionArgs } from '../guards/permisson.guard';
 
-type PermissionArgs = [...Permission[]] | [[...Permission[]], boolean]; // Or condition
-
-export function Auth(...args: PermissionArgs) {
-  return applyDecorators();
-}
+export const PERMISSIONS_KEY = 'permissions';
+export const Permissions = (args: PermissionArgs) => SetMetadata(PERMISSIONS_KEY, args);

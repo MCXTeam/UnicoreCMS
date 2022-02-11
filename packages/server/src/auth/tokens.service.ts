@@ -1,19 +1,23 @@
-import { UnprocessableEntityException, Injectable, UnauthorizedException } from '@nestjs/common'
+import { UnprocessableEntityException, Injectable, UnauthorizedException, Inject } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { TokenExpiredError } from 'jsonwebtoken'
 import { User } from 'src/admin/users/entities/user.entity'
 import { UsersService } from 'src/admin/users/users.service'
-import { Repository } from 'typeorm'
-import { envConfig } from 'zirconia-common'
+import { MoreThanOrEqual, Repository } from 'typeorm'
+import { envConfig } from 'unicore-common'
 import { RefreshToken } from './entities/refresh-token.entity'
 import { JWTPayload, JWTRefreshPayload } from './interfaces/jwt-payload'
 import { v4 as uuidv4 } from 'uuid';
 import { AuthenticatedDto } from './dto/authenticated.dto'
 import { InjectRepository } from '@nestjs/typeorm'
+import * as ms from 'ms'
+import { MomentWrapper } from '@common'
 
 @Injectable()
 export class TokensService {
   constructor(
+    @Inject('moment')
+    private moment: MomentWrapper,
     @InjectRepository(RefreshToken)
     private tokensRepository: Repository<RefreshToken>,
     private usersService: UsersService,
@@ -31,7 +35,8 @@ export class TokensService {
   }
 
   async generateRefreshToken(user: User, agent?: string, ip?: string): Promise<string> {
-    const token = await this.tokensRepository.save({ agent, ip, user })
+    const expires = this.moment().add(ms(envConfig.jwtRefreshExpires), 'milliseconds').local().toDate()
+    const token = await this.tokensRepository.save({ agent, ip, user, expires })
 
     const payload: JWTRefreshPayload = {
       sub: user.uuid,
@@ -78,7 +83,8 @@ export class TokensService {
   async resolveRefreshToken(encoded: string): Promise<{ user: User, token: RefreshToken }> {
     const payload = await this.decodeRefreshToken(encoded)
     const token = await this.tokensRepository.findOne({
-      uuid: payload.jwtid
+      uuid: payload.jwtid,
+      expires: MoreThanOrEqual(this.moment().toDate())
     })
 
     if (!token) {

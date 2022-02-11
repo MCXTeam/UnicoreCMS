@@ -8,7 +8,7 @@
       @keydown="onKeyDown"
     />
     <a href="https://www.primefaces.org/primeblocks-vue" class="block mt-3">
-      <img alt="primeblocks" src="" class="w-full" />
+      <img alt="unicoredocs" src="" class="w-full" />
     </a>
   </div>
 </template>

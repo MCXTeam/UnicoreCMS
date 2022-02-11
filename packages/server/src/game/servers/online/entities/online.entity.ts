@@ -6,8 +6,8 @@ export class Online {
   @Column({ nullable: true })
   online: boolean;
 
-  @Column('simple-array', { default: '' })
-  players: string[];
+  @Column({ nullable: true })
+  players: number;
 
   @Column({ nullable: true })
   maxplayers: number;

@@ -10,12 +10,13 @@
     "strict": true,
     "noEmit": true,
     "experimentalDecorators": true,
+    "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
       "~/*": ["./*"],
       "@/*": ["./*"]
     },
-    "types": ["@nuxt/types", "@types/node", "@nuxtjs/auth-next",]
+    "types": ["@nuxt/types", "@types/node", "@nuxtjs/auth-next", "@nuxtjs/moment"]
   },
   "extends": "../../tsconfig.json",
   "exclude": ["node_modules", ".nuxt", "dist"]

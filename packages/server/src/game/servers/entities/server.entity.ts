@@ -39,13 +39,17 @@ export class Server {
   @Column({ nullable: true })
   image: string;
 
-  @OneToOne(() => Online, (online) => online.server)
-  online?: Online;
+  @OneToOne(() => Online, (online) => online.server, {
+    cascade: ['insert', 'update'],
+  })
+  online: Online;
 
-  @OneToOne(() => Query, (query) => query.server)
-  query?: Query;
+  @OneToOne(() => Query, (query) => query.server, {
+    cascade: ['insert', 'update'],
+  })
+  query: Query;
 
-  @ManyToMany(() => Mod)
+  @ManyToMany(() => Mod, (mod) => mod.servers)
   @JoinTable()
   mods?: Mod[];
 

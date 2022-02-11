@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-discord';
-import { envConfig } from 'zirconia-common';
+import { envConfig } from 'unicore-common';
 import { OauthProvider } from './oauth-providers';
 
 @Injectable()

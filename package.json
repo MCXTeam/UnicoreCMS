@@ -1,12 +1,12 @@
 {
-  "name": "zirconia-cms",
+  "name": "unicore-cms",
   "private": true,
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
-    "dev": "npm run build --workspace=zirconia-common && lerna run dev --parallel --no-bail",
-    "build": "npm run build -w zirconia-common && lerna run build --stream --parallel",
+    "dev": "npm run build --workspace=unicore-common && lerna run dev --parallel --no-bail",
+    "build": "npm run build -w unicore-common && lerna run build --stream --parallel",
     "start": "lerna run start --parallel --no-bail",
     "lint": "lerna run lint --parallel",
     "format": "lerna run format --parallel"
@@ -16,10 +16,14 @@
     "@types/passport-local": "^1.0.34",
     "lerna": "^4.0.0",
     "typescript": "^4.5.5",
-    "zirconia-server": "file:packages/server"
+    "unicore-admin": "file:packages/admin",
+    "unicore-client": "file:packages/client",
+    "unicore-common": "file:packages/common",
+    "unicore-server": "file:packages/server"
   },
   "dependencies": {
     "@nestjs/jwt": "^8.0.0",
-    "passport-jwt": "^4.0.0"
+    "passport-jwt": "^4.0.0",
+    "vk-io": "^4.4.0"
   }
 }

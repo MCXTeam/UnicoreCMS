@@ -11,6 +11,7 @@ import { Onlines } from './dto/onlines.dto';
 import { OnlinesRecord } from './entities/onlines-record.entity';
 import { OnlinesAbsoluteRecord } from './entities/onlines-absolute-record.entity';
 import { RecordOnlineInterface } from './interfaces/record-online.interface';
+import { classToPlain } from 'class-transformer';
 
 @Injectable()
 export class OnlineService {
@@ -23,18 +24,20 @@ export class OnlineService {
     private onlinesAbsoluteRecordsRepository: Repository<OnlinesAbsoluteRecord>,
   ) { }
 
-  async findAll(): Promise<Onlines> {
-    const servers = await this.onlineRepository.find()
-    const record = await this.onlinesRecordsRepository.findOne({ 
+  async find(): Promise<Onlines> {
+    const servers = await this.onlineRepository.find({
+      relations: ["server"]
+    })
+    const record = await this.onlinesRecordsRepository.findOne({
       order: { created: 'DESC' },
       where: { created: MoreThanOrEqual(moment().startOf('day').toDate()) }
     })
     const absolute = await this.onlinesAbsoluteRecordsRepository.findOne({ order: { online: 'DESC' } })
 
-    return { 
+    return {
       servers,
       total: {
-        online: _(servers).map(serv => serv.players.length).sum(),
+        online: _(servers).map(serv => serv.players).sum(),
         records: {
           today: {
             online: record?.online || 0,
@@ -50,10 +53,15 @@ export class OnlineService {
   }
 
   async updateOnlinesRecords(): Promise<Onlines> {
-    const onlines: Onlines = await this.findAll()
+    const onlines: Onlines = await this.find()
     let today: RecordOnlineInterface
     let absolute: RecordOnlineInterface
-    
+
+    const id = (await this.onlinesRecordsRepository.findOne({
+      order: { created: 'DESC' },
+      where: { created: MoreThanOrEqual(moment().startOf('day').toDate()) }
+    }))?.id
+
     // Update absolute record
     if (onlines.total.online > onlines.total.records.absolute.online) {
       const entity = await this.onlinesAbsoluteRecordsRepository.save({ online: onlines.total.online })
@@ -61,13 +69,13 @@ export class OnlineService {
     }
 
     // Update today record
-    if (onlines.total.online > onlines.total.records.today.online) {
-      if (moment(onlines.total.records.today.created).isSame(moment(), 'day')) {
+    if (onlines.total.online > onlines.total.records.today.online ) {
+      if (moment(onlines.total.records.today.created).isSame(moment(), 'day') && id) {
         await this.onlinesRecordsRepository.createQueryBuilder()
           .createQueryBuilder()
           .update(OnlinesRecord)
           .set({ online: onlines.total.online })
-          .where('created = :created', { created: onlines.total.records.today.created })
+          .where('id = :id', { id })
           .execute()
 
         today = {
@@ -111,37 +119,37 @@ export class OnlineService {
     if (onlineState) {
       online = {
         maxplayers: onlineState.maxplayers,
-        players: onlineState.players.map(player => player.name),
+        players: onlineState.players.length,
         online: true
       }
     } else {
       online = {
         maxplayers: 0,
-        players: [],
+        players: 0,
         online: false
       }
     }
 
-    if (!_.isEqual(server.online, {...server.online, ...online})) {
+    if (!_.isEqual(classToPlain(server.online), { ...server.online, ...online })) {
       var record: number = server.online.record
       var record_today: number = server.online.record_today
 
-      if (online.players.length > server.online.record) {
-        record = online.players.length
+      if (online.players > server.online.record) {
+        record = online.players
       }
 
-      if (online.players.length > server.online.record_today || !moment().isSame(server.online.updated, 'd')) {
-        record_today = online.players.length
+      if (online.players > server.online.record_today || !moment().isSame(server.online.updated, 'd')) {
+        record_today = online.players
       }
 
       await this.onlineRepository.createQueryBuilder()
         .createQueryBuilder()
         .update(Online)
         .set({ ...online, record, record_today })
-        .where('id = :id', { id: server.id })
+        .where('server_id = :id', { id: server.id })
         .execute()
 
-      server.online = {...server.online, ...online}
+      server.online = { ...server.online, ...online }
 
       return {
         instance: server,

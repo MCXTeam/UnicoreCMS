@@ -1,7 +1,9 @@
 export class RoleDTO {
-  id: number;
+  id: string;
 
   name: string;
 
   perms: string[];
+
+  priority: number
 }

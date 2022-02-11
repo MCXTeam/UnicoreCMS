@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { envConfig } from 'zirconia-common';
+import { envConfig } from 'unicore-common';
 import { NamingStrategy } from '@common';
 import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
@@ -12,6 +12,9 @@ import {
 } from '@nestlab/google-recaptcha';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
+import { MomentModule } from './moment';
+import { EventsModule } from './events/events.module';
+import { IntegrationsModule } from './admin/integrations/integrations.module';
 
 @Module({
   imports: [
@@ -25,17 +28,22 @@ import { ScheduleModule } from '@nestjs/schedule';
       entities: ['./**/*.entity.js'],
       namingStrategy: new NamingStrategy(),
       synchronize: true,
+      // logging: true
     }),
     GoogleRecaptchaModule.forRoot({
       secretKey: envConfig.recaptchaSecret,
       response: (req) => req.headers.recaptcha,
       // skipIf: process.env.NODE_ENV !== 'production',
+      actions: ['login'],
       network: GoogleRecaptchaNetwork.Recaptcha,
     }),
     ThrottlerModule.forRoot({
       ttl: 60,
       limit: 10,
     }),
+    MomentModule,
+    IntegrationsModule,
+    EventsModule,
     ScheduleModule.forRoot(),
     AuthModule,
     AdminModule,
@@ -45,4 +53,4 @@ import { ScheduleModule } from '@nestjs/schedule';
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }

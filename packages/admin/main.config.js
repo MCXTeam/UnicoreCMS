@@ -1,11 +1,11 @@
 import merge from 'deepmerge'
-import { envConfig } from 'zirconia-common'
+import { envConfig } from 'unicore-common'
 import ms from 'ms'
 
 export default (config) => merge({
   // Глобальные заголовки страниц: https://go.nuxtjs.dev/config-head
   head: {
-    title: 'ZirconiaCMS',
+    title: 'UnicoreCMS',
     htmlAttrs: {
       lang: 'ru',
     },
@@ -18,11 +18,19 @@ export default (config) => merge({
     link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
   },
 
+  server: {
+    port: envConfig.frontendPort,
+  },
+
   // Глобальный CSS: https://go.nuxtjs.dev/config-css
   css: [],
 
   // Плагины для запуска перед рендерингом страницы: https://go.nuxtjs.dev/config-plugins
-  plugins: [],
+  plugins: [
+    { src: '../admin/plugins/vee-validate.ts', mode: 'client' },
+    { src: '../admin/plugins/lodash.ts' },
+    { src: '../admin/plugins/moment.ts' }
+  ],
 
   // Автоматический импорт компонентов: https://go.nuxtjs.dev/config-components
   components: true,
@@ -31,23 +39,44 @@ export default (config) => merge({
   buildModules: [
     // https://go.nuxtjs.dev/typescript
     '@nuxt/postcss8',
+    '@nuxtjs/moment',
     '@nuxt/typescript-build',
   ],
 
   // Модули: https://go.nuxtjs.dev/config-modules
   modules: [
     '@nuxtjs/axios',
-    '@nuxtjs/auth-next'
+    '@nuxtjs/auth-next',
+    '@nuxtjs/recaptcha',
+    'nuxt-socket-io'
   ],
 
   axios: {
     baseURL: envConfig.apiBaseurl,
   },
 
+  io: {
+    sockets: [
+      {
+        url: envConfig.apiBaseurl,
+        vuex: {
+          actions: [
+            'servers/online --> io/serversOnline',
+          ],
+        }
+      },
+    ]
+  },
+
+  recaptcha: {
+    siteKey: envConfig.recaptchaPublic,
+    version: 3
+  },
+
   auth: {
     strategies: {
       local: {
-        scheme: 'zirconia-admin/schemes/core',
+        scheme: 'unicore-admin/schemes/core',
         token: {
           property: 'accessToken',
           maxAge: ms(envConfig.jwtExpires) / 1000,
@@ -69,6 +98,18 @@ export default (config) => merge({
         }
       }
     },
+  },
+
+  moment: {
+    /* module options */
+    defaultLocale: 'ru',
+    locales: ['ru'],
+    defaultTimezone: 'Europe/Moscow',
+    timezone: true,
+  },
+
+  publicRuntimeConfig: {
+    apiUrl: envConfig.apiBaseurl
   },
 
   // Конфигурация сборки: https://go.nuxtjs.dev/config-build

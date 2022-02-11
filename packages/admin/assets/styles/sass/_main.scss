@@ -46,3 +46,8 @@ a {
 .layout-leave-to {
     opacity: 0;
 }
+
+.p-autocomplete .p-autocomplete-multiple-container {
+    flex-wrap: wrap; 
+    gap: 5px;
+}

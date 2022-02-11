@@ -25,7 +25,8 @@ export class AuthService {
         throw new UnauthorizedException()
       }
 
-      const valid = this.validateCredentials(user, password)
+      const valid = await this.validateCredentials(user, password)
+
       if (!valid) {
         throw new UnauthorizedException()
       }

@@ -1,13 +1,17 @@
-import mainConfig from 'zirconia-admin/main.config'
-import { envConfig } from 'zirconia-common'
+import mainConfig from 'unicore-admin/main.config'
 
 export default mainConfig({
-  server: {
-    port: envConfig.frontendPort,
-  },
+  css: [
+    'normalize.css/normalize.css',
+    'vuesax/dist/vuesax.css',
+    'flag-icons/sass/flag-icons.scss',
+    '~assets/style/main.scss',
+    '~assets/fonts/main.scss'
+  ],
 
   buildModules: [
-    // https://go.nuxtjs.dev/tailwindcss
-    '@nuxtjs/tailwindcss',
+    '@nuxtjs/color-mode'
   ],
+
+  plugins: ['~/plugins/vuesax.ts'],
 })

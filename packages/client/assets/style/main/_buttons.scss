@@ -1,0 +1,19 @@
+.vs-button {
+  border-radius: 6px;
+}
+ 
+.vs-button--size-xl > .vs-button__content {
+  padding: 10px 15px;
+  text-transform: uppercase;
+  font-weight: 500;
+
+  i {
+    font-size: 2rem;
+  }
+}
+
+.dark-mode {
+  .vs-button--default {
+    color: rgba($color: #000000, $alpha: 0.9);
+  }
+}

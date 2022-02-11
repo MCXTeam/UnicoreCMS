@@ -1,11 +1,13 @@
 export interface StatGroup {
   date: Date,
-  count: number
+  count?: number
   amount?: number
 }
 
 export interface StatInterface {
-  days: StatGroup
-  weeks: StatGroup
-  mounths: StatGroup
+  days: StatGroup[],
+  months: StatGroup[],
+  count?: number
+  amount?: number
+  date?: Date
 }

@@ -1,5 +1,5 @@
 import { ValidateBy, ValidationOptions, buildMessage } from 'class-validator';
-import { IS_USERNAME, isUsername } from 'zirconia-common';
+import { IS_USERNAME, isUsername } from 'unicore-common';
 
 /**
  * Проверяет, является ли строка логином.

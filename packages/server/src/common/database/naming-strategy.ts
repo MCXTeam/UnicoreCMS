@@ -8,7 +8,7 @@ export class NamingStrategy
   implements NamingStrategyInterface
 {
   tableName(className: string, customName: string): string {
-    return customName || `zirconia_${pluralize(snakeCase(className))}`;
+    return customName || `unicore_${pluralize(snakeCase(className))}`;
   }
 
   columnName(

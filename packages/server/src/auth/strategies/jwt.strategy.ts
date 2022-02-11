@@ -1,7 +1,7 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
-import { envConfig } from 'zirconia-common';
+import { envConfig } from 'unicore-common';
 import { JWTPayload } from '../interfaces/jwt-payload';
 import { UsersService } from 'src/admin/users/users.service';
 

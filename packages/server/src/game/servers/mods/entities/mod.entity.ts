@@ -22,7 +22,7 @@ export class Mod {
   @Column({ nullable: true })
   icon: string;
 
-  @ManyToMany(() => Server, {
+  @ManyToMany(() => Server, (server) => server.mods, {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',

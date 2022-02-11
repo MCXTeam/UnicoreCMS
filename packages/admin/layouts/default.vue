@@ -1,6 +1,8 @@
 <template>
   <div :class="containerClass" @click="onWrapperClick">
-    <AppTopbar @menu-toggle="onMenuToggle"  />
+    <Toast />
+    <ConfirmDialog />
+    <AppTopbar @menu-toggle="onMenuToggle" />
     <div class="layout-sidebar" @click="onSidebarClick">
       <AppMenu :model="menu" @menuitem-click="onMenuItemClick" />
     </div>
@@ -11,7 +13,10 @@
       <AppFooter />
     </div>
     <transition name="layout-mask">
-        <div class="layout-mask p-component-overlay" v-if="mobileMenuActive"></div>
+      <div
+        class="layout-mask p-component-overlay"
+        v-if="mobileMenuActive"
+      ></div>
     </transition>
   </div>
 </template>
@@ -30,145 +35,130 @@ export default {
           items: [
             {
               label: 'Панель управления',
-              icon: 'pi pi-fw pi-home',
+              icon: 'pi pi-fw pi-chart-bar',
               to: '/',
             },
+            {
+              label: 'Пользователи',
+              icon: 'pi pi-fw pi-users',
+              to: '/users',
+            },
+            {
+              label: 'Роли',
+              icon: 'pi pi-fw pi-lock',
+              to: '/roles',
+            },
+            {
+              label: 'Настройки',
+              icon: 'pi pi-fw pi-bars',
+              to: '/roles',
+            },
           ],
         },
         {
-          label: 'UI Components',
-          icon: 'pi pi-fw pi-sitemap',
+          label: 'Управление контентом',
           items: [
             {
-              label: 'Form Layout',
-              icon: 'pi pi-fw pi-id-card',
-              to: '/formlayout',
-            },
-            { label: 'Input', icon: 'pi pi-fw pi-check-square', to: '/input' },
-            {
-              label: 'Float Label',
-              icon: 'pi pi-fw pi-bookmark',
-              to: '/floatlabel',
-            },
-            {
-              label: 'Invalid State',
-              icon: 'pi pi-fw pi-exclamation-circle',
-              to: '/invalidstate',
-            },
-            { label: 'Button', icon: 'pi pi-fw pi-mobile', to: '/button' },
-            { label: 'Table', icon: 'pi pi-fw pi-table', to: '/table' },
-            { label: 'List', icon: 'pi pi-fw pi-list', to: '/list' },
-            { label: 'Tree', icon: 'pi pi-fw pi-share-alt', to: '/tree' },
-            { label: 'Panel', icon: 'pi pi-fw pi-tablet', to: '/panel' },
-            { label: 'Overlay', icon: 'pi pi-fw pi-clone', to: '/overlay' },
-            { label: 'Media', icon: 'pi pi-fw pi-image', to: '/media' },
-            { label: 'Menu', icon: 'pi pi-fw pi-bars', to: '/menu' },
-            { label: 'Message', icon: 'pi pi-fw pi-comment', to: '/messages' },
-            { label: 'File', icon: 'pi pi-fw pi-file', to: '/file' },
-            { label: 'Chart', icon: 'pi pi-fw pi-chart-bar', to: '/chart' },
-            { label: 'Misc', icon: 'pi pi-fw pi-circle-off', to: '/misc' },
-          ],
-        },
-        {
-          label: 'PrimeBlocks',
-          items: [
-            {
-              label: 'Free Blocks',
-              icon: 'pi pi-fw pi-eye',
+              label: 'Новости',
+              icon: 'pi pi-paperclip',
               to: '/blocks',
-              badge: 'NEW',
             },
             {
-              label: 'All Blocks',
-              icon: 'pi pi-fw pi-globe',
-              url: 'https://www.primefaces.org/primeblocks-vue',
-              target: '_blank',
+              label: 'Статические страницы',
+              icon: 'pi pi-sitemap',
+              to: '/blocks',
+            },
+            {
+              label: 'Серверы',
+              icon: 'pi pi-play',
+              to: '/servers',
+            },
+            {
+              label: 'Моды',
+              icon: 'pi pi-map-marker',
+              to: '/mods',
+            },
+            {
+              label: 'Правила',
+              icon: 'pi pi-book',
+              to: '/books',
             },
           ],
         },
         {
-          label: 'Utilities',
-          items: [
-            { label: 'PrimeIcons', icon: 'pi pi-fw pi-prime', to: '/icons' },
-            {
-              label: 'PrimeFlex',
-              icon: 'pi pi-fw pi-desktop',
-              url: 'https://www.primefaces.org/primeflex/',
-              target: '_blank',
-            },
-          ],
-        },
-        {
-          label: 'Pages',
-          icon: 'pi pi-fw pi-clone',
-          items: [
-            { label: 'Crud', icon: 'pi pi-fw pi-user-edit', to: '/crud' },
-            {
-              label: 'Timeline',
-              icon: 'pi pi-fw pi-calendar',
-              to: '/timeline',
-            },
-            { label: 'Landing', icon: 'pi pi-fw pi-globe', to: '/landing' },
-            { label: 'Login', icon: 'pi pi-fw pi-sign-in', to: '/login' },
-            { label: 'Error', icon: 'pi pi-fw pi-times-circle', to: '/error' },
-            {
-              label: 'Not Found',
-              icon: 'pi pi-fw pi-exclamation-circle',
-              to: '/notfound',
-            },
-            { label: 'Access Denied', icon: 'pi pi-fw pi-lock', to: '/access' },
-            { label: 'Empty', icon: 'pi pi-fw pi-circle-off', to: '/empty' },
-          ],
-        },
-        {
-          label: 'Menu Hierarchy',
-          icon: 'pi pi-fw pi-search',
+          label: 'E-Commerce',
           items: [
             {
-              label: 'Submenu 1',
-              icon: 'pi pi-fw pi-bookmark',
+              label: 'Донат',
+              icon: 'pi pi-fw pi-money-bill',
               items: [
                 {
-                  label: 'Submenu 1.1',
-                  icon: 'pi pi-fw pi-bookmark',
-                  items: [
-                    { label: 'Submenu 1.1.1', icon: 'pi pi-fw pi-bookmark' },
-                    { label: 'Submenu 1.1.2', icon: 'pi pi-fw pi-bookmark' },
-                    { label: 'Submenu 1.1.3', icon: 'pi pi-fw pi-bookmark' },
-                  ],
+                  label: 'Донат-группы',
+                  icon: 'pi pi-fw pi-users',
+                  to: '/icons',
                 },
                 {
-                  label: 'Submenu 1.2',
-                  icon: 'pi pi-fw pi-bookmark',
-                  items: [
-                    { label: 'Submenu 1.2.1', icon: 'pi pi-fw pi-bookmark' },
-                    { label: 'Submenu 1.2.2', icon: 'pi pi-fw pi-bookmark' },
-                  ],
+                  label: 'Донат-права',
+                  icon: 'pi pi-fw pi-money-bill',
+                  to: '/icons',
+                },
+                {
+                  label: 'Периоды',
+                  icon: 'pi pi-fw pi-calendar',
+                  to: '/icons',
                 },
               ],
             },
             {
-              label: 'Submenu 2',
-              icon: 'pi pi-fw pi-bookmark',
+              label: 'Магазин',
+              icon: 'pi pi-fw pi-shopping-cart',
               items: [
                 {
-                  label: 'Submenu 2.1',
-                  icon: 'pi pi-fw pi-bookmark',
-                  items: [
-                    { label: 'Submenu 2.1.1', icon: 'pi pi-fw pi-bookmark' },
-                    { label: 'Submenu 2.1.2', icon: 'pi pi-fw pi-bookmark' },
-                    { label: 'Submenu 2.1.3', icon: 'pi pi-fw pi-bookmark' },
-                  ],
+                  label: 'Каталог',
+                  icon: 'pi pi-fw pi-shopping-cart',
+                  to: '/icons',
                 },
                 {
-                  label: 'Submenu 2.2',
-                  icon: 'pi pi-fw pi-bookmark',
-                  items: [
-                    { label: 'Submenu 2.2.1', icon: 'pi pi-fw pi-bookmark' },
-                    { label: 'Submenu 2.2.2', icon: 'pi pi-fw pi-bookmark' },
-                  ],
+                  label: 'Киты',
+                  icon: 'pi pi-fw pi-briefcase',
+                  to: '/icons',
                 },
               ],
+            },
+            {
+              label: 'Промо-коды',
+              icon: 'pi pi-fw pi-dollar',
+              to: '/icons',
+            },
+            {
+              label: 'Голосование',
+              icon: 'pi pi-fw pi-volume-off',
+              to: '/icons',
+            },
+          ],
+        },
+        {
+          label: 'Утилиты',
+          items: [
+            {
+              label: 'Управление хранилищем',
+              icon: 'pi pi-fw pi-folder',
+              to: '/',
+            },
+            {
+              label: 'Слияние базы данных',
+              icon: 'pi pi-fw pi-clone',
+              to: '/users',
+            },
+            {
+              label: 'API-Ключи',
+              icon: 'pi pi-fw pi-reply',
+              to: '/users',
+            },
+            {
+              label: 'Вебхуки',
+              icon: 'pi pi-fw pi-link',
+              to: '/users',
             },
           ],
         },
@@ -242,7 +232,7 @@ export default {
         else if (this.layoutMode === 'overlay') return this.overlayMenuActive
       }
       return true
-    }
+    },
   },
   computed: {
     containerClass() {
@@ -260,7 +250,10 @@ export default {
           'p-ripple-disabled': this.$primevue.config.ripple === false,
         },
       ]
-    }
+    },
+  },
+  mounted() {
+    this.socket = this.$nuxtSocket({})
   },
   beforeUpdate() {
     if (this.mobileMenuActive)

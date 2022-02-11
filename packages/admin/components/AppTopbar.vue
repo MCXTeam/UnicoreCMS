@@ -2,7 +2,7 @@
   <div class="layout-topbar">
     <router-link to="/" class="layout-topbar-logo">
       <img alt="Logo" src="/logo.png" />
-      <span>ZIRCONIACMS</span>
+      <span>UNICORECMS</span>
     </router-link>
     <button
       class="p-link layout-menu-button layout-topbar-button"

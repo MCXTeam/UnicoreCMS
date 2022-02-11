@@ -1,11 +1,11 @@
 import mainConfig from './main.config'
-import { envConfig } from 'zirconia-common'
+import { envConfig } from 'unicore-common'
 
 export default mainConfig({
   ssr: false,
 
   head: {
-    titleTemplate: '%s - ZirconiaCMS',
+    titleTemplate: '%s - UnicoreCMS',
     title: 'Панель управления',
   },
 
@@ -14,11 +14,10 @@ export default mainConfig({
   },
 
   plugins: [
-    '~/plugins/primevue',
-    '~/assets/styles/layout.scss'
+    '~/plugins/primevue'
   ],
 
-  css: ['primeflex/primeflex.css'],
+  css: ['primeflex/primeflex.css', '~/assets/styles/layout.scss'],
 
   primevue: {
     theme: 'vela-purple',
@@ -44,6 +43,7 @@ export default mainConfig({
       'ConfirmDialog',
       'ConfirmPopup',
       'ContextMenu',
+      'ImagePreview',
       'DataTable',
       'DataView',
       'DataViewLayoutOptions',
@@ -99,7 +99,8 @@ export default mainConfig({
       'ToggleButton',
       'Tree',
       'TreeTable',
-      'TriStateCheckbox'
+      'TriStateCheckbox',
+      'Editor'
     ],
     directives: [
       'Tooltip',

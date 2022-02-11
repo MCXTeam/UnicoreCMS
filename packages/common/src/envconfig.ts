@@ -24,6 +24,8 @@ export interface EnvConfig {
   discordclientSecret: string;
   recaptchaSecret: string;
   recaptchaPublic: string;
+  vkLongpoll: boolean;
+  vkApiKey: string;
 }
 
 export const envConfig: EnvConfig = {
@@ -58,4 +60,8 @@ export const envConfig: EnvConfig = {
   // OAUTH
   discordClientID: env.get('DISCORD_CLIENT_ID').asString(),
   discordclientSecret: env.get('DISCORD_CLIENT_SECRET').asString(),
+
+  // VK Longpoll
+  vkLongpoll: env.get('VK_LONGPOLL').default(0).asBool(),
+  vkApiKey: env.get('VK_APIKEY').asString(),
 };

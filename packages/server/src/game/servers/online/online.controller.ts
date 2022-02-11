@@ -1,4 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
+import { Public } from 'src/auth/decorators/public.decorator';
 import { OnlineService } from './online.service';
 
 @Controller('servers/online')
@@ -7,8 +8,9 @@ export class OnlineController {
     private onlineService: OnlineService
   ) {}
 
+  @Public()
   @Get()
-  findAll() {
-    return this.onlineService.findAll()
+  find() {
+    return this.onlineService.find()
   }
 }

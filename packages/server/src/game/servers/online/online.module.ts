@@ -8,9 +8,11 @@ import { ServersService } from '../servers.service';
 import { Server } from '../entities/server.entity';
 import { OnlinesRecord } from './entities/onlines-record.entity';
 import { OnlinesAbsoluteRecord } from './entities/onlines-absolute-record.entity';
+import { Query } from './entities/query.entity';
+import { Mod } from '../mods/entities/mod.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Online, Server, OnlinesRecord, OnlinesAbsoluteRecord])],
+  imports: [TypeOrmModule.forFeature([Online, Server, OnlinesRecord, OnlinesAbsoluteRecord, Query, Mod])],
   providers: [OnlineService, OnlineTasks, ServersService],
   controllers: [OnlineController],
   exports: [OnlineService]

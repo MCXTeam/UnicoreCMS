@@ -1,4 +1,4 @@
-import { isUsername, IS_USERNAME_OR_EMAIL } from 'zirconia-common';
+import { isUsername, IS_USERNAME_OR_EMAIL } from 'unicore-common';
 import {
   ValidateBy,
   ValidationOptions,
