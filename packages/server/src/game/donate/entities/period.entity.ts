@@ -1,9 +1,4 @@
-import {
-  Column,
-  Entity,
-  ManyToMany,
-  PrimaryColumn,
-} from 'typeorm';
+import { Column, Entity, ManyToMany, PrimaryColumn } from 'typeorm';
 import { DonateGroup } from '../groups/entities/donate-group.entity';
 import { DonatePermission } from '../permissions/entities/donate-permission.entity';
 
@@ -16,10 +11,10 @@ export class Period {
   name: string;
 
   @Column({ nullable: true })
-  expire: number
+  expire: number;
 
   @Column({ nullable: true })
-  not_expire: boolean
+  not_expire: boolean;
 
   @ManyToMany(() => DonateGroup, (group) => group.periods, {
     cascade: true,

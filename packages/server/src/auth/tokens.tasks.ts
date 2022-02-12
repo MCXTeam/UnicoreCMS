@@ -1,4 +1,3 @@
-
 import { MomentWrapper } from '@common';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
@@ -8,7 +7,7 @@ import { RefreshToken } from './entities/refresh-token.entity';
 
 @Injectable()
 export class OnlineTasks {
-  constructor (
+  constructor(
     @Inject('moment')
     private moment: MomentWrapper,
     @InjectRepository(RefreshToken)
@@ -18,8 +17,8 @@ export class OnlineTasks {
   @Cron(CronExpression.EVERY_10_MINUTES)
   async clean() {
     const expiresTokens = await this.tokensRepository.find({
-      expires: LessThan(this.moment().toDate())
-    })
-    await this.tokensRepository.remove(expiresTokens)
+      expires: LessThan(this.moment().toDate()),
+    });
+    await this.tokensRepository.remove(expiresTokens);
   }
 }

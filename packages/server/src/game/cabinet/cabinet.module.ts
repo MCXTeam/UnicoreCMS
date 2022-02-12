@@ -8,14 +8,6 @@ import { VotesModule } from './votes/votes.module';
 import { SettingsModule } from './settings/settings.module';
 
 @Module({
-  imports: [
-    PlaytimeModule,
-    HistoryModule,
-    SkinModule,
-    ReferalsModule,
-    GiftsModule,
-    VotesModule,
-    SettingsModule,
-  ],
+  imports: [PlaytimeModule, HistoryModule, SkinModule, ReferalsModule, GiftsModule, VotesModule, SettingsModule],
 })
 export class CabinetModule {}

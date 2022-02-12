@@ -10,12 +10,8 @@ import { OnlinesRecord } from 'src/game/servers/online/entities/onlines-record.e
 import { Payment } from 'src/payment/entities/payment.entity';
 import { History } from 'src/game/cabinet/history/entities/history.entity';
 
-
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([OnlinesRecord, User, History, Payment]),
-    OnlineModule, PaymentModule, StoreModule
-  ],
+  imports: [TypeOrmModule.forFeature([OnlinesRecord, User, History, Payment]), OnlineModule, PaymentModule, StoreModule],
   providers: [DashboardService],
   controllers: [DashboardController],
 })

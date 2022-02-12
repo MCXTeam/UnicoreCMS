@@ -1,11 +1,11 @@
-import { IsDefined, IsOptional, IsString } from "class-validator";
+import { IsDefined, IsOptional, IsString } from 'class-validator';
 
 export class ModInput {
   @IsDefined()
   @IsString()
-  name: string
+  name: string;
 
   @IsOptional()
   @IsString()
-  description: string
+  description: string;
 }

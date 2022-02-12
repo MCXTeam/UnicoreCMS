@@ -1,13 +1,6 @@
 import { StorageManager } from '@common';
 import { User } from 'src/admin/users/entities/user.entity';
-import {
-  AfterRemove,
-  Column,
-  Entity,
-  JoinColumn,
-  OneToOne,
-  PrimaryColumn,
-} from 'typeorm';
+import { AfterRemove, Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class Skin {

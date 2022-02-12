@@ -12,19 +12,16 @@ import { EventsService } from './events.service';
   },
 })
 export class EventsGateway implements OnGatewayInit {
-  private logger = new Logger(EventsGateway.name)
+  private logger = new Logger(EventsGateway.name);
 
-  constructor (
-    private eventsService: EventsService,
-    private onlineService: OnlineService
-  ) {}
+  constructor(private eventsService: EventsService, private onlineService: OnlineService) {}
 
   @WebSocketServer()
   server: Server;
 
   afterInit() {
-    this.eventsService.server = this.server
-    this.logger.log("WebSocket server is initialized and running")
+    this.eventsService.server = this.server;
+    this.logger.log('WebSocket server is initialized and running');
   }
 
   @SubscribeMessage('servers/online')

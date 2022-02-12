@@ -1,4 +1,4 @@
-import { IsArray, IsDefined, IsInt, IsString } from "class-validator";
+import { IsArray, IsDefined, IsInt, IsString } from 'class-validator';
 
 export class RoleUpdateInput {
   @IsDefined()
@@ -11,5 +11,5 @@ export class RoleUpdateInput {
 
   @IsDefined()
   @IsInt()
-  priority: number
+  priority: number;
 }

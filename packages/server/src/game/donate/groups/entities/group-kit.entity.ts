@@ -1,22 +1,16 @@
 import { StorageManager } from '@common';
-import {
-  AfterRemove,
-  Column,
-  Entity,
-  ManyToMany,
-  PrimaryColumn,
-} from 'typeorm';
+import { AfterRemove, Column, Entity, ManyToMany, PrimaryColumn } from 'typeorm';
 import { DonateGroup } from './donate-group.entity';
 
 @Entity()
-export class Kit {
+export class GroupKit {
   @PrimaryColumn()
   id: string;
 
   @Column()
   name: string;
 
-  @Column({
+  @Column('text', {
     nullable: true,
   })
   description?: string;

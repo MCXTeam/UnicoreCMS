@@ -14,20 +14,13 @@ import { TokensService } from './tokens.service';
 @UseGuards(ThrottlerCoreGuard)
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private tokensService: TokensService,
-    private authService: AuthService
-  ) { }
+  constructor(private tokensService: TokensService, private authService: AuthService) {}
 
   @Public()
   @Recaptcha({ action: 'login' })
   @Post('login')
-  login(
-    @Body() input: LoginInput,
-    @UserAgent() agent: string,
-    @IpAddress() ip: string
-  ): Promise<AuthenticatedDto> {
-    return this.authService.login(input, agent, ip)
+  login(@Body() input: LoginInput, @UserAgent() agent: string, @IpAddress() ip: string): Promise<AuthenticatedDto> {
+    return this.authService.login(input, agent, ip);
   }
 
   @Public()
@@ -35,21 +28,19 @@ export class AuthController {
   refresh(
     @Body('refresh_token') token: string,
     @UserAgent() agent: string,
-    @IpAddress() ip: string
+    @IpAddress() ip: string,
   ): Promise<Omit<AuthenticatedDto, 'user'>> {
-    return this.tokensService.createTokensFromRefreshToken(token, agent, ip)
+    return this.tokensService.createTokensFromRefreshToken(token, agent, ip);
   }
 
   @Post('logout')
-  logout(
-    @Body('refresh_token') token: string
-  ): Promise<void> {
-    return this.tokensService.revokeRefreshToken(token)
+  logout(@Body('refresh_token') token: string): Promise<void> {
+    return this.tokensService.revokeRefreshToken(token);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
   me(@CurrentUser() user: User): UserDto {
-    return new UserDto(user)
+    return new UserDto(user);
   }
 }

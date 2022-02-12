@@ -4,5 +4,5 @@ export enum GiftType {
   Donate = 'donate',
   Permission = 'permission',
   Product = 'product',
-  Kit = 'kit'
+  Kit = 'kit',
 }

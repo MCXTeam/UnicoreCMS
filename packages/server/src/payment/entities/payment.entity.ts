@@ -1,13 +1,5 @@
 import { User } from 'src/admin/users/entities/user.entity';
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { PaymentMethod } from '../enums/payment-methods.enum';
 import { PaymentStatuses } from '../enums/payment-statuses.enum';
 
@@ -17,7 +9,7 @@ export class Payment {
   id: number;
 
   @Column()
-  method: PaymentMethod
+  method: PaymentMethod;
 
   @Column('decimal', {
     precision: 5,

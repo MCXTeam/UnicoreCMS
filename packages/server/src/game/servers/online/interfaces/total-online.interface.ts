@@ -1,7 +1,7 @@
-import { RecordsOnlineInterface } from "./record-online.interface";
+import { RecordsOnlineInterface } from './record-online.interface';
 
 export interface TotalOnlineInterface {
-  online: number
+  online: number;
 
-  records: RecordsOnlineInterface
+  records: RecordsOnlineInterface;
 }

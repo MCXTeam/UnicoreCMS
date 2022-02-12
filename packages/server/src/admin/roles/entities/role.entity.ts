@@ -13,10 +13,10 @@ export class Role {
   perms: string[];
 
   @Column({ default: false })
-  important: boolean
+  important: boolean;
 
   @Column({ default: 0 })
-  priority: number
+  priority: number;
 
   @ManyToMany(() => User, (user) => user.roles)
   users: User[];

@@ -1,12 +1,6 @@
 <template>
   <div class="layout-menu-container">
-    <AppSubmenu
-      :items="model"
-      class="layout-menu"
-      :root="true"
-      @menuitem-click="onMenuItemClick"
-      @keydown="onKeyDown"
-    />
+    <AppSubmenu :items="model" class="layout-menu" :root="true" @menuitem-click="onMenuItemClick" @keydown="onKeyDown" />
     <a href="https://www.primefaces.org/primeblocks-vue" class="block mt-3">
       <img alt="unicoredocs" src="" class="w-full" />
     </a>

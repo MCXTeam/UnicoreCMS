@@ -29,13 +29,13 @@
 }
 
 body {
-  font-family: "Brutal Type";
+  font-family: 'Brutal Type';
   background-color: var(--vs-theme-bg);
   transition: background-color 0.3s;
   overflow: hidden;
 }
 
-@import "./buttons";
-@import "./navbar";
-@import "./contetn";
-@import "./header";
+@import './buttons';
+@import './navbar';
+@import './contetn';
+@import './header';

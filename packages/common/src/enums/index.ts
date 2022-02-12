@@ -1,2 +1,2 @@
-export * from './permissions.enum'
-export * from './event-permission'
+export * from "./permissions.enum";
+export * from "./event-permission";

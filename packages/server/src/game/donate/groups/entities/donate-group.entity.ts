@@ -1,16 +1,9 @@
 import { StorageManager } from '@common';
 import { Server } from 'src/game/servers/entities/server.entity';
-import {
-  AfterRemove,
-  Column,
-  Entity,
-  JoinTable,
-  ManyToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { AfterRemove, Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { DonateFeatures } from '../interfaces/donate-features.interface';
 import { Period } from '../../entities/period.entity';
-import { Kit } from './kit.entity';
+import { GroupKit } from './group-kit.entity';
 
 @Entity()
 export class DonateGroup {
@@ -37,9 +30,9 @@ export class DonateGroup {
   @Column('json', { nullable: true })
   features?: DonateFeatures[];
 
-  @ManyToMany(() => Kit, (kit) => kit.groups)
+  @ManyToMany(() => GroupKit, (kit) => kit.groups)
   @JoinTable()
-  kits: Kit[];
+  kits: GroupKit[];
 
   @ManyToMany(() => Period, (period) => period.donate_groups)
   @JoinTable()

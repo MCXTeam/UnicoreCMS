@@ -1,1 +1,1 @@
-export {  MomentWrapper } from './moment'
+export { MomentWrapper } from './moment';

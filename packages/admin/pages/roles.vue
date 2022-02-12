@@ -5,12 +5,7 @@
         <Toolbar class="mb-4">
           <template v-slot:start>
             <div class="my-2">
-              <Button
-                label="Создать"
-                icon="pi pi-plus"
-                class="p-button-success mr-2"
-                @click="openDialog()"
-              />
+              <Button label="Создать" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
             </div>
           </template>
         </Toolbar>
@@ -18,47 +13,32 @@
           :value="roles"
           :loading="loading"
           :rows="50"
-          :paginator="true"
+          paginator
           :filters.sync="filters"
-          :rowHover="true"
+          rowHover
           responsiveLayout="scroll"
           dataKey="id"
         >
           <template #header>
-            <div
-              class="
-                flex flex-column
-                md:flex-row md:justify-content-between md:align-items-center
-              "
-            >
+            <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
               <h5 class="m-0">Управление ролями</h5>
               <span class="block mt-2 md:mt-0 p-input-icon-left">
                 <i class="pi pi-search" />
-                <InputText
-                  v-model="filters['global'].value"
-                  placeholder="Поиск..."
-                />
+                <InputText v-model="filters['global'].value" placeholder="Поиск..." />
               </span>
             </div>
           </template>
-          <Column field="id" header="ID"></Column>
-          <Column field="name" header="Название">
+          <Column field="id" header="ID" sortable></Column>
+          <Column field="name" header="Название" sortable>
             <template #body="slotProps">
               <span class="mr-2">{{ slotProps.data.name }}</span>
-              <Tag
-                v-if="slotProps.data.important"
-                value="Только редактирование"
-              ></Tag>
+              <Tag v-if="slotProps.data.important" value="Только редактирование"></Tag>
             </template>
           </Column>
           <Column field="priority" header="Приоритет"></Column>
           <Column :styles="{ width: '8rem' }">
             <template #body="slotProps">
-              <Button
-                @click="openDialog(slotProps.data)"
-                icon="pi pi-pencil"
-                class="p-button-rounded p-button-success mr-2"
-              />
+              <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
               <Button
                 @click="removeRole(slotProps.data.id)"
                 v-if="!slotProps.data.important"
@@ -89,33 +69,17 @@
               <div class="field">
                 <label>ID</label>
                 <InputText :disabled="updateMode" v-model="role.id" autofocus />
-                <small
-                  v-show="errors[0]"
-                  class="p-error"
-                  v-text="errors[0]"
-                ></small>
+                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
               </div>
             </ValidationProvider>
-            <ValidationProvider
-              name="Название"
-              rules="required|alpha_dash"
-              v-slot="{ errors }"
-            >
+            <ValidationProvider name="Название" rules="required|alpha_dash" v-slot="{ errors }">
               <div class="field">
                 <label>Название</label>
                 <InputText v-model="role.name" />
-                <small
-                  v-show="errors[0]"
-                  class="p-error"
-                  v-text="errors[0]"
-                ></small>
+                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
               </div>
             </ValidationProvider>
-            <ValidationProvider
-              name="Разрешения"
-              rules="required"
-              v-slot="{ errors }"
-            >
+            <ValidationProvider name="Разрешения" rules="required" v-slot="{ errors }">
               <div class="field">
                 <label>Разрешения</label>
                 <span class="p-fluid">
@@ -129,36 +93,18 @@
                     placeholder="Выберите разрешения"
                   />
                 </span>
-                <small
-                  v-show="errors[0]"
-                  class="p-error"
-                  v-text="errors[0]"
-                ></small>
+                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
               </div>
             </ValidationProvider>
-            <ValidationProvider
-              name="Приоритет"
-              rules="required"
-              v-slot="{ errors }"
-            >
+            <ValidationProvider name="Приоритет" rules="required" v-slot="{ errors }">
               <div class="field">
                 <label>Приоритет</label>
                 <InputNumber v-model="role.priority" />
-                <small
-                  v-show="errors[0]"
-                  class="p-error"
-                  v-text="errors[0]"
-                ></small>
+                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
               </div>
             </ValidationProvider>
             <template #footer>
-              <Button
-                :disabled="loading"
-                label="Отмена"
-                icon="pi pi-times"
-                class="p-button-text"
-                @click="hideDialog"
-              />
+              <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
                 :disabled="loading || invalid"
                 label="Сохранить"
@@ -208,9 +154,7 @@ export default {
   async fetch() {
     this.roles = await this.$axios.get('/admin/roles').then((res) => res.data)
 
-    this.autocompleate = await this.$axios
-      .get('/admin/roles/autocompleate')
-      .then((res) => res.data)
+    this.autocompleate = await this.$axios.get('/admin/roles/autocompleate').then((res) => res.data)
 
     this.roleDialog = false
     this.loading = false
@@ -279,10 +223,7 @@ export default {
     async updateRole() {
       this.loading = true
       try {
-        await this.$axios.patch(
-          '/admin/roles/' + this.role.id,
-          this.$_.omit(this.role, 'id')
-        )
+        await this.$axios.patch('/admin/roles/' + this.role.id, this.$_.omit(this.role, 'id'))
         this.$toast.add({
           severity: 'success',
           detail: 'Роль успешно редактирована',

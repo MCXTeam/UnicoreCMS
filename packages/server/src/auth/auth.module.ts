@@ -26,8 +26,8 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
     GravitModule,
   ],
   providers: [
-    AuthService, 
-    TokensService, 
+    AuthService,
+    TokensService,
     JwtStrategy,
     {
       provide: APP_GUARD,

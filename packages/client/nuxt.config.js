@@ -6,12 +6,10 @@ export default mainConfig({
     'vuesax/dist/vuesax.css',
     'flag-icons/sass/flag-icons.scss',
     '~assets/style/main.scss',
-    '~assets/fonts/main.scss'
+    '~assets/fonts/main.scss',
   ],
 
-  buildModules: [
-    '@nuxtjs/color-mode'
-  ],
+  buildModules: ['@nuxtjs/color-mode'],
 
   plugins: ['~/plugins/vuesax.ts'],
 })

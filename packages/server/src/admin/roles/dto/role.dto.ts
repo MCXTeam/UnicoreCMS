@@ -5,5 +5,5 @@ export class RoleDTO {
 
   perms: string[];
 
-  priority: number
+  priority: number;
 }

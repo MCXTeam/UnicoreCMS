@@ -11,89 +11,88 @@ import { Mod } from './entities/mod.entity';
 export class ModsService {
   constructor(
     @InjectRepository(Mod)
-    private modsRepository: Repository<Mod>
-  ) { }
+    private modsRepository: Repository<Mod>,
+  ) {}
 
   find(query: PaginateQuery): Promise<Paginated<Mod>> {
     return paginate(query, this.modsRepository, {
       sortableColumns: ['id', 'name'],
       searchableColumns: ['id', 'name'],
       defaultSortBy: [['id', 'DESC']],
-      maxLimit: 500
+      maxLimit: 500,
     });
   }
 
   findOne(id: number, relations?: string[]) {
-    return this.modsRepository.findOne(id, { relations })
+    return this.modsRepository.findOne(id, { relations });
   }
 
   async create(input: ModInput): Promise<Mod> {
-    const mod = new Mod()
+    const mod = new Mod();
 
-    mod.name = input.name
-    mod.description = input.description
+    mod.name = input.name;
+    mod.description = input.description;
 
-    return this.modsRepository.save(mod)
+    return this.modsRepository.save(mod);
   }
 
   async update(id: number, input: ModInput): Promise<Mod> {
-    const mod = await this.findOne(id)
+    const mod = await this.findOne(id);
 
     if (!mod) {
-      throw new NotFoundException()
+      throw new NotFoundException();
     }
 
-    mod.name = input.name
-    mod.description = input.description
+    mod.name = input.name;
+    mod.description = input.description;
 
-    return this.modsRepository.save(mod)
+    return this.modsRepository.save(mod);
   }
 
   async remove(id: number) {
-    const mod = await this.findOne(id)
+    const mod = await this.findOne(id);
 
     if (!mod) {
-      throw new NotFoundException()
+      throw new NotFoundException();
     }
 
-    return this.modsRepository.remove(mod)
+    return this.modsRepository.remove(mod);
   }
 
   async removeMany(ids: number[]) {
     const mods = await this.modsRepository.find({
       where: {
-        id: In(ids)
+        id: In(ids),
       },
-    })
+    });
 
-    return this.modsRepository.remove(mods)
+    return this.modsRepository.remove(mods);
   }
 
   async updateMedia(id: number, file: MulterFile) {
-    const mod = await this.findOne(id)
+    const mod = await this.findOne(id);
 
     if (!mod) {
       StorageManager.remove(file.fieldname);
-      throw new NotFoundException()
+      throw new NotFoundException();
     }
 
-
     StorageManager.remove(mod.icon);
-    mod.icon = file.filename
+    mod.icon = file.filename;
 
-    return this.modsRepository.save(mod)
+    return this.modsRepository.save(mod);
   }
 
   async removeMedia(id: number) {
-    const mod = await this.findOne(id)
+    const mod = await this.findOne(id);
 
     if (!mod) {
-      throw new NotFoundException()
+      throw new NotFoundException();
     }
 
     StorageManager.remove(mod.icon);
-    mod.icon = null
+    mod.icon = null;
 
-    return this.modsRepository.save(mod)
+    return this.modsRepository.save(mod);
   }
 }

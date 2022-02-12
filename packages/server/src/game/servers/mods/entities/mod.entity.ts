@@ -1,11 +1,5 @@
 import { StorageManager } from '@common';
-import {
-  AfterRemove,
-  Column,
-  Entity,
-  ManyToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { AfterRemove, Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Server } from '../../entities/server.entity';
 
 @Entity()

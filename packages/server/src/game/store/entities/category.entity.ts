@@ -1,34 +1,32 @@
-import { StorageManager } from "@common";
-import { Kit } from "src/game/donate/groups/entities/kit.entity";
-import { AfterRemove, Column, Entity, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Product } from "./product.entity";
+import { StorageManager } from '@common';
+import { AfterRemove, Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Kit } from './kit.entity';
+import { Product } from './product.entity';
 
 @Entity()
-export class Categoty {
+export class Category {
   @PrimaryGeneratedColumn()
-  id: number
+  id: number;
 
   @Column()
-  name: string
+  name: string;
 
-  @Column('text')
-  description: string
+  @Column('text', {
+    nullable: true
+  })
+  description: string;
 
   @Column({ nullable: true })
-  icon: string
+  icon: string;
 
-  @ManyToMany(() => Product, {
+  @ManyToMany(() => Product, (product) => product.categories, {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
   products: Product[];
 
-  @ManyToMany(() => Kit, {
-    cascade: true,
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
+  @ManyToMany(() => Kit, (kit) => kit.products)
   kits: Kit[];
 
   @AfterRemove()

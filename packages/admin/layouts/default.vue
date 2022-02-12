@@ -13,10 +13,7 @@
       <AppFooter />
     </div>
     <transition name="layout-mask">
-      <div
-        class="layout-mask p-component-overlay"
-        v-if="mobileMenuActive"
-      ></div>
+      <div class="layout-mask p-component-overlay" v-if="mobileMenuActive"></div>
     </transition>
   </div>
 </template>
@@ -95,17 +92,17 @@ export default {
                 {
                   label: 'Донат-группы',
                   icon: 'pi pi-fw pi-users',
-                  to: '/icons',
+                  to: '/donate/groups',
                 },
                 {
                   label: 'Донат-права',
                   icon: 'pi pi-fw pi-money-bill',
-                  to: '/icons',
+                  to: '/donate/perms',
                 },
                 {
                   label: 'Периоды',
                   icon: 'pi pi-fw pi-calendar',
-                  to: '/icons',
+                  to: '/donate/periods',
                 },
               ],
             },
@@ -116,12 +113,17 @@ export default {
                 {
                   label: 'Каталог',
                   icon: 'pi pi-fw pi-shopping-cart',
-                  to: '/icons',
+                  to: '/store/products',
+                },
+                {
+                  label: 'Категории',
+                  icon: 'pi pi-fw pi-list',
+                  to: '/store/categories',
                 },
                 {
                   label: 'Киты',
                   icon: 'pi pi-fw pi-briefcase',
-                  to: '/icons',
+                  to: '/store/kits',
                 },
               ],
             },
@@ -214,14 +216,7 @@ export default {
     },
     removeClass(element, className) {
       if (element.classList) element.classList.remove(className)
-      else
-        element.className = element.className.replace(
-          new RegExp(
-            '(^|\\b)' + className.split(' ').join('|') + '(\\b|$)',
-            'gi'
-          ),
-          ' '
-        )
+      else element.className = element.className.replace(new RegExp('(^|\\b)' + className.split(' ').join('|') + '(\\b|$)', 'gi'), ' ')
     },
     isDesktop() {
       return window.innerWidth >= 992
@@ -241,10 +236,8 @@ export default {
         {
           'layout-overlay': this.layoutMode === 'overlay',
           'layout-static': this.layoutMode === 'static',
-          'layout-static-sidebar-inactive':
-            this.staticMenuInactive && this.layoutMode === 'static',
-          'layout-overlay-sidebar-active':
-            this.overlayMenuActive && this.layoutMode === 'overlay',
+          'layout-static-sidebar-inactive': this.staticMenuInactive && this.layoutMode === 'static',
+          'layout-overlay-sidebar-active': this.overlayMenuActive && this.layoutMode === 'overlay',
           'layout-mobile-sidebar-active': this.mobileMenuActive,
           'p-input-filled': this.$primevue.config.inputStyle === 'filled',
           'p-ripple-disabled': this.$primevue.config.ripple === false,
@@ -256,8 +249,7 @@ export default {
     this.socket = this.$nuxtSocket({})
   },
   beforeUpdate() {
-    if (this.mobileMenuActive)
-      this.addClass(document.body, 'body-overflow-hidden')
+    if (this.mobileMenuActive) this.addClass(document.body, 'body-overflow-hidden')
     else this.removeClass(document.body, 'body-overflow-hidden')
   },
 }

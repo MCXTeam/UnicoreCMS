@@ -3,14 +3,14 @@ import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeor
 @Entity()
 export class OnlinesRecord {
   @PrimaryGeneratedColumn()
-  id: number
+  id: number;
 
-  @Column({ default: 0})
+  @Column({ default: 0 })
   online: number;
 
   @CreateDateColumn()
-  updated: Date
+  updated: Date;
 
   @CreateDateColumn()
-  created: Date
+  created: Date;
 }

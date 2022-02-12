@@ -1,7 +1,9 @@
 export class JWTPayload {
-  sub: string
+  sub: string;
+
+  api?: boolean
 }
 
 export class JWTRefreshPayload extends JWTPayload {
-  jwtid: string
+  jwtid: string;
 }

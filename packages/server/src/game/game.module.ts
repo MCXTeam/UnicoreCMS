@@ -7,13 +7,6 @@ import { PlayersModule } from './players/players.module';
 import { CabinetModule } from './cabinet/cabinet.module';
 
 @Module({
-  imports: [
-    ServersModule,
-    DonateModule,
-    MoneyModule,
-    StoreModule,
-    PlayersModule,
-    CabinetModule,
-  ],
+  imports: [ServersModule, DonateModule, MoneyModule, StoreModule, PlayersModule, CabinetModule],
 })
 export class GameModule {}

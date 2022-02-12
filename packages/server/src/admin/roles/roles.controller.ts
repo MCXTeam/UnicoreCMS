@@ -6,32 +6,30 @@ import { RolesService } from './roles.service';
 
 @Controller('admin/roles')
 export class RolesController {
-  constructor (
-    private rolesService: RolesService
-  ) {}
+  constructor(private rolesService: RolesService) {}
 
   @Get()
   findAll(): Promise<Role[]> {
-    return this.rolesService.find()
+    return this.rolesService.find();
   }
 
   @Get('autocompleate')
   findAutoCompleate(): Promise<string[]> {
-    return this.rolesService.findAutoCompleate()
+    return this.rolesService.findAutoCompleate();
   }
 
   @Post()
   create(@Body() body: RoleCreateInput) {
-    return this.rolesService.create(body)
+    return this.rolesService.create(body);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() body: RoleUpdateInput) {
-    return this.rolesService.update(id, body)
+    return this.rolesService.update(id, body);
   }
 
-  @Delete(':id') 
+  @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.rolesService.remove(id)
+    return this.rolesService.remove(id);
   }
 }

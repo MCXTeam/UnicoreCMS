@@ -1,11 +1,11 @@
 export interface RecordsOnlineInterface {
-  today: RecordOnlineInterface
+  today: RecordOnlineInterface;
 
-  absolute: RecordOnlineInterface
+  absolute: RecordOnlineInterface;
 }
 
 export interface RecordOnlineInterface {
-  online: number
+  online: number;
 
-  created: Date
+  created: Date;
 }

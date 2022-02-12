@@ -1,2 +1,2 @@
 export * from './IpAddress.decorator';
-export * from './UserAgent.decorator'
+export * from './UserAgent.decorator';

@@ -28,5 +28,5 @@ export class Online {
   server: Server;
 
   @UpdateDateColumn()
-  updated: Date
+  updated: Date;
 }

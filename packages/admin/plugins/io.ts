@@ -1,8 +1,8 @@
-import { Plugin } from '@nuxt/types';
+import { Plugin } from '@nuxt/types'
 
 // @ts-ignore
 const MomentPlugin: Plugin = ({ $nuxtSocket }) => {
   const socket = $nuxtSocket({})
-};
+}
 
-export default MomentPlugin;
+export default MomentPlugin

@@ -1,5 +1,5 @@
 export enum EventPermission {
-  AdminDashboard = 'admin.dashboard.events',
+  AdminDashboard = "admin.dashboard.events",
 
-  AdminUser = 'admin.user.events',
+  AdminUser = "admin.user.events",
 }

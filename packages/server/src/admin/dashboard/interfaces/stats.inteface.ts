@@ -1,8 +1,8 @@
-import { StatInterface } from "./stat.interface";
+import { StatInterface } from './stat.interface';
 
 export interface StatsInterface {
-  payments: StatInterface
-  purchases: StatInterface
-  online_records: StatInterface
-  users: StatInterface
+  payments: StatInterface;
+  purchases: StatInterface;
+  online_records: StatInterface;
+  users: StatInterface;
 }

@@ -2,5 +2,5 @@
   "compilerOptions": {
     "types": ["@nuxtjs/color-mode"]
   },
-  "extends": "unicore-admin/tsconfig.json",
+  "extends": "unicore-admin/tsconfig.json"
 }

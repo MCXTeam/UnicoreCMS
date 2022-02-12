@@ -8,10 +8,7 @@ import { RolesController } from './roles.controller';
 import { RolesService } from './roles.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Role]),
-    ServersModule
-  ],
+  imports: [TypeOrmModule.forFeature([Role]), ServersModule],
   providers: [
     RolesService,
     {
@@ -22,9 +19,9 @@ import { RolesService } from './roles.service';
   controllers: [RolesController],
 })
 export class RolesModule implements OnModuleInit {
-  constructor(private rolesService: RolesService) { }
+  constructor(private rolesService: RolesService) {}
 
   async onModuleInit() {
-    await this.rolesService.importantRoles()
+    await this.rolesService.importantRoles();
   }
 }

@@ -1,92 +1,92 @@
-import { User } from "src/admin/users/entities/user.entity";
-import { Period } from "src/game/donate/entities/period.entity";
-import { DonateGroup } from "src/game/donate/groups/entities/donate-group.entity";
-import { Kit } from "src/game/donate/groups/entities/kit.entity";
-import { DonatePermission } from "src/game/donate/permissions/entities/donate-permission.entity";
-import { Product } from "src/game/store/entities/product.entity";
-import { Payment } from "src/payment/entities/payment.entity";
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { HistoryType } from "../enums/history-type.enum";
+import { User } from 'src/admin/users/entities/user.entity';
+import { Period } from 'src/game/donate/entities/period.entity';
+import { DonateGroup } from 'src/game/donate/groups/entities/donate-group.entity';
+import { DonatePermission } from 'src/game/donate/permissions/entities/donate-permission.entity';
+import { Kit } from 'src/game/store/entities/kit.entity';
+import { Product } from 'src/game/store/entities/product.entity';
+import { Payment } from 'src/payment/entities/payment.entity';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { HistoryType } from '../enums/history-type.enum';
 
 @Entity()
 export class History {
   @PrimaryGeneratedColumn()
-  id: number
+  id: number;
 
   @Column()
-  type: HistoryType
+  type: HistoryType;
 
   @ManyToOne(() => User, {
     cascade: true,
     onDelete: 'CASCADE',
-    onUpdate: 'CASCADE'
+    onUpdate: 'CASCADE',
   })
   @JoinColumn()
-  user: User 
+  user: User;
 
   @ManyToOne(() => Product, {
     cascade: true,
     onDelete: 'CASCADE',
-    onUpdate: 'CASCADE'
+    onUpdate: 'CASCADE',
   })
   @JoinColumn()
-  product?: Product 
+  product?: Product;
 
   @ManyToOne(() => Kit, {
     cascade: true,
     onDelete: 'CASCADE',
-    onUpdate: 'CASCADE'
+    onUpdate: 'CASCADE',
   })
   @JoinColumn()
-  kit?: Kit 
+  kit?: Kit;
 
   @ManyToOne(() => DonateGroup, {
     cascade: true,
     onDelete: 'CASCADE',
-    onUpdate: 'CASCADE'
+    onUpdate: 'CASCADE',
   })
   @JoinColumn()
-  donate_group?: DonateGroup 
+  donate_group?: DonateGroup;
 
   @ManyToOne(() => DonatePermission, {
     cascade: true,
     onDelete: 'CASCADE',
-    onUpdate: 'CASCADE'
+    onUpdate: 'CASCADE',
   })
   @JoinColumn()
-  donate_permission?: DonatePermission
+  donate_permission?: DonatePermission;
 
   @ManyToOne(() => Period, {
     cascade: true,
     onDelete: 'CASCADE',
-    onUpdate: 'CASCADE'
+    onUpdate: 'CASCADE',
   })
   @JoinColumn()
-  period?: Period
+  period?: Period;
 
   @ManyToOne(() => Payment, {
     cascade: true,
     onDelete: 'CASCADE',
-    onUpdate: 'CASCADE'
+    onUpdate: 'CASCADE',
   })
   @JoinColumn()
-  payment?: Payment
+  payment?: Payment;
 
   @ManyToOne(() => User, {
     cascade: true,
     onDelete: 'CASCADE',
-    onUpdate: 'CASCADE'
+    onUpdate: 'CASCADE',
   })
   @JoinColumn()
-  target?: User 
+  target?: User;
 
   @Column('decimal', {
     nullable: true,
     precision: 5,
     scale: 2,
   })
-  amount?: number
+  amount?: number;
 
   @CreateDateColumn()
-  created: Date
+  created: Date;
 }

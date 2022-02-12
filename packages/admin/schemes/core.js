@@ -6,10 +6,7 @@ export default class CoreScheme extends RefreshScheme {
       this.$auth.reset({ resetInterceptor: false })
     }
 
-    const response = await this.$auth.request(
-      endpoint,
-      this.options.endpoints.login
-    )
+    const response = await this.$auth.request(endpoint, this.options.endpoints.login)
 
     this.updateTokens(response)
     if (!this.requestHandler.interceptor) {
@@ -28,8 +25,8 @@ export default class CoreScheme extends RefreshScheme {
         .requestWith(this.name, endpoint, {
           ...this.options.endpoints.logout,
           data: {
-            'refresh_token': this.refreshToken.get()
-          }
+            refresh_token: this.refreshToken.get(),
+          },
         })
         .catch(() => {})
     }

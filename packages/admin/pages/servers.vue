@@ -5,12 +5,7 @@
         <Toolbar class="mb-4">
           <template v-slot:start>
             <div class="my-2">
-              <Button
-                label="Создать"
-                icon="pi pi-plus"
-                class="p-button-success mr-2"
-                @click="openDialog()"
-              />
+              <Button label="Создать" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
             </div>
           </template>
         </Toolbar>
@@ -19,38 +14,26 @@
           :value="servers"
           :loading="loading"
           :rows="20"
-          :paginator="true"
+          paginator
           :filters.sync="filters"
-          :rowHover="true"
+          rowHover
           responsiveLayout="scroll"
           dataKey="id"
         >
           <template #header>
-            <div
-              class="
-                flex flex-column
-                md:flex-row md:justify-content-between md:align-items-center
-              "
-            >
+            <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
               <h5 class="m-0">Управление серверами</h5>
               <span class="block mt-2 md:mt-0 p-input-icon-left">
                 <i class="pi pi-search" />
-                <InputText
-                  v-model="filters['global'].value"
-                  placeholder="Поиск..."
-                />
+                <InputText v-model="filters['global'].value" placeholder="Поиск..." />
               </span>
             </div>
           </template>
-          <Column field="id" header="ID" :styles="{ width: '8rem' }"></Column>
-          <Column field="name" header="Название">
+          <Column sortable field="id" header="ID" :styles="{ width: '8rem' }"></Column>
+          <Column sortable field="name" header="Название">
             <template #body="slotProps">
               <div class="flex align-items-center">
-                <Avatar
-                  v-if="slotProps.data.icon"
-                  :image="`${$config.apiUrl + '/' + slotProps.data.icon}`"
-                  shape="circle"
-                />
+                <Avatar v-if="slotProps.data.icon" :image="`${$config.apiUrl + '/' + slotProps.data.icon}`" shape="circle" />
                 <Avatar v-else icon="pi pi-image" shape="circle" />
                 <span class="ml-2">{{ slotProps.data.name }}</span>
               </div>
@@ -58,16 +41,8 @@
           </Column>
           <Column :styles="{ width: '12rem' }">
             <template #body="slotProps">
-              <Button
-                @click="openDialog(slotProps.data)"
-                icon="pi pi-pencil"
-                class="p-button-rounded p-button-success mr-2"
-              />
-              <Button
-                @click="openFileDialog(slotProps.data)"
-                icon="pi pi-images"
-                class="p-button-rounded p-button-secondary mr-2"
-              />
+              <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
+              <Button @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary mr-2" />
               <Button
                 @click="removeServer(slotProps.data.id)"
                 v-if="!slotProps.data.important"
@@ -78,37 +53,17 @@
           </Column>
         </DataTable>
 
-        <Dialog
-          :visible.sync="fileDialog"
-          :style="{ width: '600px' }"
-          :modal="true"
-          header="Редактирование медиа"
-          class="p-fluid"
-        >
+        <Dialog :visible.sync="fileDialog" :style="{ width: '600px' }" :modal="true" header="Редактирование медиа" class="p-fluid">
           <label>Иконка сервера</label>
           <div class="grid mb-4 pt-2">
             <div class="col-6">
-              <Avatar
-                v-if="server.icon"
-                :image="`${$config.apiUrl + '/' + server.icon}`"
-                size="xlarge"
-                shape="circle"
-              />
+              <Avatar v-if="server.icon" :image="`${$config.apiUrl + '/' + server.icon}`" size="xlarge" shape="circle" />
               <Avatar v-else icon="pi pi-image" size="xlarge" shape="circle" />
             </div>
             <div class="col-6">
               <div class="field mb-0 mt-2">
-                <Button
-                  label="Загрузить"
-                  icon="pi pi-upload"
-                  @click="$refs.iconInput.choose()"
-                />
-                <Button
-                  label="Удалить"
-                  icon="pi pi-trash"
-                  class="p-button-secondary mt-2"
-                  @click="removeMedia('icon')"
-                />
+                <Button label="Загрузить" icon="pi pi-upload" @click="$refs.iconInput.choose()" />
+                <Button label="Удалить" icon="pi pi-trash" class="p-button-secondary mt-2" @click="removeMedia('icon')" />
                 <FileUpload
                   ref="iconInput"
                   style="display: none"
@@ -126,26 +81,12 @@
           <div class="grid mb-4 pt-2">
             <div class="col-12 md:col-6">
               <Avatar v-if="!server.image" icon="pi pi-image" size="xlarge" />
-              <ImagePreview
-                v-else
-                width="200"
-                :src="`${$config.apiUrl + '/' + server.image}`"
-                preview
-              />
+              <ImagePreview v-else width="200" :src="`${$config.apiUrl + '/' + server.image}`" preview />
             </div>
             <div class="col-12 md:col-6">
               <div class="field mb-0 mt-2">
-                <Button
-                  label="Загрузить"
-                  icon="pi pi-upload"
-                  @click="$refs.imageInput.choose()"
-                />
-                <Button
-                  label="Удалить"
-                  icon="pi pi-trash"
-                  class="p-button-secondary mt-2"
-                  @click="removeMedia('image')"
-                />
+                <Button label="Загрузить" icon="pi pi-upload" @click="$refs.imageInput.choose()" />
+                <Button label="Удалить" icon="pi pi-trash" class="p-button-secondary mt-2" @click="removeMedia('image')" />
                 <FileUpload
                   ref="imageInput"
                   style="display: none"
@@ -182,50 +123,26 @@
                 >
                   <div class="field">
                     <label>ID</label>
-                    <InputText
-                      :disabled="updateMode"
-                      v-model="server.id"
-                      autofocus
-                    />
-                    <small
-                      v-show="errors[0]"
-                      class="p-error"
-                      v-text="errors[0]"
-                    ></small>
+                    <InputText :disabled="updateMode" v-model="server.id" autofocus />
+                    <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
                   </div>
                 </ValidationProvider>
               </div>
               <div class="col-12 md:col-6">
-                <ValidationProvider
-                  name="Название"
-                  rules="required"
-                  v-slot="{ errors }"
-                >
+                <ValidationProvider name="Название" rules="required" v-slot="{ errors }">
                   <div class="field">
                     <label>Название</label>
                     <InputText v-model="server.name" />
-                    <small
-                      v-show="errors[0]"
-                      class="p-error"
-                      v-text="errors[0]"
-                    ></small>
+                    <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
                   </div>
                 </ValidationProvider>
               </div>
               <div class="col-12">
-                <ValidationProvider
-                  name="Версия"
-                  rules="required"
-                  v-slot="{ errors }"
-                >
+                <ValidationProvider name="Версия" rules="required" v-slot="{ errors }">
                   <div class="field">
                     <label>Версия</label>
                     <InputText v-model="server.version" />
-                    <small
-                      v-show="errors[0]"
-                      class="p-error"
-                      v-text="errors[0]"
-                    ></small>
+                    <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
                   </div>
                 </ValidationProvider>
                 <div class="field">
@@ -245,29 +162,16 @@
                   >
                     <template #item="slotProps">
                       <div class="flex align-items-center">
-                        <Avatar
-                          v-if="slotProps.item.icon"
-                          :image="`${
-                            $config.apiUrl + '/' + slotProps.item.icon
-                          }`"
-                          shape="circle"
-                        />
+                        <Avatar v-if="slotProps.item.icon" :image="`${$config.apiUrl + '/' + slotProps.item.icon}`" shape="circle" />
                         <Avatar v-else icon="pi pi-image" shape="circle" />
-                        <span class="ml-2"
-                          >{{ slotProps.item.name }} (#{{
-                            slotProps.item.id
-                          }})</span
-                        >
+                        <span class="ml-2">{{ slotProps.item.name }} (#{{ slotProps.item.id }})</span>
                       </div>
                     </template>
                   </AutoComplete>
                 </div>
                 <div class="field">
                   <label>Описание</label>
-                  <Editor
-                    v-model="server.description"
-                    editorStyle="height: 220px"
-                  >
+                  <Editor v-model="server.description" editorStyle="height: 220px">
                     <template #toolbar>
                       <span class="ql-formats">
                         <button class="ql-bold"></button>
@@ -279,51 +183,26 @@
                 </div>
               </div>
               <div class="col-12 md:col-6">
-                <ValidationProvider
-                  name="Query хост"
-                  rules="required"
-                  v-slot="{ errors }"
-                >
+                <ValidationProvider name="Query хост" rules="required" v-slot="{ errors }">
                   <div class="field">
                     <label>Query хост</label>
                     <InputText v-model="server.query.host" />
-                    <small
-                      v-show="errors[0]"
-                      class="p-error"
-                      v-text="errors[0]"
-                    ></small>
+                    <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
                   </div>
                 </ValidationProvider>
               </div>
               <div class="col-12 md:col-6">
-                <ValidationProvider
-                  name="Query порт"
-                  rules="required|min_value:0|max_value:65535"
-                  v-slot="{ errors }"
-                >
+                <ValidationProvider name="Query порт" rules="required|min_value:0|max_value:65535" v-slot="{ errors }">
                   <div class="field">
                     <label>Query порт</label>
-                    <InputNumber
-                      :useGrouping="false"
-                      v-model="server.query.port"
-                    />
-                    <small
-                      v-show="errors[0]"
-                      class="p-error"
-                      v-text="errors[0]"
-                    ></small>
+                    <InputNumber :useGrouping="false" v-model="server.query.port" />
+                    <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
                   </div>
                 </ValidationProvider>
               </div>
             </div>
             <template #footer>
-              <Button
-                :disabled="loading"
-                label="Отмена"
-                icon="pi pi-times"
-                class="p-button-text"
-                @click="hideDialog"
-              />
+              <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
                 :disabled="loading || invalid"
                 label="Сохранить"
@@ -408,15 +287,11 @@ export default {
       formData.append('file', event.files[0])
 
       try {
-        await this.$axios.patch(
-          `/servers/${type}/${this.server.id}`,
-          formData,
-          {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          }
-        )
+        await this.$axios.patch(`/servers/${type}/${this.server.id}`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        })
         this.$toast.add({
           severity: 'success',
           detail: 'Иконка успешно обновлена',
@@ -432,10 +307,7 @@ export default {
       }
     },
     async openFileDialog(server) {
-      this.server = this.$_.pick(
-        await this.$axios.get('/servers/' + server.id).then((res) => res.data),
-        this.$_.deepKeys(this.server)
-      )
+      this.server = this.$_.pick(await this.$axios.get('/servers/' + server.id).then((res) => res.data), this.$_.deepKeys(this.server))
       this.fileDialog = true
     },
     async removeMedia(type) {
@@ -452,17 +324,13 @@ export default {
     async openDialog(server = null) {
       this.updateMode = !!server
       if (server) {
-        this.server = this.$_.pick(
-          await this.$axios
-            .get('/servers/' + server.id)
-            .then((res) => res.data),
-          this.$_.deepKeys(this.server)
-        )
+        this.server = this.$_.pick(await this.$axios.get('/servers/' + server.id).then((res) => res.data), this.$_.deepKeys(this.server))
       } else {
         this.server = {
           id: null,
-          icon: null,
+          name: null,
           image: null,
+          icon: null,
           version: null,
           slogan: null,
           description: null,

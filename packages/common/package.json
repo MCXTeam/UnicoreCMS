@@ -1,21 +1,22 @@
 {
-    "name": "unicore-common",
-    "version": "1.0.0",
-    "main": "dist/index.js",
-    "private": true,
-    "scripts": {
-        "dev": "tsc -w --preserveWatchOutput",
-        "build": "tsc --preserveWatchOutput"
-    },
-    "dependencies": {
-        "@nestjs/common": "^8.2.6",
-        "dotenv": "^14.3.2",
-        "env-var": "^7.1.1",
-        "nest-winston": "^1.6.2",
-        "validator": "^13.7.0",
-        "winston": "^3.5.0"
-    },
-    "devDependencies": {
-        "@types/dotenv": "^8.2.0"
-    }
+  "name": "unicore-common",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "private": true,
+  "scripts": {
+    "dev": "tsc -w --preserveWatchOutput",
+    "build": "tsc --preserveWatchOutput",
+    "format": "prettier --write --list-different ."
+  },
+  "dependencies": {
+    "@nestjs/common": "^8.2.6",
+    "dotenv": "^14.3.2",
+    "env-var": "^7.1.1",
+    "nest-winston": "^1.6.2",
+    "validator": "^13.7.0",
+    "winston": "^3.5.0"
+  },
+  "devDependencies": {
+    "@types/dotenv": "^8.2.0"
+  }
 }

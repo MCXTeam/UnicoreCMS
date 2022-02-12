@@ -1,40 +1,46 @@
-import { StorageManager } from "@common";
-import { Server } from "src/game/servers/entities/server.entity";
-import { AfterRemove, Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Categoty } from "./category.entity";
+import { StorageManager } from '@common';
+import { Server } from 'src/game/servers/entities/server.entity';
+import { AfterRemove, Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Category } from './category.entity';
+import { Kit } from './kit.entity';
+import { Enchantment } from './enchantment.entity';
 
 @Entity()
 export class Product {
   @PrimaryGeneratedColumn()
-  id: number
+  id: number;
 
   @Column()
-  name: string
+  name: string;
 
   @Column({ nullable: true })
-  icon: string
+  icon: string;
 
-  @Column('text')
-  description: string
+  @Column('text', { nullable: true })
+  description: string;
 
   @ManyToMany(() => Server, (server) => server.products)
   servers: Server[];
 
-  @ManyToMany(() => Categoty, (category) => category.products)
-  @JoinTable()
-  categories: Categoty[];
+  @ManyToMany(() => Kit, (kit) => kit.products)
+  kits: Kit[];
 
-  @Column('decimal', {
-    precision: 5,
-    scale: 2,
-  })
+  @ManyToMany(() => Category, (category) => category.products)
+  @JoinTable()
+  categories: Category[];
+
+  @ManyToMany(() => Enchantment, (enchantment) => enchantment.products)
+  @JoinTable()
+  enchantments: Enchantment[];
+
+  @Column('float')
   price: number;
 
-  @Column()
-  item_id: string
+  @Column({ nullable: true })
+  sale: number;
 
-  @Column({ default: 64 })
-  stack_size: number
+  @Column()
+  item_id: string;
 
   @AfterRemove()
   removeFile() {

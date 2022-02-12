@@ -21,73 +21,65 @@ import { ServersService } from './servers.service';
 
 @Controller('servers')
 export class ServersController {
-  constructor(private serversService: ServersService) { }
+  constructor(private serversService: ServersService) {}
 
   @Post()
   create(@Body() body: ServerCreateInput) {
-    return this.serversService.create(body)
+    return this.serversService.create(body);
   }
-
 
   @Public()
   @Get()
   find() {
-    return this.serversService.find(['online'])
+    return this.serversService.find(['online']);
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    const server = await this.serversService.findOne(id, ['mods', 'query'])
+    const server = await this.serversService.findOne(id, ['mods', 'query']);
 
     if (!server) {
-      throw new NotFoundException()
+      throw new NotFoundException();
     }
 
-    return server
+    return server;
   }
 
   @Public()
   @Get('public/:id')
   async findOnePublic(@Param('id') id: string) {
-    const server = await this.serversService.findOne(id, ['mods'])
+    const server = await this.serversService.findOne(id, ['mods']);
 
     if (!server) {
-      throw new NotFoundException()
+      throw new NotFoundException();
     }
 
-    return server
+    return server;
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() body: ServerUpdateInput) {
-    return this.serversService.update(id, body)
+    return this.serversService.update(id, body);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.serversService.remove(id)
+    return this.serversService.remove(id);
   }
 
   @Patch(':type/:id')
   @UseInterceptors(
-    FileFastifyInterceptor("file", {
+    FileFastifyInterceptor('file', {
       storage: StorageManager.disk(),
       fileFilter: imageFileFilter,
-    })
+    }),
   )
-  updateMedia(
-    @Param('id') id: string,
-    @Param('type', new ParseEnumPipe(ServerMedia)) type: ServerMedia,
-    @UploadedFile() file: MulterFile
-  ) {
-    return this.serversService.updateMedia(id, type, file)
+  updateMedia(@Param('id') id: string, @Param('type', new ParseEnumPipe(ServerMedia)) type: ServerMedia, @UploadedFile() file: MulterFile) {
+    return this.serversService.updateMedia(id, type, file);
   }
 
   @Delete(':type/:id')
-  removeMedia(
-    @Param('id') id: string,
-    @Param('type', new ParseEnumPipe(ServerMedia)) type: ServerMedia,
-  ) {
-    return this.serversService.removeMedia(id, type)
+  removeMedia(@Param('id') id: string, @Param('type', new ParseEnumPipe(ServerMedia)) type: ServerMedia) {
+    return this.serversService.removeMedia(id, type);
   }
 }

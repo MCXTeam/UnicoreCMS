@@ -1,8 +1,7 @@
 import { Skin } from '../entities/skin.entity';
 import { Exclude } from 'class-transformer';
-import { getDeigest } from '../utils/getDigest';
 import { Cloak } from '../entities/cloak.entity';
-import { StorageManager } from '@common';
+import { StorageManager, getDeigest } from '@common';
 
 export class CloakDto implements Cloak {
   get url(): string {

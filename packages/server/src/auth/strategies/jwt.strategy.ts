@@ -7,9 +7,7 @@ import { UsersService } from 'src/admin/users/users.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(
-    private usersService: UsersService
-  ) {
+  constructor(private usersService: UsersService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -18,10 +16,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JWTPayload) {
-    const user = await this.usersService.getById(payload.sub, ['skin', 'cloak', 'roles'])
-    
+    const user = await this.usersService.getById(payload.sub, ['skin', 'cloak', 'roles']);
+
     if (!user) {
-      return null
+      return null;
     }
 
     return user;

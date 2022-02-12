@@ -1,1 +1,1 @@
-export * from './delete-many.input'
+export * from './delete-many.input';

@@ -1,14 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  ParseArrayPipe,
-  ParseIntPipe,
-  Patch,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseArrayPipe, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateUserInput } from './dto/create-user.input';
@@ -37,10 +27,7 @@ export class UsersController {
 
   @ApiOperation({ summary: 'Обновить одного пользователя' })
   @Patch(':id')
-  update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateUserDto: UpdateUserInput,
-  ) {}
+  update(@Param('id', ParseIntPipe) id: number, @Body() updateUserDto: UpdateUserInput) {}
 
   @ApiOperation({ summary: 'Удалить одного пользователя' })
   @Delete(':id')
@@ -48,13 +35,11 @@ export class UsersController {
 
   @ApiOperation({ summary: 'Удалить несколько пользователей' })
   @Delete('bulk/:id')
-  removeMany(
-    @Param('id', new ParseArrayPipe({ items: Number })) id: number[],
-  ) {}
+  removeMany(@Param('id', new ParseArrayPipe({ items: Number })) id: number[]) {}
 
   @ApiOperation({ summary: 'Количество пользователей' })
   @Get('count')
   count(): Promise<number> {
-    return this.usersService.count()
+    return this.usersService.count();
   }
 }

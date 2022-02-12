@@ -1,51 +1,25 @@
 <template>
   <div>
-    <vs-navbar
-      not-line
-      square
-      target-scroll="#padding-scroll-content"
-      padding-scroll
-      center-collapsed
-      v-model="active"
-    >
+    <vs-navbar v-model="active" not-line square target-scroll="#padding-scroll-content" padding-scroll center-collapsed>
       <template #left>
-        <vs-button
-          class="d-lg-none d-md-block me-4"
-          @click="activeSidebar = !activeSidebar"
-          flat
-          icon
-        >
+        <vs-button class="d-lg-none d-md-block me-4" flat icon @click="activeSidebar = !activeSidebar">
           <i class="bx bx-menu"></i>
         </vs-button>
         <img class="my-2" src="/icon.png" height="64px" />
         <h2 class="ms-3 my-0 d-none d-md-block">UnicoreCMS</h2>
       </template>
-      <vs-navbar-item
-        class="d-none d-lg-block"
-        :active="active == 'servers'"
-        id="guide"
-      >
+      <vs-navbar-item id="guide" class="d-none d-lg-block" :active="active == 'servers'">
         <i class="bx bx-server"></i> Серверы
       </vs-navbar-item>
-      <vs-navbar-item class="d-none d-lg-block" id="docs">
-        <i class="bx bx-chat"></i> Форум
-      </vs-navbar-item>
-      <vs-navbar-item
-        class="d-none d-lg-block"
-        :active="active == 'donate'"
-        id="components"
-      >
+      <vs-navbar-item id="docs" class="d-none d-lg-block"> <i class="bx bx-chat"></i> Форум </vs-navbar-item>
+      <vs-navbar-item id="components" class="d-none d-lg-block" :active="active == 'donate'">
         <i class="bx bx-paperclip"></i> Правила
       </vs-navbar-item>
-      <vs-navbar-item
-        class="d-none d-lg-block"
-        :active="active == 'rules'"
-        id="components"
-      >
+      <vs-navbar-item id="components" class="d-none d-lg-block" :active="active == 'rules'">
         <i class="bx bx-donate-heart"></i> Донат
       </vs-navbar-item>
       <template #right>
-        <vs-switch dark :val="color_mode" v-model="$colorMode.value">
+        <vs-switch v-model="$colorMode.value" dark :val="color_mode">
           <template #circle>
             <i v-if="$colorMode.value === 'light'" class="bx bxs-moon"></i>
             <i v-else class="bx bxs-sun"></i>
@@ -70,9 +44,9 @@ export default {
     active: '',
   }),
   watch: {
-    '$colorMode.value': function (val) {
-      this.$colorMode.value === 'dark' ? this.$colorMode.preference = 'light' : this.$colorMode.preference = 'dark'
-    }
+    '$colorMode.value'(val) {
+      this.$colorMode.value === 'dark' ? (this.$colorMode.preference = 'light') : (this.$colorMode.preference = 'dark')
+    },
   },
 }
 </script>

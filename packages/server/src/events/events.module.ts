@@ -7,6 +7,6 @@ import { EventsService } from './events.service';
 @Module({
   imports: [OnlineModule],
   providers: [EventsGateway, EventsService],
-  exports: [EventsService]
+  exports: [EventsService],
 })
 export class EventsModule {}

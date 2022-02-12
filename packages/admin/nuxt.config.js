@@ -13,9 +13,7 @@ export default mainConfig({
     port: envConfig.adminPort,
   },
 
-  plugins: [
-    '~/plugins/primevue'
-  ],
+  plugins: ['~/plugins/primevue'],
 
   css: ['primeflex/primeflex.css', '~/assets/styles/layout.scss'],
 
@@ -100,29 +98,22 @@ export default mainConfig({
       'Tree',
       'TreeTable',
       'TriStateCheckbox',
-      'Editor'
+      'Editor',
     ],
-    directives: [
-      'Tooltip',
-      'Ripple',
-      'BadgeDirective',
-      'StyleClass'
-    ]
+    directives: ['Tooltip', 'Ripple', 'BadgeDirective', 'StyleClass'],
   },
- 
-  modules: [
-    'primevue/nuxt',
-  ],
+
+  modules: ['primevue/nuxt'],
 
   auth: {
     redirect: {
       login: '/login',
       logout: '/login',
-      home: '/'
-    }
+      home: '/',
+    },
   },
 
   router: {
-    middleware: ['auth']
-  }
+    middleware: ['auth'],
+  },
 })

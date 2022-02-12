@@ -5,12 +5,7 @@
         <Toolbar class="mb-4">
           <template v-slot:start>
             <div class="my-2">
-              <Button
-                label="Создать"
-                icon="pi pi-plus"
-                class="p-button-success mr-2"
-                @click="openNew"
-              />
+              <Button label="Создать" icon="pi pi-plus" class="p-button-success mr-2" @click="openNew" />
               <Button
                 label="Удалить"
                 icon="pi pi-trash"
@@ -36,12 +31,7 @@
           responsiveLayout="scroll"
         >
           <template #header>
-            <div
-              class="
-                flex flex-column
-                md:flex-row md:justify-content-between md:align-items-center
-              "
-            >
+            <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
               <h5 class="m-0">Управление пользователями</h5>
               <span class="block mt-2 md:mt-0 p-input-icon-left">
                 <i class="pi pi-search" />
@@ -51,23 +41,13 @@
           </template>
 
           <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
-          <Column
-            field="code"
-            header="Code"
-            :sortable="true"
-            headerStyle="width:14%; min-width:10rem;"
-          >
+          <Column field="code" header="Code" :sortable="true" headerStyle="width:14%; min-width:10rem;">
             <template #body="slotProps">
               <span class="p-column-title">Code</span>
               {{ slotProps.data.code }}
             </template>
           </Column>
-          <Column
-            field="name"
-            header="Name"
-            :sortable="true"
-            headerStyle="width:14%; min-width:10rem;"
-          >
+          <Column field="name" header="Name" :sortable="true" headerStyle="width:14%; min-width:10rem;">
             <template #body="slotProps">
               <span class="p-column-title">Name</span>
               {{ slotProps.data.name }}
@@ -76,93 +56,45 @@
           <Column header="Image" headerStyle="width:14%; min-width:10rem;">
             <template #body="slotProps">
               <span class="p-column-title">Image</span>
-              <img
-                :src="'images/product/' + slotProps.data.image"
-                :alt="slotProps.data.image"
-                class="shadow-2"
-                width="100"
-              />
+              <img :src="'images/product/' + slotProps.data.image" :alt="slotProps.data.image" class="shadow-2" width="100" />
             </template>
           </Column>
-          <Column
-            field="price"
-            header="Price"
-            :sortable="true"
-            headerStyle="width:14%; min-width:8rem;"
-          >
+          <Column field="price" header="Price" :sortable="true" headerStyle="width:14%; min-width:8rem;">
             <template #body="slotProps">
               <span class="p-column-title">Price</span>
               {{ formatCurrency(slotProps.data.price) }}
             </template>
           </Column>
-          <Column
-            field="category"
-            header="Category"
-            :sortable="true"
-            headerStyle="width:14%; min-width:10rem;"
-          >
+          <Column field="category" header="Category" :sortable="true" headerStyle="width:14%; min-width:10rem;">
             <template #body="slotProps">
               <span class="p-column-title">Category</span>
               {{ formatCurrency(slotProps.data.category) }}
             </template>
           </Column>
-          <Column
-            field="rating"
-            header="Reviews"
-            :sortable="true"
-            headerStyle="width:14%; min-width:10rem;"
-          >
+          <Column field="rating" header="Reviews" :sortable="true" headerStyle="width:14%; min-width:10rem;">
             <template #body="slotProps">
               <span class="p-column-title">Rating</span>
-              <Rating
-                :modelValue="slotProps.data.rating"
-                :readonly="true"
-                :cancel="false"
-              />
+              <Rating :modelValue="slotProps.data.rating" :readonly="true" :cancel="false" />
             </template>
           </Column>
-          <Column
-            field="inventoryStatus"
-            header="Status"
-            :sortable="true"
-            headerStyle="width:14%; min-width:10rem;"
-          >
+          <Column field="inventoryStatus" header="Status" :sortable="true" headerStyle="width:14%; min-width:10rem;">
             <template #body="slotProps">
               <span class="p-column-title">Status</span>
               <span
-                :class="
-                  'product-badge status-' +
-                  (slotProps.data.inventoryStatus
-                    ? slotProps.data.inventoryStatus.toLowerCase()
-                    : '')
-                "
+                :class="'product-badge status-' + (slotProps.data.inventoryStatus ? slotProps.data.inventoryStatus.toLowerCase() : '')"
                 >{{ slotProps.data.inventoryStatus }}</span
               >
             </template>
           </Column>
           <Column headerStyle="min-width:10rem;">
             <template #body="slotProps">
-              <Button
-                icon="pi pi-pencil"
-                class="p-button-rounded p-button-success mr-2"
-                @click="editProduct(slotProps.data)"
-              />
-              <Button
-                icon="pi pi-trash"
-                class="p-button-rounded p-button-warning mt-2"
-                @click="confirmDeleteProduct(slotProps.data)"
-              />
+              <Button icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" @click="editProduct(slotProps.data)" />
+              <Button icon="pi pi-trash" class="p-button-rounded p-button-warning mt-2" @click="confirmDeleteProduct(slotProps.data)" />
             </template>
           </Column>
         </DataTable>
 
-        <Dialog
-          :visible.sync="productDialog"
-          :style="{ width: '450px' }"
-          header="Product Details"
-          :modal="true"
-          class="p-fluid"
-        >
+        <Dialog :visible.sync="productDialog" :style="{ width: '450px' }" header="Product Details" :modal="true" class="p-fluid">
           <img
             :src="'images/product/' + product.image"
             :alt="product.image"
@@ -179,19 +111,11 @@
               autofocus
               :class="{ 'p-invalid': submitted && !product.name }"
             />
-            <small class="p-invalid" v-if="submitted && !product.name"
-              >Name is required.</small
-            >
+            <small class="p-invalid" v-if="submitted && !product.name">Name is required.</small>
           </div>
           <div class="field">
             <label for="description">Description</label>
-            <Textarea
-              id="description"
-              v-model="product.description"
-              required="true"
-              rows="3"
-              cols="20"
-            />
+            <Textarea id="description" v-model="product.description" required="true" rows="3" cols="20" />
           </div>
 
           <div class="field">
@@ -205,18 +129,10 @@
             >
               <template #value="slotProps">
                 <div v-if="slotProps.value && slotProps.value.value">
-                  <span
-                    :class="'product-badge status-' + slotProps.value.value"
-                    >{{ slotProps.value.label }}</span
-                  >
+                  <span :class="'product-badge status-' + slotProps.value.value">{{ slotProps.value.label }}</span>
                 </div>
                 <div v-else-if="slotProps.value && !slotProps.value.value">
-                  <span
-                    :class="
-                      'product-badge status-' + slotProps.value.toLowerCase()
-                    "
-                    >{{ slotProps.value }}</span
-                  >
+                  <span :class="'product-badge status-' + slotProps.value.toLowerCase()">{{ slotProps.value }}</span>
                 </div>
                 <span v-else>
                   {{ slotProps.placeholder }}
@@ -229,39 +145,19 @@
             <label class="mb-3">Category</label>
             <div class="formgrid grid">
               <div class="field-radiobutton col-6">
-                <RadioButton
-                  id="category1"
-                  name="category"
-                  value="Accessories"
-                  v-model="product.category"
-                />
+                <RadioButton id="category1" name="category" value="Accessories" v-model="product.category" />
                 <label for="category1">Accessories</label>
               </div>
               <div class="field-radiobutton col-6">
-                <RadioButton
-                  id="category2"
-                  name="category"
-                  value="Clothing"
-                  v-model="product.category"
-                />
+                <RadioButton id="category2" name="category" value="Clothing" v-model="product.category" />
                 <label for="category2">Clothing</label>
               </div>
               <div class="field-radiobutton col-6">
-                <RadioButton
-                  id="category3"
-                  name="category"
-                  value="Electronics"
-                  v-model="product.category"
-                />
+                <RadioButton id="category3" name="category" value="Electronics" v-model="product.category" />
                 <label for="category3">Electronics</label>
               </div>
               <div class="field-radiobutton col-6">
-                <RadioButton
-                  id="category4"
-                  name="category"
-                  value="Fitness"
-                  v-model="product.category"
-                />
+                <RadioButton id="category4" name="category" value="Fitness" v-model="product.category" />
                 <label for="category4">Fitness</label>
               </div>
             </div>
@@ -270,99 +166,41 @@
           <div class="formgrid grid">
             <div class="field col">
               <label for="price">Price</label>
-              <InputNumber
-                id="price"
-                v-model="product.price"
-                mode="currency"
-                currency="USD"
-                locale="en-US"
-              />
+              <InputNumber id="price" v-model="product.price" mode="currency" currency="USD" locale="en-US" />
             </div>
             <div class="field col">
               <label for="quantity">Quantity</label>
-              <InputNumber
-                id="quantity"
-                v-model="product.quantity"
-                integeronly
-              />
+              <InputNumber id="quantity" v-model="product.quantity" integeronly />
             </div>
           </div>
           <template #footer>
-            <Button
-              label="Cancel"
-              icon="pi pi-times"
-              class="p-button-text"
-              @click="hideDialog"
-            />
-            <Button
-              label="Save"
-              icon="pi pi-check"
-              class="p-button-text"
-              @click="saveProduct"
-            />
+            <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
+            <Button label="Save" icon="pi pi-check" class="p-button-text" @click="saveProduct" />
           </template>
         </Dialog>
 
-        <Dialog
-          :visible.sync="deleteProductDialog"
-          :style="{ width: '450px' }"
-          header="Confirm"
-          :modal="true"
-        >
+        <Dialog :visible.sync="deleteProductDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
           <div class="flex align-items-center justify-content-center">
-            <i
-              class="pi pi-exclamation-triangle mr-3"
-              style="font-size: 2rem"
-            />
+            <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
             <span v-if="product"
               >Are you sure you want to delete <b>{{ product.name }}</b
               >?</span
             >
           </div>
           <template #footer>
-            <Button
-              label="No"
-              icon="pi pi-times"
-              class="p-button-text"
-              @click="deleteProductDialog = false"
-            />
-            <Button
-              label="Yes"
-              icon="pi pi-check"
-              class="p-button-text"
-              @click="deleteProduct"
-            />
+            <Button label="No" icon="pi pi-times" class="p-button-text" @click="deleteProductDialog = false" />
+            <Button label="Yes" icon="pi pi-check" class="p-button-text" @click="deleteProduct" />
           </template>
         </Dialog>
 
-        <Dialog
-          v-model="deleteProductsDialog"
-          :style="{ width: '450px' }"
-          header="Confirm"
-          :modal="true"
-        >
+        <Dialog v-model="deleteProductsDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
           <div class="flex align-items-center justify-content-center">
-            <i
-              class="pi pi-exclamation-triangle mr-3"
-              style="font-size: 2rem"
-            />
-            <span v-if="product"
-              >Are you sure you want to delete the selected products?</span
-            >
+            <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
+            <span v-if="product">Are you sure you want to delete the selected products?</span>
           </div>
           <template #footer>
-            <Button
-              label="No"
-              icon="pi pi-times"
-              class="p-button-text"
-              @click="deleteProductsDialog = false"
-            />
-            <Button
-              label="Yes"
-              icon="pi pi-check"
-              class="p-button-text"
-              @click="deleteSelectedProducts"
-            />
+            <Button label="No" icon="pi pi-times" class="p-button-text" @click="deleteProductsDialog = false" />
+            <Button label="Yes" icon="pi pi-check" class="p-button-text" @click="deleteSelectedProducts" />
           </template>
         </Dialog>
       </div>
@@ -427,9 +265,7 @@ export default {
           this.product.id = this.createId()
           this.product.code = this.createId()
           this.product.image = 'product-placeholder.svg'
-          this.product.inventoryStatus = this.product.inventoryStatus
-            ? this.product.inventoryStatus.value
-            : 'INSTOCK'
+          this.product.inventoryStatus = this.product.inventoryStatus ? this.product.inventoryStatus.value : 'INSTOCK'
           this.products.push(this.product)
           this.$toast.add({
             severity: 'success',
@@ -473,8 +309,7 @@ export default {
     },
     createId() {
       let id = ''
-      var chars =
-        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+      var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
       for (var i = 0; i < 5; i++) {
         id += chars.charAt(Math.floor(Math.random() * chars.length))
       }
@@ -487,9 +322,7 @@ export default {
       this.deleteProductsDialog = true
     },
     deleteSelectedProducts() {
-      this.products = this.products.filter(
-        (val) => !this.selectedProducts.includes(val)
-      )
+      this.products = this.products.filter((val) => !this.selectedProducts.includes(val))
       this.deleteProductsDialog = false
       this.selectedProducts = null
       this.$toast.add({

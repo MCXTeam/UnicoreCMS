@@ -1,17 +1,7 @@
 import { StorageManager } from '@common';
-import { Kit } from 'src/game/donate/groups/entities/kit.entity';
+import { Kit } from 'src/game/store/entities/kit.entity';
 import { Product } from 'src/game/store/entities/product.entity';
-import {
-  AfterRemove,
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinTable,
-  ManyToMany,
-  OneToOne,
-  PrimaryColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { AfterRemove, Column, CreateDateColumn, Entity, JoinTable, ManyToMany, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 import { Mod } from '../mods/entities/mod.entity';
 import { Online } from '../online/entities/online.entity';
 import { Query } from '../online/entities/query.entity';
@@ -53,13 +43,13 @@ export class Server {
   @JoinTable()
   mods?: Mod[];
 
-  @ManyToMany(() => Product)
+  @ManyToMany(() => Product, (product) => product.servers)
   @JoinTable()
-  products?: Kit[];
+  products?: Product[];
 
-  @ManyToMany(() => Product)
+  @ManyToMany(() => Kit, (kit) => kit.servers)
   @JoinTable()
-  kits?: Product[];
+  kits?: Kit[];
 
   @CreateDateColumn()
   created: Date;

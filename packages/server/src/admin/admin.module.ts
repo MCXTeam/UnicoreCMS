@@ -6,16 +6,11 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { LogModule } from './logs/logs.module';
 import { ConfigModule } from './config/config.module';
 import { WebhookModule } from './webhook/webhook.module';
+import { ApiModule } from './api/api.module';
+import { StorageModule } from './storage/storage.module';
+import { PagesModule } from './pages/pages.module';
 
 @Module({
-  imports: [
-    MigrationsModule,
-    RolesModule,
-    NewsModule,
-    DashboardModule,
-    LogModule,
-    ConfigModule,
-    WebhookModule
-  ],
+  imports: [MigrationsModule, RolesModule, NewsModule, DashboardModule, LogModule, ConfigModule, WebhookModule, ApiModule, StorageModule, PagesModule],
 })
 export class AdminModule {}

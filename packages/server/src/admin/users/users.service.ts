@@ -1,12 +1,7 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOneOptions, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-import {
-  PaginateQuery,
-  Paginated,
-  paginate,
-  FilterOperator,
-} from 'nestjs-paginate';
+import { PaginateQuery, Paginated, paginate, FilterOperator } from 'nestjs-paginate';
 
 export class UsersService {
   constructor(
@@ -47,11 +42,11 @@ export class UsersService {
   async getByUsernameOrEmail(username_or_email: string, relations?: string[]): Promise<User> {
     return this.usersRepository.findOne({
       where: [{ username: username_or_email }, { email: username_or_email }],
-      relations
+      relations,
     });
   }
 
   async count(): Promise<number> {
-    return this.usersRepository.count()
+    return this.usersRepository.count();
   }
 }

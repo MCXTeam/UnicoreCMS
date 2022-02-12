@@ -1,11 +1,11 @@
-import { IsDefined, IsPort, IsString } from "class-validator";
+import { IsDefined, IsPort, IsString } from 'class-validator';
 
 export class QueryInput {
   @IsDefined()
   @IsString()
-  host: string
+  host: string;
 
   @IsDefined()
   @IsPort()
-  port: number
+  port: number;
 }

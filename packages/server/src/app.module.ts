@@ -6,10 +6,8 @@ import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
 import { GameModule } from './game/game.module';
 import { PaymentModule } from './payment/payment.module';
-import {
-  GoogleRecaptchaModule,
-  GoogleRecaptchaNetwork,
-} from '@nestlab/google-recaptcha';
+import { GoogleRecaptchaModule, GoogleRecaptchaNetwork } from '@nestlab/google-recaptcha';
+import { HttpModule } from '@nestjs/axios';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MomentModule } from './moment';
@@ -41,6 +39,7 @@ import { IntegrationsModule } from './admin/integrations/integrations.module';
       ttl: 60,
       limit: 10,
     }),
+    HttpModule,
     MomentModule,
     IntegrationsModule,
     EventsModule,
@@ -53,4 +52,4 @@ import { IntegrationsModule } from './admin/integrations/integrations.module';
   controllers: [],
   providers: [],
 })
-export class AppModule { }
+export class AppModule {}

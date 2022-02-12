@@ -1,43 +1,48 @@
-import { StorageManager } from "@common";
-import { Server } from "src/game/servers/entities/server.entity";
-import { AfterRemove, Column, JoinTable, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Categoty } from "./category.entity";
+import { StorageManager } from '@common';
+import { Server } from 'src/game/servers/entities/server.entity';
+import { AfterRemove, Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Category } from './category.entity';
+import { Product } from './product.entity';
 
+@Entity()
 export class Kit {
   @PrimaryGeneratedColumn()
-  id: number
+  id: number;
 
   @Column()
-  name: string
+  name: string;
 
-  @Column()
-  ingame_id: string;
-
-  @Column({ nullable: true })
-  icon: string
-
-  @Column({ nullable: true })
-  image: string
-
-  @Column('text')
-  description: string
-
-  @Column('decimal', {
-    precision: 5,
-    scale: 2,
+  @Column('text', {
+    nullable: true
   })
+  description: string;
+
+  @Column({ nullable: true })
+  icon: string;
+
+  @Column('float')
   price: number;
+
+  @Column({ nullable: true })
+  sale: number;
 
   @ManyToMany(() => Server, (server) => server.kits)
   servers: Server[];
 
-  @ManyToMany(() => Categoty, (category) => category.kits)
+  @ManyToMany(() => Category, (category) => category.kits)
   @JoinTable()
-  categories: Categoty[];
+  categories: Category[];
+
+  @ManyToMany(() => Product, (product) => product.kits, {
+    cascade: true,
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  @JoinTable()
+  products: Product[];
 
   @AfterRemove()
   removeFile() {
     StorageManager.remove(this.icon);
-    StorageManager.remove(this.image);
   }
 }

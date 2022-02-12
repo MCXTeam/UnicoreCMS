@@ -3,5 +3,5 @@ import { Server } from 'socket.io';
 
 @Injectable()
 export class EventsService {
- public server: Server;
+  public server: Server;
 }

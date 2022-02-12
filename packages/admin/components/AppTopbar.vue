@@ -4,10 +4,7 @@
       <img alt="Logo" src="/logo.png" />
       <span>UNICORECMS</span>
     </router-link>
-    <button
-      class="p-link layout-menu-button layout-topbar-button"
-      @click="onMenuToggle"
-    >
+    <button class="p-link layout-menu-button layout-topbar-button" @click="onMenuToggle">
       <i class="pi pi-bars"></i>
     </button>
 

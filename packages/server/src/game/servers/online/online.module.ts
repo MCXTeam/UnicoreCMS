@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { OnlineService } from './online.service';
-import { OnlineController } from './online.controller';;
+import { OnlineController } from './online.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Online } from './entities/online.entity';
 import { OnlineTasks } from './online.tasks';
@@ -15,6 +15,6 @@ import { Mod } from '../mods/entities/mod.entity';
   imports: [TypeOrmModule.forFeature([Online, Server, OnlinesRecord, OnlinesAbsoluteRecord, Query, Mod])],
   providers: [OnlineService, OnlineTasks, ServersService],
   controllers: [OnlineController],
-  exports: [OnlineService]
+  exports: [OnlineService],
 })
 export class OnlineModule {}

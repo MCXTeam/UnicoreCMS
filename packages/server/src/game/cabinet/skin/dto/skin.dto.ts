@@ -1,8 +1,7 @@
 import { Skin } from '../entities/skin.entity';
 import { Exclude } from 'class-transformer';
 import { SkinMeta } from './skin-meta';
-import { getDeigest } from '../utils/getDigest';
-import { StorageManager } from '@common';
+import { StorageManager, getDeigest } from '@common';
 
 export class SkinDto implements Skin {
   get url(): string {

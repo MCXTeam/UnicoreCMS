@@ -5,11 +5,6 @@ import { PlaytimeListModule } from './playtime-list/playtime-list.module';
 import { BanListModule } from './ban-list/ban-list.module';
 
 @Module({
-  imports: [
-    ReferalsListModule,
-    VotesListModule,
-    PlaytimeListModule,
-    BanListModule,
-  ],
+  imports: [ReferalsListModule, VotesListModule, PlaytimeListModule, BanListModule],
 })
 export class PlayersModule {}

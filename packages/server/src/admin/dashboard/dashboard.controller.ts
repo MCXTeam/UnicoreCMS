@@ -6,12 +6,10 @@ import { Permission } from 'unicore-common';
 @Permissions([Permission.AdminDashboard])
 @Controller('admin/dashboard')
 export class DashboardController {
-  constructor (
-    private dahboardService: DashboardService
-  ) {}
+  constructor(private dahboardService: DashboardService) {}
 
   @Get('stats')
   stats() {
-    return this.dahboardService.stats()
+    return this.dahboardService.stats();
   }
 }

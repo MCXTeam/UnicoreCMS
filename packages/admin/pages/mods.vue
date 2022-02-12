@@ -5,12 +5,7 @@
         <Toolbar class="mb-4">
           <template v-slot:start>
             <div class="my-2">
-              <Button
-                label="Создать"
-                icon="pi pi-plus"
-                class="p-button-success mr-2"
-                @click="openDialog()"
-              />
+              <Button label="Создать" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
               <Button
                 label="Удалить"
                 icon="pi pi-trash"
@@ -24,8 +19,8 @@
 
         <DataTable
           :value="mods.data"
-          :lazy="true"
-          :paginator="true"
+          lazy
+          paginator
           :rows="mods.meta.itemsPerPage"
           :filters.sync="filters"
           dataKey="id"
@@ -33,37 +28,25 @@
           :loading="loading"
           :rowsPerPageOptions="[20, 50, 100, 500]"
           @page="onPage($event)"
+          @sort="onSort($event)"
           :selection.sync="selected"
           responsiveLayout="scroll"
         >
           <template #header>
-            <div
-              class="
-                flex flex-column
-                md:flex-row md:justify-content-between md:align-items-center
-              "
-            >
+            <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
               <h5 class="m-0">Управление модами</h5>
               <span class="block mt-2 md:mt-0 p-input-icon-left">
                 <i class="pi pi-search" />
-                <InputText
-                  @keydown.enter="onFilter()"
-                  v-model="filters['global'].value"
-                  placeholder="Поиск..."
-                />
+                <InputText @keydown.enter="onFilter()" v-model="filters['global'].value" placeholder="Поиск..." />
               </span>
             </div>
           </template>
           <Column selectionMode="multiple" :styles="{ width: '3rem' }"></Column>
-          <Column field="id" header="ID" :styles="{ width: '8rem' }"></Column>
-          <Column field="name" header="Название">
+          <Column field="id" header="ID" :styles="{ width: '8rem' }" sortable></Column>
+          <Column field="name" header="Название" sortable>
             <template #body="slotProps">
               <div class="flex align-items-center">
-                <Avatar
-                  v-if="slotProps.data.icon"
-                  :image="`${$config.apiUrl + '/' + slotProps.data.icon}`"
-                  shape="circle"
-                />
+                <Avatar v-if="slotProps.data.icon" :image="`${$config.apiUrl + '/' + slotProps.data.icon}`" shape="circle" />
                 <Avatar v-else icon="pi pi-image" shape="circle" />
                 <span class="ml-2">{{ slotProps.data.name }}</span>
               </div>
@@ -71,16 +54,8 @@
           </Column>
           <Column :styles="{ width: '12rem' }">
             <template #body="slotProps">
-              <Button
-                @click="openDialog(slotProps.data)"
-                icon="pi pi-pencil"
-                class="p-button-rounded p-button-success mr-2"
-              />
-              <Button
-                @click="openFileDialog(slotProps.data)"
-                icon="pi pi-images"
-                class="p-button-rounded p-button-secondary mr-2"
-              />
+              <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
+              <Button @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary mr-2" />
               <Button
                 @click="removeMod(slotProps.data.id)"
                 v-if="!slotProps.data.important"
@@ -90,41 +65,13 @@
             </template>
           </Column>
         </DataTable>
-        <Dialog
-          :visible.sync="fileDialog"
-          :style="{ width: '400px' }"
-          :modal="true"
-          header="Иконка мода"
-          class="p-fluid"
-        >
-          <div
-            class="
-              flex
-              align-items-center
-              justify-content-center
-              flex-wrap
-              w-full
-            "
-          >
-            <Avatar
-              v-if="mod.icon"
-              :image="`${$config.apiUrl + '/' + mod.icon}`"
-              size="xlarge"
-              shape="circle"
-            />
+        <Dialog :visible.sync="fileDialog" :style="{ width: '400px' }" :modal="true" header="Иконка мода" class="p-fluid">
+          <div class="flex align-items-center justify-content-center flex-wrap w-full">
+            <Avatar v-if="mod.icon" :image="`${$config.apiUrl + '/' + mod.icon}`" size="xlarge" shape="circle" />
             <Avatar v-else icon="pi pi-image" size="xlarge" shape="circle" />
             <div class="field ml-6 mb-0">
-              <Button
-                label="Загрузить"
-                icon="pi pi-upload"
-                @click="$refs.fileInput.choose()"
-              />
-              <Button
-                label="Удалить"
-                icon="pi pi-trash"
-                class="p-button-secondary mt-2"
-                @click="removeIcon()"
-              />
+              <Button label="Загрузить" icon="pi pi-upload" @click="$refs.fileInput.choose()" />
+              <Button label="Удалить" icon="pi pi-trash" class="p-button-secondary mt-2" @click="removeIcon()" />
               <FileUpload
                 ref="fileInput"
                 style="display: none"
@@ -148,19 +95,11 @@
             header="Создание/редактирование мода"
             class="p-fluid"
           >
-            <ValidationProvider
-              name="Название"
-              rules="required"
-              v-slot="{ errors }"
-            >
+            <ValidationProvider name="Название" rules="required" v-slot="{ errors }">
               <div class="field">
                 <label>Название</label>
                 <InputText v-model="mod.name" autofocus />
-                <small
-                  v-show="errors[0]"
-                  class="p-error"
-                  v-text="errors[0]"
-                ></small>
+                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
               </div>
             </ValidationProvider>
             <div class="field">
@@ -176,13 +115,7 @@
               </Editor>
             </div>
             <template #footer>
-              <Button
-                :disabled="loading"
-                label="Отмена"
-                icon="pi pi-times"
-                class="p-button-text"
-                @click="hideDialog"
-              />
+              <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
                 :disabled="loading || invalid"
                 label="Сохранить"
@@ -199,6 +132,7 @@
 </template>
 
 <script>
+import { sortTransform } from '~/helpers'
 import { FilterMatchMode } from 'primevue/api'
 import { ValidationObserver, ValidationProvider } from 'vee-validate'
 
@@ -219,7 +153,7 @@ export default {
           totalItems: 0,
           currentPage: 1,
           totalPages: 1,
-          sortBy: [],
+          sortBy: null,
         },
       },
       loading: true,
@@ -247,6 +181,7 @@ export default {
           page: this.mods.meta.currentPage,
           limit: this.mods.meta.itemsPerPage,
           search: this.filters.global.value,
+          sortBy: this.mods.meta.sortBy,
         },
       })
       .then((res) => res.data)
@@ -316,6 +251,11 @@ export default {
       this.mods.meta.itemsPerPage = event.rows
       this.$fetch()
     },
+    onSort(event) {
+      this.mods.meta.sortBy = sortTransform(event.sortOrder, event.sortField)
+
+      this.$fetch()
+    },
     onFilter() {
       this.$fetch()
     },
@@ -364,10 +304,7 @@ export default {
     async updateMod() {
       this.loading = true
       try {
-        await this.$axios.patch(
-          '/servers/mods/' + this.mod.id,
-          this.$_.omit(this.mod, 'id')
-        )
+        await this.$axios.patch('/servers/mods/' + this.mod.id, this.$_.omit(this.mod, 'id'))
         this.$toast.add({
           severity: 'success',
           detail: 'Мод успешно редактирован',

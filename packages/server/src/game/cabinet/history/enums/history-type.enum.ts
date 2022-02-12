@@ -15,15 +15,12 @@ export enum HistoryType {
 
 export class HistoryGroupType {
   static Purchase = [
-    HistoryType.DonateGroupPurchase, 
-    HistoryType.DonatePermissionPurchase, 
-    HistoryType.ProductPurchase, 
-    HistoryType.KitPurchase, 
-    HistoryType.UnabnPurchase
-  ]
+    HistoryType.DonateGroupPurchase,
+    HistoryType.DonatePermissionPurchase,
+    HistoryType.ProductPurchase,
+    HistoryType.KitPurchase,
+    HistoryType.UnabnPurchase,
+  ];
 
-  static Transfer = [
-    HistoryType.RealTransfer, 
-    HistoryType.MoneyTransfer, 
-  ]
+  static Transfer = [HistoryType.RealTransfer, HistoryType.MoneyTransfer];
 }

@@ -4,13 +4,11 @@ import { OnlineService } from './online.service';
 
 @Controller('servers/online')
 export class OnlineController {
-  constructor (
-    private onlineService: OnlineService
-  ) {}
+  constructor(private onlineService: OnlineService) {}
 
   @Public()
   @Get()
   find() {
-    return this.onlineService.find()
+    return this.onlineService.find();
   }
 }
