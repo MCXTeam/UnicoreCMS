@@ -1,9 +1,10 @@
 import { StorageManager } from '@common';
 import { Server } from 'src/game/servers/entities/server.entity';
-import { AfterRemove, Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { AfterRemove, Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Category } from './category.entity';
 import { Kit } from './kit.entity';
 import { Enchantment } from './enchantment.entity';
+import { KitItem } from './kit-item.entity';
 
 @Entity()
 export class Product {
@@ -22,8 +23,8 @@ export class Product {
   @ManyToMany(() => Server, (server) => server.products)
   servers: Server[];
 
-  @ManyToMany(() => Kit, (kit) => kit.products)
-  kits: Kit[];
+  @OneToMany(() => KitItem, (item) => item.product)
+  kit_items: KitItem[];
 
   @ManyToMany(() => Category, (category) => category.products)
   @JoinTable()

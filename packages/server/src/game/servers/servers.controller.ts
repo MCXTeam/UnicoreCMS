@@ -31,7 +31,7 @@ export class ServersController {
   @Public()
   @Get()
   find() {
-    return this.serversService.find(['online']);
+    return this.serversService.find();
   }
 
   @Get(':id')

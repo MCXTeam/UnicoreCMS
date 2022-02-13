@@ -5,7 +5,7 @@ import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { KitInput } from '../dto/kit.input.dto';
 import { KitsService } from '../providers/kits.service';
 
-@Controller('admin/store/kits')
+@Controller('store/kits')
 export class KitsController {
   constructor(private kitsService: KitsService) { }
 
@@ -16,7 +16,7 @@ export class KitsController {
 
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
-    const kit = this.kitsService.findOne(id, ['products', 'servers', 'categories'])
+    const kit = this.kitsService.findOne(id, ['items', 'servers', 'categories'])
     
     if (!kit)
       throw new NotFoundException()

@@ -19,12 +19,6 @@
         <i class="bx bx-donate-heart"></i> Донат
       </vs-navbar-item>
       <template #right>
-        <vs-switch v-model="$colorMode.value" dark :val="color_mode">
-          <template #circle>
-            <i v-if="$colorMode.value === 'light'" class="bx bxs-moon"></i>
-            <i v-else class="bx bxs-sun"></i>
-          </template>
-        </vs-switch>
         <vs-button size="xl">Начать игру <i class="bx bx-play"></i></vs-button>
       </template>
     </vs-navbar>
@@ -43,10 +37,5 @@ export default {
   data: () => ({
     active: '',
   }),
-  watch: {
-    '$colorMode.value'(val) {
-      this.$colorMode.value === 'dark' ? (this.$colorMode.preference = 'light') : (this.$colorMode.preference = 'dark')
-    },
-  },
 }
 </script>

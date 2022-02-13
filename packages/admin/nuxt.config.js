@@ -113,6 +113,10 @@ export default mainConfig({
     },
   },
 
+  loading: {
+    color: '#BA68C8',
+  },
+
   router: {
     middleware: ['auth'],
   },

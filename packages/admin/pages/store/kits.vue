@@ -66,23 +66,23 @@
             </template>
             <template #filter="{ filterModel }">
               <div class="mb-3 font-bold">Серверы</div>
-              <AutoComplete
+              <MultiSelect
+                display="chip"
+                :filter="true"
                 v-model="filterModel.value"
-                :multiple="true"
-                :suggestions="serversFilterd"
-                @complete="searchServer($event)"
-                field="name"
+                :options="servers"
+                optionLabel="name"
                 placeholder="Выберите серверы"
-                style="max-width: 200px"
+                class="p-column-filter"
               >
-                <template #item="slotProps">
-                  <div class="flex align-items-center">
-                    <Avatar v-if="slotProps.item.icon" :image="`${$config.apiUrl + '/' + slotProps.item.icon}`" shape="circle" />
+                <template #option="slotProps">
+                  <div class="p-multiselect-representative-option">
+                    <Avatar v-if="slotProps.option.icon" :image="`${$config.apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
                     <Avatar v-else icon="pi pi-image" shape="circle" />
-                    <span class="ml-2">{{ slotProps.item.name }} (#{{ slotProps.item.id }})</span>
+                    <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                   </div>
                 </template>
-              </AutoComplete>
+              </MultiSelect>
             </template>
           </Column>
           <Column field="categories" header="Категории" filterField="categories" :showFilterMatchModes="false">
@@ -175,43 +175,76 @@
             </div>
             <div class="field">
               <label>Товары</label>
-              <AutoComplete
-                v-model="kit.products"
-                :multiple="true"
-                :suggestions="products"
-                @complete="searchProduct($event)"
-                field="name"
-                appendTo="body"
-                placeholder="Выберите товары"
+              <Button @click="addKitItem" icon="pi pi-plus" class="p-button-rounded p-button-text" />
+              <DataTable
+                :value="kit.items"
+                editMode="row"
+                :editingRows.sync="kitItems"
+                @row-edit-save="onKitItemEditSave"
+                responsiveLayout="scroll"
               >
-                <template #item="slotProps">
-                  <div class="flex align-items-center">
-                    <Avatar v-if="slotProps.item.icon" :image="`${$config.apiUrl + '/' + slotProps.item.icon}`" shape="circle" />
-                    <Avatar v-else icon="pi pi-image" shape="circle" />
-                    <span class="ml-2">{{ slotProps.item.name }} (#{{ slotProps.item.id }})</span>
-                  </div>
-                </template>
-              </AutoComplete>
+                <Column field="product" header="Товар из магазина" :styles="{ width: '40%' }">
+                  <template #body="slotProps">
+                    <div class="flex align-items-center">
+                      <Avatar v-if="$_.get(slotProps.data, 'product.icon')" :image="`${$config.apiUrl + '/' + $_.get(slotProps.data, 'product.icon')}`" shape="circle" />
+                      <Avatar v-else icon="pi pi-image" shape="circle" />
+                      <span class="ml-2">{{ $_.get(slotProps.data, 'product.name', 'Не выбран') }}</span>
+                    </div>
+                  </template>
+                  <template #editor="slotProps">
+                    <AutoComplete
+                      v-model="slotProps.data[slotProps.column.field]"
+                      :suggestions="products"
+                      @complete="searchProduct($event)"
+                      field="name"
+                      appendTo="body"
+                    >
+                      <template #item="slotProps">
+                        <div class="flex align-items-center">
+                          <Avatar v-if="slotProps.item.icon" :image="`${$config.apiUrl + '/' + slotProps.item.icon}`" shape="circle" />
+                          <Avatar v-else icon="pi pi-image" shape="circle" />
+                          <span class="ml-2">{{ slotProps.item.name }} (#{{ slotProps.item.id }})</span>
+                        </div>
+                      </template>
+                    </AutoComplete>
+                  </template>
+                </Column>
+                <Column field="amount" header="Количество" :styles="{ width: '50%' }">
+                  <template #editor="slotProps">
+                    <InputNumber placehol v-model="slotProps.data[slotProps.column.field]" />
+                  </template>
+                </Column>
+                <Column :rowEditor="true" :styles="{ width: '10%', 'min-width': '8rem' }" :bodyStyle="{ 'text-align': 'right' }"></Column>
+                <Column v-if="!kitItems || !kitItems.length" :styles="{ width: '3rem' }" :bodyStyle="{ 'text-align': 'center' }">
+                  <template #body="slotProps">
+                    <Button
+                      @click="removeKitItem(slotProps.index)"
+                      icon="pi pi-trash"
+                      class="p-button-rounded p-button-text p-button-danger"
+                    />
+                  </template>
+                </Column>
+              </DataTable>
             </div>
             <div class="field">
               <label>Серверы</label>
-              <AutoComplete
+              <MultiSelect
+                display="chip"
+                :filter="true"
                 v-model="kit.servers"
-                :multiple="true"
-                :suggestions="serversFilterd"
-                @complete="searchServer($event)"
-                field="name"
-                appendTo="body"
+                :options="servers"
+                optionLabel="name"
                 placeholder="Выберите серверы"
+                class="p-column-filter"
               >
-                <template #item="slotProps">
-                  <div class="flex align-items-center">
-                    <Avatar v-if="slotProps.item.icon" :image="`${$config.apiUrl + '/' + slotProps.item.icon}`" shape="circle" />
+                <template #option="slotProps">
+                  <div class="p-multiselect-representative-option">
+                    <Avatar v-if="slotProps.option.icon" :image="`${$config.apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
                     <Avatar v-else icon="pi pi-image" shape="circle" />
-                    <span class="ml-2">{{ slotProps.item.name }} (#{{ slotProps.item.id }})</span>
+                    <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                   </div>
                 </template>
-              </AutoComplete>
+              </MultiSelect>
             </div>
             <div class="field">
               <label>Категории</label>
@@ -288,7 +321,6 @@ export default {
       categories: null,
       products: null,
       servers: null,
-      serversFilterd: null,
       kits: {
         data: null,
         meta: {
@@ -308,7 +340,7 @@ export default {
         sale: null,
         servers: [],
         categories: [],
-        products: [],
+        items: [],
         icon: null,
       },
       fileDialog: false,
@@ -318,12 +350,13 @@ export default {
         servers: { value: null },
         categories: { value: null },
       },
+      kitItems: null,
     }
   },
   async fetch() {
     this.loading = true
     this.kits = await this.$axios
-      .get('/admin/store/kits', {
+      .get('/store/kits', {
         params: {
           page: this.kits.meta.currentPage,
           limit: this.kits.meta.itemsPerPage,
@@ -341,6 +374,20 @@ export default {
     this.selected = null
   },
   methods: {
+    onKitItemEditSave(event) {
+      let { newData, index } = event
+      this.kit.items[index] = newData
+    },
+    addKitItem() {
+      this.kit.items.push({
+        amount: null,
+        product: null,
+      })
+    },
+    removeKitItem(index) {
+      this.kit.items.splice(index, 1)
+      this.kitItems = []
+    },
     filtersTansformer(filters) {
       const transformed = {}
 
@@ -370,7 +417,7 @@ export default {
     },
     async searchCategory(event) {
       this.categories = await this.$axios
-        .get('/admin/store/categories', {
+        .get('/store/categories', {
           params: {
             search: event.query.trim(),
           },
@@ -379,28 +426,19 @@ export default {
     },
     async searchProduct(event) {
       this.products = await this.$axios
-        .get('/admin/store/products', {
+        .get('/store/products', {
           params: {
             search: event.query.trim(),
           },
         })
         .then((res) => res.data.data)
     },
-    searchServer(event) {
-      if (!event.query.trim().length) {
-        this.serversFilterd = this.servers
-      } else {
-        this.serversFilterd = this.servers.filter((server) => {
-          if (server.name.toLowerCase().includes(event.query.toLowerCase())) return server
-        })
-      }
-    },
     async uploadIcon(event) {
       let formData = new FormData()
       formData.append('file', event.files[0])
 
       try {
-        await this.$axios.patch(`/admin/store/kits/icon/` + this.kit.id, formData, {
+        await this.$axios.patch(`/store/kits/icon/` + this.kit.id, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -412,6 +450,7 @@ export default {
         })
         await this.$fetch()
       } catch {
+        this.fileDialog = false
         this.$toast.add({
           severity: 'error',
           detail: 'Поддерживаются только изображения',
@@ -421,7 +460,7 @@ export default {
     },
     async removeIcon() {
       try {
-        await this.$axios.delete(`/admin/store/kits/icon/` + this.kit.id)
+        await this.$axios.delete(`/store/kits/icon/` + this.kit.id)
         this.$toast.add({
           severity: 'success',
           detail: 'Иконка успешно удалена',
@@ -432,11 +471,12 @@ export default {
     },
     hideDialog() {
       this.kitDialog = false
+      this.kitItems = []
     },
     async openDialog(kit = null) {
       this.updateMode = !!kit
       if (kit) {
-        this.kit = this.$_.pick(await this.$axios.get('/admin/store/kits/' + kit.id).then((res) => res.data), this.$_.deepKeys(this.kit))
+        this.kit = this.$_.pick(await this.$axios.get('/store/kits/' + kit.id).then((res) => res.data), this.$_.deepKeys(this.kit))
       } else {
         this.kit = {
           id: null,
@@ -447,22 +487,22 @@ export default {
           item_id: null,
           servers: this.filters?.servers?.value || [],
           categories: this.filters?.categories?.value || [],
-          products: [],
+          items: [],
         }
       }
       this.kitDialog = true
     },
-    openFileDialog(kit) {
-      this.kit = this.$_.pick(kit, this.$_.deepKeys(this.kit))
+    async openFileDialog(kit) {
+      this.kit = this.$_.pick(await this.$axios.get('/store/kits/' + kit.id).then((res) => res.data), this.$_.deepKeys(this.kit))
       this.fileDialog = true
     },
     async createKit() {
       this.loading = true
       try {
-        await this.$axios.post('/admin/store/kits', {
+        await this.$axios.post('/store/kits', {
           ...this.kit,
           servers: this.kit.servers.map((server) => server.id),
-          products: this.kit.products.map((product) => product.id),
+          items: this.kit.items.map((item) => ({ product_id: item.product.id, amount: item.amount })),
           categories: this.kit.categories.map((category) => category.id),
         })
         this.$toast.add({
@@ -492,12 +532,12 @@ export default {
       this.loading = true
       try {
         await this.$axios.patch(
-          '/admin/store/kits/' + this.kit.id,
+          '/store/kits/' + this.kit.id,
           this.$_.omit(
             {
               ...this.kit,
               servers: this.kit.servers.map((server) => server.id),
-              products: this.kit.products.map((product) => product.id),
+              items: this.kit.items.map((item) => ({ product_id: item.product.id, amount: item.amount })),
               categories: this.kit.categories.map((category) => category.id),
             },
             'id'
@@ -526,7 +566,7 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$axios.delete('/admin/store/kits/' + id)
+            await this.$axios.delete('/store/kits/' + id)
             this.$toast.add({
               severity: 'success',
               detail: 'Кит успешно удален',
@@ -545,7 +585,7 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$axios.delete('admin/store/kits/bulk/', {
+            await this.$axios.delete('/store/kits/bulk/', {
               data: {
                 items: this.selected.map((category) => category.id),
               },

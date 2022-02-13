@@ -97,7 +97,12 @@ export default {
                 {
                   label: 'Донат-права',
                   icon: 'pi pi-fw pi-money-bill',
-                  to: '/donate/perms',
+                  to: '/donate/permissions',
+                },
+                {
+                  label: 'Донат-киты',
+                  icon: 'pi pi-fw pi-briefcase',
+                  to: '/donate/kits',
                 },
                 {
                   label: 'Периоды',

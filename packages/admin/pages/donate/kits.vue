@@ -18,37 +18,33 @@
         </Toolbar>
 
         <DataTable
-          :value="mods.data"
-          lazy
-          paginator
-          :rows="mods.meta.itemsPerPage"
-          :filters.sync="filters"
-          dataKey="id"
-          :totalRecords="mods.meta.totalItems"
+          :value="kits"
           :loading="loading"
-          :rowsPerPageOptions="[20, 50, 100, 500]"
-          @page="onPage($event)"
-          @sort="onSort($event)"
-          :selection.sync="selected"
+          :rows="20"
+          paginator
+          :filters.sync="filters"
+          rowHover
           responsiveLayout="scroll"
+          :selection.sync="selected"
+          dataKey="id"
         >
           <template #header>
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-              <h5 class="m-0">Управление модами</h5>
+              <h5 class="m-0">Управление донат-китами</h5>
               <span class="block mt-2 md:mt-0 p-input-icon-left">
                 <i class="pi pi-search" />
-                <InputText @keydown.enter="onFilter()" v-model="filters['global'].value" placeholder="Поиск..." />
+                <InputText v-model="filters['global'].value" placeholder="Поиск..." />
               </span>
             </div>
           </template>
           <Column selectionMode="multiple" :styles="{ width: '3rem' }"></Column>
-          <Column field="id" header="ID" :styles="{ width: '8rem' }" sortable></Column>
-          <Column field="name" header="Название" sortable>
+          <Column sortable field="id" header="ID" :styles="{ width: '8rem' }"></Column>
+          <Column sortable field="name" header="Название"></Column>
+          <Column field="image" header="Картинка">
             <template #body="slotProps">
-              <div class="flex align-items-center">
-                <Avatar v-if="slotProps.data.icon" :image="`${$config.apiUrl + '/' + slotProps.data.icon}`" shape="circle" />
-                <Avatar v-else icon="pi pi-image" shape="circle" />
-                <span class="ml-2">{{ slotProps.data.name }}</span>
+              <div class="col-12 md:col-6">
+                <Avatar v-if="!slotProps.data.image" icon="pi pi-image" size="xlarge" />
+                <ImagePreview v-else height="64" :src="`${$config.apiUrl + '/' + slotProps.data.image}`" preview />
               </div>
             </template>
           </Column>
@@ -57,54 +53,58 @@
               <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
               <Button @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary mr-2" />
               <Button
-                @click="removeMod(slotProps.data.id)"
-                v-if="!slotProps.data.important"
+                @click="removeKit(slotProps.data.id)"
                 icon="pi pi-trash"
                 class="p-button-rounded p-button-warning mt-2"
               />
             </template>
           </Column>
         </DataTable>
-        <Dialog :visible.sync="fileDialog" :style="{ width: '400px' }" :modal="true" header="Иконка мода" class="p-fluid">
-          <div class="flex align-items-center justify-content-center flex-wrap w-full">
-            <Avatar v-if="mod.icon" :image="`${$config.apiUrl + '/' + mod.icon}`" size="xlarge" shape="circle" />
-            <Avatar v-else icon="pi pi-image" size="xlarge" shape="circle" />
-            <div class="field ml-6 mb-0">
-              <Button label="Загрузить" icon="pi pi-upload" @click="$refs.fileInput.choose()" />
-              <Button label="Удалить" icon="pi pi-trash" class="p-button-secondary mt-2" @click="removeIcon()" />
-              <FileUpload
-                ref="fileInput"
-                style="display: none"
-                mode="basic"
-                name="file"
-                accept="image/*"
-                :auto="true"
-                :customUpload="true"
-                @uploader="uploadIcon"
-              />
+
+        <Dialog :visible.sync="fileDialog" :style="{ width: '600px' }" :modal="true" header="Редактирование картинки" class="p-fluid">
+          <div class="grid mb-4 pt-2">
+            <div class="col-12 md:col-6">
+              <Avatar v-if="!kit.image" icon="pi pi-image" size="xlarge" />
+              <ImagePreview v-else width="200" :src="`${$config.apiUrl + '/' + kit.image}`" preview />
+            </div>
+            <div class="col-12 md:col-6">
+              <div class="field mb-0 mt-2">
+                <Button label="Загрузить" icon="pi pi-upload" @click="$refs.imageInput.choose()" />
+                <Button label="Удалить" icon="pi pi-trash" class="p-button-secondary mt-2" @click="removeImage" />
+                <FileUpload
+                  ref="imageInput"
+                  style="display: none"
+                  mode="basic"
+                  name="file"
+                  accept="image/*"
+                  :auto="true"
+                  :customUpload="true"
+                  @uploader="uploadImage"
+                />
+              </div>
             </div>
           </div>
         </Dialog>
 
         <ValidationObserver v-slot="{ invalid }">
           <Dialog
-            :visible.sync="modDialog"
+            :visible.sync="kitDialog"
             :closable="false"
             :style="{ width: '600px' }"
             :modal="true"
-            header="Создание/редактирование мода"
+            header="Создание/редактирование кита"
             class="p-fluid"
           >
             <ValidationProvider name="Название" rules="required" v-slot="{ errors }">
               <div class="field">
                 <label>Название</label>
-                <InputText v-model="mod.name" autofocus />
+                <InputText v-model="kit.name" />
                 <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
               </div>
             </ValidationProvider>
             <div class="field">
               <label>Описание</label>
-              <Editor v-model="mod.description" editorStyle="height: 220px">
+              <Editor v-model="kit.description" editorStyle="height: 220px">
                 <template #toolbar>
                   <span class="ql-formats">
                     <button class="ql-bold"></button>
@@ -121,7 +121,7 @@
                 label="Сохранить"
                 icon="pi pi-check"
                 class="p-button-text"
-                @click="updateMode ? updateMod() : createMod()"
+                @click="updateMode ? updateKit() : createKit()"
               />
             </template>
           </Dialog>
@@ -132,13 +132,12 @@
 </template>
 
 <script>
-import { sortTransform } from '~/helpers'
 import { FilterMatchMode } from 'primevue/api'
 import { ValidationObserver, ValidationProvider } from 'vee-validate'
 
 export default {
   head: {
-    title: 'Моды',
+    title: 'Донат-киты',
   },
   components: {
     ValidationObserver,
@@ -146,27 +145,18 @@ export default {
   },
   data() {
     return {
-      mods: {
-        data: null,
-        meta: {
-          itemsPerPage: 20,
-          totalItems: 0,
-          currentPage: 1,
-          totalPages: 1,
-          sortBy: null,
-        },
-      },
+      kits: null,
       loading: true,
+      selected: null,
       updateMode: false,
-      mod: {
+      fileDialog: false,
+      kit: {
         id: null,
         name: null,
-        icon: null,
         description: null,
+        image: null,
       },
-      selected: null,
-      modDialog: false,
-      fileDialog: false,
+      kitDialog: false,
       filters: {
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
       },
@@ -174,35 +164,28 @@ export default {
   },
   async fetch() {
     this.loading = true
-    this.selected = null
-    this.mods = await this.$axios
-      .get('/servers/mods', {
-        params: {
-          page: this.mods.meta.currentPage,
-          limit: this.mods.meta.itemsPerPage,
-          search: this.filters.global.value,
-          sortBy: this.mods.meta.sortBy,
-        },
-      })
-      .then((res) => res.data)
-    this.modDialog = false
+    this.kitDialog = false
     this.fileDialog = false
+    this.kits = await this.$axios.get('/donates/group-kits').then((res) => res.data)
     this.loading = false
   },
   methods: {
-    async uploadIcon(event) {
+    hideDialog() {
+      this.kitDialog = false
+    },
+    async uploadImage(event) {
       let formData = new FormData()
       formData.append('file', event.files[0])
 
       try {
-        await this.$axios.patch(`/servers/mods/icon/` + this.mod.id, formData, {
+        await this.$axios.patch(`/donates/group-kits/image/` + this.kit.id, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
         })
         this.$toast.add({
           severity: 'success',
-          detail: 'Иконка успешно обновлена',
+          detail: 'Картинка успешно обновлена',
           life: 3000,
         })
         await this.$fetch()
@@ -215,50 +198,80 @@ export default {
         })
       }
     },
-    async removeIcon() {
+    async removeImage() {
       try {
-        await this.$axios.delete(`/servers/mods/icon/` + this.mod.id)
+        await this.$axios.delete(`/donates/group-kits/image/` + this.kit.id)
         this.$toast.add({
           severity: 'success',
-          detail: 'Иконка успешно удалена',
+          detail: 'Картинка успешно удалена',
           life: 3000,
         })
         await this.$fetch()
       } catch {}
     },
-    hideDialog() {
-      this.modDialog = false
+    async openFileDialog(kit) {
+      this.kit = this.$_.pick(kit, this.$_.deepKeys(this.kit))
+      this.fileDialog = true
     },
-    openDialog(mod = null) {
-      this.updateMode = !!mod
-      if (mod) {
-        this.mod = this.$_.pick(mod, this.$_.deepKeys(this.mod))
+    async openDialog(kit = null) {
+      this.updateMode = !!kit
+      if (kit) {
+        this.kit = this.$_.pick(kit, this.$_.deepKeys(this.kit))
       } else {
-        this.mod = {
+        this.kit = {
           id: null,
           name: null,
           description: null,
-          icon: null,
+          image: null,
         }
       }
-      this.modDialog = true
+      this.kitDialog = true
     },
-    openFileDialog(mod) {
-      this.mod = this.$_.pick(mod, this.$_.deepKeys(this.mod))
-      this.fileDialog = true
+    async createKit() {
+      this.loading = true
+      try {
+        await this.$axios.post('/donates/group-kits', this.kit)
+        this.$toast.add({
+          severity: 'success',
+          detail: 'Кит успешно добавлен',
+          life: 3000,
+        })
+        await this.$fetch()
+      } catch (err) {
+        this.loading = false
+        if (err.response.status === 409) {
+          this.$toast.add({
+            severity: 'error',
+            detail: 'Кит с данным ID уже присутствует',
+            life: 3000,
+          })
+        } else {
+          this.$toast.add({
+            severity: 'error',
+            detail: 'Введены некоректные данные',
+            life: 3000,
+          })
+        }
+      }
     },
-    onPage(event) {
-      this.mods.meta.currentPage = event.page + 1
-      this.mods.meta.itemsPerPage = event.rows
-      this.$fetch()
-    },
-    onSort(event) {
-      this.mods.meta.sortBy = sortTransform(event.sortOrder, event.sortField)
-
-      this.$fetch()
-    },
-    onFilter() {
-      this.$fetch()
+    async updateKit() {
+      this.loading = true
+      try {
+        await this.$axios.patch('/donates/group-kits/' + this.kit.id, this.$_.omit(this.kit, 'id'))
+        this.$toast.add({
+          severity: 'success',
+          detail: 'Кит успешно редактирован',
+          life: 3000,
+        })
+        await this.$fetch()
+      } catch (err) {
+        this.loading = false
+        this.$toast.add({
+          severity: 'error',
+          detail: 'Введены некоректные данные',
+          life: 3000,
+        })
+      }
     },
     async removeMany() {
       this.$confirm.require({
@@ -268,14 +281,14 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$axios.delete('/servers/mods/bulk/', {
+            await this.$axios.delete('/donates/group-kits/bulk/', {
               data: {
-                items: this.selected.map((mod) => mod.id),
+                items: this.selected.map((kit) => kit.id),
               },
             })
             this.$toast.add({
               severity: 'success',
-              detail: 'Моды успешно удалены',
+              detail: 'Киты успешно удалены',
               life: 3000,
             })
           } catch {}
@@ -283,45 +296,7 @@ export default {
         },
       })
     },
-    async createMod() {
-      this.loading = true
-      try {
-        await this.$axios.post('/servers/mods', this.mod)
-        this.$toast.add({
-          severity: 'success',
-          detail: 'Мод успешно добавлен',
-          life: 3000,
-        })
-        await this.$fetch()
-      } catch (err) {
-        this.loading = false
-        this.$toast.add({
-          severity: 'error',
-          detail: 'Введены некоректные данные',
-          life: 3000,
-        })
-      }
-    },
-    async updateMod() {
-      this.loading = true
-      try {
-        await this.$axios.patch('/servers/mods/' + this.mod.id, this.$_.omit(this.mod, 'id'))
-        this.$toast.add({
-          severity: 'success',
-          detail: 'Мод успешно редактирован',
-          life: 3000,
-        })
-        await this.$fetch()
-      } catch (err) {
-        this.loading = false
-        this.$toast.add({
-          severity: 'error',
-          detail: 'Введены некоректные данные',
-          life: 3000,
-        })
-      }
-    },
-    async removeMod(id) {
+    async removeKit(id) {
       this.$confirm.require({
         message: `Данный процесс будет необратим!`,
         header: 'Подтверждение удаления',
@@ -329,10 +304,10 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$axios.delete('/servers/mods/' + id)
+            await this.$axios.delete('/donates/group-kits/' + id)
             this.$toast.add({
               severity: 'success',
-              detail: 'Мод успешно удален',
+              detail: 'Кит успешно удален',
               life: 3000,
             })
           } catch {}

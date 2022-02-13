@@ -174,11 +174,10 @@ export default {
     }
   },
   async fetch() {
-    console.log(this.categories.meta.itemsPerPage)
     this.loading = true
     this.selected = null
     this.categories = await this.$axios
-      .get('/admin/store/categories', {
+      .get('/store/categories', {
         params: {
           page: this.categories.meta.currentPage,
           limit: this.categories.meta.itemsPerPage,
@@ -213,7 +212,7 @@ export default {
       formData.append('file', event.files[0])
 
       try {
-        await this.$axios.patch(`/admin/store/categories/icon/` + this.category.id, formData, {
+        await this.$axios.patch(`/store/categories/icon/` + this.category.id, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -225,6 +224,7 @@ export default {
         })
         await this.$fetch()
       } catch {
+        this.fileDialog = false
         this.$toast.add({
           severity: 'error',
           detail: 'Поддерживаются только изображения',
@@ -234,7 +234,7 @@ export default {
     },
     async removeIcon() {
       try {
-        await this.$axios.delete(`/admin/store/categories/icon/` + this.category.id)
+        await this.$axios.delete(`/store/categories/icon/` + this.category.id)
         this.$toast.add({
           severity: 'success',
           detail: 'Иконка успешно удалена',
@@ -267,7 +267,7 @@ export default {
     async createCategory() {
       this.loading = true
       try {
-        await this.$axios.post('/admin/store/categories', this.category)
+        await this.$axios.post('/store/categories', this.category)
         this.$toast.add({
           severity: 'success',
           detail: 'Категория успешно добавлена',
@@ -294,7 +294,7 @@ export default {
     async updateCategory() {
       this.loading = true
       try {
-        await this.$axios.patch('/admin/store/categories/' + this.category.id, this.$_.omit(this.category, 'id'))
+        await this.$axios.patch('/store/categories/' + this.category.id, this.$_.omit(this.category, 'id'))
         this.$toast.add({
           severity: 'success',
           detail: 'Категория успешно редактирована',
@@ -318,7 +318,7 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$axios.delete('/admin/store/categories/' + id)
+            await this.$axios.delete('/store/categories/' + id)
             this.$toast.add({
               severity: 'success',
               detail: 'Категория успешно удалена',
@@ -337,7 +337,7 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$axios.delete('admin/store/categories/bulk/', {
+            await this.$axios.delete('/store/categories/bulk/', {
               data: {
                 items: this.selected.map((category) => category.id),
               },

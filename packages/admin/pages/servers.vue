@@ -299,6 +299,7 @@ export default {
         })
         await this.$fetch()
       } catch {
+        this.fileDialog = false
         this.$toast.add({
           severity: 'error',
           detail: 'Поддерживаются только изображения',

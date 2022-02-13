@@ -26,7 +26,11 @@ export class Category {
   })
   products: Product[];
 
-  @ManyToMany(() => Kit, (kit) => kit.products)
+  @ManyToMany(() => Kit, (kit) => kit.categories, {
+    cascade: true,
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   kits: Kit[];
 
   @AfterRemove()

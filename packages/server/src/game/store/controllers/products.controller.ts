@@ -17,7 +17,7 @@ import { ProductsManyInput } from '../dto/product-many.input';
 import { ProductInput } from '../dto/product.dto';
 import { ProductsService } from '../providers/product.service';
 
-@Controller('admin/store/products')
+@Controller('store/products')
 export class ProductsController {
   constructor(private productsService: ProductsService) {}
 

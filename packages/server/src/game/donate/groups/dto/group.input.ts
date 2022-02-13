@@ -1,25 +1,19 @@
 import { Type } from "class-transformer"
 import { IsArray, IsDefined, IsInt, IsNumber, IsOptional, IsString, Max, Min } from "class-validator"
+import { DonateFeaturesDto } from "./donate-features.dto"
 
-export class KitItemInput {
-  @IsDefined()
-  @IsNumber()
-  product_id: number
-
-  @IsDefined()
-  @IsNumber()
-  @Min(1)
-  amount: number
-}
-
-export class KitInput {
+export class GroupInput {
   @IsDefined()
   @IsString()
   name: string
 
+  @IsDefined()
+  @IsString()
+  ingame_id: string
+
   @IsOptional()
   @IsString()
-  description: string
+  description?: string 
 
   @IsDefined()
   @IsNumber()
@@ -33,16 +27,26 @@ export class KitInput {
 
   @IsDefined()
   @IsArray()
+  @Type(() => DonateFeaturesDto)
+  features: DonateFeaturesDto[]
+
+  @IsDefined()
+  @IsArray()
   @IsString({ each: true })
   servers: string[];
 
   @IsDefined()
   @IsArray()
-  @IsInt({ each: true })
-  categories: number[];
+  @IsString({ each: true })
+  web_perms: string[];
 
   @IsDefined()
   @IsArray()
-  @Type(() => KitItemInput)
-  items: KitItemInput[];
+  @IsInt({ each: true })
+  kits: number[];
+
+  @IsDefined()
+  @IsArray()
+  @IsInt({ each: true })
+  periods: number[];
 }

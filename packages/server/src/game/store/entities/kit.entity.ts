@@ -1,7 +1,8 @@
 import { StorageManager } from '@common';
 import { Server } from 'src/game/servers/entities/server.entity';
-import { AfterRemove, Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { AfterRemove, Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Category } from './category.entity';
+import { KitItem } from './kit-item.entity';
 import { Product } from './product.entity';
 
 @Entity()
@@ -33,13 +34,11 @@ export class Kit {
   @JoinTable()
   categories: Category[];
 
-  @ManyToMany(() => Product, (product) => product.kits, {
-    cascade: true,
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
+  @OneToMany(() => KitItem, (item) => item.kit, {
+    cascade: ['insert', 'update'],
   })
   @JoinTable()
-  products: Product[];
+  items: KitItem[];
 
   @AfterRemove()
   removeFile() {

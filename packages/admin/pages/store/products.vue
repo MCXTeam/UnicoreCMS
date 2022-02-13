@@ -78,23 +78,23 @@
             </template>
             <template #filter="{ filterModel }">
               <div class="mb-3 font-bold">Серверы</div>
-              <AutoComplete
+              <MultiSelect
+                display="chip"
+                :filter="true"
                 v-model="filterModel.value"
-                :multiple="true"
-                :suggestions="serversFilterd"
-                @complete="searchServer($event)"
-                field="name"
+                :options="servers"
+                optionLabel="name"
                 placeholder="Выберите серверы"
-                style="max-width: 200px"
+                class="p-column-filter"
               >
-                <template #item="slotProps">
-                  <div class="flex align-items-center">
-                    <Avatar v-if="slotProps.item.icon" :image="`${$config.apiUrl + '/' + slotProps.item.icon}`" shape="circle" />
+                <template #option="slotProps">
+                  <div class="p-multiselect-representative-option">
+                    <Avatar v-if="slotProps.option.icon" :image="`${$config.apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
                     <Avatar v-else icon="pi pi-image" shape="circle" />
-                    <span class="ml-2">{{ slotProps.item.name }} (#{{ slotProps.item.id }})</span>
+                    <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                   </div>
                 </template>
-              </AutoComplete>
+              </MultiSelect>
             </template>
           </Column>
           <Column field="categories" header="Категории" filterField="categories" :showFilterMatchModes="false">
@@ -168,23 +168,23 @@
           >
             <div class="field">
               <label>Серверы</label>
-              <AutoComplete
+              <MultiSelect
+                display="chip"
+                :filter="true"
                 v-model="productMany.servers"
-                :multiple="true"
-                :suggestions="serversFilterd"
-                @complete="searchServer($event)"
-                field="name"
-                appendTo="body"
+                :options="servers"
+                optionLabel="name"
                 :placeholder="productMany.servers.length ? 'Выберите серверы' : 'Без изменений'"
+                class="p-column-filter"
               >
-                <template #item="slotProps">
-                  <div class="flex align-items-center">
-                    <Avatar v-if="slotProps.item.icon" :image="`${$config.apiUrl + '/' + slotProps.item.icon}`" shape="circle" />
+                <template #option="slotProps">
+                  <div class="p-multiselect-representative-option">
+                    <Avatar v-if="slotProps.option.icon" :image="`${$config.apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
                     <Avatar v-else icon="pi pi-image" shape="circle" />
-                    <span class="ml-2">{{ slotProps.item.name }} (#{{ slotProps.item.id }})</span>
+                    <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                   </div>
                 </template>
-              </AutoComplete>
+              </MultiSelect>
             </div>
             <div class="field">
               <label>Категории</label>
@@ -270,23 +270,23 @@
             </div>
             <div class="field">
               <label>Серверы</label>
-              <AutoComplete
+              <MultiSelect
+                display="chip"
+                :filter="true"
                 v-model="product.servers"
-                :multiple="true"
-                :suggestions="serversFilterd"
-                @complete="searchServer($event)"
-                field="name"
-                appendTo="body"
+                :options="servers"
+                optionLabel="name"
                 placeholder="Выберите серверы"
+                class="p-column-filter"
               >
-                <template #item="slotProps">
-                  <div class="flex align-items-center">
-                    <Avatar v-if="slotProps.item.icon" :image="`${$config.apiUrl + '/' + slotProps.item.icon}`" shape="circle" />
+                <template #option="slotProps">
+                  <div class="p-multiselect-representative-option">
+                    <Avatar v-if="slotProps.option.icon" :image="`${$config.apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
                     <Avatar v-else icon="pi pi-image" shape="circle" />
-                    <span class="ml-2">{{ slotProps.item.name }} (#{{ slotProps.item.id }})</span>
+                    <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                   </div>
                 </template>
-              </AutoComplete>
+              </MultiSelect>
             </div>
             <div class="field">
               <label>Категории</label>
@@ -404,7 +404,7 @@ export default {
   async fetch() {
     this.loading = true
     this.products = await this.$axios
-      .get('/admin/store/products', {
+      .get('/store/products', {
         params: {
           page: this.products.meta.currentPage,
           limit: this.products.meta.itemsPerPage,
@@ -452,28 +452,19 @@ export default {
     },
     async searchCategory(event) {
       this.categories = await this.$axios
-        .get('/admin/store/categories', {
+        .get('/store/categories', {
           params: {
             search: event.query.trim(),
           },
         })
         .then((res) => res.data.data)
     },
-    searchServer(event) {
-      if (!event.query.trim().length) {
-        this.serversFilterd = this.servers
-      } else {
-        this.serversFilterd = this.servers.filter((server) => {
-          if (server.name.toLowerCase().includes(event.query.toLowerCase())) return server
-        })
-      }
-    },
     async uploadIcon(event) {
       let formData = new FormData()
       formData.append('file', event.files[0])
 
       try {
-        await this.$axios.patch(`/admin/store/products/icon/` + this.product.id, formData, {
+        await this.$axios.patch(`/store/products/icon/` + this.product.id, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -485,6 +476,7 @@ export default {
         })
         await this.$fetch()
       } catch {
+        this.fileDialog = false
         this.$toast.add({
           severity: 'error',
           detail: 'Поддерживаются только изображения',
@@ -494,7 +486,7 @@ export default {
     },
     async removeIcon() {
       try {
-        await this.$axios.delete(`/admin/store/products/icon/` + this.product.id)
+        await this.$axios.delete(`/store/products/icon/` + this.product.id)
         this.$toast.add({
           severity: 'success',
           detail: 'Иконка успешно удалена',
@@ -544,7 +536,7 @@ export default {
     async createProduct() {
       this.loading = true
       try {
-        await this.$axios.post('/admin/store/products', {
+        await this.$axios.post('/store/products', {
           ...this.product,
           servers: this.product.servers.map((server) => server.id),
           categories: this.product.categories.map((category) => category.id),
@@ -576,7 +568,7 @@ export default {
       this.loading = true
       try {
         await this.$axios.patch(
-          '/admin/store/products/' + this.product.id,
+          '/store/products/' + this.product.id,
           this.$_.omit(
             {
               ...this.product,
@@ -609,7 +601,7 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$axios.delete('/admin/store/products/' + id)
+            await this.$axios.delete('/store/products/' + id)
             this.$toast.add({
               severity: 'success',
               detail: 'Товар успешно удален',
@@ -628,7 +620,7 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$axios.patch('admin/store/products/bulk/', {
+            await this.$axios.patch('/store/products/bulk/', {
               products: this.selected.map((select) => {
                 select = this.$_.pick(select, 'id')
 
@@ -670,7 +662,7 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$axios.delete('admin/store/products/bulk/', {
+            await this.$axios.delete('/store/products/bulk/', {
               data: {
                 items: this.selected.map((category) => category.id),
               },

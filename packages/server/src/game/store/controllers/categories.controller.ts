@@ -5,7 +5,7 @@ import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { Category } from '../entities/category.entity';
 import { CategoriesService } from '../providers/categories.service';
 
-@Controller('admin/store/categories')
+@Controller('store/categories')
 export class CategoriesController {
   constructor (private categoriesService: CategoriesService) {}
 
