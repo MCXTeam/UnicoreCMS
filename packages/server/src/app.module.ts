@@ -13,21 +13,12 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { MomentModule } from './moment';
 import { EventsModule } from './events/events.module';
 import { IntegrationsModule } from './admin/integrations/integrations.module';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { ormconfig } from './ormconfig';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: envConfig.databaseType as any,
-      host: envConfig.databaseHost,
-      port: envConfig.databasePort,
-      username: envConfig.databaseUser,
-      password: envConfig.databasePassword,
-      database: envConfig.databaseName,
-      entities: ['./**/*.entity.js'],
-      namingStrategy: new NamingStrategy(),
-      synchronize: true,
-      // logging: true
-    }),
+    TypeOrmModule.forRoot(ormconfig),
     GoogleRecaptchaModule.forRoot({
       secretKey: envConfig.recaptchaSecret,
       response: (req) => req.headers.recaptcha,
@@ -38,6 +29,19 @@ import { IntegrationsModule } from './admin/integrations/integrations.module';
     ThrottlerModule.forRoot({
       ttl: 60,
       limit: 10,
+    }),
+    MailerModule.forRoot({
+      transport: {
+        service: envConfig.smtpService,
+        host: envConfig.smtpHost,
+        port: envConfig.smtpPort,
+        ignoreTLS: envConfig.smtpIgnoreTLS,
+        secure: envConfig.smtpSecure,
+        auth: {
+          user: envConfig.smtpUser,
+          pass: envConfig.smtpPassword,
+        },
+      },
     }),
     HttpModule,
     MomentModule,

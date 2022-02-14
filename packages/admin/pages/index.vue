@@ -68,9 +68,8 @@
         <span class="text-500">сегодня</span>
       </div>
     </div>
-
-    <div class="col-12 xl:col-6">
-      <div class="card">
+    <div class="col-12 xl:col-6 mt-2">
+      <div class="card h-full">
         <h5>Доход за последние 7 дней</h5>
         <DataTable
           :value="$_.reverse($_.get(stats, 'payments.days', []))"
@@ -92,7 +91,25 @@
           </Column>
         </DataTable>
       </div>
-      <div class="card">
+    </div>
+    <div class="col-12 xl:col-6 mt-2">
+      <div class="card h-full">
+        <div class="flex justify-content-between align-items-center mb-5">
+          <h5>Статистика</h5>
+          <div>
+            <Button
+              icon="pi pi-ellipsis-v"
+              class="p-button-text p-button-plain p-button-rounded"
+              @click="$refs.menu2.toggle($event)"
+            ></Button>
+            <Menu ref="menu2" :popup="true" :model="charts"></Menu>
+          </div>
+        </div>
+        <Chart type="bar" :data="barData" :options="barOptions" />
+      </div>
+    </div>
+    <div class="col-12 xl:col-6 mt-2">
+      <div class="card h-full">
         <div class="flex justify-content-between align-items-center mb-5">
           <h5>Best Selling Products</h5>
           <div>
@@ -101,7 +118,7 @@
               class="p-button-text p-button-plain p-button-rounded"
               @click="$refs.menu2.toggle($event)"
             ></Button>
-            <Menu ref="menu2" :popup="true" :model="items"></Menu>
+            <!--Menu ref="menu2" :popup="true" :model="items"></Menu-->
           </div>
         </div>
         <ul class="list-none p-0 m-0">
@@ -180,22 +197,8 @@
         </ul>
       </div>
     </div>
-    <div class="col-12 xl:col-6">
-      <div class="card">
-        <div class="flex justify-content-between align-items-center mb-5">
-          <h5>Статистика</h5>
-          <div>
-            <Button
-              icon="pi pi-ellipsis-v"
-              class="p-button-text p-button-plain p-button-rounded"
-              @click="$refs.menu2.toggle($event)"
-            ></Button>
-            <Menu ref="menu2" :popup="true" :model="charts"></Menu>
-          </div>
-        </div>
-        <Chart type="bar" :data="barData" :options="barOptions" />
-      </div>
-      <div class="card">
+    <div class="col-12 xl:col-6 mt-2">
+      <div class="card h-full">
         <div class="flex align-items-center justify-content-between mb-4">
           <h5>Notifications</h5>
           <div>
@@ -251,6 +254,8 @@
           </li>
         </ul>
       </div>
+    </div>
+    <div class="col-12 mt-2">
       <div
         class="px-4 py-5 shadow-2 flex flex-column md:flex-row md:align-items-center justify-content-between mb-3"
         style="
@@ -260,7 +265,7 @@
         "
       >
         <div>
-          <div class="text-blue-100 font-medium text-xl mt-2 mb-3">TAKE THE NEXT STEP</div>
+          <div class="text-blue-100 font-medium text-xl mt-2 mb-3">СДЕЛАЙТЕ СЛЕДУЮЩИЙ ШАГ</div>
           <div class="text-white font-medium text-5xl">Try PrimeBlocks</div>
         </div>
         <div class="mt-4 mr-auto md:mt-0 md:mr-0">
@@ -290,7 +295,7 @@ export default {
           },
         },
         {
-          label: 'Месяца',
+          label: 'Годовая',
           command: () => {
             this.monthsCharts()
           },

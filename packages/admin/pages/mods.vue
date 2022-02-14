@@ -278,6 +278,7 @@ export default {
               detail: 'Моды успешно удалены',
               life: 3000,
             })
+            this.selected = []
           } catch {}
           await this.$fetch()
         },

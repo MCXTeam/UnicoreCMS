@@ -9,8 +9,9 @@ import { WebhookModule } from './webhook/webhook.module';
 import { ApiModule } from './api/api.module';
 import { StorageModule } from './storage/storage.module';
 import { PagesModule } from './pages/pages.module';
+import { EmailModule } from './email/email.module';
 
 @Module({
-  imports: [MigrationsModule, RolesModule, NewsModule, DashboardModule, LogModule, ConfigModule, WebhookModule, ApiModule, StorageModule, PagesModule],
+  imports: [MigrationsModule, RolesModule, NewsModule, DashboardModule, LogModule, ConfigModule, WebhookModule, ApiModule, StorageModule, PagesModule, EmailModule, WebhookModule],
 })
 export class AdminModule {}

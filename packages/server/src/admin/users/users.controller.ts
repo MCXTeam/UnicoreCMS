@@ -1,10 +1,9 @@
 import { Body, Controller, Delete, Get, Param, ParseArrayPipe, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CreateUserInput } from './dto/create-user.input';
-import { UpdateUserInput } from './dto/update-user.input';
 import { UsersService } from './users.service';
 import { PaginatedUsersDto } from './dto/paginated-users.dto';
+import { UserInput } from './dto/user.input';
 
 @ApiTags('users')
 @Controller('admin/users')
@@ -13,7 +12,7 @@ export class UsersController {
 
   @ApiOperation({ summary: 'Создать одного пользователя' })
   @Post()
-  create(@Body() createUserDto: CreateUserInput) {}
+  create(@Body() createUserDto: UserInput) {}
 
   @ApiOperation({ summary: 'Найти всех пользователей' })
   @Get()
@@ -27,7 +26,7 @@ export class UsersController {
 
   @ApiOperation({ summary: 'Обновить одного пользователя' })
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateUserDto: UpdateUserInput) {}
+  update(@Param('id', ParseIntPipe) id: number, @Body() updateUserDto: UserInput) {}
 
   @ApiOperation({ summary: 'Удалить одного пользователя' })
   @Delete(':id')

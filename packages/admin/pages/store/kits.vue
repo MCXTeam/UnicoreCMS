@@ -186,7 +186,11 @@
                 <Column field="product" header="Товар из магазина" :styles="{ width: '40%' }">
                   <template #body="slotProps">
                     <div class="flex align-items-center">
-                      <Avatar v-if="$_.get(slotProps.data, 'product.icon')" :image="`${$config.apiUrl + '/' + $_.get(slotProps.data, 'product.icon')}`" shape="circle" />
+                      <Avatar
+                        v-if="$_.get(slotProps.data, 'product.icon')"
+                        :image="`${$config.apiUrl + '/' + $_.get(slotProps.data, 'product.icon')}`"
+                        shape="circle"
+                      />
                       <Avatar v-else icon="pi pi-image" shape="circle" />
                       <span class="ml-2">{{ $_.get(slotProps.data, 'product.name', 'Не выбран') }}</span>
                     </div>
@@ -513,19 +517,11 @@ export default {
         await this.$fetch()
       } catch (err) {
         this.loading = false
-        if (err.response.status === 409) {
-          this.$toast.add({
-            severity: 'error',
-            detail: 'Кит с данным ID уже присутствует',
-            life: 3000,
-          })
-        } else {
-          this.$toast.add({
-            severity: 'error',
-            detail: 'Введены некоректные данные',
-            life: 3000,
-          })
-        }
+        this.$toast.add({
+          severity: 'error',
+          detail: 'Введены некоректные данные',
+          life: 3000,
+        })
       }
     },
     async updateKit() {
@@ -595,6 +591,7 @@ export default {
               detail: 'Киты успешно удалены',
               life: 3000,
             })
+            this.selected = []
           } catch {}
           await this.$fetch()
         },

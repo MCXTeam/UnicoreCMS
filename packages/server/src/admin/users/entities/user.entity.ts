@@ -25,11 +25,14 @@ export class User {
   @Column({ nullable: true })
   superuser: boolean;
 
+  @Column({ nullable: true })
+  activated: boolean;
+
   @ManyToMany(() => Role, (role) => role.users)
   @JoinTable()
   roles?: Role[];
 
-  @Column('simple-array', { default: '' })
+  @Column('simple-array', { nullable: true })
   perms: string[];
 
   // @OneToMany(() => Payment, payment => payment.user)

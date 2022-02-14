@@ -6,7 +6,8 @@ const env = from(process.env);
 config({ path: resolve(__dirname, "../../../.env") });
 
 export interface EnvConfig {
-  host: string;
+  baseurl: string;
+  name: string;
   frontendPort: number;
   adminPort: number;
   backendPort: number;
@@ -26,11 +27,20 @@ export interface EnvConfig {
   recaptchaPublic: string;
   vkLongpoll: boolean;
   vkApiKey: string;
+  smtpService: string;
+  smtpHost: string;
+  smtpPort: number;
+  smtpIgnoreTLS: boolean
+  smtpSecure: boolean
+  smtpUser: string
+  smtpPassword: string
 }
 
 export const envConfig: EnvConfig = {
   // Хост приложения
-  host: env.get("HOST").required().asString(),
+  baseurl: env.get("BASEURL").required().asString(),
+
+  name: env.get("NAME").default("UnicoreCMS").asString(),
 
   // Порты
   frontendPort: env.get("FRONTEND_PORT").default(3000).asPortNumber(),
@@ -64,4 +74,13 @@ export const envConfig: EnvConfig = {
   // VK Longpoll
   vkLongpoll: env.get("VK_LONGPOLL").default(0).asBool(),
   vkApiKey: env.get("VK_APIKEY").asString(),
+
+  // SMTP
+  smtpService: env.get("SMTP_SERVICE").asString(),
+  smtpHost: env.get("SMTP_HOST").asString(),
+  smtpPort: env.get("SMTP_PORT").asPortNumber(),
+  smtpIgnoreTLS: env.get("SMTP_IGNORE_TLS").asBool(),
+  smtpSecure: env.get("SMTP_SECURE").asBool(),
+  smtpUser: env.get("SMTP_USER").asString(),
+  smtpPassword: env.get("SMTP_PASSWORD").asString(),
 };

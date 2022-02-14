@@ -25,6 +25,9 @@ export class Server {
   @Column('text', { nullable: true })
   description: string;
 
+  @Column('text', { nullable: true })
+  content: string;
+
   @Column({ nullable: true })
   icon: string;
 

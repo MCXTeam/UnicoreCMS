@@ -1,11 +1,12 @@
-import { User } from 'src/admin/users/entities/user.entity';
 import { Period } from 'src/game/donate/entities/period.entity';
 import { DonateGroup } from 'src/game/donate/groups/entities/donate-group.entity';
 import { DonatePermission } from 'src/game/donate/permissions/entities/donate-permission.entity';
+import { Server } from 'src/game/servers/entities/server.entity';
 import { Kit } from 'src/game/store/entities/kit.entity';
 import { Product } from 'src/game/store/entities/product.entity';
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { GiftType } from '../enums/gift-type.enum';
+import { GiftActivation } from './gift-activation.entity';
 
 @Entity()
 export class Gift {
@@ -18,16 +19,11 @@ export class Gift {
   @Column()
   type: GiftType;
 
-  @ManyToOne(() => User, {
-    cascade: true,
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn()
-  owner: User;
+  @OneToMany(() => GiftActivation, (activation) => activation.gift)
+  activations: GiftActivation;
 
   @Column({ nullable: true })
-  max_uses: string;
+  max_activations: number;
 
   @Column({ nullable: true })
   expires: Date;
@@ -36,6 +32,7 @@ export class Gift {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
+    eager: true
   })
   @JoinColumn()
   product?: Product;
@@ -44,6 +41,7 @@ export class Gift {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
+    eager: true
   })
   @JoinColumn()
   kit?: Kit;
@@ -52,6 +50,7 @@ export class Gift {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
+    eager: true
   })
   @JoinColumn()
   donate_group?: DonateGroup;
@@ -60,22 +59,31 @@ export class Gift {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
+    eager: true
   })
   @JoinColumn()
   donate_permission?: DonatePermission;
+
+  @ManyToOne(() => Server, {
+    cascade: true,
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+    eager: true
+  })
+  @JoinColumn()
+  server?: Server;
 
   @ManyToOne(() => Period, {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
+    eager: true
   })
   @JoinColumn()
   period?: Period;
 
-  @Column('decimal', {
+  @Column('float', {
     nullable: true,
-    precision: 5,
-    scale: 2,
   })
   amount?: number;
 

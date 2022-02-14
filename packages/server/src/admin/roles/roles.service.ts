@@ -8,6 +8,7 @@ import { RoleUpdateInput } from './dto/role-update.input';
 import { RoleCreateInput } from './dto/role-create.input';
 import { User } from '../users/entities/user.entity';
 import { ServersService } from 'src/game/servers/servers.service';
+import { ImportantRoles } from './emums/important-roles.enum';
 
 @Injectable()
 export class RolesService {
@@ -15,7 +16,7 @@ export class RolesService {
     @InjectRepository(Role)
     private rolesRepository: Repository<Role>,
     private serversService: ServersService,
-  ) {}
+  ) { }
 
   /**
    * Генерация корневых ролей
@@ -26,14 +27,20 @@ export class RolesService {
       .insert()
       .into(Role)
       .values([
-        { id: 'user', name: 'User', perms: ['user.*'], important: true },
         {
-          id: 'admin',
-          name: 'Admin',
-          perms: ['*'],
+          id: ImportantRoles.Default,
+          name: 'Игрок',
+          perms: ['user.*'],
           important: true,
-          priority: 10,
+          priority: 0,
         },
+        {
+          id: ImportantRoles.Banned,
+          name: 'Заблокированный',
+          perms: [],
+          important: true,
+          priority: 5,
+        }
       ])
       .orIgnore()
       .execute();

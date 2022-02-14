@@ -58,12 +58,17 @@ export default {
             {
               label: 'Новости',
               icon: 'pi pi-paperclip',
-              to: '/blocks',
+              to: '/news',
             },
             {
               label: 'Статические страницы',
               icon: 'pi pi-sitemap',
-              to: '/blocks',
+              to: '/pages',
+            },
+            {
+              label: 'Email-сообщения',
+              icon: 'pi pi-send',
+              to: '/email',
             },
             {
               label: 'Серверы',
@@ -74,11 +79,6 @@ export default {
               label: 'Моды',
               icon: 'pi pi-map-marker',
               to: '/mods',
-            },
-            {
-              label: 'Правила',
-              icon: 'pi pi-book',
-              to: '/books',
             },
           ],
         },
@@ -135,7 +135,7 @@ export default {
             {
               label: 'Промо-коды',
               icon: 'pi pi-fw pi-dollar',
-              to: '/icons',
+              to: '/gifts',
             },
             {
               label: 'Голосование',

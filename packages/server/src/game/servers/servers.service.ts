@@ -18,8 +18,6 @@ export class ServersService {
     private serversRepository: Repository<Server>,
     @InjectRepository(Mod)
     private modsRepository: Repository<Mod>,
-    @InjectRepository(Query)
-    private queryRepository: Repository<Query>,
   ) {}
 
   find(relations: string[] = new Array()): Promise<Server[]> {
@@ -42,6 +40,7 @@ export class ServersService {
     server.version = input.version;
     server.slogan = input.slogan;
     server.description = input.description;
+    server.content = input.content;
 
     server.online = new Online();
     server.query = new Query();
@@ -67,6 +66,7 @@ export class ServersService {
     server.version = input.version;
     server.slogan = input.slogan;
     server.description = input.description;
+    server.content = input.content;
 
     server.query.host = input.query.host;
     server.query.port = input.query.port;

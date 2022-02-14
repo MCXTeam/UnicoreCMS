@@ -19,6 +19,10 @@ export class ServerUpdateInput {
   @IsString()
   description: string;
 
+  @IsOptional()
+  @IsString()
+  content: string;
+
   @IsDefined()
   @Type(() => Query)
   query: Query;

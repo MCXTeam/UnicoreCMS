@@ -1,15 +1,18 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOneOptions, Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { PaginateQuery, Paginated, paginate, FilterOperator } from 'nestjs-paginate';
+import { UserInput } from './dto/user.input';
+import * as bcrypt from 'bcrypt';
+import { Role } from '../roles/entities/role.entity';
 
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    @InjectRepository(Role)
+    private rolesRepository: Repository<Role>,
   ) {}
-
-  async create() {}
 
   findAll(query: PaginateQuery): Promise<Paginated<User>> {
     const queryBuilder = this.usersRepository
@@ -48,5 +51,25 @@ export class UsersService {
 
   async count(): Promise<number> {
     return this.usersRepository.count();
+  }
+
+  async create(input: UserInput): Promise<User> {
+    const user = new User()
+
+    user.email = input.email
+    user.username = input.username
+    user.superuser = input.superuser
+    user.password = bcrypt.hashSync(input.password, 10)
+    user.activated = input.activated
+
+    user.perms = input.perms
+
+    if (!input.roles) input.roles = []
+
+    user.roles = await this.rolesRepository.find({
+      id: In(input.roles),
+    });
+
+    return this.usersRepository.save(user);
   }
 }

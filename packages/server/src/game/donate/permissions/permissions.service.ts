@@ -59,6 +59,7 @@ export class DonatePermissionsService {
         perm.web_perms = input.web_perms
         break;
       case PermissionType.Kit:
+        perm.perms = input.perms
         perm.kits = await this.groupKitsRepository.find({
           id: In(input.kits),
         });
@@ -104,6 +105,7 @@ export class DonatePermissionsService {
         perm.web_perms = input.web_perms
         break;
       case PermissionType.Kit:
+        perm.perms = input.perms
         perm.kits = await this.groupKitsRepository.find({
           id: In(input.kits),
         });

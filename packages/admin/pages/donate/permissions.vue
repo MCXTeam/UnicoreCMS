@@ -43,7 +43,7 @@
           <Column field="name" header="Название" sortable></Column>
           <Column field="type" header="Тип" sortable>
             <template #body="slotProps">
-              {{ types.find(type => type.value == slotProps.data.type).name }}
+              {{ types.find((type) => type.value == slotProps.data.type).name }}
             </template>
           </Column>
           <Column field="servers" header="Серверы" filterField="servers" :showFilterMatchModes="false">
@@ -95,10 +95,10 @@
                 <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
               </div>
             </ValidationProvider>
-            <ValidationProvider name="Название" rules="required" v-slot="{ errors }">
+            <ValidationProvider name="Тип" rules="required" v-slot="{ errors }">
               <div class="field">
                 <label>Тип</label>
-                <Dropdown v-model="permission.type" :options="types" optionLabel="name" placeholder="Выберите тип" />
+                <Dropdown v-model="permission.type" :options="types" optionLabel="name" appendTo="body" />
                 <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
               </div>
             </ValidationProvider>
@@ -168,12 +168,9 @@
                 </template>
               </MultiSelect>
             </div>
-            <div class="field" v-if="$_.get(permission.type, 'value') == 'game'">
+            <div class="field" v-if="$_.get(permission.type, 'value') == 'game' || $_.get(permission.type, 'value') == 'kit'">
               <label>Права</label>
-              <Chips
-                v-model="permission.perms"
-                placeholder="Выберите разрешения"
-              />
+              <Chips v-model="permission.perms" placeholder="Выберите разрешения" />
             </div>
             <div class="field" v-if="$_.get(permission.type, 'value') == 'web'">
               <label>Веб-права</label>
@@ -188,7 +185,7 @@
               />
             </div>
             <div class="field" v-if="$_.get(permission.type, 'value') == 'kit'">
-              <label>Киты</label>
+              <label>Связанные киты</label>
               <MultiSelect
                 v-model="permission.kits"
                 display="chip"
@@ -254,9 +251,9 @@ export default {
         servers: { value: null, matchMode: FilterMatchMode.CONTAINS },
       },
       types: [
-        { name: "Игровые пермишены", value: "game" },
-        { name: "Веб-пермишены", value: "web" },
-        { name: "Киты", value: "kit" },
+        { name: 'Игровые пермишены', value: 'game' },
+        { name: 'Веб-пермишены', value: 'web' },
+        { name: 'Киты', value: 'kit' },
       ],
       autocompleate: null,
       autocompleateFilterd: null,
@@ -302,7 +299,7 @@ export default {
           await this.$axios.get('/donates/permissions/' + permission.id).then((res) => res.data),
           this.$_.deepKeys(this.permission)
         )
-        this.permission.type = this.types.find(type => type.value ==  this.permission.type)
+        this.permission.type = this.types.find((type) => type.value == this.permission.type)
       } else {
         this.permission = {
           id: null,
@@ -338,19 +335,11 @@ export default {
         await this.$fetch()
       } catch (err) {
         this.loading = false
-        if (err.response.status === 409) {
-          this.$toast.add({
-            severity: 'error',
-            detail: 'Право с данным ID уже присутствует',
-            life: 3000,
-          })
-        } else {
-          this.$toast.add({
-            severity: 'error',
-            detail: 'Введены некоректные данные',
-            life: 3000,
-          })
-        }
+        this.$toast.add({
+          severity: 'error',
+          detail: 'Введены некоректные данные',
+          life: 3000,
+        })
       }
     },
     async updatePermission() {
@@ -396,6 +385,7 @@ export default {
               detail: 'Права успешно удалены',
               life: 3000,
             })
+            this.selected = []
           } catch {}
           await this.$fetch()
         },

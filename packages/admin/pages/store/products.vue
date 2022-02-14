@@ -549,19 +549,11 @@ export default {
         await this.$fetch()
       } catch (err) {
         this.loading = false
-        if (err.response.status === 409) {
-          this.$toast.add({
-            severity: 'error',
-            detail: 'Товар с данным ID уже присутствует',
-            life: 3000,
-          })
-        } else {
-          this.$toast.add({
-            severity: 'error',
-            detail: 'Введены некоректные данные',
-            life: 3000,
-          })
-        }
+        this.$toast.add({
+          severity: 'error',
+          detail: 'Введены некоректные данные',
+          life: 3000,
+        })
       }
     },
     async updateProduct() {
@@ -672,6 +664,7 @@ export default {
               detail: 'Товары успешно удалены',
               life: 3000,
             })
+            this.selected = []
           } catch {}
           await this.$fetch()
         },

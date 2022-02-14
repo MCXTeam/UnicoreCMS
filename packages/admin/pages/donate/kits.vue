@@ -52,11 +52,7 @@
             <template #body="slotProps">
               <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
               <Button @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary mr-2" />
-              <Button
-                @click="removeKit(slotProps.data.id)"
-                icon="pi pi-trash"
-                class="p-button-rounded p-button-warning mt-2"
-              />
+              <Button @click="removeKit(slotProps.data.id)" icon="pi pi-trash" class="p-button-rounded p-button-warning mt-2" />
             </template>
           </Column>
         </DataTable>
@@ -239,19 +235,11 @@ export default {
         await this.$fetch()
       } catch (err) {
         this.loading = false
-        if (err.response.status === 409) {
-          this.$toast.add({
-            severity: 'error',
-            detail: 'Кит с данным ID уже присутствует',
-            life: 3000,
-          })
-        } else {
-          this.$toast.add({
-            severity: 'error',
-            detail: 'Введены некоректные данные',
-            life: 3000,
-          })
-        }
+        this.$toast.add({
+          severity: 'error',
+          detail: 'Введены некоректные данные',
+          life: 3000,
+        })
       }
     },
     async updateKit() {
@@ -291,6 +279,7 @@ export default {
               detail: 'Киты успешно удалены',
               life: 3000,
             })
+            this.selected = []
           } catch {}
           await this.$fetch()
         },

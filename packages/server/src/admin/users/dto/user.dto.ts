@@ -11,8 +11,9 @@ export class UserDto implements User {
   @Exclude()
   password: string;
 
-  @Exclude()
   superuser: boolean;
+
+  activated: boolean;
 
   perms: string[];
 

@@ -171,7 +171,7 @@
                 </div>
                 <div class="field">
                   <label>Описание</label>
-                  <Editor v-model="server.description" editorStyle="height: 220px">
+                  <Editor v-model="server.content" editorStyle="height: 220px">
                     <template #toolbar>
                       <span class="ql-formats">
                         <button class="ql-bold"></button>
@@ -180,6 +180,10 @@
                       </span>
                     </template>
                   </Editor>
+                </div>
+                <div class="field">
+                  <label>Описание (meta-description)</label>
+                  <Textarea v-model="server.description" :autoResize="true" />
                 </div>
               </div>
               <div class="col-12 md:col-6">
@@ -245,6 +249,7 @@ export default {
         version: null,
         slogan: null,
         description: null,
+        content: null,
         query: {
           host: null,
           port: null,
@@ -335,6 +340,7 @@ export default {
           version: null,
           slogan: null,
           description: null,
+          content: null,
           query: {
             host: null,
             port: null,
