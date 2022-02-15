@@ -1,5 +1,5 @@
 import merge from 'deepmerge'
-import { envConfig } from 'unicore-common'
+import { envConfig } from 'unicore-common/dist/envconfig'
 import ms from 'ms'
 
 export default (config) =>

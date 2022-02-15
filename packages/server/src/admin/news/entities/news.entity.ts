@@ -1,5 +1,4 @@
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Attachment } from './attachments.entity';
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class News {
@@ -12,8 +11,8 @@ export class News {
   @Column('text')
   description: string;
 
-  @OneToMany(() => Attachment, (attachment) => attachment.news)
-  attachments: Attachment[];
+  @Column({ nullable: true })
+  image: string;
 
   @CreateDateColumn()
   created: Date;

@@ -1,13 +1,11 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { envConfig } from 'unicore-common';
-import { NamingStrategy } from '@common';
 import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
 import { GameModule } from './game/game.module';
 import { PaymentModule } from './payment/payment.module';
 import { GoogleRecaptchaModule, GoogleRecaptchaNetwork } from '@nestlab/google-recaptcha';
-import { HttpModule } from '@nestjs/axios';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MomentModule } from './moment';
@@ -43,7 +41,6 @@ import { ormconfig } from './ormconfig';
         },
       },
     }),
-    HttpModule,
     MomentModule,
     IntegrationsModule,
     EventsModule,

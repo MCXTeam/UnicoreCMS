@@ -1,5 +1,5 @@
 import mainConfig from './main.config'
-import { envConfig } from 'unicore-common'
+import { envConfig } from 'unicore-common/dist/envconfig'
 
 export default mainConfig({
   ssr: false,

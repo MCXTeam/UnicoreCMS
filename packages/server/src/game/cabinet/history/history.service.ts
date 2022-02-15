@@ -50,8 +50,6 @@ export class HistoryService {
         doublePayload = doublePayload as number;
 
         break;
-      default:
-        break;
     }
   }
 }
