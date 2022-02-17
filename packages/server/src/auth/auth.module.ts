@@ -13,10 +13,13 @@ import { RefreshToken } from './entities/refresh-token.entity';
 import { TokensService } from './tokens.service';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { ApiModule } from 'src/admin/api/api.module';
+import { ApiKeyStrategy } from './strategies/api-key.strategy';
 
 @Module({
   imports: [
     UsersModule,
+    ApiModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     TypeOrmModule.forFeature([RefreshToken, User]),
     JwtModule.register({
@@ -28,6 +31,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
   providers: [
     AuthService,
     TokensService,
+    ApiKeyStrategy,
     JwtStrategy,
     {
       provide: APP_GUARD,

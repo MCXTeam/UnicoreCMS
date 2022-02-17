@@ -1,5 +1,6 @@
-import { Body, Controller, Get, NotFoundException, Param, Patch } from "@nestjs/common";
+import { Body, Controller, Get, NotFoundException, Param, Patch, Post } from "@nestjs/common";
 import { EmailInput } from "./dto/email.input";
+import { TestEmailInput } from "./dto/test-email.input";
 import { EmailService } from "./email.service";
 
 @Controller('admin/email')
@@ -25,5 +26,10 @@ export class EmailController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() body: EmailInput) {
     return this.emailService.update(id, body);
+  }
+
+  @Post('test')
+  test(@Body() body: TestEmailInput) {
+    return this.emailService.test(body);
   }
 }

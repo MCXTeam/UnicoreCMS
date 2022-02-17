@@ -1,18 +1,24 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { MailerService } from "@nestjs-modules/mailer";
+import { Injectable, Logger, NotFoundException, ServiceUnavailableException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
+import { envConfig } from "unicore-common";
 import { EmailInput } from "./dto/email.input";
+import { TestEmailInput } from "./dto/test-email.input";
 import { EmailMessage } from "./entities/email-message.entity";
 import { EmailMessageType } from "./enums/email-message-type.enum";
 
 @Injectable()
 export class EmailService {
+  private logger = new Logger(EmailService.name)
+
   constructor(
     @InjectRepository(EmailMessage)
     private emailMessagesRepository: Repository<EmailMessage>,
+    private mailerService: MailerService
   ) { }
 
-   async generate(): Promise<void> {
+  async generate(): Promise<void> {
     await this.emailMessagesRepository
       .createQueryBuilder()
       .insert()
@@ -36,26 +42,41 @@ export class EmailService {
       ])
       .orIgnore()
       .execute()
-    } 
+  }
 
-    find(): Promise<EmailMessage[]> {
-      return this.emailMessagesRepository.find();
-    }
-  
-    findOne(id: string): Promise<EmailMessage> {
-      return this.emailMessagesRepository.findOne(id);
+  find(): Promise<EmailMessage[]> {
+    return this.emailMessagesRepository.find();
+  }
+
+  findOne(id: string): Promise<EmailMessage> {
+    return this.emailMessagesRepository.findOne(id);
+  }
+
+  async update(id: string, input: EmailInput): Promise<EmailMessage> {
+    const message = await this.findOne(id);
+
+    if (!message) {
+      throw new NotFoundException();
     }
 
-    async update(id: string, input: EmailInput): Promise<EmailMessage> {
-      const message = await this.findOne(id);
-  
-      if (!message) {
-        throw new NotFoundException();
-      }
-  
-      message.title = input.title;
-      message.content = input.content;
-  
-      return this.emailMessagesRepository.save(message);
-    }
+    message.title = input.title;
+    message.content = input.content;
+
+    return this.emailMessagesRepository.save(message);
+  }
+
+  test(input: TestEmailInput) {
+    return this.mailerService
+      .sendMail({
+        to: input.email,
+        from: envConfig.mailFrom,
+        subject: 'Test Email',
+        text: 'Test Email sent by UnicoreCMS',
+      })
+      .then((res) => {})
+      .catch((e) => {
+        this.logger.error(e.toString())
+        throw new ServiceUnavailableException()
+      });
+  }
 }

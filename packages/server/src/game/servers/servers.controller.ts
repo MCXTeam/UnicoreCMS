@@ -34,21 +34,10 @@ export class ServersController {
     return this.serversService.find();
   }
 
+  @Public()
   @Get(':id')
   async findOne(@Param('id') id: string) {
     const server = await this.serversService.findOne(id, ['mods', 'query']);
-
-    if (!server) {
-      throw new NotFoundException();
-    }
-
-    return server;
-  }
-
-  @Public()
-  @Get('public/:id')
-  async findOnePublic(@Param('id') id: string) {
-    const server = await this.serversService.findOne(id, ['mods']);
 
     if (!server) {
       throw new NotFoundException();

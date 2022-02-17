@@ -14,6 +14,9 @@ export class News {
   @Column({ nullable: true })
   image: string;
 
+  @Column({ nullable: true })
+  link: string;
+
   @CreateDateColumn()
   created: Date;
 }

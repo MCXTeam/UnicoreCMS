@@ -59,7 +59,7 @@ export class RolesService {
     return uniq(autocompleate.flat(2)).sort();
   }
 
-  async me(user: User) {
+  me(user: User) {
     if (user.superuser) return Object.values(Permission);
   }
 

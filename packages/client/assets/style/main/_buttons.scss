@@ -3,12 +3,23 @@
 }
 
 .vs-button--size-xl > .vs-button__content {
-  padding: 10px 15px;
+  padding: 10px 25px;
   text-transform: uppercase;
   font-weight: 500;
+  min-height: 50px;
 
   i {
     font-size: 2rem;
+  }
+}
+
+.vs-button--size-large > .vs-button__content {
+  padding: 5px 15px;
+  font-weight: 500;
+  min-height: 40px;
+
+  i {
+    font-size: 1.8rem;
   }
 }
 

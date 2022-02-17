@@ -9,7 +9,17 @@ export default mainConfig({
     '~assets/fonts/main.scss',
   ],
 
-  buildModules: ['@nuxtjs/color-mode'],
+  buildModules: [
+    '@nuxtjs/color-mode'
+  ],
 
-  plugins: ['~/plugins/vuesax.ts'],
+  plugins: [
+    { src: '~/plugins/vuesax.ts' },
+    { src: '~/plugins/aos.ts', ssr: false },
+    { src: '~/plugins/primevue.ts' }
+  ],
+
+  build: {
+    transpile: ['primevue']
+  },
 })

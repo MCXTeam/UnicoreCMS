@@ -1,5 +1,5 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { PaginateQuery, Paginated, paginate, FilterOperator } from 'nestjs-paginate';
 import { UserInput } from './dto/user.input';
@@ -12,13 +12,16 @@ export class UsersService {
     private usersRepository: Repository<User>,
     @InjectRepository(Role)
     private rolesRepository: Repository<Role>,
-  ) {}
+  ) { }
 
   findAll(query: PaginateQuery): Promise<Paginated<User>> {
     const queryBuilder = this.usersRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.roles', 'roles')
-      .leftJoinAndSelect('user.skin', 'skin');
+      .leftJoinAndSelect('user.skin', 'skin')
+      .where({
+        username: Not("Kernel")
+      });
 
     return paginate(query, queryBuilder, {
       sortableColumns: ['uuid', 'username', 'email', 'created'],
@@ -49,8 +52,29 @@ export class UsersService {
     });
   }
 
+  async getKernel(): Promise<User> {
+    return this.usersRepository.findOne({
+      username: "Kernel"
+    });
+  }
+
+  async genKernel() {
+    await this.usersRepository.createQueryBuilder()
+      .insert()
+      .into(User)
+      .values({
+        username: "Kernel",
+        password: "",
+        activated: true
+      })
+      .orIgnore()
+      .execute();
+  }
+
   async count(): Promise<number> {
-    return this.usersRepository.count();
+    return this.usersRepository.count({
+      username: Not("Kernel")
+    });
   }
 
   async create(input: UserInput): Promise<User> {

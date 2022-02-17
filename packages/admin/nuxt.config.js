@@ -18,7 +18,7 @@ export default mainConfig({
   css: ['primeflex/primeflex.css', '~/assets/styles/layout.scss'],
 
   primevue: {
-    theme: 'vela-purple',
+    theme: 'saga-purple',
     ripple: true,
     components: [
       'AutoComplete',

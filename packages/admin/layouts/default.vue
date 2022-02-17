@@ -147,25 +147,25 @@ export default {
         {
           label: 'Утилиты',
           items: [
-            {
-              label: 'Управление хранилищем',
-              icon: 'pi pi-fw pi-folder',
-              to: '/',
-            },
-            {
-              label: 'Слияние базы данных',
-              icon: 'pi pi-fw pi-clone',
-              to: '/users',
-            },
+            // {
+            //   label: 'Управление хранилищем',
+            //   icon: 'pi pi-fw pi-folder',
+            //   to: '/',
+            // },
+            // {
+            //   label: 'Слияние базы данных',
+            //   icon: 'pi pi-fw pi-clone',
+            //   to: '/users',
+            // },
             {
               label: 'API-Ключи',
               icon: 'pi pi-fw pi-reply',
-              to: '/users',
+              to: '/api',
             },
             {
               label: 'Вебхуки',
               icon: 'pi pi-fw pi-link',
-              to: '/users',
+              to: '/webhooks',
             },
           ],
         },

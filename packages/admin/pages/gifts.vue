@@ -73,7 +73,7 @@
             header="Создание/редактирование промо-кода"
             class="p-fluid"
           >
-            <ValidationProvider name="Название" rules="required" v-slot="{ errors }">
+            <ValidationProvider name="Промо-код" rules="required" v-slot="{ errors }">
               <div class="field">
                 <label>Промо-код</label>
                 <InputText v-model="gift.promocode" />

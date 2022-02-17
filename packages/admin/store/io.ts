@@ -1,10 +1,23 @@
-import { ActionTree, MutationTree } from 'vuex'
+import { ActionTree, MutationTree, GetterTree } from 'vuex'
 
 export const state = () => ({
-  serversOnline: [] as string[],
+  serversOnline: {
+    servers: [],
+    total: {
+      online: 0,
+      records: {
+        absolute: 0,
+        today: 0,
+      },
+    },
+  } as any,
 })
 
 export type RootState = ReturnType<typeof state>
+
+export const getters: GetterTree<RootState, RootState> = {
+  serversOnline: state => state.serversOnline,
+}
 
 export const mutations: MutationTree<RootState> = {
   SERVERS_ONLINE: (state, serversOnline: string[]) => (state.serversOnline = serversOnline),
@@ -12,6 +25,6 @@ export const mutations: MutationTree<RootState> = {
 
 export const actions: ActionTree<RootState, RootState> = {
   async serversOnline({ commit }, servers) {
-    console.log(servers)
+    commit('SERVERS_ONLINE', servers)
   },
 }

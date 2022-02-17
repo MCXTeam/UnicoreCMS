@@ -2,6 +2,8 @@ import { extend } from 'vee-validate'
 import * as rules from 'vee-validate/dist/rules'
 import { messages } from 'vee-validate/dist/locale/ru.json'
 import { isUsername, IS_USERNAME, IS_USERNAME_OR_EMAIL } from 'unicore-common/dist/validation/index'
+// @ts-ignore
+import isURL from 'validator/lib/isURL';
 
 for (let [rule, validation] of Object.entries(rules)) {
   extend(rule, {
@@ -16,6 +18,13 @@ extend(IS_USERNAME, {
     return isUsername(value)
   },
   message: 'Некоретное имя пользователя',
+})
+
+extend('url', {
+  validate(value) {
+    return isURL(value)
+  },
+  message: 'Поле должно содержать URL адрес',
 })
 
 extend(IS_USERNAME_OR_EMAIL, {

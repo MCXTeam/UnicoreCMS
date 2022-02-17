@@ -4,13 +4,10 @@
 
 .vs-navbar__item {
   font-size: 1rem;
-  opacity: 1;
-  display: flex;
-  align-items: center;
-  gap: 5px;
+  opacity: .9;
 
   i {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
   }
 
   &:hover {
@@ -21,6 +18,11 @@
 .vs-navbar-content:not(.paddingScrollActive) {
   background-color: transparent;
 }
+
+.paddingScrollActive {
+  box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.02), 0px 0px 2px rgba(0, 0, 0, 0.05), 0px 1px 4px rgba(0, 0, 0, 0.08);
+}
+
 
 .square {
   height: 100vh;

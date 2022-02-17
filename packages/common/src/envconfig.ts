@@ -34,6 +34,7 @@ export interface EnvConfig {
   smtpSecure: boolean
   smtpUser: string
   smtpPassword: string
+  mailFrom: string
 }
 
 export const envConfig: EnvConfig = {
@@ -76,6 +77,7 @@ export const envConfig: EnvConfig = {
   vkApiKey: env.get("VK_APIKEY").asString(),
 
   // SMTP
+  mailFrom: env.get("MAIL_FROM").asString(),
   smtpService: env.get("SMTP_SERVICE").asString(),
   smtpHost: env.get("SMTP_HOST").asString(),
   smtpPort: env.get("SMTP_PORT").asPortNumber(),

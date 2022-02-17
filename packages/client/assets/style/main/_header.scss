@@ -1,7 +1,11 @@
 .header {
   position: relative;
   width: 100%;
-  height: 750px;
+  height: 500px;
+
+  @include media-breakpoint-up(lg) {
+    height: 750px;
+  }
 
   &::before {
     content: '';
@@ -29,12 +33,20 @@
   .header-render {
     position: absolute;
     right: 0;
-    bottom: 120px;
+    bottom: 40px;
+  }
+
+  h1 {
+    color: rgba(var(--vs-text), .8);
+
+    b {
+      color: rgba(var(--vs-text), .9);
+    }
   }
 }
 
 .dark-mode .header {
   &::before {
-    background: url('/images/bg.jpg') center no-repeat, linear-gradient(180deg, var(--vs-theme-bg) 120px, rgba(var(--vs-background), 0.3));
+    background: url('/images/bg.jpg') center no-repeat, linear-gradient(180deg, var(--vs-theme-bg) 120px, rgba(var(--vs-background), 0.15));
   }
 }

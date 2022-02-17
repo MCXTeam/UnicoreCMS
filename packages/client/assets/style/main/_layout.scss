@@ -1,12 +1,17 @@
+@import './buttons';
+@import './navbar';
+@import './contetn';
+@import './header';
+
 :root {
-  --vs-primary: 26, 92, 255;
+  --vs-primary: 157, 33, 207;
   --vs-theme-bg: #f4f7f8;
   --vs-theme-color: #212529;
   --vs-theme-layout: #fff;
   --vs-theme-bg2: #eef2f5;
   --vs-theme-code: #3f3d56;
   --vs-theme-code2: #363449;
-  --vs-primary: 255, 184, 0;
+  --vs-text: 0, 0, 0;
 }
 
 .dark-mode {
@@ -16,7 +21,6 @@
   --vs-theme-bg2: #141417;
   --vs-theme-code: #141417;
   --vs-theme-code2: #161619;
-  --vs-text: 244, 247, 248;
   --vs-background: 30, 32, 35;
   --vs-text: 255, 255, 255;
   --vs-gray-1: 24, 25, 28;
@@ -26,16 +30,24 @@
   --vs-shadow-opacity: 0.3;
   --vs-dark: 0, 0, 0;
   --vs-background-opacity: 0.6;
+
+  @import 'primevue/resources/themes/bootstrap4-dark-blue/theme.css';
 }
+// color="#4c21cf"
 
 body {
   font-family: 'Brutal Type';
   background-color: var(--vs-theme-bg);
   transition: background-color 0.3s;
+  color: rgba(var(--vs-text), .75);
+  line-height: 180%;
   overflow: hidden;
 }
 
-@import './buttons';
-@import './navbar';
-@import './contetn';
-@import './header';
+h1, h2, h3, h4, h5, h6 {
+  color: rgba(var(--vs-text), .85);
+}
+
+b {
+  font-weight: 800
+}

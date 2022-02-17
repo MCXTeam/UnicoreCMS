@@ -19,11 +19,12 @@ export default class UsersModule implements OnModuleInit {
   constructor(private usersService: UsersService) { }
 
   async onModuleInit() {
+    await this.usersService.genKernel()
+
     if (await this.usersService.count() == 0) {
       const input = new UserInput()
 
       input.username = "admin"
-      input.email = "admin@changeme.com"
       input.password = faker.internet.password(16)
       input.superuser = true
       input.activated = true

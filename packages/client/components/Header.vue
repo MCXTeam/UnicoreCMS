@@ -8,7 +8,18 @@
       ></path>
     </svg>
     <div class="container">
-      <img class="header-render" src="/images/render.png" />
+      <div class="h-100 d-flex flex-column justify-content-center">
+        <h1 class="mb-4"><b>UnicoreCMS</b> - Ваш сайт готов к работе</h1>
+        <p class="mt-0 mb-2">
+          Next-gen Headless система управления контентом и электронная коммерция для Minecraft <br />
+          написанная на NestJS и NuxtJS
+        </p>
+        <div class="d-flex mt-4">
+          <vs-button size="xl">Регистрация</vs-button>
+          <vs-button size="xl" color="#7945D6">Войти</vs-button>
+        </div>
+      </div>
+      <img class="header-render d-none d-lg-block" src="/images/render.png" />
     </div>
   </div>
 </template>

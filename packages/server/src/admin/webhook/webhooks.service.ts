@@ -1,4 +1,5 @@
 import { HttpService } from "@nestjs/axios";
+import { HexColorString, MessageAttachment, MessageEmbed } from 'discord.js';
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { In, Repository } from "typeorm";
@@ -7,13 +8,18 @@ import { WebhookInput } from "./dto/webhook.input";
 import { Webhook } from "./entities/webhook.entity";
 import { WebhookRequestType } from "./enums/webhook-request-type";
 import { WebhookType } from "./enums/webhook-type.enum";
+import { VkLongpollService } from "../integrations/vk-longpoll/vk-longpoll.service";
+import { AttachmentType } from "vk-io";
+
+
 
 @Injectable()
 export class WebhooksService {
   constructor(
     @InjectRepository(Webhook)
     private webhooksRepository: Repository<Webhook>,
-    private httpService: HttpService
+    private httpService: HttpService,
+    private vkService: VkLongpollService,
   ) { }
 
   async send(type: WebhookType, payload: any): Promise<void> {
@@ -50,8 +56,8 @@ export class WebhooksService {
 
   }
 
-  private vkNewsCreatedDiscord(url: string, payload: News) {
-
+  private vkNewsCreatedDiscord(url: string, payload: any) {
+    this.vkService.DiscordParse(url, payload)
   }
 
   find(): Promise<Webhook[]> {
