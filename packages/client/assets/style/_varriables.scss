@@ -1,23 +1,7 @@
-$landing-header: 700px;
-$landing-header-mobile: 500px;
-
-// Other
-$server-progressbar-offline: linear-gradient(to right, #ee250c, #ee250c 100%);
+$server-progressbar-offline: #ee250c;
 $server-progressbar-fill: linear-gradient(to right, #3ab22e 0%, #d9e51a 40%, #f68106 65%, #ee250c 100%);
-$server-progressbar: linear-gradient(to left, var(--vs-theme-layout), var(--vs-theme-layout) 100%);
-$news-truncate: 250;
-$server-background: linear-gradient(
-    90deg,
-    rgba(32, 32, 32, 0.7) 0%,
-    rgba(32, 32, 32, 0.7) 60%,
-    rgba(32, 32, 32, 0.55) 80%,
-    rgba(32, 32, 32, 0.35) 100%
-  ),
-  center;
 
 :export {
-  serverBackground: $server-background;
-  serverProgress: $server-progressbar;
   serverProgressFill: $server-progressbar-fill;
   serverProgressOffline: $server-progressbar-offline;
 }

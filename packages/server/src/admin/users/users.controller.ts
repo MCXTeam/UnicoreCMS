@@ -4,9 +4,10 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { PaginatedUsersDto } from './dto/paginated-users.dto';
 import { UserInput } from './dto/user.input';
+import { Public } from 'src/auth/decorators/public.decorator';
 
 @ApiTags('users')
-@Controller('admin/users')
+@Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
@@ -36,6 +37,7 @@ export class UsersController {
   @Delete('bulk/:id')
   removeMany(@Param('id', new ParseArrayPipe({ items: Number })) id: number[]) {}
 
+  @Public()
   @ApiOperation({ summary: 'Количество пользователей' })
   @Get('count')
   count(): Promise<number> {

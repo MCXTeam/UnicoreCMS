@@ -45,11 +45,11 @@ export class OnlineService {
         records: {
           today: {
             online: record?.online || 0,
-            created: record?.updated || moment().toDate(),
+            created: moment(record?.updated).toDate(),
           },
           absolute: {
             online: absolute?.online || 0,
-            created: absolute?.created || moment().toDate(),
+            created:  moment(absolute?.created).toDate(),
           },
         },
       },
@@ -83,7 +83,10 @@ export class OnlineService {
           .createQueryBuilder()
           .createQueryBuilder()
           .update(OnlinesRecord)
-          .set({ online: onlines.total.online })
+          .set({ 
+            online: onlines.total.online,
+            updated: moment().utc().toDate()
+          })
           .where('id = :id', { id })
           .execute();
 

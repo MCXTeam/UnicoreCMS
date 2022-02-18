@@ -9,17 +9,59 @@
     </svg>
     <div class="container">
       <div class="h-100 d-flex flex-column justify-content-center">
-        <h1 class="mb-4"><b>UnicoreCMS</b> - Ваш сайт готов к работе</h1>
+        <h1 class="mb-3"><b>UnicoreCMS</b> - Ваш сайт готов к работе</h1>
         <p class="mt-0 mb-2">
           Next-gen Headless система управления контентом и электронная коммерция для Minecraft <br />
           написанная на NestJS и NuxtJS
         </p>
-        <div class="d-flex mt-4">
-          <vs-button size="xl">Регистрация</vs-button>
-          <vs-button size="xl" color="#7945D6">Войти</vs-button>
+        <div class="d-flex justify-content-between mt-4" style="max-width: 250px">
+          <div>
+            <div class="d-flex align-items-center">
+              <div class="circle me-2" />
+              <span class="text-uppercase">В игре</span>
+            </div>
+            <h1 class="mt-2"><number :to="onlines.total.online" :duration="1" /></h1>
+          </div>
+          <div>
+            <div class="d-flex align-items-center">
+              <div class="circle me-2" />
+              <span class="text-uppercase">Всего</span>
+            </div>
+            <h1 class="mt-2"><number :to="users" :duration="1" /></h1>
+          </div>
+        </div>
+        <div class="mt-3 download-content" style="max-width: 400px">
+          <vs-button block class="mb-2" size="xl">Скачать лаунчер <i class="bx bxl-windows ms-2"></i></vs-button>
+          <div class="d-flex justify-content-between">
+            <span>Клиент также доступен на</span>
+            <div class="d-flex">
+              <vs-button transparent class="m-0">Linux</vs-button>
+              <vs-button transparent class="m-0">MacOS</vs-button>
+            </div>
+          </div>
         </div>
       </div>
       <img class="header-render d-none d-lg-block" src="/images/render.png" />
     </div>
   </div>
 </template>
+
+<script>
+import { mapGetters } from 'vuex'
+
+export default {
+  data() {
+    return {
+      users: 0
+    }
+  },
+  async fetch() {
+    this.users = await this.$axios.get("http://localhost:5000/users/count").then(res => res.data)
+  },
+  computed: {
+    ...mapGetters({
+      onlines: 'io/serversOnline',
+    }),
+  },
+}
+</script>
