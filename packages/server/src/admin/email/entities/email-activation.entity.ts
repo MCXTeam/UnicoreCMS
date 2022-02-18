@@ -1,14 +1,14 @@
-import { User } from "src/admin/users/entities/user.entity";
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { EmailMessageType } from "../enums/email-message-type.enum";
+import { User } from 'src/admin/users/entities/user.entity';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { EmailMessageType } from '../enums/email-message-type.enum';
 
 @Entity()
 export class EmailActivation {
   @PrimaryGeneratedColumn()
-  id: EmailMessageType
+  id: EmailMessageType;
 
   @Column()
-  code: string
+  code: string;
 
   @ManyToOne(() => User, {
     cascade: true,
@@ -19,5 +19,5 @@ export class EmailActivation {
   user: User;
 
   @CreateDateColumn()
-  created: Date
+  created: Date;
 }

@@ -30,11 +30,11 @@ export interface EnvConfig {
   smtpService: string;
   smtpHost: string;
   smtpPort: number;
-  smtpIgnoreTLS: boolean
-  smtpSecure: boolean
-  smtpUser: string
-  smtpPassword: string
-  mailFrom: string
+  smtpIgnoreTLS: boolean;
+  smtpSecure: boolean;
+  smtpUser: string;
+  smtpPassword: string;
+  mailFrom: string;
 }
 
 export const envConfig: EnvConfig = {

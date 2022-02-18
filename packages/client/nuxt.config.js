@@ -14,16 +14,14 @@ export default mainConfig({
     '~assets/fonts/main.scss',
   ],
 
-  buildModules: [
-    '@nuxtjs/color-mode'
-  ],
+  buildModules: ['@nuxtjs/color-mode'],
 
   plugins: [
     { src: '~/plugins/vuesax.ts' },
     { src: '~/plugins/aos.ts', ssr: false },
     { src: '~/plugins/number-animation.ts', ssr: false },
     { src: '~/plugins/primevue.ts' },
-    { src: '~/plugins/nprogress.ts', ssr: false }
+    { src: '~/plugins/nprogress.ts', ssr: false },
   ],
 
   serverMiddleware: ['~/server-middlewares/ssr-handler.ts'],
@@ -36,19 +34,19 @@ export default mainConfig({
         config.plugins.push(
           new PurgecssPlugin({
             safelist: [
-              "aos-init",
-              "aos-animate",
-              "data-aos-delay",
-              "data-aos-duration",
-              "fade-up",
-              "fade-left",
-              "fade-right",
-              "flip-left",
-              "dark-mode",
+              'aos-init',
+              'aos-animate',
+              'data-aos-delay',
+              'data-aos-duration',
+              'fade-up',
+              'fade-left',
+              'fade-right',
+              'flip-left',
+              'dark-mode',
               /^vs-/,
               /-(leave|enter|appear)(|-(to|from|active))$/,
               /^(?!(|.*?:)cursor-move).+-move$/,
-              /^router-link(|-exact)-active$/
+              /^router-link(|-exact)-active$/,
             ],
             paths: glob.sync([
               path.join(__dirname, './pages/**/*.vue'),
@@ -56,9 +54,9 @@ export default mainConfig({
               path.join(__dirname, './components/**/*.vue'),
               path.join(__dirname, './plugins/**/*.ts'),
               path.join(__dirname, '../../node_modules/primevue/**/*.@(vue|js)'),
-              path.join(__dirname, '../../node_modules/vuesax/**/*.@(vue|js)')
+              path.join(__dirname, '../../node_modules/vuesax/**/*.@(vue|js)'),
             ]),
-            whitelist: ['html', 'body']
+            whitelist: ['html', 'body'],
           })
         )
       }

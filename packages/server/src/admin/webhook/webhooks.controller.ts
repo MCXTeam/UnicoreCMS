@@ -1,8 +1,8 @@
-import { DeleteManyInput } from "@common";
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from "@nestjs/common";
-import { WebhookInput } from "./dto/webhook.input";
-import { WebhookMapper } from "./mappers/webhook.mapper";
-import { WebhooksService } from "./webhooks.service";
+import { DeleteManyInput } from '@common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import { WebhookInput } from './dto/webhook.input';
+import { WebhookMapper } from './mappers/webhook.mapper';
+import { WebhooksService } from './webhooks.service';
 
 @Controller('admin')
 export class WebhooksController {

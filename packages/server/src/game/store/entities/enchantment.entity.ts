@@ -1,6 +1,6 @@
-import { StorageManager } from "@common";
-import { AfterRemove, Column, Entity, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Product } from "./product.entity";
+import { StorageManager } from '@common';
+import { AfterRemove, Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Product } from './product.entity';
 
 @Entity()
 export class Enchantment {
@@ -11,7 +11,7 @@ export class Enchantment {
   name: string;
 
   @Column('text', {
-    nullable: true
+    nullable: true,
   })
   description: string;
 

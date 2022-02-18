@@ -31,12 +31,10 @@ export class GiftsService {
     private kitsRepository: Repository<Kit>,
     @InjectRepository(Gift)
     private giftsRepository: Repository<Gift>,
-  ) { }
+  ) {}
 
   find(): Promise<Gift[]> {
-    const qb = this.giftsRepository.createQueryBuilder('gift')
-      .loadRelationCountAndMap('gift.activations', 'gift.activations')
-      .getMany()
+    const qb = this.giftsRepository.createQueryBuilder('gift').loadRelationCountAndMap('gift.activations', 'gift.activations').getMany();
 
     return qb;
   }
@@ -48,45 +46,45 @@ export class GiftsService {
   async create(input: GiftInput) {
     const gift = new Gift();
 
-    gift.promocode = input.promocode
-    gift.type = input.type
-    gift.max_activations = input.max_activations
-    gift.expires = this.moment(input.expires).utc().toDate()
+    gift.promocode = input.promocode;
+    gift.type = input.type;
+    gift.max_activations = input.max_activations;
+    gift.expires = this.moment(input.expires).utc().toDate();
 
-    gift.product = null
-    gift.kit = null
-    gift.donate_group = null
-    gift.donate_permission = null
-    gift.server = null
-    gift.period = null
-    gift.amount = null
+    gift.product = null;
+    gift.kit = null;
+    gift.donate_group = null;
+    gift.donate_permission = null;
+    gift.server = null;
+    gift.period = null;
+    gift.amount = null;
 
     switch (input.type) {
       case GiftType.Product:
-        gift.amount = input.amount
-        gift.product = await this.productsRepository.findOneOrFail(input.product)
-        gift.server = await this.serversRepository.findOneOrFail(input.server)
+        gift.amount = input.amount;
+        gift.product = await this.productsRepository.findOneOrFail(input.product);
+        gift.server = await this.serversRepository.findOneOrFail(input.server);
         break;
       case GiftType.Kit:
-        gift.kit = await this.kitsRepository.findOneOrFail(input.kit)
-        gift.server = await this.serversRepository.findOneOrFail(input.server)
+        gift.kit = await this.kitsRepository.findOneOrFail(input.kit);
+        gift.server = await this.serversRepository.findOneOrFail(input.server);
         break;
       case GiftType.Donate:
-        gift.donate_group = await this.donateGroupsRepository.findOneOrFail(input.donate_group)
-        gift.period = await this.periodsRepository.findOneOrFail(input.period)
-        gift.server = await this.serversRepository.findOneOrFail(input.server)
+        gift.donate_group = await this.donateGroupsRepository.findOneOrFail(input.donate_group);
+        gift.period = await this.periodsRepository.findOneOrFail(input.period);
+        gift.server = await this.serversRepository.findOneOrFail(input.server);
         break;
       case GiftType.Permission:
-        gift.donate_permission = await this.donatePermissionsRepository.findOneOrFail(input.donate_permission)
-        gift.period = await this.periodsRepository.findOneOrFail(input.period)
-        gift.server = await this.serversRepository.findOneOrFail(input.server)
+        gift.donate_permission = await this.donatePermissionsRepository.findOneOrFail(input.donate_permission);
+        gift.period = await this.periodsRepository.findOneOrFail(input.period);
+        gift.server = await this.serversRepository.findOneOrFail(input.server);
         break;
       case GiftType.Money:
-        gift.amount = input.amount
-        gift.server = await this.serversRepository.findOneOrFail(input.server)
+        gift.amount = input.amount;
+        gift.server = await this.serversRepository.findOneOrFail(input.server);
         break;
       case GiftType.Real:
-        gift.amount = input.amount
+        gift.amount = input.amount;
         break;
     }
 
@@ -100,45 +98,45 @@ export class GiftsService {
       throw new NotFoundException();
     }
 
-    gift.promocode = input.promocode
-    gift.type = input.type
-    gift.max_activations = input.max_activations
-    gift.expires = this.moment(input.expires).utc().toDate()
+    gift.promocode = input.promocode;
+    gift.type = input.type;
+    gift.max_activations = input.max_activations;
+    gift.expires = this.moment(input.expires).utc().toDate();
 
-    gift.product = null
-    gift.kit = null
-    gift.donate_group = null
-    gift.donate_permission = null
-    gift.server = null
-    gift.period = null
-    gift.amount = null
+    gift.product = null;
+    gift.kit = null;
+    gift.donate_group = null;
+    gift.donate_permission = null;
+    gift.server = null;
+    gift.period = null;
+    gift.amount = null;
 
     switch (input.type) {
       case GiftType.Product:
-        gift.amount = input.amount
-        gift.product = await this.productsRepository.findOneOrFail(input.product)
-        gift.server = await this.serversRepository.findOneOrFail(input.server)
+        gift.amount = input.amount;
+        gift.product = await this.productsRepository.findOneOrFail(input.product);
+        gift.server = await this.serversRepository.findOneOrFail(input.server);
         break;
       case GiftType.Kit:
-        gift.kit = await this.kitsRepository.findOneOrFail(input.kit)
-        gift.server = await this.serversRepository.findOneOrFail(input.server)
+        gift.kit = await this.kitsRepository.findOneOrFail(input.kit);
+        gift.server = await this.serversRepository.findOneOrFail(input.server);
         break;
       case GiftType.Donate:
-        gift.donate_group = await this.donateGroupsRepository.findOneOrFail(input.donate_group)
-        gift.period = await this.periodsRepository.findOneOrFail(input.period)
-        gift.server = await this.serversRepository.findOneOrFail(input.server)
+        gift.donate_group = await this.donateGroupsRepository.findOneOrFail(input.donate_group);
+        gift.period = await this.periodsRepository.findOneOrFail(input.period);
+        gift.server = await this.serversRepository.findOneOrFail(input.server);
         break;
       case GiftType.Permission:
-        gift.donate_permission = await this.donatePermissionsRepository.findOneOrFail(input.donate_permission)
-        gift.period = await this.periodsRepository.findOneOrFail(input.period)
-        gift.server = await this.serversRepository.findOneOrFail(input.server)
+        gift.donate_permission = await this.donatePermissionsRepository.findOneOrFail(input.donate_permission);
+        gift.period = await this.periodsRepository.findOneOrFail(input.period);
+        gift.server = await this.serversRepository.findOneOrFail(input.server);
         break;
       case GiftType.Money:
-        gift.amount = input.amount
-        gift.server = await this.serversRepository.findOneOrFail(input.server)
+        gift.amount = input.amount;
+        gift.server = await this.serversRepository.findOneOrFail(input.server);
         break;
       case GiftType.Real:
-        gift.amount = input.amount
+        gift.amount = input.amount;
         break;
     }
 

@@ -9,6 +9,6 @@ import { Period } from './entities/period.entity';
 @Module({
   imports: [DonatePermissionsModule, DonateGroupsModule, TypeOrmModule.forFeature([Period])],
   providers: [PeriodsService],
-  controllers: [PeriodsController]
+  controllers: [PeriodsController],
 })
 export class DonateModule {}

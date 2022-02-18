@@ -1,5 +1,5 @@
-import { uniq } from "lodash";
-import { EventPermission, Permission } from "unicore-common";
+import { uniq } from 'lodash';
+import { EventPermission, Permission } from 'unicore-common';
 
 export const PermissionMapper = uniq(
   Object.values({ ...Permission, ...EventPermission })

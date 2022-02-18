@@ -1,15 +1,15 @@
-import { IsDefined, IsInt, IsNumber, IsString } from "class-validator"
+import { IsDefined, IsInt, IsNumber, IsString } from 'class-validator';
 
 export class PeriodInput {
   @IsDefined()
   @IsString()
-  name: string
+  name: string;
 
   @IsDefined()
   @IsInt()
-  expire: number
+  expire: number;
 
   @IsDefined()
   @IsNumber()
-  multiplier: number
+  multiplier: number;
 }

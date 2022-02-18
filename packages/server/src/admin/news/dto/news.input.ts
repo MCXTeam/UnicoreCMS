@@ -1,4 +1,4 @@
-import { IsBoolean, IsDefined, IsOptional, IsString } from "class-validator";
+import { IsBoolean, IsDefined, IsOptional, IsString } from 'class-validator';
 
 export class NewsInput {
   @IsDefined()

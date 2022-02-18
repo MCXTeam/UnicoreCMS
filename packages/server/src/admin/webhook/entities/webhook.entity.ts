@@ -1,6 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
-import { WebhookRequestType } from "../enums/webhook-request-type";
-import { WebhookType } from "../enums/webhook-type.enum";
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { WebhookRequestType } from '../enums/webhook-request-type';
+import { WebhookType } from '../enums/webhook-type.enum';
 
 @Entity()
 export class Webhook {

@@ -37,7 +37,7 @@
 
 <script>
 export default {
-  layout: "landing",
+  layout: 'landing',
   data() {
     return {
       news: {

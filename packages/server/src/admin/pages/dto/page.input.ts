@@ -1,19 +1,19 @@
-import { IsDefined, IsOptional, IsString } from "class-validator";
+import { IsDefined, IsOptional, IsString } from 'class-validator';
 
 export class PageInput {
   @IsDefined()
   @IsString()
-  title: string
+  title: string;
 
   @IsDefined()
   @IsString()
-  path: string
+  path: string;
 
   @IsOptional()
   @IsString()
-  description: string
+  description: string;
 
   @IsOptional()
   @IsString()
-  content: string
+  content: string;
 }

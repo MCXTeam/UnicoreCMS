@@ -1,11 +1,11 @@
-import { IsDefined, IsString } from "class-validator";
+import { IsDefined, IsString } from 'class-validator';
 
 export class EmailInput {
   @IsDefined()
   @IsString()
-  title: string
+  title: string;
 
   @IsDefined()
   @IsString()
-  content: string
+  content: string;
 }

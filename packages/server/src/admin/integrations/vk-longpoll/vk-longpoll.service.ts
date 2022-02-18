@@ -22,38 +22,32 @@ export class VkLongpollService {
     private newsRepository: Repository<News>,
     @Inject(forwardRef(() => WebhooksService))
     private webhooksService: WebhooksService,
-  ) { }
+  ) {}
 
   resolveResource(resource: string): Promise<IResolvedTargetResource | IResolvedOwnerResource> {
     return resolveResource({
       resource,
-      api: this.VK.api
+      api: this.VK.api,
     });
   }
 
   async toHtml(text: string): Promise<string> {
     // Fix ссылок
-    text = text.replace(/\[([^[]+?)\|([^]+?)]/g, (match, link, title) => (
-      `<a href="${!link.startsWith(VK_LINK_PREFIX) ? VK_LINK_PREFIX : ''}${link}" target="_blank">${title}</a>`
-    ));
+    text = text.replace(
+      /\[([^[]+?)\|([^]+?)]/g,
+      (match, link, title) => `<a href="${!link.startsWith(VK_LINK_PREFIX) ? VK_LINK_PREFIX : ''}${link}" target="_blank">${title}</a>`,
+    );
 
     // Fix хештегов
     text = await replaceAsync(text, /(?:^|\s)#([^\s]+)/g, async (match, hashtag): Promise<string> => {
-      const space = match.startsWith('\n') ?
-        '\n'
-        :
-        match.startsWith(' ') ?
-          ' '
-          :
-          '';
+      const space = match.startsWith('\n') ? '\n' : match.startsWith(' ') ? ' ' : '';
 
       const isNavigationHashtag = match.match(/#([^\s]+)@([a-zA-Z_]+)/);
 
       if (isNavigationHashtag) {
         const [, hashtag, group] = isNavigationHashtag;
 
-        const resource = await this.resolveResource(group)
-          .catch(() => null);
+        const resource = await this.resolveResource(group).catch(() => null);
 
         if (resource?.type === 'group') {
           if (hashtag.match(/[a-zA-Z]+/)) {
@@ -76,27 +70,21 @@ export class VkLongpollService {
 
   async toMarkdown(text: string): Promise<string> {
     // Fix ссылок
-    text = text.replace(/\[([^[]+?)\|([^]+?)]/g, (match, link, title) => (
-      `[${title}](${!link.startsWith(VK_LINK_PREFIX) ? VK_LINK_PREFIX : ''}${link})`
-    ));
+    text = text.replace(
+      /\[([^[]+?)\|([^]+?)]/g,
+      (match, link, title) => `[${title}](${!link.startsWith(VK_LINK_PREFIX) ? VK_LINK_PREFIX : ''}${link})`,
+    );
 
     // Fix хештегов
     text = await replaceAsync(text, /(?:^|\s)#([^\s]+)/g, async (match, hashtag): Promise<string> => {
-      const space = match.startsWith('\n') ?
-        '\n'
-        :
-        match.startsWith(' ') ?
-          ' '
-          :
-          '';
+      const space = match.startsWith('\n') ? '\n' : match.startsWith(' ') ? ' ' : '';
 
       const isNavigationHashtag = match.match(/#([^\s]+)@([a-zA-Z_]+)/);
 
       if (isNavigationHashtag) {
         const [, hashtag, group] = isNavigationHashtag;
 
-        const resource = await this.resolveResource(group)
-          .catch(() => null);
+        const resource = await this.resolveResource(group).catch(() => null);
 
         if (resource?.type === 'group') {
           if (hashtag.match(/[a-zA-Z]+/)) {
@@ -119,28 +107,27 @@ export class VkLongpollService {
 
   async DiscordParse(url: string, payload: any) {
     const webhookClient = new WebhookClient({ url });
-    let { text, attachments } = payload
+    let { text, attachments } = payload;
     const embed = new MessageEmbed();
     const postAuthor = await getById(this.VK.api, payload.from_id);
-    const imageurl = attachments?.find(att => att.type == "photo")?.photo?.sizes?.at(-1)?.url
+    const imageurl = attachments?.find((att) => att.type == 'photo')?.photo?.sizes?.at(-1)?.url;
 
     if (postAuthor) {
       embed.setAuthor({
         name: postAuthor.name,
         iconURL: postAuthor.photo_50,
-        url: getPostLink(payload)
-      })
+        url: getPostLink(payload),
+      });
     }
 
     if (text) {
-      if (text.length > 4096)
-        text = text.slice(0, 4096) + "..."
-      
-      embed.setDescription(await this.toMarkdown(text))
+      if (text.length > 4096) text = text.slice(0, 4096) + '...';
+
+      embed.setDescription(await this.toMarkdown(text));
     }
 
     if (imageurl) {
-      embed.setImage(imageurl)
+      embed.setImage(imageurl);
     }
 
     webhookClient.send({
@@ -161,25 +148,24 @@ export class VkLongpollService {
         // const postAuthor = await getById(vk.api, payload.from_id);
 
         // Add news to repo
-        const imageurl = payload.attachments?.find(att => att.type == "photo")?.photo?.sizes?.at(-1)?.url
+        const imageurl = payload.attachments?.find((att) => att.type == 'photo')?.photo?.sizes?.at(-1)?.url;
 
-        const news = new News()
+        const news = new News();
 
-        news.description = await this.toHtml(payload.text)
-        news.title = payload.text.slice(0, 30)
+        news.description = await this.toHtml(payload.text);
+        news.title = payload.text.slice(0, 30);
         news.link = await getPostLink(payload);
 
-        if (news.title < news.description)
-          news.title += '...';
+        if (news.title < news.description) news.title += '...';
 
         if (imageurl) {
-          news.image = await StorageManager.saveFromUrl(imageurl)
+          news.image = await StorageManager.saveFromUrl(imageurl);
         }
 
-        await this.newsRepository.save(news)
+        await this.newsRepository.save(news);
 
         // Sending webhooks
-        this.webhooksService.send(WebhookType.VKNewsCreated, payload)
+        this.webhooksService.send(WebhookType.VKNewsCreated, payload);
       }
     });
 

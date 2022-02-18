@@ -7,7 +7,7 @@ import { PagesService } from './pages.service';
 @Module({
   imports: [TypeOrmModule.forFeature([Page])],
   providers: [PagesService],
-  controllers: [PagesController]
+  controllers: [PagesController],
 })
 export class PagesModule implements OnModuleInit {
   constructor(private pagesService: PagesService) {}

@@ -1,18 +1,18 @@
-import { IsDate, IsDefined, IsEnum, IsInt, IsNumber, IsOptional, IsString, Min } from "class-validator";
-import { GiftType } from "../enums/gift-type.enum";
+import { IsDate, IsDefined, IsEnum, IsInt, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { GiftType } from '../enums/gift-type.enum';
 
 export class GiftInput {
   @IsDefined()
   @IsString()
-  promocode: string
+  promocode: string;
 
   @IsDefined()
   @IsEnum(GiftType)
-  type: GiftType
+  type: GiftType;
 
   @IsOptional()
   @IsInt()
-  max_activations?: number
+  max_activations?: number;
 
   @IsOptional()
   @IsString()
@@ -20,27 +20,27 @@ export class GiftInput {
 
   @IsOptional()
   @IsInt()
-  product?: number
+  product?: number;
 
   @IsOptional()
   @IsInt()
-  kit?: number
+  kit?: number;
 
   @IsOptional()
   @IsInt()
-  donate_group?: number
+  donate_group?: number;
 
   @IsOptional()
   @IsInt()
-  donate_permission?: number
+  donate_permission?: number;
 
   @IsOptional()
   @IsString()
-  server?: string
+  server?: string;
 
   @IsOptional()
   @IsInt()
-  period?: number
+  period?: number;
 
   @IsOptional()
   @IsNumber()

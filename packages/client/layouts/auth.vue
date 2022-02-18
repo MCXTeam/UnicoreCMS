@@ -6,7 +6,13 @@
       </nuxt-link>
       <nuxt-child />
     </div>
-    <img data-aos-anchor="body" data-aos-delay="300" data-aos="fade-left" class="header-render d-none d-lg-block" src="/images/render.png" />
+    <img
+      data-aos-anchor="body"
+      data-aos-delay="300"
+      data-aos="fade-left"
+      class="header-render d-none d-lg-block"
+      src="/images/render.png"
+    />
   </div>
 </template>
 

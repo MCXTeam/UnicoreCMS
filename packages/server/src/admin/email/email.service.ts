@@ -1,22 +1,22 @@
-import { MailerService } from "@nestjs-modules/mailer";
-import { Injectable, Logger, NotFoundException, ServiceUnavailableException } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
-import { envConfig } from "unicore-common";
-import { EmailInput } from "./dto/email.input";
-import { TestEmailInput } from "./dto/test-email.input";
-import { EmailMessage } from "./entities/email-message.entity";
-import { EmailMessageType } from "./enums/email-message-type.enum";
+import { MailerService } from '@nestjs-modules/mailer';
+import { Injectable, Logger, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { envConfig } from 'unicore-common';
+import { EmailInput } from './dto/email.input';
+import { TestEmailInput } from './dto/test-email.input';
+import { EmailMessage } from './entities/email-message.entity';
+import { EmailMessageType } from './enums/email-message-type.enum';
 
 @Injectable()
 export class EmailService {
-  private logger = new Logger(EmailService.name)
+  private logger = new Logger(EmailService.name);
 
   constructor(
     @InjectRepository(EmailMessage)
     private emailMessagesRepository: Repository<EmailMessage>,
-    private mailerService: MailerService
-  ) { }
+    private mailerService: MailerService,
+  ) {}
 
   async generate(): Promise<void> {
     await this.emailMessagesRepository
@@ -38,10 +38,10 @@ export class EmailService {
           id: EmailMessageType.Device,
           title: 'Вход с нового устройства',
           content: `<h1>Привет, {USERNAME}!</h1><p><br></p><p>В ваш аккаунт был выполнен вход с нового устройства, если это не вы, немедленно смените пароль!</p><p><br></p><p>IP-адресс: {IP}</p>`,
-        }
+        },
       ])
       .orIgnore()
-      .execute()
+      .execute();
   }
 
   find(): Promise<EmailMessage[]> {
@@ -75,8 +75,8 @@ export class EmailService {
       })
       .then((res) => {})
       .catch((e) => {
-        this.logger.error(e.toString())
-        throw new ServiceUnavailableException()
+        this.logger.error(e.toString());
+        throw new ServiceUnavailableException();
       });
   }
 }

@@ -1,20 +1,20 @@
-import { Type } from "class-transformer"
-import { IsDefined, IsInt, IsNumber, IsOptional, IsString, Length, IsArray, Min, Max } from "class-validator"
+import { Type } from 'class-transformer';
+import { IsDefined, IsInt, IsNumber, IsOptional, IsString, Length, IsArray, Min, Max } from 'class-validator';
 
 export class ProductManyInput {
   @IsDefined()
   @IsInt()
-  id: number
+  id: number;
 
   @IsOptional()
   @IsNumber()
-  price?: number
+  price?: number;
 
   @IsOptional()
   @IsInt()
   @Min(0)
   @Max(99)
-  sale?: number
+  sale?: number;
 
   @IsOptional()
   @IsArray()
@@ -29,5 +29,5 @@ export class ProductManyInput {
 
 export class ProductsManyInput {
   @Type(() => ProductManyInput)
-  products: ProductManyInput[]
+  products: ProductManyInput[];
 }

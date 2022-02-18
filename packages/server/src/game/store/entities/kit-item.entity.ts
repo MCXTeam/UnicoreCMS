@@ -1,6 +1,6 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from "typeorm";
-import { Kit } from "./kit.entity";
-import { Product } from "./product.entity";
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
+import { Kit } from './kit.entity';
+import { Product } from './product.entity';
 
 @Entity()
 export class KitItem {
@@ -10,7 +10,7 @@ export class KitItem {
     onUpdate: 'CASCADE',
     primary: true,
     eager: true,
-    nullable: false
+    nullable: false,
   })
   @JoinColumn()
   product: Product;
@@ -27,5 +27,5 @@ export class KitItem {
   kit?: Product;
 
   @Column()
-  amount: number
+  amount: number;
 }

@@ -20,39 +20,39 @@ export class KitsService {
     @InjectRepository(Server)
     private serversRepository: Repository<Server>,
     @InjectRepository(Category)
-    private categoriesRepository: Repository<Category>
-  ) { }
+    private categoriesRepository: Repository<Category>,
+  ) {}
 
   async find(query: PaginateQuery): Promise<Paginated<Kit>> {
-    const queryBuilder = this.kitsRepository.createQueryBuilder('kit')
+    const queryBuilder = this.kitsRepository
+      .createQueryBuilder('kit')
       .leftJoinAndSelect('kit.servers', 'servers')
       .leftJoinAndSelect('kit.categories', 'categories');
 
-    if (query?.filter?.servers && !Array.isArray(query.filter.servers))
-      query.filter.servers = query.filter.servers.split(',')
+    if (query?.filter?.servers && !Array.isArray(query.filter.servers)) query.filter.servers = query.filter.servers.split(',');
 
-    if (query?.filter?.categories && !Array.isArray(query.filter.categories))
-      query.filter.categories = query.filter.categories.split(',')
+    if (query?.filter?.categories && !Array.isArray(query.filter.categories)) query.filter.categories = query.filter.categories.split(',');
 
     if (query.filter?.servers && query.filter?.categories) {
-      queryBuilder.andWhere("servers.id IN(:...servers) AND categories.id IN(:...categories)", {
+      queryBuilder.andWhere('servers.id IN(:...servers) AND categories.id IN(:...categories)', {
         servers: query.filter.servers,
         categories: query.filter.categories,
-      })
+      });
     } else if (query.filter?.servers) {
-      queryBuilder.andWhere("servers.id IN(:...ids)", { ids: query.filter.servers })
+      queryBuilder.andWhere('servers.id IN(:...ids)', { ids: query.filter.servers });
     } else if (query.filter?.categories) {
-      queryBuilder.andWhere("categories.id IN(:...ids)", { ids: query.filter.categories })
+      queryBuilder.andWhere('categories.id IN(:...ids)', { ids: query.filter.categories });
     }
 
-    const ids = (await queryBuilder.getMany()).map(kit => kit.id)
+    const ids = (await queryBuilder.getMany()).map((kit) => kit.id);
 
-    const qb = this.kitsRepository.createQueryBuilder('kit')
+    const qb = this.kitsRepository
+      .createQueryBuilder('kit')
       .leftJoinAndSelect('kit.servers', 'servers')
       .leftJoinAndSelect('kit.categories', 'categories')
       .where({
-        id: In(ids)
-      })
+        id: In(ids),
+      });
 
     return paginate(query, qb, {
       sortableColumns: ['id', 'name'],
@@ -63,7 +63,7 @@ export class KitsService {
   }
 
   findOne(id: number, relations?: string[]) {
-    return this.kitsRepository.findOne(id, { relations })
+    return this.kitsRepository.findOne(id, { relations });
   }
 
   async create(input: KitInput) {
@@ -82,10 +82,12 @@ export class KitsService {
       id: In(input.categories),
     });
 
-    kit.items = await Promise.all(input.items.map(async item => ({
-      amount: item.amount,
-      product: await this.productsRepository.findOne(item.product_id)
-    })))
+    kit.items = await Promise.all(
+      input.items.map(async (item) => ({
+        amount: item.amount,
+        product: await this.productsRepository.findOne(item.product_id),
+      })),
+    );
 
     return this.kitsRepository.save(kit);
   }
@@ -108,10 +110,12 @@ export class KitsService {
       id: In(input.categories),
     });
 
-    kit.items = await Promise.all(input.items.map(async item => ({
-      amount: item.amount,
-      product: await this.productsRepository.findOne(item.product_id)
-    })))
+    kit.items = await Promise.all(
+      input.items.map(async (item) => ({
+        amount: item.amount,
+        product: await this.productsRepository.findOne(item.product_id),
+      })),
+    );
 
     return this.kitsRepository.save(kit);
   }

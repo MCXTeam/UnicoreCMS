@@ -14,7 +14,7 @@ export class Kit {
   name: string;
 
   @Column('text', {
-    nullable: true
+    nullable: true,
   })
   description: string;
 

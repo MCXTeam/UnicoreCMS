@@ -1,4 +1,4 @@
 export enum WebhookRequestType {
-  JSON = "json",
-  Discord = "discord"
+  JSON = 'json',
+  Discord = 'discord',
 }

@@ -1,10 +1,10 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post } from "@nestjs/common";
-import { ApiService } from "./api.service";
-import { ApiInput } from "./dto/api.input";
+import { Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post } from '@nestjs/common';
+import { ApiService } from './api.service';
+import { ApiInput } from './dto/api.input';
 
 @Controller('admin/api')
 export class ApiController {
-  constructor(private apiService: ApiService) { }
+  constructor(private apiService: ApiService) {}
 
   @Get()
   find() {

@@ -7,7 +7,7 @@ import { CategoriesService } from '../providers/categories.service';
 
 @Controller('store/categories')
 export class CategoriesController {
-  constructor (private categoriesService: CategoriesService) {}
+  constructor(private categoriesService: CategoriesService) {}
 
   @Get()
   find(@Paginate() query: PaginateQuery) {

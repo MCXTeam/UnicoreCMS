@@ -88,7 +88,16 @@
             <ValidationProvider v-if="webhook.type" name="Событие" rules="required" v-slot="{ errors }">
               <div class="field">
                 <label>Формат</label>
-                <Dropdown v-model="webhook.request" :options="$_.get(list.find(whl => whl.id == $_.get(webhook.type, 'id')), 'supports')" appendTo="body" />
+                <Dropdown
+                  v-model="webhook.request"
+                  :options="
+                    $_.get(
+                      list.find((whl) => whl.id == $_.get(webhook.type, 'id')),
+                      'supports'
+                    )
+                  "
+                  appendTo="body"
+                />
                 <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
               </div>
             </ValidationProvider>
@@ -133,7 +142,7 @@ export default {
         name: null,
         type: null,
         request: null,
-        url: null
+        url: null,
       },
       webhookDialog: false,
       filters: {
@@ -163,7 +172,7 @@ export default {
           name: null,
           type: null,
           request: null,
-          url: null
+          url: null,
         }
       }
       this.webhookDialog = true
@@ -172,8 +181,8 @@ export default {
       this.loading = true
       try {
         await this.$axios.post('/admin/webhooks', {
-          ...this.webhook, 
-          type: this.webhook.type.id
+          ...this.webhook,
+          type: this.webhook.type.id,
         })
         this.$toast.add({
           severity: 'success',
@@ -194,8 +203,8 @@ export default {
       this.loading = true
       try {
         await this.$axios.patch('/admin/webhooks/' + this.webhook.id, {
-          ...this.$_.omit(this.webhook, 'id'), 
-          type: this.webhook.type.id
+          ...this.$_.omit(this.webhook, 'id'),
+          type: this.webhook.type.id,
         })
         this.$toast.add({
           severity: 'success',

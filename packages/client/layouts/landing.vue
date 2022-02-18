@@ -39,7 +39,7 @@
               </div>
             </div>
             <div class="panel d-flex flex-column align-items-center text-center py-4 mb-5">
-              <h2 class="mb-4 mt-0"><i class='bx bx-gift' ></i> Голосование</h2>
+              <h2 class="mb-4 mt-0"><i class="bx bx-gift"></i> Голосование</h2>
               <img src="/images/chest-minecraft.gif" height="180px" />
               <p class="mb-3">Голосуй за нас и получай приятные бонусы: игровую валюту, кейсы, предметы!</p>
               <div class="d-flex">

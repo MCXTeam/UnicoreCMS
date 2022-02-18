@@ -7,12 +7,12 @@ export class ApiToken {
 
   // Allowed Ip List
   @Column('simple-array', {
-    default: ''
+    default: '',
   })
   allow?: string[];
 
   @Column('simple-array', {
-    default: ''
+    default: '',
   })
   perms?: string[];
 

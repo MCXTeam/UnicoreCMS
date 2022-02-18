@@ -2,15 +2,15 @@ export enum EmailMessageType {
   /**
    * Активация аккаунта
    */
-  Activation = "activations",
+  Activation = 'activations',
 
   /**
    * Вход с нового устройства
    */
-  Device = "device",
+  Device = 'device',
 
   /**
    * Сброс пароля
    */
-   Reset = "reset"
+  Reset = 'reset',
 }

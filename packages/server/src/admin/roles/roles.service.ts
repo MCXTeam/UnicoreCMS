@@ -17,7 +17,7 @@ export class RolesService {
     @InjectRepository(Role)
     private rolesRepository: Repository<Role>,
     private serversService: ServersService,
-  ) { }
+  ) {}
 
   /**
    * Генерация корневых ролей
@@ -41,7 +41,7 @@ export class RolesService {
           perms: [],
           important: true,
           priority: 5,
-        }
+        },
       ])
       .orIgnore()
       .execute();

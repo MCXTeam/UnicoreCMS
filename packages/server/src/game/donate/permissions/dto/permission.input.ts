@@ -1,28 +1,28 @@
-import { IsArray, IsDefined, IsEnum, IsInt, IsNumber, IsOptional, IsString, Max, Min } from "class-validator"
-import { PermissionType } from "../enums/permission-type.enum"
+import { IsArray, IsDefined, IsEnum, IsInt, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import { PermissionType } from '../enums/permission-type.enum';
 
 export class PermissionInput {
   @IsDefined()
   @IsString()
-  name: string
+  name: string;
 
   @IsDefined()
   @IsEnum(PermissionType)
-  type: PermissionType
+  type: PermissionType;
 
   @IsOptional()
   @IsString()
-  description?: string 
+  description?: string;
 
   @IsDefined()
   @IsNumber()
-  price: number
+  price: number;
 
   @IsOptional()
   @IsInt()
   @Min(0)
   @Max(99)
-  sale: number
+  sale: number;
 
   @IsDefined()
   @IsArray()
@@ -42,10 +42,10 @@ export class PermissionInput {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  perms?: string[]
+  perms?: string[];
 
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  web_perms?: string[]
+  web_perms?: string[];
 }

@@ -36,9 +36,7 @@
             </template>
           </Column>
           <Column field="sale" header="Множитель">
-            <template #body="slotProps">
-              x{{ slotProps.data.multiplier }}
-            </template>
+            <template #body="slotProps"> x{{ slotProps.data.multiplier }} </template>
           </Column>
           <Column :styles="{ width: '8rem' }">
             <template #body="slotProps">
@@ -115,7 +113,7 @@ export default {
         id: null,
         name: null,
         expire: null,
-        multiplier: 1
+        multiplier: 1,
       },
       periodDialog: false,
       filters: {
@@ -158,7 +156,7 @@ export default {
           id: null,
           name: null,
           expire: null,
-          multiplier: 1
+          multiplier: 1,
         }
       }
       this.periodDialog = true

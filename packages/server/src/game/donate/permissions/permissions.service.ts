@@ -19,7 +19,7 @@ export class DonatePermissionsService {
     private periodsRepository: Repository<Period>,
     @InjectRepository(GroupKit)
     private groupKitsRepository: Repository<GroupKit>,
-  ) { }
+  ) {}
 
   find(relations: string[] = new Array()): Promise<DonatePermission[]> {
     return this.donatePermissionsRepository.find({ relations });
@@ -32,34 +32,34 @@ export class DonatePermissionsService {
   async create(input: PermissionInput) {
     const perm = new DonatePermission();
 
-    perm.name = input.name
-    perm.type = input.type
-    perm.description = input.description
-    perm.price = input.price
-    perm.sale = input.sale
+    perm.name = input.name;
+    perm.type = input.type;
+    perm.description = input.description;
+    perm.price = input.price;
+    perm.sale = input.sale;
 
     perm.periods = await this.periodsRepository.find({
       id: In(input.periods),
     });
 
-    perm.perms = []
-    perm.servers = []
-    perm.web_perms = []
-    perm.kits = []
-    perm.servers = []
+    perm.perms = [];
+    perm.servers = [];
+    perm.web_perms = [];
+    perm.kits = [];
+    perm.servers = [];
 
     switch (input.type) {
       case PermissionType.Game:
-        perm.perms = input.perms
+        perm.perms = input.perms;
         perm.servers = await this.serversRepository.find({
           id: In(input.servers),
         });
         break;
       case PermissionType.Web:
-        perm.web_perms = input.web_perms
+        perm.web_perms = input.web_perms;
         break;
       case PermissionType.Kit:
-        perm.perms = input.perms
+        perm.perms = input.perms;
         perm.kits = await this.groupKitsRepository.find({
           id: In(input.kits),
         });
@@ -79,33 +79,33 @@ export class DonatePermissionsService {
       throw new NotFoundException();
     }
 
-    perm.name = input.name
-    perm.description = input.description
-    perm.price = input.price
-    perm.sale = input.sale
+    perm.name = input.name;
+    perm.description = input.description;
+    perm.price = input.price;
+    perm.sale = input.sale;
 
     perm.periods = await this.periodsRepository.find({
       id: In(input.periods),
     });
 
-    perm.perms = []
-    perm.servers = []
-    perm.web_perms = []
-    perm.kits = []
-    perm.servers = []
+    perm.perms = [];
+    perm.servers = [];
+    perm.web_perms = [];
+    perm.kits = [];
+    perm.servers = [];
 
     switch (input.type) {
       case PermissionType.Game:
-        perm.perms = input.perms
+        perm.perms = input.perms;
         perm.servers = await this.serversRepository.find({
           id: In(input.servers),
         });
         break;
       case PermissionType.Web:
-        perm.web_perms = input.web_perms
+        perm.web_perms = input.web_perms;
         break;
       case PermissionType.Kit:
-        perm.perms = input.perms
+        perm.perms = input.perms;
         perm.kits = await this.groupKitsRepository.find({
           id: In(input.kits),
         });

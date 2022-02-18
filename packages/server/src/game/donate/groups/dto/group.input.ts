@@ -1,34 +1,34 @@
-import { Type } from "class-transformer"
-import { IsArray, IsDefined, IsInt, IsNumber, IsOptional, IsString, Max, Min } from "class-validator"
-import { DonateFeaturesDto } from "./donate-features.dto"
+import { Type } from 'class-transformer';
+import { IsArray, IsDefined, IsInt, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import { DonateFeaturesDto } from './donate-features.dto';
 
 export class GroupInput {
   @IsDefined()
   @IsString()
-  name: string
+  name: string;
 
   @IsDefined()
   @IsString()
-  ingame_id: string
+  ingame_id: string;
 
   @IsOptional()
   @IsString()
-  description?: string 
+  description?: string;
 
   @IsDefined()
   @IsNumber()
-  price: number
+  price: number;
 
   @IsOptional()
   @IsInt()
   @Min(0)
   @Max(99)
-  sale: number
+  sale: number;
 
   @IsDefined()
   @IsArray()
   @Type(() => DonateFeaturesDto)
-  features: DonateFeaturesDto[]
+  features: DonateFeaturesDto[];
 
   @IsDefined()
   @IsArray()

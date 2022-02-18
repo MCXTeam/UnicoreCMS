@@ -38,8 +38,8 @@ export class DonateGroupsService {
     group.price = input.price;
     group.sale = input.sale;
     group.ingame_id = input.ingame_id;
-    group.web_perms = input.web_perms
-    group.features = input.features
+    group.web_perms = input.web_perms;
+    group.features = input.features;
 
     group.servers = await this.serversRepository.find({
       id: In(input.servers),
@@ -68,8 +68,8 @@ export class DonateGroupsService {
     group.price = input.price;
     group.sale = input.sale;
     group.ingame_id = input.ingame_id;
-    group.web_perms = input.web_perms
-    group.features = input.features
+    group.web_perms = input.web_perms;
+    group.features = input.features;
 
     group.servers = await this.serversRepository.find({
       id: In(input.servers),

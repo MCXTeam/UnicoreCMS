@@ -16,7 +16,7 @@ export const state = () => ({
 export type RootState = ReturnType<typeof state>
 
 export const getters: GetterTree<RootState, RootState> = {
-  serversOnline: state => state.serversOnline,
+  serversOnline: (state) => state.serversOnline,
 }
 
 export const mutations: MutationTree<RootState> = {

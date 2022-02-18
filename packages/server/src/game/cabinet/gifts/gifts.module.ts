@@ -13,9 +13,7 @@ import { Gift } from './entities/gift.entity';
 import { GiftActivation } from './entities/gift-activation.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([
-    Product, Kit, DonateGroup, DonatePermission, Period, Server, User, Gift, GiftActivation
-  ])],
+  imports: [TypeOrmModule.forFeature([Product, Kit, DonateGroup, DonatePermission, Period, Server, User, Gift, GiftActivation])],
   providers: [GiftsService],
   controllers: [GiftsController],
 })

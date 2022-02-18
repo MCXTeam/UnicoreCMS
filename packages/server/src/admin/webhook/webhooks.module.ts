@@ -7,15 +7,9 @@ import { WebhooksController } from './webhooks.controller';
 import { WebhooksService } from './webhooks.service';
 
 @Module({
-  imports: [
-    HttpModule, 
-    TypeOrmModule.forFeature([Webhook]), 
-    VkLongpollModule
-  ],
-  providers: [
-    WebhooksService
-  ],
+  imports: [HttpModule, TypeOrmModule.forFeature([Webhook]), VkLongpollModule],
+  providers: [WebhooksService],
   controllers: [WebhooksController],
-  exports: [WebhooksService]
+  exports: [WebhooksService],
 })
 export class WebhooksModule {}

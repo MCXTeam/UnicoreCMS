@@ -52,11 +52,11 @@ import { mapGetters } from 'vuex'
 export default {
   data() {
     return {
-      users: 0
+      users: 0,
     }
   },
   async fetch() {
-    this.users = await this.$axios.get("http://localhost:5000/users/count").then(res => res.data)
+    this.users = await this.$axios.get('http://localhost:5000/users/count').then((res) => res.data)
   },
   computed: {
     ...mapGetters({

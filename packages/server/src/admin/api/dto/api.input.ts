@@ -1,4 +1,4 @@
-import { IsArray, IsDefined, IsString } from "class-validator";
+import { IsArray, IsDefined, IsString } from 'class-validator';
 
 export class ApiInput {
   @IsDefined()

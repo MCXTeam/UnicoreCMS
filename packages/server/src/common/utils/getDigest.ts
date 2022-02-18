@@ -5,7 +5,7 @@ export function getDeigest(file: string | Buffer): string | null {
   if (!file) return null;
 
   if (typeof file === 'string') {
-    file = StorageManager.read(file)
+    file = StorageManager.read(file);
   }
 
   const digest = crypto.createHash('sha1');

@@ -1,5 +1,5 @@
-import { envConfig } from "unicore-common";
-import { NamingStrategy } from "./common/database";
+import { envConfig } from 'unicore-common';
+import { NamingStrategy } from './common/database';
 
 export const ormconfig: any = {
   type: envConfig.databaseType,
@@ -12,4 +12,4 @@ export const ormconfig: any = {
   seeds: ['dist/seeds/*.js'],
   factories: ['dist/factories/*.js'],
   namingStrategy: new NamingStrategy(),
-}
+};

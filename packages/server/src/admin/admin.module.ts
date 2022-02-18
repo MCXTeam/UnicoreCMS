@@ -12,6 +12,18 @@ import { PagesModule } from './pages/pages.module';
 import { EmailModule } from './email/email.module';
 
 @Module({
-  imports: [MigrationsModule, RolesModule, NewsModule, DashboardModule, LogModule, ConfigModule, WebhooksModule, ApiModule, StorageModule, PagesModule, EmailModule],
+  imports: [
+    MigrationsModule,
+    RolesModule,
+    NewsModule,
+    DashboardModule,
+    LogModule,
+    ConfigModule,
+    WebhooksModule,
+    ApiModule,
+    StorageModule,
+    PagesModule,
+    EmailModule,
+  ],
 })
 export class AdminModule {}

@@ -1,16 +1,16 @@
-import { Plugin } from '@nuxt/types';
+import { Plugin } from '@nuxt/types'
 // @ts-ignore
 import NProgress from 'nprogress'
 
 const NprogressPlugin: Plugin = ({ app }) => {
   app.router?.beforeEach((to, from, next) => {
-    NProgress.start();
+    NProgress.start()
     next()
-  });
+  })
 
   app.router?.afterEach(() => {
     NProgress.done()
-  });
+  })
 }
 
 export default NprogressPlugin

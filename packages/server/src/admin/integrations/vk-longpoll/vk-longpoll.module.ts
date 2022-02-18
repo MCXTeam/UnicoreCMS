@@ -6,10 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { News } from 'src/admin/news/entities/news.entity';
 
 @Module({
-  imports: [
-    forwardRef(() => WebhooksModule),
-    TypeOrmModule.forFeature([News])
-  ],
+  imports: [forwardRef(() => WebhooksModule), TypeOrmModule.forFeature([News])],
   providers: [VkLongpollService],
   exports: [VkLongpollService],
 })

@@ -12,7 +12,7 @@ export class UsersService {
     private usersRepository: Repository<User>,
     @InjectRepository(Role)
     private rolesRepository: Repository<Role>,
-  ) { }
+  ) {}
 
   findAll(query: PaginateQuery): Promise<Paginated<User>> {
     const queryBuilder = this.usersRepository
@@ -20,7 +20,7 @@ export class UsersService {
       .leftJoinAndSelect('user.roles', 'roles')
       .leftJoinAndSelect('user.skin', 'skin')
       .where({
-        username: Not("Kernel")
+        username: Not('Kernel'),
       });
 
     return paginate(query, queryBuilder, {
@@ -54,18 +54,19 @@ export class UsersService {
 
   async getKernel(): Promise<User> {
     return this.usersRepository.findOne({
-      username: "Kernel"
+      username: 'Kernel',
     });
   }
 
   async genKernel() {
-    await this.usersRepository.createQueryBuilder()
+    await this.usersRepository
+      .createQueryBuilder()
       .insert()
       .into(User)
       .values({
-        username: "Kernel",
-        password: "",
-        activated: true
+        username: 'Kernel',
+        password: '',
+        activated: true,
       })
       .orIgnore()
       .execute();
@@ -73,22 +74,22 @@ export class UsersService {
 
   async count(): Promise<number> {
     return this.usersRepository.count({
-      username: Not("Kernel")
+      username: Not('Kernel'),
     });
   }
 
   async create(input: UserInput): Promise<User> {
-    const user = new User()
+    const user = new User();
 
-    user.email = input.email
-    user.username = input.username
-    user.superuser = input.superuser
-    user.password = bcrypt.hashSync(input.password, 10)
-    user.activated = input.activated
+    user.email = input.email;
+    user.username = input.username;
+    user.superuser = input.superuser;
+    user.password = bcrypt.hashSync(input.password, 10);
+    user.activated = input.activated;
 
-    user.perms = input.perms
+    user.perms = input.perms;
 
-    if (!input.roles) input.roles = []
+    if (!input.roles) input.roles = [];
 
     user.roles = await this.rolesRepository.find({
       id: In(input.roles),

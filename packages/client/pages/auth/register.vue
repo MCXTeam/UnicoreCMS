@@ -15,7 +15,13 @@
         <i class="bx bx-lock-open-alt"></i>
       </template>
     </vs-input>
-    <vs-input data-aos="zoom-in-right" data-aos-delay="600" type="password" placeholder="Подтверждение пароля" v-model="form.password_confirm">
+    <vs-input
+      data-aos="zoom-in-right"
+      data-aos-delay="600"
+      type="password"
+      placeholder="Подтверждение пароля"
+      v-model="form.password_confirm"
+    >
       <template #icon>
         <i class="bx bx-lock-open-alt"></i>
       </template>

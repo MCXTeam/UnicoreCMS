@@ -11,7 +11,7 @@ import { Category } from './../entities/category.entity';
 export class CategoriesService {
   constructor(
     @InjectRepository(Category)
-    private categoriesRepository: Repository<Category>
+    private categoriesRepository: Repository<Category>,
   ) {}
 
   find(query: PaginateQuery): Promise<Paginated<Category>> {
@@ -24,7 +24,7 @@ export class CategoriesService {
   }
 
   findOne(id: number, relations?: string[]) {
-    return this.categoriesRepository.findOne(id, { relations })
+    return this.categoriesRepository.findOne(id, { relations });
   }
 
   create(input: CategoryInput) {

@@ -1,28 +1,28 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
 export class Page {
   @PrimaryGeneratedColumn()
-  id: number
+  id: number;
 
   @Column({ nullable: true, unique: true })
-  is_rules: boolean
+  is_rules: boolean;
 
   @Column()
-  title: string
+  title: string;
 
   @Column({ unique: true })
-  path: string
+  path: string;
 
   @Column({ nullable: true })
-  description: string
+  description: string;
 
   @Column('longtext', { nullable: true })
-  content: string
+  content: string;
 
   @CreateDateColumn()
-  created: Date
+  created: Date;
 
   @UpdateDateColumn()
-  updated: Date
+  updated: Date;
 }

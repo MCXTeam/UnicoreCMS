@@ -13,7 +13,7 @@ export class DonatePermission {
   name: string;
 
   @Column()
-  type: PermissionType
+  type: PermissionType;
 
   @Column('float')
   price: number;

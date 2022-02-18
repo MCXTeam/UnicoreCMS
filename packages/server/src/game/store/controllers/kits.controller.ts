@@ -1,5 +1,17 @@
 import { DeleteManyInput, imageFileFilter, StorageManager } from '@common';
-import { Body, Controller, Get, Post, Patch, Param, Delete, UseInterceptors, ParseIntPipe, UploadedFile, NotFoundException } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Param,
+  Delete,
+  UseInterceptors,
+  ParseIntPipe,
+  UploadedFile,
+  NotFoundException,
+} from '@nestjs/common';
 import { FileFastifyInterceptor, MulterFile } from 'fastify-file-interceptor';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { KitInput } from '../dto/kit.input.dto';
@@ -7,7 +19,7 @@ import { KitsService } from '../providers/kits.service';
 
 @Controller('store/kits')
 export class KitsController {
-  constructor(private kitsService: KitsService) { }
+  constructor(private kitsService: KitsService) {}
 
   @Get()
   find(@Paginate() query: PaginateQuery) {
@@ -16,12 +28,11 @@ export class KitsController {
 
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
-    const kit = this.kitsService.findOne(id, ['items', 'servers', 'categories'])
-    
-    if (!kit)
-      throw new NotFoundException()
+    const kit = this.kitsService.findOne(id, ['items', 'servers', 'categories']);
 
-    return kit
+    if (!kit) throw new NotFoundException();
+
+    return kit;
   }
 
   @Post()

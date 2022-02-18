@@ -46,7 +46,14 @@
         </DataTable>
 
         <ValidationObserver v-slot="{ invalid }">
-          <Dialog :style="{ width: '800px' }" :visible.sync="pageDialog" :closable="false" :modal="true" header="Создание/редактирование страницы" class="p-fluid">
+          <Dialog
+            :style="{ width: '800px' }"
+            :visible.sync="pageDialog"
+            :closable="false"
+            :modal="true"
+            header="Создание/редактирование страницы"
+            class="p-fluid"
+          >
             <ValidationProvider
               name="Путь"
               :rules="{

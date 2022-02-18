@@ -14,7 +14,7 @@ export class Period {
   expire: number;
 
   @Column('float', {
-    default: 1
+    default: 1,
   })
   multiplier: number;
 

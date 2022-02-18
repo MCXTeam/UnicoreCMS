@@ -32,7 +32,7 @@ export class Gift {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
-    eager: true
+    eager: true,
   })
   @JoinColumn()
   product?: Product;
@@ -41,7 +41,7 @@ export class Gift {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
-    eager: true
+    eager: true,
   })
   @JoinColumn()
   kit?: Kit;
@@ -50,7 +50,7 @@ export class Gift {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
-    eager: true
+    eager: true,
   })
   @JoinColumn()
   donate_group?: DonateGroup;
@@ -59,7 +59,7 @@ export class Gift {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
-    eager: true
+    eager: true,
   })
   @JoinColumn()
   donate_permission?: DonatePermission;
@@ -68,7 +68,7 @@ export class Gift {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
-    eager: true
+    eager: true,
   })
   @JoinColumn()
   server?: Server;
@@ -77,7 +77,7 @@ export class Gift {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
-    eager: true
+    eager: true,
   })
   @JoinColumn()
   period?: Period;

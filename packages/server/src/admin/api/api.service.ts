@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
-import { ApiInput } from "./dto/api.input";
-import { ApiToken } from "./entities/api-token.entity";
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { ApiInput } from './dto/api.input';
+import { ApiToken } from './entities/api-token.entity';
 import { nanoid } from 'nanoid';
 
 @Injectable()
@@ -13,19 +13,19 @@ export class ApiService {
   ) {}
 
   find(): Promise<ApiToken[]> {
-    return this.apiTokensRepository.find()
+    return this.apiTokensRepository.find();
   }
 
   findOne(secret: string): Promise<ApiToken> {
-    return this.apiTokensRepository.findOne(secret)
+    return this.apiTokensRepository.findOne(secret);
   }
 
   create(input: ApiInput) {
     const apikey = new ApiToken();
 
     apikey.secret = nanoid(64);
-    apikey.allow = input.allow
-    apikey.perms = input.perms
+    apikey.allow = input.allow;
+    apikey.perms = input.perms;
 
     return this.apiTokensRepository.save(apikey);
   }
@@ -37,8 +37,8 @@ export class ApiService {
       throw new NotFoundException();
     }
 
-    apikey.allow = input.allow
-    apikey.perms = input.perms
+    apikey.allow = input.allow;
+    apikey.perms = input.perms;
 
     return this.apiTokensRepository.save(apikey);
   }

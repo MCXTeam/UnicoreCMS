@@ -12,7 +12,7 @@ export class Category {
   name: string;
 
   @Column('text', {
-    nullable: true
+    nullable: true,
   })
   description: string;
 

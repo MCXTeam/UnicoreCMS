@@ -1,6 +1,6 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post } from "@nestjs/common";
-import { PageInput } from "./dto/page.input";
-import { PagesService } from "./pages.service";
+import { Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post } from '@nestjs/common';
+import { PageInput } from './dto/page.input';
+import { PagesService } from './pages.service';
 
 @Controller('pages')
 export class PagesController {

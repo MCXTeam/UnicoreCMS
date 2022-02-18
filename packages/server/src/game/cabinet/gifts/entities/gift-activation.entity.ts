@@ -1,6 +1,6 @@
-import { User } from "src/admin/users/entities/user.entity";
-import { CreateDateColumn, Entity, JoinColumn, ManyToOne } from "typeorm";
-import { Gift } from "./gift.entity";
+import { User } from 'src/admin/users/entities/user.entity';
+import { CreateDateColumn, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Gift } from './gift.entity';
 
 @Entity()
 export class GiftActivation {
@@ -8,7 +8,7 @@ export class GiftActivation {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
-    primary: true
+    primary: true,
   })
   @JoinColumn()
   gift?: Gift;
@@ -17,7 +17,7 @@ export class GiftActivation {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
-    primary: true
+    primary: true,
   })
   @JoinColumn()
   user?: User;

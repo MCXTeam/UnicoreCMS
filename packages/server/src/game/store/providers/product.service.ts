@@ -19,39 +19,39 @@ export class ProductsService {
     @InjectRepository(Server)
     private serversRepository: Repository<Server>,
     @InjectRepository(Category)
-    private categoriesRepository: Repository<Category>
-  ) { }
+    private categoriesRepository: Repository<Category>,
+  ) {}
 
   async find(query: PaginateQuery): Promise<Paginated<Product>> {
-    const queryBuilder = this.productsRepository.createQueryBuilder('product')
+    const queryBuilder = this.productsRepository
+      .createQueryBuilder('product')
       .leftJoinAndSelect('product.servers', 'servers')
       .leftJoinAndSelect('product.categories', 'categories');
 
-    if (query?.filter?.servers && !Array.isArray(query.filter.servers))
-      query.filter.servers = query.filter.servers.split(',')
+    if (query?.filter?.servers && !Array.isArray(query.filter.servers)) query.filter.servers = query.filter.servers.split(',');
 
-    if (query?.filter?.categories && !Array.isArray(query.filter.categories))
-      query.filter.categories = query.filter.categories.split(',')
+    if (query?.filter?.categories && !Array.isArray(query.filter.categories)) query.filter.categories = query.filter.categories.split(',');
 
     if (query.filter?.servers && query.filter?.categories) {
-      queryBuilder.andWhere("servers.id IN(:...servers) AND categories.id IN(:...categories)", { 
+      queryBuilder.andWhere('servers.id IN(:...servers) AND categories.id IN(:...categories)', {
         servers: query.filter.servers,
         categories: query.filter.categories,
-      })
+      });
     } else if (query.filter?.servers) {
-      queryBuilder.andWhere("servers.id IN(:...ids)", { ids: query.filter.servers })
+      queryBuilder.andWhere('servers.id IN(:...ids)', { ids: query.filter.servers });
     } else if (query.filter?.categories) {
-      queryBuilder.andWhere("categories.id IN(:...ids)", { ids: query.filter.categories })
+      queryBuilder.andWhere('categories.id IN(:...ids)', { ids: query.filter.categories });
     }
 
-    const ids = (await queryBuilder.getMany()).map(product => product.id)
-    
-    const qb = this.productsRepository.createQueryBuilder('product')
+    const ids = (await queryBuilder.getMany()).map((product) => product.id);
+
+    const qb = this.productsRepository
+      .createQueryBuilder('product')
       .leftJoinAndSelect('product.servers', 'servers')
       .leftJoinAndSelect('product.categories', 'categories')
       .where({
-        id: In(ids)
-      })
+        id: In(ids),
+      });
 
     return paginate(query, qb, {
       sortableColumns: ['id', 'name', 'price', 'sale'],
@@ -59,14 +59,14 @@ export class ProductsService {
       defaultSortBy: [['id', 'DESC']],
       filterableColumns: {
         price: [FilterOperator.GTE, FilterOperator.LTE],
-        sale: [FilterOperator.GTE, FilterOperator.LTE]
+        sale: [FilterOperator.GTE, FilterOperator.LTE],
       },
       maxLimit: 500,
     });
   }
 
   findOne(id: number, relations?: string[]) {
-    return this.productsRepository.findOne(id, { relations })
+    return this.productsRepository.findOne(id, { relations });
   }
 
   async create(input: ProductInput) {
@@ -136,31 +136,28 @@ export class ProductsService {
   async updateMany(input: ProductsManyInput) {
     const products = await this.productsRepository.find({
       where: {
-        id: In(input.products.map(entity => entity.id)),
+        id: In(input.products.map((entity) => entity.id)),
       },
-      relations: ['servers', 'categories']
+      relations: ['servers', 'categories'],
     });
 
-    const productsEdited = await Promise.all(products.map(async product => {
-      var { sale, price, servers, categories } = input.products.find(entity => entity.id === product.id)
+    const productsEdited = await Promise.all(
+      products.map(async (product) => {
+        var { sale, price, servers, categories } = input.products.find((entity) => entity.id === product.id);
 
-      if (sale)
-        product.sale = sale
+        if (sale) product.sale = sale;
 
-      if (sale === 0)
-        product.sale = null
+        if (sale === 0) product.sale = null;
 
-      if (price)
-        product.price = price
+        if (price) product.price = price;
 
-      if (servers && servers.length)
-        product.servers = await this.serversRepository.find({ where: { id: In(servers) } })
+        if (servers && servers.length) product.servers = await this.serversRepository.find({ where: { id: In(servers) } });
 
-      if (categories && categories.length)
-        product.categories = await this.categoriesRepository.find({ where: { id: In(categories) } })
+        if (categories && categories.length) product.categories = await this.categoriesRepository.find({ where: { id: In(categories) } });
 
-      return product
-    }))
+        return product;
+      }),
+    );
 
     return this.productsRepository.save(productsEdited);
   }
