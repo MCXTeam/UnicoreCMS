@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post } from '@nestjs/common';
+import { Public } from 'src/auth/decorators/public.decorator';
 import { PageInput } from './dto/page.input';
 import { PagesService } from './pages.service';
 
@@ -11,24 +12,21 @@ export class PagesController {
     return this.pagesService.create(body);
   }
 
+  @Public()
   @Get()
   find() {
     return this.pagesService.find();
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: number) {
-    const page = await this.pagesService.findOne(id);
-
-    if (!page) {
-      throw new NotFoundException();
-    }
-
-    return page;
+  @Public()
+  @Get("rules")
+  rules() {
+    return this.pagesService.rules();
   }
 
-  @Get('public/:id')
-  async findOnePublic(@Param('id') id: number) {
+  @Public()
+  @Get(':id')
+  async findOne(@Param('id') id: number) {
     const page = await this.pagesService.findOne(id);
 
     if (!page) {

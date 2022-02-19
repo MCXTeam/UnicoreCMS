@@ -10,7 +10,6 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MomentModule } from './moment';
 import { EventsModule } from './events/events.module';
-import { IntegrationsModule } from './admin/integrations/integrations.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ormconfig } from './ormconfig';
 
@@ -20,15 +19,18 @@ import { ormconfig } from './ormconfig';
     GoogleRecaptchaModule.forRoot({
       secretKey: envConfig.recaptchaSecret,
       response: (req) => req.headers.recaptcha,
-      // skipIf: process.env.NODE_ENV !== 'production',
-      actions: ['login'],
+      skipIf: process.env.NODE_ENV !== 'production',
+      actions: ['login', 'register', 'reset', 'verify', 'promocode'],
       network: GoogleRecaptchaNetwork.Recaptcha,
     }),
     ThrottlerModule.forRoot({
-      ttl: 60,
+      ttl: 120,
       limit: 10,
     }),
     MailerModule.forRoot({
+      defaults: {
+        from: envConfig.mailFrom,
+      },
       transport: {
         service: envConfig.smtpService,
         host: envConfig.smtpHost,
@@ -42,7 +44,6 @@ import { ormconfig } from './ormconfig';
       },
     }),
     MomentModule,
-    IntegrationsModule,
     EventsModule,
     ScheduleModule.forRoot(),
     AuthModule,
@@ -53,4 +54,4 @@ import { ormconfig } from './ormconfig';
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }

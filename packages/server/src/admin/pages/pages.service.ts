@@ -41,6 +41,12 @@ export class PagesService {
     return this.pagesRepository.findOne(id);
   }
 
+  rules(): Promise<Page> {
+    return this.pagesRepository.findOne({
+      is_rules: true
+    });
+  }
+
   async create(input: PageInput): Promise<Page> {
     if (await this.pagesRepository.findOne({ path: input.path })) {
       throw new ConflictException();

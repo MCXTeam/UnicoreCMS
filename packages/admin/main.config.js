@@ -71,7 +71,7 @@ export default (config) =>
       auth: {
         strategies: {
           local: {
-            scheme: 'unicore-admin/schemes/core',
+            scheme: '../admin/schemes/core',
             token: {
               property: 'accessToken',
               maxAge: ms(envConfig.jwtExpires) / 1000,
@@ -83,7 +83,7 @@ export default (config) =>
               maxAge: ms(envConfig.jwtRefreshExpires) / 1000,
             },
             user: {
-              property: false,
+              property: "user",
             },
             endpoints: {
               login: { url: '/auth/login', method: 'post' },
@@ -105,16 +105,29 @@ export default (config) =>
 
       publicRuntimeConfig: {
         apiUrl: envConfig.apiBaseurl,
+        url: envConfig.baseurl,
+        name: envConfig.name,
+      },
+
+      render: {
+        static: {
+          setHeaders(res) {
+            res.setHeader('X-Frame-Options', 'ALLOWALL')
+            res.setHeader('Access-Control-Allow-Origin', '*')
+            res.setHeader('Access-Control-Allow-Methods', 'GET')
+            res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+          }
+        }
       },
 
       // Конфигурация сборки: https://go.nuxtjs.dev/config-build
       build: {
-        postcss: {
-          plugins: {
-            autoprefixer: {},
+          postcss: {
+            plugins: {
+              autoprefixer: {},
+            },
           },
         },
       },
-    },
-    config
+      config
   )

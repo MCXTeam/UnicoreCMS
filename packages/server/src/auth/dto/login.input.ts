@@ -1,10 +1,12 @@
 import { IsUsernameOrEmail } from '@common';
-import { IsDefined } from 'class-validator';
+import { IsDefined, IsString } from 'class-validator';
 
 export class LoginInput {
+  @IsDefined()
   @IsUsernameOrEmail()
   username_or_email: string;
 
   @IsDefined()
+  @IsString()
   password: string;
 }

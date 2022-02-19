@@ -3,7 +3,7 @@
     <div class="panel d-flex flex-column align-items-center justify-content-center px-5">
       <div class="d-flex align-items-center">
         <img class="my-1" src="/icon.png" height="64px" />
-        <h2 class="ms-3 my-0 d-none d-md-block">UnicoreCMS</h2>
+        <h2 class="ms-3 my-0 d-none d-md-block" v-text="$config.name" />
       </div>
       <h1>Страница не найдена</h1>
       <span>Произошла ошибка - {{ error.statusCode }}</span>

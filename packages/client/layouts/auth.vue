@@ -2,7 +2,7 @@
   <div class="vh-100 vw-100 d-flex align-items-center justify-content-center auth-layout">
     <div data-aos-delay="50" data-aos="fade-left" class="panel d-flex flex-column align-items-center px-5">
       <nuxt-link data-aos="zoom-in-right" to="/">
-        <img class="mb-4" src="/icon.png" height="128px" />
+        <img src="/icon.png" :alt="$config.name" height="128px" />
       </nuxt-link>
       <nuxt-child />
     </div>

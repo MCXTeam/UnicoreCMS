@@ -5,6 +5,7 @@ import { PaginateQuery, Paginated, paginate, FilterOperator } from 'nestjs-pagin
 import { UserInput } from './dto/user.input';
 import * as bcrypt from 'bcrypt';
 import { Role } from '../roles/entities/role.entity';
+import { ConflictException } from '@nestjs/common';
 
 export class UsersService {
   constructor(
@@ -12,7 +13,7 @@ export class UsersService {
     private usersRepository: Repository<User>,
     @InjectRepository(Role)
     private rolesRepository: Repository<Role>,
-  ) {}
+  ) { }
 
   findAll(query: PaginateQuery): Promise<Paginated<User>> {
     const queryBuilder = this.usersRepository
@@ -79,6 +80,17 @@ export class UsersService {
   }
 
   async create(input: UserInput): Promise<User> {
+    const userExist = await this.usersRepository.findOne({
+      where: [
+        { email: input.username },
+        { username: input.username }
+      ]
+    });
+
+    if (userExist) {
+      throw new ConflictException();
+    }
+
     const user = new User();
 
     user.email = input.email;

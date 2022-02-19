@@ -15,11 +15,13 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { ApiModule } from 'src/admin/api/api.module';
 import { ApiKeyStrategy } from './strategies/api-key.strategy';
+import { EmailModule } from 'src/admin/email/email.module';
 
 @Module({
   imports: [
     UsersModule,
     ApiModule,
+    EmailModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     TypeOrmModule.forFeature([RefreshToken, User]),
     JwtModule.register({

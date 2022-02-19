@@ -6,6 +6,14 @@ import mainConfig from 'unicore-admin/main.config'
 export default mainConfig({
   loading: false,
 
+  auth: {
+    redirect: {
+      login: '/auth',
+      logout: '/',
+      home: '/cabinet'
+    },
+  },
+
   css: [
     'normalize.css/normalize.css',
     'vuesax/dist/vuesax.css',
@@ -24,7 +32,7 @@ export default mainConfig({
     { src: '~/plugins/nprogress.ts', ssr: false },
   ],
 
-  serverMiddleware: ['~/server-middlewares/ssr-handler.ts'],
+  serverMiddleware: ['~/server-middleware/ssr-handler.ts'],
 
   build: {
     extractCSS: true,

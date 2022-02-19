@@ -1,7 +1,7 @@
-@import './buttons';
-@import './navbar';
-@import './contetn';
-@import './header';
+@import "./buttons";
+@import "./navbar";
+@import "./contetn";
+@import "./header";
 
 :root {
   --vs-primary: 156, 39, 176;
@@ -33,12 +33,12 @@
   --vs-dark: 0, 0, 0;
   --vs-background-opacity: 0.6;
 
-  @import 'primevue/resources/themes/bootstrap4-dark-blue/theme.css';
+  @import "primevue/resources/themes/bootstrap4-dark-blue/theme.css";
 }
 // color="#4c21cf"
 
 body {
-  font-family: 'Brutal Type';
+  font-family: "Brutal Type";
   background-color: var(--vs-theme-bg);
   transition: background-color 0.3s;
   color: rgba(var(--vs-text), 0.75);
@@ -55,11 +55,15 @@ h6 {
   color: rgba(var(--vs-text), 0.85);
 }
 
+.vs-notification__content__header h4 {
+  color: var(--vs-theme-layout);
+}
+
 b {
   font-weight: 800;
 }
 
-a:link,
+a,
 a:visited {
   color: rgb(var(--vs-primary));
   text-decoration: none;
@@ -116,7 +120,8 @@ a:visited {
 
 .auth-layout,
 .error-layout {
-  background: url('/images/bg.jpg') center no-repeat, linear-gradient(180deg, var(--vs-theme-bg) 120px, rgba(var(--vs-primary), 0.3));
+  background: url("/images/bg.jpg") center no-repeat,
+    linear-gradient(180deg, var(--vs-theme-bg) 120px, rgba(var(--vs-primary), 0.3));
   background-blend-mode: overlay;
 
   .header-render {
@@ -142,5 +147,24 @@ a:visited {
 
   .panel {
     min-width: 500px;
+    max-width: 500px;
+
+    @include media-breakpoint-down(sm) {
+      min-width: 95%;
+      max-width: 95%;
+      padding: 0 20px !important;
+    }
+  }
+}
+
+.vs-dialog--autoWidth {
+  min-width: 400px !important;
+}
+
+@include media-breakpoint-down(sm) {
+  [data-aos] {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: none !important;
   }
 }

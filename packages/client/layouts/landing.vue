@@ -6,15 +6,20 @@
           <i class="bx bx-menu"></i>
         </vs-button>
         <img class="my-1" src="/icon.png" height="64px" />
-        <h2 class="ms-3 my-0 d-none d-md-block">UnicoreCMS</h2>
+        <h2 class="ms-3 my-0 d-none d-md-block" v-text="$config.name" />
         <vs-navbar-item to="/servers" class="d-none d-lg-block ms-4"> <i class="bx bx-server"></i> Серверы </vs-navbar-item>
         <vs-navbar-item href="#" class="d-none d-lg-block"> <i class="bx bx-chat"></i> Форум </vs-navbar-item>
         <vs-navbar-item to="/page/rules" class="d-none d-lg-block"> <i class="bx bx-paperclip"></i> Правила </vs-navbar-item>
         <vs-navbar-item to="/donate" class="d-none d-lg-block"> <i class="bx bx-donate-heart"></i> Донат </vs-navbar-item>
       </template>
       <template #right>
-        <vs-button to="/auth" class="d-none d-md-block" size="large" transparent>Войти</vs-button>
-        <vs-button to="/start" size="large">Начать игру <i class="bx bx-play"></i></vs-button>
+        <div class="d-flex">
+          <vs-button v-if="$auth.loggedIn" to="/download" size="large">Скачать лаунчер <i class="bx bxl-windows"></i></vs-button>
+          <div class="d-flex" v-else>
+            <vs-button to="/auth" class="d-none d-md-block" size="large" transparent>Войти</vs-button>
+            <vs-button to="/start" size="large">Начать игру <i class="bx bx-play"></i></vs-button>
+          </div>
+        </div>
         <div class="ms-2 d-none d-lg-block" style="font-size: 1.5rem">
           <i v-if="$colorMode.preference == 'light'" @click="switchTheme" class="bx bxs-sun" style="cursor: pointer"></i>
           <i v-else @click="switchTheme" class="bx bxs-moon" style="cursor: pointer"></i>
@@ -31,6 +36,7 @@
           </div>
           <div class="col">
             <div class="panel d-flex flex-column align-items-center py-4 mb-5">
+              <SkinViewer2D />
               <h2 class="mb-4 mt-0"><i class="bx bx-key"></i> Авторизация</h2>
               <vs-button to="/auth" size="xl" class="px-4">Войти</vs-button>
               <div class="d-flex mt-3">
@@ -111,12 +117,16 @@
 <script>
 import scss from '~/assets/style/_varriables.scss'
 import { mapGetters } from 'vuex'
+import SkinViewer2D from '../../admin/components/SkinView2D.vue'
 
 export default {
   data() {
     return {
       scss,
     }
+  },
+  components: {
+    SkinViewer2D
   },
   computed: {
     ...mapGetters({

@@ -5,7 +5,7 @@ import 'aos/dist/aos.css'
 
 const AosPlugin: Plugin = ({ app }) => {
   app.AOS = new AOS.init({
-    disable: 'phone',
+    disable: 'mobile',
     once: true,
   })
 }
