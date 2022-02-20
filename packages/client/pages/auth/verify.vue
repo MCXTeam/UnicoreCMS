@@ -19,14 +19,13 @@
     </div>
     <div data-aos="zoom-in-right" data-aos-delay="750" class="mb-4 mt-2 w-100 d-flex justify-content-around">
       <a @click="resend()">Выслать новый код</a>
-      <a @click="logout()">Выйти</a>
+      <a @click="$unicore.logout()">Выйти</a>
     </div>
   </ValidationObserver>
 </template>
 
 <script>
 import { ValidationObserver, ValidationProvider } from 'vee-validate'
-import { errorNotifications, successNotifications, authErrorNotifications } from '~/helpers'
 
 export default {
   middleware: ['auth', 'alter-verify'],
@@ -43,11 +42,6 @@ export default {
     }
   },
   methods: {
-    async logout() {
-      const loading = this.$vs.loading()
-      await this.$auth.logout()
-      loading.close()
-    },
     async verify() {
       const loading = this.$vs.loading()
       try {
@@ -57,7 +51,7 @@ export default {
         loading.close()
       } catch (err) {
         loading.close()
-        authErrorNotifications(err, this, `Указанный вами пин-код является неверным`)
+        this.$unicore.authErrorNotification(err, `Указанный вами пин-код является неверным`)
       }
     },
     async resend() {
@@ -65,10 +59,10 @@ export default {
       try {
         await this.$axios.get('/auth/resend')
         loading.close()
-        successNotifications(this, 'Мы выслали вам новый пин-код, пожалуйста проверьте вашу почту')
+        this.$unicore.successNotification('Мы выслали вам новый пин-код, пожалуйста проверьте вашу почту')
       } catch (err) {
         loading.close()
-        errorNotifications(this, 'Слишком много запросов, подождите пару минут...')
+        this.$unicore.errorNotification('Слишком много запросов, подождите пару минут...')
       }
     },
   },

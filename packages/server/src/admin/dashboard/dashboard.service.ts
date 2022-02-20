@@ -140,7 +140,12 @@ export class DashboardService {
             amount:
               (
                 await this.onlinesRecordsRepository.findOne({
-                  created: Between(this.moment(date).toDate(), this.moment(date).endOf('month').toDate()),
+                  where: {
+                    created: Between(this.moment(date).toDate(), this.moment(date).endOf('month').toDate()),
+                  },
+                  order: {
+                    online: "DESC"
+                  }
                 })
               )?.online || 0,
           })),

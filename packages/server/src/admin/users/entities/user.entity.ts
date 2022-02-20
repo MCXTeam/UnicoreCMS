@@ -29,6 +29,12 @@ export class User {
   @Column({ nullable: true })
   activated: boolean;
 
+  @Column({ default: 0 })
+  real: number;
+
+  @Column({ default: 0 })
+  money: number;
+
   @ManyToMany(() => Role, (role) => role.users)
   @JoinTable()
   roles?: Role[];

@@ -5,21 +5,25 @@
         <vs-button class="d-lg-none d-md-block me-4" flat icon>
           <i class="bx bx-menu"></i>
         </vs-button>
-        <img class="my-1" src="/icon.png" height="64px" />
-        <h2 class="ms-3 my-0 d-none d-md-block" v-text="$config.name" />
-        <vs-navbar-item to="/servers" class="d-none d-lg-block ms-4"> <i class="bx bx-server"></i> Серверы </vs-navbar-item>
-        <vs-navbar-item href="#" class="d-none d-lg-block"> <i class="bx bx-chat"></i> Форум </vs-navbar-item>
-        <vs-navbar-item to="/page/rules" class="d-none d-lg-block"> <i class="bx bx-paperclip"></i> Правила </vs-navbar-item>
-        <vs-navbar-item to="/donate" class="d-none d-lg-block"> <i class="bx bx-donate-heart"></i> Донат </vs-navbar-item>
+        <nuxt-link to="/" class="d-flex align-items-center without-underline">
+          <img class="my-1" src="/icon.png" height="64px" />
+          <h2 class="ms-3 my-0 d-none d-md-block" v-text="$config.name" />
+        </nuxt-link>
+        <nuxt-link to="/servers" class="vs-navbar__item d-none d-lg-block ms-4"> <i class="bx bx-server"></i> Серверы </nuxt-link>
+        <a href="#" class="vs-navbar__item d-none d-lg-block"> <i class="bx bx-chat"></i> Форум </a>
+        <nuxt-link to="/page/rules" class="vs-navbar__item d-none d-lg-block"> <i class="bx bx-paperclip"></i> Правила </nuxt-link>
+        <nuxt-link to="/donate" class="vs-navbar__item d-none d-lg-block"> <i class="bx bx-donate-heart"></i> Донат </nuxt-link>
       </template>
       <template #right>
-        <div class="d-flex">
-          <vs-button v-if="$auth.loggedIn" to="/download" size="large">Скачать лаунчер <i class="bx bxl-windows"></i></vs-button>
+        <no-ssr>
+          <div class="d-flex align-items-center" v-if="$auth.loggedIn">
+            <vs-button to="/download" size="large">Скачать лаунчер <i class="bx bxl-windows"></i></vs-button>
+          </div>
           <div class="d-flex" v-else>
             <vs-button to="/auth" class="d-none d-md-block" size="large" transparent>Войти</vs-button>
             <vs-button to="/start" size="large">Начать игру <i class="bx bx-play"></i></vs-button>
           </div>
-        </div>
+        </no-ssr>
         <div class="ms-2 d-none d-lg-block" style="font-size: 1.5rem">
           <i v-if="$colorMode.preference == 'light'" @click="switchTheme" class="bx bxs-sun" style="cursor: pointer"></i>
           <i v-else @click="switchTheme" class="bx bxs-moon" style="cursor: pointer"></i>
@@ -35,15 +39,34 @@
             <nuxt-child />
           </div>
           <div class="col">
-            <div class="panel d-flex flex-column align-items-center py-4 mb-5">
-              <SkinViewer2D />
-              <h2 class="mb-4 mt-0"><i class="bx bx-key"></i> Авторизация</h2>
-              <vs-button to="/auth" size="xl" class="px-4">Войти</vs-button>
-              <div class="d-flex mt-3">
-                <vs-button to="/auth/register" transparent class="m-0">Регистрация</vs-button>
-                <vs-button to="/auth/reset" transparent class="m-0">Сбросить пароль</vs-button>
+            <no-ssr>
+              <div v-if="$auth.loggedIn" class="panel d-flex flex-column align-items-center py-4 mb-5">
+                <h3 class="mb-4 mt-0"><i class="bx bx-user"></i> Привет, {{ $auth.user.username }}</h3>
+                <div class="d-flex align-items-center w-100 mb-2 mini-profile p-2">
+                  <Avatar class="rounded shadow me-3" size="large">
+                    <SkinView2D class="rounded" :width="48" :height="48" :skin="$auth.user.skin" />
+                  </Avatar>
+                  <div>
+                    <h5 class="m-0">Баланс: {{ $utils.formatCurrency($auth.user.real) }}</h5>
+                    <h5 class="m-0">Монеток: {{ $utils.formatCurrency($auth.user.money) }}</h5>
+                  </div>
+                </div>
+                <div class="tab-panel w-100">
+                  <vs-button to="/cabinet" transparent block class="m-0" size="large">Личный кабинет</vs-button>
+                  <vs-button to="/cabinet/store" transparent block class="m-0" size="large">Магазин</vs-button>
+                  <vs-button to="/cabinet/players" transparent block class="m-0" size="large">Игроки</vs-button>
+                  <vs-button @click="$unicore.logout()" transparent block class="m-0" size="large" danger>Выйти из системы</vs-button>
+                </div>
               </div>
-            </div>
+              <div v-else class="panel d-flex flex-column align-items-center py-4 mb-5">
+                <h2 class="mb-4 mt-0"><i class="bx bx-key"></i> Авторизация</h2>
+                <vs-button to="/auth" size="xl" class="px-4">Войти</vs-button>
+                <div class="d-flex mt-3">
+                  <vs-button to="/auth/register" transparent class="m-0">Регистрация</vs-button>
+                  <vs-button to="/auth/reset" transparent class="m-0">Сбросить пароль</vs-button>
+                </div>
+              </div>
+            </no-ssr>
             <div class="panel d-flex flex-column align-items-center text-center py-4 mb-5">
               <h2 class="mb-4 mt-0"><i class="bx bx-gift"></i> Голосование</h2>
               <img src="/images/chest-minecraft.gif" height="180px" />
@@ -61,7 +84,9 @@
                     <Avatar v-else size="xlarge"> <i class="bx bxs-server"></i> </Avatar>
                     <div class="ms-3">
                       <span>Версия: {{ online.server.version }}</span>
-                      <h3 class="mb-1 mt-0">{{ online.server.name }}</h3>
+                      <nuxt-link :to="`/servers/${online.server.id}`">
+                        <h3 class="mb-1 mt-0">{{ online.server.name }}</h3>
+                      </nuxt-link>
                     </div>
                   </div>
                   <div class="d-flex flex-column align-items-end">
@@ -117,16 +142,12 @@
 <script>
 import scss from '~/assets/style/_varriables.scss'
 import { mapGetters } from 'vuex'
-import SkinViewer2D from '../../admin/components/SkinView2D.vue'
 
 export default {
   data() {
     return {
       scss,
     }
-  },
-  components: {
-    SkinViewer2D
   },
   computed: {
     ...mapGetters({

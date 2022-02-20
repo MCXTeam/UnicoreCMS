@@ -15,6 +15,10 @@ export class UserDto implements User {
 
   activated: boolean;
 
+  money: number;
+
+  real: number;
+
   perms: string[];
 
   created: Date;

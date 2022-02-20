@@ -80,7 +80,6 @@
 
 <script>
 import { ValidationObserver, ValidationProvider } from 'vee-validate'
-import { authErrorNotifications } from '~/helpers'
 
 export default {
   layout: 'auth',
@@ -120,7 +119,7 @@ export default {
         loading.close()
       } catch (err) {
         loading.close()
-        authErrorNotifications(err, this, `Игрок с данным именем пользователя или email уже существует`)
+        this.$unicore.authErrorNotification(err, `Игрок с данным именем пользователя или email уже существует`)
       }
     },
   },

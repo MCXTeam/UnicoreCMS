@@ -48,7 +48,6 @@
 
 <script>
 import { ValidationObserver, ValidationProvider } from 'vee-validate'
-import { authErrorNotifications } from '~/helpers'
 
 export default {
   layout: 'auth',
@@ -78,7 +77,7 @@ export default {
         loading.close()
       } catch (err) {
         loading.close()
-        authErrorNotifications(err, this, `Неправельный логин или пароль`)
+        this.$unicore.authErrorNotification(err, `Неправельный логин или пароль`)
       }
     },
   },

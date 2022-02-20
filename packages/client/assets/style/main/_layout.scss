@@ -35,7 +35,12 @@
 
   @import "primevue/resources/themes/bootstrap4-dark-blue/theme.css";
 }
-// color="#4c21cf"
+
+.vs-loading {
+  --vs-color: var(--vs-primary);
+  --vs-background: var(--vs-gray-1);
+  --vs-opacity: 0.6;
+}
 
 body {
   font-family: "Brutal Type";
@@ -55,7 +60,7 @@ h6 {
   color: rgba(var(--vs-text), 0.85);
 }
 
-.vs-notification__content__header h4 {
+html:not(.dark-mode) .vs-notification__content__header h4 {
   color: var(--vs-theme-layout);
 }
 
@@ -74,6 +79,12 @@ a:visited {
     text-decoration-color: rgba(var(--vs-primary), 0.5);
     text-decoration-thickness: 2px;
     text-underline-offset: 5px;
+  }
+
+  &.without-underline {
+    &:hover {
+      text-decoration: none !important;
+    }
   }
 }
 
@@ -167,4 +178,20 @@ a:visited {
     pointer-events: auto !important;
     transform: none !important;
   }
+}
+
+.rounded-circle canvas {
+  @extend .rounded-circle;
+}
+
+.rounded canvas {
+  @extend .rounded;
+}
+
+.pixalated {
+  image-rendering: pixelated;
+}
+
+hr {
+  border: 1px solid rgba(var(--vs-text), 0.05);
 }

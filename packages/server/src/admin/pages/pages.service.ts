@@ -41,6 +41,10 @@ export class PagesService {
     return this.pagesRepository.findOne(id);
   }
 
+  findByPath(path: string): Promise<Page> {
+    return this.pagesRepository.findOne({ path });
+  }
+
   rules(): Promise<Page> {
     return this.pagesRepository.findOne({
       is_rules: true

@@ -54,19 +54,14 @@ export class TokensService {
   }
 
   async updateRefreshToken(user: User, refreshToken: RefreshToken, ip?: string): Promise<string> {
-    const uuid = uuidv4();
-
-    await this.tokensRepository
-      .createQueryBuilder()
-      .createQueryBuilder()
-      .update(RefreshToken)
-      .set({ uuid, ip })
-      .where('uuid = :uuid', { uuid: refreshToken.uuid })
-      .execute();
+    refreshToken.ip = ip
+    refreshToken.uuid = uuidv4()
+    
+    await this.tokensRepository.save(refreshToken)
 
     const payload: JWTRefreshPayload = {
       sub: user.uuid,
-      jwtid: uuid,
+      jwtid: refreshToken.uuid,
     };
 
     return this.jwt.signAsync(payload, {

@@ -1,4 +1,4 @@
-import { HTTPRequest, HTTPResponse, RefreshScheme } from '~auth/runtime'
+import { RefreshScheme } from '~auth/runtime'
 
 export default class CoreScheme extends RefreshScheme {
   async login(endpoint, { reset = true } = {}) {
@@ -14,7 +14,7 @@ export default class CoreScheme extends RefreshScheme {
     }
 
     this.updateTokens(response)
-    this.$auth.setUser(response.data)
+    this.$auth.setUser(response.data.user)
 
     return response
   }

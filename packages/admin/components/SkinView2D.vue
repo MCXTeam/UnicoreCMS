@@ -14,11 +14,11 @@ export default {
       type: Number,
       default: 64,
     },
-    skinUrl: String,
+    skin: String,
   },
 
   watch: {
-    skinUrl() {
+    skin() {
       this.render()
     },
     width() {
@@ -37,9 +37,12 @@ export default {
     render() {
       new SkinViewer2D({
         domElement: this.$refs.skinHead,
-        skinUrl: this.skinUrl || `${this.$config.url}/default.png`,
-        width: this.width || 64,
-        height: this.height || 64,
+        skinUrl:
+          this.skin && this.$_.get(this.skin, 'file')
+            ? `${this.$config.apiUrl}/${this.$_.get(this.skin, 'file')}`
+            : `${this.$config.url}/default.png`,
+        width: this.width,
+        height: this.height,
       })
     },
   },

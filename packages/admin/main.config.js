@@ -31,6 +31,7 @@ export default (config) =>
       plugins: [
         { src: '../admin/plugins/vee-validate.ts', mode: 'client' },
         { src: '../admin/plugins/lodash.ts' },
+        { src: '../admin/plugins/utils.ts' },
         { src: '../admin/plugins/moment.ts' },
       ],
 
@@ -122,12 +123,12 @@ export default (config) =>
 
       // Конфигурация сборки: https://go.nuxtjs.dev/config-build
       build: {
-          postcss: {
-            plugins: {
-              autoprefixer: {},
-            },
+        postcss: {
+          plugins: {
+            autoprefixer: {},
           },
         },
       },
-      config
+    },
+    config
   )

@@ -2,9 +2,15 @@ import PurgecssPlugin from 'purgecss-webpack-plugin'
 import glob from 'glob-all'
 import path from 'path'
 import mainConfig from 'unicore-admin/main.config'
+import { envConfig } from 'unicore-common/dist/envconfig'
 
 export default mainConfig({
   loading: false,
+
+  head: {
+    titleTemplate: `%s - ${envConfig.name}`,
+    title: 'Игровые серверы Minecraft'
+  },
 
   auth: {
     redirect: {
@@ -29,10 +35,23 @@ export default mainConfig({
     { src: '~/plugins/aos.ts', ssr: false },
     { src: '~/plugins/number-animation.ts', ssr: false },
     { src: '~/plugins/primevue.ts' },
+    { src: '~/plugins/unicore.ts', ssr: false },
     { src: '~/plugins/nprogress.ts', ssr: false },
   ],
 
   serverMiddleware: ['~/server-middleware/ssr-handler.ts'],
+
+  router: {
+    extendRoutes(routes, resolve) {
+      routes.push(
+        {
+          name: 'page/index',
+          path: '/page/**',
+          component: resolve(__dirname, 'pages/page/index.vue'),
+        }
+      )
+    }
+  },
 
   build: {
     extractCSS: true,

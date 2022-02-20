@@ -2,10 +2,11 @@
 @import '~bootstrap/scss/functions';
 @import '~bootstrap/scss/variables';
 @import '~bootstrap/scss/mixins';
-@import 'bootstrap/scss/utilities';
-@import 'bootstrap/scss/utilities/api';
+@import '~bootstrap/scss/utilities';
+@import '~bootstrap/scss/utilities/api';
 @import '~bootstrap/scss/containers';
 @import '~bootstrap/scss/grid';
+@import '~bootstrap/scss/root';
 
 @import './primevue-dark';
 @import 'primevue/resources/themes/saga-purple/theme.css';

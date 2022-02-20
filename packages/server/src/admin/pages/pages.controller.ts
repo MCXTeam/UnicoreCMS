@@ -36,6 +36,18 @@ export class PagesController {
     return page;
   }
 
+  @Public()
+  @Post('path')
+  async findByPath(@Body('path') path: string) {
+    const page = await this.pagesService.findByPath(path);
+
+    if (!page) {
+      throw new NotFoundException();
+    }
+
+    return page;
+  }
+
   @Patch(':id')
   update(@Param('id') id: number, @Body() body: PageInput) {
     return this.pagesService.update(id, body);
