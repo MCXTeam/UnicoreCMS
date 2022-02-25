@@ -1,12 +1,13 @@
 .header {
   position: relative;
+  overflow: hidden;
   width: 100%;
   height: 750px;
   max-height: 750px;
   transition: max-height 0.5s;
 
   &.header-sm {
-    max-height: 400px;
+    max-height: 300px;
 
     .header-render {
       transform: translateX(1000px);
@@ -33,29 +34,31 @@
     z-index: -1;
     height: 100%;
     width: 100%;
-    background: url("/images/bg.jpg") center no-repeat,
-      linear-gradient(180deg, var(--vs-theme-bg) 120px, rgba(var(--vs-primary), 0.3));
+    background: url("/images/bg.jpg"), linear-gradient(180deg, var(--vs-theme-bg) 120px, rgba(var(--vs-primary), 0.3));
     background-blend-mode: overlay;
+    background-size: cover;
+    background-position: center;
+    transition: background-position 0.5s ease;
   }
 
   .header-waves {
     position: absolute;
     bottom: 0;
     fill: var(--vs-theme-bg);
-    transition: all 0.15s;
+    transition: all 0.3s;
     opacity: 1;
   }
 
   .header-content-sm {
     opacity: 0;
-    transition: all 0.15s linear;
+    transition: all 0.3s;
     position: absolute;
   }
 
   .header-content {
-    transition: all 2s linear;
+    transition: all 2s;
     transform: translateX(0);
-    transition: transform 0.25s;
+    transition: transform 0.3s;
   }
 
   .container {
@@ -92,8 +95,9 @@
 
 .dark-mode .header {
   &::before {
-    background: url("/images/bg.jpg") center no-repeat,
+    background: url("/images/bg.jpg"),
       linear-gradient(180deg, var(--vs-theme-bg) 120px, rgba(var(--vs-background), 0.15));
+    background-position: center;
   }
 }
 

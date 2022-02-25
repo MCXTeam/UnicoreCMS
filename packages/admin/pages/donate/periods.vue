@@ -35,7 +35,7 @@
               {{ $moment.duration(slotProps.data.expire, 'seconds').format() }}
             </template>
           </Column>
-          <Column field="sale" header="Множитель">
+          <Column field="multiplier" header="Множитель">
             <template #body="slotProps"> x{{ slotProps.data.multiplier }} </template>
           </Column>
           <Column :styles="{ width: '8rem' }">
@@ -45,6 +45,7 @@
             </template>
           </Column>
         </DataTable>
+
 
         <ValidationObserver v-slot="{ invalid }">
           <Dialog
@@ -62,14 +63,14 @@
                 <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
               </div>
             </ValidationProvider>
-            <ValidationProvider name="Приоритет" rules="required|min:0" v-slot="{ errors }">
+            <ValidationProvider name="Время в секундах" rules="required|min:0" v-slot="{ errors }">
               <div class="field">
                 <label>Время в секундах (0 - вечный)</label>
                 <InputNumber v-model="period.expire" suffix=" сек." />
                 <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
               </div>
             </ValidationProvider>
-            <ValidationProvider name="Приоритет" rules="min:0|max:99" v-slot="{ errors }">
+            <ValidationProvider name="Множитель цены" rules="min:0" v-slot="{ errors }">
               <div class="field">
                 <label>Множитель цены</label>
                 <InputNumber v-model="period.multiplier" mode="decimal" :min-fraction-digits="2" prefix="x" />
@@ -128,22 +129,6 @@ export default {
     this.loading = false
   },
   methods: {
-    searchAutocompleate(event) {
-      if (!event.query.trim().length) {
-        this.autocompleateFilterd = this.autocompleate
-      } else {
-        this.autocompleateFilterd = [
-          event.query.toLowerCase(),
-          ...this.autocompleate.filter((perm) => {
-            return perm.toLowerCase().includes(event.query.toLowerCase())
-          }),
-        ]
-
-        if (this.autocompleateFilterd.length === 0) {
-          this.autocompleateFilterd = [event.query.toLowerCase()]
-        }
-      }
-    },
     hideDialog() {
       this.periodDialog = false
     },

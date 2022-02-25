@@ -73,7 +73,7 @@ export class CategoriesService {
     const category = await this.findOne(id);
 
     if (!category) {
-      StorageManager.remove(file.fieldname);
+      StorageManager.remove(file.filename);
       throw new NotFoundException();
     }
 

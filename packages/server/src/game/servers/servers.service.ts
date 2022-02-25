@@ -41,6 +41,7 @@ export class ServersService {
     server.slogan = input.slogan;
     server.description = input.description;
     server.content = input.content;
+    server.table = input.table;
 
     server.online = new Online();
     server.query = new Query();
@@ -67,6 +68,7 @@ export class ServersService {
     server.slogan = input.slogan;
     server.description = input.description;
     server.content = input.content;
+    server.table = input.table;
 
     server.query.host = input.query.host;
     server.query.port = input.query.port;

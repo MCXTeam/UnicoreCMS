@@ -4,6 +4,11 @@ import { messages } from 'vee-validate/dist/locale/ru.json'
 import { isUsername, IS_USERNAME, IS_USERNAME_OR_EMAIL } from 'unicore-common/dist/validation/index'
 // @ts-ignore
 import isURL from 'validator/lib/isURL'
+import { ValidationObserver, ValidationProvider } from 'vee-validate'
+import Vue from 'vue'
+
+Vue.component('ValidationObserver', ValidationObserver)
+Vue.component('ValidationProvider', ValidationProvider)
 
 for (let [rule, validation] of Object.entries(rules)) {
   extend(rule, {

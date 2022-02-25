@@ -39,7 +39,7 @@ export class AuthController {
     @Body('refresh_token') token: string,
     @UserAgent() agent: string,
     @IpAddress() ip: string,
-  ): Promise<Omit<AuthenticatedDto, 'user'>> {
+  ): Promise<Omit<AuthenticatedDto, 'user' | 'refreshToken'>> {
     return this.tokensService.createTokensFromRefreshToken(token, agent, ip);
   }
 

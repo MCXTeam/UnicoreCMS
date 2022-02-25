@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "types": ["@nuxtjs/color-mode"]
+    "types": ["@nuxtjs/color-mode", "@nuxtjs/axios"]
   },
   "extends": "unicore-admin/tsconfig.json"
 }

@@ -133,6 +133,17 @@ export default {
               ],
             },
             {
+              label: 'Пополнение',
+              icon: 'pi pi-fw pi-wallet',
+              items: [
+                {
+                  label: 'Бонусы',
+                  icon: 'pi pi-fw pi-dollar',
+                  to: '/payment/bonuses',
+                }
+              ],
+            },
+            {
               label: 'Промо-коды',
               icon: 'pi pi-fw pi-dollar',
               to: '/gifts',

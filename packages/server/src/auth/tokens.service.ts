@@ -101,17 +101,17 @@ export class TokensService {
     return { user, token };
   }
 
-  async createTokensFromRefreshToken(refresh: string, agent?: string, ip?: string): Promise<Omit<AuthenticatedDto, 'user'>> {
+  async createTokensFromRefreshToken(refresh: string, agent?: string, ip?: string): Promise<Omit<AuthenticatedDto, 'user' | 'refreshToken'>> {
     const { token, user } = await this.resolveRefreshToken(refresh);
 
     if (agent != token.agent) {
       throw new UnauthorizedException();
     }
 
-    const refreshToken = await this.updateRefreshToken(user, token, ip);
+    //const refreshToken = await this.updateRefreshToken(user, token, ip);
     const accessToken = await this.generateAccessToken(user);
 
-    return { refreshToken, accessToken };
+    return { /* refreshToken, */ accessToken };
   }
 
   async revokeRefreshToken(encoded: string): Promise<void> {

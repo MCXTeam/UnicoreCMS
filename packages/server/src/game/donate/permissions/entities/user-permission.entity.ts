@@ -16,7 +16,12 @@ export class UsersDonatePermission {
   @JoinColumn()
   user: User;
 
-  @ManyToOne(() => DonatePermission)
+  @ManyToOne(() => DonatePermission, {
+    cascade: true,
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+    eager: true
+  })
   @JoinColumn()
   permission: DonatePermission;
 
@@ -24,9 +29,15 @@ export class UsersDonatePermission {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
+    eager: true
   })
   @JoinColumn()
   server: Server;
+
+  @Column({
+    nullable: true,
+  })
+  gived: boolean
 
   @Column({
     nullable: true,

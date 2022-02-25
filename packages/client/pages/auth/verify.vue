@@ -25,15 +25,9 @@
 </template>
 
 <script>
-import { ValidationObserver, ValidationProvider } from 'vee-validate'
-
 export default {
   middleware: ['auth', 'alter-verify'],
   layout: 'auth',
-  components: {
-    ValidationObserver,
-    ValidationProvider,
-  },
   data() {
     return {
       form: {

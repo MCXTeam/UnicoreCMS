@@ -4,6 +4,7 @@ import { DonatePermission } from 'src/game/donate/permissions/entities/donate-pe
 import { Kit } from 'src/game/store/entities/kit.entity';
 import { Product } from 'src/game/store/entities/product.entity';
 import { AfterRemove, Column, CreateDateColumn, Entity, JoinTable, ManyToMany, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import { ServerTableDto } from '../dto/server-table.dto';
 import { Mod } from '../mods/entities/mod.entity';
 import { Online } from '../online/entities/online.entity';
 import { Query } from '../online/entities/query.entity';
@@ -63,6 +64,9 @@ export class Server {
   @ManyToMany(() => Kit, (kit) => kit.servers)
   @JoinTable()
   kits?: Kit[];
+
+  @Column('json', { nullable: true })
+  table: ServerTableDto[]
 
   @CreateDateColumn()
   created: Date;

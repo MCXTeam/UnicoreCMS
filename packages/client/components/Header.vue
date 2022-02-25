@@ -66,7 +66,7 @@ export default {
   computed: {
     ...mapGetters({
       onlines: 'io/serversOnline',
-      name: 'unicore/name'
+      name: 'unicore/name',
     }),
   },
 }

@@ -166,7 +166,7 @@ export class ProductsService {
     const product = await this.findOne(id);
 
     if (!product) {
-      StorageManager.remove(file.fieldname);
+      StorageManager.remove(file.filename);
       throw new NotFoundException();
     }
 

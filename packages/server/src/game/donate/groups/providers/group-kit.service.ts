@@ -67,7 +67,7 @@ export class GroupKitsService {
     const kit = await this.findOne(id);
 
     if (!kit) {
-      StorageManager.remove(file.fieldname);
+      StorageManager.remove(file.filename);
       throw new NotFoundException();
     }
 

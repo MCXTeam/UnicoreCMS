@@ -95,4 +95,9 @@ export enum Permission {
   EditorCabinetGiftsUpdate = "editor.cabinet.gifts.update",
   EditorCabinetGiftsDelete = "editor.cabinet.gifts.delete",
   EditorCabinetGiftsDeleteMany = "editor.cabinet.gifts.delete.many",
+
+  UserCabinetSkin = "user.cabinet.skin",
+  UserCabinetSkinHd = "user.cabinet.skin.hd",
+  UserCabinetCloak = "user.cabinet.cloak",
+  UserCabinetCloakHd = "user.cabinet.cloak.hd",
 }

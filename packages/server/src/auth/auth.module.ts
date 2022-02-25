@@ -16,12 +16,14 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { ApiModule } from 'src/admin/api/api.module';
 import { ApiKeyStrategy } from './strategies/api-key.strategy';
 import { EmailModule } from 'src/admin/email/email.module';
+import { SettingsModule } from 'src/game/cabinet/settings/settings.module';
 
 @Module({
   imports: [
     UsersModule,
     ApiModule,
     EmailModule,
+    SettingsModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     TypeOrmModule.forFeature([RefreshToken, User]),
     JwtModule.register({

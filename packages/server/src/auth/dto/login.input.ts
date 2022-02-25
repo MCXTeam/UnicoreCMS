@@ -1,5 +1,5 @@
 import { IsUsernameOrEmail } from '@common';
-import { IsDefined, IsString } from 'class-validator';
+import { IsDefined, IsOptional, IsString } from 'class-validator';
 
 export class LoginInput {
   @IsDefined()
@@ -9,4 +9,8 @@ export class LoginInput {
   @IsDefined()
   @IsString()
   password: string;
+
+  @IsOptional()
+  @IsString()
+  totp: string;
 }

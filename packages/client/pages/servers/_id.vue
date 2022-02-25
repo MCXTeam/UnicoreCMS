@@ -13,7 +13,7 @@
         <div class="row">
           <div class="col-xl-7 pe-xl-5" v-if="server.content">
             <h2 class="mt-4 mb-2">Описание сервера</h2>
-            <div v-html="server.content" />
+            <div class="description-html" v-html="server.content" />
           </div>
           <div class="col-5">
             <h3 class="mt-4 mb-2">Информация о сервере</h3>
@@ -22,21 +22,9 @@
                 <td>Игровая версия</td>
                 <td v-text="server.version" />
               </tr>
-              <tr>
-                <td>Игровая версия</td>
-                <td v-text="server.version" />
-              </tr>
-              <tr>
-                <td>Игровая версия</td>
-                <td v-text="server.version" />
-              </tr>
-              <tr>
-                <td>Игровая версия</td>
-                <td v-text="server.version" />
-              </tr>
-              <tr>
-                <td>Игровая версия</td>
-                <td v-text="server.version" />
+              <tr v-for="(row, i) in server.table" :key="i">
+                <td v-text="row.title" />
+                <td v-text="row.description" />
               </tr>
             </table>
           </div>
@@ -99,7 +87,6 @@ export default {
         ?.filter((m) => !m.description)
         ?.map((m) => m.name)
         ?.join(', ')
-
       this.$store.commit('unicore/SET_NAME', `Информация о сервере ${this.server.name}`)
     } catch {
       this.$nuxt.error({ statusCode: 404 })

@@ -144,7 +144,7 @@ export class KitsService {
     const kit = await this.findOne(id);
 
     if (!kit) {
-      StorageManager.remove(file.fieldname);
+      StorageManager.remove(file.filename);
       throw new NotFoundException();
     }
 

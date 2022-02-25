@@ -32,7 +32,9 @@ export class DonatePermission {
   @Column('simple-array', { default: '' })
   web_perms: string[];
 
-  @ManyToMany(() => GroupKit, (kit) => kit.permission)
+  @ManyToMany(() => GroupKit, (kit) => kit.permission, {
+    eager: true
+  })
   @JoinTable()
   kits: GroupKit[];
 

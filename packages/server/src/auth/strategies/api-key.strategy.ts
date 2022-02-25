@@ -1,11 +1,10 @@
-import { Inject, Injectable, Scope, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { HeaderAPIKeyStrategy } from 'passport-headerapikey';
 import { ApiService } from 'src/admin/api/api.service';
 import { UsersService } from 'src/admin/users/users.service';
 import * as requestIp from 'request-ip';
 import * as minimath from 'minimatch';
-import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 
 @Injectable()

@@ -2,6 +2,16 @@
   @extend .container;
 }
 
+@mixin link-active {
+  text-decoration: none !important;
+  color: rgba(var(--vs-text), 0.75) !important;
+
+  &::before {
+    left: 15px;
+    width: calc(100% - 30px);
+  }
+}
+
 .vs-navbar__item {
   font-size: 1rem;
   position: relative;
@@ -26,13 +36,7 @@
 
   &:hover,
   &.nuxt-link-exact-active {
-    text-decoration: none !important;
-    color: rgba(var(--vs-text), 0.75) !important;
-
-    &::before {
-      left: 15px;
-      width: calc(100% - 30px);
-    }
+    @include link-active;
   }
 }
 
@@ -48,6 +52,10 @@
       }
     }
   }
+}
+
+.cabinet-navbar .vs-navbar__item.nuxt-link-active {
+  @include link-active;
 }
 
 .paddingScrollActive {

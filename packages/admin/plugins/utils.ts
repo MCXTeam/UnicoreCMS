@@ -28,8 +28,12 @@ declare module 'vuex/types/index' {
 
 const utilsPlugin: Plugin = (context, inject) => {
   inject('utils', {
-    formatCurrency(value: number) {
+    formatCurrency(value: number, sale: number) {
       if (!value) value = 0
+
+      if (sale)
+        value = value - value * sale / 100;
+
       return value.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' })
     },
     formatNumber(value: number) {

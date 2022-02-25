@@ -1,7 +1,40 @@
+$primary: 156, 39, 176;
+$second: 238, 242, 245;
+$theme-bg: #f4f7f8;
+$theme-color: #212529;
+$theme-layout: #fff;
+$theme-bg2: #eef2f5;
+$theme-code: #3f3d56;
+$theme-code2: #363449;
+$text: 0, 0, 0;
+
+$dark-primary: 186, 104, 200;
+$dark-theme-bg: #18191c;
+$dark-theme-color: #fff;
+$dark-theme-layout: #1e2023;
+$dark-theme-bg2: #141417;
+$dark-theme-code: #141417;
+$dark-theme-code2: #161619;
+$dark-background: 30, 32, 35;
+$dark-text: 255, 255, 255;
+$dark-gray-1: 24, 25, 28;
+$dark-gray-2: 20, 20, 23;
+$dark-gray-3: 15, 16, 19;
+$dark-gray-4: 10, 11, 14;
+$dark-shadow-opacity: 0.3;
+$dark-dark: 0, 0, 0;
+$dark-background-opacity: 0.6;
+
 $server-progressbar-offline: #ee250c;
 $server-progressbar-fill: linear-gradient(to right, #3ab22e 0%, #d9e51a 40%, #f68106 65%, #ee250c 100%);
 
 :export {
   serverProgressFill: $server-progressbar-fill;
   serverProgressOffline: $server-progressbar-offline;
+
+  primary: $primary;
+  dark-primary: $dark-primary;
+
+  theme-layout: $theme-layout;
+  dark-theme-layout: $dark-theme-layout;
 }

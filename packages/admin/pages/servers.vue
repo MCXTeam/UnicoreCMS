@@ -186,6 +186,44 @@
                   <Textarea v-model="server.description" :autoResize="true" />
                 </div>
               </div>
+              <div class="col-12">
+                <div class="field">
+                  <label>Характеристики (построение таблицы)</label>
+                  <Button @click="addRow" icon="pi pi-plus" class="p-button-rounded p-button-text" />
+                  <DataTable
+                    :value="server.table"
+                    editMode="row"
+                    :editingRows.sync="table"
+                    @row-edit-save="onRowEditSave"
+                    responsiveLayout="scroll"
+                  >
+                    <Column field="title" header="Заголовок" :styles="{ width: '40%' }">
+                      <template #editor="slotProps">
+                        <InputText v-model="slotProps.data[slotProps.column.field]" />
+                      </template>
+                    </Column>
+                    <Column field="description" header="Описание" :styles="{ width: '50%' }">
+                      <template #editor="slotProps">
+                        <Textarea v-model="slotProps.data[slotProps.column.field]" :autoResize="true" />
+                      </template>
+                    </Column>
+                    <Column
+                      :rowEditor="true"
+                      :styles="{ width: '10%', 'min-width': '8rem' }"
+                      :bodyStyle="{ 'text-align': 'right' }"
+                    ></Column>
+                    <Column v-if="!table || !table.length" :styles="{ width: '3rem' }" :bodyStyle="{ 'text-align': 'center' }">
+                      <template #body="slotProps">
+                        <Button
+                          @click="removeRow(slotProps.index)"
+                          icon="pi pi-trash"
+                          class="p-button-rounded p-button-text p-button-danger"
+                        />
+                      </template>
+                    </Column>
+                  </DataTable>
+                </div>
+              </div>
               <div class="col-12 md:col-6">
                 <ValidationProvider name="Query хост" rules="required" v-slot="{ errors }">
                   <div class="field">
@@ -241,6 +279,7 @@ export default {
       mods: null,
       updateMode: false,
       fileDialog: false,
+      table: [],
       server: {
         id: null,
         name: null,
@@ -250,6 +289,7 @@ export default {
         slogan: null,
         description: null,
         content: null,
+        table: [],
         query: {
           host: null,
           port: null,
@@ -275,6 +315,20 @@ export default {
     // });
   },
   methods: {
+    onRowEditSave(event) {
+      let { newData, index } = event
+      this.server.table[index] = newData
+    },
+    addRow() {
+      this.server.table.push({
+        title: null,
+        description: null,
+      })
+    },
+    removeRow(index) {
+      this.server.table.splice(index, 1)
+      this.table = []
+    },
     async searchMod(event) {
       this.mods = await this.$axios
         .get('/servers/mods', {

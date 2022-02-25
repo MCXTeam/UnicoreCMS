@@ -1,17 +1,29 @@
-import { StorageManager } from '@common';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { MomentWrapper, StorageManager } from '@common';
+import { BadRequestException, Inject, Injectable, NotFoundException, ServiceUnavailableException, UnsupportedMediaTypeException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MulterFile } from 'fastify-file-interceptor';
+import { User } from 'src/admin/users/entities/user.entity';
+import { HistoryType } from 'src/game/cabinet/history/enums/history-type.enum';
+import { HistoryService } from 'src/game/cabinet/history/history.service';
 import { Server } from 'src/game/servers/entities/server.entity';
 import { In, Repository } from 'typeorm';
 import { Period } from '../../entities/period.entity';
+import { GroupBuyInput } from '../dto/group-buy.input';
 import { GroupInput } from '../dto/group.input';
 import { DonateGroup } from '../entities/donate-group.entity';
 import { GroupKit } from '../entities/group-kit.entity';
+import { UsersDonateGroup } from '../entities/user-donate.entity';
 
 @Injectable()
 export class DonateGroupsService {
   constructor(
+    private historyService: HistoryService,
+    @Inject('moment')
+    private moment: MomentWrapper,
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
+    @InjectRepository(UsersDonateGroup)
+    private userDonatesRepository: Repository<UsersDonateGroup>,
     @InjectRepository(DonateGroup)
     private donateGroupsRepository: Repository<DonateGroup>,
     @InjectRepository(Server)
@@ -20,10 +32,74 @@ export class DonateGroupsService {
     private periodsRepository: Repository<Period>,
     @InjectRepository(GroupKit)
     private groupKitsRepository: Repository<GroupKit>,
-  ) {}
+  ) { }
 
   find(relations: string[] = new Array()): Promise<DonateGroup[]> {
     return this.donateGroupsRepository.find({ relations });
+  }
+
+  async findByServer(id: string) {
+    const groups = await this.donateGroupsRepository.find({
+      relations: ['servers', 'periods'],
+      order: {
+        price: 'ASC',
+      },
+      where: (qb) => {
+        qb.where('server_id = :id', { id })
+      },
+    });
+
+    return groups.filter(group => group.periods.length)
+  }
+
+  me(user: User): Promise<UsersDonateGroup[]> {
+    return this.userDonatesRepository.find({ user: { uuid: user.uuid } });
+  }
+
+  async buy(user: User, ip: string, input: GroupBuyInput) {
+    const group = await this.findOne(input.group, ['servers', 'periods'])
+    const server = group?.servers?.find(server => server.id == input.server)
+    const period = group?.periods?.find(period => period.id == input.period)
+
+    if (!group || !server || !period)
+      throw new NotFoundException()
+
+    const price = (group.price - group.price * group.sale / 100) * period.multiplier
+
+    if (user.real < price)
+      throw new BadRequestException()
+
+    let userDonate = await this.userDonatesRepository.findOne({
+      user: {
+        uuid: user.uuid
+      },
+      server: {
+        id: server.id
+      },
+      group: {
+        id: group.id
+      }
+    })
+
+    if (userDonate) {
+      if (!userDonate.expired)
+        throw new BadRequestException()
+
+      userDonate.gived = null
+      userDonate.expired = period.expire ? this.moment(userDonate.expired).utc().add(period.expire, 'seconds').toDate() : null
+    } else {
+      userDonate = new UsersDonateGroup()
+      userDonate.expired = period.expire ? this.moment().utc().add(period.expire, 'seconds').toDate() : null
+      userDonate.server = server
+      userDonate.group = group
+      userDonate.user = user
+    }
+
+    user.real = user.real - price
+
+    await this.historyService.create(HistoryType.DonateGroupPurchase, ip, user, group, server, period);
+    await this.userDonatesRepository.save(userDonate)
+    await this.usersRepository.save(user)
   }
 
   findOne(id: number, relations?: string[]): Promise<DonateGroup> {
@@ -110,7 +186,7 @@ export class DonateGroupsService {
     const group = await this.findOne(id);
 
     if (!group) {
-      StorageManager.remove(file.fieldname);
+      StorageManager.remove(file.filename);
       throw new NotFoundException();
     }
 

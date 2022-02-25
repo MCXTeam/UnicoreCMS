@@ -1,9 +1,9 @@
 import { Middleware } from '@nuxt/types';
 
-const verifyMiddleware: Middleware = ({ $auth, redirect }: any) => {
-  if (!$auth?.user?.activated)
+const verifyMiddleware: Middleware = ({ $auth, redirect, route }) => {
+  if (!$auth.user?.activated)
     return redirect('/auth/verify');
-  else
+  else if (route.path?.startsWith('/auth'))
     return $auth.redirect('home');;
 };
 

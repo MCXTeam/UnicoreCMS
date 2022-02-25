@@ -73,7 +73,7 @@ export class ModsService {
     const mod = await this.findOne(id);
 
     if (!mod) {
-      StorageManager.remove(file.fieldname);
+      StorageManager.remove(file.filename);
       throw new NotFoundException();
     }
 

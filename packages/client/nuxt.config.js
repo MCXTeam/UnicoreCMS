@@ -3,6 +3,7 @@ import glob from 'glob-all'
 import path from 'path'
 import mainConfig from 'unicore-admin/main.config'
 import { envConfig } from 'unicore-common/dist/envconfig'
+import { sitemapSettings } from './sitemap'
 
 export default mainConfig({
   loading: false,
@@ -28,6 +29,8 @@ export default mainConfig({
     '~assets/fonts/main.scss',
   ],
 
+  modules: ['@nuxtjs/sitemap'],
+
   buildModules: ['@nuxtjs/color-mode'],
 
   plugins: [
@@ -35,6 +38,7 @@ export default mainConfig({
     { src: '~/plugins/aos.ts', ssr: false },
     { src: '~/plugins/number-animation.ts', ssr: false },
     { src: '~/plugins/primevue.ts' },
+    { src: '~/plugins/axios.ts' },
     { src: '~/plugins/unicore.ts', ssr: false },
     { src: '~/plugins/nprogress.ts', ssr: false },
   ],
@@ -52,6 +56,8 @@ export default mainConfig({
       )
     }
   },
+
+  sitemap: sitemapSettings,
 
   build: {
     extractCSS: true,

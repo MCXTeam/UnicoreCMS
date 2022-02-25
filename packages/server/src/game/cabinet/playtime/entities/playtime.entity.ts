@@ -4,7 +4,7 @@ import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToOne, Upda
 
 @Entity()
 export class Playtime {
-  @OneToOne(() => User, {
+  @ManyToOne(() => User, {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
@@ -17,6 +17,7 @@ export class Playtime {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
+    eager: true,
     primary: true,
   })
   server: Server;

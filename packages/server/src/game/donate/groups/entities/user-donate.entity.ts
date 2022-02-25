@@ -20,6 +20,7 @@ export class UsersDonateGroup {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
+    eager: true
   })
   @JoinColumn()
   group: DonateGroup;
@@ -28,6 +29,7 @@ export class UsersDonateGroup {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
+    eager: true
   })
   @JoinColumn()
   server: Server;
@@ -36,6 +38,11 @@ export class UsersDonateGroup {
     nullable: true,
   })
   expired: Date;
+
+  @Column({
+    nullable: true,
+  })
+  gived: boolean
 
   @CreateDateColumn()
   created: Date;

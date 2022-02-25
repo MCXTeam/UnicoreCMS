@@ -79,15 +79,9 @@
 </template>
 
 <script>
-import { ValidationObserver, ValidationProvider } from 'vee-validate'
-
 export default {
   layout: 'auth',
   middleware: 'guest',
-  components: {
-    ValidationObserver,
-    ValidationProvider,
-  },
   data() {
     return {
       form: {

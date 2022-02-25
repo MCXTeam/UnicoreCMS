@@ -2,6 +2,7 @@ import { User } from 'src/admin/users/entities/user.entity';
 import { Period } from 'src/game/donate/entities/period.entity';
 import { DonateGroup } from 'src/game/donate/groups/entities/donate-group.entity';
 import { DonatePermission } from 'src/game/donate/permissions/entities/donate-permission.entity';
+import { Server } from 'src/game/servers/entities/server.entity';
 import { Kit } from 'src/game/store/entities/kit.entity';
 import { Product } from 'src/game/store/entities/product.entity';
 import { Payment } from 'src/payment/entities/payment.entity';
@@ -16,10 +17,14 @@ export class History {
   @Column()
   type: HistoryType;
 
+  @Column()
+  ip: string;
+
   @ManyToOne(() => User, {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
+    nullable: false
   })
   @JoinColumn()
   user: User;
@@ -28,6 +33,7 @@ export class History {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
+    nullable: true
   })
   @JoinColumn()
   product?: Product;
@@ -36,14 +42,25 @@ export class History {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
+    nullable: true
   })
   @JoinColumn()
   kit?: Kit;
+
+  @ManyToOne(() => Server, {
+    cascade: true,
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+    nullable: true
+  })
+  @JoinColumn()
+  server?: Server;
 
   @ManyToOne(() => DonateGroup, {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
+    nullable: true
   })
   @JoinColumn()
   donate_group?: DonateGroup;
@@ -52,6 +69,7 @@ export class History {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
+    nullable: true
   })
   @JoinColumn()
   donate_permission?: DonatePermission;
@@ -60,6 +78,7 @@ export class History {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
+    nullable: true
   })
   @JoinColumn()
   period?: Period;
@@ -68,6 +87,7 @@ export class History {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
+    nullable: true
   })
   @JoinColumn()
   payment?: Payment;
@@ -76,6 +96,7 @@ export class History {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
+    nullable: true
   })
   @JoinColumn()
   target?: User;

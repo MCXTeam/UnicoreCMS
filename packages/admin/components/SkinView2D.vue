@@ -14,12 +14,15 @@ export default {
       type: Number,
       default: 64,
     },
-    skin: String,
+    skin: Object,
   },
 
   watch: {
-    skin() {
-      this.render()
+    skin: {
+      handler: function () {
+        this.render()
+      },
+      deep: true,
     },
     width() {
       this.render()

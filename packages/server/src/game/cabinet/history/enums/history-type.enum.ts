@@ -5,6 +5,7 @@ export enum HistoryType {
   DonatePermissionPurchase = 'donate_permission_purchase',
   UnabnPurchase = 'unban_purchase',
 
+  MoneyServerTransfer = 'money_server_transfer',
   MoneyTransfer = 'money_transfer',
   RealTransfer = 'money_transfer',
 
@@ -22,5 +23,5 @@ export class HistoryGroupType {
     HistoryType.UnabnPurchase,
   ];
 
-  static Transfer = [HistoryType.RealTransfer, HistoryType.MoneyTransfer];
+  static Transfer = [HistoryType.RealTransfer, HistoryType.MoneyTransfer, HistoryType.MoneyServerTransfer];
 }

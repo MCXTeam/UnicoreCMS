@@ -25,8 +25,8 @@
           </div>
         </no-ssr>
         <div class="ms-2 d-none d-lg-block" style="font-size: 1.5rem">
-          <i v-if="$colorMode.preference == 'light'" @click="switchTheme" class="bx bxs-sun" style="cursor: pointer"></i>
-          <i v-else @click="switchTheme" class="bx bxs-moon" style="cursor: pointer"></i>
+          <i v-if="$colorMode.preference == 'light'" @click="$unicore.switchTheme()" class="bx bxs-sun" style="cursor: pointer"></i>
+          <i v-else @click="$unicore.switchTheme()" class="bx bxs-moon" style="cursor: pointer"></i>
         </div>
       </template>
     </vs-navbar>
@@ -47,8 +47,7 @@
                     <SkinView2D class="rounded" :width="48" :height="48" :skin="$auth.user.skin" />
                   </Avatar>
                   <div>
-                    <h5 class="m-0">Баланс: {{ $utils.formatCurrency($auth.user.real) }}</h5>
-                    <h5 class="m-0">Монеток: {{ $utils.formatCurrency($auth.user.money) }}</h5>
+                    <h4 class="m-0">Баланс: {{ $utils.formatCurrency($auth.user.real) }}</h4>
                   </div>
                 </div>
                 <div class="tab-panel w-100">
@@ -159,12 +158,6 @@ export default {
     this.socket.emit('servers/online', {}, (res) => {
       this.$store.commit('io/SERVERS_ONLINE', res)
     })
-  },
-  methods: {
-    switchTheme() {
-      if (this.$colorMode.preference == 'light') this.$colorMode.preference = 'dark'
-      else this.$colorMode.preference = 'light'
-    },
   },
 }
 </script>

@@ -2,36 +2,37 @@
 @import "./navbar";
 @import "./contetn";
 @import "./header";
+@import "./_firefly.sass";
 
 :root {
-  --vs-primary: 156, 39, 176;
-  --vs-second: 238, 242, 245;
-  --vs-theme-bg: #f4f7f8;
-  --vs-theme-color: #212529;
-  --vs-theme-layout: #fff;
-  --vs-theme-bg2: #eef2f5;
-  --vs-theme-code: #3f3d56;
-  --vs-theme-code2: #363449;
-  --vs-text: 0, 0, 0;
+  --vs-primary: #{$primary};
+  --vs-second: #{$second};
+  --vs-theme-bg: #{$theme-bg};
+  --vs-theme-color: #{$theme-color};
+  --vs-theme-layout: #{$theme-layout};
+  --vs-theme-bg2: #{$theme-bg2};
+  --vs-theme-code: #{$theme-code};
+  --vs-theme-code2: #{$theme-code2};
+  --vs-text: #{$text};
 }
 
 .dark-mode {
-  --vs-primary: 186, 104, 200;
-  --vs-theme-bg: #18191c;
-  --vs-theme-color: #fff;
-  --vs-theme-layout: #1e2023;
-  --vs-theme-bg2: #141417;
-  --vs-theme-code: #141417;
-  --vs-theme-code2: #161619;
-  --vs-background: 30, 32, 35;
-  --vs-text: 255, 255, 255;
-  --vs-gray-1: 24, 25, 28;
-  --vs-gray-2: 20, 20, 23;
-  --vs-gray-3: 15, 16, 19;
-  --vs-gray-4: 10, 11, 14;
-  --vs-shadow-opacity: 0.3;
-  --vs-dark: 0, 0, 0;
-  --vs-background-opacity: 0.6;
+  --vs-primary: #{$dark-primary};
+  --vs-theme-bg: #{$dark-theme-bg};
+  --vs-theme-color: #{$dark-theme-color};
+  --vs-theme-layout: #{$dark-theme-layout};
+  --vs-theme-bg2: #{$dark-theme-bg2};
+  --vs-theme-code: #{$dark-theme-code};
+  --vs-theme-code2: #{$dark-theme-code2};
+  --vs-background: #{$dark-background};
+  --vs-text: #{$dark-text};
+  --vs-gray-1: #{$dark-gray-1};
+  --vs-gray-2: #{$dark-gray-2};
+  --vs-gray-3: #{$dark-gray-3};
+  --vs-gray-4: #{$dark-gray-4};
+  --vs-shadow-opacity: #{$dark-shadow-opacity};
+  --vs-dark: #{$dark-dark};
+  --vs-background-opacity: #{$dark-background-opacity};
 
   @import "primevue/resources/themes/bootstrap4-dark-blue/theme.css";
 }
@@ -195,3 +196,4 @@ a:visited {
 hr {
   border: 1px solid rgba(var(--vs-text), 0.05);
 }
+

@@ -61,6 +61,11 @@ class UnicorePlugin {
 
     this.context.$vs.notification({ ...config, text })
   }
+
+  switchTheme() {
+    if (this.context.$colorMode.preference == 'light') this.context.$colorMode.preference = 'dark'
+    else this.context.$colorMode.preference = 'light'
+  }
 }
 
 declare module '@nuxt/types' {

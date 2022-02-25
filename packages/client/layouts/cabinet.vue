@@ -15,7 +15,22 @@
         <nuxt-link to="/download" class="vs-navbar__item d-none d-lg-block"> <i class="bx bxl-windows"></i> Скачать </nuxt-link>
       </template>
       <template #right>
-        <div class="d-flex align-items-center"></div>
+        <div class="d-flex align-items-center p-2">
+          <Avatar class="rounded shadow">
+            <SkinView2D class="rounded" :width="32" :height="32" :skin="$auth.user.skin" />
+          </Avatar>
+          <div class="d-none d-lg-block ms-3">
+            <h4 class="m-0">Привет, {{ $auth.user.username }}</h4>
+            <h5 class="m-0">Баланс: {{ $utils.formatCurrency($auth.user.real) }}</h5>
+          </div>
+          <vs-button @click="$unicore.logout()" transparent class="ms-2 d-none d-lg-block" size="large" danger>
+            <i class="bx bx-exit"></i>
+          </vs-button>
+          <div class="d-none d-lg-block" style="font-size: 1.5rem">
+            <i v-if="$colorMode.preference == 'light'" @click="$unicore.switchTheme()" class="bx bxs-sun" style="cursor: pointer"></i>
+            <i v-else @click="$unicore.switchTheme()" class="bx bxs-moon" style="cursor: pointer"></i>
+          </div>
+        </div>
       </template>
     </vs-navbar>
     <div id="padding-scroll-content" class="square">
@@ -51,6 +66,7 @@ import { mapGetters } from 'vuex'
 import SkinViewer2D from '../../admin/components/SkinView2D.vue'
 
 export default {
+  middleware: ['auth', 'verify'],
   computed: {
     ...mapGetters({
       name: 'unicore/name',

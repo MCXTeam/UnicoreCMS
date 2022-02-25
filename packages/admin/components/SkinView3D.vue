@@ -15,8 +15,8 @@ export default {
       type: Number,
       default: 400,
     },
-    skin: String,
-    cape: String,
+    skin: Object,
+    cloak: Object,
   },
 
   data() {
@@ -28,11 +28,17 @@ export default {
   },
 
   watch: {
-    skin() {
-      this.viewer.loadSkin()
+    skin: {
+      handler: function () {
+        this.loadSkin()
+      },
+      deep: true,
     },
-    cape() {
-      this.viewer.loadCape()
+    cloak: {
+      handler: function () {
+        this.loadCloak()
+      },
+      deep: true,
     },
     width() {
       this.viewer.width = this.width
@@ -40,6 +46,10 @@ export default {
     height() {
       this.viewer.height = this.height
     },
+  },
+
+  beforeDestroy() {
+    this.viewer.dispose()
   },
 
   mounted() {
@@ -55,7 +65,7 @@ export default {
     this.control.enablePan = false
 
     this.loadSkin()
-    this.loadCape()
+    this.loadCloak()
   },
 
   methods: {
@@ -67,9 +77,9 @@ export default {
       )
     },
 
-    loadCape() {
+    loadCloak() {
       this.viewer.loadCape(
-        this.cape && this.$_.get(this.cape, 'file') ? `${this.$config.apiUrl}/${this.$_.get(this.cape, 'file')}` : null
+        this.cloak && this.$_.get(this.cloak, 'file') ? `${this.$config.apiUrl}/${this.$_.get(this.cloak, 'file')}` : null
       )
     },
 

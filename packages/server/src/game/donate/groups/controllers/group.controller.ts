@@ -1,4 +1,4 @@
-import { DeleteManyInput, imageFileFilter, StorageManager } from '@common';
+import { DeleteManyInput, imageFileFilter, IpAddress, StorageManager } from '@common';
 import {
   Body,
   Controller,
@@ -13,12 +13,15 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileFastifyInterceptor, MulterFile } from 'fastify-file-interceptor';
+import { User } from 'src/admin/users/entities/user.entity';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import { GroupBuyInput } from '../dto/group-buy.input';
 import { GroupInput } from '../dto/group.input';
 import { DonateGroupsService } from '../providers/groups.service';
 
 @Controller('donates/groups')
 export class DonateGroupsController {
-  constructor(private donateGroupsService: DonateGroupsService) {}
+  constructor(private donateGroupsService: DonateGroupsService) { }
 
   @Post()
   create(@Body() body: GroupInput) {
@@ -29,6 +32,22 @@ export class DonateGroupsController {
   find() {
     return this.donateGroupsService.find(['servers']);
   }
+
+  @Get('me')
+  me(@CurrentUser() user: User) {
+    return this.donateGroupsService.me(user);
+  }
+
+  @Get('server/:id')
+  async findByServer(@Param('id') id: string) {
+    return this.donateGroupsService.findByServer(id);
+  }
+
+  @Post('buy')
+  async buy(@CurrentUser() user: User, @IpAddress() ip: string, @Body() body: GroupBuyInput) {
+    return this.donateGroupsService.buy(user, ip, body)
+  }
+
 
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
