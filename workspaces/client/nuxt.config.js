@@ -9,7 +9,7 @@ export default mainConfig({
   loading: false,
 
   head: {
-    titleTemplate: `%s - ${envConfig.name}`,
+    titleTemplate: `%s - ${envConfig.sitename}`,
     title: 'Игровые серверы Minecraft'
   },
 
