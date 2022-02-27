@@ -2,23 +2,19 @@
   "name": "unicore-cms",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "workspaces/*"
   ],
   "scripts": {
     "dev": "npm run build --workspace=unicore-common && lerna run dev --parallel --no-bail",
     "build": "npm run build -w unicore-common && lerna run build --stream --parallel",
     "start": "lerna run start --parallel --no-bail",
-    "lint": "lerna run lint --parallel",
-    "format": "lerna run format --parallel",
+    "lint": "npm run lint --workspaces --if-present",
+    "format": "npm run format --workspaces --if-present",
     "sync": "npm run schema:sync -w unicore-server",
     "seed": "npm run seed:run -w unicore-server"
   },
   "devDependencies": {
     "lerna": "^4.0.0",
-    "typescript": "^4.5.5",
-    "unicore-admin": "file:packages/admin",
-    "unicore-client": "file:packages/client",
-    "unicore-common": "file:packages/common",
-    "unicore-server": "file:packages/server"
+    "typescript": "^4.5.5"
   }
 }
