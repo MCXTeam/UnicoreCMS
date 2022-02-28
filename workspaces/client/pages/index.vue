@@ -52,7 +52,7 @@ export default {
     }
   },
   async fetch() {
-    this.news.data = []
+    this.news.data = null
     this.news = await this.$axios
       .get('/news', {
         params: {

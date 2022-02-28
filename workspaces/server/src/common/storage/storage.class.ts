@@ -7,6 +7,7 @@ import { Request } from 'express';
 import axios from 'axios';
 import { parse as urlParse } from 'url';
 import { Logger } from '@nestjs/common';
+import { envConfig } from 'unicore-common';
 
 const destination = '../../storage';
 
@@ -30,7 +31,7 @@ export class StorageManager {
    * Получить url файла
    */
   static url(filename: string) {
-    return '/' + destination + '/' + filename;
+    return envConfig.apiBaseurl + '/' + filename;
   }
 
   /**

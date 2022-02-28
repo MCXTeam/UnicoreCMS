@@ -9,7 +9,7 @@ export default class CreateNews implements Seeder {
     const news = _.range(20).map(() => ({
       title: faker.lorem.text().slice(0, 60) + '...',
       description: faker.lorem.text(),
-    }));
+    })); 
 
     await connection.createQueryBuilder().insert().into(News).values(news).execute();
   }

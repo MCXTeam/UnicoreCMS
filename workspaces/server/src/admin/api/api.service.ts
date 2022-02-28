@@ -4,12 +4,15 @@ import { Repository } from 'typeorm';
 import { ApiInput } from './dto/api.input';
 import { ApiToken } from './entities/api-token.entity';
 import { nanoid } from 'nanoid';
+import { EventsService } from 'src/events/events.service';
+import { ApiKeyRoom } from 'src/auth/helpers';
 
 @Injectable()
 export class ApiService {
   constructor(
     @InjectRepository(ApiToken)
     private apiTokensRepository: Repository<ApiToken>,
+    private eventsService: EventsService,
   ) {}
 
   find(): Promise<ApiToken[]> {
@@ -40,6 +43,7 @@ export class ApiService {
     apikey.allow = input.allow;
     apikey.perms = input.perms;
 
+    this.eventsService.server.to(ApiKeyRoom(apikey)).disconnectSockets()
     return this.apiTokensRepository.save(apikey);
   }
 
@@ -50,6 +54,7 @@ export class ApiService {
       throw new NotFoundException();
     }
 
+    this.eventsService.server.to(ApiKeyRoom(apikey)).disconnectSockets()
     return this.apiTokensRepository.remove(apikey);
   }
 }

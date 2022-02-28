@@ -1,4 +1,8 @@
 export enum Permission {
+  // Kernel
+  KernelUnicoreProvider = "kernel.unicore.provider",
+  KernelUnicoreConnect = "kernel.unicore.connect",
+
   // Dashboard
   AdminDashboard = "admin.dashboard",
 

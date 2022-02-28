@@ -2,7 +2,8 @@ import { Role } from 'src/admin/roles/entities/role.entity';
 import { Ban } from 'src/game/cabinet/bans/entities/ban.entity';
 import { Cloak } from 'src/game/cabinet/skin/entities/cloak.entity';
 import { Skin } from 'src/game/cabinet/skin/entities/skin.entity';
-import { Column, CreateDateColumn, Entity, Generated, JoinTable, ManyToMany, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import { Server } from 'src/game/servers/entities/server.entity';
+import { Column, CreateDateColumn, Entity, Generated, JoinTable, ManyToMany, ManyToOne, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
 export class User {
@@ -63,6 +64,11 @@ export class User {
     eager: true
   })
   cloak?: Cloak;
+
+  @ManyToOne(() => Server, {
+    eager: true
+  })
+  server?: Server;
 
   @OneToOne(() => Ban, (ban) => ban.user, {
     eager: true

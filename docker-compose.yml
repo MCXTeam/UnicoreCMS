@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: unicorecms
+    restart: always
+    build:
+      context: . 
+      dockerfile: ./docker/node/Dockerfile
+    command: npm run start
+    volumes:
+      - .:/usr/local/app
+    networks:
+      - unicore-net
+      - unicore-kernel-net
+
+networks:
+  unicore-net:
+    driver: bridge
+    internal: true
+  unicore-kernel-net:
+    driver: bridge
+    internal: false

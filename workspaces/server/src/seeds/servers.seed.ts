@@ -26,7 +26,7 @@ export default class CreateServers implements Seeder {
       {
         name: "Mekanism",
         description: faker.lorem.text(),
-        icon: "default/mods/mekanism.png"
+        icon: "default/mods/mekanism.jpeg"
       },
       {
         name: "Industrial Foregoing",
@@ -55,7 +55,7 @@ export default class CreateServers implements Seeder {
       {
         name: "ExNihilo",
         description: faker.lorem.text(),
-        icon: "default/mods/draconic-evolution.png"
+        icon: "default/mods/exnihilo.png"
       }
     ])
 

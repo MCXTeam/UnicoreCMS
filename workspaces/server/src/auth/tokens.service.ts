@@ -69,20 +69,20 @@ export class TokensService {
     });
   }
 
-  async decodeRefreshToken(token: string): Promise<JWTRefreshPayload> {
+  async decodeToken(token: string): Promise<JWTRefreshPayload | JWTPayload> {
     try {
       return this.jwt.verifyAsync(token);
     } catch (e) {
       if (e instanceof TokenExpiredError) {
-        throw new UnprocessableEntityException('Refresh token expired');
+        throw new UnprocessableEntityException('Token expired');
       } else {
-        throw new UnprocessableEntityException('Refresh token malformed');
+        throw new UnprocessableEntityException('Token malformed');
       }
     }
   }
 
   async resolveRefreshToken(encoded: string): Promise<{ user: User; token: RefreshToken }> {
-    const payload = await this.decodeRefreshToken(encoded);
+    const payload = await this.decodeToken(encoded) as JWTRefreshPayload;
     const token = await this.tokensRepository.findOne({
       uuid: payload.jwtid,
       expires: MoreThanOrEqual(this.moment().toDate()),
@@ -115,7 +115,7 @@ export class TokensService {
   }
 
   async revokeRefreshToken(encoded: string): Promise<void> {
-    const payload = await this.decodeRefreshToken(encoded);
+    const payload = await this.decodeToken(encoded) as JWTRefreshPayload;
     const token = await this.tokensRepository.findOne({
       uuid: payload.jwtid,
     });

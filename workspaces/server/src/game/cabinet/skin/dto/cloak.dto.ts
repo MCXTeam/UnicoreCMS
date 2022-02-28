@@ -1,13 +1,14 @@
 import { Skin } from '../entities/skin.entity';
-import { Exclude } from 'class-transformer';
-import { Cloak } from '../entities/cloak.entity';
+import { Exclude, Expose } from 'class-transformer';
 import { StorageManager, getDeigest } from '@common';
 
-export class CloakDto implements Cloak {
+export class CloakDto {
+  @Expose()
   get url(): string {
     return StorageManager.url(this.file);
   }
 
+  @Expose()
   get digest(): string {
     return getDeigest(this.file);
   }
@@ -18,6 +19,4 @@ export class CloakDto implements Cloak {
   constructor(partial: Partial<Skin>) {
     Object.assign(this, partial);
   }
-
-  removeFile(): void {}
 }
