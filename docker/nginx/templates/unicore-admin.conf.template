@@ -1,0 +1,10 @@
+# Admin
+server {
+  listen 80;
+
+  server_name ${ADMIN_HOST};
+
+  location / {
+    proxy_pass http://app:${ADMIN_PORT};
+  }
+}

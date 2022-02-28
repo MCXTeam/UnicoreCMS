@@ -24,6 +24,6 @@ async function bootstrap() {
   app.useWebSocketAdapter(new AuthAdapter(app));
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.enableCors();
-  app.listen(envConfig.backendPort);
+  app.listen(envConfig.backendPort, '0.0.0.0');
 }
 bootstrap();

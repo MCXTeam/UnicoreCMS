@@ -1,0 +1,10 @@
+# Client
+server {
+  listen 80 default_server;
+
+  server_name ${CLIENT_HOST} www.${CLIENT_HOST};
+
+  location / {
+    proxy_pass http://app:${CLIENT_PORT};
+  }
+}

@@ -39,3 +39,5 @@ lerna-debug.log*
 
 /storage/*
 !/storage/default
+
+docker/mysql-data

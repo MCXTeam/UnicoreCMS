@@ -46,9 +46,9 @@ export const envConfig: EnvConfig = {
   sitename: env.get("SITENAME").default("UnicoreCMS").asString(),
 
   // Порты
-  frontendPort: env.get("FRONTEND_PORT").default(3000).asPortNumber(),
+  frontendPort: env.get("CLIENT_PORT").default(3000).asPortNumber(),
   adminPort: env.get("ADMIN_PORT").default(4000).asPortNumber(),
-  backendPort: env.get("BACKEND_PORT").default(5000).asPortNumber(),
+  backendPort: env.get("SERVER_PORT").default(5000).asPortNumber(),
 
   // URL REWRITES
   apiBaseurl: env.get("API_BASEURL").required().asString(),

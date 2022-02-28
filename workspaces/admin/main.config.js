@@ -22,6 +22,7 @@ export default (config) =>
 
       server: {
         port: envConfig.frontendPort,
+        host: '0.0.0.0'
       },
 
       // Глобальный CSS: https://go.nuxtjs.dev/config-css

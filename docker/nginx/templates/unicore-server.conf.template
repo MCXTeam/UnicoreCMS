@@ -1,0 +1,10 @@
+# Server
+server {
+  listen 80;
+
+  server_name ${SERVER_HOST};
+
+  location / {
+    proxy_pass http://app:${SERVER_PORT};
+  }
+}

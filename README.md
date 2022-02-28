@@ -9,3 +9,9 @@
 
 > ...
 
+# Docker Commands
+
+docker exec -t -i unicorecms npm run sync
+docker exec -t -i unicorecms npm run seed
+docker exec -t -i unicorecms npm run build
+
