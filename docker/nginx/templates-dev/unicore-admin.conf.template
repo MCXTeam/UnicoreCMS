@@ -1,0 +1,10 @@
+# Admin
+server {
+  listen 80;
+
+  server_name ${ADMIN_HOST};
+
+  location / {
+    proxy_pass http://192.168.1.152:${ADMIN_PORT};
+  }
+}

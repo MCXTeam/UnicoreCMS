@@ -1,6 +1,6 @@
 <template>
   <section>
-    <div v-if="servers.length">
+    <div v-if="servers">
       <nuxt-link
         :to="`/servers/${server.id}`"
         class="mb-4 panel server-block p-5 d-flex align-items-center justify-content-between without-underline"
@@ -27,7 +27,7 @@ export default {
 
   data() {
     return {
-      servers: [],
+      servers: null,
     }
   },
 

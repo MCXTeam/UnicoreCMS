@@ -4,6 +4,8 @@ services:
   nginx:
     image: nginx:1.21.6
     container_name: unicorecms-nginx
+    profiles: 
+      - nginx
     restart: unless-stopped
     environment:
       - ADMIN_HOST=${ADMIN_HOST?err}
@@ -36,6 +38,8 @@ services:
 
   app:
     container_name: unicorecms
+    profiles: 
+      - prod
     restart: always
     build:
       context: .
@@ -52,13 +56,21 @@ services:
       - /usr/local/app/workspaces/client/.nuxt
       - /usr/local/app/workspaces/common/dist
       - /usr/local/app/workspaces/server/dist
-    ports:
-      - ${CLIENT_PORT:-3000}:${CLIENT_PORT:-3000}
-      - ${ADMIN_PORT:-4000}:${ADMIN_PORT:-4000}
-      - ${SERVER_PORT:-5000}:${SERVER_PORT:-5000}
     depends_on:
       - mariadb
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
-networks:
-  unicore-net:
-    driver: bridge
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: unicorecms-pma
+    restart: unless-stopped
+    profiles: 
+      - dev
+    links:
+      - mariadb
+    environment:
+      PMA_HOST: mariadb
+      PMA_PORT: 3306
+    ports:
+      - 8081:80

@@ -15,3 +15,12 @@ docker exec -t -i unicorecms npm run sync
 docker exec -t -i unicorecms npm run seed
 docker exec -t -i unicorecms npm run build
 
+# Starting
+## Full
+docker-compose --profile nginx --profile prod up
+
+## Without Nginx
+docker-compose --profile app up
+
+## Dev-mode
+docker-compose --profile dev up
