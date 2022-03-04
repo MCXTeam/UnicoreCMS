@@ -11,3 +11,7 @@ export class JWTPayload {
 export class JWTRefreshPayload extends JWTPayload {
   jwtid: string;
 }
+
+export class JWTMinecraftPayload extends JWTPayload {
+  ref: string;
+}

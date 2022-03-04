@@ -59,10 +59,6 @@ export class RolesService {
     return uniq(autocompleate.flat(2)).sort();
   }
 
-  me(user: User) {
-    if (user.superuser) return Object.values(Permission);
-  }
-
   find(): Promise<Role[]> {
     return this.rolesRepository.find({
       order: {

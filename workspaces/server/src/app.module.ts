@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { envConfig } from 'unicore-common';
 import { AuthModule } from './auth/auth.module';
@@ -12,6 +12,30 @@ import { MomentModule } from './moment';
 import { EventsModule } from './events/events.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ormconfig } from './ormconfig';
+import { GravitModule } from './auth/gravit/gravit.module';
+
+import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
+
+import { Request, Response, NextFunction } from 'express';
+
+@Injectable()
+export class AppLoggerMiddleware implements NestMiddleware {
+  private logger = new Logger('HTTP');
+
+  use(request: Request, response: Response, next: NextFunction): void {
+    const { ip, method, originalUrl, hostname } = request;
+
+    response.on('close', () => {
+      const { statusCode } = response;
+
+      this.logger.log(
+        `${method} ${hostname + originalUrl} ${statusCode} - ${ip}`
+      );
+    });
+
+    next();
+  }
+}
 
 @Module({
   imports: [
@@ -46,6 +70,7 @@ import { ormconfig } from './ormconfig';
     MomentModule,
     ScheduleModule.forRoot(),
     AuthModule,
+    GravitModule,
     AdminModule,
     EventsModule,
     GameModule,
@@ -54,4 +79,8 @@ import { ormconfig } from './ormconfig';
   controllers: [],
   providers: [],
 })
-export class AppModule { }
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(AppLoggerMiddleware).forRoutes('*');
+  }
+}

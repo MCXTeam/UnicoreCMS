@@ -3,5 +3,5 @@ class AuthDetails {
 }
 
 export class GravitGetAuthDetails {
-  details: AuthDetails
+  details: AuthDetails[]
 }

@@ -1,11 +1,11 @@
-import { classToPlain, Exclude, Expose, instanceToPlain, plainToClass, plainToInstance, serialize, Transform, Type } from "class-transformer";
+import { Exclude, Expose, instanceToPlain, Transform } from "class-transformer";
 import { User } from "src/admin/users/entities/user.entity";
 import * as _ from "lodash"
-import { Skin } from "src/game/cabinet/skin/entities/skin.entity";
+
 import { SkinDto } from "src/game/cabinet/skin/dto/skin.dto";
 import { CloakDto } from "src/game/cabinet/skin/dto/cloak.dto";
 import { Role } from "src/admin/roles/entities/role.entity";
-import { Cloak } from "src/game/cabinet/skin/entities/cloak.entity";
+import { transformPermissions } from "src/admin/roles/guards/permisson.guard";
 
 export class GravitPermissions {
   perms: string[]
@@ -25,14 +25,11 @@ export class GravitUserDto {
 
   @Expose()
   accessToken: string
-
+  
   @Expose()
   get permissions(): GravitPermissions {
     return {
-      perms: [
-        ...this.perms || [],
-        ...this.roles.map(role => role.perms).flat()
-      ],
+      perms: this.perms,
       roles: this.roles.map(role => role.id)
     }
   }
@@ -45,7 +42,7 @@ export class GravitUserDto {
   @Transform(({ value }) => value ? instanceToPlain(new CloakDto(value)) : null)
   cloak?: CloakDto;
 
-  constructor(partial: Partial<User & { accessToken: string}>) {
-    Object.assign(this, partial);
+  constructor(partial: Partial<User>) {
+    Object.assign(this, transformPermissions(partial));
   }
 }

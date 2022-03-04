@@ -1,8 +1,9 @@
 import { GravitUserDto } from "./gravit-user.dto";
 import { nanoid } from 'nanoid';
-import { JWTPayload } from "src/auth/interfaces/jwt-payload";
 import { User } from "src/admin/users/entities/user.entity";
 import { instanceToPlain } from "class-transformer";
+import { envConfig } from "unicore-common";
+import * as ms from "ms"
 
 export class GravitSessionDto {
   id: string
@@ -11,11 +12,9 @@ export class GravitSessionDto {
 
   constructor(
     user: User,
-    accessToken: string,
-    accessTokenPayload: JWTPayload
   ) {
     this.id = nanoid()
-    this.expireIn = accessTokenPayload.exp
-    this.user = instanceToPlain(new GravitUserDto({ ...user, accessToken })) as GravitUserDto
+    this.expireIn = 0
+    this.user = instanceToPlain(new GravitUserDto(user)) as GravitUserDto
   }
 }

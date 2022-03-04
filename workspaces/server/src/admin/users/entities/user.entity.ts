@@ -32,6 +32,12 @@ export class User {
   activated: boolean;
 
   @Column({ nullable: true })
+  accessToken: string;
+
+  @Column({ nullable: true })
+  serverId: string;
+
+  @Column({ nullable: true })
   two_factor_enabled?: boolean;
 
   @Column({ nullable: true })
@@ -64,11 +70,6 @@ export class User {
     eager: true
   })
   cloak?: Cloak;
-
-  @ManyToOne(() => Server, {
-    eager: true
-  })
-  server?: Server;
 
   @OneToOne(() => Ban, (ban) => ban.user, {
     eager: true

@@ -6,7 +6,7 @@ import { UsersService } from 'src/admin/users/users.service';
 import { MoreThanOrEqual, Repository } from 'typeorm';
 import { envConfig } from 'unicore-common';
 import { RefreshToken } from './entities/refresh-token.entity';
-import { JWTPayload, JWTRefreshPayload } from './interfaces/jwt-payload';
+import { JWTMinecraftPayload, JWTPayload, JWTRefreshPayload } from './interfaces/jwt-payload';
 import { v4 as uuidv4 } from 'uuid';
 import { AuthenticatedDto } from './dto/authenticated.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -31,6 +31,17 @@ export class TokensService {
 
     return this.jwt.sign(payload, {
       expiresIn: envConfig.jwtExpires,
+    });
+  }
+
+  async generateMinecraftAccessToken(user: User, refreshPayload: JWTRefreshPayload): Promise<string> {
+    const payload: JWTMinecraftPayload = {
+      sub: user.uuid,
+      ref: refreshPayload.jwtid
+    };
+
+    return this.jwt.sign(payload, {
+      expiresIn: envConfig.jwtRefreshExpires,
     });
   }
 
@@ -121,6 +132,14 @@ export class TokensService {
     });
 
     if (token && payload) {
+      await this.tokensRepository.remove(token);
+    }
+  }
+
+  async revokeRefreshTokenBySession(uuid: string): Promise<void> {
+    const token = await this.tokensRepository.findOne({ uuid });
+
+    if (token) {
       await this.tokensRepository.remove(token);
     }
   }

@@ -1,8 +1,6 @@
 import { INestApplicationContext } from '@nestjs/common';
 import { IoAdapter } from '@nestjs/platform-socket.io';
-import { Socket } from 'dgram';
 import { ApiService } from 'src/admin/api/api.service';
-import { UserDto } from 'src/admin/users/dto/user.dto';
 import { UsersService } from 'src/admin/users/users.service';
 import { userRoom } from '../helpers';
 import { ApiKeyRoom } from '../helpers/api-key-room';

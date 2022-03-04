@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/admin/users/entities/user.entity';
@@ -29,8 +29,7 @@ import { SettingsModule } from 'src/game/cabinet/settings/settings.module';
     JwtModule.register({
       secret: envConfig.jwtKey,
       signOptions: { expiresIn: envConfig.jwtExpires },
-    }),
-    GravitModule,
+    })
   ],
   providers: [
     AuthService,

@@ -1,9 +1,13 @@
-import { Exclude } from 'class-transformer';
+import { Exclude, Transform } from 'class-transformer';
 import { Cloak } from 'src/game/cabinet/skin/entities/cloak.entity';
 import { Skin } from 'src/game/cabinet/skin/entities/skin.entity';
 import { User } from '../entities/user.entity';
+import * as minimath from 'minimatch';
+import * as _ from 'lodash';
+import { Permission } from 'unicore-common';
+import { transformPermissions } from 'src/admin/roles/guards/permisson.guard';
 
-export class UserDto implements User {
+export class UserDto {
   uuid: string;
 
   username: string;
@@ -33,11 +37,13 @@ export class UserDto implements User {
 
   perms: string[];
 
+  roles: string[];
+
   created: Date;
 
   updated: Date;
 
   constructor(partial: Partial<User>) {
-    Object.assign(this, partial);
+    Object.assign(this, transformPermissions(partial));
   }
 }

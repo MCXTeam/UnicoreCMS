@@ -6,6 +6,7 @@ import { UserInput } from './dto/user.input';
 import * as bcrypt from 'bcrypt';
 import { Role } from '../roles/entities/role.entity';
 import { ConflictException } from '@nestjs/common';
+import { ImportantRoles } from '../roles/emums/important-roles.enum';
 
 export class UsersService {
   constructor(
@@ -106,6 +107,9 @@ export class UsersService {
     user.roles = await this.rolesRepository.find({
       id: In(input.roles),
     });
+
+    if (!user.roles.find(role => role.id === ImportantRoles.Default))
+      user.roles.push(await this.rolesRepository.findOne(ImportantRoles.Default))
 
     return this.usersRepository.save(user);
   }
