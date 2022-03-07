@@ -3,10 +3,12 @@ import { BadRequestException, Inject, Injectable, NotFoundException, ServiceUnav
 import { InjectRepository } from '@nestjs/typeorm';
 import { MulterFile } from 'fastify-file-interceptor';
 import { User } from 'src/admin/users/entities/user.entity';
+import { EventsService } from 'src/events/events.service';
 import { HistoryType } from 'src/game/cabinet/history/enums/history-type.enum';
 import { HistoryService } from 'src/game/cabinet/history/history.service';
 import { Server } from 'src/game/servers/entities/server.entity';
 import { In, Repository } from 'typeorm';
+import { Permission } from 'unicore-common';
 import { Period } from '../../entities/period.entity';
 import { GroupBuyInput } from '../dto/group-buy.input';
 import { GroupInput } from '../dto/group.input';
@@ -17,6 +19,7 @@ import { UsersDonateGroup } from '../entities/user-donate.entity';
 @Injectable()
 export class DonateGroupsService {
   constructor(
+    private eventsService: EventsService,
     private historyService: HistoryService,
     @Inject('moment')
     private moment: MomentWrapper,
@@ -52,6 +55,18 @@ export class DonateGroupsService {
     return groups.filter(group => group.periods.length)
   }
 
+  async findByUserAndServer(server: string, user: string) {
+    const groups = await this.userDonatesRepository.find({
+      where: {
+        server: { id: server },
+        user: { uuid: user }
+      },
+      relations: ["user"]
+    });
+
+    return groups
+  }
+
   me(user: User): Promise<UsersDonateGroup[]> {
     return this.userDonatesRepository.find({ user: { uuid: user.uuid } });
   }
@@ -70,22 +85,24 @@ export class DonateGroupsService {
       throw new BadRequestException()
 
     let userDonate = await this.userDonatesRepository.findOne({
-      user: {
-        uuid: user.uuid
+      where: {
+        user: {
+          uuid: user.uuid
+        },
+        server: {
+          id: server.id
+        },
+        group: {
+          id: group.id
+        }
       },
-      server: {
-        id: server.id
-      },
-      group: {
-        id: group.id
-      }
+      relations: ["user"]
     })
 
     if (userDonate) {
       if (!userDonate.expired)
         throw new BadRequestException()
 
-      userDonate.gived = null
       userDonate.expired = period.expire ? this.moment(userDonate.expired).utc().add(period.expire, 'seconds').toDate() : null
     } else {
       userDonate = new UsersDonateGroup()
@@ -100,6 +117,9 @@ export class DonateGroupsService {
     await this.historyService.create(HistoryType.DonateGroupPurchase, ip, user, group, server, period);
     await this.userDonatesRepository.save(userDonate)
     await this.usersRepository.save(user)
+
+    // Event!
+    this.eventsService.server.to(Permission.KernelUnicoreConnect).emit("buy_donate", userDonate)
   }
 
   findOne(id: number, relations?: string[]): Promise<DonateGroup> {

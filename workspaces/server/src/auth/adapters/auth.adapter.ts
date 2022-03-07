@@ -1,6 +1,7 @@
 import { INestApplicationContext } from '@nestjs/common';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { ApiService } from 'src/admin/api/api.service';
+import { UserDto } from 'src/admin/users/dto/user.dto';
 import { UsersService } from 'src/admin/users/users.service';
 import { userRoom } from '../helpers';
 import { ApiKeyRoom } from '../helpers/api-key-room';
@@ -34,7 +35,7 @@ export class AuthAdapter extends IoAdapter {
             const apiToken = await this.apiService.findOne(socket.handshake.headers?.authorization.slice(8))
             const user = await this.usersService.getKernel()
             user.perms = apiToken.perms
-            socket.join([...user.perms, userRoom(user), ApiKeyRoom(apiToken)])
+            socket.join([...new UserDto(user).perms, userRoom(user), ApiKeyRoom(apiToken)])
             socket.user = user; 
           } else {
             const { user } = await this.tokensService.resolveRefreshToken(socket.handshake.query.token as string);

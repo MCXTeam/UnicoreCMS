@@ -13,8 +13,10 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileFastifyInterceptor, MulterFile } from 'fastify-file-interceptor';
+import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import { Permission } from 'unicore-common';
 import { GroupBuyInput } from '../dto/group-buy.input';
 import { GroupInput } from '../dto/group.input';
 import { DonateGroupsService } from '../providers/groups.service';
@@ -41,6 +43,12 @@ export class DonateGroupsController {
   @Get('server/:id')
   async findByServer(@Param('id') id: string) {
     return this.donateGroupsService.findByServer(id);
+  }
+
+  @Permissions([Permission.KernelUnicoreConnect])
+  @Get("user/:server/:uuid")
+  async findOneByUserAndServer(@Param('server') server: string, @Param('uuid') uuid: string) {
+    return this.donateGroupsService.findByUserAndServer(server, uuid)
   }
 
   @Post('buy')

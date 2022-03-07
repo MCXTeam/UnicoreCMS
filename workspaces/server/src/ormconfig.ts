@@ -8,6 +8,7 @@ export const ormconfig: any = {
   username: envConfig.databaseUser,
   password: envConfig.databasePassword,
   database: envConfig.databaseName,
+  timezone: "utc",
   entities: ['./**/*.entity.js'],
   seeds: ['dist/seeds/*.js'],
   factories: ['dist/factories/*.js'],

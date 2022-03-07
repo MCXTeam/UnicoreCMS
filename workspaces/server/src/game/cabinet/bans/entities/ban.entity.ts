@@ -25,7 +25,7 @@ export class Ban {
   reason: string;
 
   @Column({ nullable: true })
-  expires: Date
+  expires?: Date
 
   @CreateDateColumn()
   created: Date;

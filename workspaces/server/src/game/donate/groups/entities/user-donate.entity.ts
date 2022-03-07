@@ -39,11 +39,6 @@ export class UsersDonateGroup {
   })
   expired: Date;
 
-  @Column({
-    nullable: true,
-  })
-  gived: boolean
-
   @CreateDateColumn()
   created: Date;
 }

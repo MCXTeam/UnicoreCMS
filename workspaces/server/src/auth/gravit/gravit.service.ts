@@ -100,10 +100,10 @@ export class GravitService {
         throw new HttpException({ error: GravitError.WrongPassword }, HttpStatus.UNAUTHORIZED);
     }
 
-    if (user.ban)
-      throw new HttpException({ error: GravitError.UserBlocked }, HttpStatus.FORBIDDEN);
+    // if (user.ban)
+    //   throw new HttpException({ error: GravitError.UserBlocked }, HttpStatus.FORBIDDEN);
 
-    const refreshToken = await this.tokensService.generateRefreshToken(user, "Launcher", input?.context?.ip);
+    const refreshToken = await this.tokensService.generateRefreshToken(user, "launcher", input?.context?.ip);
     const refreshTokenPayload = await this.tokensService.decodeToken(refreshToken) as JWTRefreshPayload;
 
     const accessToken = await this.tokensService.generateAccessToken(user);
@@ -118,7 +118,7 @@ export class GravitService {
     try {
       const { user } = await this.tokensService.resolveRefreshToken(input.refreshToken);
       // const refreshTokenPayload = await this.tokensService.decodeToken(input.refreshToken) as JWTRefreshPayload;
-      const { accessToken } = await this.tokensService.createTokensFromRefreshToken(input.refreshToken, "Launcher", input?.context?.ip)
+      const { accessToken } = await this.tokensService.createTokensFromRefreshToken(input.refreshToken, "launcher", input?.context?.ip)
 
       // user.accessToken = await this.tokensService.generateMinecraftAccessToken(user, refreshTokenPayload)
       // await this.usersRepository.save(user)
@@ -139,7 +139,7 @@ export class GravitService {
     })
 
     if (user) {
-      const tokens = await this.tokensRepository.find({ user, agent: "Launcher" })
+      const tokens = await this.tokensRepository.find({ user, agent: "launcher" })
       await this.tokensRepository.remove(tokens)
     }
   }
@@ -150,7 +150,7 @@ export class GravitService {
     })
 
     if (user) {
-      const tokens = await this.tokensRepository.find({ user, agent: "Launcher" })
+      const tokens = await this.tokensRepository.find({ user, agent: "launcher" })
       await this.tokensRepository.remove(tokens)
     }
   }
@@ -162,15 +162,15 @@ export class GravitService {
       throw new ForbiddenException();
     }
 
-    const { user } = await this.tokensRepository.findOne({
+    const token = await this.tokensRepository.findOne({
       uuid: minecraftTokenPayload.ref,
     }, { relations: ['user'] })
 
-    if (!user || user.accessToken != input.accessToken)
+    if (!token?.user || token?.user.accessToken != input.accessToken)
       throw new ForbiddenException();
 
-    user.serverId = input.serverId
-    await this.usersRepository.save(user)
+    token.user.serverId = input.serverId
+    await this.usersRepository.save(token?.user)
   }
 
   async checkServer(input: GravitCheckServer) {

@@ -1,10 +1,11 @@
-import { Body, Controller, Delete, Get, Param, ParseArrayPipe, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, ParseArrayPipe, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { PaginatedUsersDto } from './dto/paginated-users.dto';
 import { UserInput } from './dto/user.input';
 import { Public } from 'src/auth/decorators/public.decorator';
+import { UserProtectedDto } from './dto/user-protected.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -42,5 +43,27 @@ export class UsersController {
   @Get('count')
   count(): Promise<number> {
     return this.usersService.count();
+  }
+
+  @Public()
+  @Get('public/uuid/:uuid')
+  async getUserByUUID(@Param('uuid') uuid: string): Promise<UserProtectedDto> {
+    const user = await this.usersService.getById(uuid)
+
+    if (!user)
+      throw new NotFoundException()
+
+    return new UserProtectedDto(user)
+  }
+
+  @Public()
+  @Get('public/username/:username')
+  async getUserByUsername(@Param('username') username: string): Promise<UserProtectedDto> {
+    const user = await this.usersService.getByUsername(username)
+
+    if (!user)
+      throw new NotFoundException()
+
+    return new UserProtectedDto(user)
   }
 }
