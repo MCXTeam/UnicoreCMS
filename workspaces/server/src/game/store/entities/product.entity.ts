@@ -20,6 +20,9 @@ export class Product {
   @Column('text', { nullable: true })
   description: string;
 
+  @Column('text', { nullable: true })
+  nbt: string;
+
   @ManyToMany(() => Server, (server) => server.products)
   servers: Server[];
 

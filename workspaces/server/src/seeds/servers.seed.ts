@@ -9,7 +9,6 @@ import { Category } from 'src/game/store/entities/category.entity';
 import { Product } from 'src/game/store/entities/product.entity';
 import { Connection } from "typeorm";
 import { Seeder } from "typeorm-seeding";
-import products from './products.json'
 
 export default class CreateServers implements Seeder {
   public async run(factory: any, connection: Connection): Promise<any> {

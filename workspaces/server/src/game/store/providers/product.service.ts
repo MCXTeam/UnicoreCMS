@@ -2,14 +2,27 @@ import { StorageManager } from '@common';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MulterFile } from 'fastify-file-interceptor';
+import * as JSZip from 'jszip';
 import * as _ from 'lodash';
+import { zipWith } from 'lodash';
 import { FilterOperator, paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { Server } from 'src/game/servers/entities/server.entity';
 import { In, Repository } from 'typeorm';
+import { ProductFromGameInput } from '../dto/product-fromgame.dto';
 import { ProductsManyInput } from '../dto/product-many.input';
 import { ProductInput } from '../dto/product.dto';
 import { Category } from '../entities/category.entity';
 import { Product } from '../entities/product.entity';
+
+interface ProductMap {
+  name: string,
+  icon?: string,
+  description?: string,
+  nbt?: string,
+  price: number,
+  sale?: number,
+  item_id: string,
+}
 
 @Injectable()
 export class ProductsService {
@@ -20,7 +33,7 @@ export class ProductsService {
     private serversRepository: Repository<Server>,
     @InjectRepository(Category)
     private categoriesRepository: Repository<Category>,
-  ) {}
+  ) { }
 
   async find(query: PaginateQuery): Promise<Paginated<Product>> {
     const queryBuilder = this.productsRepository
@@ -69,6 +82,21 @@ export class ProductsService {
     return this.productsRepository.findOne(id, { relations });
   }
 
+  async createFromGame(input: ProductFromGameInput) {
+    const product = new Product();
+
+    product.name = input.name;
+    product.price = input.price;
+    product.item_id = input.id;
+    product.nbt = input.nbt;
+
+    product.servers = await this.serversRepository.find({
+      id: input.server
+    });
+
+    return this.productsRepository.save(product);
+  }
+
   async create(input: ProductInput) {
     const product = new Product();
 
@@ -77,6 +105,7 @@ export class ProductsService {
     product.price = input.price;
     product.sale = input.sale;
     product.item_id = input.item_id;
+    product.nbt = input.nbt;
 
     product.servers = await this.serversRepository.find({
       id: In(input.servers),
@@ -101,6 +130,7 @@ export class ProductsService {
     product.price = input.price;
     product.sale = input.sale;
     product.item_id = input.item_id;
+    product.nbt = input.nbt;
 
     product.servers = await this.serversRepository.find({
       id: In(input.servers),
@@ -131,6 +161,38 @@ export class ProductsService {
     });
 
     return this.productsRepository.remove(products);
+  }
+
+  async exportItems(ids: number[]) {
+    const products = await this.productsRepository.find({
+      where: {
+        id: In(ids),
+      },
+    });
+    const zip = new JSZip();
+    const storage = zip.folder("storage");
+
+    const mapping: ProductMap[] = products.map(product => {
+      if (product.icon) {
+        const iconBuffer = StorageManager.read(product.icon)
+
+        if (iconBuffer)
+          storage.file(product.icon, iconBuffer, { base64: true })
+      }
+
+      return {
+        name: product.name,
+        icon: product.icon,
+        description: product.description,
+        nbt: product.nbt,
+        price: product.price,
+        sale: product.sale,
+        item_id: product.item_id,
+      }
+    })
+
+    zip.file("content.json", JSON.stringify(mapping));
+    return zip.generateAsync({type: "base64"})
   }
 
   async updateMany(input: ProductsManyInput) {

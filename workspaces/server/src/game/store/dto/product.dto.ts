@@ -14,6 +14,10 @@ export class ProductInput {
   price: number;
 
   @IsOptional()
+  @IsString()
+  nbt: string;
+
+  @IsOptional()
   @IsInt()
   @Min(0)
   @Max(99)

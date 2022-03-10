@@ -1,7 +1,8 @@
 import { DeleteManyInput, imageFileFilter, StorageManager } from '@common';
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Res, StreamableFile, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileFastifyInterceptor, MulterFile } from 'fastify-file-interceptor';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
+import { ProductFromGameInput } from '../dto/product-fromgame.dto';
 import { ProductsManyInput } from '../dto/product-many.input';
 import { ProductInput } from '../dto/product.dto';
 import { ProductsService } from '../providers/product.service';
@@ -23,6 +24,17 @@ export class ProductsController {
   @Post()
   create(@Body() body: ProductInput) {
     return this.productsService.create(body);
+  }
+
+  @Post("from_game")
+  createFromGame(@Body() body: ProductFromGameInput) {
+    return this.productsService.createFromGame(body);
+  }
+
+  @Post("export")
+  async exportItems(@Body() body: DeleteManyInput) {
+    const file = await this.productsService.exportItems(body.items);
+    return file;
   }
 
   @Patch(':id')

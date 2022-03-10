@@ -16,7 +16,7 @@
             </div>
           </template>
 
-          <!--template #end>
+          <template #end>
             <FileUpload
               mode="basic"
               accept="image/*"
@@ -25,8 +25,14 @@
               chooseLabel="Импорт"
               class="mr-2 inline-block"
             />
-            <Button label="Экспорт" icon="pi pi-upload" class="p-button-help" />
-          </template-->
+            <Button
+              :disabled="!selected || !selected.length || loading"
+              label="Экспорт"
+              icon="pi pi-upload"
+              class="p-button-help"
+              @click="exportItems()"
+            />
+          </template>
         </Toolbar>
         <DataTable
           :value="products.data"
@@ -656,7 +662,7 @@ export default {
           try {
             await this.$axios.delete('/store/products/bulk/', {
               data: {
-                items: this.selected.map((category) => category.id),
+                items: this.selected.map((product) => product.id),
               },
             })
             this.$toast.add({
@@ -669,6 +675,20 @@ export default {
           await this.$fetch()
         },
       })
+    },
+    async exportItems() {
+      this.loading = true
+      try {
+        const response = await this.$axios.post('/store/products/export', {
+          items: this.selected.map((product) => product.id),
+        })
+
+        let link = document.createElement('a')
+        link.href = "data:application/zip;base64," + response.data;
+        link.download = `${this.selected.length}-items.${this.$moment().format()}.zip`
+        link.click()
+      } catch {}
+      this.loading = false
     },
   },
 }
