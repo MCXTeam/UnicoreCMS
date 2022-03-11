@@ -1,4 +1,4 @@
-import { createWriteStream, existsSync, lstatSync, readFileSync, unlinkSync, writeFileSync } from 'fs';
+import { createWriteStream, existsSync, lstatSync, readFileSync, renameSync, unlinkSync, writeFileSync } from 'fs';
 import { nanoid } from 'nanoid';
 import { extname } from 'path';
 import { DiskStorageOptions } from 'multer';
@@ -43,6 +43,26 @@ export class StorageManager {
     const path = destination + '/' + filename;
 
     if (existsSync(path) && lstatSync(path).isFile()) unlinkSync(path);
+  }
+
+  static save(origin: string, buffer: Buffer): string {
+    const name = nanoid() + extname(origin)
+    const path = destination + '/' + name;
+
+    writeFileSync(path, buffer)
+    return name
+  }
+
+  static rename(filename: string): string {
+    const path = destination + '/' + filename;
+    const newname = nanoid() + extname(filename)
+    const newpath = destination + '/' + newname
+
+    if (existsSync(path) && lstatSync(path).isFile()) {
+      renameSync(path, newpath)
+      return newname
+    } else 
+      return null  
   }
 
   static async saveFromUrl(url: string): Promise<string> {

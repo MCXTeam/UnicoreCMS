@@ -17,14 +17,7 @@
           </template>
 
           <template #end>
-            <FileUpload
-              mode="basic"
-              accept="image/*"
-              :maxFileSize="1000000"
-              label="Import"
-              chooseLabel="Импорт"
-              class="mr-2 inline-block"
-            />
+            <Button :disabled="loading" label="Импорт" icon="pi pi-plus" class="mr-2" @click="openImportDialog()" />
             <Button
               :disabled="!selected || !selected.length || loading"
               label="Экспорт"
@@ -241,6 +234,80 @@
 
         <ValidationObserver v-slot="{ invalid }">
           <Dialog
+            :visible.sync="importDialog"
+            :closable="false"
+            :style="{ width: '600px' }"
+            :modal="true"
+            header="Импортирование товаров"
+            class="p-fluid"
+          >
+            <div class="field">
+              <label>Серверы</label>
+              <MultiSelect
+                display="chip"
+                :filter="true"
+                v-model="productMany.servers"
+                :options="servers"
+                optionLabel="name"
+                :placeholder="productMany.servers.length ? 'Выберите серверы' : 'Не выбраны'"
+                class="p-column-filter"
+              >
+                <template #option="slotProps">
+                  <div class="p-multiselect-representative-option">
+                    <Avatar v-if="slotProps.option.icon" :image="`${$config.apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
+                    <Avatar v-else icon="pi pi-image" shape="circle" />
+                    <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
+                  </div>
+                </template>
+              </MultiSelect>
+            </div>
+            <div class="field">
+              <label>Категории</label>
+              <AutoComplete
+                v-model="productMany.categories"
+                :multiple="true"
+                :suggestions="categories"
+                @complete="searchCategory($event)"
+                field="name"
+                appendTo="body"
+                :placeholder="productMany.categories.length ? 'Выберите катагории' : 'Не выбраны'"
+              >
+                <template #item="slotProps">
+                  <div class="flex align-items-center">
+                    <Avatar v-if="slotProps.item.icon" :image="`${$config.apiUrl + '/' + slotProps.item.icon}`" shape="circle" />
+                    <Avatar v-else icon="pi pi-image" shape="circle" />
+                    <span class="ml-2">{{ slotProps.item.name }} (#{{ slotProps.item.id }})</span>
+                  </div>
+                </template>
+              </AutoComplete>
+            </div>
+            <div class="field">
+              <FileUpload
+                :disabled="loading"
+                ref="importer"
+                mode="basic"
+                :customUpload="true"
+                accept="zip,application/octet-stream,application/zip,application/x-zip,application/x-zip-compressed"
+                :maxFileSize="1000000"
+                label="Import"
+                chooseLabel="Выберите файл"
+              />
+            </div>
+            <template #footer>
+              <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideImportDialog" />
+              <Button
+                :disabled="loading || invalid || !$_.get($refs, 'importer.files', []).length"
+                label="Импортировать"
+                icon="pi pi-check"
+                class="p-button-text"
+                @click="importItems"
+              />
+            </template>
+          </Dialog>
+        </ValidationObserver>
+
+        <ValidationObserver v-slot="{ invalid }">
+          <Dialog
             :visible.sync="productDialog"
             :closable="false"
             :style="{ width: '600px' }"
@@ -398,6 +465,7 @@ export default {
         categories: [],
       },
       productManyDialog: false,
+      importDialog: false,
       fileDialog: false,
       productDialog: false,
       filters: {
@@ -424,6 +492,7 @@ export default {
 
     this.productDialog = false
     this.productManyDialog = false
+    this.importDialog = false
     this.fileDialog = false
     this.loading = false
     this.selected = null
@@ -507,6 +576,9 @@ export default {
     hideManyDialog() {
       this.productManyDialog = false
     },
+    hideImportDialog() {
+      this.importDialog = false
+    },
     async openDialog(product = null) {
       this.updateMode = !!product
       if (product) {
@@ -534,6 +606,15 @@ export default {
         categories: [],
       }
       this.productManyDialog = true
+    },
+    async openImportDialog() {
+      this.productMany = {
+        price: null,
+        sale: null,
+        servers: [],
+        categories: [],
+      }
+      this.importDialog = true
     },
     openFileDialog(product) {
       this.product = this.$_.pick(product, this.$_.deepKeys(this.product))
@@ -676,6 +757,40 @@ export default {
         },
       })
     },
+    async importItems() {
+      this.loading = true
+      let formData = new FormData()
+      formData.append('file', this.$refs.importer.files[0])
+
+      if (this.productMany.servers && this.productMany.servers.length)
+        formData.append("servers", this.productMany.servers.map((server) => server.id))
+
+      if (this.productMany.categories && this.productMany.categories.length)
+        formData.append('categories', this.productMany.categories.map((category) => category.id))
+
+      try {
+        const resp = await this.$axios.post('/store/products/import', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        })
+        this.$toast.add({
+          severity: 'success',
+          detail: `Импортировано ${resp.data.length} продуктов`,
+          life: 3000,
+        })
+        await this.$fetch()
+      } catch {
+        this.fileDialog = false
+        this.$toast.add({
+          severity: 'error',
+          detail: 'Файл не поддерживается UnicoreCMS',
+          life: 3000,
+        })
+      }
+      this.hideImportDialog()
+      this.loading = false
+    },
     async exportItems() {
       this.loading = true
       try {
@@ -684,7 +799,7 @@ export default {
         })
 
         let link = document.createElement('a')
-        link.href = "data:application/zip;base64," + response.data;
+        link.href = 'data:application/zip;base64,' + response.data
         link.download = `${this.selected.length}-items.${this.$moment().format()}.zip`
         link.click()
       } catch {}

@@ -1,10 +1,11 @@
-import { DeleteManyInput, imageFileFilter, StorageManager } from '@common';
+import { DeleteManyInput, imageFileFilter, StorageManager, zipFileFilter } from '@common';
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Res, StreamableFile, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileFastifyInterceptor, MulterFile } from 'fastify-file-interceptor';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { ProductFromGameInput } from '../dto/product-fromgame.dto';
-import { ProductsManyInput } from '../dto/product-many.input';
+import { ProductManyInput, ProductsManyInput } from '../dto/product-many.input';
 import { ProductInput } from '../dto/product.dto';
+import { ProductsImportInput } from '../dto/products-import.input';
 import { ProductsService } from '../providers/product.service';
 
 @Controller('store/products')
@@ -37,6 +38,18 @@ export class ProductsController {
     return file;
   }
 
+  @Post('import')
+  @UseInterceptors(
+    FileFastifyInterceptor('file', {
+      storage: StorageManager.disk(),
+      fileFilter: zipFileFilter,
+    }),
+  )
+  importItems(@Body() body: ProductsImportInput, @UploadedFile() file: MulterFile) {
+    console.log(body)
+    return this.productsService.importItems(body, file.filename);
+  }
+  
   @Patch(':id')
   update(@Param('id', ParseIntPipe) id: number, @Body() body: ProductInput) {
     return this.productsService.update(id, body);

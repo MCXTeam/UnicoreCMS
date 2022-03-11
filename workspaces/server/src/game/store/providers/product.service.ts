@@ -1,5 +1,5 @@
 import { StorageManager } from '@common';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MulterFile } from 'fastify-file-interceptor';
 import * as JSZip from 'jszip';
@@ -9,8 +9,9 @@ import { FilterOperator, paginate, Paginated, PaginateQuery } from 'nestjs-pagin
 import { Server } from 'src/game/servers/entities/server.entity';
 import { In, Repository } from 'typeorm';
 import { ProductFromGameInput } from '../dto/product-fromgame.dto';
-import { ProductsManyInput } from '../dto/product-many.input';
+import { ProductManyInput, ProductsManyInput } from '../dto/product-many.input';
 import { ProductInput } from '../dto/product.dto';
+import { ProductsImportInput } from '../dto/products-import.input';
 import { Category } from '../entities/category.entity';
 import { Product } from '../entities/product.entity';
 
@@ -195,6 +196,53 @@ export class ProductsService {
     return zip.generateAsync({type: "base64"})
   }
 
+  async importItems(input: ProductsImportInput, filename: string, remove_tmp: boolean = true) {
+    const fileBuffer = StorageManager.read(filename)
+    if (remove_tmp)
+      StorageManager.remove(filename)
+    const zipTree = await JSZip.loadAsync(fileBuffer)
+    const content = await zipTree.file("content.json").async("string")
+
+    let servers: Server[] = []
+    let categories: Category[] = []
+
+    if (input.servers)
+      servers = await this.serversRepository.find({ where: { id: In(input.servers.split(",")) } });
+
+    if (input.categories)
+      categories = await this.categoriesRepository.find({ where: { id: In(input.categories.split(",").map(i => Number(i))) } });
+    
+    if (!content)
+      throw new BadRequestException()
+
+    const mapping: ProductMap[] = JSON.parse(content)
+    const products: Product[] = []
+
+    // Rename icons
+    await Promise.all(mapping.map(async (product, index) => {
+      const entity = new Product()
+
+      entity.name = product.name
+      entity.description = product.description
+      entity.nbt = product.nbt
+      entity.price = product.price
+      entity.sale = product.sale
+      entity.item_id = product.item_id
+      entity.servers = servers
+      entity.categories = categories
+
+      if (product.icon) {
+        const iconBuff = await zipTree.file("storage/" + product.icon).async("nodebuffer")
+        if (iconBuff)
+          entity.icon = StorageManager.save(product.icon, iconBuff)
+      }
+
+      products.push(entity)
+    }))
+
+    return this.productsRepository.save(products)
+  }
+
   async updateMany(input: ProductsManyInput) {
     const products = await this.productsRepository.find({
       where: {
@@ -202,6 +250,8 @@ export class ProductsService {
       },
       relations: ['servers', 'categories'],
     });
+    let servers_: Server[] = []
+    let categories_: Category[] = []
 
     const productsEdited = await Promise.all(
       products.map(async (product) => {
@@ -213,9 +263,11 @@ export class ProductsService {
 
         if (price) product.price = price;
 
-        if (servers && servers.length) product.servers = await this.serversRepository.find({ where: { id: In(servers) } });
+        if (servers_.length) product.servers = servers_
+        else if (servers && servers.length) product.servers = await this.serversRepository.find({ where: { id: In(servers) } });
 
-        if (categories && categories.length) product.categories = await this.categoriesRepository.find({ where: { id: In(categories) } });
+        if (categories_.length) product.categories = categories_
+        else if (categories && categories.length) product.categories = await this.categoriesRepository.find({ where: { id: In(categories) } });
 
         return product;
       }),
