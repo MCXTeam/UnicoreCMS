@@ -10,8 +10,8 @@
           <h2 class="ms-3 my-0 d-none d-md-block" v-text="$config.name" />
         </nuxt-link>
         <nuxt-link to="/cabinet" class="vs-navbar__item d-none d-lg-block ms-4"> <i class="bx bx-user"></i> Личный кабинет </nuxt-link>
-        <nuxt-link to="/cabinet/store" class="vs-navbar__item d-none d-lg-block"> <i class="bx bx-cart"></i> Магазин </nuxt-link>
-        <nuxt-link to="/cabinet/players" class="vs-navbar__item d-none d-lg-block"> <i class="bx bx-stats"></i> Игроки </nuxt-link>
+        <nuxt-link to="/store" class="vs-navbar__item d-none d-lg-block"> <i class="bx bx-cart"></i> Магазин </nuxt-link>
+        <nuxt-link to="/players" class="vs-navbar__item d-none d-lg-block"> <i class="bx bx-stats"></i> Игроки </nuxt-link>
         <nuxt-link to="/download" class="vs-navbar__item d-none d-lg-block"> <i class="bx bxl-windows"></i> Скачать </nuxt-link>
       </template>
       <template #right>
@@ -38,7 +38,7 @@
         <h1 v-text="name" class="py-3" />
         <div class="row">
           <div class="col">
-            <div class="panel cabinet-tab-panel mb-4">
+            <div class="panel cabinet-tab-panel mb-4" v-if="$route.path.startsWith('/cabinet')">
               <nuxt-link to="/cabinet"> <i class="bx bx-user"></i> Общее </nuxt-link>
               <nuxt-link to="/cabinet/stats"> <i class="bx bx-bar-chart-alt-2"></i> Статистика </nuxt-link>
               <nuxt-link to="/cabinet/donate"> <i class="bx bx-crown"></i> Донат </nuxt-link>
@@ -48,6 +48,13 @@
               <nuxt-link to="/cabinet/auth"> <i class="bx bx-bug"></i> История авторизаций </nuxt-link>
               <nuxt-link to="/cabinet/referals"> <i class="bx bxs-megaphone"></i> Рефералы </nuxt-link>
               <nuxt-link to="/cabinet/gifts"> <i class="bx bx-party"></i> Бонусы </nuxt-link>
+            </div>
+            <div v-else-if="$route.path.startsWith('/store')">
+              <div class="panel cabinet-tab-panel mb-4">
+                <nuxt-link class="no-exact" to="/store/products"> <i class='bx bx-store' ></i> Товары </nuxt-link>
+                <nuxt-link class="no-exact" to="/store/cart"> <i class='bx bx-cart-alt'></i> Корзина </nuxt-link>
+                <nuxt-link class="no-exact" to="/store/warehouse"> <i class='bx bx-package' ></i> Склад </nuxt-link>
+              </div>
             </div>
           </div>
           <div class="col-xl-9 pe-xl-5">

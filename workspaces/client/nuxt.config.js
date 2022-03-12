@@ -52,6 +52,11 @@ export default mainConfig({
           name: 'page/index',
           path: '/page/**',
           component: resolve(__dirname, 'pages/page/index.vue'),
+        },
+        {
+          name: 'store/index',
+          path: '/store',
+          redirect: '/store/products'
         }
       )
     }

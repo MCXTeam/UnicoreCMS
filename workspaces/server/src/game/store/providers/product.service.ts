@@ -15,7 +15,7 @@ import { ProductsImportInput } from '../dto/products-import.input';
 import { Category } from '../entities/category.entity';
 import { Product } from '../entities/product.entity';
 
-interface ProductMap {
+export interface ProductMap {
   name: string,
   icon?: string,
   description?: string,
@@ -23,6 +23,11 @@ interface ProductMap {
   price: number,
   sale?: number,
   item_id: string,
+}
+
+export type StoreServer = Server & {
+  categories_count: number,
+  products_count: number
 }
 
 @Injectable()
@@ -81,6 +86,25 @@ export class ProductsService {
 
   findOne(id: number, relations?: string[]) {
     return this.productsRepository.findOne(id, { relations });
+  }
+
+  async servers(): Promise<StoreServer[]> {
+    const servers = await Promise.all((await this.serversRepository.find()).map(async (serv: StoreServer) => {
+      serv.products_count = await this.productsRepository.createQueryBuilder('product')
+        .leftJoinAndSelect('product.servers', 'servers')
+        .where("servers.id = :id", { id: serv.id })
+        .getCount()
+
+      serv.categories_count = _((await this.productsRepository.createQueryBuilder('product')
+        .leftJoinAndSelect('product.servers', 'servers')
+        .leftJoinAndSelect('product.categories', 'categories')
+        .where("servers.id = :id", { id: serv.id })
+        .getMany()).map(prod => prod.categories).flat()).uniqBy(cat => cat.id).value().length
+
+      return serv
+    }))
+
+    return servers
   }
 
   async createFromGame(input: ProductFromGameInput) {
@@ -193,7 +217,7 @@ export class ProductsService {
     })
 
     zip.file("content.json", JSON.stringify(mapping));
-    return zip.generateAsync({type: "base64"})
+    return zip.generateAsync({ type: "base64" })
   }
 
   async importItems(input: ProductsImportInput, filename: string, remove_tmp: boolean = true) {
@@ -211,14 +235,13 @@ export class ProductsService {
 
     if (input.categories)
       categories = await this.categoriesRepository.find({ where: { id: In(input.categories.split(",").map(i => Number(i))) } });
-    
+
     if (!content)
       throw new BadRequestException()
 
     const mapping: ProductMap[] = JSON.parse(content)
     const products: Product[] = []
 
-    // Rename icons
     await Promise.all(mapping.map(async (product, index) => {
       const entity = new Product()
 

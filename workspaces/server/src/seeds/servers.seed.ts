@@ -1,12 +1,21 @@
+import { StorageManager } from '@common';
 import faker from '@faker-js/faker';
+import { readFileSync } from 'fs';
+import * as JSZip from 'jszip';
 import * as _ from 'lodash';
+import { Period } from 'src/game/donate/entities/period.entity';
+import { DonateGroup } from 'src/game/donate/groups/entities/donate-group.entity';
+import { GroupKit } from 'src/game/donate/groups/entities/group-kit.entity';
 import { ServerTableDto } from 'src/game/servers/dto/server-table.dto';
 import { Server } from 'src/game/servers/entities/server.entity';
 import { Mod } from 'src/game/servers/mods/entities/mod.entity';
 import { Online } from 'src/game/servers/online/entities/online.entity';
 import { Query } from 'src/game/servers/online/entities/query.entity';
 import { Category } from 'src/game/store/entities/category.entity';
+import { KitItem } from 'src/game/store/entities/kit-item.entity';
+import { Kit } from 'src/game/store/entities/kit.entity';
 import { Product } from 'src/game/store/entities/product.entity';
+import { ProductMap } from 'src/game/store/providers/product.service';
 import { Connection } from "typeorm";
 import { Seeder } from "typeorm-seeding";
 
@@ -138,26 +147,108 @@ export default class CreateServers implements Seeder {
       { server: servers[2] }
     ]
 
-    await connection.getRepository(Server).save(servers);
+    const servers_ = await connection.getRepository(Server).save(servers);
     await connection.createQueryBuilder().insert().into(Query).values(queries).execute();
     await connection.createQueryBuilder().insert().into(Online).values(onlines).execute();
+    const categories = await connection.getRepository(Category).save([{
+      name: "Minecraft",
+      icon: "default/minecraft.png"
+    }]);
 
-    // Products
-    // const categories = await connection.getRepository(Category).save([{
-    //   name: "Minecraft",
-    //   icon: "default/store/minecraft.png"
-    // }]);
+    try {
+      const fileBuffer = readFileSync("./../../compat/Vanilla-export.zip")
+      const zipTree = await JSZip.loadAsync(fileBuffer)
+      const content = await zipTree.file("content.json").async("string")
+      const mapping: ProductMap[] = JSON.parse(content)
+      const products: Product[] = []
 
-    // const products = [
+      await Promise.all(mapping.map(async (product, index) => {
+        const entity = new Product()
+  
+        entity.name = product.name
+        entity.description = product.description
+        entity.nbt = product.nbt
+        entity.price = product.price
+        entity.sale = product.sale
+        entity.item_id = product.item_id
+        entity.servers = servers_
+        entity.categories = categories
+  
+        if (product.icon) {
+          const iconBuff = await zipTree.file("storage/" + product.icon).async("nodebuffer")
+          if (iconBuff)
+            entity.icon = StorageManager.save(product.icon, iconBuff)
+        }
+  
+        products.push(entity)
+      }))
+
+      const productsEntities = await connection.getRepository(Product).save(products)
+
+      await connection.getRepository(Kit).save([{
+        name: "Ресурсы",
+        icon: "default/minecraft.png",
+        servers: servers_,
+        categories: categories,
+        items: [
+          {
+            product: productsEntities.find(p => p.item_id == "minecraft:iron_ingot"),
+            amount: 32
+          },
+          {
+            product: productsEntities.find(p => p.item_id == "minecraft:gold_ingot"),
+            amount: 16
+          },
+          {
+            product: productsEntities.find(p => p.item_id == "minecraft:diamond"),
+            amount: 8
+          },
+          {
+            product: productsEntities.find(p => p.item_id == "minecraft:emerald"),
+            amount: 8
+          }
+        ],
+        price: 25
+      }])
+    } catch (_) {}
+
+    const periods = await connection.getRepository(Period).save([
+      {
+        name: "1 месяц",
+        expire: 2592000,
+        multiplier: 1
+      },
+      {
+        name: "2 месяца",
+        expire: 5184000,
+        multiplier: 1.9
+      },
+      {
+        name: "3 месяца",
+        expire: 7776000,
+        multiplier: 2.7
+      },
+      {
+        name: "Навсегда",
+        expire: 0,
+        multiplier: 10
+      },
+    ])
+
+    // const groupKits = await connection.getRepository(GroupKit).save([
     //   {
-    //     name: "",
-    //     icon: "",
-    //     price: 0,
-    //     item_id: "",
-    //     categories, servers
+    //     name: "VIP"
     //   },
-    // ]
+    // ])
 
-    // connection.getRepository(Product).save(products)
+    // await connection.getRepository(DonateGroup).save([
+    //   {
+    //     ingame_id: "vip",
+    //     name: "Vip",
+    //     price: 100,
+    //     servers: servers_,
+    //     periods: periods
+    //   }
+    // ])
   }
 }

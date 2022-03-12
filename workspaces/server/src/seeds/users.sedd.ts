@@ -10,7 +10,7 @@ export default class CreateUsers implements Seeder {
   public async run(factory: any, connection: Connection): Promise<any> {
     if (envConfig.devseed) {
       const users = await Promise.all(
-        _.range(1000).map(async () => ({
+        _.range(250).map(async () => ({
           email: faker.internet.email(),
           username: faker.internet.userName(),
           password: await bcrypt.hash(faker.internet.password(), 10),

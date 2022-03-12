@@ -1,7 +1,7 @@
 import { ServerMiddleware } from '@nuxt/types'
 
 const SSRHandlerMiddleware: ServerMiddleware = function (req, res, next) {
-  const pathStarts = ['/auth', '/cabinet']
+  const pathStarts = ['/auth', '/cabinet', '/store', '/players']
 
   if (pathStarts.some((srt) => req.originalUrl?.startsWith(srt))) {
     // @ts-ignore

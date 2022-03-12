@@ -40,14 +40,6 @@
           <Column selectionMode="multiple" :styles="{ width: '3rem' }"></Column>
           <Column sortable field="id" header="ID" :styles="{ width: '8rem' }"></Column>
           <Column sortable field="name" header="Название"></Column>
-          <Column field="image" header="Картинка">
-            <template #body="slotProps">
-              <div class="col-12 md:col-6">
-                <Avatar v-if="!slotProps.data.image" icon="pi pi-image" size="xlarge" />
-                <ImagePreview v-else height="64" :src="`${$config.apiUrl + '/' + slotProps.data.image}`" preview />
-              </div>
-            </template>
-          </Column>
           <Column :styles="{ width: '12rem' }">
             <template #body="slotProps">
               <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
@@ -57,9 +49,10 @@
           </Column>
         </DataTable>
 
-        <Dialog :visible.sync="fileDialog" :style="{ width: '600px' }" :modal="true" header="Редактирование картинки" class="p-fluid">
-          <div class="grid mb-4 pt-2">
+        <Dialog :visible.sync="fileDialog" :style="{ width: '600px' }" :modal="true" header="Редактирование картинкок" class="p-fluid">
+          <div v-for="server in servers" :key="server.id" class="grid mb-4 pt-2">
             <div class="col-12 md:col-6">
+              <h4 v-text="server.name" />
               <Avatar v-if="!kit.image" icon="pi pi-image" size="xlarge" />
               <ImagePreview v-else width="200" :src="`${$config.apiUrl + '/' + kit.image}`" preview />
             </div>
@@ -152,6 +145,7 @@ export default {
         description: null,
         image: null,
       },
+      servers: null,
       kitDialog: false,
       filters: {
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -163,6 +157,7 @@ export default {
     this.kitDialog = false
     this.fileDialog = false
     this.kits = await this.$axios.get('/donates/group-kits').then((res) => res.data)
+    this.servers = await this.$axios.get('/servers').then((res) => res.data)
     this.loading = false
   },
   methods: {

@@ -3,7 +3,7 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Res, S
 import { FileFastifyInterceptor, MulterFile } from 'fastify-file-interceptor';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { ProductFromGameInput } from '../dto/product-fromgame.dto';
-import { ProductManyInput, ProductsManyInput } from '../dto/product-many.input';
+import { ProductsManyInput } from '../dto/product-many.input';
 import { ProductInput } from '../dto/product.dto';
 import { ProductsImportInput } from '../dto/products-import.input';
 import { ProductsService } from '../providers/product.service';
@@ -20,6 +20,11 @@ export class ProductsController {
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.productsService.findOne(id, ['categories', 'servers']);
+  }
+
+  @Get("protected/servers")
+  servers() {
+    return this.productsService.servers();
   }
 
   @Post()

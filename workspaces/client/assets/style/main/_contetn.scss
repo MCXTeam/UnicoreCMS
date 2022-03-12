@@ -183,7 +183,8 @@ a.server-block:hover {
     }
 
     &:hover,
-    &.nuxt-link-exact-active {
+    &.nuxt-link-exact-active,
+    &.nuxt-link-active.no-exact {
       color: rgba(var(--vs-text), 1) !important;
       text-decoration: none;
       padding-left: 25px !important;
