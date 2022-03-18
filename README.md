@@ -7,6 +7,8 @@
  
 [![Build Status](https://github.com/UnicoreProject/UnicoreCMS/actions/workflows/build.yml/badge.svg)](https://github.com/UnicoreProject/UnicoreCMS/actions)
 
+[Документация](https://unicore.uno/docs/) | [Покупка](https://unicore.uno/buy/)
+
 > **UnicoreCMS** - Headless CMS для модовых проектов Minecraft. Современные технологии и профессиональный подход, невероятная производительность и скорость. 
 
 ## Преимущества
