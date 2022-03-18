@@ -1,5 +1,7 @@
 import { Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post } from '@nestjs/common';
 import { Public } from 'src/auth/decorators/public.decorator';
+import { Permission } from 'unicore-common';
+import { Permissions } from '../roles/decorators/permission.decorator';
 import { PageInput } from './dto/page.input';
 import { PagesService } from './pages.service';
 
@@ -7,6 +9,7 @@ import { PagesService } from './pages.service';
 export class PagesController {
   constructor(private pagesService: PagesService) {}
 
+  @Permissions([Permission.AdminEmailRead, Permission.AdminPagesCreate])
   @Post()
   create(@Body() body: PageInput) {
     return this.pagesService.create(body);
@@ -48,11 +51,13 @@ export class PagesController {
     return page;
   }
 
+  @Permissions([Permission.AdminEmailRead, Permission.AdminPagesUpdate])
   @Patch(':id')
   update(@Param('id') id: number, @Body() body: PageInput) {
     return this.pagesService.update(id, body);
   }
 
+  @Permissions([Permission.AdminEmailRead, Permission.AdminPagesDelete])
   @Delete(':id')
   remove(@Param('id') id: number) {
     return this.pagesService.remove(id);

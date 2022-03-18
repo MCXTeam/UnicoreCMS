@@ -14,7 +14,7 @@ import { RolesService } from './roles.service';
     {
       provide: APP_GUARD,
       useClass: PermissionGuard,
-    },
+    }
   ],
   controllers: [RolesController],
 })

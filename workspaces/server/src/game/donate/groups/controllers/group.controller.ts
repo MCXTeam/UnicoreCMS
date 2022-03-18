@@ -25,11 +25,13 @@ import { DonateGroupsService } from '../providers/groups.service';
 export class DonateGroupsController {
   constructor(private donateGroupsService: DonateGroupsService) { }
 
+  @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsCreate])
   @Post()
   create(@Body() body: GroupInput) {
     return this.donateGroupsService.create(body);
   }
 
+  @Permissions([Permission.AdminDashboard, Permission.EditorDonateRead])
   @Get()
   find() {
     return this.donateGroupsService.find(['servers']);
@@ -56,7 +58,7 @@ export class DonateGroupsController {
     return this.donateGroupsService.buy(user, ip, body)
   }
 
-
+  @Permissions([Permission.AdminDashboard, Permission.EditorDonateRead])
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
     const server = await this.donateGroupsService.findOne(id, ['periods', 'servers', 'kits']);
@@ -68,21 +70,25 @@ export class DonateGroupsController {
     return server;
   }
 
+  @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsUpdate])
   @Patch(':id')
   update(@Param('id', ParseIntPipe) id: number, @Body() body: GroupInput) {
     return this.donateGroupsService.update(id, body);
   }
 
+  @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsDelete])
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.donateGroupsService.remove(id);
   }
 
+  @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsDeleteMany])
   @Delete('bulk/:ids')
   removeMany(@Body() body: DeleteManyInput) {
     return this.donateGroupsService.removeMany(body.items);
   }
 
+  @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsUpdate])
   @Patch('icon/:id')
   @UseInterceptors(
     FileFastifyInterceptor('file', {
@@ -94,6 +100,7 @@ export class DonateGroupsController {
     return this.donateGroupsService.updateIcon(id, file);
   }
 
+  @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsUpdate])
   @Delete('icon/:id')
   removeMedia(@Param('id', ParseIntPipe) id: number) {
     return this.donateGroupsService.removeIcon(id);

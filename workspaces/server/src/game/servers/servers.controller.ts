@@ -13,7 +13,9 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileFastifyInterceptor, MulterFile } from 'fastify-file-interceptor';
+import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { Public } from 'src/auth/decorators/public.decorator';
+import { Permission } from 'unicore-common';
 import { ServerCreateInput } from './dto/server-create.input';
 import { ServerUpdateInput } from './dto/server-update.input';
 import { ServerMedia } from './enums/server-media.enum';
@@ -23,6 +25,7 @@ import { ServersService } from './servers.service';
 export class ServersController {
   constructor(private serversService: ServersService) {}
 
+  @Permissions([Permission.AdminDashboard, Permission.AdminServersCreate])
   @Post()
   create(@Body() body: ServerCreateInput) {
     return this.serversService.create(body);
@@ -46,16 +49,19 @@ export class ServersController {
     return server;
   }
 
+  @Permissions([Permission.AdminDashboard, Permission.AdminServersUpdate])
   @Patch(':id')
   update(@Param('id') id: string, @Body() body: ServerUpdateInput) {
     return this.serversService.update(id, body);
   }
 
+  @Permissions([Permission.AdminDashboard, Permission.AdminServersDelete])
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.serversService.remove(id);
   }
 
+  @Permissions([Permission.AdminDashboard, Permission.AdminServersUpdate])
   @Patch(':type/:id')
   @UseInterceptors(
     FileFastifyInterceptor('file', {
@@ -67,6 +73,7 @@ export class ServersController {
     return this.serversService.updateMedia(id, type, file);
   }
 
+  @Permissions([Permission.AdminDashboard, Permission.AdminServersUpdate])
   @Delete(':type/:id')
   removeMedia(@Param('id') id: string, @Param('type', new ParseEnumPipe(ServerMedia)) type: ServerMedia) {
     return this.serversService.removeMedia(id, type);

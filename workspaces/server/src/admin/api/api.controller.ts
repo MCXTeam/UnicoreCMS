@@ -1,7 +1,9 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { SuperUserGuard } from '../roles/guards/superuser.guard';
 import { ApiService } from './api.service';
 import { ApiInput } from './dto/api.input';
 
+@UseGuards(SuperUserGuard)
 @Controller('admin/api')
 export class ApiController {
   constructor(private apiService: ApiService) {}

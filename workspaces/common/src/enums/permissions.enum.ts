@@ -49,7 +49,7 @@ export enum Permission {
   EditorNewsDelete = "editor.news.delete",
   EditorNewsDeleteMany = "editor.news.delete.many",
 
-  EditorDonateGroupsRead = "editor.groups.read",
+  EditorDonateRead = "editor.groups.read",
 
   EditorDonateGroupsCreate = "editor.donate.groups.create",
   EditorDonateGroupsUpdate = "editor.donate.groups.update",
@@ -82,6 +82,8 @@ export enum Permission {
   EditorStoreProductsUpdateMany = "editor.store.products.update.many",
   EditorStoreProductsDelete = "editor.store.products.delete",
   EditorStoreProductsDeleteMany = "editor.store.products.delete.many",
+  EditorStoreProductsExport = "editor.store.products.export",
+  EditorStoreProductsImport = "editor.store.products.import",
 
   EditorStoreKitsCreate = "editor.store.kits.create",
   EditorStoreKitsUpdate = "editor.store.kits.update",

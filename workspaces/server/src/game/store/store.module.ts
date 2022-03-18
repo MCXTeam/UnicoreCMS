@@ -16,7 +16,7 @@ import { KitsService } from './providers/kits.service';
 import { Kit } from './entities/kit.entity';
 
 @Module({
-  providers: [StoreService, CategoriesService, StoreService, ProductsService, KitsService],
+  providers: [StoreService, CategoriesService, ProductsService, KitsService],
   imports: [TypeOrmModule.forFeature([Category, Product, Server, Kit]), WarehouseModule, CartModule],
   exports: [StoreService],
   controllers: [StoreController, CategoriesController, KitsController, ProductsController],

@@ -37,11 +37,13 @@ export class SkinController {
     return this.skinsService.updateCloakMe(req, file)
   }
 
+  @Permissions([Permission.UserCabinetSkin])
   @Delete('skin')
   removeSkinMe(@CurrentUser() user: User) {
     return this.skinsService.removeSkin(user)
   }
 
+  @Permissions([Permission.UserCabinetCloak])
   @Delete('cloak')
   removeCloakMe(@CurrentUser() user: User) {
     return this.skinsService.removeCloak(user)

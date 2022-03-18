@@ -167,7 +167,7 @@ export default {
         await this.$axios.post('/admin/api', this.token)
         this.$toast.add({
           severity: 'success',
-          detail: 'Гифт-код успешно добавлен',
+          detail: 'API-ключ успешно добавлен',
           life: 3000,
         })
         await this.$fetch()

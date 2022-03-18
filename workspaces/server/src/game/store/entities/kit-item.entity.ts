@@ -24,7 +24,7 @@ export class KitItem {
     nullable: false,
   })
   @JoinColumn()
-  kit?: Product;
+  kit?: Kit;
 
   @Column()
   amount: number;

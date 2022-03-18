@@ -1,8 +1,8 @@
 <template>
   <div class="layout-menu-container">
     <AppSubmenu :items="model" class="layout-menu" :root="true" @menuitem-click="onMenuItemClick" @keydown="onKeyDown" />
-    <a href="https://www.primefaces.org/primeblocks-vue" class="block mt-3">
-      <img alt="unicoredocs" src="" class="w-full" />
+    <a target="_blank" href="https://unicore.uno/docs" class="block mt-3 docs-image">
+      <img alt="unicoredocs" src="/docs.jpg" class="w-full" />
     </a>
   </div>
 </template>

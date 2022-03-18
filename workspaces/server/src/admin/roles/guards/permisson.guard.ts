@@ -31,7 +31,7 @@ export function transformPermissions(userPart: Partial<User>) {
   return user
 }
 
-export async function matchPermission(args: PermissionArgs, request: any): Promise<boolean> {
+export function matchPermission(args: PermissionArgs, request: any): boolean {
   const user: User = request.user;
 
   // Первым делом проверяем пользователя на SuperUser aka root
@@ -116,7 +116,7 @@ export async function matchPermission(args: PermissionArgs, request: any): Promi
 export class PermissionGuard implements CanActivate {
   constructor(private reflector: Reflector) { }
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  canActivate(context: ExecutionContext): boolean {
     const permissions = this.reflector.getAllAndOverride<PermissionArgs>(PERMISSIONS_KEY, [context.getHandler(), context.getClass()]);
 
     if (!permissions) {
