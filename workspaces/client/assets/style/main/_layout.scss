@@ -197,3 +197,32 @@ hr {
   border: 1px solid rgba(var(--vs-text), 0.05);
 }
 
+.store-table-overflow {
+  overflow-y: auto;
+}
+
+.store-table {
+  width: 100%;
+  min-width: 500px;
+  border-collapse: collapse;
+
+  tr {
+    border-bottom: 2px solid rgba(var(--vs-text), 0.05);
+
+    td {
+      position: relative;
+      padding: 7px 0;
+    }
+  }
+
+  h4, h5, span, strike {
+    line-height: 15px;
+  }
+
+  .sale-wrapper {
+    position: absolute;
+    top: 7px;
+    line-height: 20px;
+  }
+}
+

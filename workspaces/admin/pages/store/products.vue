@@ -439,10 +439,11 @@ export default {
       products: {
         data: null,
         meta: {
-          id: null,
-          name: null,
-          description: null,
-          icon: null,
+          itemsPerPage:	20,
+          totalItems: 0,
+          currentPage: 0,
+          totalPages: 0,
+          sortBy: null
         },
       },
       loading: true,

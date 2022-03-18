@@ -57,8 +57,8 @@ export const envConfig: EnvConfig = {
   databaseType: env.get("DATABASE_TYPE").default("mysql").asString(),
   databaseHost: env.get("DATABASE_HOST").default("127.0.0.1").asString(),
   databasePort: env.get("DATABASE_PORT").default(3306).asPortNumber(),
-  databaseUser: env.get("DATABASE_USER").required().asString(),
-  databasePassword: env.get("DATABASE_PASSWORD").required().asString(),
+  databaseUser: env.get("DATABASE_USER").asString(),
+  databasePassword: env.get("DATABASE_PASSWORD").asString(),
   databaseName: env.get("DATABASE_NAME").required().asString(),
 
   // JWT
