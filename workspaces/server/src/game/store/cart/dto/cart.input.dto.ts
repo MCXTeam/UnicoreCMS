@@ -1,4 +1,4 @@
-import { IsDefined, IsInt, IsString } from "class-validator";
+import { IsDefined, IsInt, IsString, Max, Min } from "class-validator";
 
 export class CartInput {
   @IsDefined()
@@ -11,5 +11,7 @@ export class CartInput {
   
   @IsDefined()
   @IsInt()
+  @Min(1)
+  @Max(10000)
   amount: number
 }

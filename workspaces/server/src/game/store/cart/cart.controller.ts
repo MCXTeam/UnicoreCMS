@@ -15,22 +15,22 @@ export class CartController {
     return this.cartService.findByServer(user, id)
   }
 
-  @Post()
+  @Post("add")
   add(@CurrentUser() user: User, @Body() body: CartInput) {
     return this.cartService.add(user, body.product_id, body.server_id, body.amount)
   }
 
-  @Post("buy")
-  buy(@CurrentUser() user: User) {
-    return this.cartService.buy(user)
+  @Post("buy/:id")
+  buy(@CurrentUser() user: User, @Param('id') id: string) {
+    return this.cartService.buy(user, id)
   }
 
-  @Delete()
-  clearOwn(@CurrentUser() user: User) {
-    return this.cartService.clearOwn(user)
+  @Delete('server/:id')
+  clearOwn(@CurrentUser() user: User, @Param('id') id: string) {
+    return this.cartService.clearOwn(user, id)
   }
 
-  @Delete(':id')
+  @Delete('item/:id')
   removeOwn(@CurrentUser() user: User, @Param('id', ParseIntPipe) id: number) {
     return this.cartService.removeOwn(user, id)
   }

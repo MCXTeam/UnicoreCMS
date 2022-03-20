@@ -11,7 +11,7 @@ import * as _ from "lodash"
 
 @Injectable()
 export class CartService {
-  constructor (
+  constructor(
     @InjectRepository(CartItem)
     private cartItemsRepository: Repository<CartItem>,
     @InjectRepository(WarehouseItem)
@@ -21,7 +21,7 @@ export class CartService {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
     private serversService: ServersService
-  ) {}
+  ) { }
 
   resolver(repo: Repository<WarehouseItem | CartItem>, server: Server, user: User, product: Product) {
     return repo.findOne({ server, user, product })
@@ -42,9 +42,9 @@ export class CartService {
 
   async add(user: User, product_id: number, server_id: string, amount: number) {
     const server = await this.serversService.findOne(server_id)
-    const product = await this.productsRepository.findOne(product_id)
+    const product = await this.productsRepository.findOne(product_id, { relations: ["servers"] })
 
-    if (!product || !server)
+    if (!product || !server || !product.servers.find(srv => srv.id == server.id))
       throw new BadRequestException()
 
     let cartItem = await this.resolver(this.cartItemsRepository, server, user, product) as CartItem
@@ -63,14 +63,19 @@ export class CartService {
     return this.cartItemsRepository.save(cartItem)
   }
 
-  async clearOwn(user: User) {
-    const cartItems = await this.cartItemsRepository.find({ user })
+  async clearOwn(user: User, server_id: string) {
+    const server = await this.serversService.findOne(server_id)
+
+    if (!server)
+      throw new BadRequestException()
+
+    const cartItems = await this.cartItemsRepository.find({ user, server })
 
     return this.cartItemsRepository.remove(cartItems)
   }
 
   async clear(user_uuid: string) {
-    const user =  await this.usersRepository.findOne(user_uuid)
+    const user = await this.usersRepository.findOne(user_uuid)
     const cartItems = await this.cartItemsRepository.find({ user })
 
     if (!user || !cartItems)
@@ -91,34 +96,39 @@ export class CartService {
     return this.cartItemsRepository.remove(cartItem)
   }
 
-  async buy(user: User) {
-    const cartItems = await this.cartItemsRepository.find({ user })
+  async buy(user: User, server_id: string) {
+    const server = await this.serversService.findOne(server_id)
+
+    if (!server)
+      throw new BadRequestException()
+
+    const cartItems = await this.cartItemsRepository.find({ where: { user, server }, relations: ["server", "product"] })
     const price = _.sum(cartItems.map(cartItem => (cartItem.product.price - cartItem.product.price * cartItem.product.sale / 100) * cartItem.amount))
-    
+
     if (user.real < price)
       throw new BadRequestException()
 
-      let warehouseItems = await Promise.all(cartItems.map(async cartItem => {
-        let warehouseItem = await this.resolver(this.warehouseItemsRepository, cartItem.server, user, cartItem.product) as WarehouseItem
+    let warehouseItems = await Promise.all(cartItems.map(async cartItem => {
+      let warehouseItem = await this.resolver(this.warehouseItemsRepository, cartItem.server, user, cartItem.product) as WarehouseItem
 
-        if (warehouseItem) {
-          warehouseItem.amount += cartItem.amount
-        } else {
-          warehouseItem = new WarehouseItem()
-    
-          warehouseItem.product = cartItem.product
-          warehouseItem.server = cartItem.server
-          warehouseItem.user = user
-          warehouseItem.amount = cartItem.amount
-        }
+      if (warehouseItem) {
+        warehouseItem.amount += cartItem.amount
+      } else {
+        warehouseItem = new WarehouseItem()
 
-        return warehouseItem
-      }))
-  
-      user.real = user.real - price
+        warehouseItem.product = cartItem.product
+        warehouseItem.server = cartItem.server
+        warehouseItem.user = user
+        warehouseItem.amount = cartItem.amount
+      }
 
-      await this.usersRepository.save(user)
-      await this.cartItemsRepository.remove(cartItems)
-      return this.warehouseItemsRepository.save(warehouseItems)
+      return warehouseItem
+    }))
+
+    user.real = user.real - price
+
+    await this.usersRepository.save(user)
+    await this.cartItemsRepository.remove(cartItems)
+    return this.warehouseItemsRepository.save(warehouseItems)
   }
 }

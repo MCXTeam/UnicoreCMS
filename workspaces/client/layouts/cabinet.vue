@@ -1,6 +1,6 @@
 <template>
   <div>
-    <vs-navbar class="cabinet-navbar" not-line square center-collapsed>
+    <vs-navbar class="cabinet-navbar" not-line fixed center-collapsed>
       <template #left>
         <vs-button class="d-lg-none d-md-block me-4" flat icon>
           <i class="bx bx-menu"></i>
@@ -33,34 +33,33 @@
         </div>
       </template>
     </vs-navbar>
-    <div id="padding-scroll-content" class="square">
-      <div class="container cabinet-container">
-        <h1 v-text="name" class="py-3" />
-        <div class="row">
-          <div class="col">
-            <div class="panel cabinet-tab-panel mb-4" v-if="$route.path.startsWith('/cabinet')">
-              <nuxt-link to="/cabinet"> <i class="bx bx-user"></i> Общее </nuxt-link>
-              <nuxt-link to="/cabinet/stats"> <i class="bx bx-bar-chart-alt-2"></i> Статистика </nuxt-link>
-              <nuxt-link to="/cabinet/donate"> <i class="bx bx-crown"></i> Донат </nuxt-link>
-              <nuxt-link to="/cabinet/settings"> <i class="bx bx-edit-alt"></i> Настройки и безопасность </nuxt-link>
-              <nuxt-link to="/cabinet/payment"> <i class="bx bx-wallet-alt"></i> Пополнение и перевод </nuxt-link>
-              <nuxt-link to="/cabinet/history"> <i class="bx bx-history"></i> Транзакции и покупки </nuxt-link>
-              <nuxt-link to="/cabinet/auth"> <i class="bx bx-bug"></i> История авторизаций </nuxt-link>
-              <nuxt-link to="/cabinet/referals"> <i class="bx bxs-megaphone"></i> Рефералы </nuxt-link>
-              <nuxt-link to="/cabinet/gifts"> <i class="bx bx-party"></i> Бонусы </nuxt-link>
-            </div>
-            <div v-else-if="$route.path.startsWith('/store')">
-              <div class="panel cabinet-tab-panel mb-4">
-                <nuxt-link class="no-exact" to="/store/products"> <i class='bx bx-store' ></i> Товары </nuxt-link>
-                <nuxt-link class="no-exact" to="/store/cart"> <i class='bx bx-cart-alt'></i> Корзина </nuxt-link>
-                <nuxt-link class="no-exact" to="/store/warehouse"> <i class='bx bx-package' ></i> Склад </nuxt-link>
-              </div>
+    <div class="container cabinet-container">
+      <h1 v-text="name" class="py-3" />
+      <div class="row">
+        <div class="col">
+          <div class="panel cabinet-tab-panel mb-4" v-if="$route.path.startsWith('/cabinet')">
+            <nuxt-link to="/cabinet"> <i class="bx bx-user"></i> Общее </nuxt-link>
+            <nuxt-link to="/cabinet/stats"> <i class="bx bx-bar-chart-alt-2"></i> Статистика </nuxt-link>
+            <nuxt-link to="/cabinet/donate"> <i class="bx bx-crown"></i> Донат </nuxt-link>
+            <nuxt-link to="/cabinet/settings"> <i class="bx bx-edit-alt"></i> Настройки и безопасность </nuxt-link>
+            <nuxt-link to="/cabinet/payment"> <i class="bx bx-wallet-alt"></i> Пополнение и перевод </nuxt-link>
+            <nuxt-link to="/cabinet/history"> <i class="bx bx-history"></i> Транзакции и покупки </nuxt-link>
+            <nuxt-link to="/cabinet/auth"> <i class="bx bx-bug"></i> История авторизаций </nuxt-link>
+            <nuxt-link to="/cabinet/referals"> <i class="bx bxs-megaphone"></i> Рефералы </nuxt-link>
+            <nuxt-link to="/cabinet/gifts"> <i class="bx bx-party"></i> Бонусы </nuxt-link>
+          </div>
+          <div v-else-if="$route.path.startsWith('/store')">
+            <div class="panel cabinet-tab-panel mb-4">
+              <nuxt-link class="no-exact" to="/store/products"> <i class="bx bx-store"></i> Товары </nuxt-link>
+              <nuxt-link class="no-exact" to="/store/cart"> <i class="bx bx-cart-alt"></i> Корзина </nuxt-link>
+              <nuxt-link class="no-exact" to="/store/warehouse"> <i class="bx bx-package"></i> Склад </nuxt-link>
             </div>
           </div>
-          <div class="col-xl-9 pe-xl-5">
-            <div class="panel px-0 py-4">
-              <nuxt-child />
-            </div>
+          <component v-if="sidebar_component" :is="sidebar_component.component" v-bind="sidebar_component.payload" />
+        </div>
+        <div class="col-xl-9 pe-xl-5">
+          <div class="panel px-0 py-4">
+            <nuxt-child />
           </div>
         </div>
       </div>
@@ -74,10 +73,24 @@ import SkinViewer2D from '../../admin/components/SkinView2D.vue'
 
 export default {
   middleware: ['auth', 'verify'],
+  data() {
+    return {
+      sidebar_component: null,
+    }
+  },
+  created() {
+    this.$nuxt.$on('setStoreSidebar', ($event) => (this.sidebar_component = $event))
+    this.$nuxt.$on('setStoreSidebarLoadingState', (loading) => (this.sidebar_component.payload = { ...this.sidebar_component.payload, loading }))
+  },
   computed: {
     ...mapGetters({
       name: 'unicore/name',
     }),
+  },
+  methods: {
+    updateSidebar(value) {
+      alert(1)
+    },
   },
   components: {
     SkinViewer2D,

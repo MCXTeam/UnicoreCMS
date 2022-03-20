@@ -31,6 +31,16 @@ export class ProductsController {
     return this.productsService.servers();
   }
 
+  @Get("protected/servers/:id")
+  server(@Param('id') id: string) {
+    return this.productsService.server(id);
+  }
+
+  @Get("protected/products")
+  findProtected(@Paginate() query: PaginateQuery) {
+    return this.productsService.findProtected(query);
+  }
+
   @Permissions([Permission.AdminDashboard, Permission.EditorStoreProductsCreate])
   @Post()
   create(@Body() body: ProductInput) {

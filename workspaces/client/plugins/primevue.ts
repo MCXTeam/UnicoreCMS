@@ -8,6 +8,7 @@ import Skeleton from 'primevue/skeleton'
 import Avatar from 'primevue/avatar'
 import Dropdown from 'primevue/dropdown';
 import ConfirmDialog from 'primevue/confirmdialog';
+import Slider from 'primevue/slider';
 
 Vue.use(ConfirmationService);
 
@@ -17,6 +18,7 @@ Vue.component('ProgressBar', ProgressBar)
 Vue.component('Avatar', Avatar)
 Vue.component('Dropdown', Dropdown)
 Vue.component('ConfirmDialog', ConfirmDialog)
+Vue.component('Slider', Slider)
 
 Vue.use(PrimeVue, {
   ripple: true,

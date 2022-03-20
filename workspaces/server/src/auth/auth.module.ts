@@ -7,7 +7,6 @@ import UsersModule from 'src/admin/users/users.module';
 import { envConfig } from 'unicore-common';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { GravitModule } from './gravit/gravit.module';
 import { AuthController } from './auth.controller';
 import { RefreshToken } from './entities/refresh-token.entity';
 import { TokensService } from './tokens.service';

@@ -4,12 +4,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { MulterFile } from 'fastify-file-interceptor';
 import * as JSZip from 'jszip';
 import * as _ from 'lodash';
-import { zipWith } from 'lodash';
 import { FilterOperator, paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { Server } from 'src/game/servers/entities/server.entity';
 import { In, Repository } from 'typeorm';
+import { PaginatedProductProtectedDto } from '../dto/paginated-product-protected.dto';
 import { ProductFromGameInput } from '../dto/product-fromgame.dto';
-import { ProductManyInput, ProductsManyInput } from '../dto/product-many.input';
+import { ProductsManyInput } from '../dto/product-many.input';
 import { ProductInput } from '../dto/product.dto';
 import { ProductsImportInput } from '../dto/products-import.input';
 import { Category } from '../entities/category.entity';
@@ -26,8 +26,11 @@ export interface ProductMap {
 }
 
 export type StoreServer = Server & {
-  categories_count: number,
-  products_count: number
+  categories_count?: number,
+  products_count?: number,
+  categories?: Category[],
+  min_price?: number,
+  max_price?: number
 }
 
 @Injectable()
@@ -77,11 +80,50 @@ export class ProductsService {
       searchableColumns: ['id', 'name', 'item_id', 'price', 'sale'],
       defaultSortBy: [['id', 'DESC']],
       filterableColumns: {
-        price: [FilterOperator.GTE, FilterOperator.LTE],
-        sale: [FilterOperator.GTE, FilterOperator.LTE],
+        price: [FilterOperator.BTW],
+        sale: [FilterOperator.BTW],
       },
       maxLimit: 500,
     });
+  }
+
+  async findProtected(query: PaginateQuery): Promise<PaginatedProductProtectedDto> {
+    const queryBuilder = this.productsRepository
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.servers', 'servers')
+      .leftJoinAndSelect('product.categories', 'categories');
+
+      console.log(query)
+
+    if (query?.filter?.categories && !Array.isArray(query.filter.categories)) query.filter.categories = query.filter.categories.split(',');
+
+    if (query.filter?.server && query.filter?.categories) {
+      queryBuilder.andWhere('servers.id = :server AND categories.id IN(:...categories)', {
+        server: query.filter.server,
+        categories: (query.filter.categories as string[]).filter(val => val),
+      });
+    } else if (query.filter?.server) {
+      queryBuilder.andWhere('servers.id = :server', { server: query.filter.server });
+    }
+
+    const ids = (await queryBuilder.getMany()).map((product) => product.id);
+
+    const qb = this.productsRepository
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.categories', 'categories')
+      .where({
+        id: In(ids),
+      });
+
+    return new PaginatedProductProtectedDto(await paginate(query, qb, {
+      sortableColumns: ['id', 'name', 'price'],
+      searchableColumns: ['id', 'name'],
+      defaultSortBy: [['id', 'DESC']],
+      filterableColumns: {
+        price: [FilterOperator.BTW]
+      },
+      maxLimit: 20,
+    }));
   }
 
   findOne(id: number, relations?: string[]) {
@@ -105,6 +147,25 @@ export class ProductsService {
     }))
 
     return servers
+  }
+
+  async server(id: string): Promise<StoreServer> {
+
+    const server: StoreServer = await this.serversRepository.findOne(id)
+
+    if (!server)
+      throw new NotFoundException()
+
+    server.categories = _((await this.productsRepository.createQueryBuilder('product')
+      .leftJoinAndSelect('product.servers', 'servers')
+      .leftJoinAndSelect('product.categories', 'categories')
+      .where("servers.id = :id", { id: server.id })
+      .getMany()).map(prod => prod.categories).flat()).uniqBy(cat => cat.id).value()
+
+    server.min_price = (await this.productsRepository.findOne({ order: { price: "ASC" } }))?.price || 0
+    server.max_price = (await this.productsRepository.findOne({ order: { price: "DESC" } }))?.price || 0
+
+    return server
   }
 
   async createFromGame(input: ProductFromGameInput) {

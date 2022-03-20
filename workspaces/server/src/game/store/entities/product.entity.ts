@@ -29,7 +29,9 @@ export class Product {
   @OneToMany(() => KitItem, (item) => item.product)
   kit_items: KitItem[];
 
-  @ManyToMany(() => Category, (category) => category.products)
+  @ManyToMany(() => Category, (category) => category.products, {
+    eager: true
+  })
   @JoinTable()
   categories: Category[];
 
