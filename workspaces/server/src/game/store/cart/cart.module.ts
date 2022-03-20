@@ -8,9 +8,11 @@ import { WarehouseItem } from '../warehouse/entities/warehouse-item.entity';
 import UsersModule from 'src/admin/users/users.module';
 import { ServersModule } from 'src/game/servers/servers.module';
 import { User } from 'src/admin/users/entities/user.entity';
+import { CartItemKit } from './entities/cart-item-kit.entity';
+import { Kit } from '../entities/kit.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Product, CartItem, WarehouseItem, User]), UsersModule, ServersModule],
+  imports: [TypeOrmModule.forFeature([Product, CartItem, WarehouseItem, User, CartItemKit, Kit]), UsersModule, ServersModule],
   providers: [CartService],
   controllers: [CartController],
 })

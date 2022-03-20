@@ -1,14 +1,14 @@
 import { User } from 'src/admin/users/entities/user.entity';
 import { Server } from 'src/game/servers/entities/server.entity';
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { Product } from '../../entities/product.entity';
+import { CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Kit } from '../../entities/kit.entity';
 
 @Entity()
-export class WarehouseItem {
+export class CartItemKit {
   @PrimaryGeneratedColumn()
   id: number
 
-  @ManyToOne(() => Product, {
+  @ManyToOne(() => Kit, {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
@@ -16,7 +16,7 @@ export class WarehouseItem {
     nullable: false,
   })
   @JoinColumn()
-  product: Product;
+  kit: Kit;
 
   @ManyToOne(() => User, {
     cascade: true,
@@ -35,9 +35,6 @@ export class WarehouseItem {
   })
   @JoinColumn()
   server: Server;
-
-  @Column()
-  amount: number;
 
   @CreateDateColumn()
   created: Date

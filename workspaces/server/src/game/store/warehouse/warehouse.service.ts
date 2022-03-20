@@ -4,6 +4,7 @@ import { User } from 'src/admin/users/entities/user.entity';
 import { UsersService } from 'src/admin/users/users.service';
 import { ServersService } from 'src/game/servers/servers.service';
 import { In, Not, Repository } from 'typeorm';
+import { CartItemProtected } from '../cart/dto/cart.dto';
 import { WarehouseRejectInput } from './dto/warehouse-reject.input';
 import { WarehouseItem } from './entities/warehouse-item.entity';
 
@@ -31,7 +32,7 @@ export class WarehouseService {
     if (!server)
       throw new BadRequestException()
 
-    return this.warehouseItemsRepository.find({ user, server })
+    return (await this.warehouseItemsRepository.find({ user, server })).map(wi => new CartItemProtected(wi))
   }
 
   async afterGive(input: WarehouseRejectInput) {
@@ -42,6 +43,6 @@ export class WarehouseService {
 
     const rejectedItems = await this.warehouseItemsRepository.find({ id: Not(In(input.rejected_items)), user })
 
-    return this.warehouseItemsRepository.remove(rejectedItems)
+    return (await this.warehouseItemsRepository.remove(rejectedItems)).map(wi => new CartItemProtected(wi))
   }
 }

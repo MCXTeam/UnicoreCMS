@@ -7,12 +7,13 @@ import * as _ from 'lodash';
 import { FilterOperator, paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { Server } from 'src/game/servers/entities/server.entity';
 import { In, Repository } from 'typeorm';
-import { PaginatedProductProtectedDto } from '../dto/paginated-product-protected.dto';
+import { KitProtectedDto, PaginatedStoreDto, PayloadType, StoreDtoUnprotect } from '../dto/paginated-store.dto';
 import { ProductFromGameInput } from '../dto/product-fromgame.dto';
 import { ProductsManyInput } from '../dto/product-many.input';
 import { ProductInput } from '../dto/product.dto';
 import { ProductsImportInput } from '../dto/products-import.input';
 import { Category } from '../entities/category.entity';
+import { Kit } from '../entities/kit.entity';
 import { Product } from '../entities/product.entity';
 
 export interface ProductMap {
@@ -42,6 +43,8 @@ export class ProductsService {
     private serversRepository: Repository<Server>,
     @InjectRepository(Category)
     private categoriesRepository: Repository<Category>,
+    @InjectRepository(Kit)
+    private kitsRepository: Repository<Kit>,
   ) { }
 
   async find(query: PaginateQuery): Promise<Paginated<Product>> {
@@ -87,35 +90,51 @@ export class ProductsService {
     });
   }
 
-  async findProtected(query: PaginateQuery): Promise<PaginatedProductProtectedDto> {
-    const queryBuilder = this.productsRepository
+  async store(query: PaginateQuery): Promise<PaginatedStoreDto> {
+    const queryBuilderProducts = this.productsRepository
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.servers', 'servers')
       .leftJoinAndSelect('product.categories', 'categories');
 
-      console.log(query)
+    const queryBuilderKits = this.kitsRepository
+      .createQueryBuilder('kit')
+      .leftJoinAndSelect('kit.servers', 'servers')
+      .leftJoinAndSelect('kit.categories', 'categories');
 
     if (query?.filter?.categories && !Array.isArray(query.filter.categories)) query.filter.categories = query.filter.categories.split(',');
 
     if (query.filter?.server && query.filter?.categories) {
-      queryBuilder.andWhere('servers.id = :server AND categories.id IN(:...categories)', {
+      queryBuilderProducts.andWhere('servers.id = :server AND categories.id IN(:...categories)', {
+        server: query.filter.server,
+        categories: (query.filter.categories as string[]).filter(val => val),
+      });
+      queryBuilderKits.andWhere('servers.id = :server AND categories.id IN(:...categories)', {
         server: query.filter.server,
         categories: (query.filter.categories as string[]).filter(val => val),
       });
     } else if (query.filter?.server) {
-      queryBuilder.andWhere('servers.id = :server', { server: query.filter.server });
+      queryBuilderProducts.andWhere('servers.id = :server', { server: query.filter.server });
+      queryBuilderKits.andWhere('servers.id = :server', { server: query.filter.server });
     }
 
-    const ids = (await queryBuilder.getMany()).map((product) => product.id);
+    const idsProducts = (await queryBuilderProducts.getMany()).map((product) => product.id);
+    const idsKits = (await queryBuilderProducts.getMany()).map((kit) => kit.id);
 
-    const qb = this.productsRepository
+    const qbProducts = this.productsRepository
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.categories', 'categories')
       .where({
-        id: In(ids),
+        id: In(idsProducts),
       });
 
-    return new PaginatedProductProtectedDto(await paginate(query, qb, {
+    const qbKits = this.kitsRepository
+      .createQueryBuilder('kit')
+      .leftJoinAndSelect('kit.categories', 'categories')
+      .where({
+        id: In(idsKits),
+      });
+
+    const productsPaginated = await paginate(query, qbProducts, {
       sortableColumns: ['id', 'name', 'price'],
       searchableColumns: ['id', 'name'],
       defaultSortBy: [['id', 'DESC']],
@@ -123,7 +142,40 @@ export class ProductsService {
         price: [FilterOperator.BTW]
       },
       maxLimit: 20,
-    }));
+    })
+
+    const kitsPaginated = await paginate(query, qbKits, {
+      sortableColumns: ['id', 'name', 'price'],
+      searchableColumns: ['id', 'name'],
+      defaultSortBy: [['id', 'DESC']],
+      filterableColumns: {
+        price: [FilterOperator.BTW]
+      },
+      maxLimit: 20,
+    })
+
+    const combine = [
+      ...kitsPaginated.data.map(payload => ({ type: PayloadType.Kit, payload })),
+      ...productsPaginated.data.map(payload => ({ type: PayloadType.Product, payload }))
+    ]
+
+    return new PaginatedStoreDto({ 
+      ...productsPaginated as any, 
+      data: combine, 
+      meta: { 
+        ...productsPaginated.meta, 
+        totalItems: productsPaginated.meta.totalItems + kitsPaginated.meta.totalItems 
+      } 
+    });
+  }
+
+  async kit(id: number) {
+    const kit = await this.kitsRepository.findOne(id, { relations: ['categories', 'items']})
+
+    if (!kit)
+      throw new NotFoundException()
+
+    return new KitProtectedDto(kit)
   }
 
   findOne(id: number, relations?: string[]) {

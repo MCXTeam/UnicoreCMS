@@ -48,7 +48,7 @@ export default {
             {
               label: 'Настройки',
               icon: 'pi pi-fw pi-bars',
-              to: '/roles',
+              to: '/config',
             },
           ],
         },

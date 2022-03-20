@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Not, Repository } from 'typeorm';
+import { IsNull, Not, Repository } from 'typeorm';
 import { ConfigField, ConfigType } from './config.enum';
 import { ConfigInput } from './dto/config.input';
 import { Config } from './entities/config.entity';
@@ -45,7 +45,7 @@ export class ConfigService {
   }
 
   async find() {
-    return this.configTransformer(await this.configRepo.find())
+    return this.configTransformer(await this.configRepo.find({ order: { important: "DESC" }}))
   }
 
   async load() {
@@ -88,7 +88,7 @@ export class ConfigService {
   }
 
   async delate(key: string) {
-    const cfg = await this.configRepo.findOne({ key, important: Not(true) })
+    const cfg = await this.configRepo.findOne({ key, important: IsNull() })
 
     if (!cfg)
       throw new NotFoundException()

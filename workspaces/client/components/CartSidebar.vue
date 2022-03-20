@@ -45,7 +45,12 @@ export default {
 
   methods: {
     calculate() {
-      this.price = this.$_.sum(this.cart.map((ci) => (ci.product.price - (ci.product.price * ci.product.sale) / 100) * ci.amount))
+      this.price = this.$_.sum(this.cart.map((ci) => {
+        if (ci.type == 'product')
+          return (ci.payload.product.price - (ci.payload.product.price * ci.payload.product.sale) / 100) * ci.payload.amount
+        else
+          return ci.payload.kit.price - (ci.payload.kit.price * ci.payload.kit.sale) / 100
+      }))
     },
   },
 }

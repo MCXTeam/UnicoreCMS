@@ -36,9 +36,14 @@ export class ProductsController {
     return this.productsService.server(id);
   }
 
+  @Get("protected/kit/:id")
+  kit(@Param('id') id: number) {
+    return this.productsService.kit(id);
+  }
+
   @Get("protected/products")
-  findProtected(@Paginate() query: PaginateQuery) {
-    return this.productsService.findProtected(query);
+  store(@Paginate() query: PaginateQuery) {
+    return this.productsService.store(query);
   }
 
   @Permissions([Permission.AdminDashboard, Permission.EditorStoreProductsCreate])

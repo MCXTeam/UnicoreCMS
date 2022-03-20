@@ -21,7 +21,7 @@ export class ConfigController {
   }
 
   @UseGuards(SuperUserGuard)
-  @Patch(':key')
+  @Patch()
   update(@Body() body: ConfigInput) {
     return this.configService.update(body)
   }
@@ -33,8 +33,8 @@ export class ConfigController {
   }
 
   @UseGuards(SuperUserGuard)
-  @Post(':key')
+  @Post()
   create(@Body() body: ConfigInput) {
-    return this.configService.update(body)
+    return this.configService.create(body)
   }
 }

@@ -1,6 +1,6 @@
 import { User } from 'src/admin/users/entities/user.entity';
 import { Server } from 'src/game/servers/entities/server.entity';
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Product } from '../../entities/product.entity';
 
 @Entity()
@@ -41,4 +41,7 @@ export class CartItem {
 
   @CreateDateColumn()
   created: Date
+
+  @UpdateDateColumn()
+  updated: Date
 }

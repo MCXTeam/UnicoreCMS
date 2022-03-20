@@ -3,6 +3,7 @@ import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { Permission } from 'unicore-common';
+import { PayloadType } from '../dto/paginated-store.dto';
 import { CartService } from './cart.service';
 import { CartInput } from './dto/cart.input.dto';
 
@@ -17,7 +18,7 @@ export class CartController {
 
   @Post("add")
   add(@CurrentUser() user: User, @Body() body: CartInput) {
-    return this.cartService.add(user, body.product_id, body.server_id, body.amount)
+    return this.cartService.add(user, body)
   }
 
   @Post("buy/:id")
@@ -30,9 +31,9 @@ export class CartController {
     return this.cartService.clearOwn(user, id)
   }
 
-  @Delete('item/:id')
-  removeOwn(@CurrentUser() user: User, @Param('id', ParseIntPipe) id: number) {
-    return this.cartService.removeOwn(user, id)
+  @Delete('item/:type/:id')
+  removeOwn(@CurrentUser() user: User,  @Param('type') type: PayloadType, @Param('id', ParseIntPipe) id: number) {
+    return this.cartService.removeOwn(user, type, id)
   }
 
   @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
