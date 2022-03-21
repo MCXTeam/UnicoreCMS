@@ -1,4 +1,4 @@
-<img src="https://github.com/UnicoreProject/UnicoreCMS/blob/main/unicorecms.png?raw=true" />
+<img src="https://github.com/UnicoreProject/UnicoreCMS/blob/main/unicorecms.png?raw=true?v=2" />
 
 # UnicoreCMS
 
