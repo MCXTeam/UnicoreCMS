@@ -5,11 +5,14 @@
 <p>
   <img alt="TypeScript" src="https://img.shields.io/badge/-TypeScript-05122A?style=flat&logo=TypeScript"/>&nbsp;
   <img alt="Nuxt.js" src="https://img.shields.io/badge/-Nuxt.js-05122A?style=flat&logo=Nuxt.js"/>&nbsp;
+  <a href="https://t.me/unicore_project"><img alt="Telegram" src="https://img.shields.io/endpoint?style=social&url=https://runkit.io/damiankrawczyk/telegram-badge/branches/master?url=https://t.me/unicore_project"/></a>&nbsp;
  </p>
- 
-[![Build Status](https://github.com/UnicoreProject/UnicoreCMS/actions/workflows/build.yml/badge.svg)](https://github.com/UnicoreProject/UnicoreCMS/actions)
 
-[Документация](https://unicorecms.ru/docs/) | [Покупка](https://unicorecms.ru/buy/)
+<p>
+  <a href="https://unicorecms.ru/docs/" target="_blank">Документация</a> |
+  <a href="https://unicorecms.ru/buy/" target="_blank">Покупка</a> |
+  <a href="https://unicorecms.online/" target="_blank">Демо</a>
+</p>
 
 > **UnicoreCMS** - Headless CMS для модовых проектов Minecraft. Современные технологии и профессиональный подход, невероятная производительность и скорость. 
 
