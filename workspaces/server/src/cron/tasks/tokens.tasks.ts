@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import moment from 'moment';
+import * as moment from 'moment';
 import { RefreshToken } from 'src/auth/entities/refresh-token.entity';
 import { LessThan, Repository } from 'typeorm';
 

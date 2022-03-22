@@ -25,8 +25,12 @@ export default {
   },
 
   async fetch() {
-    this.page = await this.$axios.post(`/pages/path`, { path: this.$route.params.pathMatch }).then((res) => res.data)
-    this.$store.commit('unicore/SET_NAME', this.page.title)
+    try {
+      this.page = await this.$axios.post(`/pages/path`, { path: this.$route.params.pathMatch }).then((res) => res.data)
+      this.$store.commit('unicore/SET_NAME', this.page.title)
+    } catch {
+      this.$nuxt.error({ statusCode: 404 })
+    }
   },
 }
 </script>

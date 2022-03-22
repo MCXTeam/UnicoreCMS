@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { FilterOperator, paginate, PaginateQuery } from 'nestjs-paginate';
 import { User } from 'src/admin/users/entities/user.entity';
 import { Period } from 'src/game/donate/entities/period.entity';
 import { DonateGroup } from 'src/game/donate/groups/entities/donate-group.entity';
@@ -9,12 +10,37 @@ import { Kit } from 'src/game/store/entities/kit.entity';
 import { Product } from 'src/game/store/entities/product.entity';
 import { Payment } from 'src/payment/entities/payment.entity';
 import { Repository } from 'typeorm';
+import { PaginatedHistoryDto } from './dto/history.dto';
 import { History } from './entities/history.entity';
 import { HistoryType } from './enums/history-type.enum';
 
 @Injectable()
 export class HistoryService {
-  constructor(@InjectRepository(History) private historyRepository: Repository<History>) {}
+  constructor(@InjectRepository(History) private historyRepository: Repository<History>) { }
+
+  async find(query: PaginateQuery, user: User) {
+    const qb = this.historyRepository
+      .createQueryBuilder('history')
+      .leftJoinAndSelect('history.product', 'product')
+      .leftJoinAndSelect('history.kit', 'kit')
+      .leftJoinAndSelect('history.server', 'server')
+      .leftJoinAndSelect('history.donate_group', 'donate_group')
+      .leftJoinAndSelect('history.donate_permission', 'donate_permission')
+      .leftJoinAndSelect('history.period', 'period')
+      .leftJoinAndSelect('history.payment', 'payment')
+      .leftJoinAndSelect('history.target', 'target')
+      .where({ user });
+
+    return new PaginatedHistoryDto(await paginate(query, qb, {
+      sortableColumns: ['created'],
+      searchableColumns: ['created'],
+      defaultSortBy: [['created', 'DESC']],
+      filterableColumns: {
+        type: [FilterOperator.EQ]
+      },
+      maxLimit: 25,
+    }));
+  }
 
   create(type: HistoryType.ProductPurchase, ip: string, user: User, product: Product, server: Server, amount: number);
   create(type: HistoryType.KitPurchase, ip: string, user: User, product: Kit, server: Server);

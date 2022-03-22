@@ -8,8 +8,6 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  Res,
-  StreamableFile,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';

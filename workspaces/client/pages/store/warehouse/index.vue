@@ -68,7 +68,7 @@ export default {
 
   methods: {
     async warehouseFind() {
-      const loading = this.$vs.loading({ target: this.$refs.warehouse, type: 'points' })
+      const loading = this.$vs.loading({ target: this.$refs.warehouse })
       try {
         this.warehouse = await this.$axios.get('/store/warehouse/' + this.servers[Number(this.server_id)].id).then((res) => res.data)
       } catch {}

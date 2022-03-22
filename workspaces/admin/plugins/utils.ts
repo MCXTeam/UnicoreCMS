@@ -1,8 +1,10 @@
 import { Plugin } from '@nuxt/types'
+import { UAParser } from 'ua-parser-js'
 
 interface utils {
   formatCurrency(value: number): string
   formatNumber(value: number): string
+  uaParse(value: string): string
 }
 
 declare module 'vue/types/vue' {
@@ -27,6 +29,8 @@ declare module 'vuex/types/index' {
 }
 
 const utilsPlugin: Plugin = (context, inject) => {
+  const parser = new UAParser()
+
   inject('utils', {
     formatCurrency(value: number, sale: number) {
       if (!value) value = 0
@@ -35,9 +39,20 @@ const utilsPlugin: Plugin = (context, inject) => {
 
       return value.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' })
     },
+
     formatNumber(value: number) {
       if (!value) value = 0
       return value.toLocaleString('ru-RU', { minimumFractionDigits: 2 })
+    },
+
+    uaParse(value: string) {
+      const res = parser.setUA(value).getResult()
+
+      return {
+        browser: `${res.browser.name} ${res.browser.version}`,
+        os: `${res.os.name} ${res.os.version}`,
+        raw: `${res.browser.name} ${res.browser.version}, ${res.os.name} ${res.os.version}`
+      }
     },
   })
 }

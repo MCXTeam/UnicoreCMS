@@ -1,5 +1,5 @@
 import { IpAddress, ThrottlerCoreGuard, UserAgent } from '@common';
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Header, Headers, Param, Post, UseGuards } from '@nestjs/common';
 import { Recaptcha } from '@nestlab/google-recaptcha';
 import { EmailService } from 'src/admin/email/email.service';
 import { UserDto } from 'src/admin/users/dto/user.dto';
@@ -54,6 +54,7 @@ export class AuthController {
     return this.tokensService.revokeRefreshToken(token);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('resend')
   resend(@CurrentUser() user: User) {
     return this.emailService.sendActivation(user);
@@ -63,5 +64,29 @@ export class AuthController {
   @Get('me')
   me(@CurrentUser() user: User): { user: UserDto } {
     return { user: new UserDto(user) };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('sessions/me')
+  sessionsMe(@CurrentUser() user: User, @Body('token') token: string) {
+    return this.tokensService.sessions(user, token)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('sessions_all')
+  closeMeSessions(@CurrentUser() user: User) {
+    return this.tokensService.revokeRefreshTokensByUser(user)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('sessions_other')
+  closeMeOtherSessions(@CurrentUser() user: User, @Body('token') token: string) {
+    return this.tokensService.revokeRefreshTokensByUserOther(user, token)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('sessions/:uuid')
+  closeMeSession(@CurrentUser() user: User, @Param('uuid') id: number) {
+    return this.tokensService.revokeRefreshTokenBySessionAndUser(user, id)
   }
 }

@@ -1,6 +1,6 @@
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import moment from 'moment';
+import * as moment from 'moment';
 import { CartItemKit } from 'src/game/store/cart/entities/cart-item-kit.entity';
 import { CartItem } from 'src/game/store/cart/entities/cart-item.entity';
 import { LessThan, Repository } from 'typeorm';
@@ -16,10 +16,10 @@ export class CartTasks {
   @Cron(CronExpression.EVERY_HOUR)
   async clean() {
     const cartItemsClean = await this.cartItemsRepository.find({
-      updated: LessThan(moment().add(30, 'days').toDate()),
+      updated: LessThan(moment().subtract(30, 'days').toDate()),
     });
     const cartItemKitsClean = await this.cartItemKitsRepository.find({
-      updated: LessThan(moment().add(30, 'days').toDate()),
+      updated: LessThan(moment().subtract(30, 'days').toDate()),
     });
 
     await this.cartItemsRepository.remove(cartItemsClean);

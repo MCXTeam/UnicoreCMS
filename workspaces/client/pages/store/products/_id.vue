@@ -173,7 +173,14 @@ export default {
     },
 
     async catalog(params = {}) {
-      const loading = this.$vs.loading({ target: this.$refs.store, type: 'points' })
+      const priceFilter = []
+
+      if (params.price) {
+        priceFilter[0] = params.price[0] - 0.01
+        priceFilter[1] = params.price[1] + 0.01
+      }
+
+      const loading = this.$vs.loading({ target: this.$refs.store })
       this.$nuxt.$emit('setStoreSidebarLoadingState', true)
       try {
         this.products = await this.$axios
@@ -184,7 +191,7 @@ export default {
               sortBy: params.sort,
               search: params.search,
               'filter.server': this.$route.params.id,
-              'filter.price': params.price && '$btw:' + params.price.join(','),
+              'filter.price': priceFilter.length && '$btw:' + priceFilter.join(','),
             },
           })
           .then((res) => res.data)

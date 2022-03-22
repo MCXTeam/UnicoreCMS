@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { TokenExpiredError } from 'jsonwebtoken';
 import { User } from 'src/admin/users/entities/user.entity';
 import { UsersService } from 'src/admin/users/users.service';
-import { MoreThanOrEqual, Repository } from 'typeorm';
+import { MoreThanOrEqual, Not, Repository } from 'typeorm';
 import { envConfig } from 'unicore-common';
 import { RefreshToken } from './entities/refresh-token.entity';
 import { JWTMinecraftPayload, JWTPayload, JWTRefreshPayload } from './interfaces/jwt-payload';
@@ -22,7 +22,7 @@ export class TokensService {
     private tokensRepository: Repository<RefreshToken>,
     private usersService: UsersService,
     private jwt: JwtService,
-  ) {}
+  ) { }
 
   async generateAccessToken(user: User): Promise<string> {
     const payload: JWTPayload = {
@@ -119,9 +119,8 @@ export class TokensService {
   ): Promise<Omit<AuthenticatedDto, 'user' | 'refreshToken'>> {
     const { token, user } = await this.resolveRefreshToken(refresh);
 
-    if (agent != token.agent) {
-      throw new UnauthorizedException();
-    }
+    token.updated = this.moment().toDate()
+    await this.tokensRepository.save(token);
 
     //const refreshToken = await this.updateRefreshToken(user, token, ip);
     const accessToken = await this.generateAccessToken(user);
@@ -146,5 +145,53 @@ export class TokensService {
     if (token) {
       await this.tokensRepository.remove(token);
     }
+  }
+
+  async revokeRefreshTokensByUser(user: User): Promise<void> {
+    const token = await this.tokensRepository.find({ user });
+
+    if (token) {
+      await this.tokensRepository.remove(token);
+    }
+  }
+
+  async revokeRefreshTokensByUserOther(user: User, token: string): Promise<void> {
+    var payload: JWTRefreshPayload = null;
+
+    if (token) {
+      try {
+        payload = await this.decodeToken(token) as JWTRefreshPayload
+      } catch { }
+    }
+
+    const tok = await this.tokensRepository.find({ user, uuid: Not(payload?.jwtid) });
+
+    if (token) {
+      await this.tokensRepository.remove(tok);
+    }
+  }
+
+  async revokeRefreshTokenBySessionAndUser(user: User, id: number): Promise<void> {
+    const token = await this.tokensRepository.findOne({ user, id });
+
+    if (token) {
+      await this.tokensRepository.remove(token);
+    }
+  }
+
+  async sessions(user: User, token: string) {
+    var curnet = null;
+
+    if (token) {
+      try {
+        const payload = await this.decodeToken(token) as JWTRefreshPayload
+        curnet = await this.tokensRepository.findOne({ uuid: payload.jwtid })
+      } catch { }
+    }
+
+    return { curnet, all: await this.tokensRepository.find({
+      where: { user },
+      order: { updated: "DESC" }
+    }) }
   }
 }

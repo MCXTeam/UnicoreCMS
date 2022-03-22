@@ -91,7 +91,7 @@ export class History {
   })
   @JoinColumn()
   payment?: Payment;
-
+ 
   @ManyToOne(() => User, {
     cascade: true,
     onDelete: 'CASCADE',

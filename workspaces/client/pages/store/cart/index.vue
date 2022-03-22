@@ -109,7 +109,7 @@ export default {
 
   methods: {
     async cartFind() {
-      const loading = this.$vs.loading({ target: this.$refs.cart, type: 'points' })
+      const loading = this.$vs.loading({ target: this.$refs.cart })
       try {
         this.cart = await this.$axios.get('/store/cart/' + this.servers[Number(this.server_id)].id).then((res) => res.data)
         this.$nuxt.$emit('storeCartUpdate', this.cart)
@@ -126,7 +126,7 @@ export default {
     },
 
     async cartClear() {
-      const loading = this.$vs.loading({ target: this.$refs.cart, type: 'points' })
+      const loading = this.$vs.loading({ target: this.$refs.cart })
       this.$nuxt.$emit('setStoreSidebarLoadingState', true)
       try {
         await this.$axios.delete('/store/cart/server/' + this.servers[Number(this.server_id)].id)
@@ -137,7 +137,7 @@ export default {
     },
 
     async cartBuy() {
-      const loading = this.$vs.loading({ target: this.$refs.cart, type: 'points' })
+      const loading = this.$vs.loading({ target: this.$refs.cart })
       this.$nuxt.$emit('setStoreSidebarLoadingState', true)
       try {
         await this.$axios.post('/store/cart/buy/' + this.servers[Number(this.server_id)].id)
