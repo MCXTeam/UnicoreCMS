@@ -1,3 +1,4 @@
+import { IpAddress } from '@common';
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { User } from 'src/admin/users/entities/user.entity';
@@ -22,8 +23,8 @@ export class CartController {
   }
 
   @Post("buy/:id")
-  buy(@CurrentUser() user: User, @Param('id') id: string) {
-    return this.cartService.buy(user, id)
+  buy(@CurrentUser() user: User, @IpAddress() ip: string, @Param('id') id: string) {
+    return this.cartService.buy(user, ip, id)
   }
 
   @Delete('server/:id')

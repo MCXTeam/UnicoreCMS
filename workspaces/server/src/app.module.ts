@@ -17,6 +17,7 @@ import { GravitModule } from './auth/gravit/gravit.module';
 import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
 
 import { Request, Response, NextFunction } from 'express';
+import { CronModule } from './cron/cron.module';
 
 @Injectable()
 export class AppLoggerMiddleware implements NestMiddleware {
@@ -75,6 +76,7 @@ export class AppLoggerMiddleware implements NestMiddleware {
     EventsModule,
     GameModule,
     PaymentModule,
+    CronModule
   ],
   controllers: [],
   providers: [],

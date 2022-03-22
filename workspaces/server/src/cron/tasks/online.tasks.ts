@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { ServersService } from '../servers.service';
-import { OnlineService } from './online.service';
-import { UpdateOnline } from './interfaces/update-online.interface';
 import { EventsService } from 'src/events/events.service';
+import { UpdateOnline } from 'src/game/servers/online/interfaces/update-online.interface';
+import { OnlineService } from 'src/game/servers/online/online.service';
+import { ServersService } from 'src/game/servers/servers.service';
 
 @Injectable()
 export class OnlineTasks {

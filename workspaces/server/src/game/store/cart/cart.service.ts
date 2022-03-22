@@ -13,6 +13,8 @@ import { CartInput } from './dto/cart.input.dto';
 import { PayloadType } from '../dto/paginated-store.dto';
 import { Kit } from '../entities/kit.entity';
 import { CartItemKitProtected, CartItemProtected, CartProtected, CartUnprotect } from './dto/cart.dto';
+import { HistoryService } from 'src/game/cabinet/history/history.service';
+import { HistoryType } from 'src/game/cabinet/history/enums/history-type.enum';
 
 @Injectable()
 export class CartService {
@@ -29,7 +31,8 @@ export class CartService {
     private kitsRepository: Repository<Kit>,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
-    private serversService: ServersService
+    private serversService: ServersService,
+    private historyService: HistoryService
   ) { }
 
   private resolver(repo: Repository<WarehouseItem | CartItem>, server: Server, user: User, product: Product) {
@@ -155,7 +158,7 @@ export class CartService {
     return this.cartItemsRepository.remove(cartItem)
   }
 
-  async buy(user: User, server_id: string) {
+  async buy(user: User, ip: string, server_id: string) {
     const server = await this.serversService.findOne(server_id)
 
     if (!server)
@@ -190,6 +193,14 @@ export class CartService {
 
     user.real = user.real - price
 
+    for (const ci of cartItems) {
+      await this.historyService.create(HistoryType.ProductPurchase, ip, user, ci.product, ci.server, ci.amount)
+    }
+
+    for (const cik of cartKitItems) {
+      await this.historyService.create(HistoryType.KitPurchase, ip, user, cik.kit, cik.server)
+    }
+    
     await this.usersRepository.save(user)
     await this.cartItemsRepository.remove(cartItems)
     await this.cartItemKitsRepository.remove(cartKitItems)
