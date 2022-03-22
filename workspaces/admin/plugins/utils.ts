@@ -38,7 +38,7 @@ const utilsPlugin: Plugin = (context, inject) => {
     },
     formatNumber(value: number) {
       if (!value) value = 0
-      return value.toLocaleString('ru-RU')
+      return value.toLocaleString('ru-RU', { minimumFractionDigits: 2 })
     }
   })
 }

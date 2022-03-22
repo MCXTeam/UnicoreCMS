@@ -1,9 +1,18 @@
-import { IsDefined, IsNumber, IsString, Min } from "class-validator"
+import { IsDefined, IsEnum, IsNumber, IsString, Min } from "class-validator"
+
+export enum MoneyTransferType {
+  Real,
+  Money,
+}
 
 export class MoneyInput {
   @IsDefined()
+  @IsEnum(MoneyTransferType)
+  type: MoneyTransferType
+
+  @IsDefined()
   @IsString()
-  user: string
+  username: string
 
   @IsDefined()
   @IsString()
@@ -11,6 +20,6 @@ export class MoneyInput {
 
   @IsDefined()
   @IsNumber()
-  @Min(0)
-  money: number
+  @Min(1)
+  amount: number
 }

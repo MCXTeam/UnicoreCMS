@@ -57,7 +57,8 @@
 }
 
 .mini-profile {
-  @extend .rounded, .shadow-sm;
+  @extend .rounded,
+  .shadow-sm;
   background-color: var(--vs-theme-bg);
 }
 
@@ -224,7 +225,7 @@ a.server-block:hover {
     }
   }
 
-  .skin-2d > canvas {
+  .skin-2d>canvas {
     opacity: 0.7;
     transition: opacity 200ms;
 
@@ -297,6 +298,15 @@ a.server-block:hover {
   min-width: auto;
 }
 
+.input-fw {
+  .vs-input-parent,
+  .vs-input-content,
+  .vs-input, .vs-select, .vs-select-content {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
 .settings-split {
   input {
     width: 100%;
@@ -305,7 +315,7 @@ a.server-block:hover {
   @include media-breakpoint-up(xl) {
     padding: 20px 0;
 
-    > .col-xl-6 {
+    >.col-xl-6 {
       position: relative;
 
       &::before {
@@ -325,10 +335,14 @@ a.server-block:hover {
   line-height: 20px;
 }
 
-.buy-dialog, .store-filters {
+.buy-dialog,
+.store-filters {
+
   .vs-input-parent,
   .vs-input-content,
-  .vs-input, .vs-select, .vs-select-content {
+  .vs-input,
+  .vs-select,
+  .vs-select-content {
     width: 100%;
     max-width: 100%;
     font-size: 16px;
@@ -338,7 +352,12 @@ a.server-block:hover {
     font-size: 16px;
   }
 
-  .vs-input, .vs-select__input {
+  .vs-input,
+  .vs-select__input {
     height: 45px;
   }
+}
+
+.calculate > * {
+  line-height: 20px;
 }

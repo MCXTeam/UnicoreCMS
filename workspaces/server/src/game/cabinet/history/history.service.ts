@@ -22,6 +22,7 @@ export class HistoryService {
   create(type: HistoryType.DonatePermissionPurchase, ip: string, user: User, donatePermission: DonatePermission, server: Server, period: Period);
   create(type: HistoryType.Payment, ip: string, user: User, payment: Payment);
   create(type: HistoryType.MoneyServerTransfer, ip: string, user: User, server: Server, amount: number);
+  create(type: HistoryType.MoneyExchange, ip: string, user: User, server: Server, amount: number);
   create(type: HistoryType.RealTransfer, ip: string, user: User, target: User, amount: number);
   create(type: HistoryType.MoneyTransfer, ip: string, user: User, server: Server, target: User, amount: number);
   create(type: HistoryType, ip: string, user: User, payload?: any, secondPayload?: any, thirdPayload?: any) {
@@ -43,7 +44,7 @@ export class HistoryService {
 
         return this.historyRepository.save(history)
       case HistoryType.DonateGroupPurchase:
-        history.donate_group = payload ;
+        history.donate_group = payload;
         history.server = secondPayload;
         history.period = thirdPayload;
 
@@ -70,6 +71,12 @@ export class HistoryService {
 
         return this.historyRepository.save(history)
       case HistoryType.MoneyServerTransfer:
+        history.server = payload;
+        history.amount = secondPayload;
+
+        return this.historyRepository.save(history)
+
+      case HistoryType.MoneyExchange:
         history.server = payload;
         history.amount = secondPayload;
 

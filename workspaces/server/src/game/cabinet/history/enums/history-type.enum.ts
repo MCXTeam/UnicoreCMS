@@ -6,8 +6,9 @@ export enum HistoryType {
   UnabnPurchase = 'unban_purchase',
 
   MoneyServerTransfer = 'money_server_transfer',
+  MoneyExchange = 'money_server_transfer',
   MoneyTransfer = 'money_transfer',
-  RealTransfer = 'money_transfer',
+  RealTransfer = 'real_transfer',
 
   Payment = 'payment',
 

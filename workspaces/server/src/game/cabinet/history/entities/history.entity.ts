@@ -101,10 +101,8 @@ export class History {
   @JoinColumn()
   target?: User;
 
-  @Column('decimal', {
-    nullable: true,
-    precision: 5,
-    scale: 2,
+  @Column('float', {
+    nullable: true
   })
   amount?: number;
 
