@@ -3,9 +3,9 @@ export class JWTPayload {
 
   api?: boolean;
 
-  iat?: number
+  iat?: number;
 
-  exp?: number
+  exp?: number;
 }
 
 export class JWTRefreshPayload extends JWTPayload {

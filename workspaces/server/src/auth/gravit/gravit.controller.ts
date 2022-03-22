@@ -16,65 +16,62 @@ import { GravitService } from './gravit.service';
 @Permissions([Permission.KernelUnicoreProvider])
 @Controller('auth/gravit')
 export class GravitController {
-  constructor(private gravitService: GravitService) { }
+  constructor(private gravitService: GravitService) {}
 
   @Get('ping')
   ping(@CurrentUser() user: User): UserDto {
-    return new UserDto(user)
+    return new UserDto(user);
   }
 
   @Get('getUserByUsername/:username')
   getUserByUsername(@Param('username') username: string) {
-    return this.gravitService.getUserByUsername(username)
+    return this.gravitService.getUserByUsername(username);
   }
 
   @Get('getUserByUUID/:uuid')
   getUserByUUID(@Param('uuid') uuid: string) {
-    return this.gravitService.getUserByUUID(uuid)
+    return this.gravitService.getUserByUUID(uuid);
   }
 
   @Get('getUserByToken')
   getUserByToken(@Headers('Bearer') token: string) {
-    return this.gravitService.getUserByToken(token)
+    return this.gravitService.getUserByToken(token);
   }
 
   @Get('getAuthDetails')
   getDetails(): GravitGetAuthDetails {
     return {
-      details: [
-        { type: "password" },
-        { type: "totp" }
-      ]
-    }
+      details: [{ type: 'password' }, { type: 'totp' }],
+    };
   }
 
   @Post('authorize')
   authorize(@Body() body: GravitAuthorize) {
-    return this.gravitService.authorize(body)
+    return this.gravitService.authorize(body);
   }
 
   @Post('refreshToken')
   refreshAccessToken(@Body() body: GravitRefreshToken) {
-    return this.gravitService.refreshAccessToken(body)
+    return this.gravitService.refreshAccessToken(body);
   }
 
   @Post('deleteSession')
   deleteSession(@Body() body: any) {
-    return this.gravitService.deleteSession(body)
+    return this.gravitService.deleteSession(body);
   }
 
   @Post('exitUser')
   exitUser(@Body() body: any) {
-    return this.gravitService.exitUser(body)
+    return this.gravitService.exitUser(body);
   }
 
   @Post('checkServer')
   checkServer(@Body() body: GravitCheckServer) {
-    return this.gravitService.checkServer(body)
+    return this.gravitService.checkServer(body);
   }
 
   @Post('joinServer')
   joinServer(@Body() body: GravitJoinServer) {
-    return this.gravitService.joinServer(body)
+    return this.gravitService.joinServer(body);
   }
 }

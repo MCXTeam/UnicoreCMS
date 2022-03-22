@@ -1,7 +1,7 @@
 export class GravitRefreshToken {
-  refreshToken: string
+  refreshToken: string;
 
   context: {
-    ip: string
-  }
+    ip: string;
+  };
 }

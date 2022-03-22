@@ -11,27 +11,27 @@ import { MoneyService } from './money.service';
 
 @Controller('cabinet/money')
 export class MoneyController {
-  constructor (private moneyService: MoneyService) {}
+  constructor(private moneyService: MoneyService) {}
 
   @Get('me')
   me(@CurrentUser() user: User) {
-    return this.moneyService.findOneByUser(user) 
+    return this.moneyService.findOneByUser(user);
   }
 
   @SkipThrottle()
   @Permissions([Permission.KernelUnicoreConnect])
-  @Get("user/:server/:uuid")
+  @Get('user/:server/:uuid')
   async findOneByUserAndServer(@Param('server') server: string, @Param('uuid') uuid: string) {
-    return this.moneyService.findOneByUserAndServer(server, uuid)
+    return this.moneyService.findOneByUserAndServer(server, uuid);
   }
 
-  @Post("own/transfer")
+  @Post('own/transfer')
   async transferOwn(@CurrentUser() user: User, @IpAddress() ip: string, @Body() body: MoneyInput) {
-    return this.moneyService.transfer(user, ip, body)
+    return this.moneyService.transfer(user, ip, body);
   }
 
-  @Post("own/exchange")
+  @Post('own/exchange')
   async exchangeOwn(@CurrentUser() user: User, @IpAddress() ip: string, @Body() body: MoneyExchangeInput) {
-    return this.moneyService.exchange(user, ip, body)
+    return this.moneyService.exchange(user, ip, body);
   }
 }

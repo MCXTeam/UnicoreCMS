@@ -13,7 +13,12 @@
               <h5 class="m-0">{{ server.products_count }} предметов из {{ server.categories_count }} категорий</h5>
             </div>
             <img v-if="server.icon" :src="`${$config.apiUrl}/${server.icon}`" width="96px" />
-            <div class="image" :style="'background-color: var(--vs-theme-bg);' + (server.image && `background-image: url('${$config.apiUrl}/${server.image}')`)" />
+            <div
+              class="image"
+              :style="
+                'background-color: var(--vs-theme-bg);' + (server.image && `background-image: url('${$config.apiUrl}/${server.image}')`)
+              "
+            />
           </nuxt-link>
         </div>
       </div>

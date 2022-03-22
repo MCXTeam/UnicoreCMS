@@ -32,7 +32,7 @@ export class DonatePermissionsService {
     private periodsRepository: Repository<Period>,
     @InjectRepository(GroupKit)
     private groupKitsRepository: Repository<GroupKit>,
-  ) { }
+  ) {}
 
   find(relations: string[] = new Array()): Promise<DonatePermission[]> {
     return this.donatePermissionsRepository.find({ relations });
@@ -43,64 +43,63 @@ export class DonatePermissionsService {
   }
 
   async buy(user: User, ip: string, input: PermissionBuyInput) {
-    const permission = await this.findOne(input.permission, ['servers', 'periods'])
-    const server = permission?.servers?.find(server => server.id == input.server)
-    const period = permission?.periods?.find(period => period.id == input.period)
+    const permission = await this.findOne(input.permission, ['servers', 'periods']);
+    const server = permission?.servers?.find((server) => server.id == input.server);
+    const period = permission?.periods?.find((period) => period.id == input.period);
 
-    if (!permission || !period || !(server || permission.type == PermissionType.Web))
-      throw new NotFoundException()
+    if (!permission || !period || !(server || permission.type == PermissionType.Web)) throw new NotFoundException();
 
+    const price = (permission.price - (permission.price * permission.sale) / 100) * period.multiplier;
 
-    const price = (permission.price - permission.price * permission.sale / 100) * period.multiplier
-
-    if (user.real < price)
-      throw new BadRequestException()
+    if (user.real < price) throw new BadRequestException();
 
     let userPermission = await this.userPermissionsRepository.findOne({
       user: {
-        uuid: user.uuid
+        uuid: user.uuid,
       },
-      server: permission.type == PermissionType.Web ? null : {
-        id: server.id
-      },
+      server:
+        permission.type == PermissionType.Web
+          ? null
+          : {
+              id: server.id,
+            },
       permission: {
-        id: permission.id
-      }
-    })
+        id: permission.id,
+      },
+    });
 
     if (userPermission) {
-      if (!userPermission.expired)
-        throw new BadRequestException()
+      if (!userPermission.expired) throw new BadRequestException();
 
-      userPermission.gived = null
-      userPermission.expired = period.expire ? this.moment(userPermission.expired).utc().add(period.expire, 'seconds').toDate() : null
+      userPermission.gived = null;
+      userPermission.expired = period.expire ? this.moment(userPermission.expired).utc().add(period.expire, 'seconds').toDate() : null;
     } else {
-      userPermission = new UsersDonatePermission()
-      userPermission.expired = period.expire ? this.moment().utc().add(period.expire, 'seconds').toDate() : null
-      userPermission.server = server
-      userPermission.permission = permission
-      userPermission.user = user
+      userPermission = new UsersDonatePermission();
+      userPermission.expired = period.expire ? this.moment().utc().add(period.expire, 'seconds').toDate() : null;
+      userPermission.server = server;
+      userPermission.permission = permission;
+      userPermission.user = user;
     }
 
-    user.real = user.real - price
+    user.real = user.real - price;
 
     await this.historyService.create(HistoryType.DonatePermissionPurchase, ip, user, permission, server, period);
-    await this.userPermissionsRepository.save(userPermission)
-    await this.usersRepository.save(user)
+    await this.userPermissionsRepository.save(userPermission);
+    await this.usersRepository.save(user);
   }
 
   async findByServer(id: string) {
     const perms = await this.donatePermissionsRepository.find({
       relations: ['servers', 'periods'],
       order: {
-        type: 'DESC'
+        type: 'DESC',
       },
       where: (qb) => {
-        qb.where('server_id = :id', { id }).orWhere('type = :type', { type: PermissionType.Web })
+        qb.where('server_id = :id', { id }).orWhere('type = :type', { type: PermissionType.Web });
       },
     });
 
-    return perms.filter(perm => perm.periods.length)
+    return perms.filter((perm) => perm.periods.length);
   }
 
   findOne(id: number, relations?: string[]): Promise<DonatePermission> {

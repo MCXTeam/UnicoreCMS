@@ -13,7 +13,12 @@ import { Kit } from '../entities/kit.entity';
 import { HistoryModule } from 'src/game/cabinet/history/history.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Product, CartItem, WarehouseItem, User, CartItemKit, Kit]), UsersModule, ServersModule, HistoryModule],
+  imports: [
+    TypeOrmModule.forFeature([Product, CartItem, WarehouseItem, User, CartItemKit, Kit]),
+    UsersModule,
+    ServersModule,
+    HistoryModule,
+  ],
   providers: [CartService],
   controllers: [CartController],
 })

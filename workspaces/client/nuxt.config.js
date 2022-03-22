@@ -10,14 +10,14 @@ export default mainConfig({
 
   head: {
     titleTemplate: `%s - ${envConfig.sitename}`,
-    title: 'Игровые серверы Minecraft'
+    title: 'Игровые серверы Minecraft',
   },
 
   auth: {
     redirect: {
       login: '/auth',
       logout: '/',
-      home: '/cabinet'
+      home: '/cabinet',
     },
   },
 
@@ -56,10 +56,10 @@ export default mainConfig({
         {
           name: 'store/index',
           path: '/store',
-          redirect: '/store/products'
+          redirect: '/store/products',
         }
       )
-    }
+    },
   },
 
   sitemap: sitemapSettings,

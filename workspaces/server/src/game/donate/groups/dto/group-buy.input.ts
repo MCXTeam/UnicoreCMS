@@ -1,15 +1,15 @@
-import { IsDefined, IsInt, IsString } from "class-validator";
+import { IsDefined, IsInt, IsString } from 'class-validator';
 
 export class GroupBuyInput {
   @IsDefined()
   @IsInt()
-  group: number
+  group: number;
 
   @IsDefined()
   @IsString()
-  server: string
+  server: string;
 
   @IsDefined()
   @IsInt()
-  period: number
+  period: number;
 }

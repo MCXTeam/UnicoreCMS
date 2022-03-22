@@ -16,7 +16,7 @@ export class Ban {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
-    nullable: true
+    nullable: true,
   })
   @JoinColumn()
   actor: User;
@@ -25,7 +25,7 @@ export class Ban {
   reason: string;
 
   @Column({ nullable: true })
-  expires?: Date
+  expires?: Date;
 
   @CreateDateColumn()
   created: Date;

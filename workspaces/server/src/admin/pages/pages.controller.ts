@@ -22,7 +22,7 @@ export class PagesController {
   }
 
   @Public()
-  @Get("rules")
+  @Get('rules')
   rules() {
     return this.pagesService.rules();
   }

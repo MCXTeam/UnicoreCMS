@@ -439,11 +439,11 @@ export default {
       products: {
         data: null,
         meta: {
-          itemsPerPage:	20,
+          itemsPerPage: 20,
           totalItems: 0,
           currentPage: 0,
           totalPages: 0,
-          sortBy: null
+          sortBy: null,
         },
       },
       loading: true,
@@ -764,10 +764,16 @@ export default {
       formData.append('file', this.$refs.importer.files[0])
 
       if (this.productMany.servers && this.productMany.servers.length)
-        formData.append("servers", this.productMany.servers.map((server) => server.id))
+        formData.append(
+          'servers',
+          this.productMany.servers.map((server) => server.id)
+        )
 
       if (this.productMany.categories && this.productMany.categories.length)
-        formData.append('categories', this.productMany.categories.map((category) => category.id))
+        formData.append(
+          'categories',
+          this.productMany.categories.map((category) => category.id)
+        )
 
       try {
         const resp = await this.$axios.post('/store/products/import', formData, {

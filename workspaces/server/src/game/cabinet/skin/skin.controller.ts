@@ -8,10 +8,9 @@ import { Permission } from 'unicore-common';
 import { skinFileFilter } from './filters/skin.filter';
 import { SkinService } from './skin.service';
 
-
 @Controller('cabinet/skin')
 export class SkinController {
-  constructor (private skinsService: SkinService) {}
+  constructor(private skinsService: SkinService) {}
 
   @Permissions([Permission.UserCabinetSkin])
   @Patch('skin')
@@ -22,7 +21,7 @@ export class SkinController {
     }),
   )
   updateSkinMe(@Req() req: any, @UploadedFile() file: MulterFile) {
-    return this.skinsService.updateSkinMe(req, file)
+    return this.skinsService.updateSkinMe(req, file);
   }
 
   @Permissions([Permission.UserCabinetCloak])
@@ -34,18 +33,18 @@ export class SkinController {
     }),
   )
   updateCloakMe(@Req() req: any, @UploadedFile() file: MulterFile) {
-    return this.skinsService.updateCloakMe(req, file)
+    return this.skinsService.updateCloakMe(req, file);
   }
 
   @Permissions([Permission.UserCabinetSkin])
   @Delete('skin')
   removeSkinMe(@CurrentUser() user: User) {
-    return this.skinsService.removeSkin(user)
+    return this.skinsService.removeSkin(user);
   }
 
   @Permissions([Permission.UserCabinetCloak])
   @Delete('cloak')
   removeCloakMe(@CurrentUser() user: User) {
-    return this.skinsService.removeCloak(user)
+    return this.skinsService.removeCloak(user);
   }
 }

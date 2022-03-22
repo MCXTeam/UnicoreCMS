@@ -15,7 +15,7 @@
 
     <div class="store-table-overflow position-relative" ref="cart">
       <table class="store-table" v-if="cart.length">
-        <tr :key="cartItem.id" v-for="cartItem in cart.filter(ci => ci.type == 'kit')">
+        <tr :key="cartItem.id" v-for="cartItem in cart.filter((ci) => ci.type == 'kit')">
           <td class="d-flex align-items-center">
             <Avatar v-if="cartItem.payload.kit.icon" size="large" :image="`${$config.apiUrl}/${cartItem.payload.kit.icon}`"> </Avatar>
             <Avatar v-else size="large"> <i class="bx bxs-image"></i> </Avatar>
@@ -28,11 +28,7 @@
             </div>
           </td>
           <td>
-            <strike
-              v-if="cartItem.payload.kit.sale"
-              v-text="$utils.formatCurrency(cartItem.payload.kit.price)"
-              class="me-1"
-            ></strike>
+            <strike v-if="cartItem.payload.kit.sale" v-text="$utils.formatCurrency(cartItem.payload.kit.price)" class="me-1"></strike>
             <span v-text="$utils.formatCurrency(cartItem.payload.kit.price, cartItem.payload.kit.sale)"></span>
             <h5 class="m-0">1 шт.</h5>
           </td>
@@ -42,9 +38,10 @@
             ></vs-button>
           </td>
         </tr>
-        <tr :key="cartItem.id" v-for="cartItem in cart.filter(ci => ci.type == 'product')">
+        <tr :key="cartItem.id" v-for="cartItem in cart.filter((ci) => ci.type == 'product')">
           <td class="d-flex align-items-center">
-            <Avatar v-if="cartItem.payload.product.icon" size="large" :image="`${$config.apiUrl}/${cartItem.payload.product.icon}`"> </Avatar>
+            <Avatar v-if="cartItem.payload.product.icon" size="large" :image="`${$config.apiUrl}/${cartItem.payload.product.icon}`">
+            </Avatar>
             <Avatar v-else size="large"> <i class="bx bxs-image"></i> </Avatar>
             <div class="ms-3">
               <h4 class="m-0">
@@ -60,7 +57,9 @@
               v-text="$utils.formatCurrency(cartItem.payload.product.price * cartItem.payload.amount)"
               class="me-1"
             ></strike>
-            <span v-text="$utils.formatCurrency(cartItem.payload.product.price * cartItem.payload.amount, cartItem.payload.product.sale)"></span>
+            <span
+              v-text="$utils.formatCurrency(cartItem.payload.product.price * cartItem.payload.amount, cartItem.payload.product.sale)"
+            ></span>
             <h5 class="m-0">{{ cartItem.payload.amount }} шт.</h5>
           </td>
           <td align="right">

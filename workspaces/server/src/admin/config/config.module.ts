@@ -11,9 +11,9 @@ import { Config } from './entities/config.entity';
   exports: [ConfigService],
 })
 export class ConfigModule implements OnModuleInit {
-  constructor (private configService: ConfigService) {}
-  
+  constructor(private configService: ConfigService) {}
+
   async onModuleInit() {
-    await this.configService.init()
+    await this.configService.init();
   }
 }

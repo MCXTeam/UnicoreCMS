@@ -28,7 +28,7 @@ import { SettingsModule } from 'src/game/cabinet/settings/settings.module';
     JwtModule.register({
       secret: envConfig.jwtKey,
       signOptions: { expiresIn: envConfig.jwtExpires },
-    })
+    }),
   ],
   providers: [
     AuthService,

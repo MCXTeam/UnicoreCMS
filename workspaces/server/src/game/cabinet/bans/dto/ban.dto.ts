@@ -1,6 +1,6 @@
-import { Type } from "class-transformer";
-import { UserDto } from "src/admin/users/dto/user.dto";
-import { Ban } from "../entities/ban.entity";
+import { Type } from 'class-transformer';
+import { UserDto } from 'src/admin/users/dto/user.dto';
+import { Ban } from '../entities/ban.entity';
 
 export class BanDto {
   @Type(() => UserDto)
@@ -11,7 +11,7 @@ export class BanDto {
 
   reason: string;
 
-  expires?: Number
+  expires?: Number;
 
   created: Date;
 

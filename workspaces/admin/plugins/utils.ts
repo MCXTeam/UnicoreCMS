@@ -31,15 +31,14 @@ const utilsPlugin: Plugin = (context, inject) => {
     formatCurrency(value: number, sale: number) {
       if (!value) value = 0
 
-      if (sale)
-        value = value - value * sale / 100;
+      if (sale) value = value - (value * sale) / 100
 
       return value.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' })
     },
     formatNumber(value: number) {
       if (!value) value = 0
       return value.toLocaleString('ru-RU', { minimumFractionDigits: 2 })
-    }
+    },
   })
 }
 

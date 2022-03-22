@@ -24,7 +24,7 @@ export class History {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
-    nullable: false
+    nullable: false,
   })
   @JoinColumn()
   user: User;
@@ -33,7 +33,7 @@ export class History {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
-    nullable: true
+    nullable: true,
   })
   @JoinColumn()
   product?: Product;
@@ -42,7 +42,7 @@ export class History {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
-    nullable: true
+    nullable: true,
   })
   @JoinColumn()
   kit?: Kit;
@@ -51,7 +51,7 @@ export class History {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
-    nullable: true
+    nullable: true,
   })
   @JoinColumn()
   server?: Server;
@@ -60,7 +60,7 @@ export class History {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
-    nullable: true
+    nullable: true,
   })
   @JoinColumn()
   donate_group?: DonateGroup;
@@ -69,7 +69,7 @@ export class History {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
-    nullable: true
+    nullable: true,
   })
   @JoinColumn()
   donate_permission?: DonatePermission;
@@ -78,7 +78,7 @@ export class History {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
-    nullable: true
+    nullable: true,
   })
   @JoinColumn()
   period?: Period;
@@ -87,7 +87,7 @@ export class History {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
-    nullable: true
+    nullable: true,
   })
   @JoinColumn()
   payment?: Payment;
@@ -96,13 +96,13 @@ export class History {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
-    nullable: true
+    nullable: true,
   })
   @JoinColumn()
   target?: User;
 
   @Column('float', {
-    nullable: true
+    nullable: true,
   })
   amount?: number;
 

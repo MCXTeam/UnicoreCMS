@@ -80,7 +80,10 @@ export default {
   },
   created() {
     this.$nuxt.$on('setStoreSidebar', ($event) => (this.sidebar_component = $event))
-    this.$nuxt.$on('setStoreSidebarLoadingState', (loading) => (this.sidebar_component.payload = { ...this.sidebar_component.payload, loading }))
+    this.$nuxt.$on(
+      'setStoreSidebarLoadingState',
+      (loading) => (this.sidebar_component.payload = { ...this.sidebar_component.payload, loading })
+    )
   },
   computed: {
     ...mapGetters({

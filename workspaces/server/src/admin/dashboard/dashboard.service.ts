@@ -28,7 +28,7 @@ export class DashboardService {
     @InjectRepository(Payment)
     private paymentsRepository: Repository<Payment>,
     private onlineService: OnlineService,
-  ) { }
+  ) {}
 
   private async daysStatBuilder(type: StatType): Promise<StatGroup[]> {
     var result: StatGroup[] = new Array();
@@ -40,7 +40,7 @@ export class DashboardService {
           range.map(async (date) => ({
             date: this.moment(date).utc().toDate(),
             count: await this.usersRepository.count({
-                created: Between(this.moment(date).toDate(), this.moment(date).endOf('day').toDate()),
+              created: Between(this.moment(date).toDate(), this.moment(date).endOf('day').toDate()),
             }),
           })),
         );
@@ -56,8 +56,8 @@ export class DashboardService {
                     created: Between(this.moment(date).toDate(), this.moment(date).endOf('day').toDate()),
                   },
                   order: {
-                    online: "DESC"
-                  }
+                    online: 'DESC',
+                  },
                 })
               )?.online || 0,
           })),
@@ -144,8 +144,8 @@ export class DashboardService {
                     created: Between(this.moment(date).toDate(), this.moment(date).endOf('month').toDate()),
                   },
                   order: {
-                    online: "DESC"
-                  }
+                    online: 'DESC',
+                  },
                 })
               )?.online || 0,
           })),

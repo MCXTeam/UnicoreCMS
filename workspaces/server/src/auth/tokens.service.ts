@@ -37,7 +37,7 @@ export class TokensService {
   async generateMinecraftAccessToken(user: User, refreshPayload: JWTRefreshPayload): Promise<string> {
     const payload: JWTMinecraftPayload = {
       sub: user.uuid,
-      ref: refreshPayload.jwtid
+      ref: refreshPayload.jwtid,
     };
 
     return this.jwt.sign(payload, {
@@ -65,10 +65,10 @@ export class TokensService {
   }
 
   async updateRefreshToken(user: User, refreshToken: RefreshToken, ip?: string): Promise<string> {
-    refreshToken.ip = ip
-    refreshToken.uuid = uuidv4()
-    
-    await this.tokensRepository.save(refreshToken)
+    refreshToken.ip = ip;
+    refreshToken.uuid = uuidv4();
+
+    await this.tokensRepository.save(refreshToken);
 
     const payload: JWTRefreshPayload = {
       sub: user.uuid,
@@ -93,7 +93,7 @@ export class TokensService {
   }
 
   async resolveRefreshToken(encoded: string): Promise<{ user: User; token: RefreshToken }> {
-    const payload = await this.decodeToken(encoded) as JWTRefreshPayload;
+    const payload = (await this.decodeToken(encoded)) as JWTRefreshPayload;
     const token = await this.tokensRepository.findOne({
       uuid: payload.jwtid,
       expires: MoreThanOrEqual(this.moment().toDate()),
@@ -112,7 +112,11 @@ export class TokensService {
     return { user, token };
   }
 
-  async createTokensFromRefreshToken(refresh: string, agent?: string, ip?: string): Promise<Omit<AuthenticatedDto, 'user' | 'refreshToken'>> {
+  async createTokensFromRefreshToken(
+    refresh: string,
+    agent?: string,
+    ip?: string,
+  ): Promise<Omit<AuthenticatedDto, 'user' | 'refreshToken'>> {
     const { token, user } = await this.resolveRefreshToken(refresh);
 
     if (agent != token.agent) {
@@ -126,7 +130,7 @@ export class TokensService {
   }
 
   async revokeRefreshToken(encoded: string): Promise<void> {
-    const payload = await this.decodeToken(encoded) as JWTRefreshPayload;
+    const payload = (await this.decodeToken(encoded)) as JWTRefreshPayload;
     const token = await this.tokensRepository.findOne({
       uuid: payload.jwtid,
     });

@@ -1,5 +1,18 @@
 import { DeleteManyInput, imageFileFilter, StorageManager, zipFileFilter } from '@common';
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Res, StreamableFile, UploadedFile, UseInterceptors } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Res,
+  StreamableFile,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { FileFastifyInterceptor, MulterFile } from 'fastify-file-interceptor';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
@@ -26,22 +39,22 @@ export class ProductsController {
     return this.productsService.findOne(id, ['categories', 'servers']);
   }
 
-  @Get("protected/servers")
+  @Get('protected/servers')
   servers() {
     return this.productsService.servers();
   }
 
-  @Get("protected/servers/:id")
+  @Get('protected/servers/:id')
   server(@Param('id') id: string) {
     return this.productsService.server(id);
   }
 
-  @Get("protected/kit/:id")
+  @Get('protected/kit/:id')
   kit(@Param('id') id: number) {
     return this.productsService.kit(id);
   }
 
-  @Get("protected/products")
+  @Get('protected/products')
   store(@Paginate() query: PaginateQuery) {
     return this.productsService.store(query);
   }
@@ -53,13 +66,13 @@ export class ProductsController {
   }
 
   @Permissions([Permission.AdminDashboard, Permission.KernelUnicoreConnect])
-  @Post("from_game")
+  @Post('from_game')
   createFromGame(@Body() body: ProductFromGameInput) {
     return this.productsService.createFromGame(body);
   }
 
   @Permissions([Permission.AdminDashboard, Permission.EditorStoreProductsExport])
-  @Post("export")
+  @Post('export')
   async exportItems(@Body() body: DeleteManyInput) {
     const file = await this.productsService.exportItems(body.items);
     return file;
@@ -74,10 +87,10 @@ export class ProductsController {
     }),
   )
   importItems(@Body() body: ProductsImportInput, @UploadedFile() file: MulterFile) {
-    console.log(body)
+    console.log(body);
     return this.productsService.importItems(body, file.filename);
   }
-  
+
   @Permissions([Permission.AdminDashboard, Permission.EditorStoreProductsUpdate])
   @Patch(':id')
   update(@Param('id', ParseIntPipe) id: number, @Body() body: ProductInput) {

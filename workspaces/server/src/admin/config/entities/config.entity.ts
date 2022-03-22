@@ -15,5 +15,5 @@ export class Config {
   type: ConfigType;
 
   @Column({ nullable: true })
-  important: boolean
+  important: boolean;
 }

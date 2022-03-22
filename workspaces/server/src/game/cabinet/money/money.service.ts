@@ -22,55 +22,53 @@ export class MoneyService {
     private serversService: ServersService,
     private usersService: UsersService,
     private historyService: HistoryService,
-    private configService: ConfigService
-  ) { }
+    private configService: ConfigService,
+  ) {}
 
   private async generate(server: Server, user: User) {
-    const money = new Money()
-    money.server = server
-    money.money = 0
-    money.user = user
+    const money = new Money();
+    money.server = server;
+    money.money = 0;
+    money.user = user;
 
-    return await this.moneyRepository.save(money)
+    return await this.moneyRepository.save(money);
   }
 
   async findOneByUser(user: User | string): Promise<Money[]> {
     if (typeof user === 'string') {
-      user = await this.usersService.getById(user)
+      user = await this.usersService.getById(user);
 
-      if (!user)
-        throw new NotFoundException()
+      if (!user) throw new NotFoundException();
     }
 
-    const servers = await this.serversService.find()
+    const servers = await this.serversService.find();
     const money = await this.moneyRepository.find({
       user: {
-        uuid: user.uuid
-      }
-    })
+        uuid: user.uuid,
+      },
+    });
 
-    return Promise.all(servers.map(async server => {
-      const finder = money.find(m => m.server.id == server.id)
-      if (finder) return finder
-      else return await this.generate(server, user as User)
-    }))
+    return Promise.all(
+      servers.map(async (server) => {
+        const finder = money.find((m) => m.server.id == server.id);
+        if (finder) return finder;
+        else return await this.generate(server, user as User);
+      }),
+    );
   }
 
   async findOneByUserAndServer(server_id: string, user: string | User): Promise<Money> {
-    if (typeof user === 'string')
-      user = await this.usersService.getByUsername(user)
+    if (typeof user === 'string') user = await this.usersService.getByUsername(user);
 
-    const server = await this.serversService.findOne(server_id)
+    const server = await this.serversService.findOne(server_id);
 
-    if (!user || !server || !server_id)
-      throw new NotFoundException()
+    if (!user || !server || !server_id) throw new NotFoundException();
 
-    const money = await this.moneyRepository.findOne({ user, server }, { relations: ['user', 'server'] })
+    const money = await this.moneyRepository.findOne({ user, server }, { relations: ['user', 'server'] });
 
-    if (money)
-      return money
+    if (money) return money;
     else {
-      return this.generate(server, user as User)
+      return this.generate(server, user as User);
     }
   }
 
@@ -87,84 +85,79 @@ export class MoneyService {
   async transfer(user: User, ip: string, input: MoneyInput): Promise<boolean> {
     if (input.type == MoneyTransferType.Money) {
       try {
-        var target_money = await this.findOneByUserAndServer(input.server, input.username)
-        var user_money = await this.findOneByUserAndServer(input.server, user)
+        var target_money = await this.findOneByUserAndServer(input.server, input.username);
+        var user_money = await this.findOneByUserAndServer(input.server, user);
       } catch {
-        throw new NotFoundException()
+        throw new NotFoundException();
       }
 
-      if (user_money.money < input.amount)
-        throw new BadRequestException()
+      if (user_money.money < input.amount) throw new BadRequestException();
 
-      target_money.money += input.amount
-      user_money.money -= input.amount
+      target_money.money += input.amount;
+      user_money.money -= input.amount;
 
-      this.historyService.create(HistoryType.MoneyTransfer, ip, user_money.user, user_money.server, target_money.user, input.amount)
+      this.historyService.create(HistoryType.MoneyTransfer, ip, user_money.user, user_money.server, target_money.user, input.amount);
 
-      await this.moneyRepository.save([target_money, user_money])
+      await this.moneyRepository.save([target_money, user_money]);
 
-      return true
+      return true;
     } else {
-      var target_user = await this.usersService.getByUsername(input.username)
+      var target_user = await this.usersService.getByUsername(input.username);
 
-      if (!target_user)
-        throw new NotFoundException()
+      if (!target_user) throw new NotFoundException();
 
-      if (user.real < input.amount)
-        throw new BadRequestException()
+      if (user.real < input.amount) throw new BadRequestException();
 
-      target_user.real += input.amount
-      user.real -= input.amount
+      target_user.real += input.amount;
+      user.real -= input.amount;
 
-      this.historyService.create(HistoryType.RealTransfer, ip, user, target_user, input.amount)
+      this.historyService.create(HistoryType.RealTransfer, ip, user, target_user, input.amount);
 
-      return true
+      return true;
     }
   }
 
   async exchange(user: User, ip: string, input: MoneyExchangeInput): Promise<boolean> {
-    const cfg = await this.configService.load()
+    const cfg = await this.configService.load();
 
     if (input.type == MoneyExchangeType.Buy) {
       try {
-        var user_money = await this.findOneByUserAndServer(input.server, user)
+        var user_money = await this.findOneByUserAndServer(input.server, user);
       } catch {
-        throw new NotFoundException()
+        throw new NotFoundException();
       }
 
-      const price = input.amount / (cfg.public_economy_rate as number)
+      const price = input.amount / (cfg.public_economy_rate as number);
 
-      if (user.real < price)
-        throw new BadRequestException()
+      if (user.real < price) throw new BadRequestException();
 
-      user.real -= price
-      user_money.money += input.amount
+      user.real -= price;
+      user_money.money += input.amount;
 
-      this.historyService.create(HistoryType.MoneyExchange, ip, user_money.user, user_money.server, input.amount)
+      this.historyService.create(HistoryType.MoneyExchange, ip, user_money.user, user_money.server, input.amount);
 
-      await this.moneyRepository.save(user_money)
-      await this.usersRepo.save(user)
+      await this.moneyRepository.save(user_money);
+      await this.usersRepo.save(user);
 
-      return true
+      return true;
     } else {
       try {
-        var user_money_from = await this.findOneByUserAndServer(input.from_server, user)
-        var user_money_to = await this.findOneByUserAndServer(input.server, user)
+        var user_money_from = await this.findOneByUserAndServer(input.from_server, user);
+        var user_money_to = await this.findOneByUserAndServer(input.server, user);
       } catch {
-        throw new NotFoundException()
+        throw new NotFoundException();
       }
 
-      if (user_money_from.money < input.amount)
-        throw new BadRequestException()
+      if (user_money_from.money < input.amount) throw new BadRequestException();
 
-      user_money_from.money -= input.amount
-      user_money_to.money += input.amount
+      user_money_from.money -= input.amount;
+      user_money_to.money += input.amount;
 
-      this.historyService.create(HistoryType.MoneyServerTransfer, ip, user_money_to.user, user_money_to.server, input.amount)
+      this.historyService.create(HistoryType.MoneyServerTransfer, ip, user_money_to.user, user_money_to.server, input.amount);
 
-      await this.moneyRepository.save([user_money_from, user_money_to])
+      await this.moneyRepository.save([user_money_from, user_money_to]);
 
-      return true
+      return true;
     }
   }
 }

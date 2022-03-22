@@ -1,7 +1,7 @@
 class AuthDetails {
-  type: string
+  type: string;
 }
 
 export class GravitGetAuthDetails {
-  details: AuthDetails[]
+  details: AuthDetails[];
 }

@@ -10,7 +10,7 @@ export class Role {
   name: string;
 
   @Column('simple-array', {
-    nullable: true
+    nullable: true,
   })
   perms: string[];
 

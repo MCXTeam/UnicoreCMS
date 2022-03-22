@@ -9,7 +9,7 @@ import { TestEmailInput } from './dto/test-email.input';
 import { EmailActivation } from './entities/email-activation.entity';
 import { EmailMessage } from './entities/email-message.entity';
 import { EmailMessageType } from './enums/email-message-type.enum';
-import { customAlphabet } from 'nanoid'
+import { customAlphabet } from 'nanoid';
 import { ThrottlerException } from '@nestjs/throttler';
 import { MomentWrapper } from '@common';
 import { UserDto } from '../users/dto/user.dto';
@@ -29,7 +29,7 @@ export class EmailService {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
     private mailerService: MailerService,
-  ) { }
+  ) {}
 
   find(): Promise<EmailMessage[]> {
     return this.emailMessagesRepository.find();
@@ -59,7 +59,7 @@ export class EmailService {
         subject: 'Test Email',
         text: 'Test Email sent by UnicoreCMS',
       })
-      .then((res) => { })
+      .then((res) => {})
       .catch((e) => {
         this.logger.error(e.toString());
         throw new ServiceUnavailableException();
@@ -67,26 +67,26 @@ export class EmailService {
   }
 
   async sendActivation(user: User) {
-    if ((await this.emailActivationsRepository.count({
-      created: MoreThan(this.moment().utc().subtract(5, 'minutes').toDate()), user
-    })) > 2) {
-      throw new ThrottlerException()
+    if (
+      (await this.emailActivationsRepository.count({
+        created: MoreThan(this.moment().utc().subtract(5, 'minutes').toDate()),
+        user,
+      })) > 2
+    ) {
+      throw new ThrottlerException();
     }
 
-    const { content, title } = await this.emailMessagesRepository.findOne(EmailMessageType.Activation)
+    const { content, title } = await this.emailMessagesRepository.findOne(EmailMessageType.Activation);
 
-    const activation = new EmailActivation()
-    const code = customAlphabet('1234567890', 6)()
+    const activation = new EmailActivation();
+    const code = customAlphabet('1234567890', 6)();
 
-    const html = content
-      .replace("{USERNAME}", user.username)
-      .replace("{SITENAME}", envConfig.sitename)
-      .replace("{CODE}", code)
+    const html = content.replace('{USERNAME}', user.username).replace('{SITENAME}', envConfig.sitename).replace('{CODE}', code);
 
-    activation.user = user
-    activation.code = code
+    activation.user = user;
+    activation.code = code;
 
-    await this.emailActivationsRepository.save(activation)
+    await this.emailActivationsRepository.save(activation);
 
     this.mailerService.sendMail({ to: user.email, subject: title, html }).catch((e) => {
       this.logger.error(e.toString());
@@ -94,17 +94,17 @@ export class EmailService {
   }
 
   async checkCode(user: User, input: VerifyInput): Promise<UserDto> {
-    const exist = await this.emailActivationsRepository.findOne({ user, code: input.code })
+    const exist = await this.emailActivationsRepository.findOne({ user, code: input.code });
 
     if (exist) {
-      await this.emailActivationsRepository.delete({ user })
+      await this.emailActivationsRepository.delete({ user });
 
-      user.activated = true
-      await this.usersRepository.save(user)
+      user.activated = true;
+      await this.usersRepository.save(user);
 
-      return new UserDto(user)
+      return new UserDto(user);
     } else {
-      throw new NotFoundException()
+      throw new NotFoundException();
     }
   }
 }

@@ -12,17 +12,17 @@ import { RefreshToken } from '../entities/refresh-token.entity';
 
 @Module({
   imports: [
-    UsersModule, 
+    UsersModule,
     AuthModule,
     SettingsModule,
     JwtModule.register({
       secret: envConfig.jwtKey,
       signOptions: { expiresIn: envConfig.jwtExpires },
     }),
-    TypeOrmModule.forFeature([User, RefreshToken])
+    TypeOrmModule.forFeature([User, RefreshToken]),
   ],
   providers: [GravitService],
   controllers: [GravitController],
-  exports: [GravitService]
+  exports: [GravitService],
 })
 export class GravitModule {}

@@ -20,7 +20,7 @@ export class UsersDonatePermission {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
-    eager: true
+    eager: true,
   })
   @JoinColumn()
   permission: DonatePermission;
@@ -29,7 +29,7 @@ export class UsersDonatePermission {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
-    eager: true
+    eager: true,
   })
   @JoinColumn()
   server: Server;
@@ -37,7 +37,7 @@ export class UsersDonatePermission {
   @Column({
     nullable: true,
   })
-  gived: boolean
+  gived: boolean;
 
   @Column({
     nullable: true,

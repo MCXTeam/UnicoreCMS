@@ -1,10 +1,10 @@
-import { StorageManager } from "@common";
-import { AfterRemove, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { StorageManager } from '@common';
+import { AfterRemove, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Bonus {
   @PrimaryGeneratedColumn()
-  id: number
+  id: number;
 
   @Column('float')
   bonus: number;
@@ -13,7 +13,7 @@ export class Bonus {
   amount: number;
 
   @Column({ nullable: true })
-  icon: string
+  icon: string;
 
   @AfterRemove()
   removeFile() {

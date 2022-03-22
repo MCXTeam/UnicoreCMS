@@ -23,15 +23,7 @@
       </vs-select>
       <h5 class="text-uppercase mt-3 mb-0">Цена</h5>
       <div class="px-2">
-        <Slider
-          :disabled="loading"
-          v-model="priceLocal"
-          :range="true"
-          :min="range.min"
-          :max="range.max"
-          :step="0.01"
-          class="mt-3"
-        />
+        <Slider :disabled="loading" v-model="priceLocal" :range="true" :min="range.min" :max="range.max" :step="0.01" class="mt-3" />
       </div>
       <div class="d-flex justify-content-between mt-2">
         <span v-text="$utils.formatCurrency(priceLocal[0])" />

@@ -14,21 +14,32 @@ export type PermissionOptions = {
 export type PermissionArgs = Permission[] | [Permission[], PermissionOptions]; // Or condition
 
 export function transformPermissions(userPart: Partial<User>) {
-  const user = {...userPart}
+  const user = { ...userPart };
   if (!user?.perms) user.perms = [];
   if (!user?.roles) user.roles = [];
 
   if (user.perms.length) {
     // Проходимся по правам пользователя
-    const exclude = user.perms.filter(perm => perm.charAt(0) === '!').map(perm => minimath.match(Object.values(Permission), perm.slice(1))).flat()
-    user.perms = _.union(_.pull(user.perms.filter(perm => perm.charAt(0) !== '!').map(perm => minimath.match(Object.values(Permission), perm)).flat(), ...exclude));
+    const exclude = user.perms
+      .filter((perm) => perm.charAt(0) === '!')
+      .map((perm) => minimath.match(Object.values(Permission), perm.slice(1)))
+      .flat();
+    user.perms = _.union(
+      _.pull(
+        user.perms
+          .filter((perm) => perm.charAt(0) !== '!')
+          .map((perm) => minimath.match(Object.values(Permission), perm))
+          .flat(),
+        ...exclude,
+      ),
+    );
   }
 
-  user.roles = user.roles.map(role => _.omit(role, 'perms')) as Role[]
+  user.roles = user.roles.map((role) => _.omit(role, 'perms')) as Role[];
 
-  if (user.superuser) user.perms = Object.values(Permission)
+  if (user.superuser) user.perms = Object.values(Permission);
 
-  return user
+  return user;
 }
 
 export function matchPermission(args: PermissionArgs, request: any): boolean {
@@ -79,7 +90,6 @@ export function matchPermission(args: PermissionArgs, request: any): boolean {
           // Проверям наличие права по паттерну
           if (perm.charAt(0) !== '!') {
             matched = _.union(matched, minimath.match(permissions, perm));
-
           } else {
             // !Исключения (exclude) всегда в приоритете...
             // Они же права (патерны) начинающиеся на "!"
@@ -114,7 +124,7 @@ export function matchPermission(args: PermissionArgs, request: any): boolean {
 
 @Injectable()
 export class PermissionGuard implements CanActivate {
-  constructor(private reflector: Reflector) { }
+  constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
     const permissions = this.reflector.getAllAndOverride<PermissionArgs>(PERMISSIONS_KEY, [context.getHandler(), context.getClass()]);

@@ -46,23 +46,22 @@ export class StorageManager {
   }
 
   static save(origin: string, buffer: Buffer): string {
-    const name = nanoid() + extname(origin)
+    const name = nanoid() + extname(origin);
     const path = destination + '/' + name;
 
-    writeFileSync(path, buffer)
-    return name
+    writeFileSync(path, buffer);
+    return name;
   }
 
   static rename(filename: string): string {
     const path = destination + '/' + filename;
-    const newname = nanoid() + extname(filename)
-    const newpath = destination + '/' + newname
+    const newname = nanoid() + extname(filename);
+    const newpath = destination + '/' + newname;
 
     if (existsSync(path) && lstatSync(path).isFile()) {
-      renameSync(path, newpath)
-      return newname
-    } else 
-      return null  
+      renameSync(path, newpath);
+      return newname;
+    } else return null;
   }
 
   static async saveFromUrl(url: string): Promise<string> {

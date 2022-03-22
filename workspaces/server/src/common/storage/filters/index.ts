@@ -1,2 +1,2 @@
 export * from './image-filter';
-export * from './zip-filter'
+export * from './zip-filter';

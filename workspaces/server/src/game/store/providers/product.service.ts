@@ -17,22 +17,22 @@ import { Kit } from '../entities/kit.entity';
 import { Product } from '../entities/product.entity';
 
 export interface ProductMap {
-  name: string,
-  icon?: string,
-  description?: string,
-  nbt?: string,
-  price: number,
-  sale?: number,
-  item_id: string,
+  name: string;
+  icon?: string;
+  description?: string;
+  nbt?: string;
+  price: number;
+  sale?: number;
+  item_id: string;
 }
 
 export type StoreServer = Server & {
-  categories_count?: number,
-  products_count?: number,
-  categories?: Category[],
-  min_price?: number,
-  max_price?: number
-}
+  categories_count?: number;
+  products_count?: number;
+  categories?: Category[];
+  min_price?: number;
+  max_price?: number;
+};
 
 @Injectable()
 export class ProductsService {
@@ -45,7 +45,7 @@ export class ProductsService {
     private categoriesRepository: Repository<Category>,
     @InjectRepository(Kit)
     private kitsRepository: Repository<Kit>,
-  ) { }
+  ) {}
 
   async find(query: PaginateQuery): Promise<Paginated<Product>> {
     const queryBuilder = this.productsRepository
@@ -106,11 +106,11 @@ export class ProductsService {
     if (query.filter?.server && query.filter?.categories) {
       queryBuilderProducts.andWhere('servers.id = :server AND categories.id IN(:...categories)', {
         server: query.filter.server,
-        categories: (query.filter.categories as string[]).filter(val => val),
+        categories: (query.filter.categories as string[]).filter((val) => val),
       });
       queryBuilderKits.andWhere('servers.id = :server AND categories.id IN(:...categories)', {
         server: query.filter.server,
-        categories: (query.filter.categories as string[]).filter(val => val),
+        categories: (query.filter.categories as string[]).filter((val) => val),
       });
     } else if (query.filter?.server) {
       queryBuilderProducts.andWhere('servers.id = :server', { server: query.filter.server });
@@ -139,43 +139,42 @@ export class ProductsService {
       searchableColumns: ['id', 'name'],
       defaultSortBy: [['id', 'DESC']],
       filterableColumns: {
-        price: [FilterOperator.BTW]
+        price: [FilterOperator.BTW],
       },
       maxLimit: 20,
-    })
+    });
 
     const kitsPaginated = await paginate(query, qbKits, {
       sortableColumns: ['id', 'name', 'price'],
       searchableColumns: ['id', 'name'],
       defaultSortBy: [['id', 'DESC']],
       filterableColumns: {
-        price: [FilterOperator.BTW]
+        price: [FilterOperator.BTW],
       },
       maxLimit: 20,
-    })
+    });
 
     const combine = [
-      ...kitsPaginated.data.map(payload => ({ type: PayloadType.Kit, payload })),
-      ...productsPaginated.data.map(payload => ({ type: PayloadType.Product, payload }))
-    ]
+      ...kitsPaginated.data.map((payload) => ({ type: PayloadType.Kit, payload })),
+      ...productsPaginated.data.map((payload) => ({ type: PayloadType.Product, payload })),
+    ];
 
-    return new PaginatedStoreDto({ 
-      ...productsPaginated as any, 
-      data: combine, 
-      meta: { 
-        ...productsPaginated.meta, 
-        totalItems: productsPaginated.meta.totalItems + kitsPaginated.meta.totalItems 
-      } 
+    return new PaginatedStoreDto({
+      ...(productsPaginated as any),
+      data: combine,
+      meta: {
+        ...productsPaginated.meta,
+        totalItems: productsPaginated.meta.totalItems + kitsPaginated.meta.totalItems,
+      },
     });
   }
 
   async kit(id: number) {
-    const kit = await this.kitsRepository.findOne(id, { relations: ['categories', 'items']})
+    const kit = await this.kitsRepository.findOne(id, { relations: ['categories', 'items'] });
 
-    if (!kit)
-      throw new NotFoundException()
+    if (!kit) throw new NotFoundException();
 
-    return new KitProtectedDto(kit)
+    return new KitProtectedDto(kit);
   }
 
   findOne(id: number, relations?: string[]) {
@@ -183,41 +182,62 @@ export class ProductsService {
   }
 
   async servers(): Promise<StoreServer[]> {
-    const servers = await Promise.all((await this.serversRepository.find()).map(async (serv: StoreServer) => {
-      serv.products_count = await this.productsRepository.createQueryBuilder('product')
-        .leftJoinAndSelect('product.servers', 'servers')
-        .where("servers.id = :id", { id: serv.id })
-        .getCount()
+    const servers = await Promise.all(
+      (
+        await this.serversRepository.find()
+      ).map(async (serv: StoreServer) => {
+        serv.products_count = await this.productsRepository
+          .createQueryBuilder('product')
+          .leftJoinAndSelect('product.servers', 'servers')
+          .where('servers.id = :id', { id: serv.id })
+          .getCount();
 
-      serv.categories_count = _((await this.productsRepository.createQueryBuilder('product')
-        .leftJoinAndSelect('product.servers', 'servers')
-        .leftJoinAndSelect('product.categories', 'categories')
-        .where("servers.id = :id", { id: serv.id })
-        .getMany()).map(prod => prod.categories).flat()).uniqBy(cat => cat.id).value().length
+        serv.categories_count = _(
+          (
+            await this.productsRepository
+              .createQueryBuilder('product')
+              .leftJoinAndSelect('product.servers', 'servers')
+              .leftJoinAndSelect('product.categories', 'categories')
+              .where('servers.id = :id', { id: serv.id })
+              .getMany()
+          )
+            .map((prod) => prod.categories)
+            .flat(),
+        )
+          .uniqBy((cat) => cat.id)
+          .value().length;
 
-      return serv
-    }))
+        return serv;
+      }),
+    );
 
-    return servers
+    return servers;
   }
 
   async server(id: string): Promise<StoreServer> {
+    const server: StoreServer = await this.serversRepository.findOne(id);
 
-    const server: StoreServer = await this.serversRepository.findOne(id)
+    if (!server) throw new NotFoundException();
 
-    if (!server)
-      throw new NotFoundException()
+    server.categories = _(
+      (
+        await this.productsRepository
+          .createQueryBuilder('product')
+          .leftJoinAndSelect('product.servers', 'servers')
+          .leftJoinAndSelect('product.categories', 'categories')
+          .where('servers.id = :id', { id: server.id })
+          .getMany()
+      )
+        .map((prod) => prod.categories)
+        .flat(),
+    )
+      .uniqBy((cat) => cat.id)
+      .value();
 
-    server.categories = _((await this.productsRepository.createQueryBuilder('product')
-      .leftJoinAndSelect('product.servers', 'servers')
-      .leftJoinAndSelect('product.categories', 'categories')
-      .where("servers.id = :id", { id: server.id })
-      .getMany()).map(prod => prod.categories).flat()).uniqBy(cat => cat.id).value()
+    server.min_price = (await this.productsRepository.findOne({ order: { price: 'ASC' } }))?.price || 0;
+    server.max_price = (await this.productsRepository.findOne({ order: { price: 'DESC' } }))?.price || 0;
 
-    server.min_price = (await this.productsRepository.findOne({ order: { price: "ASC" } }))?.price || 0
-    server.max_price = (await this.productsRepository.findOne({ order: { price: "DESC" } }))?.price || 0
-
-    return server
+    return server;
   }
 
   async createFromGame(input: ProductFromGameInput) {
@@ -229,7 +249,7 @@ export class ProductsService {
     product.nbt = input.nbt;
 
     product.servers = await this.serversRepository.find({
-      id: input.server
+      id: input.server,
     });
 
     return this.productsRepository.save(product);
@@ -308,14 +328,13 @@ export class ProductsService {
       },
     });
     const zip = new JSZip();
-    const storage = zip.folder("storage");
+    const storage = zip.folder('storage');
 
-    const mapping: ProductMap[] = products.map(product => {
+    const mapping: ProductMap[] = products.map((product) => {
       if (product.icon) {
-        const iconBuffer = StorageManager.read(product.icon)
+        const iconBuffer = StorageManager.read(product.icon);
 
-        if (iconBuffer)
-          storage.file(product.icon, iconBuffer, { base64: true })
+        if (iconBuffer) storage.file(product.icon, iconBuffer, { base64: true });
       }
 
       return {
@@ -326,57 +345,55 @@ export class ProductsService {
         price: product.price,
         sale: product.sale,
         item_id: product.item_id,
-      }
-    })
+      };
+    });
 
-    zip.file("content.json", JSON.stringify(mapping));
-    return zip.generateAsync({ type: "base64" })
+    zip.file('content.json', JSON.stringify(mapping));
+    return zip.generateAsync({ type: 'base64' });
   }
 
   async importItems(input: ProductsImportInput, filename: string, remove_tmp: boolean = true) {
-    const fileBuffer = StorageManager.read(filename)
-    if (remove_tmp)
-      StorageManager.remove(filename)
-    const zipTree = await JSZip.loadAsync(fileBuffer)
-    const content = await zipTree.file("content.json").async("string")
+    const fileBuffer = StorageManager.read(filename);
+    if (remove_tmp) StorageManager.remove(filename);
+    const zipTree = await JSZip.loadAsync(fileBuffer);
+    const content = await zipTree.file('content.json').async('string');
 
-    let servers: Server[] = []
-    let categories: Category[] = []
+    let servers: Server[] = [];
+    let categories: Category[] = [];
 
-    if (input.servers)
-      servers = await this.serversRepository.find({ where: { id: In(input.servers.split(",")) } });
+    if (input.servers) servers = await this.serversRepository.find({ where: { id: In(input.servers.split(',')) } });
 
     if (input.categories)
-      categories = await this.categoriesRepository.find({ where: { id: In(input.categories.split(",").map(i => Number(i))) } });
+      categories = await this.categoriesRepository.find({ where: { id: In(input.categories.split(',').map((i) => Number(i))) } });
 
-    if (!content)
-      throw new BadRequestException()
+    if (!content) throw new BadRequestException();
 
-    const mapping: ProductMap[] = JSON.parse(content)
-    const products: Product[] = []
+    const mapping: ProductMap[] = JSON.parse(content);
+    const products: Product[] = [];
 
-    await Promise.all(mapping.map(async (product, index) => {
-      const entity = new Product()
+    await Promise.all(
+      mapping.map(async (product, index) => {
+        const entity = new Product();
 
-      entity.name = product.name
-      entity.description = product.description
-      entity.nbt = product.nbt
-      entity.price = product.price
-      entity.sale = product.sale
-      entity.item_id = product.item_id
-      entity.servers = servers
-      entity.categories = categories
+        entity.name = product.name;
+        entity.description = product.description;
+        entity.nbt = product.nbt;
+        entity.price = product.price;
+        entity.sale = product.sale;
+        entity.item_id = product.item_id;
+        entity.servers = servers;
+        entity.categories = categories;
 
-      if (product.icon) {
-        const iconBuff = await zipTree.file("storage/" + product.icon).async("nodebuffer")
-        if (iconBuff)
-          entity.icon = StorageManager.save(product.icon, iconBuff)
-      }
+        if (product.icon) {
+          const iconBuff = await zipTree.file('storage/' + product.icon).async('nodebuffer');
+          if (iconBuff) entity.icon = StorageManager.save(product.icon, iconBuff);
+        }
 
-      products.push(entity)
-    }))
+        products.push(entity);
+      }),
+    );
 
-    return this.productsRepository.save(products)
+    return this.productsRepository.save(products);
   }
 
   async updateMany(input: ProductsManyInput) {
@@ -386,8 +403,8 @@ export class ProductsService {
       },
       relations: ['servers', 'categories'],
     });
-    let servers_: Server[] = []
-    let categories_: Category[] = []
+    let servers_: Server[] = [];
+    let categories_: Category[] = [];
 
     const productsEdited = await Promise.all(
       products.map(async (product) => {
@@ -399,11 +416,12 @@ export class ProductsService {
 
         if (price) product.price = price;
 
-        if (servers_.length) product.servers = servers_
+        if (servers_.length) product.servers = servers_;
         else if (servers && servers.length) product.servers = await this.serversRepository.find({ where: { id: In(servers) } });
 
-        if (categories_.length) product.categories = categories_
-        else if (categories && categories.length) product.categories = await this.categoriesRepository.find({ where: { id: In(categories) } });
+        if (categories_.length) product.categories = categories_;
+        else if (categories && categories.length)
+          product.categories = await this.categoriesRepository.find({ where: { id: In(categories) } });
 
         return product;
       }),

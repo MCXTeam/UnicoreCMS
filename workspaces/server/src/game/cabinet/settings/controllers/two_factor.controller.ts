@@ -6,20 +6,20 @@ import { TwoFactorService } from '../providers/two_factor.service';
 
 @Controller('cabinet/2fa')
 export class TwoFactorController {
-  constructor (private twoFactorService: TwoFactorService) {}
+  constructor(private twoFactorService: TwoFactorService) {}
 
   @Get('generate')
   generate(@CurrentUser() user: User) {
-    return this.twoFactorService.generate(user)
+    return this.twoFactorService.generate(user);
   }
 
   @Post('enable')
   connect(@CurrentUser() user: User, @Body() body: TwoFactorInput) {
-    return this.twoFactorService.enable(user, body)
+    return this.twoFactorService.enable(user, body);
   }
 
   @Post('disable')
   disable(@CurrentUser() user: User, @Body() body: TwoFactorInput) {
-    return this.twoFactorService.disable(user, body)
+    return this.twoFactorService.disable(user, body);
   }
 }

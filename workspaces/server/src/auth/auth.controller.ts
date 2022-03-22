@@ -17,7 +17,7 @@ import { TokensService } from './tokens.service';
 @UseGuards(ThrottlerCoreGuard)
 @Controller('auth')
 export class AuthController {
-  constructor(private tokensService: TokensService, private authService: AuthService, private emailService: EmailService) { }
+  constructor(private tokensService: TokensService, private authService: AuthService, private emailService: EmailService) {}
 
   @Public()
   @Recaptcha({ action: 'login' })
@@ -54,9 +54,9 @@ export class AuthController {
     return this.tokensService.revokeRefreshToken(token);
   }
 
-  @Get("resend")
+  @Get('resend')
   resend(@CurrentUser() user: User) {
-    return this.emailService.sendActivation(user)
+    return this.emailService.sendActivation(user);
   }
 
   @UseGuards(JwtAuthGuard)

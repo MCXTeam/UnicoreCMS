@@ -20,7 +20,7 @@ export class UsersDonateGroup {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
-    eager: true
+    eager: true,
   })
   @JoinColumn()
   group: DonateGroup;
@@ -29,7 +29,7 @@ export class UsersDonateGroup {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
-    eager: true
+    eager: true,
   })
   @JoinColumn()
   server: Server;

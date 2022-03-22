@@ -14,7 +14,7 @@ export class UsersService {
     private usersRepository: Repository<User>,
     @InjectRepository(Role)
     private rolesRepository: Repository<Role>,
-  ) { }
+  ) {}
 
   findAll(query: PaginateQuery): Promise<Paginated<User>> {
     const queryBuilder = this.usersRepository
@@ -82,10 +82,7 @@ export class UsersService {
 
   async create(input: UserInput): Promise<User> {
     const userExist = await this.usersRepository.findOne({
-      where: [
-        { email: input.username },
-        { username: input.username }
-      ]
+      where: [{ email: input.username }, { username: input.username }],
     });
 
     if (userExist) {
@@ -108,8 +105,8 @@ export class UsersService {
       id: In(input.roles),
     });
 
-    if (!user.roles.find(role => role.id === ImportantRoles.Default))
-      user.roles.push(await this.rolesRepository.findOne(ImportantRoles.Default))
+    if (!user.roles.find((role) => role.id === ImportantRoles.Default))
+      user.roles.push(await this.rolesRepository.findOne(ImportantRoles.Default));
 
     return this.usersRepository.save(user);
   }

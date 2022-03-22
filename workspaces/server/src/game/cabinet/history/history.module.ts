@@ -8,6 +8,6 @@ import { History } from './entities/history.entity';
   imports: [TypeOrmModule.forFeature([History])],
   providers: [HistoryService],
   controllers: [HistoryController],
-  exports: [HistoryService]
+  exports: [HistoryService],
 })
 export class HistoryModule {}

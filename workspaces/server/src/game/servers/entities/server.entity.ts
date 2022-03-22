@@ -66,7 +66,7 @@ export class Server {
   kits?: Kit[];
 
   @Column('json', { nullable: true })
-  table: ServerTableDto[]
+  table: ServerTableDto[];
 
   @CreateDateColumn()
   created: Date;

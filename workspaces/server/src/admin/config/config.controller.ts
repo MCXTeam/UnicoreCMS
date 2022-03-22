@@ -6,35 +6,35 @@ import { ConfigInput } from './dto/config.input';
 
 @Controller('config')
 export class ConfigController {
-  constructor (private configService: ConfigService) {}
+  constructor(private configService: ConfigService) {}
 
   @Public()
   @Get('/public')
   findPublic() {
-    return this.configService.findPublic()
+    return this.configService.findPublic();
   }
 
   @UseGuards(SuperUserGuard)
   @Get()
   find() {
-    return this.configService.find()
+    return this.configService.find();
   }
 
   @UseGuards(SuperUserGuard)
   @Patch()
   update(@Body() body: ConfigInput) {
-    return this.configService.update(body)
+    return this.configService.update(body);
   }
 
   @UseGuards(SuperUserGuard)
   @Delete(':key')
   delete(@Param('key') key: string) {
-    return this.configService.delate(key)
+    return this.configService.delate(key);
   }
 
   @UseGuards(SuperUserGuard)
   @Post()
   create(@Body() body: ConfigInput) {
-    return this.configService.create(body)
+    return this.configService.create(body);
   }
 }

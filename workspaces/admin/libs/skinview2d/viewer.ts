@@ -1,4 +1,4 @@
-import { SkinObject2D } from './model';
+import { SkinObject2D } from './model'
 
 // import { TextureCanvas, loadSk } from "skinview-utils";
 
@@ -10,81 +10,81 @@ enum RenderPart {
 }
 
 interface SkinViewer2DOptions {
-  domElement: HTMLElement;
-  skinUrl: string;
-  width?: number;
-  height?: number;
-  toRender?: string;
+  domElement: HTMLElement
+  skinUrl: string
+  width?: number
+  height?: number
+  toRender?: string
 }
 
 class SkinViewer2D {
-  private canvas: HTMLCanvasElement;
+  private canvas: HTMLCanvasElement
 
-  private ctx: CanvasRenderingContext2D | null;
+  private ctx: CanvasRenderingContext2D | null
 
-  private domElement: HTMLElement;
+  private domElement: HTMLElement
 
-  private skinImage: HTMLImageElement;
+  private skinImage: HTMLImageElement
 
-  private skinObject: SkinObject2D;
+  private skinObject: SkinObject2D
 
-  private toRender: number;
+  private toRender: number
 
   constructor(options: SkinViewer2DOptions) {
-    this.domElement = options.domElement;
-    this.canvas = document.createElement('canvas');
-    this.ctx = this.canvas.getContext('2d');
+    this.domElement = options.domElement
+    this.canvas = document.createElement('canvas')
+    this.ctx = this.canvas.getContext('2d')
 
     if (options.width !== undefined) {
-      this.canvas.width = options.width;
+      this.canvas.width = options.width
     }
 
     if (options.height !== undefined) {
-      this.canvas.height = options.height;
+      this.canvas.height = options.height
     }
 
     if (options.toRender !== undefined) {
-      const groupIndex = Object(RenderPart)[options.toRender];
-      this.toRender = groupIndex;
+      const groupIndex = Object(RenderPart)[options.toRender]
+      this.toRender = groupIndex
     } else {
-      this.toRender = 0;
+      this.toRender = 0
     }
 
     // add canvas to dom
     // @ts-ignore
-    this.domElement.replaceChildren(this.canvas);
+    this.domElement.replaceChildren(this.canvas)
 
-    this.skinImage = new Image();
-    this.skinImage.src = options.skinUrl;
+    this.skinImage = new Image()
+    this.skinImage.src = options.skinUrl
 
-    this.skinObject = new SkinObject2D(this);
+    this.skinObject = new SkinObject2D(this)
 
     // texture loading
-    this.skinImage.crossOrigin = 'anonymous';
-    this.skinImage.onerror = (): void => console.error(`Failed loading ${this.skinImage.src}`);
-    this.skinImage.onload = (): void => this.render();
+    this.skinImage.crossOrigin = 'anonymous'
+    this.skinImage.onerror = (): void => console.error(`Failed loading ${this.skinImage.src}`)
+    this.skinImage.onload = (): void => this.render()
   }
 
   getCanvas(): HTMLCanvasElement {
-    return this.canvas;
+    return this.canvas
   }
 
   render(): void {
     if (this.ctx === null) {
-      return;
+      return
     }
-    const { skinImage, skinObject, ctx, toRender } = this;
-    ctx.imageSmoothingEnabled = false;
+    const { skinImage, skinObject, ctx, toRender } = this
+    ctx.imageSmoothingEnabled = false
 
     switch (toRender) {
       case RenderPart.HEAD_FRONT:
-        return skinObject.drawHeadFront(ctx, skinImage);
+        return skinObject.drawHeadFront(ctx, skinImage)
       case RenderPart.HEAD_BACK:
-        return skinObject.drawHeadBack(ctx, skinImage);
+        return skinObject.drawHeadBack(ctx, skinImage)
       default:
-        break;
+        break
     }
   }
 }
 
-export { SkinViewer2D };
+export { SkinViewer2D }

@@ -9,8 +9,8 @@ export class AuthenticatedDto {
 
   user: UserDto;
 
-  constructor(partial: Partial<{accessToken: string, refreshToken: string,  user: User }>) {
-    this.user = instanceToPlain(new UserDto(partial.user)) as UserDto
+  constructor(partial: Partial<{ accessToken: string; refreshToken: string; user: User }>) {
+    this.user = instanceToPlain(new UserDto(partial.user)) as UserDto;
     Object.assign(this, partial);
   }
 }

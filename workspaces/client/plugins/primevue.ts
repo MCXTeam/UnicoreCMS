@@ -1,16 +1,16 @@
 import Vue from 'vue'
 
-import ConfirmationService from 'primevue/confirmationservice';
+import ConfirmationService from 'primevue/confirmationservice'
 import PrimeVue from 'primevue/config'
 import ProgressSpinner from 'primevue/progressspinner'
 import ProgressBar from 'primevue/progressbar'
 import Skeleton from 'primevue/skeleton'
 import Avatar from 'primevue/avatar'
-import Dropdown from 'primevue/dropdown';
-import ConfirmDialog from 'primevue/confirmdialog';
-import Slider from 'primevue/slider';
+import Dropdown from 'primevue/dropdown'
+import ConfirmDialog from 'primevue/confirmdialog'
+import Slider from 'primevue/slider'
 
-Vue.use(ConfirmationService);
+Vue.use(ConfirmationService)
 
 Vue.component('ProgressSpinner', ProgressSpinner)
 Vue.component('Skeleton', Skeleton)

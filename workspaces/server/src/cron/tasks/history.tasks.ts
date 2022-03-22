@@ -1,8 +1,8 @@
-import { Cron, CronExpression } from "@nestjs/schedule";
-import { InjectRepository } from "@nestjs/typeorm";
-import moment from "moment";
-import { History } from "src/game/cabinet/history/entities/history.entity";
-import { LessThan, Repository } from "typeorm";
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { InjectRepository } from '@nestjs/typeorm';
+import moment from 'moment';
+import { History } from 'src/game/cabinet/history/entities/history.entity';
+import { LessThan, Repository } from 'typeorm';
 
 export class HistoryTasks {
   constructor(

@@ -31,7 +31,7 @@ export class Kit {
   servers: Server[];
 
   @ManyToMany(() => Category, (category) => category.kits, {
-    eager: true
+    eager: true,
   })
   @JoinTable()
   categories: Category[];

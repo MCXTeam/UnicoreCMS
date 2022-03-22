@@ -29,12 +29,12 @@
   }
 
   &::before {
-    content: "";
+    content: '';
     position: absolute;
     z-index: -1;
     height: 100%;
     width: 100%;
-    background: url("/images/bg.jpg"), linear-gradient(180deg, var(--vs-theme-bg) 120px, rgba(var(--vs-primary), 0.3));
+    background: url('/images/bg.jpg'), linear-gradient(180deg, var(--vs-theme-bg) 120px, rgba(var(--vs-primary), 0.3));
     background-blend-mode: overlay;
     background-size: cover;
     background-position: center;
@@ -95,8 +95,7 @@
 
 .dark-mode .header {
   &::before {
-    background: url("/images/bg.jpg"),
-      linear-gradient(180deg, var(--vs-theme-bg) 120px, rgba(var(--vs-background), 0.15));
+    background: url('/images/bg.jpg'), linear-gradient(180deg, var(--vs-theme-bg) 120px, rgba(var(--vs-background), 0.15));
     background-position: center;
   }
 }

@@ -1,13 +1,13 @@
-import { IsDefined, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsDefined, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class BanInput {
   @IsDefined()
   @IsString()
-  user_uuid: string
+  user_uuid: string;
 
   @IsOptional()
   @IsString()
-  actor_uuid?: string
+  actor_uuid?: string;
 
   @IsOptional()
   @IsNumber()
@@ -15,5 +15,5 @@ export class BanInput {
 
   @IsDefined()
   @IsString()
-  reason: string
+  reason: string;
 }

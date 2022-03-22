@@ -1,15 +1,15 @@
-import { IsDefined, IsInt, IsOptional, IsString } from "class-validator";
+import { IsDefined, IsInt, IsOptional, IsString } from 'class-validator';
 
 export class PermissionBuyInput {
   @IsDefined()
   @IsInt()
-  permission: number
+  permission: number;
 
   @IsOptional()
   @IsString()
-  server: string
+  server: string;
 
   @IsDefined()
   @IsInt()
-  period: number
+  period: number;
 }

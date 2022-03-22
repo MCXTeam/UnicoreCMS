@@ -22,7 +22,7 @@ export default (config) =>
 
       server: {
         port: envConfig.frontendPort,
-        host: '0.0.0.0'
+        host: '0.0.0.0',
       },
 
       // Глобальный CSS: https://go.nuxtjs.dev/config-css
@@ -85,7 +85,7 @@ export default (config) =>
               maxAge: ms(envConfig.jwtRefreshExpires) / 1000,
             },
             user: {
-              property: "user",
+              property: 'user',
             },
             endpoints: {
               login: { url: '/auth/login', method: 'post' },
@@ -118,8 +118,8 @@ export default (config) =>
             res.setHeader('Access-Control-Allow-Origin', '*')
             res.setHeader('Access-Control-Allow-Methods', 'GET')
             res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
-          }
-        }
+          },
+        },
       },
 
       // Конфигурация сборки: https://go.nuxtjs.dev/config-build

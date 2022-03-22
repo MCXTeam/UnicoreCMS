@@ -7,9 +7,7 @@
       </div>
       <h1 v-if="error.statusCode == 404">Страница не найдена</h1>
       <span>Произошла ошибка - {{ error.statusCode }}</span>
-      <p class="text-center" v-if="error.statusCode == 429">
-        Слишком много запросов с данного IP, подождите пару минут...
-      </p>
+      <p class="text-center" v-if="error.statusCode == 429">Слишком много запросов с данного IP, подождите пару минут...</p>
       <vs-button to="/" transparent size="large" class="mt-4"><i class="bx bx-left-arrow-alt"></i> На главную</vs-button>
     </div>
     <img class="header-render d-none d-lg-block" src="/images/render.png" />

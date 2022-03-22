@@ -20,7 +20,9 @@
             <Avatar v-if="whItem.product.icon" size="large" :image="`${$config.apiUrl}/${whItem.product.icon}`"> </Avatar>
             <Avatar v-else size="large"> <i class="bx bxs-image"></i> </Avatar>
             <div class="ms-3">
-              <h4 class="m-0">{{ whItem.product.name }} <small class="sale-wrapper ms-2">#{{ whItem.id }}</small></h4>
+              <h4 class="m-0">
+                {{ whItem.product.name }} <small class="sale-wrapper ms-2">#{{ whItem.id }}</small>
+              </h4>
               <span v-text="whItem.product.categories.map((c) => c.name).join(', ')" />
             </div>
           </td>

@@ -15,7 +15,7 @@ import { EmailMessageType } from './enums/email-message-type.enum';
   exports: [EmailService],
 })
 export class EmailModule implements OnModuleInit {
-  private logger = new Logger()
+  private logger = new Logger();
 
   constructor(@InjectRepository(EmailMessage) private emailMessagesRepository: Repository<EmailMessage>) {}
 

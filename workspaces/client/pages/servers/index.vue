@@ -38,7 +38,7 @@ export default {
   },
 
   async fetch() {
-    this.$store.commit('unicore/SET_NAME', `Игровые серверы ${this.$config.name}`);
+    this.$store.commit('unicore/SET_NAME', `Игровые серверы ${this.$config.name}`)
     this.servers = await this.$axios.get('/servers').then((res) => res.data)
   },
 }

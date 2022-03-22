@@ -30,7 +30,7 @@ export class Product {
   kit_items: KitItem[];
 
   @ManyToMany(() => Category, (category) => category.products, {
-    eager: true
+    eager: true,
   })
   @JoinTable()
   categories: Category[];

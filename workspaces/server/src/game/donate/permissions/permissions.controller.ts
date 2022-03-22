@@ -36,7 +36,7 @@ export class PermissionsController {
 
   @Post('buy')
   async buy(@CurrentUser() user: User, @IpAddress() ip: string, @Body() body: PermissionBuyInput) {
-    return this.donatePermissionsService.buy(user, ip, body)
+    return this.donatePermissionsService.buy(user, ip, body);
   }
 
   @Permissions([Permission.AdminDashboard, Permission.EditorDonateRead])

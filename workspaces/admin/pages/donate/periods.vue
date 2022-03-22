@@ -46,7 +46,6 @@
           </Column>
         </DataTable>
 
-
         <ValidationObserver v-slot="{ invalid }">
           <Dialog
             :visible.sync="periodDialog"

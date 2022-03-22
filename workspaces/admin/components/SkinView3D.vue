@@ -23,7 +23,7 @@ export default {
     return {
       viewer: null,
       control: null,
-      animation: null
+      animation: null,
     }
   },
 
@@ -88,16 +88,16 @@ export default {
 
       switch (animation) {
         case 'walk':
-          this.animation = this.viewer.animations.add(skinview3d.WalkingAnimation);
-          break;
+          this.animation = this.viewer.animations.add(skinview3d.WalkingAnimation)
+          break
         case 'run':
-          this.animation = this.viewer.animations.add(skinview3d.RunningAnimation);
-          break;
+          this.animation = this.viewer.animations.add(skinview3d.RunningAnimation)
+          break
         case 'rotate':
-          this.animation = this.viewer.animations.add(skinview3d.RotatingAnimation);
-          break;
+          this.animation = this.viewer.animations.add(skinview3d.RotatingAnimation)
+          break
         default:
-          this.animation = this.viewer.animations.add(skinview3d.FlyingAnimation);
+          this.animation = this.viewer.animations.add(skinview3d.FlyingAnimation)
           this.animation?.resetAndRemove()
       }
     },

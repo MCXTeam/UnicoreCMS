@@ -10,7 +10,7 @@ export class UserProtectedDto {
 
   @Expose()
   get uuid_clean(): string {
-    return this.uuid.replace(/-/gi, '')
+    return this.uuid.replace(/-/gi, '');
   }
 
   @Expose()

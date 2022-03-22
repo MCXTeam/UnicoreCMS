@@ -1,27 +1,27 @@
 interface Password {
-  password: string,
-  type: string,
+  password: string;
+  type: string;
 }
 
 interface Password2FA {
   firstPassword: {
-    password: string,
-    type: string
-  },
+    password: string;
+    type: string;
+  };
   secondPassword: {
-    totp: string,
-    type: string
-  }
+    totp: string;
+    type: string;
+  };
 }
 
 export class GravitAuthorize {
-  login: string
+  login: string;
 
   context?: {
-    ip: string
-  }
+    ip: string;
+  };
 
-  password: Password | Password2FA
+  password: Password | Password2FA;
 
-  minecraftAccess: boolean
+  minecraftAccess: boolean;
 }

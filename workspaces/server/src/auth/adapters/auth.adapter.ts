@@ -24,23 +24,23 @@ export class AuthAdapter extends IoAdapter {
     app.resolve<ApiService>(ApiService).then((apiService) => {
       this.apiService = apiService;
     });
-  } 
+  }
 
   createIOServer(port: number, options?: any): any {
     const server = super.createIOServer(port, options);
     server.use(async (socket: AuthSocket, next) => {
       if (socket.handshake.headers?.authorization) {
         try {
-          if (socket.handshake.headers?.authorization?.startsWith("Api-Key ")) {
-            const apiToken = await this.apiService.findOne(socket.handshake.headers?.authorization.slice(8))
-            const user = await this.usersService.getKernel()
-            user.perms = apiToken.perms
-            socket.join([...new UserDto(user).perms, userRoom(user), ApiKeyRoom(apiToken)])
-            socket.user = user; 
+          if (socket.handshake.headers?.authorization?.startsWith('Api-Key ')) {
+            const apiToken = await this.apiService.findOne(socket.handshake.headers?.authorization.slice(8));
+            const user = await this.usersService.getKernel();
+            user.perms = apiToken.perms;
+            socket.join([...new UserDto(user).perms, userRoom(user), ApiKeyRoom(apiToken)]);
+            socket.user = user;
           } else {
             const { user } = await this.tokensService.resolveRefreshToken(socket.handshake.query.token as string);
-            socket.join([...user.perms, userRoom(user)])
-            socket.user = user; 
+            socket.join([...user.perms, userRoom(user)]);
+            socket.user = user;
           }
         } catch {
           socket.join('public');

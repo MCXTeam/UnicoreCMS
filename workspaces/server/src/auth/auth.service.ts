@@ -17,8 +17,8 @@ export class AuthService {
     private tokensService: TokensService,
     private usersService: UsersService,
     private emailService: EmailService,
-    private twoFactorService: TwoFactorService
-  ) { }
+    private twoFactorService: TwoFactorService,
+  ) {}
 
   async validateCredentials(user: User, password: string) {
     return bcrypt.compare(password, user.password);
@@ -38,13 +38,10 @@ export class AuthService {
     }
 
     if (user.two_factor_enabled) {
-      if (!body.totp)
-        throw new UnauthorizedException('require2fa');
+      if (!body.totp) throw new UnauthorizedException('require2fa');
 
-      if (!this.twoFactorService.verify(user, body.totp))
-        throw new UnauthorizedException();
+      if (!this.twoFactorService.verify(user, body.totp)) throw new UnauthorizedException();
     }
-
 
     const accessToken = await this.tokensService.generateAccessToken(user);
     const refreshToken = await this.tokensService.generateRefreshToken(user, agent, ip);
@@ -55,9 +52,9 @@ export class AuthService {
   async register(input: RegisterInput, agent?: string, ip?: string) {
     try {
       const { username, email, password } = input;
-      const user = await this.usersService.create({ username, email, password })
+      const user = await this.usersService.create({ username, email, password });
 
-      this.emailService.sendActivation(user)
+      this.emailService.sendActivation(user);
       const accessToken = await this.tokensService.generateAccessToken(user);
       const refreshToken = await this.tokensService.generateRefreshToken(user, agent, ip);
 

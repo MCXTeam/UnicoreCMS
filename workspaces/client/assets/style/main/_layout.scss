@@ -1,8 +1,8 @@
-@import "./buttons";
-@import "./navbar";
-@import "./contetn";
-@import "./header";
-@import "./_firefly.sass";
+@import './buttons';
+@import './navbar';
+@import './contetn';
+@import './header';
+@import './_firefly.sass';
 
 :root {
   --vs-primary: #{$primary};
@@ -34,7 +34,7 @@
   --vs-dark: #{$dark-dark};
   --vs-background-opacity: #{$dark-background-opacity};
 
-  @import "primevue/resources/themes/bootstrap4-dark-blue/theme.css";
+  @import 'primevue/resources/themes/bootstrap4-dark-blue/theme.css';
 }
 
 .vs-loading {
@@ -44,7 +44,7 @@
 }
 
 body {
-  font-family: "Brutal Type";
+  font-family: 'Brutal Type';
   background-color: var(--vs-theme-bg);
   transition: background-color 0.3s;
   color: rgba(var(--vs-text), 0.75);
@@ -135,8 +135,7 @@ a:visited {
 
 .auth-layout,
 .error-layout {
-  background: url("/images/bg.jpg") center no-repeat,
-    linear-gradient(180deg, var(--vs-theme-bg) 120px, rgba(var(--vs-primary), 0.3));
+  background: url('/images/bg.jpg') center no-repeat, linear-gradient(180deg, var(--vs-theme-bg) 120px, rgba(var(--vs-primary), 0.3));
   background-blend-mode: overlay;
 
   .header-render {
@@ -218,7 +217,10 @@ hr {
     }
   }
 
-  h4, h5, span, strike {
+  h4,
+  h5,
+  span,
+  strike {
     line-height: 15px;
   }
 
@@ -228,4 +230,3 @@ hr {
     line-height: 20px;
   }
 }
-

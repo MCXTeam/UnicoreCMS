@@ -4,8 +4,8 @@ import SkinView2D from '../../admin/components/SkinView2D.vue'
 import SkinView3D from '../../admin/components/SkinView3D.vue'
 import Vue from 'vue'
 
-Vue.component("SkinView2D", SkinView2D)
-Vue.component("SkinView3D", SkinView3D)
+Vue.component('SkinView2D', SkinView2D)
+Vue.component('SkinView3D', SkinView3D)
 
 class UnicorePlugin {
   private context: Context
@@ -16,7 +16,7 @@ class UnicorePlugin {
 
   async logout() {
     const loading = this.context.$vs.loading({
-      text: 'Выход из системы...'
+      text: 'Выход из системы...',
     })
     await this.context.$auth.logout()
     loading.close()
@@ -78,7 +78,7 @@ declare module '@nuxt/types' {
 
 const unicorePlugin: Plugin = async (context, inject) => {
   // FETCH STORE RESOURCES
-  const cfg = await context.$axios.get('/config/public').then(res => res.data)
+  const cfg = await context.$axios.get('/config/public').then((res) => res.data)
   context.store.commit('unicore/SET_CONFIG', cfg)
   //
   inject('unicore', new UnicorePlugin(context))

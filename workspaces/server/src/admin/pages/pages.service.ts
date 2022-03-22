@@ -47,7 +47,7 @@ export class PagesService {
 
   rules(): Promise<Page> {
     return this.pagesRepository.findOne({
-      is_rules: true
+      is_rules: true,
     });
   }
 

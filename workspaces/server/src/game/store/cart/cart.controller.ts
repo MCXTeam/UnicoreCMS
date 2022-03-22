@@ -10,42 +10,42 @@ import { CartInput } from './dto/cart.input.dto';
 
 @Controller('store/cart')
 export class CartController {
-  constructor (private cartService: CartService) {}
+  constructor(private cartService: CartService) {}
 
-  @Get(":server")
+  @Get(':server')
   findByServer(@CurrentUser() user: User, @Param('server') id: string) {
-    return this.cartService.findByServer(user, id)
+    return this.cartService.findByServer(user, id);
   }
 
-  @Post("add")
+  @Post('add')
   add(@CurrentUser() user: User, @Body() body: CartInput) {
-    return this.cartService.add(user, body)
+    return this.cartService.add(user, body);
   }
 
-  @Post("buy/:id")
+  @Post('buy/:id')
   buy(@CurrentUser() user: User, @IpAddress() ip: string, @Param('id') id: string) {
-    return this.cartService.buy(user, ip, id)
+    return this.cartService.buy(user, ip, id);
   }
 
   @Delete('server/:id')
   clearOwn(@CurrentUser() user: User, @Param('id') id: string) {
-    return this.cartService.clearOwn(user, id)
+    return this.cartService.clearOwn(user, id);
   }
 
   @Delete('item/:type/:id')
-  removeOwn(@CurrentUser() user: User,  @Param('type') type: PayloadType, @Param('id', ParseIntPipe) id: number) {
-    return this.cartService.removeOwn(user, type, id)
+  removeOwn(@CurrentUser() user: User, @Param('type') type: PayloadType, @Param('id', ParseIntPipe) id: number) {
+    return this.cartService.removeOwn(user, type, id);
   }
 
   @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
   @Delete('admin/user/:uuid')
   clear(@Param('uuid') user_uuid: string) {
-    return this.cartService.clear(user_uuid)
+    return this.cartService.clear(user_uuid);
   }
 
   @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
   @Delete('admin/item/:id')
   remove(@Param('id', ParseIntPipe) id: number) {
-    return this.cartService.remove(id)
+    return this.cartService.remove(id);
   }
 }

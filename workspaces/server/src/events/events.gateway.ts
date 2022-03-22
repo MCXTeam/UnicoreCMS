@@ -27,7 +27,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection {
     // private lazyModuleLoader: LazyModuleLoader,
     private eventsService: EventsService,
     private onlineService: OnlineService,
-  ) { }
+  ) {}
 
   @WebSocketServer()
   server: Server;
@@ -40,16 +40,13 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection {
     // const { GravitModule } = await import('../auth/gravit/gravit.module');
     // const moduleRef = await this.lazyModuleLoader.load(() => GravitModule);
     // this.gravitService = await moduleRef.resolve(GravitService)
-    
 
     this.logger.log('WebSockets server is initialized and running');
   }
 
   handleConnection(socket: AuthSocket) {
-    if (socket.user)
-      this.server.to(socket.id).emit("me", instanceToPlain(new UserDto(socket.user)))
-    else
-      this.server.to(socket.id).emit("me", null)
+    if (socket.user) this.server.to(socket.id).emit('me', instanceToPlain(new UserDto(socket.user)));
+    else this.server.to(socket.id).emit('me', null);
   }
 
   @SubscribeMessage('servers/online')

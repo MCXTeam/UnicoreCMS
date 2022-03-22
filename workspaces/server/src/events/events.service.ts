@@ -15,6 +15,6 @@ export class EventsService {
   public server: Server;
 
   setServer(server: Server) {
-    this.server = server
+    this.server = server;
   }
 }

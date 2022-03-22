@@ -1,5 +1,12 @@
 import { MomentWrapper, StorageManager } from '@common';
-import { BadRequestException, Inject, Injectable, NotFoundException, ServiceUnavailableException, UnsupportedMediaTypeException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+  ServiceUnavailableException,
+  UnsupportedMediaTypeException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MulterFile } from 'fastify-file-interceptor';
 import { User } from 'src/admin/users/entities/user.entity';
@@ -35,7 +42,7 @@ export class DonateGroupsService {
     private periodsRepository: Repository<Period>,
     @InjectRepository(GroupKit)
     private groupKitsRepository: Repository<GroupKit>,
-  ) { }
+  ) {}
 
   find(relations: string[] = new Array()): Promise<DonateGroup[]> {
     return this.donateGroupsRepository.find({ relations });
@@ -48,23 +55,23 @@ export class DonateGroupsService {
         price: 'ASC',
       },
       where: (qb) => {
-        qb.where('server_id = :id', { id })
+        qb.where('server_id = :id', { id });
       },
     });
 
-    return groups.filter(group => group.periods.length)
+    return groups.filter((group) => group.periods.length);
   }
 
   async findByUserAndServer(server: string, user: string) {
     const groups = await this.userDonatesRepository.find({
       where: {
         server: { id: server },
-        user: { uuid: user }
+        user: { uuid: user },
       },
-      relations: ["user"]
+      relations: ['user'],
     });
 
-    return groups
+    return groups;
   }
 
   me(user: User): Promise<UsersDonateGroup[]> {
@@ -72,54 +79,51 @@ export class DonateGroupsService {
   }
 
   async buy(user: User, ip: string, input: GroupBuyInput) {
-    const group = await this.findOne(input.group, ['servers', 'periods'])
-    const server = group?.servers?.find(server => server.id == input.server)
-    const period = group?.periods?.find(period => period.id == input.period)
+    const group = await this.findOne(input.group, ['servers', 'periods']);
+    const server = group?.servers?.find((server) => server.id == input.server);
+    const period = group?.periods?.find((period) => period.id == input.period);
 
-    if (!group || !server || !period)
-      throw new NotFoundException()
+    if (!group || !server || !period) throw new NotFoundException();
 
-    const price = (group.price - group.price * group.sale / 100) * period.multiplier
+    const price = (group.price - (group.price * group.sale) / 100) * period.multiplier;
 
-    if (user.real < price)
-      throw new BadRequestException()
+    if (user.real < price) throw new BadRequestException();
 
     let userDonate = await this.userDonatesRepository.findOne({
       where: {
         user: {
-          uuid: user.uuid
+          uuid: user.uuid,
         },
         server: {
-          id: server.id
+          id: server.id,
         },
         group: {
-          id: group.id
-        }
+          id: group.id,
+        },
       },
-      relations: ["user"]
-    })
+      relations: ['user'],
+    });
 
     if (userDonate) {
-      if (!userDonate.expired)
-        throw new BadRequestException()
+      if (!userDonate.expired) throw new BadRequestException();
 
-      userDonate.expired = period.expire ? this.moment(userDonate.expired).utc().add(period.expire, 'seconds').toDate() : null
+      userDonate.expired = period.expire ? this.moment(userDonate.expired).utc().add(period.expire, 'seconds').toDate() : null;
     } else {
-      userDonate = new UsersDonateGroup()
-      userDonate.expired = period.expire ? this.moment().utc().add(period.expire, 'seconds').toDate() : null
-      userDonate.server = server
-      userDonate.group = group
-      userDonate.user = user
+      userDonate = new UsersDonateGroup();
+      userDonate.expired = period.expire ? this.moment().utc().add(period.expire, 'seconds').toDate() : null;
+      userDonate.server = server;
+      userDonate.group = group;
+      userDonate.user = user;
     }
 
-    user.real = user.real - price
+    user.real = user.real - price;
 
     await this.historyService.create(HistoryType.DonateGroupPurchase, ip, user, group, server, period);
-    await this.userDonatesRepository.save(userDonate)
-    await this.usersRepository.save(user)
+    await this.userDonatesRepository.save(userDonate);
+    await this.usersRepository.save(user);
 
     // Event!
-    this.eventsService.server.to(Permission.KernelUnicoreConnect).emit("buy_donate", userDonate)
+    this.eventsService.server.to(Permission.KernelUnicoreConnect).emit('buy_donate', userDonate);
   }
 
   findOne(id: number, relations?: string[]): Promise<DonateGroup> {

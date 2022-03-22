@@ -43,7 +43,7 @@ export class ApiService {
     apikey.allow = input.allow;
     apikey.perms = input.perms;
 
-    this.eventsService.server.to(ApiKeyRoom(apikey)).disconnectSockets()
+    this.eventsService.server.to(ApiKeyRoom(apikey)).disconnectSockets();
     return this.apiTokensRepository.save(apikey);
   }
 
@@ -54,7 +54,7 @@ export class ApiService {
       throw new NotFoundException();
     }
 
-    this.eventsService.server.to(ApiKeyRoom(apikey)).disconnectSockets()
+    this.eventsService.server.to(ApiKeyRoom(apikey)).disconnectSockets();
     return this.apiTokensRepository.remove(apikey);
   }
 }

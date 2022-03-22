@@ -140,7 +140,7 @@ export default {
                   label: 'Бонусы',
                   icon: 'pi pi-fw pi-dollar',
                   to: '/payment/bonuses',
-                }
+                },
               ],
             },
             {

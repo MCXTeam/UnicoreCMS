@@ -29,9 +29,7 @@ export class AppLoggerMiddleware implements NestMiddleware {
     response.on('close', () => {
       const { statusCode } = response;
 
-      this.logger.log(
-        `${method} ${hostname + originalUrl} ${statusCode} - ${ip}`
-      );
+      this.logger.log(`${method} ${hostname + originalUrl} ${statusCode} - ${ip}`);
     });
 
     next();
@@ -76,7 +74,7 @@ export class AppLoggerMiddleware implements NestMiddleware {
     EventsModule,
     GameModule,
     PaymentModule,
-    CronModule
+    CronModule,
   ],
   controllers: [],
   providers: [],

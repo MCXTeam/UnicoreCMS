@@ -8,22 +8,22 @@ import { WarehouseService } from './warehouse.service';
 
 @Controller('store/warehouse')
 export class WarehouseController {
-  constructor (private warehouseService: WarehouseService) {}
+  constructor(private warehouseService: WarehouseService) {}
 
   @Get(':server')
   async findOwn(@CurrentUser() user: User, @Param('server') server_id: string) {
-    return this.warehouseService.findOwn(user, server_id)
+    return this.warehouseService.findOwn(user, server_id);
   }
 
   @Permissions([Permission.KernelUnicoreConnect])
   @Get(':uuid/:server')
   async find(@Param('uuid') user_uuid: string, @Param('server') server_id: string) {
-    return this.warehouseService.find(user_uuid, server_id)
+    return this.warehouseService.find(user_uuid, server_id);
   }
 
   @Permissions([Permission.KernelUnicoreConnect])
   @Post()
   afterGive(@Body() body: WarehouseRejectInput) {
-    return this.warehouseService.afterGive(body)
+    return this.warehouseService.afterGive(body);
   }
 }

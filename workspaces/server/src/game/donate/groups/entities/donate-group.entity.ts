@@ -42,7 +42,7 @@ export class DonateGroup {
   periods: Period[];
 
   @Column('simple-array', {
-    nullable: true
+    nullable: true,
   })
   web_perms: string[];
 

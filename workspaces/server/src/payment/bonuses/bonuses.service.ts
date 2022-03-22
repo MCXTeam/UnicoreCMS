@@ -1,23 +1,23 @@
-import { StorageManager } from "@common";
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { MulterFile } from "fastify-file-interceptor";
-import { Repository } from "typeorm";
-import { BonusInput } from "./dto/bonus.dto";
-import { Bonus } from "./entities/bonus.entity";
+import { StorageManager } from '@common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { MulterFile } from 'fastify-file-interceptor';
+import { Repository } from 'typeorm';
+import { BonusInput } from './dto/bonus.dto';
+import { Bonus } from './entities/bonus.entity';
 
 @Injectable()
 export class BonusesService {
   constructor(
     @InjectRepository(Bonus)
     private bonusesRepository: Repository<Bonus>,
-  ) { }
+  ) {}
 
   find(): Promise<Bonus[]> {
     return this.bonusesRepository.find({
       order: {
-        amount: 'ASC'
-      }
+        amount: 'ASC',
+      },
     });
   }
 

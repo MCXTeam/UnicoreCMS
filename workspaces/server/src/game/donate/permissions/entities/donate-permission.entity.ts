@@ -27,17 +27,17 @@ export class DonatePermission {
   description: string;
 
   @Column('simple-array', {
-    nullable: true
+    nullable: true,
   })
   perms: string[];
 
   @Column('simple-array', {
-    nullable: true
+    nullable: true,
   })
   web_perms: string[];
 
   @ManyToMany(() => GroupKit, (kit) => kit.permission, {
-    eager: true
+    eager: true,
   })
   @JoinTable()
   kits: GroupKit[];

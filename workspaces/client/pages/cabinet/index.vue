@@ -20,12 +20,16 @@
               <div class="d-flex">
                 <input type="file" ref="skin" class="d-none" @change="updateSkin()" />
                 <vs-button @click="$refs.skin.click()" block :loading="skinLoading">Загрузить скин</vs-button>
-                <vs-button @click="deleteSkin($event)" block danger class="w-25" :loading="skinLoading"><i class="bx bx-trash"></i></vs-button>
+                <vs-button @click="deleteSkin($event)" block danger class="w-25" :loading="skinLoading"
+                  ><i class="bx bx-trash"></i
+                ></vs-button>
               </div>
               <div class="d-flex">
                 <input type="file" ref="cloak" class="d-none" @change="updateCloak()" />
                 <vs-button @click="$refs.cloak.click()" block :loading="cloakLoading">Загрузить плащ</vs-button>
-                <vs-button @click="deleteCloak($event)" block danger class="w-25" :loading="cloakLoading"><i class="bx bx-trash"></i></vs-button>
+                <vs-button @click="deleteCloak($event)" block danger class="w-25" :loading="cloakLoading"
+                  ><i class="bx bx-trash"></i
+                ></vs-button>
               </div>
             </div>
           </div>
@@ -66,7 +70,9 @@
         <h2 class="m-0">Блокировки аккаунта</h2>
         <p>Информация об активных блокировках аккаунта, при блокировке вам недоступны некоторые разделы сайта и доступ к серверам.</p>
         <p v-if="!$auth.user.ban" class="text-success">Все круто, твой аккаунт не в бане!</p>
-        <p v-if="$auth.user.ban && $auth.user.expires" class="text-success">Вы заблокированы до {{ $moment($auth.user.expires).local().format() }}!</p>
+        <p v-if="$auth.user.ban && $auth.user.expires" class="text-success">
+          Вы заблокированы до {{ $moment($auth.user.expires).local().format() }}!
+        </p>
         <p v-if="$auth.user.ban && !$auth.user.expires" class="text-success">Вы заблокированы навсегда!</p>
       </div>
       <div class="col-xl-4 d-flex align-items-center">
@@ -77,8 +83,8 @@
     <div class="px-4">
       <h2 class="m-0">Балансы валюты на серверах</h2>
       <p>
-        Информация о балансе внутриигровой валюты на серверах. Обмен, перевод и пополненение осуществляется во вкладке <nuxt-link to="/cabinet/payment">“ПОПОЛНЕНИЕ И
-        ПЕРЕВОД”</nuxt-link>
+        Информация о балансе внутриигровой валюты на серверах. Обмен, перевод и пополненение осуществляется во вкладке
+        <nuxt-link to="/cabinet/payment">“ПОПОЛНЕНИЕ И ПЕРЕВОД”</nuxt-link>
       </p>
       <div class="row mt-2" v-if="money">
         <div class="col-xl-4 d-flex align-items-center mb-3" v-for="m in money" :key="m.server.id">

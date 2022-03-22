@@ -1,5 +1,5 @@
 export class GravitCheckServer {
-  username: string
+  username: string;
 
-  serverId: string
+  serverId: string;
 }

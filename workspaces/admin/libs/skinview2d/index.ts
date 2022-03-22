@@ -1,2 +1,2 @@
-export * from './model';
-export * from './viewer';
+export * from './model'
+export * from './viewer'

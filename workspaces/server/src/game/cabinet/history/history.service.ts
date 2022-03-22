@@ -14,19 +14,26 @@ import { HistoryType } from './enums/history-type.enum';
 
 @Injectable()
 export class HistoryService {
-  constructor(@InjectRepository(History) private historyRepository: Repository<History>) { }
+  constructor(@InjectRepository(History) private historyRepository: Repository<History>) {}
 
   create(type: HistoryType.ProductPurchase, ip: string, user: User, product: Product, server: Server, amount: number);
   create(type: HistoryType.KitPurchase, ip: string, user: User, product: Kit, server: Server);
   create(type: HistoryType.DonateGroupPurchase, ip: string, user: User, donateGroup: DonateGroup, server: Server, period: Period);
-  create(type: HistoryType.DonatePermissionPurchase, ip: string, user: User, donatePermission: DonatePermission, server: Server, period: Period);
+  create(
+    type: HistoryType.DonatePermissionPurchase,
+    ip: string,
+    user: User,
+    donatePermission: DonatePermission,
+    server: Server,
+    period: Period,
+  );
   create(type: HistoryType.Payment, ip: string, user: User, payment: Payment);
   create(type: HistoryType.MoneyServerTransfer, ip: string, user: User, server: Server, amount: number);
   create(type: HistoryType.MoneyExchange, ip: string, user: User, server: Server, amount: number);
   create(type: HistoryType.RealTransfer, ip: string, user: User, target: User, amount: number);
   create(type: HistoryType.MoneyTransfer, ip: string, user: User, server: Server, target: User, amount: number);
   create(type: HistoryType, ip: string, user: User, payload?: any, secondPayload?: any, thirdPayload?: any) {
-    const history = new History()
+    const history = new History();
     history.user = user;
     history.type = type;
     history.ip = ip;
@@ -37,50 +44,50 @@ export class HistoryService {
         history.server = secondPayload;
         history.amount = thirdPayload;
 
-        return this.historyRepository.save(history)
+        return this.historyRepository.save(history);
       case HistoryType.KitPurchase:
         history.kit = payload;
         history.server = secondPayload;
 
-        return this.historyRepository.save(history)
+        return this.historyRepository.save(history);
       case HistoryType.DonateGroupPurchase:
         history.donate_group = payload;
         history.server = secondPayload;
         history.period = thirdPayload;
 
-        return this.historyRepository.save(history)
+        return this.historyRepository.save(history);
       case HistoryType.DonatePermissionPurchase:
         history.donate_permission = payload;
         history.server = secondPayload;
         history.period = thirdPayload;
 
-        return this.historyRepository.save(history)
+        return this.historyRepository.save(history);
       case HistoryType.Payment:
         history.payment = payload;
 
-        return this.historyRepository.save(history)
+        return this.historyRepository.save(history);
       case HistoryType.RealTransfer:
         history.target = payload;
         history.amount = secondPayload;
 
-        return this.historyRepository.save(history)
+        return this.historyRepository.save(history);
       case HistoryType.MoneyTransfer:
         history.server = payload;
         history.target = secondPayload;
         history.amount = thirdPayload;
 
-        return this.historyRepository.save(history)
+        return this.historyRepository.save(history);
       case HistoryType.MoneyServerTransfer:
         history.server = payload;
         history.amount = secondPayload;
 
-        return this.historyRepository.save(history)
+        return this.historyRepository.save(history);
 
       case HistoryType.MoneyExchange:
         history.server = payload;
         history.amount = secondPayload;
 
-        return this.historyRepository.save(history)
+        return this.historyRepository.save(history);
     }
   }
 }

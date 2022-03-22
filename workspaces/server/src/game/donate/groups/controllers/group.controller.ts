@@ -24,7 +24,7 @@ import { DonateGroupsService } from '../providers/groups.service';
 
 @Controller('donates/groups')
 export class DonateGroupsController {
-  constructor(private donateGroupsService: DonateGroupsService) { }
+  constructor(private donateGroupsService: DonateGroupsService) {}
 
   @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsCreate])
   @Post()
@@ -50,14 +50,14 @@ export class DonateGroupsController {
 
   @SkipThrottle()
   @Permissions([Permission.KernelUnicoreConnect])
-  @Get("user/:server/:uuid")
+  @Get('user/:server/:uuid')
   async findOneByUserAndServer(@Param('server') server: string, @Param('uuid') uuid: string) {
-    return this.donateGroupsService.findByUserAndServer(server, uuid)
+    return this.donateGroupsService.findByUserAndServer(server, uuid);
   }
 
   @Post('buy')
   async buy(@CurrentUser() user: User, @IpAddress() ip: string, @Body() body: GroupBuyInput) {
-    return this.donateGroupsService.buy(user, ip, body)
+    return this.donateGroupsService.buy(user, ip, body);
   }
 
   @Permissions([Permission.AdminDashboard, Permission.EditorDonateRead])

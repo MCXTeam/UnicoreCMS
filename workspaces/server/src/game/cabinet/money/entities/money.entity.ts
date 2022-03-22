@@ -9,7 +9,7 @@ export class Money {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
     eager: true,
-    primary: true
+    primary: true,
   })
   @JoinColumn()
   server: Server;
@@ -18,7 +18,7 @@ export class Money {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
-    primary: true
+    primary: true,
   })
   @JoinColumn()
   user: User;

@@ -145,8 +145,8 @@ import { mapGetters } from 'vuex'
 export default {
   head: {
     bodyAttrs: {
-      class: 'landing-body'
-    }
+      class: 'landing-body',
+    },
   },
   data() {
     return {

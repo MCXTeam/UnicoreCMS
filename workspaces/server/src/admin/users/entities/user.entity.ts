@@ -3,7 +3,18 @@ import { Ban } from 'src/game/cabinet/bans/entities/ban.entity';
 import { Cloak } from 'src/game/cabinet/skin/entities/cloak.entity';
 import { Skin } from 'src/game/cabinet/skin/entities/skin.entity';
 import { Server } from 'src/game/servers/entities/server.entity';
-import { Column, CreateDateColumn, Entity, Generated, JoinTable, ManyToMany, ManyToOne, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Generated,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToOne,
+  PrimaryColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity()
 export class User {
@@ -50,7 +61,7 @@ export class User {
   real: number;
 
   @ManyToMany(() => Role, (role) => role.users, {
-    eager: true
+    eager: true,
   })
   @JoinTable()
   roles?: Role[];
@@ -62,17 +73,17 @@ export class User {
   // payments: Payment[]
 
   @OneToOne(() => Skin, (skin) => skin.user, {
-    eager: true
+    eager: true,
   })
   skin?: Skin;
 
   @OneToOne(() => Cloak, (cloak) => cloak.user, {
-    eager: true
+    eager: true,
   })
   cloak?: Cloak;
 
   @OneToOne(() => Ban, (ban) => ban.user, {
-    eager: true
+    eager: true,
   })
   ban?: Ban;
 

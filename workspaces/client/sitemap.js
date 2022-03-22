@@ -6,19 +6,19 @@ export const sitemapSettings = {
   sitemaps: [
     {
       path: 'sitemap-index.xml',
-      exclude: ["/auth/**", "/cabinet/**", '/auth', '/cabinet'],
+      exclude: ['/auth/**', '/cabinet/**', '/auth', '/cabinet'],
       defaults: {
         changefreq: 'daily',
         priority: 1,
-        lastmod: new Date()
-      }
+        lastmod: new Date(),
+      },
     },
     {
       path: '/sitemap-servers.xml',
       exclude: ['/**'],
       routes: async () => {
         try {
-          const servers = await axios.get(envConfig.apiBaseurl + '/servers').then(res => res.data)
+          const servers = await axios.get(envConfig.apiBaseurl + '/servers').then((res) => res.data)
 
           return servers.map((server) => ({
             url: '/servers/' + server.id,
@@ -28,14 +28,14 @@ export const sitemapSettings = {
         } catch {
           return []
         }
-      }
+      },
     },
     {
       path: '/sitemap-pages.xml',
       exclude: ['/**'],
       routes: async () => {
         try {
-          const pages = await axios.get(envConfig.apiBaseurl + '/pages').then(res => res.data)
+          const pages = await axios.get(envConfig.apiBaseurl + '/pages').then((res) => res.data)
 
           return pages.map((page) => ({
             url: '/page/' + page.id,
@@ -46,7 +46,7 @@ export const sitemapSettings = {
         } catch {
           return []
         }
-      }
+      },
     },
-  ]
+  ],
 }

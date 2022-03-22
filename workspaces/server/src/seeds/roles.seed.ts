@@ -7,15 +7,15 @@ export default class CreateNews implements Seeder {
   public async run(factory: any, connection: Connection): Promise<any> {
     await connection.getRepository(Role).save([
       {
-        id: "admin",
-        name: "Администратор",
-        priority: 10
+        id: 'admin',
+        name: 'Администратор',
+        priority: 10,
       },
       {
-        id: "editor",
-        name: "Редактор",
-        priority: 7
+        id: 'editor',
+        name: 'Редактор',
+        priority: 7,
       },
-    ])
+    ]);
   }
 }

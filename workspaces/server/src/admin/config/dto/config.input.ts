@@ -1,15 +1,15 @@
-import { IsDefined, IsEnum, IsOptional, IsString } from "class-validator";
-import { ConfigType } from "../config.enum";
+import { IsDefined, IsEnum, IsOptional, IsString } from 'class-validator';
+import { ConfigType } from '../config.enum';
 
 export class ConfigInput {
   @IsDefined()
   @IsString()
-  key: string
+  key: string;
 
   @IsOptional()
-  value: string
+  value: string;
 
   @IsDefined()
   @IsEnum(ConfigType)
-  type: ConfigType
+  type: ConfigType;
 }

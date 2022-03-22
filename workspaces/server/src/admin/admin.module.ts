@@ -23,7 +23,7 @@ import { EmailModule } from './email/email.module';
     ApiModule,
     StorageModule,
     PagesModule,
-    EmailModule
+    EmailModule,
   ],
 })
 export class AdminModule {}

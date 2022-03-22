@@ -1,7 +1,7 @@
 export class GravitJoinServer {
-  username: string
+  username: string;
 
-  accessToken: string
+  accessToken: string;
 
-  serverId: string
+  serverId: string;
 }

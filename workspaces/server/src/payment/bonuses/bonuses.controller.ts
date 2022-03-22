@@ -1,9 +1,9 @@
-import { imageFileFilter, StorageManager } from "@common";
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UploadedFile, UseInterceptors } from "@nestjs/common";
-import { FileFastifyInterceptor, MulterFile } from "fastify-file-interceptor";
-import { BonusesService } from "./bonuses.service";
-import { BonusInput } from "./dto/bonus.dto";
-import { Bonus } from "./entities/bonus.entity";
+import { imageFileFilter, StorageManager } from '@common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileFastifyInterceptor, MulterFile } from 'fastify-file-interceptor';
+import { BonusesService } from './bonuses.service';
+import { BonusInput } from './dto/bonus.dto';
+import { Bonus } from './entities/bonus.entity';
 
 @Controller('payment/bonuses')
 export class BonusesController {

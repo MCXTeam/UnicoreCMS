@@ -6,7 +6,7 @@ import { Kit } from '../../entities/kit.entity';
 @Entity()
 export class CartItemKit {
   @PrimaryGeneratedColumn()
-  id: number
+  id: number;
 
   @ManyToOne(() => Kit, {
     cascade: true,
@@ -37,8 +37,8 @@ export class CartItemKit {
   server: Server;
 
   @CreateDateColumn()
-  created: Date
+  created: Date;
 
   @UpdateDateColumn()
-  updated: Date
+  updated: Date;
 }

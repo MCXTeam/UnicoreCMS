@@ -1,6 +1,6 @@
 <template>
-<div>
-  <ConfirmDialog />
-  <Nuxt />
-</div>
+  <div>
+    <ConfirmDialog />
+    <Nuxt />
+  </div>
 </template>

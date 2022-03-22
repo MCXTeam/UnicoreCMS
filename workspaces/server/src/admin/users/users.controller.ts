@@ -48,22 +48,20 @@ export class UsersController {
   @Public()
   @Get('public/uuid/:uuid')
   async getUserByUUID(@Param('uuid') uuid: string): Promise<UserProtectedDto> {
-    const user = await this.usersService.getById(uuid)
+    const user = await this.usersService.getById(uuid);
 
-    if (!user)
-      throw new NotFoundException()
+    if (!user) throw new NotFoundException();
 
-    return new UserProtectedDto(user)
+    return new UserProtectedDto(user);
   }
 
   @Public()
   @Get('public/username/:username')
   async getUserByUsername(@Param('username') username: string): Promise<UserProtectedDto> {
-    const user = await this.usersService.getByUsername(username)
+    const user = await this.usersService.getByUsername(username);
 
-    if (!user)
-      throw new NotFoundException()
+    if (!user) throw new NotFoundException();
 
-    return new UserProtectedDto(user)
+    return new UserProtectedDto(user);
   }
 }

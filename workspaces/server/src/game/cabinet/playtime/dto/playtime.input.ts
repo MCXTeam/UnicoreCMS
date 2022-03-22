@@ -1,11 +1,11 @@
-import { IsDefined, IsString } from "class-validator";
+import { IsDefined, IsString } from 'class-validator';
 
 export class PlaytimeInput {
   @IsDefined()
   @IsString()
-  user_uuid: string
+  user_uuid: string;
 
   @IsDefined()
   @IsString()
-  server_id: string
+  server_id: string;
 }

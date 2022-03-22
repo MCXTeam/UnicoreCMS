@@ -8,22 +8,22 @@ import { PlaytimeService } from './playtime.service';
 
 @Controller('cabinet/playtime')
 export class PlaytimeController {
-  constructor(private playtimeService: PlaytimeService) { }
+  constructor(private playtimeService: PlaytimeService) {}
 
   @Get('me')
   me(@CurrentUser() user: User) {
-    return this.playtimeService.findOneByUser(user)
+    return this.playtimeService.findOneByUser(user);
   }
 
   @Permissions([Permission.KernelUnicoreConnect])
   @Patch()
   update(@Body() body: PlaytimeInput[]) {
-    return this.playtimeService.update(body)
+    return this.playtimeService.update(body);
   }
 
   @Permissions([Permission.KernelUnicoreConnect])
-  @Get("user/:server/:uuid")
+  @Get('user/:server/:uuid')
   findOneByUserAndServer(@Param('server') server: string, @Param('uuid') uuid: string) {
-    return this.playtimeService.findOneByUserAndServer(server, uuid)
+    return this.playtimeService.findOneByUserAndServer(server, uuid);
   }
 }
