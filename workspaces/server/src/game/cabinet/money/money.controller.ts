@@ -1,5 +1,6 @@
 import { IpAddress } from '@common';
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
@@ -17,6 +18,7 @@ export class MoneyController {
     return this.moneyService.findOneByUser(user) 
   }
 
+  @SkipThrottle()
   @Permissions([Permission.KernelUnicoreConnect])
   @Get("user/:server/:uuid")
   async findOneByUserAndServer(@Param('server') server: string, @Param('uuid') uuid: string) {

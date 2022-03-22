@@ -1,10 +1,10 @@
 import { Plugin } from '@nuxt/types'
 
-const AxiosPluginExtend: Plugin = ({ $axios, app }) => {
+const AxiosPluginExtend: Plugin = ({ $axios, app, error }) => {
   $axios.onError(er => {
     switch (er.response?.status) {
       case 429:
-        app.$unicore.errorNotification("Слишком много запросов к данной операции, подождите пару минут...")
+        error({ statusCode: 429  })
         break;
       case 403:
         app.$unicore.errorNotification("Недостаточно прав для выполнения данного действия")

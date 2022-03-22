@@ -19,6 +19,12 @@
 
 <script>
 export default {
+  head: {
+    bodyAttrs: {
+      class: 'landing-body'
+    }
+  },
+
   async mounted() {
     try {
       await this.$recaptcha.init()

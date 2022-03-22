@@ -1,10 +1,12 @@
 import { Body, Controller, Delete, Get, NotFoundException, Param, Post } from "@nestjs/common";
+import { SkipThrottle } from "@nestjs/throttler";
 import { Permissions } from "src/admin/roles/decorators/permission.decorator";
 import { Permission } from "unicore-common";
 import { BansService } from "./bans.service";
 import { BanDto } from "./dto/ban.dto";
 import { BanInput } from "./dto/ban.input";
 
+@SkipThrottle()
 @Controller('bans')
 export class BansController {
   constructor (private bansService: BansService) {}
