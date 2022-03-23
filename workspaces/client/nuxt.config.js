@@ -57,6 +57,11 @@ export default mainConfig({
           name: 'store/index',
           path: '/store',
           redirect: '/store/products',
+        },
+        {
+          name: 'players/index',
+          path: '/players',
+          redirect: '/players/votes',
         }
       )
     },

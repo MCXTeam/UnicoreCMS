@@ -55,6 +55,13 @@
               <nuxt-link class="no-exact" to="/store/warehouse"> <i class="bx bx-package"></i> Склад </nuxt-link>
             </div>
           </div>
+          <div v-else-if="$route.path.startsWith('/players')">
+            <div class="panel cabinet-tab-panel mb-4">
+              <nuxt-link class="no-exact" to="/players/votes"> <i class='bx bx-party' ></i> Топ голосующих </nuxt-link>
+              <nuxt-link class="no-exact" to="/players/playtime"> <i class='bx bx-game' ></i> Топ онлайна </nuxt-link>
+              <nuxt-link class="no-exact" to="/players/banlist"> <i class='bx bxs-shield-alt-2' ></i> Банлист </nuxt-link>
+            </div>
+          </div>
           <component v-if="sidebar_component" :is="sidebar_component.component" v-bind="sidebar_component.payload" />
         </div>
         <div class="col-xl-9 pe-xl-5">
