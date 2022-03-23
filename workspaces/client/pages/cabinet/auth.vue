@@ -12,7 +12,7 @@
         </vs-button-group>
       </div>
     </div>
-    <vs-table class="no-overflow-table">
+    <vs-table class="no-overflow-table large-table">
       <template #thead>
         <vs-tr>
           <vs-th style="width: 35%"> Устройство </vs-th>

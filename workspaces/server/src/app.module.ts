@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { CacheModule, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { envConfig } from 'unicore-common';
 import { AuthModule } from './auth/auth.module';
@@ -39,6 +39,9 @@ export class AppLoggerMiddleware implements NestMiddleware {
 @Module({
   imports: [
     TypeOrmModule.forRoot(ormconfig),
+    CacheModule.register({
+      isGlobal: true
+    }),
     GoogleRecaptchaModule.forRoot({
       secretKey: envConfig.recaptchaSecret,
       response: (req) => req.headers.recaptcha,

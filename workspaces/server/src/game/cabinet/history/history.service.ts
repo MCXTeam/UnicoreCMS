@@ -29,6 +29,8 @@ export class HistoryService {
       .leftJoinAndSelect('history.period', 'period')
       .leftJoinAndSelect('history.payment', 'payment')
       .leftJoinAndSelect('history.target', 'target')
+      .leftJoinAndSelect('target.skin', 'skin')
+      .leftJoinAndSelect('target.cloak', 'cloak')
       .where({ user });
 
     return new PaginatedHistoryDto(await paginate(query, qb, {

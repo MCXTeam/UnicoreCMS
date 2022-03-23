@@ -19,5 +19,5 @@ export class Vote {
   user: User;
 
   @CreateDateColumn()
-  created: string;
+  created: Date;
 }

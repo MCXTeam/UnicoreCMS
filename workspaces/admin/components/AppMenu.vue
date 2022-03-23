@@ -1,7 +1,7 @@
 <template>
   <div class="layout-menu-container">
     <AppSubmenu :items="model" class="layout-menu" :root="true" @menuitem-click="onMenuItemClick" @keydown="onKeyDown" />
-    <a target="_blank" href="https://unicore.uno/docs" class="block mt-3 docs-image">
+    <a target="_blank" href="https://unicorecms.ru/docs" class="block mt-3 docs-image">
       <img alt="unicoredocs" src="/docs.jpg" class="w-full" />
     </a>
   </div>

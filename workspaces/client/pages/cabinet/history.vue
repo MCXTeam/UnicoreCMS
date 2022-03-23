@@ -18,7 +18,7 @@
       </div>
     </div>
     <div class="position-relative" ref="history">
-      <vs-table class="no-overflow-table" :key="history_type">
+      <vs-table class="no-overflow-table large-table" :key="history_type">
         <template #thead>
           <vs-tr>
             <vs-th style="max-width: 200px"> Дата </vs-th>
