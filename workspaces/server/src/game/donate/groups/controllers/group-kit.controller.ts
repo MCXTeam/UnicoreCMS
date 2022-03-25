@@ -65,20 +65,20 @@ export class GroupKitsController {
   }
 
   @Permissions([Permission.AdminDashboard, Permission.EditorDonateKitsUpdate])
-  @Patch('image/:id')
+  @Patch('image/:server/:id')
   @UseInterceptors(
     FileFastifyInterceptor('file', {
       storage: StorageManager.disk(),
       fileFilter: imageFileFilter,
     }),
   )
-  updateMedia(@Param('id', ParseIntPipe) id: number, @UploadedFile() file: MulterFile) {
-    return this.groupKitsService.updateMedia(id, file);
+  updateMedia(@Param('server') server: string, @Param('id', ParseIntPipe) id: number, @UploadedFile() file: MulterFile) {
+    return this.groupKitsService.updateMedia(server, id, file);
   }
 
   @Permissions([Permission.AdminDashboard, Permission.EditorDonateKitsUpdate])
-  @Delete('image/:id')
-  removeMedia(@Param('id', ParseIntPipe) id: number) {
-    return this.groupKitsService.removeMedia(id);
+  @Delete('image/:server/:id')
+  removeMedia(@Param('server') server: string, @Param('id', ParseIntPipe) id: number) {
+    return this.groupKitsService.removeMedia(server, id);
   }
 }

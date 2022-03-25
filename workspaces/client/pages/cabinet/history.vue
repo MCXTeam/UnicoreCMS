@@ -22,6 +22,7 @@
         <template #thead>
           <vs-tr>
             <vs-th style="max-width: 200px"> Дата </vs-th>
+            <vs-th v-if="history_type != 'payment'"> IP </vs-th>
 
             <!-- Payments -->
             <vs-th v-if="history_type == 'payment'" style="max-width: 6rem"> ID платежа </vs-th>
@@ -65,6 +66,7 @@
         <template #tbody>
           <vs-tr :key="row.id" v-for="row in history.data" :data="row">
             <vs-td> {{ $moment(row.created).local().format('D MMMM YYYY, HH:mm:ss') }} </vs-td>
+            <vs-td v-if="history_type != 'payment' && row.ip"> {{ row.ip }} </vs-td>
 
             <!-- Payments -->
             <vs-td v-if="history_type == 'payment' && row.payment" style="max-width: 6rem"> #{{ row.payment.id }} </vs-td>

@@ -1,7 +1,7 @@
-import { StorageManager } from '@common';
-import { AfterRemove, Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { DonatePermission } from '../../permissions/entities/donate-permission.entity';
 import { DonateGroup } from './donate-group.entity';
+import { GroupKitImage } from './group-kit-image.entity';
 
 @Entity()
 export class GroupKit {
@@ -15,9 +15,6 @@ export class GroupKit {
     nullable: true,
   })
   description?: string;
-
-  @Column({ nullable: true })
-  image: string;
 
   @ManyToMany(() => DonateGroup, (group) => group.kits, {
     cascade: true,
@@ -33,8 +30,10 @@ export class GroupKit {
   })
   permission: DonatePermission[];
 
-  @AfterRemove()
-  removeFile() {
-    StorageManager.remove(this.image);
-  }
+  @OneToMany(() => GroupKitImage, (item) => item.kit, {
+    cascade: ['insert', 'update'],
+    eager: true
+  })
+  @JoinTable()
+  images: GroupKitImage[]
 }

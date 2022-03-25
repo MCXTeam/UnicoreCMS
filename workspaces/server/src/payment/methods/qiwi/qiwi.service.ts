@@ -41,7 +41,7 @@ export class QiwiService implements PaymentCoreService {
     if (sign != input.sign)
       return PaymentResp.WrongSign
 
-    if (!await this.paymentHandler.handler(input.billId, null, input.amount))
+    if (!await this.paymentHandler.handler(input.billId))
       return PaymentResp.WrongPayID
 
     return PaymentResp.OK;

@@ -53,15 +53,20 @@
           <div v-for="server in servers" :key="server.id" class="grid mb-4 pt-2">
             <div class="col-12 md:col-6">
               <h4 v-text="server.name" />
-              <Avatar v-if="!kit.image" icon="pi pi-image" size="xlarge" />
-              <ImagePreview v-else width="200" :src="`${$config.apiUrl + '/' + kit.image}`" preview />
+              <Avatar v-if="!kit.images.find((img) => img.server.id == server.id)" icon="pi pi-image" size="xlarge" />
+              <ImagePreview
+                v-else
+                width="200"
+                :src="`${$config.apiUrl + '/' + kit.images.find((img) => img.server.id == server.id).image}`"
+                preview
+              />
             </div>
             <div class="col-12 md:col-6">
               <div class="field mb-0 mt-2">
-                <Button label="Загрузить" icon="pi pi-upload" @click="$refs.imageInput.choose()" />
-                <Button label="Удалить" icon="pi pi-trash" class="p-button-secondary mt-2" @click="removeImage" />
+                <Button label="Загрузить" icon="pi pi-upload" @click="preUpdateImage(server.id)" />
+                <Button label="Удалить" icon="pi pi-trash" class="p-button-secondary mt-2" @click="removeImage(server.id)" />
                 <FileUpload
-                  ref="imageInput"
+                  :ref="'imageInput-' + server.id"
                   style="display: none"
                   mode="basic"
                   name="file"
@@ -139,11 +144,12 @@ export default {
       selected: null,
       updateMode: false,
       fileDialog: false,
+      kitServer: null,
       kit: {
         id: null,
         name: null,
         description: null,
-        image: null,
+        images: [],
       },
       servers: null,
       kitDialog: false,
@@ -164,12 +170,16 @@ export default {
     hideDialog() {
       this.kitDialog = false
     },
+    preUpdateImage(id) {
+      this.kitServer = id
+      this.$refs['imageInput-' + id][0].choose()
+    },
     async uploadImage(event) {
       let formData = new FormData()
       formData.append('file', event.files[0])
 
       try {
-        await this.$axios.patch(`/donates/group-kits/image/` + this.kit.id, formData, {
+        await this.$axios.patch(`/donates/group-kits/image/${this.kitServer}/${this.kit.id}`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -189,9 +199,9 @@ export default {
         })
       }
     },
-    async removeImage() {
+    async removeImage(id) {
       try {
-        await this.$axios.delete(`/donates/group-kits/image/` + this.kit.id)
+        await this.$axios.delete(`/donates/group-kits/image/${id}/${this.kit.id}`)
         this.$toast.add({
           severity: 'success',
           detail: 'Картинка успешно удалена',
@@ -213,7 +223,7 @@ export default {
           id: null,
           name: null,
           description: null,
-          image: null,
+          images: [],
         }
       }
       this.kitDialog = true

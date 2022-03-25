@@ -8,14 +8,13 @@ import { PaymentService } from './payment.service';
 export class PaymentController {
   constructor (private paymentService: PaymentService) {}
 
-  @Public()
   @Get('methods')
   find() {
     return this.paymentService.getMethods()
   }
 
   @Public()
-  @Redirect('https://docs.nestjs.com', 302)
+  @Redirect(envConfig.baseurl, 302)
   @All('redirect/:status/:method')
   redirect(@Param('status') status: PaymentStatusesRedirect, @Param('method') method: string) {
     const url = new URL(`${envConfig.baseurl}/payment/`)

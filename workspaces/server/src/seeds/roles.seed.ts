@@ -3,7 +3,7 @@ import { Seeder } from 'typeorm-seeding';
 import * as _ from 'lodash';
 import { Role } from 'src/admin/roles/entities/role.entity';
 
-export default class CreateNews implements Seeder {
+export default class CreateRoles implements Seeder {
   public async run(factory: any, connection: Connection): Promise<any> {
     await connection.getRepository(Role).save([
       {
