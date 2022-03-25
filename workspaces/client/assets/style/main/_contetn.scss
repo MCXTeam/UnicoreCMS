@@ -57,9 +57,9 @@
 }
 
 .mini-profile {
-  @extend .rounded, .shadow-sm;
+  @extend .rounded,
+  .shadow-sm;
   background-color: var(--vs-theme-bg);
-  transform: all 0.15s;
 }
 
 .tab-panel {
@@ -224,7 +224,7 @@ a.server-block:hover {
     }
   }
 
-  .skin-2d > canvas {
+  .skin-2d>canvas {
     opacity: 0.7;
     transition: opacity 200ms;
 
@@ -298,6 +298,7 @@ a.server-block:hover {
 }
 
 .input-fw {
+
   .vs-input-parent,
   .vs-input-content,
   .vs-input,
@@ -316,7 +317,7 @@ a.server-block:hover {
   @include media-breakpoint-up(xl) {
     padding: 20px 0;
 
-    > .col-xl-6 {
+    >.col-xl-6 {
       position: relative;
 
       &::before {
@@ -338,6 +339,7 @@ a.server-block:hover {
 
 .buy-dialog,
 .store-filters {
+
   .vs-input-parent,
   .vs-input-content,
   .vs-input,
@@ -358,7 +360,7 @@ a.server-block:hover {
   }
 }
 
-.calculate > * {
+.calculate>* {
   line-height: 20px;
 }
 
@@ -372,7 +374,13 @@ a.server-block:hover {
   }
 }
 
-.bonus-block-active {
-  transform: scale(1.1);
-  filter: brightness(110%)
+.bonus-block {
+  transition: all 200ms;
+  transform: scale(1);
+  filter: brightness(100%);
+
+  &.active {
+    transform: scale(1.1);
+    filter: brightness(110%);
+  }
 }

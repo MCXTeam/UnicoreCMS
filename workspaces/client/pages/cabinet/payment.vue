@@ -5,8 +5,8 @@
       <div v-if="bonuses" class="row">
         <div v-for="bonus in bonuses" :key="bonus.id" class="col-sm-6 col-md-4 col-xl-3 mb-3">
           <div
-            class="mini-profile p-4 d-flex flex-column align-items-center justify-content-end h-100"
-            :class="b_active && b_active.id == bonus.id && 'bonus-block-active'"
+            class="mini-profile p-4 d-flex flex-column align-items-center justify-content-end h-100 bonus-block"
+            :class="b_active && b_active.id == bonus.id && 'active'"
           >
             <img width="110px" v-if="bonus.icon" :src="`${$config.apiUrl}/${bonus.icon}`" />
             <div class="w-100 mt-3">
