@@ -36,6 +36,36 @@ export interface EnvConfig {
   smtpUser: string;
   smtpPassword: string;
   mailFrom: string;
+
+  anypayEnabled: boolean
+  anypayMerchantID: string
+  anypaySecretKey: string
+
+  centappEnabled: boolean
+  centappShopID: string
+  centappToken: string
+
+  enotioEnabled: boolean
+  enotioMerchantID: string
+  enotioSecretKey: string
+  enotioSecretKeySecond: string
+
+  freekassaEnabled: boolean
+  freekassaMerchantID: string
+  freekassaSecretKey: string
+  freekassaSecretKeySecond: string
+
+  payokEnabled: boolean
+  payokShopID: string
+  payokSecretKey: string
+
+  qiwiEnabled: boolean
+  qiwiPublicKey: string
+  qiwiSecretKey: string
+
+  unitpayEnabled: boolean
+  unitpayPublicKey: string
+  unitpaySecretKey: string
 }
 
 export const envConfig: EnvConfig = {
@@ -87,4 +117,35 @@ export const envConfig: EnvConfig = {
   smtpSecure: env.get("SMTP_SECURE").asBool(),
   smtpUser: env.get("SMTP_USER").asString(),
   smtpPassword: env.get("SMTP_PASSWORD").asString(),
+
+  // Payments
+  anypayEnabled: env.get("ANYPAY_ENABLED").default(0).asBool(),
+  anypayMerchantID: env.get("ANYPAY_MERCHANT_ID").asString(),
+  anypaySecretKey: env.get("ANYPAY_SECRET_KEY").asString(),
+
+  centappEnabled: env.get("CENTAPP_ENABLED").default(0).asBool(),
+  centappShopID: env.get("CENTAPP_SHOP_ID").asString(),
+  centappToken: env.get("CENTAPP_TOKEN").asString(),
+
+  enotioEnabled: env.get("ENOTIO_ENABLED").default(0).asBool(),
+  enotioMerchantID: env.get("ENOTIO_MERCHANT_ID").asString(),
+  enotioSecretKey: env.get("ENOTIO_SECRET_KEY").asString(),
+  enotioSecretKeySecond: env.get("ENOTIO_SECRET_KEY_SECOND").asString(),
+
+  freekassaEnabled: env.get("FREEKASSA_ENABLED").default(0).asBool(),
+  freekassaMerchantID: env.get("FREEKASSA_MERCHANT_ID").asString(),
+  freekassaSecretKey: env.get("FREEKASSA_SECRET_KEY").asString(),
+  freekassaSecretKeySecond: env.get("FREEKASSA_SECRET_KEY_SECOND").asString(),
+  
+  payokEnabled: env.get("PAYOK_ENABLED").default(0).asBool(),
+  payokShopID: env.get("PAYOK_SHOP_ID").asString(),
+  payokSecretKey: env.get("PAYOK_SECRET_KEY").asString(),
+
+  qiwiEnabled: env.get("QIWI_ENABLED").default(0).asBool(),
+  qiwiPublicKey: env.get("QIWI_PUBLIC_KEY").asString(),
+  qiwiSecretKey: env.get("QIWI_SECRET_KEY").asString(),
+
+  unitpayEnabled: env.get("UNITPAY_ENABLED").default(0).asBool(),
+  unitpayPublicKey: env.get("UNITPAY_PUBLIC_KEY").asString(),
+  unitpaySecretKey: env.get("UNITPAY_SECRET_KEY").asString(),
 };

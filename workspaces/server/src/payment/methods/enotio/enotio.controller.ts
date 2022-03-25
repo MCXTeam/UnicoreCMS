@@ -4,20 +4,20 @@ import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { PaymentCreateDto } from '../core/dto/payment-create.dto';
-import { FreekassaService } from './freekassa.service';
+import { EnotioService } from './enotio.service';
 
-@Controller('payment/methods/freekassa')
-export class FreekassaController {
-  constructor(private freekassaService: FreekassaService) { }
+@Controller('payment/methods/enotio')
+export class EnotioController {
+  constructor (private enotioService: EnotioService) {}
 
   @Post('link')
   link(@CurrentUser() user: User, @Body() body: PaymentCreateDto) {
-    return this.freekassaService.createLink(user, body)
+    return this.enotioService.createLink(user, body)
   }
 
   @Public()
   @Post('handler')
   handler(@IpAddress() ip: string, @Body() body) {
-    return this.freekassaService.handler(ip, body)
+    return this.enotioService.handler(ip, body)
   }
 }

@@ -1,6 +1,5 @@
 import { User } from 'src/admin/users/entities/user.entity';
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { PaymentMethod } from '../enums/payment-methods.enum';
 import { PaymentStatuses } from '../enums/payment-statuses.enum';
 
 @Entity()
@@ -8,8 +7,11 @@ export class Payment {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ nullable: true })
+  bill_id: string
+
   @Column()
-  method: PaymentMethod;
+  method: string;
 
   @Column('decimal', {
     precision: 5,
