@@ -32,7 +32,7 @@ export class DonatePermissionsService {
     private periodsRepository: Repository<Period>,
     @InjectRepository(GroupKit)
     private groupKitsRepository: Repository<GroupKit>,
-  ) {}
+  ) { }
 
   find(relations: string[] = new Array()): Promise<DonatePermission[]> {
     return this.donatePermissionsRepository.find({ relations });
@@ -61,8 +61,8 @@ export class DonatePermissionsService {
         permission.type == PermissionType.Web
           ? null
           : {
-              id: server.id,
-            },
+            id: server.id,
+          },
       permission: {
         id: permission.id,
       },
@@ -89,15 +89,10 @@ export class DonatePermissionsService {
   }
 
   async findByServer(id: string) {
-    const perms = await this.donatePermissionsRepository.find({
-      relations: ['servers', 'periods'],
-      order: {
-        type: 'DESC',
-      },
-      where: (qb) => {
-        qb.where('server_id = :id', { id }).orWhere('type = :type', { type: PermissionType.Web });
-      },
-    });
+    const perms = (await this.donatePermissionsRepository.createQueryBuilder('perm')
+      .leftJoinAndSelect('perm.periods', 'periods')
+      .leftJoinAndSelect('perm.servers', 'servers')
+      .orderBy({ type: "DESC" }).getMany()).filter(perm => perm.servers.find(srv => srv.id == id) || perm.type == PermissionType.Web)
 
     return perms.filter((perm) => perm.periods.length);
   }
