@@ -18,6 +18,7 @@ import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
 
 import { Request, Response, NextFunction } from 'express';
 import { CronModule } from './cron/cron.module';
+import { AppController } from './app.controller';
 
 @Injectable()
 export class AppLoggerMiddleware implements NestMiddleware {
@@ -79,8 +80,7 @@ export class AppLoggerMiddleware implements NestMiddleware {
     PaymentModule,
     CronModule,
   ],
-  controllers: [],
-  providers: [],
+  controllers: [AppController]
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
