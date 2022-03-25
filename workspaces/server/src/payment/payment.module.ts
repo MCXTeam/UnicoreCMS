@@ -12,7 +12,7 @@ import { EnotioModule } from './methods/enotio/enotio.module';
 import { PayokModule } from './methods/payok/payok.module';
 import { UnitpayModule } from './methods/unitpay/unitpay.module';
 
-const register = [AnypayModule, CentappModule, EnotioModule, PayokModule, QiwiModule, UnitpayModule].filter(method => method.enabled)
+const register = [AnypayModule, CentappModule, FreekassaModule, EnotioModule, PayokModule, QiwiModule, UnitpayModule].filter(method => method.enabled)
 
 @Module({
   imports: [...register, TypeOrmModule.forFeature([Payment]), FreekassaModule, QiwiModule, BonusesModule],

@@ -50,6 +50,6 @@ export class UnitpayService implements PaymentCoreService {
         return { error: { message: PaymentResp.WrongPayID } }
     }
 
-    return PaymentResp.OK;
+    return { result: { message: PaymentResp.OK } }
   }
 }

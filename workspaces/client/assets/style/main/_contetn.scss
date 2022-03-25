@@ -59,6 +59,7 @@
 .mini-profile {
   @extend .rounded, .shadow-sm;
   background-color: var(--vs-theme-bg);
+  transform: all 0.15s;
 }
 
 .tab-panel {
@@ -369,4 +370,9 @@ a.server-block:hover {
   img {
     height: auto;
   }
+}
+
+.bonus-block-active {
+  transform: scale(1.1);
+  filter: brightness(110%)
 }

@@ -1,10 +1,13 @@
 <template>
   <div>
-    <section class="px-4">
+    <section class="px-4 pb-4">
       <h2 class="mt-0 mb-3">Пополнение счёта</h2>
       <div v-if="bonuses" class="row">
         <div v-for="bonus in bonuses" :key="bonus.id" class="col-sm-6 col-md-4 col-xl-3 mb-3">
-          <div class="mini-profile p-4 d-flex flex-column align-items-center justify-content-end h-100">
+          <div
+            class="mini-profile p-4 d-flex flex-column align-items-center justify-content-end h-100"
+            :class="b_active && b_active.id == bonus.id && 'bonus-block-active'"
+          >
             <img width="110px" v-if="bonus.icon" :src="`${$config.apiUrl}/${bonus.icon}`" />
             <div class="w-100 mt-3">
               <h2 class="m-0" v-text="$utils.formatCurrency(bonus.amount)" />
@@ -18,6 +21,51 @@
           <Skeleton width="100%" height="200px"></Skeleton>
         </div>
       </div>
+      <ValidationObserver v-slot="{ invalid }">
+        <div class="row mb-5 mt-4">
+          <div class="col-xl-6 d-flex align-items-center mb-2">
+            <p class="m-0">Или самостоятельно укажите нужную вам сумму монет в специальном поле справа</p>
+          </div>
+          <div class="col d-flex flex-column justify-content-center input-fw mb-2">
+            <h4 class="mt-0 mb-1">Сумма</h4>
+            <ValidationProvider v-slot="{ errors }" class="w-100" name="Сумма" rules="required|integer|min_value:1|max_value:15000">
+              <vs-input v-model="payment.amount">
+                <template #message-danger v-if="errors[0]">
+                  {{ errors[0] }}
+                </template>
+              </vs-input>
+            </ValidationProvider>
+          </div>
+          <div class="col-xl-6 d-flex align-items-center mb-2">
+            <p class="m-0">
+              После пополнения на Ваш счет будет зачислено:<br />
+              <b v-if="b_active">Включая бонус размером {{ b_active.bonus }}%!</b>
+            </p>
+          </div>
+          <div class="col d-flex align-items-center mb-2">
+            <h2 v-if="b_active" class="m-0">
+              {{ $utils.formatCurrency(Number(payment.amount) + (payment.amount / 100) * b_active.bonus) }}
+            </h2>
+            <h2 v-else class="m-0">{{ $utils.formatCurrency(Number(payment.amount)) }}</h2>
+          </div>
+        </div>
+        <div v-for="method in payment_methods" :key="method" class="w-100 mini-profile p-2 my-2">
+          <div class="d-flex align-items-center justify-content-between w-100">
+            <div class="d-flex align-items-center">
+              <vs-radio class="m-0" v-model="payment.method" :val="method" />
+              <h4 class="m-0">Оплата через {{ payment_methods_map[method] }}</h4>
+            </div>
+            <vs-button
+              @click="generateLink(method)"
+              v-if="payment.method == method"
+              :loading="loading_paylink"
+              :disabled="invalid"
+              size="large"
+              >Пополнить баланс</vs-button
+            >
+          </div>
+        </div>
+      </ValidationObserver>
     </section>
     <hr />
     <section class="px-4">
@@ -149,14 +197,30 @@ export default {
   data() {
     return {
       bonuses: null,
+      b_active: null,
       servers: [],
       money: [],
       loading: true,
+      loading_paylink: false,
       transfer_form: {
         type: '',
         username: '',
         amount: '',
         server: '',
+      },
+      payment_methods: true,
+      payment_methods_map: {
+        anypay: 'AnyPay',
+        centapp: 'CentApp',
+        freekassa: 'FreeKassa',
+        enotio: 'EnotIO',
+        payok: 'PayOk',
+        qiwi: 'Qiwi P2P',
+        unitpay: 'UnitPay',
+      },
+      payment: {
+        amount: 100,
+        method: 100,
       },
       exchange_form: {
         type: '',
@@ -170,9 +234,12 @@ export default {
   async fetch() {
     this.loading = true
 
+    this.payment_methods = await this.$axios.get('/payment/methods').then((res) => res.data)
     this.bonuses = await this.$axios.get('/payment/bonuses').then((res) => res.data)
     this.money = await this.$axios.get('/cabinet/money/me').then((res) => res.data)
     this.servers = await this.$axios.get('/servers').then((res) => res.data)
+
+    if (this.payment_methods.length) this.payment.method = this.payment_methods[0]
 
     if (this.servers.length) {
       if (!this.transfer_form.server) this.transfer_form.server = String(0)
@@ -184,6 +251,17 @@ export default {
   },
 
   methods: {
+    async generateLink(method) {
+      this.loading_paylink = true;
+      try {
+        const link = await this.$axios.post(`/payment/methods/${method}/link`, { amount: this.payment.amount }).then(res => res.data.link)
+        window.location.href = link
+      } catch {
+        this.$unicore.errorNotification('При генерации платежа для данного метода оплаты произошла ошибка, попробуйте другой метод, либо свяжитесь с администрацией')
+      }
+      this.loading_paylink = false;
+    },
+
     async transfer() {
       try {
         await this.$axios.post('cabinet/money/own/transfer', {
@@ -213,6 +291,14 @@ export default {
       } catch {
         this.$unicore.errorNotification('На балансе недостаточно денег, для совершения обмена')
       }
+    },
+  },
+
+  watch: {
+    'payment.amount': {
+      handler: function (newValue) {
+        this.b_active = [...this.bonuses].reverse().find((b) => newValue >= b.amount)
+      },
     },
   },
 }
