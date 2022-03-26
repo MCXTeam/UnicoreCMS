@@ -1,5 +1,6 @@
 import { Role } from 'src/admin/roles/entities/role.entity';
 import { Ban } from 'src/game/cabinet/bans/entities/ban.entity';
+import { Referal } from 'src/game/cabinet/referals/entities/referal.entity';
 import { Cloak } from 'src/game/cabinet/skin/entities/cloak.entity';
 import { Skin } from 'src/game/cabinet/skin/entities/skin.entity';
 import { Server } from 'src/game/servers/entities/server.entity';
@@ -11,6 +12,7 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryColumn,
   UpdateDateColumn,
@@ -86,14 +88,6 @@ export class User {
     eager: true,
   })
   ban?: Ban;
-
-  @ManyToMany(() => User, {
-    cascade: true,
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
-  @JoinTable()
-  referals?: User[];
 
   @CreateDateColumn()
   created: Date;

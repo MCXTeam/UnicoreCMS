@@ -22,6 +22,9 @@ export class UserProtectedDto {
   @Expose()
   cloak: Cloak;
 
+  @Expose()
+  created: Date;
+
   constructor(partial: Partial<User>) {
     Object.assign(this, partial);
   }

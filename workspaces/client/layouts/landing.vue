@@ -17,7 +17,7 @@
       <template #right>
         <no-ssr>
           <div class="d-flex align-items-center" v-if="$auth.loggedIn">
-            <vs-button to="/download" size="large">Скачать лаунчер <i class="bx bxl-windows"></i></vs-button>
+            <vs-button to="/start" size="large">Скачать лаунчер <i class="bx bxl-windows"></i></vs-button>
           </div>
           <div class="d-flex" v-else>
             <vs-button to="/auth" class="d-none d-md-block" size="large" transparent>Войти</vs-button>
@@ -52,8 +52,8 @@
                 </div>
                 <div class="tab-panel w-100">
                   <vs-button to="/cabinet" transparent block class="m-0" size="large">Личный кабинет</vs-button>
-                  <vs-button to="/cabinet/store" transparent block class="m-0" size="large">Магазин</vs-button>
-                  <vs-button to="/cabinet/players" transparent block class="m-0" size="large">Игроки</vs-button>
+                  <vs-button to="/store" transparent block class="m-0" size="large">Магазин</vs-button>
+                  <vs-button to="/players" transparent block class="m-0" size="large">Игроки</vs-button>
                   <vs-button @click="$unicore.logout()" transparent block class="m-0" size="large" danger>Выйти из системы</vs-button>
                 </div>
               </div>
@@ -134,6 +134,7 @@
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   </div>
 </template>

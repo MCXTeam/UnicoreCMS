@@ -279,39 +279,39 @@ export default class CreateServers implements Seeder {
         features: [
           {
             title: "150 тыс. блоков",
-            desciption: "Максимальный размер региона, который Вы можете заприватить"
+            description: "Максимальный размер региона, который Вы можете заприватить"
           },
           {
             title: "4 региона",
-            desciption: "Максимальное число приватов, которые Вы можете создать"
+            description: "Максимальное число приватов, которые Вы можете создать"
           },
           {
             title: "Набор флагов VIP",
-            desciption: "Creeper-explosion, ghast-fireball, snow-fall, ice-form, ice-melt и leaf-decay"
+            description: "Creeper-explosion, ghast-fireball, snow-fall, ice-form, ice-melt и leaf-decay"
           },
           {
             title: "/tpahere",
-            desciption: "Телепортировать игрока к себе"
+            description: "Телепортировать игрока к себе"
           },
           {
             title: "/back",
-            desciption: "Вернуться на точку смерти"
+            description: "Вернуться на точку смерти"
           },
           {
             title: "/fly",
-            desciption: "Включить режим полёта"
+            description: "Включить режим полёта"
           },
           {
             title: "Резервный слот",
-            desciption: "Вход на заполенный сервер"
+            description: "Вход на заполенный сервер"
           },
           {
             title: "/near",
-            desciption: "Вывести список всех игроков в радиусе 200 блоков"
+            description: "Вывести список всех игроков в радиусе 200 блоков"
           },
           {
             title: "/heal",
-            desciption: "Полностью восстановить Вашу шкалу здоровья"
+            description: "Полностью восстановить Вашу шкалу здоровья"
           },
         ]
       },
@@ -327,39 +327,39 @@ export default class CreateServers implements Seeder {
         features: [
           {
             title: "Всё включено!",
-            desciption: "Все возможности VIP!"
+            description: "Все возможности VIP!"
           },
           {
             title: "150 тыс. блоков",
-            desciption: "Максимальный размер региона, который Вы можете заприватить"
+            description: "Максимальный размер региона, который Вы можете заприватить"
           },
           {
             title: "6 регионов",
-            desciption: "Максимальное число приватов, которые Вы можете создать"
+            description: "Максимальное число приватов, которые Вы можете создать"
           },
           {
             title: "Флаги Premium",
-            desciption: "mob-spawning, mob-damage, lava-fire, deny-spawn и все флаги группы VIP"
+            description: "mob-spawning, mob-damage, lava-fire, deny-spawn и все флаги группы VIP"
           },
           {
             title: "/hat",
-            desciption: "Надеть на голову тот блок или предмет, который Вы держите в руке"
+            description: "Надеть на голову тот блок или предмет, который Вы держите в руке"
           },
           {
             title: "Приватный варп",
-            desciption: "Доступна 1 приватная точка телепортирования (warp)"
+            description: "Доступна 1 приватная точка телепортирования (warp)"
           },
           {
             title: "Смена плаща HD",
-            desciption: "Можно установить плащ высокого качества"
+            description: "Можно установить плащ высокого качества"
           },
           {
             title: "Смена скина HD",
-            desciption: "Можно установить скин высокого качества"
+            description: "Можно установить скин высокого качества"
           },
           {
             title: "Цвет на табличках",
-            desciption: "Можно писать разными цветами на табличках"
+            description: "Можно писать разными цветами на табличках"
           },
         ]
       },
@@ -376,39 +376,39 @@ export default class CreateServers implements Seeder {
         features: [
           {
             title: "Всё включено!",
-            desciption: "Все возможности Premium!"
+            description: "Все возможности Premium!"
           },
           {
             title: "200 тыс. блоков",
-            desciption: "Максимальный размер региона, который Вы можете заприватить"
+            description: "Максимальный размер региона, который Вы можете заприватить"
           },
           {
             title: "8 регионов",
-            desciption: "Максимальное число приватов, которые Вы можете создать"
+            description: "Максимальное число приватов, которые Вы можете создать"
           },
           {
             title: "Флаги Deluxe",
-            desciption: "invincible, feed-min-hunger, feed-max-hunger, water-flow, lava-flow, entry и все флаги групп VIP и PREMIUM"
+            description: "invincible, feed-min-hunger, feed-max-hunger, water-flow, lava-flow, entry и все флаги групп VIP и PREMIUM"
           },
           {
             title: "/getpos",
-            desciption: "Получить данные о Вашем местоположении"
+            description: "Получить данные о Вашем местоположении"
           },
           {
             title: "/jumpto",
-            desciption: "Прыгнуть туда, куда Вы смотрите"
+            description: "Прыгнуть туда, куда Вы смотрите"
           },
           {
             title: "/ext",
-            desciption: "Мгновенно потушить себя"
+            description: "Мгновенно потушить себя"
           },
           {
             title: "/ext [игрок]",
-            desciption: "Потушить другого игрока"
+            description: "Потушить другого игрока"
           },
           {
             title: "/heal [игрок]",
-            desciption: "Вылечить другого игрока"
+            description: "Вылечить другого игрока"
           },
         ]
       }

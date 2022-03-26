@@ -10,7 +10,7 @@
     <div class="container">
       <div class="h-100 d-flex flex-column justify-content-center">
         <div class="header-content">
-          <h1 class="mb-3"><b>UnicoreCMS</b> - Ваш сайт готов к работе</h1>
+          <h1 class="mb-3"><b v-text="$config.name" /> - Ваш сайт готов к работе</h1>
           <p class="mt-0 mb-2">
             Next-gen Headless система управления контентом и электронная коммерция для Minecraft <br />
             написанная на NestJS и NuxtJS
@@ -31,13 +31,13 @@
               <h1 class="mt-2"><number :to="users" :duration="1" /></h1>
             </div>
           </div>
-          <div class="mt-3 download-content" style="max-width: 400px">
-            <vs-button block class="mb-2" size="xl">Скачать лаунчер <i class="bx bxl-windows ms-2"></i></vs-button>
+          <div class="mt-4 download-content" style="max-width: 400px">
+            <vs-button :href="config.public_launcher_exe" target="download" block class="mb-2" size="xl">Скачать лаунчер <i class="bx bxl-windows ms-2"></i></vs-button>
             <div class="d-flex justify-content-between">
               <span>Клиент также доступен на</span>
               <div class="d-flex">
-                <vs-button transparent class="m-0">Linux</vs-button>
-                <vs-button transparent class="m-0">MacOS</vs-button>
+                <vs-button :href="config.public_launcher_jar" target="download" transparent class="m-0">Linux</vs-button>
+                <vs-button :href="config.public_launcher_jar" target="download" transparent class="m-0">MacOS</vs-button>
               </div>
             </div>
           </div>
@@ -67,6 +67,7 @@ export default {
     ...mapGetters({
       onlines: 'io/serversOnline',
       name: 'unicore/name',
+      config: 'unicore/config',
     }),
   },
 }

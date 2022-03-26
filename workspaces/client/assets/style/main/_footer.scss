@@ -1,0 +1,26 @@
+footer.app-footer {
+  margin-top: 40px;
+  background-color: var(--vs-theme-layout);
+  padding: 30px 0;
+  min-height: 180px;
+
+  .footer-desc {
+    font-size: 12px;
+    margin: 10px 0;
+    line-height: 18px;
+  }
+
+  .links {
+    display: flex;
+    flex-direction: column;
+
+    a {
+      color: rgba(var(--vs-text), 0.75) !important;
+      font-size: 16px;
+
+      &:hover, &:visited:hover {
+        text-decoration-color: rgba(var(--vs-text), 0.35);
+      }
+    }
+  }
+}

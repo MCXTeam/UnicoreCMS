@@ -66,6 +66,14 @@ export interface EnvConfig {
   unitpayEnabled: boolean
   unitpayPublicKey: string
   unitpaySecretKey: string
+
+  mctopEnabled: boolean
+  topcraftEnabled: boolean
+  minecraftratingEnabled: boolean
+
+  mctopSecretKey: string
+  topcraftSecretKey: string
+  minecraftratingSecretKey: string
 }
 
 export const envConfig: EnvConfig = {
@@ -148,4 +156,12 @@ export const envConfig: EnvConfig = {
   unitpayEnabled: env.get("UNITPAY_ENABLED").default(0).asBool(),
   unitpayPublicKey: env.get("UNITPAY_PUBLIC_KEY").asString(),
   unitpaySecretKey: env.get("UNITPAY_SECRET_KEY").asString(),
+
+  mctopEnabled: env.get("MCTOP_ENABLED").default(0).asBool(),
+  topcraftEnabled: env.get("TOPCRAFT_ENABLED").default(0).asBool(),
+  minecraftratingEnabled: env.get("MINECRAFTRATING_ENABLED").default(0).asBool(),
+
+  mctopSecretKey: env.get("MCTOP_SECRET_KEY").asString(),
+  topcraftSecretKey: env.get("TOPCRAFT_SECRET_KEY").asString(),
+  minecraftratingSecretKey: env.get("MINECRAFTRATING_SECRET_KEY").asString(),
 };

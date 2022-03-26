@@ -12,15 +12,16 @@
         <nuxt-link to="/cabinet" class="vs-navbar__item d-none d-lg-block ms-4"> <i class="bx bx-user"></i> Личный кабинет </nuxt-link>
         <nuxt-link to="/store" class="vs-navbar__item d-none d-lg-block"> <i class="bx bx-cart"></i> Магазин </nuxt-link>
         <nuxt-link to="/players" class="vs-navbar__item d-none d-lg-block"> <i class="bx bx-stats"></i> Игроки </nuxt-link>
-        <nuxt-link to="/download" class="vs-navbar__item d-none d-lg-block"> <i class="bx bxl-windows"></i> Скачать </nuxt-link>
+        <nuxt-link to="/start" class="vs-navbar__item d-none d-lg-block"> <i class="bx bxl-windows"></i> Скачать </nuxt-link>
       </template>
       <template #right>
         <div class="d-flex align-items-center p-2">
           <Avatar class="rounded shadow">
             <SkinView2D class="rounded" :width="32" :height="32" :skin="$auth.user.skin" />
           </Avatar>
-          <div class="d-none d-lg-block ms-3">
-            <h4 class="m-0">Привет, {{ $auth.user.username }}</h4>
+          <div class="ms-3">
+            <h4 class="d-block d-lg-none m-0">{{ $auth.user.username }}</h4>
+            <h4 class="d-none d-lg-block m-0">Привет, {{ $auth.user.username }}</h4>
             <h5 class="m-0">Баланс: {{ $utils.formatCurrency($auth.user.real) }}</h5>
           </div>
           <vs-button @click="$unicore.logout()" transparent class="ms-2 d-none d-lg-block" size="large" danger>
@@ -33,7 +34,7 @@
         </div>
       </template>
     </vs-navbar>
-    <div class="container cabinet-container">
+    <div class="container cabinet-container unicore-content">
       <h1 v-text="name" class="py-3" />
       <div class="row">
         <div class="col">
@@ -71,6 +72,7 @@
         </div>
       </div>
     </div>
+    <Footer style="margin-top: 120px" />
   </div>
 </template>
 

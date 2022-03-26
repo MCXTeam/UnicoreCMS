@@ -1,6 +1,5 @@
 import { User } from 'src/admin/users/entities/user.entity';
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { VotesMonitoring } from '../enums/votes-monitoring';
 
 @Entity()
 export class Vote {
@@ -8,7 +7,7 @@ export class Vote {
   id: number;
 
   @Column()
-  monitoring: VotesMonitoring;
+  monitoring: string;
 
   @ManyToOne(() => User, {
     cascade: true,

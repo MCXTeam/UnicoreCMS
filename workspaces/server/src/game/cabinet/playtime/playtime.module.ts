@@ -11,5 +11,6 @@ import { User } from 'src/admin/users/entities/user.entity';
   imports: [TypeOrmModule.forFeature([Playtime]), ServersModule, UsersModule],
   providers: [PlaytimeService],
   controllers: [PlaytimeController],
+  exports: [PlaytimeService]
 })
 export class PlaytimeModule {}

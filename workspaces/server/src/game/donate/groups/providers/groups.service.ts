@@ -49,15 +49,13 @@ export class DonateGroupsService {
   }
 
   async findByServer(id: string) {
-    const groups = await this.donateGroupsRepository.find({
-      relations: ['servers', 'periods'],
-      order: {
-        price: 'ASC',
-      },
-      where: (qb) => {
-        qb.where('server_id = :id', { id });
-      },
-    });
+    const groups = (await this.donateGroupsRepository.createQueryBuilder('group')
+      .leftJoinAndSelect('group.periods', 'periods')
+      .leftJoinAndSelect('group.kits', 'kits')
+      .leftJoinAndSelect('kits.images', 'images')
+      .leftJoinAndSelect('images.server', 'image_server')
+      .leftJoinAndSelect('group.servers', 'servers')
+      .orderBy({ price: "ASC" }).getMany()).filter(perm => perm.servers.find(srv => srv.id == id))
 
     return groups.filter((group) => group.periods.length);
   }

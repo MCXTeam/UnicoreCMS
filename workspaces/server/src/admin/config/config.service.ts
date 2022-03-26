@@ -38,6 +38,13 @@ export class ConfigService {
         },
         { key: ConfigField.LauncherExe, important: true, type: ConfigType.string },
         { key: ConfigField.LauncherJar, important: true, type: ConfigType.string },
+        { key: ConfigField.LinkDiscord, important: true, type: ConfigType.string },
+        { key: ConfigField.LinkTelegram, important: true, type: ConfigType.string },
+        { key: ConfigField.LinkVk, important: true, type: ConfigType.string },
+        { key: ConfigField.ReferalTrigger, important: true, type: ConfigType.number, value: "600" },
+        { key: ConfigField.ReferalReward, important: true, type: ConfigType.number, value: "20" },
+        { key: ConfigField.ReferalRewardPlayer, important: true, type: ConfigType.number, value: "20" },
+        { key: ConfigField.MonitoringReward, important: true, type: ConfigType.number, value: "2" },
       ])
       .orIgnore()
       .execute();

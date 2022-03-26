@@ -61,6 +61,10 @@
             <td>Стаж аккаунта</td>
             <td v-text="$moment.duration($moment() - $moment($auth.user.created)).format()" />
           </tr>
+          <tr v-if="inviter">
+            <td>Вас пригласил</td>
+            <td v-text="inviter.inviter.username" />
+          </tr>
         </table>
       </div>
     </div>
@@ -115,6 +119,7 @@ export default {
 
   data() {
     return {
+      inviter: null,
       money: null,
       skinLoading: false,
       cloakLoading: false,
@@ -127,6 +132,9 @@ export default {
 
   async fetch() {
     this.money = await this.$axios.get('/cabinet/money/me').then((res) => res.data)
+    try {
+      this.inviter = await this.$axios.get('/cabinet/referals/me/inviter').then((res) => res.data)
+    } catch {}
   },
 
   methods: {

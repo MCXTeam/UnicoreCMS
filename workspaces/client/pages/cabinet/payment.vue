@@ -258,8 +258,8 @@ export default {
         window.location.href = link
       } catch {
         this.$unicore.errorNotification('При генерации платежа для данного метода оплаты произошла ошибка, попробуйте другой метод, либо свяжитесь с администрацией')
+        this.loading_paylink = false;
       }
-      this.loading_paylink = false;
     },
 
     async transfer() {

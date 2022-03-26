@@ -3,6 +3,7 @@
 @import './contetn';
 @import './header';
 @import './_firefly.sass';
+@import './footer';
 
 :root {
   --vs-primary: #{$primary};
@@ -49,9 +50,11 @@ body {
   transition: background-color 0.3s;
   color: rgba(var(--vs-text), 0.75);
   line-height: 180%;
+  height: 100%;
 
   &.landing-body {
-    overflow: hidden;
+    overflow: hidden !important;
+    padding-bottom: 400px;
   }
 }
 
