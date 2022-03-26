@@ -14,7 +14,8 @@ import { HistoryModule } from 'src/game/cabinet/history/history.module';
 
 @Module({
   imports: [TypeOrmModule.forFeature([GroupKit, DonateGroup, Period, Server, User, UsersDonateGroup]), HistoryModule],
-  providers: [DonateGroupsService, GroupKitsService, DonateGroupsService],
+  providers: [DonateGroupsService, GroupKitsService],
+  exports: [DonateGroupsService],
   controllers: [GroupKitsController, DonateGroupsController],
 })
 export class DonateGroupsModule {}

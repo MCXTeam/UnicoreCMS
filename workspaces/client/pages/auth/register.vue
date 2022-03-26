@@ -107,8 +107,9 @@ export default {
   methods: {
     async register() {
       const loading = this.$vs.loading()
+      const recaptcha = await this.$recaptcha.execute('register')
       try {
-        const data = await this.$axios.post('/auth/register', this.form).then((res) => res.data)
+        const data = await this.$axios.post('/auth/register', this.form, { headers: { recaptcha } }).then((res) => res.data)
         await this.$auth.setUserToken(data.accessToken, data.refreshToken)
         loading.close()
       } catch (err) {

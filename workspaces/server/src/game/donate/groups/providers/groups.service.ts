@@ -4,8 +4,6 @@ import {
   Inject,
   Injectable,
   NotFoundException,
-  ServiceUnavailableException,
-  UnsupportedMediaTypeException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MulterFile } from 'fastify-file-interceptor';
@@ -76,17 +74,7 @@ export class DonateGroupsService {
     return this.userDonatesRepository.find({ user: { uuid: user.uuid } });
   }
 
-  async buy(user: User, ip: string, input: GroupBuyInput) {
-    const group = await this.findOne(input.group, ['servers', 'periods']);
-    const server = group?.servers?.find((server) => server.id == input.server);
-    const period = group?.periods?.find((period) => period.id == input.period);
-
-    if (!group || !server || !period) throw new NotFoundException();
-
-    const price = (group.price - (group.price * group.sale) / 100) * period.multiplier;
-
-    if (user.real < price) throw new BadRequestException();
-
+  async give(user: User, server: Server, group: DonateGroup, period: Period) {
     let userDonate = await this.userDonatesRepository.findOne({
       where: {
         user: {
@@ -114,14 +102,32 @@ export class DonateGroupsService {
       userDonate.user = user;
     }
 
-    user.real = user.real - price;
-
-    await this.historyService.create(HistoryType.DonateGroupPurchase, ip, user, group, server, period);
-    await this.userDonatesRepository.save(userDonate);
-    await this.usersRepository.save(user);
-
     // Event!
     this.eventsService.server.to(Permission.KernelUnicoreConnect).emit('buy_donate', userDonate);
+    
+    return this.userDonatesRepository.save(userDonate);
+  }
+
+  async buy(user: User, ip: string, input: GroupBuyInput) {
+    const group = await this.findOne(input.group, ['servers', 'periods']);
+    const server = group?.servers?.find((server) => server.id == input.server);
+    const period = group?.periods?.find((period) => period.id == input.period);
+
+    if (!group || !server || !period) throw new NotFoundException();
+
+    const price = (group.price - (group.price * group.sale) / 100) * period.multiplier;
+
+    if (user.real < price) throw new BadRequestException();
+
+    user.real = user.real - price;
+
+    try {
+      var userDonate = await this.give(user, server, group, period)
+    } catch {
+      throw new BadRequestException();
+    }
+    await this.historyService.create(HistoryType.DonateGroupPurchase, ip, user, group, server, period);
+    await this.usersRepository.save(user);
   }
 
   findOne(id: number, relations?: string[]): Promise<DonateGroup> {

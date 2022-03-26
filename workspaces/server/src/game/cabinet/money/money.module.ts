@@ -12,6 +12,7 @@ import { User } from 'src/admin/users/entities/user.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([Money, User]), ServersModule, HistoryModule, UsersModule, ConfigModule],
   providers: [MoneyService],
+  exports: [MoneyService],
   controllers: [MoneyController],
 })
 export class MoneyModule {}

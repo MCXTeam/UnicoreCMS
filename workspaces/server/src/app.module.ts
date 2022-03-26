@@ -47,7 +47,7 @@ export class AppLoggerMiddleware implements NestMiddleware {
       secretKey: envConfig.recaptchaSecret,
       response: (req) => req.headers.recaptcha,
       skipIf: process.env.NODE_ENV !== 'production',
-      actions: ['login', 'register', 'reset', 'verify', 'promocode'],
+      actions: ['login', 'register', 'reset', 'verify', 'gift'],
       network: GoogleRecaptchaNetwork.Recaptcha,
     }),
     ThrottlerModule.forRoot({

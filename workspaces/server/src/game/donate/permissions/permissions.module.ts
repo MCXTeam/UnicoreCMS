@@ -13,6 +13,7 @@ import { User } from 'src/admin/users/entities/user.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([DonatePermission, UsersDonatePermission, Server, Period, GroupKit, User]), HistoryModule],
   providers: [DonatePermissionsService],
+  exports: [DonatePermissionsService],
   controllers: [PermissionsController],
 })
 export class DonatePermissionsModule {}

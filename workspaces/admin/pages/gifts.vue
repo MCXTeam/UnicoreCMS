@@ -105,7 +105,7 @@
                 <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
               </ValidationProvider>
             </div>
-            <div class="field" v-if="['donate', 'permission', 'product', 'kit', 'money'].find((v) => v == $_.get(gift.type, 'value'))">
+            <div class="field" v-if="['donate', 'permission', 'product', 'kit', 'money'].find((v) => v == $_.get(gift.type, 'value')) && (gift.donate_permission && gift.donate_permission.type != 'web')">
               <label>Сервер</label>
               <ValidationProvider name="Сервер" rules="required" v-slot="{ errors }">
                 <Dropdown v-model="gift.server" :options="servers" optionLabel="name" appendTo="body">

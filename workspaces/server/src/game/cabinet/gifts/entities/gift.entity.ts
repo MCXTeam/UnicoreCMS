@@ -13,14 +13,14 @@ export class Gift {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ unique: true })
   promocode: string;
 
   @Column()
   type: GiftType;
 
   @OneToMany(() => GiftActivation, (activation) => activation.gift)
-  activations: GiftActivation;
+  activations: GiftActivation[];
 
   @Column({ nullable: true })
   max_activations: number;

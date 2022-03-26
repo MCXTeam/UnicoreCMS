@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { StoreService } from './providers/store.service';
 import { WarehouseModule } from './warehouse/warehouse.module';
 import { CartModule } from './cart/cart.module';
 import { StoreController } from './controllers/store.controller';
@@ -16,9 +15,8 @@ import { KitsService } from './providers/kits.service';
 import { Kit } from './entities/kit.entity';
 
 @Module({
-  providers: [StoreService, CategoriesService, ProductsService, KitsService],
+  providers: [CategoriesService, ProductsService, KitsService],
   imports: [TypeOrmModule.forFeature([Category, Product, Server, Kit]), WarehouseModule, CartModule],
-  exports: [StoreService],
   controllers: [StoreController, CategoriesController, KitsController, ProductsController],
 })
 export class StoreModule {}

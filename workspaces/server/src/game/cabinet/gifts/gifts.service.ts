@@ -1,14 +1,22 @@
 import { MomentWrapper } from '@common';
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/admin/users/entities/user.entity';
 import { Period } from 'src/game/donate/entities/period.entity';
 import { DonateGroup } from 'src/game/donate/groups/entities/donate-group.entity';
+import { DonateGroupsService } from 'src/game/donate/groups/providers/groups.service';
 import { DonatePermission } from 'src/game/donate/permissions/entities/donate-permission.entity';
+import { DonatePermissionsService } from 'src/game/donate/permissions/permissions.service';
 import { Server } from 'src/game/servers/entities/server.entity';
+import { CartService } from 'src/game/store/cart/cart.service';
 import { Kit } from 'src/game/store/entities/kit.entity';
 import { Product } from 'src/game/store/entities/product.entity';
 import { In, Repository } from 'typeorm';
+import { Money } from '../money/entities/money.entity';
+import { MoneyService } from '../money/money.service';
+import { GiftDto } from './dto/gift.dto';
 import { GiftInput } from './dto/gift.input';
+import { GiftActivation } from './entities/gift-activation.entity';
 import { Gift } from './entities/gift.entity';
 import { GiftType } from './enums/gift-type.enum';
 
@@ -31,7 +39,17 @@ export class GiftsService {
     private kitsRepository: Repository<Kit>,
     @InjectRepository(Gift)
     private giftsRepository: Repository<Gift>,
-  ) {}
+    @InjectRepository(GiftActivation)
+    private giftsActivationsRepository: Repository<GiftActivation>,
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
+    @InjectRepository(Money)
+    private moneyRepository: Repository<Money>,
+    private moneyService: MoneyService,
+    private donateGroupsService: DonateGroupsService,
+    private donatePermissionsService: DonatePermissionsService,
+    private cartService: CartService
+  ) { }
 
   find(): Promise<Gift[]> {
     const qb = this.giftsRepository.createQueryBuilder('gift').loadRelationCountAndMap('gift.activations', 'gift.activations').getMany();
@@ -43,7 +61,62 @@ export class GiftsService {
     return this.giftsRepository.findOne(id, { relations });
   }
 
+  async activate(user: User, promocode: string) {
+    const gift = await this.giftsRepository.findOne({ where: { promocode }, relations: ['activations'] })
+
+    if (!gift) {
+      throw new NotFoundException();
+    }
+
+    if (gift.max_activations && gift.activations.length >= gift.max_activations) {
+      throw new NotFoundException();
+    }
+
+    if (gift.expires && this.moment().toDate() >= gift.expires) {
+      throw new NotFoundException();
+    }
+
+    if (await this.giftsActivationsRepository.findOne({ where: { user, gift }, relations: ['user', 'gift'] })) {
+      throw new ConflictException();
+    }
+
+    switch (gift.type) {
+      case GiftType.Product:
+        await this.cartService.giveItem(user, gift.product, gift.server, gift.amount)
+        break;
+      case GiftType.Kit:
+        await this.cartService.giveKit(user, gift.server, gift.kit.id)
+        break;
+      case GiftType.Donate:
+        await this.donateGroupsService.give(user, gift.server, gift.donate_group, gift.period)
+        break;
+      case GiftType.Permission:
+        await this.donatePermissionsService.give(user, gift.server, gift.donate_permission, gift.period)
+        break;
+      case GiftType.Money:
+        const userMoney = await this.moneyService.findOneByUserAndServer(gift.server.id, user)
+        userMoney.money += gift.amount
+        await this.moneyRepository.save(userMoney)
+        break;
+      case GiftType.Real:
+        user.real += gift.amount
+        await this.usersRepository.save(user)
+        break;
+    }
+
+    const ga = new GiftActivation()
+    ga.gift = gift
+    ga.user = user
+    await this.giftsActivationsRepository.save(ga)
+
+    return new GiftDto(gift)
+  }
+
   async create(input: GiftInput) {
+    if (await this.giftsRepository.findOne({ promocode: input.promocode })) {
+      throw new NotFoundException();
+    }
+
     const gift = new Gift();
 
     gift.promocode = input.promocode;

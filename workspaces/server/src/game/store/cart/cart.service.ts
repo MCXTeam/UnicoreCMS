@@ -33,7 +33,7 @@ export class CartService {
     private usersRepository: Repository<User>,
     private serversService: ServersService,
     private historyService: HistoryService,
-  ) {}
+  ) { }
 
   private resolver(repo: Repository<WarehouseItem | CartItem>, server: Server, user: User, product: Product) {
     return repo.findOne({ server, user, product });
@@ -153,6 +153,43 @@ export class CartService {
     const cartItem = await this.cartItemsRepository.findOne(id);
 
     return this.cartItemsRepository.remove(cartItem);
+  }
+
+  async giveItem(user: User, product: Product, server: Server, amount: number) {
+    const virtualItem = new CartItem();
+    virtualItem.product = product;
+    virtualItem.amount = amount;
+    virtualItem.server = server;
+    virtualItem.user = user;
+
+    return (await this.warehouseItemsRepository.save(await this.warehousePusher(user, [virtualItem])))[0]
+  }
+
+  async giveKit(user: User, server: Server, kit: Kit | number) {
+    const warehouseItems: WarehouseItem[] = []
+
+    if (typeof kit === "number") {
+      kit = await this.kitsRepository.findOne(kit, { relations: ['items'] })
+
+      if (!kit)
+        return false
+    }
+
+    const pusherTask = kit.items.map((item) => {
+      const virtualItem = new CartItem();
+      virtualItem.product = item.product;
+      virtualItem.amount = item.amount;
+      virtualItem.server = server;
+      virtualItem.user = user;
+
+      return virtualItem;
+    })
+
+    for (const cik of pusherTask) {
+      warehouseItems.push((await this.warehouseItemsRepository.save(await this.warehousePusher(user, [cik])))[0]);
+    }
+
+    return warehouseItems
   }
 
   async buy(user: User, ip: string, server_id: string) {

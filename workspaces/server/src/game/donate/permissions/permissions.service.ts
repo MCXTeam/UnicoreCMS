@@ -2,10 +2,12 @@ import { MomentWrapper } from '@common';
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/admin/users/entities/user.entity';
+import { EventsService } from 'src/events/events.service';
 import { HistoryType } from 'src/game/cabinet/history/enums/history-type.enum';
 import { HistoryService } from 'src/game/cabinet/history/history.service';
 import { Server } from 'src/game/servers/entities/server.entity';
 import { In, Repository } from 'typeorm';
+import { Permission } from 'unicore-common';
 import { Period } from '../entities/period.entity';
 import { GroupKit } from '../groups/entities/group-kit.entity';
 import { PermissionBuyInput } from './dto/permission-buy.input';
@@ -17,6 +19,7 @@ import { PermissionType } from './enums/permission-type.enum';
 @Injectable()
 export class DonatePermissionsService {
   constructor(
+    private eventsService: EventsService,
     private historyService: HistoryService,
     @Inject('moment')
     private moment: MomentWrapper,
@@ -42,17 +45,7 @@ export class DonatePermissionsService {
     return this.userPermissionsRepository.find({ user: { uuid: user.uuid } });
   }
 
-  async buy(user: User, ip: string, input: PermissionBuyInput) {
-    const permission = await this.findOne(input.permission, ['servers', 'periods']);
-    const server = permission?.servers?.find((server) => server.id == input.server);
-    const period = permission?.periods?.find((period) => period.id == input.period);
-
-    if (!permission || !period || !(server || permission.type == PermissionType.Web)) throw new NotFoundException();
-
-    const price = (permission.price - (permission.price * permission.sale) / 100) * period.multiplier;
-
-    if (user.real < price) throw new BadRequestException();
-
+  async give(user: User, server: Server, permission: DonatePermission, period: Period) {
     let userPermission = await this.userPermissionsRepository.findOne({
       user: {
         uuid: user.uuid,
@@ -65,7 +58,7 @@ export class DonatePermissionsService {
           },
       permission: {
         id: permission.id,
-      },
+      }
     });
 
     if (userPermission) {
@@ -76,15 +69,35 @@ export class DonatePermissionsService {
     } else {
       userPermission = new UsersDonatePermission();
       userPermission.expired = period.expire ? this.moment().utc().add(period.expire, 'seconds').toDate() : null;
-      userPermission.server = server;
+
+      if (permission.type != PermissionType.Web)
+        userPermission.server = server;
+
       userPermission.permission = permission;
       userPermission.user = user;
     }
 
+    // Event!
+    this.eventsService.server.to(Permission.KernelUnicoreConnect).emit('buy_permission', userPermission);
+
+    return this.userPermissionsRepository.save(userPermission);
+  }
+
+  async buy(user: User, ip: string, input: PermissionBuyInput) {
+    const permission = await this.findOne(input.permission, ['servers', 'periods']);
+    const server = permission?.servers?.find((server) => server.id == input.server);
+    const period = permission?.periods?.find((period) => period.id == input.period);
+
+    if (!permission || !period || !(server || permission.type == PermissionType.Web)) throw new NotFoundException();
+
+    const price = (permission.price - (permission.price * permission.sale) / 100) * period.multiplier;
+
+    if (user.real < price) throw new BadRequestException();
+
     user.real = user.real - price;
 
+    await this.give(user, server, permission, period)
     await this.historyService.create(HistoryType.DonatePermissionPurchase, ip, user, permission, server, period);
-    await this.userPermissionsRepository.save(userPermission);
     await this.usersRepository.save(user);
   }
 

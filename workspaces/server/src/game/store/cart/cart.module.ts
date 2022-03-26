@@ -20,6 +20,7 @@ import { HistoryModule } from 'src/game/cabinet/history/history.module';
     HistoryModule,
   ],
   providers: [CartService],
+  exports: [CartService],
   controllers: [CartController],
 })
 export class CartModule {}

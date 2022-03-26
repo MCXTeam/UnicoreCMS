@@ -8,6 +8,9 @@ export enum ConfigField {
   LinkDiscord = 'public_link_discord',
   LinkVk = 'public_link_vk',
   LinkTelegram = 'public_link_telegram',
+  LinkMctop = 'public_link_mctop',
+  LinkTopcraft = 'public_link_topcraft',
+  LinkMinecraftraiting = 'public_link_minecraftraiting',
   MonitoringReward = "public_monitoring_reward"
 }
 

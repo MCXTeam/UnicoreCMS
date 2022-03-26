@@ -1,6 +1,9 @@
-import { DeleteManyInput } from '@common';
-import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import { DeleteManyInput, ThrottlerCoreGuard } from '@common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
+import { Recaptcha } from '@nestlab/google-recaptcha';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
+import { User } from 'src/admin/users/entities/user.entity';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { Permission } from 'unicore-common';
 import { GiftInput } from './dto/gift.input';
 import { GiftsService } from './gifts.service';
@@ -8,6 +11,13 @@ import { GiftsService } from './gifts.service';
 @Controller('cabinet/gifts')
 export class GiftsController {
   constructor(private giftsService: GiftsService) {}
+
+  @UseGuards(ThrottlerCoreGuard)
+  @Recaptcha({ action: 'gift' })
+  @Post('activate')
+  giftActivate(@CurrentUser() user: User, @Body('gift_code') code: string) {
+    return this.giftsService.activate(user, code)
+  }
 
   @Permissions([Permission.AdminDashboard, Permission.EditorCabinetGiftsCreate])
   @Post()
