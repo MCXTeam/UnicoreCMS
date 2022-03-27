@@ -64,7 +64,7 @@
           </Column>
           <Column :styles="{ width: '12rem' }">
             <template #body="slotProps">
-              <nuxt-link :to="`/users/` + slotProps.data.username">
+              <nuxt-link :to="`/users/` + slotProps.data.uuid">
                 <Button icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
               </nuxt-link>
               <Button @click="removeUser(slotProps.data.id)" icon="pi pi-trash" class="p-button-rounded p-button-warning mt-2" />

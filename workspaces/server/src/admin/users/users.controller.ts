@@ -6,6 +6,7 @@ import { PaginatedUsersDto } from './dto/paginated-users.dto';
 import { UserInput } from './dto/user.input';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { UserProtectedDto } from './dto/user-protected.dto';
+import { UserDto } from './dto/user.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -23,16 +24,21 @@ export class UsersController {
   }
 
   @ApiOperation({ summary: 'Найти одного пользователя' })
-  @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {}
+  @Get(':uuid')
+  async findOne(@Param('uuid') uuid: string) {
+    const user = await this.usersService.getById(uuid)
+    if (!user) throw new NotFoundException()
+
+    return new UserDto(user)
+  }
 
   @ApiOperation({ summary: 'Обновить одного пользователя' })
-  @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateUserDto: UserInput) {}
+  @Patch(':uuid')
+  update(@Param('uuid') uuid: string, @Body() updateUserDto: UserInput) {}
 
   @ApiOperation({ summary: 'Удалить одного пользователя' })
-  @Delete(':id')
-  remove(@Param('id') id: number) {}
+  @Delete(':uuid')
+  remove(@Param('uuid') uuid: string) {}
 
   @ApiOperation({ summary: 'Удалить несколько пользователей' })
   @Delete('bulk/:id')

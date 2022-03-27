@@ -6,7 +6,7 @@ export class GiveProductInput {
   server_id: string;
 
   @IsDefined()
-  @IsString()
+  @IsInt()
   product_id: string;
 
   @IsDefined()

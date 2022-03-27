@@ -6,14 +6,10 @@ export class GiveKitInput {
   server_id: string;
 
   @IsDefined()
-  @IsString()
+  @IsInt()
   kit_id: string;
 
   @IsDefined()
   @IsString()
   user_uuid: string;
-
-  @IsDefined()
-  @IsInt()
-  amount: number;
 }

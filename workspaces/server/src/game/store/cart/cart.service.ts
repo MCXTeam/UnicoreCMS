@@ -208,7 +208,7 @@ export class CartService {
   async giveKitByDTO(input: GiveKitInput) {
     const user = await this.usersRepository.findOne(input.user_uuid)
     const server = await this.serversService.findOne(input.server_id)
-    const kit = await this.kitsRepository.findOne(input.kit_id)
+    const kit = await this.kitsRepository.findOne(input.kit_id, { relations: ['items'] })
 
     if (!user || !server || !kit)
       throw new NotFoundException()
