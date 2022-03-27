@@ -63,8 +63,6 @@ export default {
   layout: 'landing',
   data() {
     return {
-      server: null,
-      donates: [],
       kit_active: {
         payload: null,
         donate_id: null,
@@ -76,12 +74,20 @@ export default {
       title: `Донат ${this?.server?.name}`,
     }
   },
-  async fetch() {
-    this.server = await this.$axios.get(`/servers/${this.$route.params.id}`).then((res) => res.data)
-    this.donates = await this.$axios.get('/donates/groups/server/' + this.$route.params.id).then((res) => res.data)
 
-    this.$store.commit('unicore/SET_NAME', `Платные услуги ${this.server.name}`)
+  async asyncData({ $axios, error, route, store }) {
+    try {
+      const server = await $axios.get(`/servers/${route.params.id}`).then((res) => res.data)
+      const donates = await $axios.get('/donates/groups/server/' + route.params.id).then((res) => res.data)
+
+      store.commit('unicore/SET_NAME', `Платные услуги ${server.name}`)
+
+      return { server, donates }
+    } catch {
+      error({ statusCode: 404 })
+    }
   },
+
   methods: {
     viewKit(donate_id, kit_id) {
       const kit = this.donates.find((d) => d.id == donate_id).kits.find((k) => k.id == kit_id)

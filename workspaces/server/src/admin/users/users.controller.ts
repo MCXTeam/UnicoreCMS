@@ -64,4 +64,16 @@ export class UsersController {
 
     return new UserProtectedDto(user);
   }
+
+  @Public()
+  @Get('public/user/:username')
+  async getPublicUser(@Param('username') username: string) {
+    return this.usersService.getPublicUser(username)
+  }
+
+  @Public()
+  @Get('public/users')
+  async getAllUsers() {
+    return this.usersService.getAllUsers()
+  }
 }

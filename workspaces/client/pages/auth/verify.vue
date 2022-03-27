@@ -26,7 +26,7 @@
 
 <script>
 export default {
-  middleware: ['auth', 'alter-verify'],
+  middleware: ['auth'],
   layout: 'auth',
   data() {
     return {
@@ -34,6 +34,10 @@ export default {
         code: '',
       },
     }
+  },
+  mounted() {
+    if (this.$auth.user.activated)
+      this.$auth.redirect('home')
   },
   methods: {
     async verify() {

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/admin/users/entities/user.entity';
 import { UsersService } from 'src/admin/users/users.service';
@@ -31,6 +31,13 @@ export class WarehouseService {
     if (!server) throw new BadRequestException();
 
     return (await this.warehouseItemsRepository.find({ user, server })).map((wi) => new CartItemProtected(wi));
+  }
+
+  async take(id: number) {
+    const item = await this.warehouseItemsRepository.findOne(id);
+    if (!item) throw new NotFoundException();
+    await this.warehouseItemsRepository.remove(item)
+    return true;
   }
 
   async afterGive(input: WarehouseRejectInput) {

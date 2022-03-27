@@ -1,21 +1,10 @@
 <template>
-  <section>
-    <div v-if="page" class="panel description-html" v-html="page.content" />
-    <div v-else>
-      <Skeleton width="100%" height="40px" class="me-2 mb-3" v-for="(n, index) in 3" :key="index"></Skeleton>
-    </div>
-  </section>
+  <div class="panel description-html" v-html="page.content" />
 </template>
 
 <script>
 export default {
   layout: 'landing',
-
-  data() {
-    return {
-      page: null,
-    }
-  },
 
   head() {
     return {
@@ -24,12 +13,14 @@ export default {
     }
   },
 
-  async fetch() {
+  async asyncData({ $axios, error, route, store }) {
     try {
-      this.page = await this.$axios.post(`/pages/path`, { path: this.$route.params.pathMatch }).then((res) => res.data)
-      this.$store.commit('unicore/SET_NAME', this.page.title)
+      const page = await $axios.post(`/pages/path`, { path: route.params.pathMatch }).then((res) => res.data)
+      store.commit('unicore/SET_NAME', page.title)
+
+      return { page }
     } catch {
-      this.$nuxt.error({ statusCode: 404 })
+      error({ statusCode: 404 })
     }
   },
 }

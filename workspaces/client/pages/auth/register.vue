@@ -70,7 +70,7 @@
       </div>
     </ValidationProvider>
     <div class="w-100" data-aos="zoom-in-right" data-aos-delay="1050">
-      <vs-button :disabled="invalid" type="submit" size="xl" block>Войти</vs-button>
+      <vs-button :disabled="invalid" type="submit" size="xl" block>Зарегистрироваться</vs-button>
     </div>
     <p data-aos="zoom-in-right" data-aos-delay="1200" class="mb-0 mt-4 d-flex align-items-center mb-4">
       Уже зарегистрированны? <nuxt-link class="ms-2" to="/auth">Войти</nuxt-link>
@@ -109,7 +109,7 @@ export default {
       const loading = this.$vs.loading()
       try {
         const recaptcha = await this.$recaptcha.execute('register')
-        const data = await this.$axios.post('/auth/register', this.form, { headers: { recaptcha } }).then((res) => res.data)
+        const data = await this.$axios.post('/auth/register', { ...this.form, ref: localStorage.getItem("ref") }, { headers: { recaptcha } }).then((res) => res.data)
         await this.$auth.setUserToken(data.accessToken, data.refreshToken)
         loading.close()
       } catch (err) {

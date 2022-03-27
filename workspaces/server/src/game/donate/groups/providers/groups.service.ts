@@ -15,6 +15,7 @@ import { Server } from 'src/game/servers/entities/server.entity';
 import { In, Repository } from 'typeorm';
 import { Permission } from 'unicore-common';
 import { Period } from '../../entities/period.entity';
+import { GiveDonateGroupInput } from '../dto/give-donate-group.input';
 import { GroupBuyInput } from '../dto/group-buy.input';
 import { GroupInput } from '../dto/group.input';
 import { DonateGroup } from '../entities/donate-group.entity';
@@ -74,6 +75,10 @@ export class DonateGroupsService {
     return this.userDonatesRepository.find({ user: { uuid: user.uuid } });
   }
 
+  udgByUUID(uuid: string): Promise<UsersDonateGroup[]> {
+    return this.userDonatesRepository.find({ user: { uuid } });
+  }
+
   async give(user: User, server: Server, group: DonateGroup, period: Period) {
     let userDonate = await this.userDonatesRepository.findOne({
       where: {
@@ -104,8 +109,27 @@ export class DonateGroupsService {
 
     // Event!
     this.eventsService.server.to(Permission.KernelUnicoreConnect).emit('buy_donate', userDonate);
-    
+
     return this.userDonatesRepository.save(userDonate);
+  }
+
+  async giveByDTO(input: GiveDonateGroupInput) {
+    const user = await this.usersRepository.findOne({ uuid: input.user_uuid })
+    const server = await this.serversRepository.findOne({ id: input.server_id })
+    const group = await this.donateGroupsRepository.findOne({ id: input.group_id })
+    const period = await this.periodsRepository.findOne({ id: input.period_id })
+
+    if (!user || !server || !group || !period)
+      throw new NotFoundException()
+
+    await this.give(user, server, group, period)
+  }
+
+  async take(id: number) {
+    const udg = await this.userDonatesRepository.findOne(id);
+    if (!udg) throw new NotFoundException()
+
+    await this.userDonatesRepository.remove(udg)
   }
 
   async buy(user: User, ip: string, input: GroupBuyInput) {

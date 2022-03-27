@@ -7,6 +7,8 @@ import { Permission } from 'unicore-common';
 import { PayloadType } from '../dto/paginated-store.dto';
 import { CartService } from './cart.service';
 import { CartInput } from './dto/cart.input.dto';
+import { GiveKitInput } from './dto/give-kit.input';
+import { GiveProductInput } from './dto/give-product.input';
 
 @Controller('store/cart')
 export class CartController {
@@ -47,5 +49,17 @@ export class CartController {
   @Delete('admin/item/:id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.cartService.remove(id);
+  }
+
+  @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
+  @Post('admin/give/product')
+  giveProduct(@Body() body: GiveProductInput) {
+    return this.cartService.giveProductByDTO(body);
+  }
+
+  @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
+  @Post('admin/give/kit')
+  giveKit(@Body() body: GiveKitInput) {
+    return this.cartService.giveKitByDTO(body);
   }
 }

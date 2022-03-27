@@ -2,7 +2,7 @@ import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cache } from 'cache-manager';
 import { Playtime } from 'src/game/cabinet/playtime/entities/playtime.entity';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import * as _ from 'lodash'
 import { PlaytimeGroupped } from './playtime-groupped.interface';
 import { CacheKey } from '@common';
@@ -16,7 +16,7 @@ export class PlaytimeListService {
   ) { }
 
   async refresh() {
-    const platimes: PlaytimeGroupped[] = _(await this.playtimeRepo.find({ relations: ['user'] }))
+    const platimes: PlaytimeGroupped[] = _(await this.playtimeRepo.find({ where: { user: { username: Not('Kernel') }}, relations: ['user'] }))
       .groupBy(v => v.user.uuid)
       .map((value) => ({
         user: value[0].user,

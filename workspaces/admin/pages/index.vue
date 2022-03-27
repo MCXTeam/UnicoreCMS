@@ -1,5 +1,21 @@
 <template>
   <div class="grid">
+    <div class="col-12">
+      <div class="grid grid-nogutter surface-section text-800">
+        <div class="col-12 md:col-6 p-6 text-center md:text-left flex align-items-center">
+          <section>
+            <span class="block text-6xl font-bold mb-1">UnicoreCMS</span>
+            <div class="text-6xl text-primary font-bold mb-3">Headless CMS для Minecraft</div>
+            <p class="mt-0 mb-4 text-700 line-height-3">
+              CMS для модовых проектов Minecraft. Современные технологии и профессиональный подход, невероятная производительность и скорость.
+            </p>
+            <a href="https://unicorecms.ru/docs" target="_blank">
+              <Button label="Документация" type="button" class="mr-3 p-button-raised"></Button>
+            </a>
+          </section>
+        </div>
+      </div>
+    </div>
     <div class="col-12 lg:col-6 xl:col-3">
       <div class="card mb-0">
         <div class="flex justify-content-between mb-3">
@@ -253,29 +269,6 @@
             </span>
           </li>
         </ul>
-      </div>
-    </div>
-    <div class="col-12 mt-2">
-      <div
-        class="px-4 py-5 shadow-2 flex flex-column md:flex-row md:align-items-center justify-content-between mb-3"
-        style="
-          border-radius: 1rem;
-          background: linear-gradient(0deg, rgba(0, 123, 255, 0.5), rgba(0, 123, 255, 0.5)),
-            linear-gradient(92.54deg, #1c80cf 47.88%, #ffffff 100.01%);
-        "
-      >
-        <div>
-          <div class="text-blue-100 font-medium text-xl mt-2 mb-3">СДЕЛАЙТЕ СЛЕДУЮЩИЙ ШАГ</div>
-          <div class="text-white font-medium text-5xl">Try PrimeBlocks</div>
-        </div>
-        <div class="mt-4 mr-auto md:mt-0 md:mr-0">
-          <a
-            href="https://www.primefaces.org/primeblocks-vue"
-            class="p-button font-bold px-5 py-3 p-button-warning p-button-rounded p-button-raised"
-          >
-            Get Started
-          </a>
-        </div>
       </div>
     </div>
   </div>

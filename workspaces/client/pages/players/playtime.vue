@@ -18,7 +18,7 @@
                 <Avatar class="rounded shadow me-3">
                   <SkinView2D class="rounded" :width="32" :height="32" :skin="playtime.user.skin" />
                 </Avatar>
-                <h4 class="m-0">{{ playtime.user.username }}</h4>
+                <nuxt-link :to="`/user/` + playtime.user.username">{{ playtime.user.username }}</nuxt-link>
               </div>
             </vs-td>
             <vs-td> {{ $moment.duration(playtime.time, 'minutes').format('y [years], w [weeks], d [days], h [hours], m [minutes]') }} </vs-td>

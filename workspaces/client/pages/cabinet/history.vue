@@ -108,14 +108,18 @@
             <vs-td v-if="history_type == 'money_exchange' && row.amount"> {{ $utils.formatNumber(row.amount) }} </vs-td>
 
             <!-- MoneyTransfer -->
-            <vs-td v-if="history_type == 'money_transfer' && row.target"> {{ row.target.username }} </vs-td>
+            <vs-td v-if="history_type == 'money_transfer' && row.target">
+               <nuxt-link :to="`/user/` + row.target.username">{{ row.target.username }}</nuxt-link>
+            </vs-td>
             <vs-td v-if="history_type == 'money_transfer' && row.server">
               <nuxt-link :to="'/servers/' + row.server.id">{{ row.server.name }}</nuxt-link>
             </vs-td>
             <vs-td v-if="history_type == 'money_transfer' && row.amount"> {{ $utils.formatNumber(row.amount) }} </vs-td>
 
             <!-- RealTransfer -->
-            <vs-td v-if="history_type == 'real_transfer' && row.target"> {{ row.target.username }} </vs-td>
+            <vs-td v-if="history_type == 'real_transfer' && row.target">
+              <nuxt-link :to="`/user/` + row.target.username">{{ row.target.username }}</nuxt-link>
+            </vs-td>
             <vs-td v-if="history_type == 'real_transfer' && row.amount"> {{ $utils.formatCurrency(row.amount) }} </vs-td>
           </vs-tr>
         </template>

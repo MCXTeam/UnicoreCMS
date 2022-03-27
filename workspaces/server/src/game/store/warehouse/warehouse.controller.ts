@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
@@ -25,5 +25,17 @@ export class WarehouseController {
   @Post()
   afterGive(@Body() body: WarehouseRejectInput) {
     return this.warehouseService.afterGive(body);
+  }
+
+  @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
+  @Get('admin/:uuid/:server')
+  async findFromAdmin(@Param('uuid') user_uuid: string, @Param('server') server_id: string) {
+    return this.warehouseService.find(user_uuid, server_id);
+  }
+
+  @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
+  @Delete('admin/:id')
+  async take(@Param('id') id: number) {
+    return this.warehouseService.take(id);
   }
 }

@@ -39,7 +39,7 @@
         <h5 class="text-uppercase mt-0 d-none d-xl-block"><b>UUID:</b> {{ $auth.user.uuid }}</h5>
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h3 class="m-0">Сведения об аккаунте</h3>
-          <vs-button class="d-none d-xl-block" size="small"><i class="bx bx-link me-1"></i> Публичный профиль</vs-button>
+          <vs-button :to="`/user/` + $auth.user.username" class="d-none d-xl-block" size="small"><i class="bx bx-link me-1"></i> Публичный профиль</vs-button>
         </div>
         <table class="player-info-table w-100">
           <tr>

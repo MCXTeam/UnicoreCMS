@@ -88,7 +88,7 @@
             </ValidationProvider>
             <h3 class="mb-1 mt-3">Валюта</h3>
             <ValidationProvider class="w-100" name="Валюта" rules="required">
-              <vs-select placeholder="Тип операции" v-model="transfer_form.type">
+              <vs-select placeholder="Тип валюты" v-model="transfer_form.type">
                 <vs-option label="Реальная валюта" value="0">Реальная валюта ({{ $utils.formatCurrency($auth.user.real) }})</vs-option>
                 <vs-option label="Монеты" value="1">Монеты</vs-option>
               </vs-select>

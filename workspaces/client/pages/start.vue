@@ -80,6 +80,12 @@ export default {
     }),
   },
 
+  mounted() {
+    if(this.$route.query.ref && process.client) {
+      localStorage.setItem("ref", this.$route.query.ref)
+    }
+  },
+
   asyncData({ store, $config }) {
     store.commit('unicore/SET_NAME', `Начать игру на ${$config.name}`)
   }

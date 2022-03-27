@@ -8,6 +8,9 @@ import { AuthenticatedDto } from './dto/authenticated.dto';
 import { RegisterInput } from './dto/register.input';
 import { EmailService } from 'src/admin/email/email.service';
 import { TwoFactorService } from 'src/game/cabinet/settings/providers/two_factor.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Referal } from 'src/game/cabinet/referals/entities/referal.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AuthService {
@@ -16,6 +19,8 @@ export class AuthService {
     private usersService: UsersService,
     private emailService: EmailService,
     private twoFactorService: TwoFactorService,
+    @InjectRepository(Referal)
+    private referalsRepository: Repository<Referal>,
   ) {}
 
   async validateCredentials(user: User, password: string) {
@@ -55,6 +60,17 @@ export class AuthService {
       this.emailService.sendActivation(user);
       const accessToken = await this.tokensService.generateAccessToken(user);
       const refreshToken = await this.tokensService.generateRefreshToken(user, agent, ip);
+
+      if (input.ref) {
+        const inviter = await this.usersService.getByUsername(input.ref)
+
+        if (inviter) {
+          const referal = new Referal()
+          referal.inviter = inviter
+          referal.user = user
+          await this.referalsRepository.save(referal)
+        }
+      }
 
       return new AuthenticatedDto({ accessToken, refreshToken, user });
     } catch {

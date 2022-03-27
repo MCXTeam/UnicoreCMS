@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/admin/users/entities/user.entity';
 import { Server } from 'src/game/servers/entities/server.entity';
@@ -15,6 +15,8 @@ import { Kit } from '../entities/kit.entity';
 import { CartItemKitProtected, CartItemProtected, CartProtected, CartUnprotect } from './dto/cart.dto';
 import { HistoryService } from 'src/game/cabinet/history/history.service';
 import { HistoryType } from 'src/game/cabinet/history/enums/history-type.enum';
+import { GiveProductInput } from './dto/give-product.input';
+import { GiveKitInput } from './dto/give-kit.input';
 
 @Injectable()
 export class CartService {
@@ -165,6 +167,17 @@ export class CartService {
     return (await this.warehouseItemsRepository.save(await this.warehousePusher(user, [virtualItem])))[0]
   }
 
+  async giveProductByDTO(input: GiveProductInput) {
+    const user = await this.usersRepository.findOne(input.user_uuid)
+    const server = await this.serversService.findOne(input.server_id)
+    const product = await this.productsRepository.findOne(input.product_id)
+
+    if (!user || !server || !product)
+      throw new NotFoundException()
+
+    await this.giveItem(user, product, server, input.amount)
+  }
+
   async giveKit(user: User, server: Server, kit: Kit | number) {
     const warehouseItems: WarehouseItem[] = []
 
@@ -190,6 +203,17 @@ export class CartService {
     }
 
     return warehouseItems
+  }
+
+  async giveKitByDTO(input: GiveKitInput) {
+    const user = await this.usersRepository.findOne(input.user_uuid)
+    const server = await this.serversService.findOne(input.server_id)
+    const kit = await this.kitsRepository.findOne(input.kit_id)
+
+    if (!user || !server || !kit)
+      throw new NotFoundException()
+
+    await this.giveKit(user, server, kit)
   }
 
   async buy(user: User, ip: string, server_id: string) {

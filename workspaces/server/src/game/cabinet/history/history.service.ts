@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FilterOperator, paginate, PaginateQuery } from 'nestjs-paginate';
 import { User } from 'src/admin/users/entities/user.entity';
+import { UsersService } from 'src/admin/users/users.service';
 import { Period } from 'src/game/donate/entities/period.entity';
 import { DonateGroup } from 'src/game/donate/groups/entities/donate-group.entity';
 import { DonatePermission } from 'src/game/donate/permissions/entities/donate-permission.entity';
@@ -16,7 +17,17 @@ import { HistoryType } from './enums/history-type.enum';
 
 @Injectable()
 export class HistoryService {
-  constructor(@InjectRepository(History) private historyRepository: Repository<History>) { }
+  constructor(
+    @InjectRepository(History) private historyRepository: Repository<History>,
+    private usersService: UsersService
+  ) { }
+
+  async findByUUID(query: PaginateQuery, uuid: string) {
+    const user = await this.usersService.getById(uuid)
+    if (!user) throw new NotFoundException()
+
+    return this.find(query, user)
+  }
 
   async find(query: PaginateQuery, user: User) {
     const qb = this.historyRepository

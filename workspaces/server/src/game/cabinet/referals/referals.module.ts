@@ -8,6 +8,7 @@ import { PlaytimeModule } from '../playtime/playtime.module';
 @Module({
   imports: [TypeOrmModule.forFeature([Referal]), PlaytimeModule],
   providers: [ReferalsService],
+  exports: [ReferalsService],
   controllers: [ReferalsController],
 })
 export class ReferalsModule {}

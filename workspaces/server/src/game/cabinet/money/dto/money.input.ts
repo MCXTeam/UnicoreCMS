@@ -1,4 +1,4 @@
-import { IsDefined, IsEnum, IsNumber, IsString, Min } from 'class-validator';
+import { IsDefined, IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 export enum MoneyTransferType {
   Real,
@@ -14,7 +14,7 @@ export class MoneyInput {
   @IsString()
   username: string;
 
-  @IsDefined()
+  @IsOptional()
   @IsString()
   server: string;
 

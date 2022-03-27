@@ -19,6 +19,7 @@ import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { Permission } from 'unicore-common';
+import { GiveDonateGroupInput } from '../dto/give-donate-group.input';
 import { GroupBuyInput } from '../dto/group-buy.input';
 import { GroupInput } from '../dto/group.input';
 import { DonateGroupsService } from '../providers/groups.service';
@@ -108,5 +109,23 @@ export class DonateGroupsController {
   @Delete('icon/:id')
   removeMedia(@Param('id', ParseIntPipe) id: number) {
     return this.donateGroupsService.removeIcon(id);
+  }
+
+  @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
+  @Get('admin/:uuid')
+  udgByUUID(@Param('uuid') uuid: string) {
+    return this.donateGroupsService.udgByUUID(uuid);
+  }
+
+  @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
+  @Post('admin/give')
+  give(@Body() body: GiveDonateGroupInput) {
+    return this.donateGroupsService.giveByDTO(body);
+  }
+
+  @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
+  @Delete('admin/:id')
+  take(@Param('id') id: number) {
+    return this.donateGroupsService.take(id);
   }
 }

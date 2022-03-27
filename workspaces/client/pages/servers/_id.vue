@@ -1,6 +1,5 @@
 <template>
-  <section>
-    <div v-if="server">
+    <div>
       <div class="mb-4 panel">
         <div class="panel server-block p-5 d-flex align-items-center justify-content-between">
           <div>
@@ -49,29 +48,11 @@
         <div v-text="othermods"></div>
       </div>
     </div>
-    <div v-else>
-      <Skeleton height="180px" width="100%" class="mb-4"></Skeleton>
-      <div class="d-flex w-100" v-for="(n, index) in 3" :key="index">
-        <Skeleton size="4rem" class="me-2 mb-3"></Skeleton>
-        <div style="flex: 1">
-          <Skeleton width="75%" class="mb-2"></Skeleton>
-          <Skeleton width="100%"></Skeleton>
-        </div>
-      </div>
-    </div>
-  </section>
 </template>
 
 <script>
 export default {
   layout: 'landing',
-
-  data() {
-    return {
-      server: null,
-      othermods: null,
-    }
-  },
 
   head() {
     return {
@@ -80,16 +61,18 @@ export default {
     }
   },
 
-  async fetch() {
+  async asyncData({ $axios, error, route, store }) {
     try {
-      this.server = await this.$axios.get(`/servers/${this.$route.params.id}`).then((res) => res.data)
-      this.othermods = this.server?.mods
+      const server = await $axios.get(`/servers/${route.params.id}`).then((res) => res.data)
+      const othermods = server?.mods
         ?.filter((m) => !m.description)
         ?.map((m) => m.name)
         ?.join(', ')
-      this.$store.commit('unicore/SET_NAME', `Информация о сервере ${this.server.name}`)
+      store.commit('unicore/SET_NAME', `Информация о сервере ${server.name}`)
+
+      return { server, othermods }
     } catch {
-      this.$nuxt.error({ statusCode: 404 })
+      error({ statusCode: 404 })
     }
   },
 }

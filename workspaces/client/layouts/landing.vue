@@ -31,7 +31,7 @@
       </template>
     </vs-navbar>
     <Sidebar />
-    <div id="padding-scroll-content" class="square">
+    <div id="padding-scroll-content" ref="scroll_content" class="square">
       <Header />
       <div class="container mt-5">
         <div class="row">
@@ -164,6 +164,13 @@ export default {
     this.socket.emit('servers/online', {}, (res) => {
       this.$store.commit('io/SERVERS_ONLINE', res)
     })
+  },
+  watch: {
+    async $route(to, from) {
+      this.$nextTick(() => {
+        this.$refs.scroll_content.scroll({ top: 0, behavior: 'smooth' })
+      })
+    },
   },
 }
 </script>

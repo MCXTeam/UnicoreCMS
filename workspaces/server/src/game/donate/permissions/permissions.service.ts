@@ -10,6 +10,7 @@ import { In, Repository } from 'typeorm';
 import { Permission } from 'unicore-common';
 import { Period } from '../entities/period.entity';
 import { GroupKit } from '../groups/entities/group-kit.entity';
+import { GiveDonatePermInput } from './dto/give-donate-perm.input';
 import { PermissionBuyInput } from './dto/permission-buy.input';
 import { PermissionInput } from './dto/permission.input';
 import { DonatePermission } from './entities/donate-permission.entity';
@@ -43,6 +44,10 @@ export class DonatePermissionsService {
 
   me(user: User): Promise<UsersDonatePermission[]> {
     return this.userPermissionsRepository.find({ user: { uuid: user.uuid } });
+  }
+
+  udpByUUID(uuid: string): Promise<UsersDonatePermission[]> {
+    return this.userPermissionsRepository.find({ user: { uuid } });
   }
 
   async give(user: User, server: Server, permission: DonatePermission, period: Period) {
@@ -81,6 +86,25 @@ export class DonatePermissionsService {
     this.eventsService.server.to(Permission.KernelUnicoreConnect).emit('buy_permission', userPermission);
 
     return this.userPermissionsRepository.save(userPermission);
+  }
+
+  async giveByDTO(input: GiveDonatePermInput) {
+    const user = await this.usersRepository.findOne({ uuid: input.user_uuid })
+    const server = await this.serversRepository.findOne({ id: input.server_id })
+    const permission = await this.donatePermissionsRepository.findOne({ id: input.period_id })
+    const period = await this.periodsRepository.findOne({ id: input.period_id })
+
+    if (!user || !server || !permission || !period)
+      throw new NotFoundException()
+
+    await this.give(user, server, permission, period)
+  }
+
+  async take(id: number) {
+    const udp = await this.donatePermissionsRepository.findOne(id);
+    if (!udp) throw new NotFoundException()
+
+    await this.donatePermissionsRepository.remove(udp)
   }
 
   async buy(user: User, ip: string, input: PermissionBuyInput) {

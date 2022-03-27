@@ -4,6 +4,7 @@ import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { Permission } from 'unicore-common';
+import { GiveDonatePermInput } from './dto/give-donate-perm.input';
 import { PermissionBuyInput } from './dto/permission-buy.input';
 import { PermissionInput } from './dto/permission.input';
 import { DonatePermissionsService } from './permissions.service';
@@ -67,5 +68,23 @@ export class PermissionsController {
   @Delete('bulk/:ids')
   removeMany(@Body() body: DeleteManyInput) {
     return this.donatePermissionsService.removeMany(body.items);
+  }
+
+  @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsUpdate])
+  @Get('admin/:uuid')
+  udgByUUID(@Param('uuid') uuid: string) {
+    return this.donatePermissionsService.udpByUUID(uuid);
+  }
+
+  @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsUpdate])
+  @Post('admin/give')
+  give(@Body() body: GiveDonatePermInput) {
+    return this.donatePermissionsService.giveByDTO(body);
+  }
+
+  @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsUpdate])
+  @Delete('admin/:id')
+  take(@Param('id') id: number) {
+    return this.donatePermissionsService.take(id);
   }
 }

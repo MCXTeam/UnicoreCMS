@@ -11,6 +11,7 @@ import { HistoryService } from '../history/history.service';
 import { HistoryType } from '../history/enums/history-type.enum';
 import { MoneyExchangeInput, MoneyExchangeType } from './dto/money-exchange.input';
 import { ConfigService } from 'src/admin/config/config.service';
+import { MoneyUpdateInput } from './dto/money-update.input';
 
 @Injectable()
 export class MoneyService {
@@ -72,15 +73,27 @@ export class MoneyService {
     }
   }
 
-  // async update(input: MoneyInput): Promise<Money> {
-  //   try {
-  //     const money = await this.findOneByUserAndServer(input.server, input.user)
-  //     money.money = input.money
-  //     return this.moneyRepository.save(money)
-  //   } catch {
-  //     throw new NotFoundException()
-  //   }
-  // }
+  async update(input: MoneyUpdateInput) {
+    const user = await this.usersRepo.findOne(input.uuid)
+    if (!user) throw new NotFoundException();
+
+    if (input.type == MoneyTransferType.Money) {
+      try {
+        var user_money = await this.findOneByUserAndServer(input.server, user);
+      } catch {
+        throw new NotFoundException();
+      }
+
+      user_money.money = input.amount;
+      await this.moneyRepository.save(user_money);
+
+      return true;
+    } else {
+      user.real = input.amount;
+      await this.usersRepo.save(user);
+      return true;
+    }
+  }
 
   async transfer(user: User, ip: string, input: MoneyInput): Promise<boolean> {
     if (input.type == MoneyTransferType.Money) {

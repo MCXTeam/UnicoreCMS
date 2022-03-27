@@ -25,21 +25,17 @@
 export default {
   layout: 'landing',
 
-  data() {
-    return {
-      servers: [],
-    }
-  },
-
   head() {
     return {
       title: `Донат`,
     }
   },
 
-  async fetch() {
-    this.servers = await this.$axios.get('/servers').then((res) => res.data)
-    this.$store.commit('unicore/SET_NAME', `Платные услуги ${this.$config.name}`)
+  async asyncData({ $axios, $config, store }) {
+    store.commit('unicore/SET_NAME', `Платные услуги ${$config.name}`)
+    const servers = await $axios.get('/servers').then((res) => res.data)
+
+    return { servers }
   },
 }
 </script>

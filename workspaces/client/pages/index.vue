@@ -38,33 +38,37 @@
 <script>
 export default {
   layout: 'landing',
-  data() {
-    return {
-      news: {
-        data: null,
-        meta: {
-          itemsPerPage: 10,
-          totalItems: 0,
-          currentPage: 1,
-          totalPages: 1,
-        },
-      },
-    }
-  },
-  async fetch() {
-    this.news.data = null
-    this.news = await this.$axios
+
+  async asyncData({ $axios }) {
+    const news = await $axios
       .get('/news', {
         params: {
-          limit: this.news.meta.itemsPerPage,
-          page: this.news.meta.currentPage,
+          limit: 10,
+          page: 1,
         },
       })
       .then((res) => res.data)
+
+    return { news }
   },
+
+  methods: {
+    async paginate() {
+      this.news.data = null
+      this.news = await this.$axios
+        .get('/news', {
+          params: {
+            limit: this.news.meta.itemsPerPage,
+            page: this.news.meta.currentPage,
+          },
+        })
+        .then((res) => res.data)
+    },
+  },
+
   watch: {
     'news.meta.currentPage': function () {
-      this.$fetch()
+      this.paginate()
     },
   },
 }

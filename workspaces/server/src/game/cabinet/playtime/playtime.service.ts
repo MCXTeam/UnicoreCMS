@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/admin/users/entities/user.entity';
 import { UsersService } from 'src/admin/users/users.service';
@@ -14,6 +14,7 @@ export class PlaytimeService {
     @InjectRepository(Playtime)
     private playtimeRepository: Repository<Playtime>,
     private serversService: ServersService,
+    @Inject(forwardRef(() => UsersService))
     private usersService: UsersService,
   ) {}
 

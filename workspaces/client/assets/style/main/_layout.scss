@@ -104,6 +104,7 @@ a:visited {
 
 #nprogress {
   z-index: 9999;
+  position: absolute;
 
   .bar {
     background: rgb(var(--vs-primary));

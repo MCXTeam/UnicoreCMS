@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, UnsupportedMediaTypeException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException, UnsupportedMediaTypeException } from '@nestjs/common';
 import { MulterFile } from 'fastify-file-interceptor';
 import { matchPermission } from 'src/admin/roles/guards/permisson.guard';
 import { Permission } from 'unicore-common';
@@ -9,6 +9,7 @@ import { Skin } from './entities/skin.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cloak } from './entities/cloak.entity';
 import { User } from 'src/admin/users/entities/user.entity';
+import { UsersService } from 'src/admin/users/users.service';
 
 @Injectable()
 export class SkinService {
@@ -17,7 +18,19 @@ export class SkinService {
     private skinsRepository: Repository<Skin>,
     @InjectRepository(Cloak)
     private cloaksRepository: Repository<Cloak>,
+    private usersService: UsersService
   ) {}
+
+  async updateSkin(user: User, file: MulterFile) {
+    let skin = (await this.skinsRepository.findOne(user.uuid)) || new Skin();
+
+    if (skin.file) StorageManager.remove(skin.file);
+
+    skin.user = user;
+    skin.file = file.filename;
+
+    return this.skinsRepository.save(skin);
+  }
 
   async updateSkinMe(req: any, file: MulterFile) {
     const { width, height } = sizeOf(StorageManager.read(file.filename));
@@ -32,14 +45,25 @@ export class SkinService {
       throw new ForbiddenException();
     }
 
-    let skin = (await this.skinsRepository.findOne(req.user.uuid)) || new Skin();
+    return this.updateSkin(req.user, file);
+  }
 
-    if (skin.file) StorageManager.remove(skin.file);
+  async updateSkinByUUID(uuid: string, file: MulterFile) {
+    const user = await this.usersService.getById(uuid)
+    if (!user) throw new NotFoundException()
 
-    skin.user = req.user;
-    skin.file = file.filename;
+    return this.updateSkin(user, file)
+  }
 
-    return this.skinsRepository.save(skin);
+  async updateCloak(user: User, file: MulterFile) {
+    let cloak = (await this.cloaksRepository.findOne(user.uuid)) || new Cloak();
+
+    if (cloak.file) StorageManager.remove(cloak.file);
+
+    cloak.user = user;
+    cloak.file = file.filename;
+
+    return this.cloaksRepository.save(cloak);
   }
 
   async updateCloakMe(req: any, file: MulterFile) {
@@ -55,14 +79,14 @@ export class SkinService {
       throw new ForbiddenException();
     }
 
-    let cloak = (await this.cloaksRepository.findOne(req.user.uuid)) || new Cloak();
+    return this.updateCloak(req.user, file)
+  }
 
-    if (cloak.file) StorageManager.remove(cloak.file);
+  async updateCloakByUUID(uuid: string, file: MulterFile) {
+    const user = await this.usersService.getById(uuid)
+    if (!user) throw new NotFoundException()
 
-    cloak.user = req.user;
-    cloak.file = file.filename;
-
-    return this.cloaksRepository.save(cloak);
+    return this.updateCloak(user, file)
   }
 
   async removeCloak(user: User) {
@@ -74,6 +98,13 @@ export class SkinService {
     if (cloak) this.cloaksRepository.remove(cloak);
   }
 
+  async removeCloakByUUID(uuid: string) {
+    const user = await this.usersService.getById(uuid)
+    if (!user) throw new NotFoundException()
+
+    return this.removeCloak(user)
+  }
+
   async removeSkin(user: User) {
     if (!user.skin) return;
 
@@ -81,5 +112,12 @@ export class SkinService {
     skin.user = user;
 
     if (skin) this.skinsRepository.remove(skin);
+  }
+
+  async removeSkinByUUID(uuid: string) {
+    const user = await this.usersService.getById(uuid)
+    if (!user) throw new NotFoundException()
+
+    return this.removeSkin(user)
   }
 }

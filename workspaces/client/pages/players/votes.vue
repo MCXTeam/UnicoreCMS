@@ -22,7 +22,7 @@
                 <Avatar class="rounded shadow me-3">
                   <SkinView2D class="rounded" :width="32" :height="32" :skin="vote.user.skin" />
                 </Avatar>
-                <h4 class="m-0">{{ vote.user.username }}</h4>
+                <nuxt-link :to="`/user/` + vote.user.username">{{ vote.user.username }}</nuxt-link>
               </div>
             </vs-td>
             <vs-td> {{ vote.total }} </vs-td>

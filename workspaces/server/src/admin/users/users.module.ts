@@ -1,4 +1,4 @@
-import { Logger, Module, OnModuleInit } from '@nestjs/common';
+import { forwardRef, Logger, Module, OnModuleInit } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
@@ -6,9 +6,12 @@ import { UsersController } from './users.controller';
 import { Role } from '../roles/entities/role.entity';
 import { faker } from '@faker-js/faker';
 import { UserInput } from './dto/user.input';
+import { PlaytimeModule } from 'src/game/cabinet/playtime/playtime.module';
+import { Vote } from 'src/game/cabinet/votes/entities/vote.entity';
+import { ReferalsModule } from 'src/game/cabinet/referals/referals.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Role])],
+  imports: [TypeOrmModule.forFeature([User, Role, Vote]), forwardRef(() => PlaytimeModule), forwardRef(() => ReferalsModule)],
   providers: [UsersService],
   exports: [UsersService],
   controllers: [UsersController],
