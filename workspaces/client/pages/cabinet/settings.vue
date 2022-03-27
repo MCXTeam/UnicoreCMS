@@ -6,7 +6,7 @@
         <p class="mt-0 mb-3">
           В целях безопасности мы рекомендуем выбрать пароль, который ещё не использовался вами в других учётных записях.
         </p>
-        <ValidationObserver v-slot="{ invalid }" @submit.prevent="setPassword">
+        <ValidationObserver v-slot="{ invalid }">
           <h3 class="mb-1 mt-0">Текущий пароль</h3>
           <ValidationProvider class="w-100" name="Текущий пароль" rules="required|min:6|max:24" v-slot="{ errors }" ref="password">
             <vs-input type="password" v-model="password_form.password_old" placeholder="Текущий пароль">
@@ -37,7 +37,8 @@
               </template>
             </vs-input>
           </ValidationProvider>
-          <vs-button :disabled="invalid" class="mt-3" size="large" block>Сменить пароль</vs-button>
+          <vs-checkbox class="mb-1 mt-3" v-model="password_form.close">Завершить все сеансы</vs-checkbox>
+          <vs-button @click="Password()" :disabled="invalid" class="mt-3" size="large" block>Сменить пароль</vs-button>
         </ValidationObserver>
       </div>
       <div class="col ps-xl-5 mt-5 mt-xl-0">
@@ -113,6 +114,7 @@ export default {
         password_old: '',
         password: '',
         password_confirm: '',
+        close: true,
       },
       two_factor_form: {
         code: '',
@@ -130,6 +132,20 @@ export default {
   },
 
   methods: {
+    async Password() {
+      if (this.password_form.password_old == this.password_form.password)
+        return this.$unicore.errorNotification('Новый пароль не может совпадать со старым')
+
+      const loading = this.$vs.loading()
+      try {
+        await this.$axios.post('/cabinet/settings/password', this.password_form).then((res) => res.data)
+        this.$unicore.successNotification('Ваш пароль был изменён')
+        if (this.password_form.close) this.$unicore.logout()
+      } catch {
+        this.$unicore.errorNotification('Указан неверный текущий пароль')
+      }
+      loading.close()
+    },
     async GenerateQR() {
       this.two_factor = await this.$axios.get('/cabinet/2fa/generate').then((res) => res.data)
       await new QRCode({

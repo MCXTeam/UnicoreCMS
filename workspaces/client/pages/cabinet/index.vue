@@ -47,11 +47,8 @@
             <td v-text="$auth.user.username" />
           </tr>
           <tr>
-            <td>Вход в лаунчер</td>
-            <!--td v-text="server" /-->
-            <td>
-              <Skeleton />
-            </td>
+            <td>Email</td>
+            <td v-text="$auth.user.email || '-'" />
           </tr>
           <tr>
             <td>Регистрация</td>

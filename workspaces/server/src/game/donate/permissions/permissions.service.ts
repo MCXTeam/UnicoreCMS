@@ -105,6 +105,9 @@ export class DonatePermissionsService {
     const perms = (await this.donatePermissionsRepository.createQueryBuilder('perm')
       .leftJoinAndSelect('perm.periods', 'periods')
       .leftJoinAndSelect('perm.servers', 'servers')
+      .leftJoinAndSelect('perm.kits', 'kits')
+      .leftJoinAndSelect('kits.images', 'images')
+      .leftJoinAndSelect('images.server', 'server')
       .orderBy({ type: "DESC" }).getMany()).filter(perm => perm.servers.find(srv => srv.id == id) || perm.type == PermissionType.Web)
 
     return perms.filter((perm) => perm.periods.length);

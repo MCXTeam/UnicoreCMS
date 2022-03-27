@@ -81,8 +81,8 @@ export default {
   methods: {
     async login() {
       const loading = this.$vs.loading()
-      const recaptcha = await this.$recaptcha.execute('login')
       try {
+        const recaptcha = await this.$recaptcha.execute('login')
         await this.$auth.loginWith('local', {
           data: this.form,
           headers: { recaptcha },

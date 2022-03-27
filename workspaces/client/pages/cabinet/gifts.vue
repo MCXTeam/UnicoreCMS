@@ -150,8 +150,8 @@ export default {
   methods: {
     async activateGift() {
       this.loading = true
-      const recaptcha = await this.$recaptcha.execute('gift')
       try {
+        const recaptcha = await this.$recaptcha.execute('gift')
         this.gift = await this.$axios
           .post(
             '/cabinet/gifts/activate',

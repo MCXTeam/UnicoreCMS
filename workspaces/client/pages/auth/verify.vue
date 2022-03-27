@@ -38,8 +38,8 @@ export default {
   methods: {
     async verify() {
       const loading = this.$vs.loading()
-      const recaptcha = await this.$recaptcha.execute('verify')
       try {
+        const recaptcha = await this.$recaptcha.execute('verify')
         const user = await this.$axios.post('/auth/verify', this.form, { headers: { recaptcha } }).then((res) => res.data)
         this.$auth.setUser(user)
         this.$auth.redirect('home')

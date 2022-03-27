@@ -48,7 +48,7 @@
           </Column>
           <Column field="type" header="Использований" sortable>
             <template #body="slotProps">
-              {{ slotProps.data.max_activations ? `${slotProps.data.activations}/${slotProps.data.max_activations}` : '∞' }}
+              {{ slotProps.data.max_activations ? `${slotProps.data.activations}/${slotProps.data.max_activations}` : `${slotProps.data.activations}/∞` }}
             </template>
           </Column>
           <Column field="type" header="Активен до" sortable>

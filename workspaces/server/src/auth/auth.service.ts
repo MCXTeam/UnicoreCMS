@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { User } from 'src/admin/users/entities/user.entity';
 import { UsersService } from 'src/admin/users/users.service';
 import * as bcrypt from 'bcrypt';
@@ -7,8 +7,6 @@ import { LoginInput } from './dto/login.input';
 import { AuthenticatedDto } from './dto/authenticated.dto';
 import { RegisterInput } from './dto/register.input';
 import { EmailService } from 'src/admin/email/email.service';
-import { VerifyInput } from './dto/verify.input';
-import { UserDto } from 'src/admin/users/dto/user.dto';
 import { TwoFactorService } from 'src/game/cabinet/settings/providers/two_factor.service';
 
 @Injectable()

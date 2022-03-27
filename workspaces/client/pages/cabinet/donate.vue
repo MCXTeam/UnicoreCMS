@@ -69,6 +69,15 @@
         </div>
       </template>
       <div class="description-html" v-if="permission.permission.description" v-html="permission.permission.description" />
+      <div v-if="permission.permission.type == 'kit'" class="text-center mb-2">
+        <div v-for="kit in permission.permission.kits" :key="kit.id">
+          <div v-if="kit.images.find(img => img.server.id == permission.server.id)">
+            <h4 v-if="permission.permission.kits.length > 1" class="m-0" v-text="kit.name" />
+            <div class="description-html" v-if="kit.description" v-html="kit.description" />
+            <img class="mt-2" width="250px" :src="`${$config.apiUrl}/${kit.images.find(img => img.server.id == permission.server.id).image}`" />
+          </div>
+        </div>
+      </div>
       <vs-select class="mw-100 mt-3" :key="permission.permission.periods.length" placeholder="Выберите период" v-model="permission.period">
         <vs-option
           v-for="period in permission.permission.periods"
