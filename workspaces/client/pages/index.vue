@@ -69,6 +69,9 @@ export default {
   watch: {
     'news.meta.currentPage': function () {
       this.paginate()
+      this.$nextTick(() => {
+          this.$parent.$refs.scroll_content.scroll({ top: 700, behavior: 'smooth' })
+      });
     },
   },
 }
