@@ -30,18 +30,20 @@
       <hr />
       <div class="p-4">
         <h4 class="mt-0">Наведите для просмотра набора:</h4>
-        <vs-button
-          :active="kit_active.donate_id == donate.id"
-          @mouseover="viewKit(donate.id, kit.id)"
-          @mouseleave="viewKitDestroy()"
-          border
-          size="large"
-          v-for="kit in donate.kits"
-          :key="kit.id"
-          class="me-3"
-        >
-          Кит "{{ kit.name }}"
-        </vs-button>
+        <div class="d-flex flex-wrap">
+          <vs-button
+            :active="kit_active.donate_id == donate.id && kit_active.payload && kit_active.payload.id == kit.id"
+            @mouseover="viewKit(donate.id, kit.id)"
+            @mouseleave="viewKitDestroy()"
+            border
+            size="large"
+            v-for="kit in donate.kits"
+            :key="kit.id"
+            class="me-2"
+          >
+            Кит "{{ kit.name }}"
+          </vs-button>
+        </div>
         <div v-if="kit_active.payload && kit_active.donate_id == donate.id" class="row mt-3">
           <div class="col-12">
             <p v-if="kit_active.payload.description" class="description-html" v-text="kit_active.payload.description" />

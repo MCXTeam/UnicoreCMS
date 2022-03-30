@@ -1,4 +1,4 @@
-import { IsDefined, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsDefined, IsOptional, IsString } from 'class-validator';
 
 export class BanFromAdminInput {
   @IsDefined()
@@ -6,7 +6,7 @@ export class BanFromAdminInput {
   user_uuid: string;
 
   @IsOptional()
-  @IsNumber()
+  @IsString()
   expires?: Date;
 
   @IsDefined()

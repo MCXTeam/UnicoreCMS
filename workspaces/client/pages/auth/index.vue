@@ -34,7 +34,7 @@
             </template>
           </vs-input>
         </ValidationProvider>
-        <ValidationProvider class="w-100" name="Пароль" rules="required|min:6|max:32" v-slot="{ errors }">
+        <ValidationProvider class="w-100" name="Пароль" rules="required|min:6|max:24" v-slot="{ errors }">
           <vs-input data-aos="zoom-in-right" data-aos-delay="450" type="password" placeholder="Пароль" v-model="form.password">
             <template #icon>
               <i class="bx bx-lock-open-alt"></i>

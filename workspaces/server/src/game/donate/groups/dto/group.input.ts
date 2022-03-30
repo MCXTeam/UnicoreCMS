@@ -35,7 +35,7 @@ export class GroupInput {
   @IsString({ each: true })
   servers: string[];
 
-  @IsDefined()
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
   web_perms: string[];

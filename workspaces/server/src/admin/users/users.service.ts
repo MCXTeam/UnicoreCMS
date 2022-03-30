@@ -17,6 +17,9 @@ import { CacheKey, DeleteManyInput } from '@common';
 import { UserUpdateInput } from './dto/user-update.input';
 import { matchPermission, transformPermissions } from '../roles/guards/permisson.guard';
 import { Permission } from 'unicore-common';
+import { SettingsService } from 'src/game/cabinet/settings/providers/settings.service';
+import { PasswordChangeInput } from 'src/game/cabinet/settings/dto/password-change.input';
+import { PasswordUpdateInput } from 'src/game/cabinet/settings/dto/password-update.input';
 
 export function userPermissionCheck(user: User, actor: User) {
   if (actor.superuser) return true
@@ -41,7 +44,8 @@ export class UsersService {
     private votesRepository: Repository<Vote>,
     @Inject(forwardRef(() => PlaytimeService))
     private playtimeService: PlaytimeService,
-    private referalsService: ReferalsService
+    private referalsService: ReferalsService,
+    private settingsService: SettingsService
   ) { }
 
   private async rolesModificator(user: User) {
@@ -205,10 +209,6 @@ export class UsersService {
     user.username = input.username;
     user.superuser = input.superuser;
     user.activated = input.activated;
-
-    if (input.password)
-      user.password = bcrypt.hashSync(input.password, 10);
-
     user.perms = input.perms;
 
     if (!input.roles) input.roles = [];
@@ -234,6 +234,18 @@ export class UsersService {
     }
 
     return this.usersRepository.save(user);
+  }
+
+  async updatePassord(uuid: string, input: PasswordUpdateInput, actor: User = null) {
+    const user = await this.getById(uuid)
+    if (!user) throw new NotFoundException()
+
+    if (actor) {
+      if (!userPermissionCheck(user, actor))
+        throw new ForbiddenException()
+    }
+
+    return this.settingsService.updatePassword(user, input)
   }
 
   async delete(uuid: string, actor: User = null) {

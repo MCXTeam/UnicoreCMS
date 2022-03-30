@@ -1,6 +1,6 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UsersService } from 'src/admin/users/users.service';
+import { userPermissionCheck, UsersService } from 'src/admin/users/users.service';
 import { Repository } from 'typeorm';
 import { BanInput } from './dto/ban.input';
 import { Ban } from './entities/ban.entity';
@@ -41,6 +41,7 @@ export class BansService {
     }
 
     if (input.expires) ban.expires = moment.unix(input.expires).toDate();
+    else ban.expires = null
 
     if (!ban.user || !ban.actor || ban.user.uuid == kernel.uuid) throw new BadRequestException();
 
@@ -57,7 +58,11 @@ export class BansService {
     ban.reason = input.reason;
     ban.actor = actor
     ban.user = await this.usersService.getById(input.user_uuid);
-    ban.expires = this.moment(input.expires).utc().toDate();
+
+    if (input.expires) ban.expires = this.moment(input.expires).utc().toDate();
+    else ban.expires = null
+
+    if (!userPermissionCheck(ban.user, actor)) throw new ForbiddenException()
 
     if (!ban.user || !ban.actor || ban.user.uuid == kernel.uuid) throw new BadRequestException();
 

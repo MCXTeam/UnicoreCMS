@@ -6,11 +6,12 @@ import { PaginatedUsersDto } from './dto/paginated-users.dto';
 import { UserInput } from './dto/user.input';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { UserProtectedDto } from './dto/user-protected.dto';
-import { UserDto } from './dto/user.dto';
+import { UserBasicDto, UserDto } from './dto/user.dto';
 import { UserUpdateInput } from './dto/user-update.input';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { User } from './entities/user.entity';
 import { DeleteManyInput } from '@common';
+import { PasswordUpdateInput } from 'src/game/cabinet/settings/dto/password-update.input';
 
 @ApiTags('users')
 @Controller('users')
@@ -35,13 +36,18 @@ export class UsersController {
     const user = await this.usersService.getById(uuid)
     if (!user) throw new NotFoundException()
 
-    return new UserDto(user)
+    return new UserBasicDto(user)
   }
 
   @ApiOperation({ summary: 'Обновить одного пользователя' })
   @Patch(':uuid')
   async update(@CurrentUser() actor: User, @Param('uuid') uuid: string, @Body() updateUserDto: UserUpdateInput) {
     return new UserDto(await this.usersService.update(uuid, updateUserDto, actor))
+  }
+
+  @Patch(':uuid/password')
+  async updatePassword(@CurrentUser() actor: User, @Param('uuid') uuid: string, @Body() body: PasswordUpdateInput) {
+    return this.usersService.updatePassord(uuid, body, actor)
   }
 
   @ApiOperation({ summary: 'Удалить одного пользователя' })
