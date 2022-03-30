@@ -113,7 +113,7 @@ export class DonateGroupsController {
 
   @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
   @Get('admin/:uuid')
-  udgByUUID(@Param('uuid') uuid: string) {
+  udgByUUID(@CurrentUser() user: User, @Param('uuid') uuid: string) {
     return this.donateGroupsService.udgByUUID(uuid);
   }
 

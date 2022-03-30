@@ -1,5 +1,5 @@
 import { IsUsername } from '@common';
-import { IsArray, IsBoolean, IsDefined, IsEmail, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsDefined, IsEmail, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class UserInput {
   @IsDefined()
@@ -12,6 +12,8 @@ export class UserInput {
 
   @IsDefined()
   @IsString()
+  @MinLength(6)
+  @MaxLength(24)
   password: string;
 
   @IsOptional()

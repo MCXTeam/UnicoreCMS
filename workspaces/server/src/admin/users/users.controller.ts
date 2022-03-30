@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, ParseArrayPipe, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post } from '@nestjs/common';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
@@ -7,6 +7,10 @@ import { UserInput } from './dto/user.input';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { UserProtectedDto } from './dto/user-protected.dto';
 import { UserDto } from './dto/user.dto';
+import { UserUpdateInput } from './dto/user-update.input';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import { User } from './entities/user.entity';
+import { DeleteManyInput } from '@common';
 
 @ApiTags('users')
 @Controller('users')
@@ -15,7 +19,9 @@ export class UsersController {
 
   @ApiOperation({ summary: 'Создать одного пользователя' })
   @Post()
-  create(@Body() createUserDto: UserInput) {}
+  async create(@CurrentUser() actor: User, @Body() createUserDto: UserInput) {
+    return new UserDto(await this.usersService.create(createUserDto, actor))
+  }
 
   @ApiOperation({ summary: 'Найти всех пользователей' })
   @Get()
@@ -34,15 +40,21 @@ export class UsersController {
 
   @ApiOperation({ summary: 'Обновить одного пользователя' })
   @Patch(':uuid')
-  update(@Param('uuid') uuid: string, @Body() updateUserDto: UserInput) {}
+  async update(@CurrentUser() actor: User, @Param('uuid') uuid: string, @Body() updateUserDto: UserUpdateInput) {
+    return new UserDto(await this.usersService.update(uuid, updateUserDto, actor))
+  }
 
   @ApiOperation({ summary: 'Удалить одного пользователя' })
   @Delete(':uuid')
-  remove(@Param('uuid') uuid: string) {}
+  async remove(@CurrentUser() actor: User, @Param('uuid') uuid: string) {
+    return new UserDto(await this.usersService.delete(uuid, actor))
+  }
 
   @ApiOperation({ summary: 'Удалить несколько пользователей' })
-  @Delete('bulk/:id')
-  removeMany(@Param('id', new ParseArrayPipe({ items: Number })) id: number[]) {}
+  @Delete('bulk/:ids')
+  removeMany(@CurrentUser() actor: User, @Body() body: DeleteManyInput) {
+    return this.usersService.deleteMany(body, actor)
+  }
 
   @Public()
   @ApiOperation({ summary: 'Количество пользователей' })

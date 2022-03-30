@@ -6,15 +6,29 @@ import { UserInput } from './dto/user.input';
 import * as bcrypt from 'bcrypt';
 import * as _ from 'lodash'
 import { Role } from '../roles/entities/role.entity';
-import { CACHE_MANAGER, ConflictException, forwardRef, Inject, NotFoundException } from '@nestjs/common';
+import { BadRequestException, CACHE_MANAGER, ConflictException, ForbiddenException, forwardRef, Inject, NotFoundException } from '@nestjs/common';
 import { ImportantRoles } from '../roles/emums/important-roles.enum';
 import { PlaytimeService } from 'src/game/cabinet/playtime/playtime.service';
 import { Vote } from 'src/game/cabinet/votes/entities/vote.entity';
 import { UserPublicDto } from './dto/user-public.dto';
 import { ReferalsService } from 'src/game/cabinet/referals/referals.service';
 import { Cache } from 'cache-manager';
-import { CacheKey } from '@common';
+import { CacheKey, DeleteManyInput } from '@common';
 import { UserUpdateInput } from './dto/user-update.input';
+import { matchPermission, transformPermissions } from '../roles/guards/permisson.guard';
+import { Permission } from 'unicore-common';
+
+export function userPermissionCheck(user: User, actor: User) {
+  if (actor.superuser) return true
+  if (!actor.superuser && user.superuser) return false
+  if (matchPermission([[Permission.AdminUsersUpdate, Permission.AdminUsersDelete, Permission.AdminUsersDeleteMany, Permission.AdminUsersCreate], { or: true }], { user })) {
+    const actorPerms = transformPermissions(actor).perms
+    for (const perm in transformPermissions(user).perms) {
+      if (!actorPerms.find(p => p == perm)) return false
+    }
+  }
+  return true
+}
 
 export class UsersService {
   constructor(
@@ -145,7 +159,7 @@ export class UsersService {
     });
   }
 
-  async create(input: UserInput): Promise<User> {
+  async create(input: UserInput, actor: User = null): Promise<User> {
     const userExist = await this.usersRepository.findOne({
       where: [{ email: input.username }, { username: input.username }],
     });
@@ -173,10 +187,15 @@ export class UsersService {
     if (!user.roles.find((role) => role.id === ImportantRoles.Default))
       user.roles.push(await this.rolesRepository.findOne(ImportantRoles.Default));
 
+    if (actor) {
+      if (!userPermissionCheck(user, actor))
+        throw new ForbiddenException()
+    }
+
     return this.usersRepository.save(user);
   }
 
-  async update(uuid: string, input: UserUpdateInput): Promise<User> {
+  async update(uuid: string, input: UserUpdateInput, actor: User = null): Promise<User> {
     const user = await this.getById(uuid);
 
     if (!user)
@@ -201,6 +220,46 @@ export class UsersService {
     if (!user.roles.find((role) => role.id === ImportantRoles.Default))
       user.roles.push(await this.rolesRepository.findOne(ImportantRoles.Default));
 
+    if (actor) {
+      if (!userPermissionCheck(user, actor))
+        throw new ForbiddenException()
+
+      if (user.uuid == actor.uuid) {
+        if (actor.superuser != user.superuser)
+          throw new BadRequestException()
+
+        if (!matchPermission([Permission.AdminDashboard, Permission.AdminUsersUpdate], { user }))
+          throw new BadRequestException()
+      }
+    }
+
     return this.usersRepository.save(user);
+  }
+
+  async delete(uuid: string, actor: User = null) {
+    const user = await this.getById(uuid)
+
+    if (!user)
+      throw new NotFoundException()
+
+    if (actor) {
+      if (!userPermissionCheck(user, actor))
+        throw new ForbiddenException()
+    }
+
+    return this.usersRepository.remove(user)
+  }
+
+  async deleteMany(input: DeleteManyInput, actor: User = null) {
+    const users = await this.usersRepository.findByIds(input.items)
+
+    if (actor) {
+      for (const user of users)
+        if (!userPermissionCheck(user, actor))
+          throw new ForbiddenException()
+    }
+
+    await this.usersRepository.remove(users)
+    return true
   }
 }
