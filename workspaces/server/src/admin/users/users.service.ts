@@ -21,10 +21,10 @@ import { SettingsService } from 'src/game/cabinet/settings/providers/settings.se
 import { PasswordChangeInput } from 'src/game/cabinet/settings/dto/password-change.input';
 import { PasswordUpdateInput } from 'src/game/cabinet/settings/dto/password-update.input';
 
-export function userPermissionCheck(user: User, actor: User) {
+export async function userPermissionCheck(user: User, actor: User) {
   if (actor.superuser) return true
   if (!actor.superuser && user.superuser) return false
-  if (matchPermission([[Permission.AdminUsersUpdate, Permission.AdminUsersDelete, Permission.AdminUsersDeleteMany, Permission.AdminUsersCreate], { or: true }], { user })) {
+  if (await matchPermission([[Permission.AdminUsersUpdate, Permission.AdminUsersDelete, Permission.AdminUsersDeleteMany, Permission.AdminUsersCreate], { or: true }], { user })) {
     const actorPerms = transformPermissions(actor).perms
     for (const perm in transformPermissions(user).perms) {
       if (!actorPerms.find(p => p == perm)) return false
@@ -97,16 +97,19 @@ export class UsersService {
 
   async getById(uuid: string, relations?: string[]): Promise<User> {
     const user = await this.usersRepository.findOne({ uuid }, { relations });
+    if (!user) return null
     return this.rolesModificator(user)
   }
 
   async getByUsername(username: string, relations?: string[]): Promise<User> {
     const user = await this.usersRepository.findOne({ username }, { relations });
+    if (!user) return null
     return this.rolesModificator(user)
   }
 
   async getByEmail(email: string, relations?: string[]): Promise<User> {
     const user = await this.usersRepository.findOne({ email }, { relations });
+    if (!user) return null
     return this.rolesModificator(user)
   }
 
@@ -115,6 +118,7 @@ export class UsersService {
       where: [{ username: username_or_email }, { email: username_or_email }],
       relations,
     });
+    if (!user) return null
     return this.rolesModificator(user)
   }
 
@@ -192,7 +196,7 @@ export class UsersService {
       user.roles.push(await this.rolesRepository.findOne(ImportantRoles.Default));
 
     if (actor) {
-      if (!userPermissionCheck(user, actor))
+      if (!await userPermissionCheck(user, actor))
         throw new ForbiddenException()
     }
 
@@ -221,14 +225,14 @@ export class UsersService {
       user.roles.push(await this.rolesRepository.findOne(ImportantRoles.Default));
 
     if (actor) {
-      if (!userPermissionCheck(user, actor))
+      if (!await userPermissionCheck(user, actor))
         throw new ForbiddenException()
 
       if (user.uuid == actor.uuid) {
         if (actor.superuser != user.superuser)
           throw new BadRequestException()
 
-        if (!matchPermission([Permission.AdminDashboard, Permission.AdminUsersUpdate], { user }))
+        if (!await matchPermission([Permission.AdminDashboard, Permission.AdminUsersUpdate], { user }))
           throw new BadRequestException()
       }
     }
@@ -241,7 +245,7 @@ export class UsersService {
     if (!user) throw new NotFoundException()
 
     if (actor) {
-      if (!userPermissionCheck(user, actor))
+      if (!await userPermissionCheck(user, actor))
         throw new ForbiddenException()
     }
 
@@ -255,7 +259,7 @@ export class UsersService {
       throw new NotFoundException()
 
     if (actor) {
-      if (!userPermissionCheck(user, actor))
+      if (!await userPermissionCheck(user, actor))
         throw new ForbiddenException()
     }
 
@@ -267,7 +271,7 @@ export class UsersService {
 
     if (actor) {
       for (const user of users)
-        if (!userPermissionCheck(user, actor))
+        if (!await userPermissionCheck(user, actor))
           throw new ForbiddenException()
     }
 

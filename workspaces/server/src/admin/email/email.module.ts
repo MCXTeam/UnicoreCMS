@@ -1,15 +1,17 @@
 import { Logger, Module, OnModuleInit } from '@nestjs/common';
 import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
+import { RefreshToken } from 'src/auth/entities/refresh-token.entity';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { EmailController } from './email.controller';
 import { EmailService } from './email.service';
 import { EmailActivation } from './entities/email-activation.entity';
 import { EmailMessage } from './entities/email-message.entity';
+import { PasswordReset } from './entities/password-reset.entity';
 import { EmailMessageType } from './enums/email-message-type.enum';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([EmailMessage, EmailActivation, User])],
+  imports: [TypeOrmModule.forFeature([EmailMessage, EmailActivation, User, PasswordReset, RefreshToken])],
   providers: [EmailService],
   controllers: [EmailController],
   exports: [EmailService],

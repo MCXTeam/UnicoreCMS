@@ -101,6 +101,122 @@
       </Dialog>
     </ValidationObserver>
 
+    <ValidationObserver v-slot="{ invalid }">
+      <Dialog
+        :visible.sync="giveUDGDialog"
+        :closable="false"
+        :style="{ width: '450px' }"
+        :modal="true"
+        header="Выдача донат-группы игроку"
+        class="p-fluid"
+      >
+        <div class="field">
+          <label>Сервер</label>
+          <ValidationProvider name="Сервер" rules="required" v-slot="{ errors }">
+            <Dropdown v-model="udgForm.server" :options="servers" optionLabel="name" appendTo="body">
+              <template #option="slotProps">
+                <div class="flex align-items-center">
+                  <Avatar v-if="slotProps.option.icon" :image="`${$config.apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
+                  <Avatar v-else icon="pi pi-image" shape="circle" />
+                  <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
+                </div>
+              </template>
+            </Dropdown>
+            <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+          </ValidationProvider>
+        </div>
+        <div class="field">
+          <label>Группа</label>
+          <ValidationProvider name="Группа" rules="required" v-slot="{ errors }">
+            <Dropdown v-model="udgForm.group" :options="donateGroups" optionLabel="name" appendTo="body">
+              <template #option="slotProps">
+                <div class="flex align-items-center">
+                  <Avatar v-if="slotProps.option.icon" :image="`${$config.apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
+                  <Avatar v-else icon="pi pi-image" shape="circle" />
+                  <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
+                </div>
+              </template>
+            </Dropdown>
+            <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+          </ValidationProvider>
+        </div>
+        <div class="field">
+          <label>Период</label>
+          <ValidationProvider name="Период" rules="required" v-slot="{ errors }">
+            <Dropdown v-model="udgForm.period" :options="periods" optionLabel="name" appendTo="body" />
+            <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+          </ValidationProvider>
+        </div>
+        <template #footer>
+          <Button :disabled="udg_loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideUDGDialog" />
+          <Button
+            :disabled="udg_loading || invalid"
+            label="Сохранить"
+            icon="pi pi-check"
+            class="p-button-text"
+            @click="giveDonateGroup()"
+          />
+        </template>
+      </Dialog>
+    </ValidationObserver>
+
+    <ValidationObserver v-slot="{ invalid }">
+      <Dialog
+        :visible.sync="giveUDPDialog"
+        :closable="false"
+        :style="{ width: '450px' }"
+        :modal="true"
+        header="Выдача донат-права игроку"
+        class="p-fluid"
+      >
+        <div class="field">
+          <label>Право</label>
+          <ValidationProvider name="Право" rules="required" v-slot="{ errors }">
+            <Dropdown v-model="udpForm.permission" :options="donatePermissions" optionLabel="name" appendTo="body">
+              <template #option="slotProps">
+                <div class="flex align-items-center">
+                  <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
+                </div>
+              </template>
+            </Dropdown>
+            <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+          </ValidationProvider>
+        </div>
+        <div class="field" v-if="udpForm.permission && udpForm.permission.type != 'web'">
+          <label>Сервер</label>
+          <ValidationProvider name="Сервер" rules="required" v-slot="{ errors }">
+            <Dropdown v-model="udpForm.server" :options="servers" optionLabel="name" appendTo="body">
+              <template #option="slotProps">
+                <div class="flex align-items-center">
+                  <Avatar v-if="slotProps.option.icon" :image="`${$config.apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
+                  <Avatar v-else icon="pi pi-image" shape="circle" />
+                  <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
+                </div>
+              </template>
+            </Dropdown>
+            <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+          </ValidationProvider>
+        </div>
+        <div class="field">
+          <label>Период</label>
+          <ValidationProvider name="Период" rules="required" v-slot="{ errors }">
+            <Dropdown v-model="udpForm.period" :options="periods" optionLabel="name" appendTo="body" />
+            <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+          </ValidationProvider>
+        </div>
+        <template #footer>
+          <Button :disabled="udp_loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideUDPDialog" />
+          <Button
+            :disabled="udp_loading || invalid"
+            label="Сохранить"
+            icon="pi pi-check"
+            class="p-button-text"
+            @click="giveDonatePermission()"
+          />
+        </template>
+      </Dialog>
+    </ValidationObserver>
+
     <TabView v-if="user">
       <TabPanel header="Основное">
         <div class="grid" v-if="user">
@@ -306,7 +422,7 @@
           <div class="col-12 md:col-6 p-4">
             <div class="flex justify-content-between align-items-center">
               <h4>Донат-группы</h4>
-              <Button label="Выдать" class="p-button mr-2 mb-2" @click="showProductDialog()" />
+              <Button label="Выдать" class="p-button mr-2 mb-2" @click="showUDGDialog()" />
             </div>
             <DataTable :value="udg" :loading="udg_loading" responsiveLayout="scroll" dataKey="m.id">
               <Column field="server" header="Сервер">
@@ -337,12 +453,12 @@
               </Column>
               <Column field="expired" header="Истекает" sortable>
                 <template #body="slotProps">
-                  {{ slotProps.expired ? $moment(slotProps.expired).local().format('D MMMM YYYY, HH:mm') : 'Никогда' }}
+                  {{ slotProps.data.expired ? $moment(slotProps.data.expired).local().format('D MMMM YYYY, HH:mm') : 'Никогда' }}
                 </template>
               </Column>
               <Column :styles="{ width: '4rem' }">
                 <template #body="slotProps">
-                  <Button @click="saveMoney(slotProps.data.server.id)" icon="pi pi-trash" class="p-button-rounded p-button-danger mt-2" />
+                  <Button @click="takeDonateGroup(slotProps.data.id)" icon="pi pi-trash" class="p-button-rounded p-button-danger mt-2" />
                 </template>
               </Column>
             </DataTable>
@@ -350,12 +466,12 @@
           <div class="col-12 md:col-6 p-4">
             <div class="flex justify-content-between align-items-center">
               <h4>Донат-права</h4>
-              <Button label="Выдать" class="p-button mr-2 mb-2" @click="showProductDialog()" />
+              <Button label="Выдать" class="p-button mr-2 mb-2" @click="showUDPDialog()" />
             </div>
             <DataTable :value="udp" :loading="udp_loading" responsiveLayout="scroll" dataKey="m.id">
               <Column field="server" header="Сервер">
                 <template #body="slotProps">
-                  <div v-if="slotProps.server">
+                  <div v-if="slotProps.data.server">
                     <div class="flex align-items-center">
                       <Avatar
                         v-if="slotProps.data.server.icon"
@@ -372,12 +488,16 @@
               <Column field="permission.name" header="Право" sortable />
               <Column field="expired" header="Истекает" sortable>
                 <template #body="slotProps">
-                  {{ slotProps.expired ? $moment(slotProps.expired).local().format('D MMMM YYYY, HH:mm') : 'Никогда' }}
+                  {{ slotProps.data.expired ? $moment(slotProps.data.expired).local().format('D MMMM YYYY, HH:mm') : 'Никогда' }}
                 </template>
               </Column>
               <Column :styles="{ width: '4rem' }">
                 <template #body="slotProps">
-                  <Button @click="saveMoney(slotProps.data.server.id)" icon="pi pi-trash" class="p-button-rounded p-button-danger mt-2" />
+                  <Button
+                    @click="takeDonatePermission(slotProps.data.id)"
+                    icon="pi pi-trash"
+                    class="p-button-rounded p-button-danger mt-2"
+                  />
                 </template>
               </Column>
             </DataTable>
@@ -441,7 +561,7 @@
           </div>
         </div>
       </TabPanel>
-      <TabPanel header="История и сеансы">
+      <!-- <TabPanel header="История и сеансы">
         <div class="grid">
           <div class="col-12">
             <div class="p-fluid">
@@ -454,7 +574,7 @@
             </div>
           </div>
         </div>
-      </TabPanel>
+      </TabPanel> -->
     </TabView>
   </div>
 </template>
@@ -464,6 +584,9 @@ export default {
   data() {
     return {
       servers: [],
+      periods: [],
+      donatePermissions: [],
+      donateGroups: [],
       money: [],
       udg: [],
       udp: [],
@@ -482,6 +605,8 @@ export default {
       autocompleateFilterd: null,
       giveProductDialog: false,
       giveKitDialog: false,
+      giveUDGDialog: false,
+      giveUDPDialog: false,
       whItem: {
         amount: null,
         server: null,
@@ -498,6 +623,16 @@ export default {
         close: true,
       },
       ban: null,
+      udgForm: {
+        server: null,
+        group: null,
+        period: null,
+      },
+      udpForm: {
+        server: null,
+        permission: null,
+        period: null,
+      },
     }
   },
 
@@ -505,6 +640,9 @@ export default {
     this.roles = await this.$axios.get('/admin/roles').then((res) => res.data)
     this.servers = await this.$axios.get('/servers').then((res) => res.data)
     this.autocompleate = await this.$axios.get('/admin/roles/autocompleate').then((res) => res.data)
+    this.periods = await this.$axios.get('/donates/periods').then((res) => res.data)
+    this.donatePermissions = await this.$axios.get('/donates/permissions').then((res) => res.data)
+    this.donateGroups = await this.$axios.get('/donates/groups').then((res) => res.data)
     await this.fetchUser()
 
     if (this.servers.length) {
@@ -546,12 +684,14 @@ export default {
     async udgFetch() {
       this.udg_loading = true
       this.udg = await this.$axios.get(`/donates/groups/admin/${this.user.uuid}`).then((res) => res.data)
+      this.giveUDGDialog = false
       this.udg_loading = false
     },
 
     async udpFetch() {
       this.udp_loading = true
       this.udp = await this.$axios.get(`/donates/permissions/admin/${this.user.uuid}`).then((res) => res.data)
+      this.giveUDPDialog = false
       this.udp_loading = false
     },
 
@@ -677,6 +817,87 @@ export default {
       })
     },
 
+    async takeDonateGroup(id) {
+      this.$confirm.require({
+        message: `Данный процесс будет необратим!`,
+        header: `Снятие донат-группы`,
+        icon: 'pi pi-exclamation-triangle',
+        accept: async () => {
+          this.udg_loading = true
+          try {
+            await this.$axios.delete(`/donates/groups/admin/` + id)
+            this.$toast.add({
+              severity: 'success',
+              detail: 'Донат-группа успешно снята',
+              life: 3000,
+            })
+          } catch {}
+          await this.udgFetch()
+        },
+      })
+    },
+
+    async giveDonateGroup() {
+      this.udg_loading = true
+      try {
+        await this.$axios.post(`/donates/groups/admin/give`, {
+          server_id: this.udgForm.server.id,
+          period_id: this.udgForm.period.id,
+          group_id: this.udgForm.group.id,
+          user_uuid: this.user.uuid,
+        })
+        this.$toast.add({
+          severity: 'success',
+          detail: 'Донат-группа успешно выдана',
+          life: 3000,
+        })
+      } catch {}
+      await this.udgFetch()
+      this.udg_loading = false
+    },
+
+    async giveDonatePermission() {
+      this.udp_loading = true
+      try {
+        var form = {
+          period_id: this.udpForm.period.id,
+          permission_id: this.udpForm.permission.id,
+          user_uuid: this.user.uuid,
+        }
+
+        if (this.udpForm.permission.type != 'web') form.server_id = this.udpForm.server.id
+
+        await this.$axios.post(`/donates/permissions/admin/give`, form)
+        this.$toast.add({
+          severity: 'success',
+          detail: 'Донат-право успешно выдано',
+          life: 3000,
+        })
+      } catch {}
+      await this.udpFetch()
+      this.udp_loading = false
+    },
+
+    async takeDonatePermission(id) {
+      this.$confirm.require({
+        message: `Данный процесс будет необратим!`,
+        header: `Снятие донат-права`,
+        icon: 'pi pi-exclamation-triangle',
+        accept: async () => {
+          this.udp_loading = true
+          try {
+            await this.$axios.delete(`/donates/permissions/admin/` + id)
+            this.$toast.add({
+              severity: 'success',
+              detail: 'Донат-право успешно снято',
+              life: 3000,
+            })
+          } catch {}
+          await this.udpFetch()
+        },
+      })
+    },
+
     async banCreate() {
       await this.$axios.post(`/bans/admin`, {
         user_uuid: this.user.uuid,
@@ -739,6 +960,28 @@ export default {
     },
     hideKitDialog() {
       this.giveKitDialog = false
+    },
+    showUDGDialog() {
+      ;(this.udgForm = {
+        server: null,
+        group: null,
+        period: null,
+      }),
+        (this.giveUDGDialog = true)
+    },
+    showUDPDialog() {
+      ;(this.udpForm = {
+        server: null,
+        permission: null,
+        period: null,
+      }),
+        (this.giveUDPDialog = true)
+    },
+    hideUDGDialog() {
+      this.giveUDGDialog = false
+    },
+    hideUDPDialog() {
+      this.giveUDPDialog = false
     },
     async searchProduct(event) {
       this.products = await this.$axios

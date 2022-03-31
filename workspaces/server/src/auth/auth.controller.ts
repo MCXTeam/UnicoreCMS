@@ -9,6 +9,8 @@ import { CurrentUser } from './decorators/current-user.decorator';
 import { Public } from './decorators/public.decorator';
 import { AuthenticatedDto } from './dto/authenticated.dto';
 import { LoginInput } from './dto/login.input';
+import { PasswordLinkInput } from './dto/password-link.input';
+import { PasswordResetInput } from './dto/password-reset.input';
 import { RegisterInput } from './dto/register.input';
 import { VerifyInput } from './dto/verify.input';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -47,6 +49,19 @@ export class AuthController {
   @Post('verify')
   verify(@CurrentUser() user: User, @Body() input: VerifyInput): Promise<UserDto> {
     return this.emailService.checkCode(user, input);
+  }
+
+  @Public()
+  @Post('reset')
+  resetReq(@IpAddress() ip: string, @Body() input: PasswordLinkInput) {
+    return this.emailService.sendPasswordLink(ip, input);
+  }
+
+  @Public()
+  @Recaptcha({ action: 'reset' })
+  @Post('password')
+  reset(@Body() input: PasswordResetInput): Promise<UserDto> {
+    return this.emailService.checkHash(input);
   }
 
   @Post('logout')

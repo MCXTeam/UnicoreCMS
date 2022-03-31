@@ -31,7 +31,7 @@ export class RolesService {
         {
           id: ImportantRoles.Default,
           name: 'Игрок',
-          perms: ['user.*'],
+          perms: ['user.*', '!user.cabinet.*.hd'],
           important: true,
           priority: 0,
         },

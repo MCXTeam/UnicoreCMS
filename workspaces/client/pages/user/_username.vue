@@ -6,7 +6,7 @@
           <SkinView3D class="rounded" :width="210" :height="300" :skin="user.skin" :cloak="user.cloak" ref="skin" />
           <h2 class="mt-2 mb-0" v-text="user.username" />
           <h4 v-if="!online" class="m-0">Офлайн</h4>
-          <h4 v-else class="m-0">Играет на <nuxt-link :to="`/server/${online.server.id}`" v-text="online.server.name" /></h4>
+          <h4 v-else class="m-0">Играет на <nuxt-link :to="`/servers/${online.server.id}`" v-text="online.server.name" /></h4>
         </div>
       </div>
     </div>
@@ -52,10 +52,7 @@
           <Avatar size="large" v-else> <i class="bx bxs-server"></i> </Avatar>
           <div class="ms-4">
             <h3 class="text-uppercase m-0" v-text="pt.server.name" />
-            <span v-if="pt.time"
-              >{{ $moment.duration(pt.time, 'minutes').format('y [years], w [weeks], d [days], h [hours], m [minutes]') }}, последняя
-              активность {{ $moment(pt.updated).local().format('D MMMM YYYY, HH:mm') }}</span
-            >
+            <span v-if="pt.time">{{ $moment.duration(pt.time, 'minutes').format('y [years], w [weeks], d [days], h [hours], m [minutes]') }}</span>
             <span v-else>Еще не играл(а) на этом сервере</span>
           </div>
         </div>
@@ -116,7 +113,7 @@ export default {
   async asyncData({ $axios, error, route, store, $moment }) {
     try {
       const user = await $axios.get(`/users/public/user/${route.params.username}`).then((res) => res.data)
-      const online = user.playtimes.find((pt) => pt.updated != pt.created && $moment().isSame(pt.updated))
+      const online = user.playtimes.find((pt) => pt.updated != pt.created && $moment(pt.updated).isAfter($moment().subtract(2, 'minutes')))
 
       store.commit('unicore/SET_NAME', `Профиль игрока ${user.username}`)
 

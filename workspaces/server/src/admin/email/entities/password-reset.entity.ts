@@ -2,12 +2,15 @@ import { User } from 'src/admin/users/entities/user.entity';
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
-export class EmailActivation {
+export class PasswordReset {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  code: string;
+  hash: string;
+
+  @Column()
+  ip: string;
 
   @ManyToOne(() => User, {
     cascade: true,

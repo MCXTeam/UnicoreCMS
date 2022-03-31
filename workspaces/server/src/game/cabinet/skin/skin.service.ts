@@ -40,7 +40,7 @@ export class SkinService {
       throw new UnsupportedMediaTypeException();
     }
 
-    if ((width > 64 || height > 64) && !matchPermission([Permission.UserCabinetSkinHd], req)) {
+    if ((width > 64 || height > 64) && !await matchPermission([Permission.UserCabinetSkinHd], req)) {
       StorageManager.remove(file.filename);
       throw new ForbiddenException();
     }
@@ -74,7 +74,7 @@ export class SkinService {
       throw new UnsupportedMediaTypeException();
     }
 
-    if ((width > 64 || height > 64) && !matchPermission([Permission.UserCabinetCloakHd], req)) {
+    if ((width > 64 || height > 64) && !await matchPermission([Permission.UserCabinetCloakHd], req)) {
       StorageManager.remove(file.filename);
       throw new ForbiddenException();
     }

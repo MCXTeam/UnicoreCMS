@@ -9,12 +9,12 @@ class SkinObject2D {
 
   drawHeadFront(ctx: CanvasRenderingContext2D, skinTexture: HTMLImageElement): void {
     const { width, height } = this.skinview.getCanvas()
-    ctx.drawImage(skinTexture, 8, 8, 8, 8, 0, 0, (width / 8) * 8, (height / 8) * 8)
+    ctx.drawImage(skinTexture, (skinTexture.width / 8), (skinTexture.width / 8), (skinTexture.width / 8), (skinTexture.width / 8), 0, 0, (width / (skinTexture.width / 8)) * (skinTexture.width / 8), (height / (skinTexture.width / 8)) * (skinTexture.width / 8))
   }
 
   drawHeadBack(ctx: CanvasRenderingContext2D, skinTexture: HTMLImageElement): void {
     const { width, height } = this.skinview.getCanvas()
-    ctx.drawImage(skinTexture, 24, 8, 8, 8, 4, 0, (width / 8) * 8, (height / 8) * 8)
+    ctx.drawImage(skinTexture, (width / 8 * 3), (skinTexture.width / 8), (skinTexture.width / 8), (skinTexture.width / 8), 4, 0, (width / (skinTexture.width / 8)) * (skinTexture.width / 8), (height / (skinTexture.width / 8)) * (skinTexture.width / 8))
   }
 }
 

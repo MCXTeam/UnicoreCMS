@@ -54,12 +54,12 @@ export class DonateGroupsController {
   @SkipThrottle()
   @Permissions([Permission.KernelUnicoreConnect])
   @Get('user/:server/:uuid')
-  async findOneByUserAndServer(@Param('server') server: string, @Param('uuid') uuid: string) {
+  findOneByUserAndServer(@Param('server') server: string, @Param('uuid') uuid: string) {
     return this.donateGroupsService.findByUserAndServer(server, uuid);
   }
 
   @Post('buy')
-  async buy(@CurrentUser() user: User, @IpAddress() ip: string, @Body() body: GroupBuyInput) {
+  buy(@CurrentUser() user: User, @IpAddress() ip: string, @Body() body: GroupBuyInput) {
     return this.donateGroupsService.buy(user, ip, body);
   }
 

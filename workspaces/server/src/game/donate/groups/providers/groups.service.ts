@@ -108,7 +108,7 @@ export class DonateGroupsService {
     }
 
     // Event!
-    this.eventsService.server.to(Permission.KernelUnicoreConnect).emit('buy_donate', userDonate);
+    this.eventsService.server.to(Permission.KernelUnicoreConnect).emit('give_group', userDonate);
 
     return this.userDonatesRepository.save(userDonate);
   }
@@ -126,10 +126,11 @@ export class DonateGroupsService {
   }
 
   async take(id: number) {
-    const udg = await this.userDonatesRepository.findOne(id);
+    const udg = await this.userDonatesRepository.findOne(id, { relations: ["user"] });
     if (!udg) throw new NotFoundException()
 
     await this.userDonatesRepository.remove(udg)
+    this.eventsService.server.to(Permission.KernelUnicoreConnect).emit('take_group', udg);
   }
 
   async buy(user: User, ip: string, input: GroupBuyInput) {

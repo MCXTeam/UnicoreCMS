@@ -1,11 +1,11 @@
-import { IsDefined, IsInt, IsString } from "class-validator"
+import { IsDefined, IsInt, IsOptional, IsString } from "class-validator"
 
 export class GiveDonatePermInput {
   @IsDefined()
   @IsString()
   user_uuid: string 
 
-  @IsDefined()
+  @IsOptional()
   @IsString()
   server_id: string 
 

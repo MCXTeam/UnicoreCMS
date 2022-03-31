@@ -5,8 +5,9 @@ import { UsersService } from 'src/admin/users/users.service';
 import { ServersService } from 'src/game/servers/servers.service';
 import { In, Not, Repository } from 'typeorm';
 import { CartItemProtected } from '../cart/dto/cart.dto';
-import { WarehouseRejectInput } from './dto/warehouse-reject.input';
+import { WarehouseGivedInput } from './dto/warehouse-gived.input';
 import { WarehouseItem } from './entities/warehouse-item.entity';
+import * as _ from 'lodash';
 
 @Injectable()
 export class WarehouseService {
@@ -19,10 +20,11 @@ export class WarehouseService {
 
   async find(user_id: string, server_id: string) {
     const user = await this.usersService.getById(user_id);
+    const server = await this.serversService.findOne(server_id);
 
-    if (!user) throw new BadRequestException();
+    if (!server || !user) throw new BadRequestException();
 
-    return this.findOwn(user, server_id);
+    return this.warehouseItemsRepository.find({ user, server })
   }
 
   async findOwn(user: User, server_id: string) {
@@ -40,13 +42,15 @@ export class WarehouseService {
     return true;
   }
 
-  async afterGive(input: WarehouseRejectInput) {
-    const user = await this.usersService.getById(input.user_uuid);
+  async afterGive(input: WarehouseGivedInput[]) {
+    const givedItems = await this.warehouseItemsRepository.findByIds(input.map(it => it.id));
 
-    if (!user) throw new BadRequestException();
+    for (const i in givedItems) {
+      const inputItem = input.find(it => it.id == givedItems[i].id)
+      givedItems[i].amount -= inputItem.amount
+    }
 
-    const rejectedItems = await this.warehouseItemsRepository.find({ id: Not(In(input.rejected_items)), user });
-
-    return (await this.warehouseItemsRepository.remove(rejectedItems)).map((wi) => new CartItemProtected(wi));
+    const removed = await this.warehouseItemsRepository.remove(givedItems.filter(it => it.amount <= 0))
+    await this.warehouseItemsRepository.save(_.without(givedItems, ...removed))
   }
 }

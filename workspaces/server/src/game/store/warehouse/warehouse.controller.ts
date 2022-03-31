@@ -1,9 +1,10 @@
 import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { Permission } from 'unicore-common';
-import { WarehouseRejectInput } from './dto/warehouse-reject.input';
+import { WarehouseGivedInput } from './dto/warehouse-gived.input';
 import { WarehouseService } from './warehouse.service';
 
 @Controller('store/warehouse')
@@ -15,15 +16,17 @@ export class WarehouseController {
     return this.warehouseService.findOwn(user, server_id);
   }
 
+  @SkipThrottle()
   @Permissions([Permission.KernelUnicoreConnect])
   @Get(':uuid/:server')
   async find(@Param('uuid') user_uuid: string, @Param('server') server_id: string) {
     return this.warehouseService.find(user_uuid, server_id);
   }
 
+  @SkipThrottle()
   @Permissions([Permission.KernelUnicoreConnect])
   @Post()
-  afterGive(@Body() body: WarehouseRejectInput) {
+  afterGive(@Body() body: WarehouseGivedInput[]) {
     return this.warehouseService.afterGive(body);
   }
 

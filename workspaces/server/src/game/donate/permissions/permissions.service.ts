@@ -6,7 +6,7 @@ import { EventsService } from 'src/events/events.service';
 import { HistoryType } from 'src/game/cabinet/history/enums/history-type.enum';
 import { HistoryService } from 'src/game/cabinet/history/history.service';
 import { Server } from 'src/game/servers/entities/server.entity';
-import { In, Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import { Permission } from 'unicore-common';
 import { Period } from '../entities/period.entity';
 import { GroupKit } from '../groups/entities/group-kit.entity';
@@ -64,12 +64,11 @@ export class DonatePermissionsService {
       permission: {
         id: permission.id,
       }
-    });
+    }, { relations: ['user']});
 
     if (userPermission) {
       if (!userPermission.expired) throw new BadRequestException();
 
-      userPermission.gived = null;
       userPermission.expired = period.expire ? this.moment(userPermission.expired).utc().add(period.expire, 'seconds').toDate() : null;
     } else {
       userPermission = new UsersDonatePermission();
@@ -83,28 +82,38 @@ export class DonatePermissionsService {
     }
 
     // Event!
-    this.eventsService.server.to(Permission.KernelUnicoreConnect).emit('buy_permission', userPermission);
+    if (userPermission.permission.type != PermissionType.Web)
+      this.eventsService.server.to(Permission.KernelUnicoreConnect).emit('give_permission', userPermission);
 
     return this.userPermissionsRepository.save(userPermission);
   }
 
   async giveByDTO(input: GiveDonatePermInput) {
+    var server = null;
     const user = await this.usersRepository.findOne({ uuid: input.user_uuid })
-    const server = await this.serversRepository.findOne({ id: input.server_id })
-    const permission = await this.donatePermissionsRepository.findOne({ id: input.period_id })
+    const permission = await this.donatePermissionsRepository.findOne({ id: input.permission_id })
     const period = await this.periodsRepository.findOne({ id: input.period_id })
 
-    if (!user || !server || !permission || !period)
+    if (input.server_id) {
+      server = await this.serversRepository.findOne({ id: input.server_id })
+      if (!server)
+        throw new NotFoundException()
+    }
+
+    if (!user || !permission || !period)
       throw new NotFoundException()
 
     await this.give(user, server, permission, period)
   }
 
   async take(id: number) {
-    const udp = await this.donatePermissionsRepository.findOne(id);
+    const udp = await this.userPermissionsRepository.findOne(id, { relations: ["user"] });
     if (!udp) throw new NotFoundException()
 
-    await this.donatePermissionsRepository.remove(udp)
+    await this.userPermissionsRepository.remove(udp)
+
+    if (udp.permission.type != PermissionType.Web)
+      this.eventsService.server.to(Permission.KernelUnicoreConnect).emit('take_permission', udp);
   }
 
   async buy(user: User, ip: string, input: PermissionBuyInput) {
@@ -135,6 +144,33 @@ export class DonatePermissionsService {
       .orderBy({ type: "DESC" }).getMany()).filter(perm => perm.servers.find(srv => srv.id == id) || perm.type == PermissionType.Web)
 
     return perms.filter((perm) => perm.periods.length);
+  }
+
+  async findByServerUC(id: string) {
+    const perms = (await this.donatePermissionsRepository.createQueryBuilder('perm')
+      .leftJoinAndSelect('perm.periods', 'periods')
+      .leftJoinAndSelect('perm.servers', 'servers')
+      .leftJoinAndSelect('perm.kits', 'kits')
+      .leftJoinAndSelect('kits.images', 'images')
+      .leftJoinAndSelect('images.server', 'server')
+      .where({ type: Not(PermissionType.Web) })
+      .orderBy({ type: "DESC" }).getMany()).filter(perm => perm.servers.find(srv => srv.id == id) || perm.type == PermissionType.Web)
+
+    return perms.filter((perm) => perm.periods.length);
+  }
+
+  // For UnicoreConnect
+  async findByUserAndServer(server: string, user: string) {
+    const permissions = await this.userPermissionsRepository.find({
+      where: {
+        server: { id: server },
+        permission: { type: Not(PermissionType.Web) },
+        user: { uuid: user },
+      },
+      relations: ['user', 'permission'],
+    });
+
+    return permissions;
   }
 
   findOne(id: number, relations?: string[]): Promise<DonatePermission> {

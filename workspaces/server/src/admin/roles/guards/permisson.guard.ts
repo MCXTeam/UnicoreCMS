@@ -1,4 +1,4 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { User } from 'src/admin/users/entities/user.entity';
 import { Permission } from 'unicore-common';
@@ -6,6 +6,10 @@ import * as minimath from 'minimatch';
 import * as _ from 'lodash';
 import { PERMISSIONS_KEY } from '../decorators/permission.decorator';
 import { Role } from '../entities/role.entity';
+import { getConnection, Repository } from 'typeorm';
+import { UsersDonateGroup } from 'src/game/donate/groups/entities/user-donate.entity';
+import { UsersDonatePermission } from 'src/game/donate/permissions/entities/user-permission.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 export type PermissionOptions = {
   handle?: (req: any) => Record<string, string | number | boolean> | Promise<Record<string, string | number | boolean>>;
@@ -42,7 +46,11 @@ export function transformPermissions(userPart: Partial<User>) {
   return user;
 }
 
-export function matchPermission(args: PermissionArgs, request: any): boolean {
+export async function matchPermission(args: PermissionArgs, request: any): Promise<boolean> {
+  const connection = getConnection()
+  const user_dgroups = await connection.getRepository(UsersDonateGroup).find({ where: { user: request.user }, relations: ['user'] })
+  const user_dperms = await connection.getRepository(UsersDonatePermission).find({ where: { user: request.user }, relations: ['user'] })
+  const add_perms = [user_dperms.map(udp => udp.permission.web_perms).flat(), user_dgroups.map(udg => udg.group.web_perms).flat()].flat()
   const user: User = request.user;
 
   // Первым делом проверяем пользователя на SuperUser aka root
@@ -113,6 +121,18 @@ export function matchPermission(args: PermissionArgs, request: any): boolean {
     }
   }
 
+  // Накладные права групп и прав (донат)
+  if (add_perms && add_perms.length) {
+    // Проходимся по правам пользователя
+    for (const perm of add_perms) {
+      if (perm.charAt(0) !== '!') {
+        matched = _.union(matched, minimath.match(permissions, perm));
+      } else {
+        matched = _.pull(matched, ...minimath.match(permissions, perm.slice(1)));
+      }
+    }
+  }
+
   // Подводим итог
   // OR или AND
   if (options && options.or) {
@@ -124,9 +144,11 @@ export function matchPermission(args: PermissionArgs, request: any): boolean {
 
 @Injectable()
 export class PermissionGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+  constructor(
+    private reflector: Reflector,
+  ) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const permissions = this.reflector.getAllAndOverride<PermissionArgs>(PERMISSIONS_KEY, [context.getHandler(), context.getClass()]);
 
     if (!permissions) {

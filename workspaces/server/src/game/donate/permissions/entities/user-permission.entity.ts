@@ -37,11 +37,6 @@ export class UsersDonatePermission {
   @Column({
     nullable: true,
   })
-  gived: boolean;
-
-  @Column({
-    nullable: true,
-  })
   expired: Date;
 
   @CreateDateColumn()
