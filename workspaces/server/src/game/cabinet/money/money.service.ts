@@ -12,6 +12,8 @@ import { HistoryType } from '../history/enums/history-type.enum';
 import { MoneyExchangeInput, MoneyExchangeType } from './dto/money-exchange.input';
 import { ConfigService } from 'src/admin/config/config.service';
 import { MoneyUpdateInput } from './dto/money-update.input';
+import { MoneyPayCommandInput } from './dto/money-pay-command.input';
+import { MoneyWDInput } from './dto/monet-wd.input';
 
 @Injectable()
 export class MoneyService {
@@ -24,7 +26,7 @@ export class MoneyService {
     private usersService: UsersService,
     private historyService: HistoryService,
     private configService: ConfigService,
-  ) {}
+  ) { }
 
   private async generate(server: Server, user: User) {
     const money = new Money();
@@ -73,6 +75,34 @@ export class MoneyService {
     }
   }
 
+  async findOneByUserUuidAndServer(server_id: string, user: string | User): Promise<Money> {
+    if (typeof user === 'string') user = await this.usersService.getById(user);
+
+    const server = await this.serversService.findOne(server_id);
+
+    if (!user || !server || !server_id) throw new NotFoundException();
+
+    const money = await this.moneyRepository.findOne({ user, server }, { relations: ['user', 'server'] });
+
+    if (money) return money;
+    else {
+      return this.generate(server, user as User);
+    }
+  }
+
+  async findTopByServer(id: string): Promise<Money[]> {
+    return this.moneyRepository.find({
+      where: {
+        server: { id }
+      },
+      order: {
+        money: "DESC"
+      },
+      relations: ["server", "user"],
+      take: 10
+    })
+  }
+
   async update(input: MoneyUpdateInput) {
     const user = await this.usersRepo.findOne(input.uuid)
     if (!user) throw new NotFoundException();
@@ -95,7 +125,57 @@ export class MoneyService {
     }
   }
 
+  async payCommand(input: MoneyPayCommandInput) {
+    if (input.target_uuid == input.user_uuid)
+      throw new BadRequestException();
+
+    try {
+      var target_money = await this.findOneByUserUuidAndServer(input.server_id, input.target_uuid);
+      var user_money = await this.findOneByUserUuidAndServer(input.server_id, input.user_uuid);
+    } catch {
+      throw new NotFoundException();
+    }
+
+    if (user_money.money < input.amount) throw new BadRequestException();
+
+    target_money.money += input.amount;
+    user_money.money -= input.amount;
+
+    this.historyService.create(HistoryType.MoneyTransfer, input.user_ip, user_money.user, user_money.server, target_money.user, input.amount);
+
+    return (await this.moneyRepository.save([target_money, user_money]))[1];
+  }
+
+  async deposit(input: MoneyWDInput) {
+    try {
+      var user_money = await this.findOneByUserUuidAndServer(input.server_id, input.user_uuid);
+    } catch {
+      throw new NotFoundException();
+    }
+
+    user_money.money += input.amount;
+
+    return this.moneyRepository.save(user_money);
+  }
+
+  async withdraw(input: MoneyWDInput) {
+    try {
+      var user_money = await this.findOneByUserUuidAndServer(input.server_id, input.user_uuid);
+    } catch {
+      throw new NotFoundException();
+    }
+
+    if (user_money.money < input.amount) throw new BadRequestException();
+
+    user_money.money -= input.amount;
+
+    return this.moneyRepository.save(user_money);
+  }
+
   async transfer(user: User, ip: string, input: MoneyInput): Promise<boolean> {
+    if (user.username == input.username)
+      throw new BadRequestException();
+
     if (input.type == MoneyTransferType.Money) {
       try {
         var target_money = await this.findOneByUserAndServer(input.server, input.username);

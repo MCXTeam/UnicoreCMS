@@ -5,7 +5,9 @@ import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { Permission } from 'unicore-common';
+import { MoneyWDInput } from './dto/monet-wd.input';
 import { MoneyExchangeInput } from './dto/money-exchange.input';
+import { MoneyPayCommandInput } from './dto/money-pay-command.input';
 import { MoneyUpdateInput } from './dto/money-update.input';
 import { MoneyInput } from './dto/money.input';
 import { MoneyService } from './money.service';
@@ -23,7 +25,35 @@ export class MoneyController {
   @Permissions([Permission.KernelUnicoreConnect])
   @Get('user/:server/:uuid')
   async findOneByUserAndServer(@Param('server') server: string, @Param('uuid') uuid: string) {
-    return this.moneyService.findOneByUserAndServer(server, uuid);
+    return this.moneyService.findOneByUserUuidAndServer(server, uuid);
+  }
+
+  @SkipThrottle()
+  @Permissions([Permission.KernelUnicoreConnect])
+  @Post('user')
+  async payCommand(@Body() body: MoneyPayCommandInput) {
+    return this.moneyService.payCommand(body);
+  }
+
+  @SkipThrottle()
+  @Permissions([Permission.KernelUnicoreConnect])
+  @Post('user/deposit')
+  async deposit(@Body() body: MoneyWDInput) {
+    return this.moneyService.deposit(body);
+  }
+
+  @SkipThrottle()
+  @Permissions([Permission.KernelUnicoreConnect])
+  @Post('user/withdraw')
+  async withdraw(@Body() body: MoneyWDInput) {
+    return this.moneyService.withdraw(body);
+  }
+
+  @SkipThrottle()
+  @Permissions([Permission.KernelUnicoreConnect])
+  @Get('top/:server')
+  async findTopByServer(@Param('server') server: string) {
+    return this.moneyService.findTopByServer(server);
   }
 
   @Post('own/transfer')

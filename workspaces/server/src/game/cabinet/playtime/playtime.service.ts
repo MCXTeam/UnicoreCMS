@@ -82,6 +82,19 @@ export class PlaytimeService {
     }
   }
 
+  async findTopByServer(id: string): Promise<Playtime[]> {
+    return this.playtimeRepository.find({
+      where: {
+        server: { id }
+      },
+      order: {
+        time: "DESC"
+      },
+      relations: ["server", "user"],
+      take: 10
+    })
+  }
+
   async update(input: PlaytimeInput[]) {
     const servers = await this.serversService.find();
     const pt = await this.playtimeRepository.find({
