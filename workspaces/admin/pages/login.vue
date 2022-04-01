@@ -46,6 +46,35 @@
         <Button :disabled="loading || invalid" type="submit" label="Войти" class="w-full p-3 text-xl mt-5"></Button>
       </form>
     </ValidationObserver>
+
+    <ValidationObserver v-slot="{ invalid }">
+      <Dialog
+        :visible.sync="totpRequired"
+        :closable="false"
+        :closeOnEscape="false"
+        :style="{ width: '450px' }"
+        :modal="true"
+        header="Двухфакторная аутификация"
+        class="p-fluid"
+      >
+        <ValidationProvider name="Код из приложения" rules="required|min:0" v-slot="{ errors }">
+          <div class="field">
+            <label>Код из приложения</label>
+            <InputText v-model="login.totp" autofocus />
+            <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+          </div>
+        </ValidationProvider>
+        <template #footer>
+          <Button
+            :disabled="invalid"
+            label="Войти"
+            icon="pi pi-check"
+            class="p-button-text"
+            @click="Login()"
+          />
+        </template>
+      </Dialog>
+    </ValidationObserver>
   </div>
 </template>
 
@@ -67,7 +96,9 @@ export default {
       login: {
         username_or_email: '',
         password: '',
+        totp: null
       },
+      totpRequired: false,
     }
   },
   async mounted() {
@@ -90,12 +121,25 @@ export default {
           headers: { recaptcha },
         })
       } catch (err) {
-        this.$toast.add({
-          severity: 'error',
-          summary: 'Ошибка авторизации',
-          detail: 'Неправельный логин или пароль',
-          life: 3000,
-        })
+        if (err?.response?.data?.message == 'require2fa') {
+          this.totpRequired = true
+        } else {
+          if (this.totpRequired) {
+            this.$toast.add({
+              severity: 'error',
+              summary: 'Ошибка авторизации',
+              detail: 'Код из приложения не подходит, попробуйте еще раз',
+              life: 3000,
+            })
+          } else {
+            this.$toast.add({
+              severity: 'error',
+              summary: 'Ошибка авторизации',
+              detail: 'Неправельный логин или пароль',
+              life: 3000,
+            })
+          }
+        }
         this.loading = false
       }
     },

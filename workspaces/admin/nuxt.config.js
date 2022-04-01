@@ -17,6 +17,14 @@ export default mainConfig({
 
   css: ['primeflex/primeflex.css', '~/assets/styles/layout.scss'],
 
+  auth: {
+    redirect: {
+      login: '/login',
+      logout: '/login',
+      home: '/',
+    },
+  },
+
   primevue: {
     theme: 'vela-purple',
     ripple: true,
@@ -104,14 +112,6 @@ export default mainConfig({
   },
 
   modules: ['primevue/nuxt'],
-
-  auth: {
-    redirect: {
-      login: '/login',
-      logout: '/login',
-      home: '/',
-    },
-  },
 
   loading: {
     color: '#BA68C8',

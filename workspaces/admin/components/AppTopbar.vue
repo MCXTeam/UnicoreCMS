@@ -23,21 +23,15 @@
     </button>
     <ul class="layout-topbar-menu hidden lg:flex origin-top">
       <li>
-        <button class="p-link layout-topbar-button">
-          <i class="pi pi-calendar"></i>
-          <span>Events</span>
-        </button>
-      </li>
-      <li>
-        <button class="p-link layout-topbar-button">
-          <i class="pi pi-cog"></i>
-          <span>Settings</span>
-        </button>
+        <nuxt-link class="p-link layout-topbar-button" :to="'/users/' + $auth.user.uuid">
+          <i class="pi pi-user"></i>
+          <span>Профиль</span>
+        </nuxt-link>
       </li>
       <li>
         <button class="p-link layout-topbar-button" @click="$auth.logout()">
-          <i class="pi pi-user"></i>
-          <span>Profile</span>
+          <i class="pi pi-sign-out"></i>
+          <span>Выйти</span>
         </button>
       </li>
     </ul>

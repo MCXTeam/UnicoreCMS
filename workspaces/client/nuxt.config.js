@@ -72,7 +72,7 @@ export default mainConfig({
   build: {
     extractCSS: true,
     transpile: ['primevue'],
-    extend(config, { isDev, isClient }) {
+    extend(config, { isDev }) {
       if (!isDev) {
         config.plugins.push(
           new PurgecssPlugin({
@@ -86,10 +86,12 @@ export default mainConfig({
               'fade-right',
               'flip-left',
               'dark-mode',
+              'dark-mode',
+              'dark-mode',
               /^vs-/,
               /-(leave|enter|appear)(|-(to|from|active))$/,
               /^(?!(|.*?:)cursor-move).+-move$/,
-              /^router-link(|-exact)-active$/,
+              /^nuxt-link(|-exact)-active$/,
             ],
             paths: glob.sync([
               path.join(__dirname, './pages/**/*.vue'),
