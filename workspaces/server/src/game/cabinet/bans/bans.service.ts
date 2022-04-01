@@ -8,6 +8,8 @@ import * as moment from 'moment';
 import { User } from 'src/admin/users/entities/user.entity';
 import { BanFromAdminInput } from './dto/ban-from-admin.input';
 import { MomentWrapper } from '@common';
+import { ConfigService } from 'src/admin/config/config.service';
+import { ConfigField } from 'src/admin/config/config.enum';
 
 @Injectable()
 export class BansService {
@@ -16,7 +18,10 @@ export class BansService {
     private moment: MomentWrapper,
     @InjectRepository(Ban)
     private bansRepository: Repository<Ban>,
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
     private usersService: UsersService,
+    private configService: ConfigService,
   ) { }
 
   findOne(uuid: string): Promise<Ban> {
@@ -70,13 +75,19 @@ export class BansService {
   }
 
   async unban(user: User) {
-    const ban = await this.bansRepository.findOne({ where: { user }, relations: ["user"] })
-
-    if (!ban)
+    if (!user.ban)
       throw new NotFoundException()
 
+    const config = await this.configService.load()
+    
     // Price calc
-    await this.bansRepository.remove(ban)
+    if (user.real < config[ConfigField.UnbanPrice])
+      throw new BadRequestException()
+
+    user.real -= config[ConfigField.UnbanPrice] as number
+    
+    await this.usersRepository.save(user)
+    await this.bansRepository.delete({ user })
     return true
   }
 

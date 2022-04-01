@@ -135,13 +135,7 @@ export default {
             {
               label: 'Пополнение',
               icon: 'pi pi-fw pi-wallet',
-              items: [
-                {
-                  label: 'Бонусы',
-                  icon: 'pi pi-fw pi-dollar',
-                  to: '/payment/bonuses',
-                },
-              ],
+              to: '/payment',
             },
             {
               label: 'Промо-коды',
@@ -151,7 +145,7 @@ export default {
             {
               label: 'Голосование',
               icon: 'pi pi-fw pi-volume-off',
-              to: '/icons',
+              to: '/votes',
             },
           ],
         },

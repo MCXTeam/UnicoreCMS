@@ -38,9 +38,10 @@ export class ConfigService {
         },
         { key: ConfigField.LauncherExe, important: true, type: ConfigType.string },
         { key: ConfigField.LauncherJar, important: true, type: ConfigType.string },
-        { key: ConfigField.LinkDiscord, important: true, type: ConfigType.string, value: "https://unicorecms.ru" },
-        { key: ConfigField.LinkTelegram, important: true, type: ConfigType.string, value: "https://unicorecms.ru" },
-        { key: ConfigField.LinkVk, important: true, type: ConfigType.string, value: "https://unicorecms.ru" },
+        { key: ConfigField.LinkDiscord, important: true, type: ConfigType.string, value: "https://t.me/unicore_project" },
+        { key: ConfigField.LinkTelegram, important: true, type: ConfigType.string, value: "https://t.me/unicore_project" },
+        { key: ConfigField.LinkVk, important: true, type: ConfigType.string, value: "https://t.me/unicore_project" },
+        { key: ConfigField.LinkYoutube, important: true, type: ConfigType.string, value: "https://t.me/unicore_project" },
         { key: ConfigField.ReferalTrigger, important: true, type: ConfigType.number, value: "600" },
         { key: ConfigField.ReferalReward, important: true, type: ConfigType.number, value: "20" },
         { key: ConfigField.ReferalRewardPlayer, important: true, type: ConfigType.number, value: "20" },
@@ -48,6 +49,7 @@ export class ConfigService {
         { key: ConfigField.LinkMctop, important: true, type: ConfigType.string, value: "https://unicorecms.ru" },
         { key: ConfigField.LinkMinecraftraiting, important: true, type: ConfigType.string, value: "https://unicorecms.ru" },
         { key: ConfigField.LinkTopcraft, important: true, type: ConfigType.string, value: "https://unicorecms.ru" },
+        { key: ConfigField.UnbanPrice, important: true, type: ConfigType.number, value: "150" },
       ])
       .orIgnore()
       .execute();

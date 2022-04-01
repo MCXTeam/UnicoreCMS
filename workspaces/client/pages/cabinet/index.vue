@@ -71,13 +71,13 @@
         <h2 class="m-0">Блокировки аккаунта</h2>
         <p>Информация об активных блокировках аккаунта, при блокировке вам недоступны некоторые разделы сайта и доступ к серверам.</p>
         <p v-if="!$auth.user.ban" class="text-success">Все круто, твой аккаунт не в бане!</p>
-        <p v-if="$auth.user.ban && $auth.user.expires" class="text-success">
-          Вы заблокированы до {{ $moment($auth.user.expires).local().format() }}!
+        <p v-if="$auth.user.ban && $auth.user.ban.expires" class="text-success">
+          Вы заблокированы до {{ $moment($auth.user.expires).local().format('DD.MM.YYYY, HH:mm:ss') }}!
         </p>
-        <p v-if="$auth.user.ban && !$auth.user.expires" class="text-success">Вы заблокированы навсегда!</p>
+        <p v-if="$auth.user.ban && !$auth.user.ban.expires" class="text-success">Вы заблокированы навсегда!</p>
       </div>
       <div class="col-xl-4 d-flex align-items-center">
-        <vs-button block size="large" :disabled="!$auth.user.ban">Приобрести платный разбан</vs-button>
+        <vs-button block size="large" :disabled="!$auth.user.ban" :loading="banLoading" @click="unabn()">Купить разбан за {{$utils.formatCurrency(config.public_unban_price)}}</vs-button>
       </div>
     </div>
     <hr class="my-3" />
@@ -111,6 +111,8 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 export default {
   layout: 'cabinet',
 
@@ -120,11 +122,18 @@ export default {
       money: null,
       skinLoading: false,
       cloakLoading: false,
+      banLoading: false,
     }
   },
 
   asyncData({ store }) {
     store.commit('unicore/SET_NAME', 'Личный кабинет')
+  },
+
+  computed: {
+    ...mapGetters({
+      config: 'unicore/config',
+    }),
   },
 
   async fetch() {
@@ -173,23 +182,34 @@ export default {
 
       this.cloakLoading = false
     },
-    async deleteSkin(event) {
+    async deleteSkin() {
       this.skinLoading = true
       try {
         await this.$axios.delete('/cabinet/skin/skin')
         await this.$auth.fetchUser()
         this.$unicore.successNotification('Ваш скин был удалён!')
-      } catch (e) {}
+      } catch {}
       this.skinLoading = false
     },
-    async deleteCloak(event) {
+    async deleteCloak() {
       this.cloakLoading = true
       try {
         await this.$axios.delete('/cabinet/skin/cloak')
         await this.$auth.fetchUser()
         this.$unicore.successNotification('Ваш плащ был удалён!')
-      } catch (e) {}
+      } catch {}
       this.cloakLoading = false
+    },
+    async unabn() {
+      this.banLoading = true
+      try {
+        await this.$axios.post('/bans/unban')
+        await this.$auth.fetchUser()
+        this.$unicore.successNotification('Ваш аккаунт был разблокирован!')
+      } catch {
+         this.$unicore.errorNotification('На балансе недостаточно денег для покупки разбана!')
+      }
+      this.banLoading = false
     },
   },
 

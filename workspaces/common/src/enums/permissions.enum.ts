@@ -43,7 +43,6 @@ export enum Permission {
   EditorModsDelete = "editor.mods.delete",
   EditorModsDeleteMany = "editor.mods.delete.many",
 
-  EditorNewsRead = "editor.news.read",
   EditorNewsCreate = "editor.news.create",
   EditorNewsUpdate = "editor.news.update",
   EditorNewsDelete = "editor.news.delete",
@@ -95,6 +94,14 @@ export enum Permission {
   EditorCabinetGiftsUpdate = "editor.cabinet.gifts.update",
   EditorCabinetGiftsDelete = "editor.cabinet.gifts.delete",
   EditorCabinetGiftsDeleteMany = "editor.cabinet.gifts.delete.many",
+
+  EditorVotesGiftsCreate = "editor.cabinet.votesgifts.create",
+  EditorVotesGiftsUpdate = "editor.cabinet.votesgifts.update",
+  EditorVotesGiftsDelete = "editor.cabinet.votesgifts.delete",
+
+  EditorPaymentBonusesGiftsCreate = "editor.cabinet.paymentbonuses.create",
+  EditorPaymentBonusesUpdate = "editor.cabinet.paymentbonuses.update",
+  EditorPaymentBonusesDelete = "editor.cabinet.paymentbonuses.delete",
 
   UserCabinetSkin = "user.cabinet.skin",
   UserCabinetSkinHd = "user.cabinet.skin.hd",

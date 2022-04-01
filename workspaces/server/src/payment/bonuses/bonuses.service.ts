@@ -35,7 +35,7 @@ export class BonusesService {
   }
 
   async update(id: number, input: BonusInput): Promise<Bonus> {
-    const bonus = await this.findOne(id);
+    const bonus = await this.bonusesRepository.findOne(id);
 
     if (!bonus) {
       throw new NotFoundException();
@@ -48,7 +48,7 @@ export class BonusesService {
   }
 
   async remove(id: number): Promise<Bonus> {
-    const bonus = await this.findOne(id);
+    const bonus = await this.bonusesRepository.findOne(id);
 
     if (!bonus) {
       throw new NotFoundException();
@@ -58,7 +58,7 @@ export class BonusesService {
   }
 
   async updateIcon(id: number, file: MulterFile) {
-    const bonus = await this.findOne(id);
+    const bonus = await this.bonusesRepository.findOne(id);
 
     if (!bonus) {
       StorageManager.remove(file.filename);
@@ -72,7 +72,7 @@ export class BonusesService {
   }
 
   async removeIcon(id: number) {
-    const bonus = await this.findOne(id);
+    const bonus = await this.bonusesRepository.findOne(id);
 
     if (!bonus) {
       throw new NotFoundException();

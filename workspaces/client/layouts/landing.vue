@@ -38,7 +38,7 @@
           <div class="col-xl-9 pe-xl-5">
             <nuxt-child />
           </div>
-          <div class="col">
+          <div class="col mt-5 mt-xl-0">
             <no-ssr>
               <div v-if="$auth.loggedIn" class="panel d-flex flex-column align-items-center py-4 mb-5">
                 <h3 class="mb-4 mt-0"><i class="bx bx-user"></i> Привет, {{ $auth.user.username }}</h3>
@@ -131,6 +131,22 @@
               <Skeleton width="70%" class="mb-2"></Skeleton>
               <Skeleton width="70%" class="mb-2"></Skeleton>
             </div>
+            <no-ssr>
+              <div class="d-flex flex-column social-blocks pt-3">
+                <a v-if="config.public_link_discord" class="px-4 py-3 mt-3 discord" :href="config.public_link_discord" target="_blank">
+                  <h2 class="m-0 d-flex align-items-center"><i class="bx bxl-discord-alt me-2"></i> Discord</h2>
+                </a>
+                <a v-if="config.public_link_vk" class="px-4 py-3 mt-3 vk" :href="config.public_link_vk" target="_blank">
+                  <h2 class="m-0 d-flex align-items-center"><i class="bx bxl-vk me-2"></i> ВКонтакте</h2>
+                </a>
+                <a v-if="config.public_link_telegram" class="px-4 py-3 mt-3 telegram" :href="config.public_link_telegram" target="_blank">
+                  <h2 class="m-0 d-flex align-items-center"><i class="bx bxl-telegram me-2"></i> Telegram</h2>
+                </a>
+                <a v-if="config.public_link_youtube" class="px-4 py-3 mt-3 youtube" :href="config.public_link_youtube" target="_blank">
+                  <h2 class="m-0 d-flex align-items-center"><i class="bx bxl-youtube me-2"></i> YouTube</h2>
+                </a>
+              </div>
+            </no-ssr>
           </div>
         </div>
       </div>
@@ -157,6 +173,7 @@ export default {
   computed: {
     ...mapGetters({
       onlines: 'io/serversOnline',
+      config: 'unicore/config',
     }),
   },
   async mounted() {

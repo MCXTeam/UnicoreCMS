@@ -191,6 +191,7 @@ export default {
               sortBy: params.sort,
               search: params.search,
               'filter.server': this.$route.params.id,
+              'filter.categories': params.category,
               'filter.price': priceFilter.length && '$btw:' + priceFilter.join(','),
             },
           })

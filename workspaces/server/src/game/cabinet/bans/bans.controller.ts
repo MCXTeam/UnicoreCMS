@@ -15,6 +15,12 @@ export class BansController {
   constructor(private bansService: BansService) {}
 
   @Permissions([Permission.KernelUnicoreConnect])
+  @Post('unban')
+  unban(@CurrentUser() user: User) {
+    return this.bansService.unban(user);
+  }
+
+  @Permissions([Permission.KernelUnicoreConnect])
   @Get(':uuid')
   async findOne(@Param('uuid') uuid: string): Promise<BanDto> {
     const ban = await this.bansService.findOne(uuid);

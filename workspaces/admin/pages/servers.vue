@@ -385,6 +385,8 @@ export default {
       this.updateMode = !!server
       if (server) {
         this.server = this.$_.pick(await this.$axios.get('/servers/' + server.id).then((res) => res.data), this.$_.deepKeys(this.server))
+        if (!this.server.table)
+          this.server.table = []
       } else {
         this.server = {
           id: null,

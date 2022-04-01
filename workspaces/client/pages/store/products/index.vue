@@ -10,7 +10,7 @@
           >
             <div>
               <h2 class="m-0">{{ server.name }}</h2>
-              <h5 class="m-0">{{ server.products_count }} предметов из {{ server.categories_count }} категорий</h5>
+              <h5 class="m-0">{{ server.products_count }} товаров из {{ server.categories_count }} категорий</h5>
             </div>
             <img v-if="server.icon" :src="`${$config.apiUrl}/${server.icon}`" width="96px" />
             <div

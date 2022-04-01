@@ -153,7 +153,7 @@ export class VkLongpollService {
         const news = new News();
 
         news.description = await this.toHtml(payload.text);
-        news.title = payload.text.slice(0, 30);
+        news.title = payload.text.length > 25 ? payload.text.slice(0, 25) + '...' : payload.text;
         news.link = await getPostLink(payload);
 
         if (news.title < news.description) news.title += '...';

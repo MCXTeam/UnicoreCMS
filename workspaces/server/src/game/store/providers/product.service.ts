@@ -45,7 +45,7 @@ export class ProductsService {
     private categoriesRepository: Repository<Category>,
     @InjectRepository(Kit)
     private kitsRepository: Repository<Kit>,
-  ) {}
+  ) { }
 
   async find(query: PaginateQuery): Promise<Paginated<Product>> {
     const queryBuilder = this.productsRepository
@@ -190,16 +190,28 @@ export class ProductsService {
           .createQueryBuilder('product')
           .leftJoinAndSelect('product.servers', 'servers')
           .where('servers.id = :id', { id: serv.id })
-          .getCount();
+          .getCount() + await this.kitsRepository
+            .createQueryBuilder('kit')
+            .leftJoinAndSelect('kit.servers', 'servers')
+            .where('servers.id = :id', { id: serv.id })
+            .getCount();
 
         serv.categories_count = _(
           (
-            await this.productsRepository
-              .createQueryBuilder('product')
-              .leftJoinAndSelect('product.servers', 'servers')
-              .leftJoinAndSelect('product.categories', 'categories')
-              .where('servers.id = :id', { id: serv.id })
-              .getMany()
+            [
+              await this.productsRepository
+                .createQueryBuilder('product')
+                .leftJoinAndSelect('product.servers', 'servers')
+                .leftJoinAndSelect('product.categories', 'categories')
+                .where('servers.id = :id', { id: serv.id })
+                .getMany(),
+              await this.kitsRepository
+                .createQueryBuilder('kit')
+                .leftJoinAndSelect('kit.servers', 'servers')
+                .leftJoinAndSelect('kit.categories', 'categories')
+                .where('servers.id = :id', { id: serv.id })
+                .getMany(),
+            ].flat()
           )
             .map((prod) => prod.categories)
             .flat(),

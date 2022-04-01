@@ -4,6 +4,7 @@ import { ConfigModule } from 'src/admin/config/config.module';
 import { EmailActivation } from 'src/admin/email/entities/email-activation.entity';
 import { PasswordReset } from 'src/admin/email/entities/password-reset.entity';
 import { User } from 'src/admin/users/entities/user.entity';
+import { Ban } from 'src/game/cabinet/bans/entities/ban.entity';
 import { RefreshToken } from 'src/auth/entities/refresh-token.entity';
 import { History } from 'src/game/cabinet/history/entities/history.entity';
 import { PlaytimeModule } from 'src/game/cabinet/playtime/playtime.module';
@@ -23,9 +24,13 @@ import { OnlineTasks } from './tasks/online.tasks';
 import { PaymentTasks } from './tasks/payment-cleaner.tasks';
 import { ReferalsTasks } from './tasks/referals.tasks';
 import { TokenTasks } from './tasks/tokens.tasks';
+import { BanTasks } from './tasks/ban.tasks';
+import { VotesTasks } from './tasks/votes.tasks';
+import { Vote } from 'src/game/cabinet/votes/entities/vote.entity';
+import { VoteGift } from 'src/game/cabinet/votes/entities/vote-gift.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([RefreshToken, History, CartItem, CartItemKit, UsersDonateGroup, UsersDonatePermission, Payment, Referal, User, PasswordReset, EmailActivation]), ServersModule, OnlineModule, ConfigModule, PlaytimeModule],
-  providers: [TokenTasks, HistoryTasks, OnlineTasks, CartTasks, DonateTasks, PaymentTasks, ReferalsTasks, HistoryTasks, EmailTasks],
+  imports: [TypeOrmModule.forFeature([RefreshToken, History, CartItem, CartItemKit, UsersDonateGroup, UsersDonatePermission, Payment, Referal, User, PasswordReset, EmailActivation, Ban, Vote, VoteGift]), ServersModule, OnlineModule, ConfigModule, PlaytimeModule],
+  providers: [TokenTasks, HistoryTasks, OnlineTasks, CartTasks, DonateTasks, PaymentTasks, ReferalsTasks, HistoryTasks, EmailTasks, BanTasks, VotesTasks],
 })
 export class CronModule { }

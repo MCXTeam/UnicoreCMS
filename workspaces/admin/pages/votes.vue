@@ -12,7 +12,7 @@
         <DataTable :value="bonuses" :loading="loading" :filters.sync="filters" rowHover responsiveLayout="scroll" dataKey="id">
           <template #header>
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-              <h5 class="m-0">Управление бонусами пополнения</h5>
+              <h5 class="m-0">Управление бонусами голосования</h5>
               <span class="block mt-2 md:mt-0 p-input-icon-left">
                 <i class="pi pi-search" />
                 <InputText v-model="filters['global'].value" placeholder="Поиск..." />
@@ -20,47 +20,17 @@
             </div>
           </template>
           <Column field="id" header="ID" sortable></Column>
-          <Column field="amount" header="Сумма" sortable>
-            <template #body="slotProps">
-              <div class="flex align-items-center">
-                <Avatar v-if="slotProps.data.icon" :image="`${$config.apiUrl + '/' + slotProps.data.icon}`" shape="circle" />
-                <Avatar v-else icon="pi pi-image" shape="circle" />
-                <span class="ml-2">{{ $utils.formatCurrency(slotProps.data.amount) }}%</span>
-              </div>
-            </template>
-          </Column>
-          <Column field="bonus" header="Бонуск пополнению">
-            <template #body="slotProps"> {{ slotProps.data.bonus }}% </template>
+          <Column field="place" header="Место" sortable />
+          <Column field="bonus" header="Бонус">
+            <template #body="slotProps"> {{ $utils.formatCurrency(slotProps.data.bonus) }} </template>
           </Column>
           <Column :styles="{ width: '12rem' }">
             <template #body="slotProps">
               <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
-              <Button @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary mr-2" />
               <Button @click="removeBonus(slotProps.data.id)" icon="pi pi-trash" class="p-button-rounded p-button-warning mt-2" />
             </template>
           </Column>
         </DataTable>
-
-        <Dialog :visible.sync="fileDialog" :style="{ width: '400px' }" :modal="true" header="Иконка бонуса" class="p-fluid">
-          <div class="flex align-items-center justify-content-center flex-wrap w-full">
-            <Avatar v-if="bonus.icon" :image="`${$config.apiUrl + '/' + bonus.icon}`" size="xlarge" shape="circle" />
-            <Avatar v-else icon="pi pi-image" size="xlarge" shape="circle" />
-            <div class="field ml-6 mb-0">
-              <Button label="Загрузить" icon="pi pi-upload" @click="$refs.fileInput.choose()" />
-              <Button label="Удалить" icon="pi pi-trash" class="p-button-secondary mt-2" @click="removeIcon()" />
-              <FileUpload
-                ref="fileInput"
-                style="display: none"
-                mode="basic"
-                name="file"
-                accept="image/*"
-                :auto="true"
-                :customUpload="true"
-                @uploader="uploadIcon"
-              />
-            </div>
-          </div>
-        </Dialog>
 
         <ValidationObserver v-slot="{ invalid }">
           <Dialog
@@ -71,17 +41,17 @@
             header="Создание/редактирование бонуса"
             class="p-fluid"
           >
-            <ValidationProvider name="Название" rules="required|min:0" v-slot="{ errors }">
+            <ValidationProvider name="Место" rules="required|min:0" v-slot="{ errors }">
               <div class="field">
-                <label>Сумма (условие >=)</label>
-                <InputNumber currency="RUB" locale="ru-RU" mode="currency" v-model="bonus.amount" />
+                <label>Место</label>
+                <InputNumber v-model="bonus.place" />
                 <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
               </div>
             </ValidationProvider>
-            <ValidationProvider name="Бонус к пополнению" rules="required|min:0" v-slot="{ errors }">
+            <ValidationProvider name="Бонус рублей на баланс" rules="required|min:0" v-slot="{ errors }">
               <div class="field">
-                <label>Бонус к пополнению</label>
-                <InputNumber v-model="bonus.bonus" suffix="%" />
+                <label>Бонус рублей на баланс</label>
+                <InputNumber v-model="bonus.bonus" currency="RUB" locale="ru-RU" mode="currency" />
                 <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
               </div>
             </ValidationProvider>
@@ -107,7 +77,7 @@ import { ValidationObserver, ValidationProvider } from 'vee-validate'
 
 export default {
   head: {
-    title: 'Бонусы пополнения',
+    title: 'Бонусы голосования',
   },
   components: {
     ValidationObserver,
@@ -118,12 +88,10 @@ export default {
       bonuses: null,
       loading: true,
       updateMode: false,
-      fileDialog: false,
       bonus: {
         id: null,
         bonus: null,
-        icon: null,
-        amount: null,
+        place: null,
       },
       bonusDialog: false,
       filters: {
@@ -132,17 +100,11 @@ export default {
     }
   },
   async fetch() {
-    this.bonuses = await this.$axios.get('/payment/bonuses').then((res) => res.data)
-
+    this.bonuses = await this.$axios.get('/cabinet/votes/gifts').then((res) => res.data)
     this.bonusDialog = false
-    this.fileDialog = false
     this.loading = false
   },
   methods: {
-    async openFileDialog(bonus) {
-      this.bonus = this.$_.pick(bonus, this.$_.deepKeys(this.bonus))
-      this.fileDialog = true
-    },
     hideDialog() {
       this.bonusDialog = false
     },
@@ -153,9 +115,8 @@ export default {
       } else {
         this.bonus = {
           id: null,
-          name: null,
-          expire: null,
-          multiplier: 1,
+          bonus: null,
+          place: null,
         }
       }
       this.bonusDialog = true
@@ -163,7 +124,7 @@ export default {
     async createBonus() {
       this.loading = true
       try {
-        await this.$axios.post('/payment/bonuses', this.bonus)
+        await this.$axios.post('/cabinet/votes/gifts', this.bonus)
         this.$toast.add({
           severity: 'success',
           detail: 'Бонус успешно добавлен',
@@ -177,11 +138,12 @@ export default {
           life: 3000,
         })
       }
+      this.loading = false
     },
     async updateBonus() {
       this.loading = true
       try {
-        await this.$axios.patch('/payment/bonuses/' + this.bonus.id, this.$_.omit(this.bonus, 'id'))
+        await this.$axios.patch('/cabinet/votes/gifts' + this.bonus.id, this.$_.omit(this.bonus, 'id'))
         this.$toast.add({
           severity: 'success',
           detail: 'Бонус успешно редактирован',
@@ -196,6 +158,7 @@ export default {
           life: 3000,
         })
       }
+      this.loading = false
     },
     async removeBonus(id) {
       this.$confirm.require({
@@ -205,7 +168,7 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$axios.delete('/payment/bonuses/' + id)
+            await this.$axios.delete('/cabinet/votes/gifts' + id)
             this.$toast.add({
               severity: 'success',
               detail: 'Бонус успешно удален',
@@ -215,41 +178,6 @@ export default {
           await this.$fetch()
         },
       })
-    },
-    async uploadIcon(event) {
-      let formData = new FormData()
-      formData.append('file', event.files[0])
-
-      try {
-        await this.$axios.patch(`/payment/bonuses/icon/` + this.bonus.id, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        })
-        this.$toast.add({
-          severity: 'success',
-          detail: 'Картинка успешно обновлена',
-          life: 3000,
-        })
-        await this.$fetch()
-      } catch {
-        this.$toast.add({
-          severity: 'error',
-          detail: 'Поддерживаются только изображения',
-          life: 3000,
-        })
-      }
-    },
-    async removeIcon() {
-      try {
-        await this.$axios.delete(`/payment/bonuses/icon/` + this.bonus.id)
-        this.$toast.add({
-          severity: 'success',
-          detail: 'Картинка успешно удалена',
-          life: 3000,
-        })
-        await this.$fetch()
-      } catch {}
     },
   },
 }

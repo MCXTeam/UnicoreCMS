@@ -7,7 +7,7 @@ export const sitemapSettings = {
   path: '/sitemap.xml',
   sitemaps: [{
       path: 'sitemap-index.xml',
-      exclude: ['/auth/**', '/cabinet/**', '/store/**', '/players/**', '/auth', '/cabinet', '/store', '/players'],
+      exclude: ['/auth/**', '/cabinet/**', '/store/**', '/players/**', '/auth', '/cabinet', '/store', '/players', '/page'],
       defaults: {
         changefreq: 'daily',
         priority: 1,
@@ -49,6 +49,23 @@ export const sitemapSettings = {
             url: '/page/' + page.path,
             priority: page.is_rules && 1,
             lastmod: page.updated,
+            changefreq: 'daily',
+          }))
+        } catch {
+          return []
+        }
+      },
+    },
+    {
+      path: '/sitemap-news.xml',
+      exclude: ['/**'],
+      routes: async () => {
+        try {
+          const news = await axios.get(envConfig.apiBaseurl + '/news/helper/sitemap').then((res) => res.data)
+
+          return news.map((id) => ({
+            url: '/news/' + id,
+            lastmod: new Date(),
             changefreq: 'daily',
           }))
         } catch {

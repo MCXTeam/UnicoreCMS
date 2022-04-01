@@ -10,6 +10,7 @@ import { WebhookRequestType } from './enums/webhook-request-type';
 import { WebhookType } from './enums/webhook-type.enum';
 import { VkLongpollService } from '../integrations/vk-longpoll/vk-longpoll.service';
 import { AttachmentType } from 'vk-io';
+import { envConfig } from 'unicore-common';
 
 @Injectable()
 export class WebhooksService {
@@ -26,6 +27,14 @@ export class WebhooksService {
     if (webhooks.length == 0) return;
 
     for (const wh of webhooks) {
+      if (wh.type == WebhookType.NewsCreated) {
+        if (payload.image) {
+          const url = new URL(envConfig.apiBaseurl)
+          url.pathname = payload.image
+          payload.image = url.href
+        }
+      }
+
       switch (wh.request) {
         case WebhookRequestType.Discord:
           switch (wh.type) {

@@ -4,6 +4,17 @@
       <h2 class="m-0">Топ голосующих за {{ $moment().format('MMMM') }}</h2>
       <vs-button size="large" to="/cabinet/gifts">Голосовать</vs-button>
     </div>
+    <div v-if="votesGifts.length">
+      <h4 class="m-0">Что вы получите заняв призовое место?</h4>
+      <div class="row d-flex justify-content-center my-3">
+        <div v-for="vg in votesGifts" :key="vg.id" class="col-6 col-lg">
+          <div class="mini-profile px-3 py-2" :class="'vote-gift-' + vg.place">
+            <h3 class="m-0">{{ vg.place }} место</h3>
+            <span v-text="$utils.formatCurrency(vg.bonus)" />
+          </div>
+        </div>
+      </div>
+    </div>
     <div ref="votes">
       <vs-table class="no-overflow-table mt-4 large-table">
         <template #thead>
@@ -16,7 +27,9 @@
         </template>
         <template #tbody>
           <vs-tr :key="vote.user.uuid" v-for="(vote, i) in votes.data" :data="vote">
-            <vs-td> <h3 class="m-0">#{{ (votes.meta.total - 1) * 25 +  i + 1}}</h3> </vs-td>
+            <vs-td>
+              <h3 class="m-0">#{{ (votes.meta.total - 1) * 25 + i + 1 }}</h3>
+            </vs-td>
             <vs-td>
               <div class="d-flex align-items-center">
                 <Avatar class="rounded shadow me-3">
@@ -48,6 +61,7 @@ export default {
 
   data() {
     return {
+      votesGifts: [],
       votes: {
         data: [],
         meta: {
@@ -61,13 +75,22 @@ export default {
   async fetch() {
     const loading = this.$vs.loading({ target: this.$refs.votes })
     this.votes = await this.$axios.get('players/votes-list', { params: { page: this.votes.meta.page } }).then((res) => res.data)
+    this.votesGifts = await this.$axios.get('cabinet/votes/gifts').then((res) => res.data)
     loading.close()
+  },
+
+  methods: {
+    async load() {
+      const loading = this.$vs.loading({ target: this.$refs.votes })
+      this.votes = await this.$axios.get('players/votes-list', { params: { page: this.votes.meta.page } }).then((res) => res.data)
+      loading.close()
+    },
   },
 
   watch: {
     'votes.meta.page': {
       handler: function () {
-        this.$fetch()
+        this.load()
       },
     },
   },
