@@ -17,7 +17,8 @@
             <div class="flex justify-content-center align-items-center bg-pink-500 border-circle" style="height: 3.2rem; width: 3.2rem">
               <i class="pi pi-fw pi-exclamation-circle text-2xl text-50"></i>
             </div>
-            <h1 class="font-bold text-5xl text-900 mb-2">Страница не найдена</h1>
+            <h1 class="font-bold text-5xl text-900 mb-2" v-if="error.statusCode == 404">Страница не найдена</h1>
+            <h1 class="font-bold text-5xl text-900 mb-2" v-if="error.statusCode == 403">Доступ заблокирован</h1>
             <span class="text-600">Произошла ошибка - {{ error.statusCode }}</span>
             <div class="col-12 mt-5 text-center">
               <i class="pi pi-fw pi-arrow-left text-blue-500 mr-2" style="vertical-align: center"></i>

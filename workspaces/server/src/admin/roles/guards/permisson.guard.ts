@@ -21,6 +21,7 @@ export function transformPermissions(userPart: Partial<User>) {
   const user = { ...userPart };
   if (!user?.perms) user.perms = [];
   if (!user?.roles) user.roles = [];
+  user.perms.push(...user.roles.map((role) => role.perms).flat())
 
   if (user.perms.length) {
     // Проходимся по правам пользователя

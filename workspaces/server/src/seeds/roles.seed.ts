@@ -10,11 +10,13 @@ export default class CreateRoles implements Seeder {
         id: 'admin',
         name: 'Администратор',
         priority: 10,
+        perms: ["admin.*"]
       },
       {
         id: 'editor',
         name: 'Редактор',
         priority: 7,
+        perms: ["editor.*"]
       },
     ]);
   }

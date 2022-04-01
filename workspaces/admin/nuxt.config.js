@@ -13,7 +13,7 @@ export default mainConfig({
     port: envConfig.adminPort,
   },
 
-  plugins: ['~/plugins/primevue'],
+  plugins: ['~/plugins/primevue', '~/plugins/axios'],
 
   css: ['primeflex/primeflex.css', '~/assets/styles/layout.scss'],
 
