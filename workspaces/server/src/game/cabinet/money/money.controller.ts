@@ -56,11 +56,13 @@ export class MoneyController {
     return this.moneyService.findTopByServer(server);
   }
 
+  @Permissions([Permission.UserCabinetTransfer])
   @Post('own/transfer')
   async transferOwn(@CurrentUser() user: User, @IpAddress() ip: string, @Body() body: MoneyInput) {
     return this.moneyService.transfer(user, ip, body);
   }
 
+  @Permissions([Permission.UserCabinetExchange])
   @Post('own/exchange')
   async exchangeOwn(@CurrentUser() user: User, @IpAddress() ip: string, @Body() body: MoneyExchangeInput) {
     return this.moneyService.exchange(user, ip, body);

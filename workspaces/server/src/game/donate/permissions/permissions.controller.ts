@@ -48,6 +48,7 @@ export class PermissionsController {
     return await this.donatePermissionsService.findByServerUC(id);
   }
 
+  @Permissions([Permission.UserDonatePermissionBuy])
   @Post('buy')
   async buy(@CurrentUser() user: User, @IpAddress() ip: string, @Body() body: PermissionBuyInput) {
     return this.donatePermissionsService.buy(user, ip, body);

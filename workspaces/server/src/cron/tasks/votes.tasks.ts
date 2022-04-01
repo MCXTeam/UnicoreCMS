@@ -50,7 +50,10 @@ export class VotesTasks {
     }
 
     const ids = votes.map(v => v.ids).flat()
-    await this.votesRepository.delete(ids)
-    await this.usersRepository.save(users)
+
+    if (users.length && ids.length) {
+      await this.votesRepository.delete(ids)
+      await this.usersRepository.save(users)
+    }
   }
 }

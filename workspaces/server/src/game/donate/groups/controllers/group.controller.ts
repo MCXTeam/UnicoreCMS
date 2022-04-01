@@ -58,6 +58,7 @@ export class DonateGroupsController {
     return this.donateGroupsService.findByUserAndServer(server, uuid);
   }
 
+  @Permissions([Permission.UserDonateGroupBuy])
   @Post('buy')
   buy(@CurrentUser() user: User, @IpAddress() ip: string, @Body() body: GroupBuyInput) {
     return this.donateGroupsService.buy(user, ip, body);

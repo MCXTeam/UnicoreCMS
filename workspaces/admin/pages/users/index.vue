@@ -67,12 +67,95 @@
               <nuxt-link :to="`/users/` + slotProps.data.uuid">
                 <Button icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
               </nuxt-link>
-              <Button @click="removeUser(slotProps.data.id)" icon="pi pi-trash" class="p-button-rounded p-button-warning mt-2" />
+              <Button @click="removeUser(slotProps.data.uuid)" icon="pi pi-trash" class="p-button-rounded p-button-warning mt-2" />
             </template>
           </Column>
         </DataTable>
       </div>
     </div>
+
+    <ValidationObserver v-slot="{ invalid }">
+      <Dialog
+        :visible.sync="userDialog"
+        :closable="false"
+        :style="{ width: '450px' }"
+        :modal="true"
+        header="Создание пользователя"
+        class="p-fluid"
+      >
+        <div class="p-fluid">
+          <div class="field">
+            <ValidationProvider name="Имя пользователя" rules="required|isUsername" v-slot="{ errors }">
+              <label>Имя пользователя</label>
+              <InputText v-model="user.username" type="text" />
+              <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+            </ValidationProvider>
+          </div>
+          <div class="field">
+            <ValidationProvider name="Email" rules="required|email" v-slot="{ errors }">
+              <label>Email</label>
+              <InputText v-model="user.email" type="text" />
+              <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+            </ValidationProvider>
+          </div>
+          <div class="field-checkbox">
+            <Checkbox :binary="true" v-model="user.activated" />
+            <label>Активирован (Email)</label>
+          </div>
+          <h4>Роли и права</h4>
+          <div class="field">
+            <label>Роли</label>
+            <MultiSelect
+              display="chip"
+              :filter="true"
+              v-model="user.roles"
+              optionDisabled="important"
+              :options="roles"
+              optionLabel="name"
+              optionValue="id"
+              placeholder="Выберите роли"
+              class="p-column-filter"
+            />
+          </div>
+          <div class="field">
+            <label>Права</label>
+            <span class="p-fluid">
+              <AutoComplete
+                v-model="user.perms"
+                :multiple="true"
+                :suggestions="autocompleateFilterd"
+                @complete="searchAutocompleate($event)"
+                appendTo="body"
+                :completeOnFocus="true"
+                placeholder="Выберите разрешения"
+              />
+            </span>
+          </div>
+          <div class="field-checkbox">
+            <Checkbox :binary="true" v-model="user.superuser" />
+            <label>Суперпользователь</label>
+          </div>
+          <div class="field">
+            <ValidationProvider class="w-100" name="password" rules="required|min:6|max:32" v-slot="{ errors }">
+              <label>Пароль</label>
+              <InputText autocomplete="false" v-model="user.password" placeholder="Без изменений" type="password" />
+              <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+            </ValidationProvider>
+          </div>
+          <div class="field">
+            <ValidationProvider class="w-100" name="Подтверждение пароля" rules="required|confirmed:password" v-slot="{ errors }">
+              <label>Подтверждение пароля</label>
+              <InputText autocomplete="false" v-model="user.password_confirm" placeholder="Без изменений" type="password" />
+              <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+            </ValidationProvider>
+          </div>
+        </div>
+        <template #footer>
+          <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
+          <Button :disabled="loading || invalid" label="Сохранить" icon="pi pi-check" class="p-button-text" @click="createUser()" />
+        </template>
+      </Dialog>
+    </ValidationObserver>
   </div>
 </template>
 
@@ -96,6 +179,19 @@ export default {
           sortBy: null,
         },
       },
+      userDialog: false,
+      autocompleateFilterd: null,
+      user: {
+        username: null,
+        email: null,
+        activated: true,
+        roles: [],
+        perms: [],
+        superuser: false,
+        password: null,
+      },
+      roles: [],
+      autocompleate: [],
       loading: true,
       selected: null,
       filters: {
@@ -106,6 +202,8 @@ export default {
   async fetch() {
     this.loading = true
     this.selected = null
+    this.roles = (await this.$axios.get('/admin/roles').then((res) => res.data)).filter((role) => role.id != 'banned')
+    this.autocompleate = await this.$axios.get('/admin/roles/autocompleate').then((res) => res.data)
     this.users = await this.$axios
       .get('/users', {
         params: {
@@ -131,6 +229,37 @@ export default {
     },
     onFilter() {
       this.$fetch()
+    },
+    hideDialog() {
+      this.userDialog = false
+    },
+    openDialog() {
+      this.user = {
+        username: null,
+        email: null,
+        activated: true,
+        roles: ['default'],
+        perms: [],
+        superuser: false,
+        password: null,
+      }
+      this.userDialog = true
+    },
+    searchAutocompleate(event) {
+      if (!event.query.trim().length) {
+        this.autocompleateFilterd = this.autocompleate
+      } else {
+        this.autocompleateFilterd = [
+          event.query.toLowerCase(),
+          ...this.autocompleate.filter((perm) => {
+            return perm.toLowerCase().includes(event.query.toLowerCase())
+          }),
+        ]
+
+        if (this.autocompleateFilterd.length === 0) {
+          this.autocompleateFilterd = [event.query.toLowerCase()]
+        }
+      }
     },
     async removeMany() {
       this.$confirm.require({
@@ -174,6 +303,50 @@ export default {
           await this.$fetch()
         },
       })
+    },
+    async removeMany() {
+      this.$confirm.require({
+        message: `Данный процесс будет необратим!`,
+        header: `Удаления ${this.selected.length} объектов`,
+        icon: 'pi pi-exclamation-triangle',
+        accept: async () => {
+          this.loading = true
+          try {
+            await this.$axios.delete('/users/bulk/', {
+              data: {
+                items: this.selected.map((user) => user.uuid),
+              },
+            })
+            this.$toast.add({
+              severity: 'success',
+              detail: 'Пользователи успешно удалены',
+              life: 3000,
+            })
+            this.selected = []
+          } catch {}
+          await this.$fetch()
+        },
+      })
+    },
+    async createUser() {
+      this.loading = true
+      try {
+        await this.$axios.post('/users', this.user)
+        this.$toast.add({
+          severity: 'success',
+          detail: 'Пользователь успешно добавлен',
+          life: 3000,
+        })
+        this.userDialog = false
+        await this.$fetch()
+      } catch (err) {
+        this.$toast.add({
+          severity: 'error',
+          detail: 'Введены некоректные данные, либо у вас недостаточно прав',
+          life: 3000,
+        })
+      }
+      this.loading = false
     },
   },
 }

@@ -14,7 +14,7 @@ import { BanInput } from './dto/ban.input';
 export class BansController {
   constructor(private bansService: BansService) {}
 
-  @Permissions([Permission.KernelUnicoreConnect])
+  @Permissions([Permission.UserCabinetUnbanBuy])
   @Post('unban')
   unban(@CurrentUser() user: User) {
     return this.bansService.unban(user);

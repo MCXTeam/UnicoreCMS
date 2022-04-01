@@ -38,7 +38,7 @@ export class RolesService {
         {
           id: ImportantRoles.Banned,
           name: 'Заблокированный',
-          perms: [],
+          perms: ['!user.cabinet.transfer'],
           important: true,
           priority: 5,
         },
