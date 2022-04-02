@@ -85,16 +85,6 @@
   .vs-sidebar__item:not(.exact) {
     padding-left: 8px;
     opacity: 1;
-
-    .vs-sidebar__item__icon {
-      text-decoration: none !important;
-    }
-  }
-
-  &:hover, &:focus {
-    .vs-sidebar__item__icon {
-      text-decoration: none !important;
-    }
   }
 }
 
@@ -102,17 +92,13 @@
   .vs-sidebar__item {
     padding-left: 8px;
     opacity: 1;
-
-    .vs-sidebar__item__icon {
-      text-decoration: none !important;
-    }
   }
 }
 
-a {
-  &:hover, &:focus {
-    .vs-sidebar__item__icon {
-      text-decoration: none !important;
-    }
+.vs-sidebar a {
+
+  &:hover,
+  &:focus {
+    text-decoration: none !important;
   }
 }
