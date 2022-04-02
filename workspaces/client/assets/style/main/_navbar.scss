@@ -44,6 +44,7 @@
   background-color: transparent;
 
   .vs-navbar__item {
+
     &:hover,
     &.nuxt-link-exact-active {
       &::before {
@@ -62,6 +63,7 @@
   box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.02), 0px 0px 2px rgba(0, 0, 0, 0.05), 0px 1px 4px rgba(0, 0, 0, 0.08);
 
   .vs-navbar__item {
+
     &:hover,
     &.nuxt-link-exact-active {
       &::before {
@@ -77,4 +79,40 @@
   position: static;
   overflow: auto;
   width: 100%;
+}
+
+.nuxt-link-active {
+  .vs-sidebar__item:not(.exact) {
+    padding-left: 8px;
+    opacity: 1;
+
+    .vs-sidebar__item__icon {
+      text-decoration: none !important;
+    }
+  }
+
+  &:hover, &:focus {
+    .vs-sidebar__item__icon {
+      text-decoration: none !important;
+    }
+  }
+}
+
+.nuxt-link-exact-active {
+  .vs-sidebar__item {
+    padding-left: 8px;
+    opacity: 1;
+
+    .vs-sidebar__item__icon {
+      text-decoration: none !important;
+    }
+  }
+}
+
+a {
+  &:hover, &:focus {
+    .vs-sidebar__item__icon {
+      text-decoration: none !important;
+    }
+  }
 }

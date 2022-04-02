@@ -7,7 +7,7 @@
     <div v-if="votesGifts.length">
       <h4 class="m-0">Что вы получите заняв призовое место?</h4>
       <div class="row d-flex justify-content-center my-3">
-        <div v-for="vg in votesGifts" :key="vg.id" class="col-6 col-lg">
+        <div v-for="vg in votesGifts" :key="vg.id" class="col-6 col-lg mb-2">
           <div class="mini-profile px-3 py-2" :class="'vote-gift-' + vg.place">
             <h3 class="m-0">{{ vg.place }} место</h3>
             <span v-text="$utils.formatCurrency(vg.bonus)" />

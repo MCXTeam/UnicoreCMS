@@ -2,7 +2,7 @@
   <div>
     <vs-navbar class="cabinet-navbar" not-line fixed center-collapsed>
       <template #left>
-        <vs-button class="d-lg-none d-md-block me-4" flat icon>
+        <vs-button @click="activeSidebar = true" class="d-lg-none d-md-block me-4" flat icon>
           <i class="bx bx-menu"></i>
         </vs-button>
         <nuxt-link to="/" class="d-flex align-items-center without-underline">
@@ -34,6 +34,70 @@
         </div>
       </template>
     </vs-navbar>
+
+    <vs-sidebar absolute :open.sync="activeSidebar">
+      <template #logo>
+        <img src="/icon.png" />
+        <h2 class="ms-2 my-0" v-text="$config.name" />
+      </template>
+      <nuxt-link to="/">
+        <vs-sidebar-item class="exact">
+          <template #icon>
+            <i class="bx bx-home"></i>
+          </template>
+          Главная
+        </vs-sidebar-item>
+      </nuxt-link>
+      <nuxt-link to="/cabinet">
+        <vs-sidebar-item>
+          <template #icon>
+            <i class="bx bx-user"></i>
+          </template>
+          Личный кабинет
+        </vs-sidebar-item>
+      </nuxt-link>
+      <nuxt-link to="/store">
+        <vs-sidebar-item>
+          <template #icon>
+            <i class="bx bx-cart"></i>
+          </template>
+          Магазин
+        </vs-sidebar-item>
+      </nuxt-link>
+      <nuxt-link to="/players">
+        <vs-sidebar-item>
+          <template #icon>
+            <i class="bx bx-stats"></i>
+          </template>
+          Игроки
+        </vs-sidebar-item>
+      </nuxt-link>
+      <nuxt-link to="/start">
+        <vs-sidebar-item>
+          <template #icon>
+            <i class="bx bxl-windows"></i>
+          </template>
+          Скачать
+        </vs-sidebar-item>
+      </nuxt-link>
+      <template #footer>
+        <no-ssr>
+          <vs-row justify="space-between" class="d-flex align-items-center">
+            <vs-avatar>
+              <SkinView2D class="rounded" :width="48" :height="48" :skin="$auth.user.skin" />
+            </vs-avatar>
+            <div class="d-flex flex-column justify-content-center">
+              <h4 class="m-0">{{ $auth.user.username }}</h4>
+              <h5 class="m-0">Баланс: {{ $utils.formatCurrency($auth.user.real) }}</h5>
+            </div>
+            <vs-avatar @click="$unicore.logout()">
+              <i class="bx bx-power-off"></i>
+            </vs-avatar>
+          </vs-row>
+        </no-ssr>
+      </template>
+    </vs-sidebar>
+
     <div class="container cabinet-container unicore-content">
       <h1 v-text="name" class="py-3" />
       <div class="row">
@@ -58,9 +122,9 @@
           </div>
           <div v-else-if="$route.path.startsWith('/players')">
             <div class="panel cabinet-tab-panel mb-4">
-              <nuxt-link class="no-exact" to="/players/votes"> <i class='bx bx-party' ></i> Топ голосующих </nuxt-link>
-              <nuxt-link class="no-exact" to="/players/playtime"> <i class='bx bx-game' ></i> Топ онлайна </nuxt-link>
-              <nuxt-link class="no-exact" to="/players/banlist"> <i class='bx bxs-shield-alt-2' ></i> Банлист </nuxt-link>
+              <nuxt-link class="no-exact" to="/players/votes"> <i class="bx bx-party"></i> Топ голосующих </nuxt-link>
+              <nuxt-link class="no-exact" to="/players/playtime"> <i class="bx bx-game"></i> Топ онлайна </nuxt-link>
+              <nuxt-link class="no-exact" to="/players/banlist"> <i class="bx bxs-shield-alt-2"></i> Банлист </nuxt-link>
             </div>
           </div>
           <component v-if="sidebar_component" :is="sidebar_component.component" v-bind="sidebar_component.payload" />
@@ -85,6 +149,7 @@ export default {
   data() {
     return {
       sidebar_component: null,
+      activeSidebar: false,
     }
   },
   created() {
@@ -106,6 +171,13 @@ export default {
   },
   components: {
     SkinViewer2D,
+  },
+  watch: {
+    async $route(to, from) {
+      this.$nextTick(() => {
+        this.activeSidebar = false
+      })
+    },
   },
 }
 </script>
