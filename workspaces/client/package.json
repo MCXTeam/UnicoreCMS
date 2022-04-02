@@ -11,7 +11,9 @@
   },
   "dependencies": {
     "@nuxtjs/color-mode": "^2.1.1",
+    "@nuxtjs/google-analytics": "^2.4.0",
     "@nuxtjs/sitemap": "^2.4.0",
+    "@nuxtjs/yandex-metrika": "^1.4.0",
     "@types/ua-parser-js": "^0.7.36",
     "aos": "^2.3.4",
     "bootstrap": "^5.1.3",

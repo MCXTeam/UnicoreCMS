@@ -74,6 +74,9 @@ export interface EnvConfig {
   mctopSecretKey: string
   topcraftSecretKey: string
   minecraftratingSecretKey: string
+
+  googleAnalyticsId: string
+  yandexMetrikaId: string
 }
 
 export const envConfig: EnvConfig = {
@@ -164,4 +167,7 @@ export const envConfig: EnvConfig = {
   mctopSecretKey: env.get("MCTOP_SECRET_KEY").asString(),
   topcraftSecretKey: env.get("TOPCRAFT_SECRET_KEY").asString(),
   minecraftratingSecretKey: env.get("MINECRAFTRATING_SECRET_KEY").asString(),
+
+  googleAnalyticsId: env.get("GOOGLE_ANALYTICS_ID").asString(),
+  yandexMetrikaId: env.get("YANDEX_METRIKA_ID").asString(),
 };

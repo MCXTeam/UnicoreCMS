@@ -29,7 +29,20 @@ export default mainConfig({
     '~assets/fonts/main.scss',
   ],
 
-  modules: ['@nuxtjs/sitemap'],
+  modules: [
+    '@nuxtjs/sitemap',
+    ...envConfig.googleAnalyticsId ? ['@nuxtjs/google-analytics'] : [],
+    ...envConfig.yandexMetrikaId ? ['@nuxtjs/yandex-metrika'] : [],
+  ],
+
+  publicRuntimeConfig: {
+    yandexMetrika: {
+      id: envConfig.yandexMetrikaId,
+    },
+    googleAnalytics: {
+      id: envConfig.googleAnalyticsId
+    }
+  },
 
   buildModules: ['@nuxtjs/color-mode'],
 
