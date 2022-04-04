@@ -96,7 +96,6 @@ export class PlaytimeService {
   }
 
   async update(input: PlaytimeInput[]) {
-    console.log(input)
     const servers = await this.serversService.find();
     const pt = await this.playtimeRepository.find({
       where: { user: { uuid: In(input.map((v) => v.user_uuid)) } },
