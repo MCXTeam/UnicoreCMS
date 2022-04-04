@@ -15,6 +15,16 @@
   --vs-theme-code: #{$theme-code};
   --vs-theme-code2: #{$theme-code2};
   --vs-text: #{$text};
+  --bs-primary-rgb: 13, 110, 253;
+  --bs-secondary-rgb: 108, 117, 125;
+  --bs-success-rgb: 25, 135, 84;
+  --bs-info-rgb: 13, 202, 240;
+  --bs-warning-rgb: 255, 193, 7;
+  --bs-danger-rgb: 220, 53, 69;
+  --bs-light-rgb: 248, 249, 250;
+  --bs-dark-rgb: 33, 37, 41;
+  --bs-white-rgb: 255, 255, 255;
+  --bs-black-rgb: 0, 0, 0;
 }
 
 .dark-mode {
@@ -119,9 +129,11 @@ a:visited {
 .page-enter-active {
   transition: all 0.3s ease;
 }
+
 .page-leave-active {
   transition: all 0.5s cubic-bezier(1, 0.5, 0.8, 1);
 }
+
 .page-enter,
 .page-leave-to {
   transform: translateX(10px);
@@ -132,6 +144,7 @@ a:visited {
 .layout-leave-active {
   transition: opacity 0.3s;
 }
+
 .layout-enter,
 .layout-leave-to {
   opacity: 0;

@@ -51,7 +51,7 @@
           class="d-flex justify-content-between align-items-center my-3 w-100"
         >
           <vs-checkbox v-model="form.save_me">Запомнить меня</vs-checkbox>
-          <vs-button to="/auth/reset" transparent>Забыли пароль?</vs-button>
+          <nuxt-link to="/auth/reset">Забыли пароль?</nuxt-link>
         </div>
       </div>
       <div class="w-100" data-aos="zoom-in-right" data-aos-delay="750">

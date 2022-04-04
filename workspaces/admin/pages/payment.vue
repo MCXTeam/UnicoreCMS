@@ -158,7 +158,7 @@ export default {
           amount: null,
         }
       }
-      this.bonusDialog = false
+      this.bonusDialog = true
     },
     async createBonus() {
       this.loading = true

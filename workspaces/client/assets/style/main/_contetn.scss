@@ -469,25 +469,33 @@ a.server-block:hover {
     &.discord {
       @extend .rounded;
       background-color: #7289DA;
-      color: #fff !important;
+      h2 {
+        color: #fff !important;
+      }
     }
 
     &.vk {
       @extend .rounded;
       background-color: #4E8ACE;
-      color: #fff !important;
+      h2 {
+        color: #fff !important;
+      }
     }
 
     &.telegram {
       @extend .rounded;
       background-color: #32AFED;
-      color: #fff !important;
+      h2 {
+        color: #fff !important;
+      }
     }
 
     &.youtube {
       @extend .rounded;
       background-color: #FF0000;
-      color: #fff !important;
+      h2 {
+        color: #fff !important;
+      }
     }
   }
 }

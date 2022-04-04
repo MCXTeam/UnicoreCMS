@@ -18,6 +18,7 @@ export class PlaytimeController {
     return (await this.playtimeService.findOneByUser(user)).map(pt => instanceToPlain(new PlaytimeDto(pt)));
   }
 
+  @SkipThrottle()
   @Permissions([Permission.KernelUnicoreConnect])
   @Patch()
   update(@Body() body: PlaytimeInput[]) {

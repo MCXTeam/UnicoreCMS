@@ -330,6 +330,10 @@
               </div>
             </ValidationProvider>
             <div class="field">
+              <label>NBT-теги</label>
+              <InputText v-model="product.nbt" />
+            </div>
+            <div class="field">
               <label>Описание</label>
               <Editor v-model="product.description" editorStyle="height: 160px">
                 <template #toolbar>
@@ -458,6 +462,7 @@ export default {
         categories: [],
         icon: null,
         item_id: null,
+        nbt: null,
       },
       productMany: {
         price: null,
@@ -595,6 +600,7 @@ export default {
           servers: this.filters?.servers?.value || [],
           categories: this.filters?.categories?.value || [],
           icon: null,
+          nbt: null,
         }
       }
       this.productDialog = true

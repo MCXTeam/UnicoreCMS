@@ -7,5 +7,5 @@ export class PlaytimeInput {
 
   @IsDefined()
   @IsString()
-  server_id: string;
+  server: string;
 }

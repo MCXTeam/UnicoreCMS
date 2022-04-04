@@ -96,6 +96,7 @@ export class PlaytimeService {
   }
 
   async update(input: PlaytimeInput[]) {
+    console.log(input)
     const servers = await this.serversService.find();
     const pt = await this.playtimeRepository.find({
       where: { user: { uuid: In(input.map((v) => v.user_uuid)) } },
@@ -104,8 +105,8 @@ export class PlaytimeService {
 
     await Promise.all(
       input.map(async (row) => {
-        const finder = pt.find((p) => p.server.id == row.server_id && p.user.uuid == row.user_uuid);
-        const server = servers.find((serv) => serv.id == row.server_id);
+        const finder = pt.find((p) => p.server.id == row.server && p.user.uuid == row.user_uuid);
+        const server = servers.find((serv) => serv.id == row.server);
 
         if (server) {
           if (finder) {

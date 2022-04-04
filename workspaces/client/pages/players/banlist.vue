@@ -28,7 +28,7 @@
             </vs-td>
             <vs-td> {{ $moment(ban.created).local().format('DD.MM.YYYY, HH:mm:ss') }} </vs-td>
             <vs-td> {{ ban.expires ? $moment(ban.expires).local().format('DD.MM.YYYY, HH:mm:ss') : 'Никогда' }} </vs-td>
-            <vs-td v-if="ban.actor">
+            <vs-td v-if="ban.actor && ban.actor.username != 'Kernel'">
               <nuxt-link :to="`/user/` + ban.actor.username">{{ ban.actor.username }}</nuxt-link>
             </vs-td>
             <vs-td v-else> Консоль </vs-td>

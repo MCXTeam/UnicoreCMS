@@ -71,10 +71,10 @@
         <h2 class="m-0">Блокировки аккаунта</h2>
         <p>Информация об активных блокировках аккаунта, при блокировке вам недоступны некоторые разделы сайта и доступ к серверам.</p>
         <p v-if="!$auth.user.ban" class="text-success">Все круто, твой аккаунт не в бане!</p>
-        <p v-if="$auth.user.ban && $auth.user.ban.expires" class="text-success">
+        <p v-if="$auth.user.ban && $auth.user.ban.expires" class="text-danger">
           Вы заблокированы до {{ $moment($auth.user.expires).local().format('DD.MM.YYYY, HH:mm:ss') }}!
         </p>
-        <p v-if="$auth.user.ban && !$auth.user.ban.expires" class="text-success">Вы заблокированы навсегда!</p>
+        <p v-if="$auth.user.ban && !$auth.user.ban.expires" class="text-danger">Вы заблокированы навсегда!</p>
       </div>
       <div class="col-xl-4 d-flex align-items-center">
         <vs-button block size="large" :disabled="!$auth.user.ban" :loading="banLoading" @click="unabn()">Купить разбан за {{$utils.formatCurrency(config.public_unban_price)}}</vs-button>

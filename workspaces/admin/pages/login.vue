@@ -93,6 +93,7 @@ export default {
   data() {
     return {
       disabled: false,
+      loading: false,
       login: {
         username_or_email: '',
         password: '',
