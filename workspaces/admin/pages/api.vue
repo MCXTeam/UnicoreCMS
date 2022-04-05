@@ -6,13 +6,6 @@
           <template v-slot:start>
             <div class="my-2">
               <Button label="Создать" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
-              <Button
-                label="Удалить"
-                icon="pi pi-trash"
-                class="p-button-danger"
-                :disabled="!selected || !selected.length"
-                @click="removeMany()"
-              />
             </div>
           </template>
         </Toolbar>
