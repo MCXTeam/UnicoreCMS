@@ -57,7 +57,7 @@
   - Продажа внутриигровых [товаров и китов](https://unicorecms.ru/docs/admin/store), группирование по **категориям**. 
   - Продажа внутриигровых [прав/групп](https://unicorecms.ru/docs/admin/donate-groups-and-perms)
   - Продажа [веб-прав](https://unicorecms.ru/docs/admin/roles-and-perms) (Например возможность загрузки HD-скина и т. д.) 
-  - [Вознаграждения при голосовании](https://unicorecms.ru/docs/sittings/votes) в мониторингах (TopCraft, MCTop, Minecraft-Raiting). 
+  - [Вознаграждения при голосовании](https://unicorecms.ru/docs/settings/votes) в мониторингах (TopCraft, MCTop, Minecraft-Raiting). 
   - Ежемесячные подарки для топ-голосующих. 
   - **Внутриигровая экономика** (мультисерверно). Перевод валюты между серверами, игроками, обмен валюты. 
 ### Внешние компоненты
