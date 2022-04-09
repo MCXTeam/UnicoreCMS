@@ -54,6 +54,8 @@ services:
       - /usr/local/app/workspaces/server/node_modules
       - /usr/local/app/workspaces/admin/.nuxt
       - /usr/local/app/workspaces/client/.nuxt
+      - /usr/local/app/workspaces/admin/dist
+      - /usr/local/app/workspaces/client/dist
       - /usr/local/app/workspaces/common/dist
       - /usr/local/app/workspaces/server/dist
     depends_on:
