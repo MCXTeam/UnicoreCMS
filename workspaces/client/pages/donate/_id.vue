@@ -48,7 +48,7 @@
           <div class="col-12">
             <p v-if="kit_active.payload.description" class="description-html" v-text="kit_active.payload.description" />
           </div>
-          <div v-for="(img, i) in kit_active.payload.images" :key="i" class="col-xl-4">
+          <div v-for="(img, i) in kit_active.payload.images" :key="i" class="col-xl-4 mb-3">
             <div class="kit-image">
               <h4 class="mt-0 mb-1" v-text="img.server.name" />
               <img :src="`${$config.apiUrl}/${img.image}`" />
