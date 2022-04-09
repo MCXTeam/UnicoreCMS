@@ -8,7 +8,7 @@ services:
       - nginx
     restart: unless-stopped
     environment:
-      - ADMIN_HOST=${HOST?err}
+      - ADMIN_HOST=${ADMIN_HOST?err}
       - CLIENT_HOST=${CLIENT_HOST?err}
       - SERVER_HOST=${SERVER_HOST?err}
       - CLIENT_PORT=${CLIENT_PORT:-3000}
@@ -44,7 +44,7 @@ services:
     build:
       context: .
       dockerfile: ./docker/node/Dockerfile
-    command: npm run dev
+    command: npm run start
     volumes:
       - .:/usr/local/app
       - /usr/local/app/node_modules
@@ -54,6 +54,8 @@ services:
       - /usr/local/app/workspaces/server/node_modules
       - /usr/local/app/workspaces/admin/.nuxt
       - /usr/local/app/workspaces/client/.nuxt
+      - /usr/local/app/workspaces/admin/dist
+      - /usr/local/app/workspaces/client/dist
       - /usr/local/app/workspaces/common/dist
       - /usr/local/app/workspaces/server/dist
     depends_on:

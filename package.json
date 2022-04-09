@@ -6,7 +6,7 @@
   ],
   "scripts": {
     "dev": "npm run build --workspace=unicore-common && lerna run dev --parallel --no-bail",
-    "build": "npm run build -w unicore-common && lerna run build --stream --parallel",
+    "build": "npm run build -w unicore-common && npm run build --workspaces --if-present",
     "start": "lerna run start --parallel --no-bail",
     "lint": "npm run lint --workspaces --if-present",
     "format": "npm run format --workspaces --if-present",
