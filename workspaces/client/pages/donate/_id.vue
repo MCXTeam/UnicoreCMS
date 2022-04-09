@@ -7,7 +7,7 @@
     <div v-for="donate in donates" :key="donate.id" class="donate-block my-4">
       <div class="p-4">
         <div class="row">
-          <div class="col-3">
+          <div class="col-12 col-xl-3">
             <div class="d-flex align-items-center mb-2">
               <h1 class="m-0">{{ donate.name }}</h1>
               <h5 class="sale-wrapper ms-2 my-0" v-if="donate.sale">-{{ donate.sale }}%</h5>
