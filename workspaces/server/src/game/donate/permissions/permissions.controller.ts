@@ -84,19 +84,19 @@ export class PermissionsController {
     return this.donatePermissionsService.removeMany(body.items);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsUpdate])
+  @Permissions([Permission.AdminDashboard, Permission.AdminUsersRead])
   @Get('admin/:uuid')
   udgByUUID(@Param('uuid') uuid: string) {
     return this.donatePermissionsService.udpByUUID(uuid);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsUpdate])
+  @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
   @Post('admin/give')
   give(@Body() body: GiveDonatePermInput) {
     return this.donatePermissionsService.giveByDTO(body);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsUpdate])
+  @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
   @Delete('admin/:id')
   take(@Param('id') id: number) {
     return this.donatePermissionsService.take(id);

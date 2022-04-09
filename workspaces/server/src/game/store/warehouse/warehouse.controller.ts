@@ -30,7 +30,7 @@ export class WarehouseController {
     return this.warehouseService.afterGive(body);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
+  @Permissions([Permission.AdminDashboard, Permission.AdminUsersRead])
   @Get('admin/:uuid/:server')
   async findFromAdmin(@Param('uuid') user_uuid: string, @Param('server') server_id: string) {
     return this.warehouseService.find(user_uuid, server_id);

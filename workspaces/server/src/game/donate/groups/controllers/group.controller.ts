@@ -112,7 +112,7 @@ export class DonateGroupsController {
     return this.donateGroupsService.removeIcon(id);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
+  @Permissions([Permission.AdminDashboard, Permission.AdminUsersRead])
   @Get('admin/:uuid')
   udgByUUID(@CurrentUser() user: User, @Param('uuid') uuid: string) {
     return this.donateGroupsService.udgByUUID(uuid);
