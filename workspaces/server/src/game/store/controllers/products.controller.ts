@@ -11,7 +11,6 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { SkipThrottle } from '@nestjs/throttler';
 import { FileFastifyInterceptor, MulterFile } from 'fastify-file-interceptor';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
@@ -64,7 +63,6 @@ export class ProductsController {
     return this.productsService.create(body);
   }
 
-  @SkipThrottle()
   @Permissions([Permission.KernelUnicoreConnect])
   @Post('from_game')
   createFromGame(@Body() body: ProductFromGameInput) {

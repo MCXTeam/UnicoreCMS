@@ -12,7 +12,6 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { SkipThrottle } from '@nestjs/throttler';
 import { FileFastifyInterceptor, MulterFile } from 'fastify-file-interceptor';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { User } from 'src/admin/users/entities/user.entity';
@@ -51,7 +50,6 @@ export class DonateGroupsController {
     return this.donateGroupsService.findByServer(id);
   }
 
-  @SkipThrottle()
   @Permissions([Permission.KernelUnicoreConnect])
   @Get('user/:server/:uuid')
   findOneByUserAndServer(@Param('server') server: string, @Param('uuid') uuid: string) {

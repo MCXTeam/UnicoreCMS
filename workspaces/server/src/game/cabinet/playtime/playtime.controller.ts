@@ -1,5 +1,4 @@
 import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
-import { SkipThrottle } from '@nestjs/throttler';
 import { instanceToPlain } from 'class-transformer';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { User } from 'src/admin/users/entities/user.entity';
@@ -18,21 +17,18 @@ export class PlaytimeController {
     return (await this.playtimeService.findOneByUser(user)).map(pt => instanceToPlain(new PlaytimeDto(pt)));
   }
 
-  @SkipThrottle()
   @Permissions([Permission.KernelUnicoreConnect])
   @Patch()
   update(@Body() body: PlaytimeInput[]) {
     return this.playtimeService.update(body);
   }
 
-  @SkipThrottle()
   @Permissions([Permission.KernelUnicoreConnect])
   @Get('user/:server/:uuid')
   async findOneByUserAndServer(@Param('server') server: string, @Param('uuid') uuid: string) {
     return this.playtimeService.findOneByUserAndServer(server, uuid);
   }
 
-  @SkipThrottle()
   @Permissions([Permission.KernelUnicoreConnect])
   @Get('top/:server')
   async findTopByServer(@Param('server') server: string) {

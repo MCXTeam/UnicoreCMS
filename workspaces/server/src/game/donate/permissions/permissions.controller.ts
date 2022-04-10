@@ -1,6 +1,5 @@
 import { DeleteManyInput, IpAddress } from '@common';
 import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
-import { SkipThrottle } from '@nestjs/throttler';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
@@ -31,7 +30,6 @@ export class PermissionsController {
     return this.donatePermissionsService.me(user);
   }
 
-  @SkipThrottle()
   @Permissions([Permission.KernelUnicoreConnect])
   @Get('user/:server/:uuid')
   findOneByUserAndServer(@Param('server') server: string, @Param('uuid') uuid: string) {

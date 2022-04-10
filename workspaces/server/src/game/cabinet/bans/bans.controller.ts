@@ -1,5 +1,4 @@
 import { Body, Controller, Delete, Get, NotFoundException, Param, Post } from '@nestjs/common';
-import { SkipThrottle } from '@nestjs/throttler';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
@@ -9,7 +8,6 @@ import { BanFromAdminInput } from './dto/ban-from-admin.input';
 import { BanDto } from './dto/ban.dto';
 import { BanInput } from './dto/ban.input';
 
-@SkipThrottle()
 @Controller('bans')
 export class BansController {
   constructor(private bansService: BansService) {}

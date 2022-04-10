@@ -442,6 +442,7 @@ export default {
       try {
         await this.$axios.patch('/servers/' + this.server.id, {
           ...this.$_(this.server).omitBy(this.$_.isEmpty).omit('id').value(),
+          table: this.table && this.table.length ? this.table : [],
           mods: this.server.mods.map((mod) => mod.id),
         })
         this.$toast.add({

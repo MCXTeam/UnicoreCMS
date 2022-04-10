@@ -1,6 +1,5 @@
 import { IpAddress } from '@common';
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
-import { SkipThrottle } from '@nestjs/throttler';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
@@ -21,35 +20,30 @@ export class MoneyController {
     return this.moneyService.findOneByUser(user);
   }
 
-  @SkipThrottle()
   @Permissions([Permission.KernelUnicoreConnect])
   @Get('user/:server/:uuid')
   async findOneByUserAndServer(@Param('server') server: string, @Param('uuid') uuid: string) {
     return this.moneyService.findOneByUserUuidAndServer(server, uuid);
   }
 
-  @SkipThrottle()
   @Permissions([Permission.KernelUnicoreConnect])
   @Post('user')
   async payCommand(@Body() body: MoneyPayCommandInput) {
     return this.moneyService.payCommand(body);
   }
 
-  @SkipThrottle()
   @Permissions([Permission.KernelUnicoreConnect])
   @Post('user/deposit')
   async deposit(@Body() body: MoneyWDInput) {
     return this.moneyService.deposit(body);
   }
 
-  @SkipThrottle()
   @Permissions([Permission.KernelUnicoreConnect])
   @Post('user/withdraw')
   async withdraw(@Body() body: MoneyWDInput) {
     return this.moneyService.withdraw(body);
   }
 
-  @SkipThrottle()
   @Permissions([Permission.KernelUnicoreConnect])
   @Get('top/:server')
   async findTopByServer(@Param('server') server: string) {

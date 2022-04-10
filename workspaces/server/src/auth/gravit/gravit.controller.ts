@@ -1,5 +1,4 @@
 import { Body, Controller, Get, Headers, Param, Post } from '@nestjs/common';
-import { SkipThrottle } from '@nestjs/throttler';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { UserDto } from 'src/admin/users/dto/user.dto';
 import { User } from 'src/admin/users/entities/user.entity';
@@ -12,7 +11,6 @@ import { GravitJoinServer } from './dto/inputs/gravit-join-server.input';
 import { GravitRefreshToken } from './dto/inputs/gravit-refresh-token.input';
 import { GravitService } from './gravit.service';
 
-@SkipThrottle()
 @Permissions([Permission.KernelUnicoreProvider])
 @Controller('auth/gravit')
 export class GravitController {
