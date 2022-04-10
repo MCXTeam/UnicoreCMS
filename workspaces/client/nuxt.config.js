@@ -56,8 +56,6 @@ export default mainConfig({
     { src: '~/plugins/nprogress.ts', ssr: false },
   ],
 
-  serverMiddleware: ['~/server-middleware/ssr-handler.ts'],
-
   router: {
     extendRoutes(routes, resolve) {
       routes.push(

@@ -51,7 +51,8 @@ export default (config) =>
       modules: ['@nuxtjs/axios', '@nuxtjs/auth-next', '@nuxtjs/recaptcha', 'nuxt-socket-io'],
 
       axios: {
-        baseURL: envConfig.apiBaseurl,
+        baseURL: "http://127.0.0.1:" + envConfig.backendPort,
+		    browserBaseURL: envConfig.apiBaseurl,
       },
 
       io: {
