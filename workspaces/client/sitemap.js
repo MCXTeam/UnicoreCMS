@@ -5,7 +5,7 @@ import {
 
 export const sitemapSettings = {
   path: '/sitemap.xml',
-  hostname: envConfig.frontendPort,
+  hostname: envConfig.baseurl,
   sitemaps: [{
       path: 'sitemap-index.xml',
       exclude: ['/auth/**', '/cabinet/**', '/store/**', '/players/**', '/auth', '/cabinet', '/store', '/players', '/page'],
