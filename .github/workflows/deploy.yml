@@ -25,9 +25,15 @@ jobs:
         key: ${{ secrets.PRIVATE_KEY }}
         port: 22
         script: |
-          cd /home/app
-          git pull origin master
+          cd /root/UnicoreCMS-main
+          git pull origin main
           git status
           npx lerna bootstrap
           npm run build
-          pm2 restart
+          pm2 restart all
+    - name: Purge cache
+      uses: jakejarvis/cloudflare-purge-action@master
+      env:
+        CLOUDFLARE_ZONE: ${{ secrets.CLOUDFLARE_ZONE }}
+        CLOUDFLARE_EMAIL: ${{ secrets.CLOUDFLARE_EMAIL }}
+        CLOUDFLARE_KEY: ${{ secrets.CLOUDFLARE_KEY }}
