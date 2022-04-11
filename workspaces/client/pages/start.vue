@@ -42,7 +42,9 @@
             установить её.
           </p>
           <div class="mt-4 download-content" style="max-width: 400px">
-            <vs-button :href="config.public_launcher_exe" target="download" block class="mb-2" size="xl">Скачать лаунчер <i class="bx bxl-windows ms-2"></i></vs-button>
+            <vs-button :href="config.public_launcher_exe" target="download" block class="mb-2" size="xl"
+              >Скачать лаунчер <i class="bx bxl-windows ms-2"></i
+            ></vs-button>
             <div class="d-flex justify-content-between">
               <span>Клиент также доступен на</span>
               <div class="d-flex">
@@ -74,6 +76,10 @@ import { mapGetters } from 'vuex'
 export default {
   layout: 'landing',
 
+  head: {
+    title: 'Начать игру',
+  },
+
   computed: {
     ...mapGetters({
       config: 'unicore/config',
@@ -81,13 +87,13 @@ export default {
   },
 
   mounted() {
-    if(this.$route.query.ref && process.client) {
-      localStorage.setItem("ref", this.$route.query.ref)
+    if (this.$route.query.ref && process.client) {
+      localStorage.setItem('ref', this.$route.query.ref)
     }
   },
 
   asyncData({ store, $config }) {
-    store.commit('unicore/SET_NAME', `Начать игру на ${$config.name}`)
-  }
+    store.commit('unicore/SET_NAME', `Начать игру на ${$config.sitename}`)
+  },
 }
 </script>

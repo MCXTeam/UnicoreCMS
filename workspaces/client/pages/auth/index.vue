@@ -2,7 +2,7 @@
   <section>
     <ValidationObserver v-slot="{ invalid }" class="d-flex flex-column align-items-center w-100" tag="form" @submit.prevent="login">
       <h3 data-aos="zoom-in-right" data-aos-delay="150" class="text-uppercase text-center mb-4">
-        Войдите в учётную запись {{ $config.name }}
+        Войдите в учётную запись {{ $config.sitename }}
       </h3>
       <div class="w-100" v-if="totpRequired">
         <p class="text-center mb-4 w-100">

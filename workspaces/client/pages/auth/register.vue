@@ -1,7 +1,7 @@
 <template>
   <ValidationObserver v-slot="{ invalid }" class="d-flex flex-column align-items-center w-100" tag="form" @submit.prevent="register">
     <h3 data-aos="zoom-in-right" data-aos-delay="150" class="text-uppercase text-center mb-4">
-      Регистрация учётной записи {{ $config.name }}
+      Регистрация учётной записи {{ $config.sitename }}
     </h3>
     <vs-dialog scroll overflow-hidden auto-width v-model="rules.active" :loading="!rules.title">
       <template #header>
@@ -82,6 +82,7 @@
 export default {
   layout: 'auth',
   middleware: 'guest',
+  
   data() {
     return {
       form: {

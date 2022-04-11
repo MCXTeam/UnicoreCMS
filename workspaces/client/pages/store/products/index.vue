@@ -36,6 +36,9 @@
 <script>
 export default {
   layout: 'cabinet',
+  head: {
+    title: 'Магазин',
+  },
   asyncData({ store }) {
     store.commit('unicore/SET_NAME', 'Магазин')
   },

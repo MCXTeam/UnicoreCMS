@@ -6,7 +6,7 @@
           <img height="100px" src="/icon.png" />
         </div>
         <div class="col-xl-6">
-          <h3 class="mt-0 mb-1">© {{ $moment().format('YYYY') }} {{ $config.name }}</h3>
+          <h3 class="mt-0 mb-1">© {{ $moment().format('YYYY') }} {{ $config.sitename }}</h3>
           <p class="footer-desc">
             Все права защищены. Копирование материалов сайта запрещено. Мы предоставляем ознакомительный и бесплатный вариант игры
             <a href="https://www.minecraft.net" target="_blank">Minecraft</a>.

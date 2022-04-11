@@ -8,7 +8,7 @@
           </vs-button>
           <nuxt-link to="/" class="d-flex align-items-center without-underline">
             <img class="my-1" src="/icon.png" height="64px" />
-            <h2 class="ms-3 my-0 d-none d-md-block" v-text="$config.name" />
+            <h2 class="ms-3 my-0 d-none d-md-block" v-text="$config.sitename" />
           </nuxt-link>
           <nuxt-link to="/servers" class="vs-navbar__item d-none d-lg-block ms-4"> <i class="bx bx-server"></i> Серверы </nuxt-link>
           <a href="#" class="vs-navbar__item d-none d-lg-block"> <i class="bx bx-chat"></i> Форум </a>
@@ -34,7 +34,7 @@
       <vs-sidebar absolute :open.sync="activeSidebar">
         <template #logo>
           <img src="/icon.png" />
-          <h2 class="ms-2 my-0" v-text="$config.name" />
+          <h2 class="ms-2 my-0" v-text="$config.sitename" />
         </template>
         <nuxt-link to="/">
           <vs-sidebar-item class="exact">

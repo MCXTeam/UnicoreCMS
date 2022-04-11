@@ -33,7 +33,7 @@ export default {
   },
 
   async asyncData({ $axios, $config, store }) {
-    store.commit('unicore/SET_NAME', `Игровые серверы ${$config.name}`)
+    store.commit('unicore/SET_NAME', `Игровые серверы ${$config.sitename}`)
     const servers = await $axios.get('/servers').then((res) => res.data)
 
     return { servers }

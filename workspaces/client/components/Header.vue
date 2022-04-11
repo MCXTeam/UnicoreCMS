@@ -10,7 +10,7 @@
     <div class="container">
       <div class="h-100 d-flex flex-column justify-content-center">
         <div class="header-content">
-          <h1 class="mb-3"><b v-text="$config.name" /> - Ваш сайт готов к работе</h1>
+          <h1 class="mb-3"><b v-text="$config.sitename" /> - Ваш сайт готов к работе</h1>
           <p class="mt-0 mb-2">
             Next-gen Headless система управления контентом и электронная коммерция для Minecraft <br />
             написанная на NestJS и NuxtJS

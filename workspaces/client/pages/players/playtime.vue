@@ -39,6 +39,10 @@ import SkinViewer2D from '../../../admin/components/SkinView2D.vue'
 export default {
   layout: 'cabinet',
 
+  head: {
+    title: 'Топ-онлайн',
+  },
+
   components: {
     SkinViewer2D,
   },

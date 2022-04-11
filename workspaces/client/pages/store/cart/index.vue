@@ -79,6 +79,9 @@ import CartSidebar from '~/components/CartSidebar.vue'
 
 export default {
   layout: 'cabinet',
+  head: {
+    title: 'Корзина',
+  },
   asyncData({ store }) {
     store.commit('unicore/SET_NAME', 'Корзина')
   },

@@ -8,7 +8,7 @@
           </vs-button>
           <nuxt-link to="/" class="d-flex align-items-center without-underline">
             <img class="my-1" src="/icon.png" height="64px" />
-            <h2 class="ms-3 my-0 d-none d-md-block" v-text="$config.name" />
+            <h2 class="ms-3 my-0 d-none d-md-block" v-text="$config.sitename" />
           </nuxt-link>
           <nuxt-link to="/cabinet" class="vs-navbar__item d-none d-lg-block ms-4"> <i class="bx bx-user"></i> Личный кабинет </nuxt-link>
           <nuxt-link to="/store" class="vs-navbar__item d-none d-lg-block"> <i class="bx bx-cart"></i> Магазин </nuxt-link>
@@ -39,7 +39,7 @@
       <vs-sidebar absolute :open.sync="activeSidebar">
         <template #logo>
           <img src="/icon.png" />
-          <h2 class="ms-2 my-0" v-text="$config.name" />
+          <h2 class="ms-2 my-0" v-text="$config.sitename" />
         </template>
         <nuxt-link to="/">
           <vs-sidebar-item class="exact">
@@ -148,6 +148,9 @@ import SkinViewer2D from '../../admin/components/SkinView2D.vue'
 
 export default {
   middleware: ['auth', 'verify'],
+  head: {
+    title: 'Личный кабинет',
+  },
   data() {
     return {
       sidebar_component: null,

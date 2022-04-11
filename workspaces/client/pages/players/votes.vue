@@ -55,6 +55,10 @@
 export default {
   layout: 'cabinet',
 
+  head: {
+    title: 'Топ-голосующих',
+  },
+
   asyncData({ store }) {
     store.commit('unicore/SET_NAME', 'Игроки')
   },

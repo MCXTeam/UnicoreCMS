@@ -50,6 +50,10 @@ import SkinViewer2D from '../../../admin/components/SkinView2D.vue'
 export default {
   layout: 'cabinet',
 
+  head: {
+    title: 'Банлист',
+  },
+
   components: {
     SkinViewer2D,
   },

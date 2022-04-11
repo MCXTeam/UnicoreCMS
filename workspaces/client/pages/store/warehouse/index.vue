@@ -42,6 +42,9 @@ import WarehouseSidebar from '~/components/WarehouseSidebar.vue'
 
 export default {
   layout: 'cabinet',
+  head: {
+    title: 'Склад',
+  },
   asyncData({ store }) {
     store.commit('unicore/SET_NAME', 'Склад')
   },

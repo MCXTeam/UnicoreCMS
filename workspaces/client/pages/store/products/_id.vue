@@ -85,6 +85,9 @@ import StoreProductsSidebar from '~/components/StoreProductsSidebar.vue'
 export default {
   layout: 'cabinet',
   props: ['sidebar_component'],
+  head: {
+    title: 'Магазин',
+  },
   data() {
     return {
       server: null,

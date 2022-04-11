@@ -109,7 +109,7 @@ export default (config) =>
       publicRuntimeConfig: {
         apiUrl: envConfig.apiBaseurl,
         url: envConfig.baseurl,
-        name: envConfig.sitename,
+        sitename: envConfig.sitename,
       },
 
       render: {
