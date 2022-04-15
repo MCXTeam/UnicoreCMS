@@ -20,11 +20,9 @@
         <DataTable
           :value="groups"
           :loading="loading"
-          :rows="20"
-          paginator
-          :filters.sync="filters"
           rowHover
           responsiveLayout="scroll"
+          @row-reorder="onGroupReorder"
           :selection.sync="selected"
           dataKey="id"
           filterDisplay="menu"
@@ -32,15 +30,12 @@
           <template #header>
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
               <h5 class="m-0">Управление донат-группами</h5>
-              <span class="block mt-2 md:mt-0 p-input-icon-left">
-                <i class="pi pi-search" />
-                <InputText v-model="filters['global'].value" placeholder="Поиск..." />
-              </span>
             </div>
           </template>
+          <Column :styles="{ width: '3rem' }" :rowReorder="true" headerStyle="width: 3rem" />
           <Column selectionMode="multiple" :styles="{ width: '3rem' }"></Column>
-          <Column sortable field="id" header="ID" :styles="{ width: '8rem' }"></Column>
-          <Column field="name" header="Название" sortable>
+          <Column field="id" header="ID" :styles="{ width: '8rem' }"></Column>
+          <Column field="name" header="Название">
             <template #body="slotProps">
               <div class="flex align-items-center">
                 <Avatar v-if="slotProps.data.icon" :image="`${$config.apiUrl + '/' + slotProps.data.icon}`" shape="circle" />
@@ -49,29 +44,15 @@
               </div>
             </template>
           </Column>
-          <Column field="servers" header="Серверы" filterField="servers" :showFilterMatchModes="false">
+          <Column field="price" header="Цена">
+            <template #body="slotProps">
+              {{ formatCurrency(slotProps.data.price) }}
+            </template>
+          </Column>
+          <Column field="sale" header="Скидка"></Column>
+          <Column field="servers" header="Серверы">
             <template #body="slotProps">
               <Tag class="mr-2 mb-2" v-for="server in slotProps.data.servers" :key="server.id" :value="server.name"></Tag>
-            </template>
-            <template #filter="{ filterModel }">
-              <div class="mb-3 font-bold">Серверы</div>
-              <MultiSelect
-                display="chip"
-                :filter="true"
-                v-model="filterModel.value"
-                :options="servers"
-                optionLabel="name"
-                placeholder="Выберите серверы"
-                class="p-column-filter"
-              >
-                <template #option="slotProps">
-                  <div class="p-multiselect-representative-option">
-                    <Avatar v-if="slotProps.option.icon" :image="`${$config.apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
-                    <Avatar v-else icon="pi pi-image" shape="circle" />
-                    <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
-                  </div>
-                </template>
-              </MultiSelect>
             </template>
           </Column>
           <Column :styles="{ width: '12rem' }">
@@ -194,6 +175,8 @@
                     <button class="ql-bold"></button>
                     <button class="ql-italic"></button>
                     <button class="ql-underline"></button>
+                    <button class="ql-link"></button>
+                    <button class="ql-image"></button>
                   </span>
                 </template>
               </Editor>
@@ -204,10 +187,12 @@
               <DataTable
                 :value="group.features"
                 editMode="row"
+                @row-reorder="onRowReorder"
                 :editingRows.sync="features"
                 @row-edit-save="onFeatureEditSave"
                 responsiveLayout="scroll"
               >
+                <Column :styles="{ width: '3rem' }" :rowReorder="true" headerStyle="width: 3rem" />
                 <Column field="title" header="Заголовок" :styles="{ width: '40%' }">
                   <template #editor="slotProps">
                     <InputText v-model="slotProps.data[slotProps.column.field]" />
@@ -268,7 +253,6 @@
 </template>
 
 <script>
-import { FilterMatchMode } from 'primevue/api'
 import { ValidationObserver, ValidationProvider } from 'vee-validate'
 
 export default {
@@ -301,10 +285,6 @@ export default {
         periods: [],
       },
       groupDialog: false,
-      filters: {
-        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        servers: { value: null, matchMode: FilterMatchMode.CONTAINS },
-      },
       autocompleate: null,
       autocompleateFilterd: null,
       servers: null,
@@ -325,6 +305,23 @@ export default {
     this.loading = false
   },
   methods: {
+    async onGroupReorder(event) {
+      this.loading = true
+      await this.$axios.post('/donates/groups/sort', {
+        items: event.value.map((g, priority) => ({
+          id: g.id,
+          priority,
+        })),
+      })
+      this.$fetch()
+    },
+    formatCurrency(value) {
+      if (value) return value.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' })
+      return
+    },
+    onRowReorder(event) {
+      this.group.features = event.value
+    },
     onFeatureEditSave(event) {
       let { newData, index } = event
       this.group.features[index] = newData
@@ -430,6 +427,7 @@ export default {
       try {
         await this.$axios.post('/donates/groups', {
           ...this.group,
+          features: this.group.features && this.group.features.length ? this.group.features.map((row, priority) => ({ ...row, priority })) : [],
           kits: this.group.kits.map((kit) => kit.id),
           periods: this.group.periods.map((period) => period.id),
           servers: this.group.servers.map((server) => server.id),
@@ -454,6 +452,7 @@ export default {
       try {
         await this.$axios.patch('/donates/groups/' + this.group.id, {
           ...this.$_.omit(this.group, 'id'),
+          features: this.group.features && this.group.features.length ? this.group.features.map((row, priority) => ({ ...row, priority })) : [],
           kits: this.group.kits.map((kit) => kit.id),
           periods: this.group.periods.map((period) => period.id),
           servers: this.group.servers.map((server) => server.id),

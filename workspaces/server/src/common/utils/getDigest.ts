@@ -8,7 +8,7 @@ export function getDeigest(file: string | Buffer): string | null {
     file = StorageManager.read(file);
   }
 
-  const digest = crypto.createHash('md5').setEncoding('base64').update(file).end();
+  const digest = crypto.createHash("md5").update(file).digest("base64");
 
-  return digest.read();
+  return digest;
 }

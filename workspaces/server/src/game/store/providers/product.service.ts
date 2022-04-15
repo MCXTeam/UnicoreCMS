@@ -15,6 +15,7 @@ import { ProductsImportInput } from '../dto/products-import.input';
 import { Category } from '../entities/category.entity';
 import { Kit } from '../entities/kit.entity';
 import { Product } from '../entities/product.entity';
+import { GiveMethod } from '../enums/give-method.enum';
 
 export interface ProductMap {
   name: string;
@@ -23,7 +24,9 @@ export interface ProductMap {
   nbt?: string;
   price: number;
   sale?: number;
-  item_id: string;
+  give_method: GiveMethod;
+  item_id?: string;
+  commands?: string[];
 }
 
 export type StoreServer = Server & {
@@ -244,6 +247,10 @@ export class ProductsService {
         .flat(),
     )
       .uniqBy((cat) => cat.id)
+      .map(cat => ({
+        ...cat, priority: cat.priority ? cat.priority : 0
+      }) as Category)
+      .orderBy(["priority", "name"], ["desc", "asc"])
       .value();
 
     server.min_price = (await this.productsRepository.findOne({ order: { price: 'ASC' } }))?.price || 0;
@@ -255,6 +262,7 @@ export class ProductsService {
   async createFromGame(input: ProductFromGameInput) {
     const product = new Product();
 
+    product.give_method = GiveMethod.UnicoreConnect
     product.name = input.name;
     product.price = input.price;
     product.item_id = input.id;
@@ -274,8 +282,14 @@ export class ProductsService {
     product.description = input.description;
     product.price = input.price;
     product.sale = input.sale;
-    product.item_id = input.item_id;
-    product.nbt = input.nbt;
+    product.give_method = input.give_method
+
+    if (product.give_method == GiveMethod.UnicoreConnect) {
+      product.item_id = input.item_id;
+      product.nbt = input.nbt;
+    } else {
+      product.commands = input.commands
+    }
 
     product.servers = await this.serversRepository.find({
       id: In(input.servers),
@@ -299,8 +313,17 @@ export class ProductsService {
     product.description = input.description;
     product.price = input.price;
     product.sale = input.sale;
-    product.item_id = input.item_id;
-    product.nbt = input.nbt;
+    product.give_method = input.give_method
+
+    if (product.give_method == GiveMethod.UnicoreConnect) {
+      product.item_id = input.item_id;
+      product.nbt = input.nbt;
+      product.commands = null
+    } else {
+      product.commands = input.commands
+      product.item_id = null;
+      product.nbt = null;
+    }
 
     product.servers = await this.serversRepository.find({
       id: In(input.servers),
@@ -353,10 +376,12 @@ export class ProductsService {
         name: product.name,
         icon: product.icon,
         description: product.description,
+        give_method: product.give_method,
         nbt: product.nbt,
         price: product.price,
         sale: product.sale,
         item_id: product.item_id,
+        commands: product.commands,
       };
     });
 
@@ -392,7 +417,9 @@ export class ProductsService {
         entity.nbt = product.nbt;
         entity.price = product.price;
         entity.sale = product.sale;
+        entity.give_method = product.give_method;
         entity.item_id = product.item_id;
+        entity.commands = product.commands;
         entity.servers = servers;
         entity.categories = categories;
 

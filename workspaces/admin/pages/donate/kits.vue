@@ -20,26 +20,21 @@
         <DataTable
           :value="kits"
           :loading="loading"
-          :rows="20"
-          paginator
-          :filters.sync="filters"
           rowHover
           responsiveLayout="scroll"
           :selection.sync="selected"
+          @row-reorder="onKitsReorder"
           dataKey="id"
         >
           <template #header>
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
               <h5 class="m-0">Управление донат-китами</h5>
-              <span class="block mt-2 md:mt-0 p-input-icon-left">
-                <i class="pi pi-search" />
-                <InputText v-model="filters['global'].value" placeholder="Поиск..." />
-              </span>
             </div>
           </template>
+          <Column :styles="{ width: '3rem' }" :rowReorder="true" headerStyle="width: 3rem" />
           <Column selectionMode="multiple" :styles="{ width: '3rem' }"></Column>
-          <Column sortable field="id" header="ID" :styles="{ width: '8rem' }"></Column>
-          <Column sortable field="name" header="Название"></Column>
+          <Column field="id" header="ID" :styles="{ width: '8rem' }"></Column>
+          <Column field="name" header="Название"></Column>
           <Column :styles="{ width: '12rem' }">
             <template #body="slotProps">
               <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
@@ -104,6 +99,7 @@
                     <button class="ql-bold"></button>
                     <button class="ql-italic"></button>
                     <button class="ql-underline"></button>
+                    <button class="ql-link"></button>
                   </span>
                 </template>
               </Editor>
@@ -126,7 +122,6 @@
 </template>
 
 <script>
-import { FilterMatchMode } from 'primevue/api'
 import { ValidationObserver, ValidationProvider } from 'vee-validate'
 
 export default {
@@ -152,10 +147,7 @@ export default {
         images: [],
       },
       servers: null,
-      kitDialog: false,
-      filters: {
-        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-      },
+      kitDialog: false
     }
   },
   async fetch() {
@@ -167,6 +159,16 @@ export default {
     this.loading = false
   },
   methods: {
+    async onKitsReorder(event) {
+      this.loading = true
+      await this.$axios.post('/donates/group-kits/sort', {
+        items: event.value.map((kit, priority) => ({
+          id: kit.id,
+          priority,
+        })),
+      })
+      this.$fetch()
+    },
     hideDialog() {
       this.kitDialog = false
     },

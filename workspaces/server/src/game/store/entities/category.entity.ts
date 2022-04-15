@@ -3,13 +3,21 @@ import { AfterRemove, Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 
 import { Kit } from './kit.entity';
 import { Product } from './product.entity';
 
-@Entity()
+@Entity({
+  orderBy: {
+    priority: "DESC",
+    name: "ASC"
+  }
+})
 export class Category {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
   name: string;
+
+  @Column({ nullable: true })
+  priority: number;
 
   @Column('text', {
     nullable: true,

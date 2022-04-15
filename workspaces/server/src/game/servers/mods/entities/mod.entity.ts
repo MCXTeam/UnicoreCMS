@@ -2,13 +2,20 @@ import { StorageManager } from '@common';
 import { AfterRemove, Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Server } from '../../entities/server.entity';
 
-@Entity()
+@Entity({
+  orderBy: {
+    name: "ASC"
+  }
+})
 export class Mod {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
   name: string;
+
+  @Column({ nullable: true })
+  link: string;
 
   @Column('text', { nullable: true })
   description: string;

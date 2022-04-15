@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import { IsArray, IsDefined, IsInt, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
-import { DonateFeaturesDto } from './donate-features.dto';
+import { GroupFeature } from '../entities/group-feature.entity';
 
 export class GroupInput {
   @IsDefined()
@@ -27,8 +27,8 @@ export class GroupInput {
 
   @IsDefined()
   @IsArray()
-  @Type(() => DonateFeaturesDto)
-  features: DonateFeaturesDto[];
+  @Type(() => GroupFeature)
+  features: GroupFeature[];
 
   @IsDefined()
   @IsArray()

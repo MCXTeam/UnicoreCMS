@@ -25,9 +25,9 @@ export class OnlineService {
   ) {}
 
   async find(): Promise<Onlines> {
-    const servers = await this.onlineRepository.find({
+    const servers = _.orderBy(await this.onlineRepository.find({
       relations: ['server'],
-    });
+    }), ["server.priority"], ["asc"]);
     const record = await this.onlinesRecordsRepository.findOne({
       order: { created: 'DESC' },
       where: { created: MoreThanOrEqual(moment().startOf('day').toDate()) },

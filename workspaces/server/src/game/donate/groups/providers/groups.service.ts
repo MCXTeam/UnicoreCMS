@@ -1,4 +1,4 @@
-import { MomentWrapper, StorageManager } from '@common';
+import { CommonSortInput, MomentWrapper, StorageManager } from '@common';
 import {
   BadRequestException,
   Inject,
@@ -21,6 +21,7 @@ import { GroupInput } from '../dto/group.input';
 import { DonateGroup } from '../entities/donate-group.entity';
 import { GroupKit } from '../entities/group-kit.entity';
 import { UsersDonateGroup } from '../entities/user-donate.entity';
+import * as _ from 'lodash'
 
 @Injectable()
 export class DonateGroupsService {
@@ -54,9 +55,16 @@ export class DonateGroupsService {
       .leftJoinAndSelect('kits.images', 'images')
       .leftJoinAndSelect('images.server', 'image_server')
       .leftJoinAndSelect('group.servers', 'servers')
+      .leftJoinAndSelect('group.features', 'features')
       .orderBy({ price: "ASC" }).getMany()).filter(perm => perm.servers.find(srv => srv.id == id))
 
-    return groups.filter((group) => group.periods.length);
+    return _(groups.filter((group) => group.periods.length).map(group => ({
+      ...group,
+      kits: _(group.kits.map(kit => ({
+        ...kit, priority: kit.priority ? kit.priority : 0, 
+        images: _(kit.images.map(image => ({...image, priority: image.server.priority ? image.server.priority : 0}))).orderBy(["server.priority", "id"], ["asc", "asc"]).value()
+      }))).orderBy(["priority", "id"], ["asc", "asc"]).value()
+    }))).orderBy(["priority", "id"], ["asc", "asc"]).value()
   }
 
   async findByUserAndServer(server: string, user: string) {
@@ -147,7 +155,7 @@ export class DonateGroupsService {
     user.real = user.real - price;
 
     try {
-      var userDonate = await this.give(user, server, group, period)
+      await this.give(user, server, group, period)
     } catch {
       throw new BadRequestException();
     }
@@ -183,6 +191,19 @@ export class DonateGroupsService {
     });
 
     return this.donateGroupsRepository.save(group);
+  }
+
+  async sort(input: CommonSortInput) {
+    const servers = await this.donateGroupsRepository.findByIds(input.items.map(srv => srv.id))
+
+    return this.donateGroupsRepository.save(servers.map(dong => {
+      const updatedSort = input.items.find(dg => dg.id == dong.id)
+
+      if (updatedSort) 
+        return { ...dong, priority: updatedSort.priority }
+      
+      return dong
+    }))
   }
 
   async update(id: number, input: GroupInput) {

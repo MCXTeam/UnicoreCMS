@@ -16,6 +16,12 @@ export class ProductProtectedDto {
   @Exclude()
   item_id: string;
 
+  @Exclude()
+  give_method: string;
+
+  @Exclude()
+  command: string;
+
   constructor(partial: Partial<Product>) {
     Object.assign(this, partial);
   }

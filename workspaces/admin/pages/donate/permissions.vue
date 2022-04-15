@@ -26,22 +26,25 @@
           rowHover
           responsiveLayout="scroll"
           :selection.sync="selected"
+          @row-reorder="onPermsReorder"
           dataKey="id"
-          filterDisplay="menu"
         >
           <template #header>
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
               <h5 class="m-0">Управление донат-правами</h5>
-              <span class="block mt-2 md:mt-0 p-input-icon-left">
-                <i class="pi pi-search" />
-                <InputText v-model="filters['global'].value" placeholder="Поиск..." />
-              </span>
             </div>
           </template>
+          <Column :styles="{ width: '3rem' }" :rowReorder="true" headerStyle="width: 3rem" />
           <Column selectionMode="multiple" :styles="{ width: '3rem' }"></Column>
-          <Column sortable field="id" header="ID" :styles="{ width: '8rem' }"></Column>
-          <Column field="name" header="Название" sortable></Column>
-          <Column field="type" header="Тип" sortable>
+          <Column field="id" header="ID" :styles="{ width: '8rem' }"></Column>
+          <Column field="name" header="Название"></Column>
+          <Column field="price" header="Цена">
+            <template #body="slotProps">
+              {{ formatCurrency(slotProps.data.price) }}
+            </template>
+          </Column>
+          <Column field="sale" header="Скидка"></Column>
+          <Column field="type" header="Тип">
             <template #body="slotProps">
               {{ types.find((type) => type.value == slotProps.data.type).name }}
             </template>
@@ -49,26 +52,6 @@
           <Column field="servers" header="Серверы" filterField="servers" :showFilterMatchModes="false">
             <template #body="slotProps">
               <Tag class="mr-2 mb-2" v-for="server in slotProps.data.servers" :key="server.id" :value="server.name"></Tag>
-            </template>
-            <template #filter="{ filterModel }">
-              <div class="mb-3 font-bold">Серверы</div>
-              <MultiSelect
-                display="chip"
-                :filter="true"
-                v-model="filterModel.value"
-                :options="servers"
-                optionLabel="name"
-                placeholder="Выберите серверы"
-                class="p-column-filter"
-              >
-                <template #option="slotProps">
-                  <div class="p-multiselect-representative-option">
-                    <Avatar v-if="slotProps.option.icon" :image="`${$config.apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
-                    <Avatar v-else icon="pi pi-image" shape="circle" />
-                    <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
-                  </div>
-                </template>
-              </MultiSelect>
             </template>
           </Column>
           <Column :styles="{ width: '12rem' }">
@@ -123,6 +106,8 @@
                     <button class="ql-bold"></button>
                     <button class="ql-italic"></button>
                     <button class="ql-underline"></button>
+                    <button class="ql-link"></button>
+                    <button class="ql-image"></button>
                   </span>
                 </template>
               </Editor>
@@ -215,7 +200,6 @@
 </template>
 
 <script>
-import { FilterMatchMode } from 'primevue/api'
 import { ValidationObserver, ValidationProvider } from 'vee-validate'
 
 export default {
@@ -246,10 +230,6 @@ export default {
         web_perms: [],
       },
       permissionDialog: false,
-      filters: {
-        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        servers: { value: null, matchMode: FilterMatchMode.CONTAINS },
-      },
       types: [
         { name: 'Игровые пермишены', value: 'game' },
         { name: 'Веб-пермишены', value: 'web' },
@@ -273,6 +253,20 @@ export default {
     this.loading = false
   },
   methods: {
+    async onPermsReorder(event) {
+      this.loading = true
+      await this.$axios.post('/donates/permissions/sort', {
+        items: event.value.map((p, priority) => ({
+          id: p.id,
+          priority,
+        })),
+      })
+      this.$fetch()
+    },
+    formatCurrency(value) {
+      if (value) return value.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' })
+      return
+    },
     searchAutocompleate(event) {
       if (!event.query.trim().length) {
         this.autocompleateFilterd = this.autocompleate

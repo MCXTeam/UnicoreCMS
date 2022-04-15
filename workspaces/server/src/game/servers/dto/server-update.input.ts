@@ -1,7 +1,7 @@
 import { Type } from 'class-transformer';
 import { IsArray, IsDefined, IsInt, IsOptional, IsString } from 'class-validator';
+import { ServerTable } from '../entities/server-table.entity';
 import { Query } from '../online/entities/query.entity';
-import { ServerTableDto } from './server-table.dto';
 
 export class ServerUpdateInput {
   @IsDefined()
@@ -30,8 +30,8 @@ export class ServerUpdateInput {
 
   @IsDefined()
   @IsArray()
-  @Type(() => ServerTableDto)
-  table: ServerTableDto[];
+  @Type(() => ServerTable)
+  table: ServerTable[];
 
   @IsInt({ each: true })
   mods: number[];

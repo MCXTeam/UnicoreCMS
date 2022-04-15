@@ -1,10 +1,13 @@
 {
   "name": "unicore-server",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "",
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "bin": {
+    "unicore": "dist/cli/main.js"
+  },
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
@@ -32,8 +35,11 @@
     "@nestjs/websockets": "^8.2.6",
     "@nestlab/google-recaptcha": "^2.1.2",
     "@types/cache-manager": "^3.4.3",
+    "ascii-art": "^2.8.5",
+    "asciimo": "^0.3.1",
     "bcrypt": "^5.0.1",
     "cache-manager": "^3.6.0",
+    "canvas": "^2.9.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",
     "discord.js": "^13.6.0",
@@ -51,6 +57,7 @@
     "moment-range": "^4.0.2",
     "multer": "^1.4.4",
     "mysql2": "^2.3.3",
+    "nest-commander": "^2.4.0",
     "nestjs-paginate": "^2.4.1",
     "nodemailer": "^6.7.2",
     "npm": "^8.4.1",
@@ -60,6 +67,7 @@
     "passport-jwt": "^4.0.0",
     "passport-telegram": "^1.0.0",
     "passport-vkontakte": "^0.5.0",
+    "rcon-client": "^4.2.3",
     "reflect-metadata": "^0.1.13",
     "request-ip": "^2.1.3",
     "rimraf": "^3.0.2",

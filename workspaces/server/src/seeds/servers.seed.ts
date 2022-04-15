@@ -8,13 +8,12 @@ import { DonateGroup } from 'src/game/donate/groups/entities/donate-group.entity
 import { GroupKit } from 'src/game/donate/groups/entities/group-kit.entity';
 import { DonatePermission } from 'src/game/donate/permissions/entities/donate-permission.entity';
 import { PermissionType } from 'src/game/donate/permissions/enums/permission-type.enum';
-import { ServerTableDto } from 'src/game/servers/dto/server-table.dto';
+import { ServerTable } from 'src/game/servers/entities/server-table.entity';
 import { Server } from 'src/game/servers/entities/server.entity';
 import { Mod } from 'src/game/servers/mods/entities/mod.entity';
 import { Online } from 'src/game/servers/online/entities/online.entity';
 import { Query } from 'src/game/servers/online/entities/query.entity';
 import { Category } from 'src/game/store/entities/category.entity';
-import { KitItem } from 'src/game/store/entities/kit-item.entity';
 import { Kit } from 'src/game/store/entities/kit.entity';
 import { Product } from 'src/game/store/entities/product.entity';
 import { ProductMap } from 'src/game/store/providers/product.service';
@@ -71,25 +70,6 @@ export default class CreateServers implements Seeder {
       },
     ]);
 
-    const table: ServerTableDto[] = [
-      {
-        title: 'Режим сражений',
-        description: 'PvP',
-      },
-      {
-        title: 'Размер основного мира',
-        description: '15000 блоков',
-      },
-      {
-        title: 'Размер доп. миров',
-        description: '5000 блоков',
-      },
-      {
-        title: 'Вайп доп. миров каждые',
-        description: '14 дней',
-      },
-    ];
-
     const servers = [
       {
         id: 'hitech',
@@ -99,7 +79,24 @@ export default class CreateServers implements Seeder {
         slogan: 'Мир в котором можно всё',
         content: faker.lorem.text(),
         version: '1.12.2',
-        table,
+        table: [
+          {
+            title: 'Режим сражений',
+            description: 'PvP',
+          },
+          {
+            title: 'Размер основного мира',
+            description: '15000 блоков',
+          },
+          {
+            title: 'Размер доп. миров',
+            description: '5000 блоков',
+          },
+          {
+            title: 'Вайп доп. миров каждые',
+            description: '14 дней',
+          },
+        ].map((v, priority) => ({ ...v, priority })),
         mods: hitechMods,
       },
       {
@@ -110,7 +107,24 @@ export default class CreateServers implements Seeder {
         slogan: 'Мир в котором можно всё',
         content: faker.lorem.text(),
         version: '1.12.2',
-        table,
+        table: [
+          {
+            title: 'Режим сражений',
+            description: 'PvP',
+          },
+          {
+            title: 'Размер основного мира',
+            description: '15000 блоков',
+          },
+          {
+            title: 'Размер доп. миров',
+            description: '5000 блоков',
+          },
+          {
+            title: 'Вайп доп. миров каждые',
+            description: '14 дней',
+          },
+        ].map((v, priority) => ({ ...v, priority })),
         mods: [...hitechMods, ...technomagicMods],
       },
       {
@@ -121,7 +135,24 @@ export default class CreateServers implements Seeder {
         slogan: 'Мир в котором можно всё',
         content: faker.lorem.text(),
         version: '1.12.2',
-        table,
+        table: [
+          {
+            title: 'Режим сражений',
+            description: 'PvP',
+          },
+          {
+            title: 'Размер основного мира',
+            description: '15000 блоков',
+          },
+          {
+            title: 'Размер доп. миров',
+            description: '5000 блоков',
+          },
+          {
+            title: 'Вайп доп. миров каждые',
+            description: '14 дней',
+          },
+        ].map((v, priority) => ({ ...v, priority })),
         mods: [...hitechMods, ...skytechMods],
       },
     ];
@@ -313,13 +344,13 @@ export default class CreateServers implements Seeder {
             title: "/heal",
             description: "Полностью восстановить Вашу шкалу здоровья"
           },
-        ]
+        ].map((v, priority) => ({ ...v, priority }))
       },
       {
         ingame_id: "premium",
         name: "Premium",
         icon: "default/premium.png",
-        price: 100,
+        price: 250,
         sale: 10,
         kits: groupKits.filter(kit => kit.name == 'Premium'),
         servers: servers_,
@@ -361,13 +392,13 @@ export default class CreateServers implements Seeder {
             title: "Цвет на табличках",
             description: "Можно писать разными цветами на табличках"
           },
-        ]
+        ].map((v, priority) => ({ ...v, priority }))
       },
       {
         ingame_id: "elite",
         name: "Elite",
         icon: "default/elite.png",
-        price: 100,
+        price: 500,
         sale: 10,
         kits: groupKits.filter(kit => kit.name == 'Elite'),
         servers: servers_,
@@ -410,7 +441,7 @@ export default class CreateServers implements Seeder {
             title: "/heal [игрок]",
             description: "Вылечить другого игрока"
           },
-        ]
+        ].map((v, priority) => ({ ...v, priority }))
       }
     ])
 

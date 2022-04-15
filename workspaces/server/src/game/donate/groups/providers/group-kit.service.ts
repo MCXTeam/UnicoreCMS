@@ -1,4 +1,4 @@
-import { StorageManager } from '@common';
+import { CommonSortInput, StorageManager } from '@common';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MulterFile } from 'fastify-file-interceptor';
@@ -32,6 +32,19 @@ export class GroupKitsService {
     kit.description = input.description;
 
     return this.groupKitsRepository.save(kit);
+  }
+
+  async sort(input: CommonSortInput) {
+    const servers = await this.groupKitsRepository.findByIds(input.items.map(srv => srv.id))
+
+    return this.groupKitsRepository.save(servers.map(kit => {
+      const updatedSort = input.items.find(kt => kt.id == kit.id)
+
+      if (updatedSort) 
+        return { ...kit, priority: updatedSort.priority }
+      
+      return kit
+    }))
   }
 
   async update(id: number, input: GroupKitInput): Promise<GroupKit> {

@@ -5,6 +5,7 @@ import { Category } from './category.entity';
 import { Kit } from './kit.entity';
 import { Enchantment } from './enchantment.entity';
 import { KitItem } from './kit-item.entity';
+import { GiveMethod } from '../enums/give-method.enum';
 
 @Entity()
 export class Product {
@@ -17,7 +18,7 @@ export class Product {
   @Column({ nullable: true })
   icon: string;
 
-  @Column('text', { nullable: true })
+  @Column('longtext', { nullable: true })
   description: string;
 
   @Column('text', { nullable: true })
@@ -45,8 +46,14 @@ export class Product {
   @Column({ nullable: true })
   sale: number;
 
-  @Column()
-  item_id: string;
+  @Column({ default: GiveMethod.UnicoreConnect })
+  give_method: GiveMethod
+
+  @Column({ nullable: true })
+  item_id?: string;
+
+  @Column('simple-array', { nullable: true })
+  commands?: string[];
 
   @AfterRemove()
   removeFile() {

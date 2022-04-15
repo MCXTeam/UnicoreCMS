@@ -7,10 +7,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Server } from './entities/server.entity';
 import { Mod } from './mods/entities/mod.entity';
 import { Query } from './online/entities/query.entity';
+import { RconModule } from './rcon/rcon.module';
 
 @Module({
   providers: [ServersService],
-  imports: [ModsModule, OnlineModule, TypeOrmModule.forFeature([Server, Mod, Query])],
+  imports: [ModsModule, OnlineModule, RconModule, TypeOrmModule.forFeature([Server, Mod, Query])],
   exports: [ServersService],
   controllers: [ServersController],
 })

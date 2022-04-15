@@ -3,13 +3,20 @@ import { DonatePermission } from '../../permissions/entities/donate-permission.e
 import { DonateGroup } from './donate-group.entity';
 import { GroupKitImage } from './group-kit-image.entity';
 
-@Entity()
+@Entity({
+  orderBy: {
+    priority: "ASC"
+  }
+})
 export class GroupKit {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
   name: string;
+
+  @Column({ nullable: true })
+  priority?: number;
 
   @Column('text', {
     nullable: true,

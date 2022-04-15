@@ -1,4 +1,4 @@
-import { DeleteManyInput, IpAddress } from '@common';
+import { CommonSortInput, DeleteManyInput, IpAddress } from '@common';
 import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { User } from 'src/admin/users/entities/user.entity';
@@ -17,6 +17,12 @@ export class PermissionsController {
   @Post()
   create(@Body() body: PermissionInput) {
     return this.donatePermissionsService.create(body);
+  }
+
+  @Permissions([Permission.AdminDashboard, Permission.EditorDonatePermsUpdate])
+  @Post('sort')
+  sort(@Body() body: CommonSortInput) {
+    return this.donatePermissionsService.sort(body);
   }
 
   @Permissions([Permission.AdminDashboard, Permission.EditorDonateRead])

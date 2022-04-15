@@ -18,6 +18,7 @@ import { Public } from 'src/auth/decorators/public.decorator';
 import { Permission } from 'unicore-common';
 import { ServerCreateInput } from './dto/server-create.input';
 import { ServerUpdateInput } from './dto/server-update.input';
+import { ServersSortInput } from './dto/servers-sort.input';
 import { ServerMedia } from './enums/server-media.enum';
 import { ServersService } from './servers.service';
 
@@ -40,7 +41,7 @@ export class ServersController {
   @Public()
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    const server = await this.serversService.findOne(id, ['mods', 'query']);
+    const server = await this.serversService.findOne(id, ['mods', 'query', 'table']);
 
     if (!server) {
       throw new NotFoundException();
@@ -53,6 +54,12 @@ export class ServersController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() body: ServerUpdateInput) {
     return this.serversService.update(id, body);
+  }
+
+  @Permissions([Permission.AdminDashboard, Permission.AdminServersUpdate])
+  @Post('sort')
+  sort(@Body() body: ServersSortInput) {
+    return this.serversService.sort(body);
   }
 
   @Permissions([Permission.AdminDashboard, Permission.AdminServersDelete])

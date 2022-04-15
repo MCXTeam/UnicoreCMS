@@ -26,6 +26,7 @@
           :rowsPerPageOptions="[20, 50, 100, 500]"
           @page="onPage($event)"
           @sort="onSort($event)"
+          @row-reorder="onKitsReorder"
           @filter="onFilter"
           :selection.sync="selected"
           rowHover
@@ -169,6 +170,8 @@
                     <button class="ql-bold"></button>
                     <button class="ql-italic"></button>
                     <button class="ql-underline"></button>
+                    <button class="ql-link"></button>
+                    <button class="ql-image"></button>
                   </span>
                 </template>
               </Editor>

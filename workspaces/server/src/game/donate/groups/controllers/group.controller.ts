@@ -1,4 +1,4 @@
-import { DeleteManyInput, imageFileFilter, IpAddress, StorageManager } from '@common';
+import { CommonSortInput, DeleteManyInput, imageFileFilter, IpAddress, StorageManager } from '@common';
 import {
   Body,
   Controller,
@@ -31,6 +31,12 @@ export class DonateGroupsController {
   @Post()
   create(@Body() body: GroupInput) {
     return this.donateGroupsService.create(body);
+  }
+
+  @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsUpdate])
+  @Post('sort')
+  sort(@Body() body: CommonSortInput) {
+    return this.donateGroupsService.sort(body);
   }
 
   @Permissions([Permission.AdminDashboard, Permission.EditorDonateRead])

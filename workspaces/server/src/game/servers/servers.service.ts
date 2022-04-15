@@ -5,6 +5,7 @@ import { MulterFile } from 'fastify-file-interceptor';
 import { In, Repository } from 'typeorm';
 import { ServerCreateInput } from './dto/server-create.input';
 import { ServerUpdateInput } from './dto/server-update.input';
+import { ServersSortInput } from './dto/servers-sort.input';
 import { Server } from './entities/server.entity';
 import { ServerMedia } from './enums/server-media.enum';
 import { Mod } from './mods/entities/mod.entity';
@@ -18,14 +19,27 @@ export class ServersService {
     private serversRepository: Repository<Server>,
     @InjectRepository(Mod)
     private modsRepository: Repository<Mod>,
-  ) {}
+  ) { }
 
   find(relations: string[] = new Array()): Promise<Server[]> {
     return this.serversRepository.find({ relations });
   }
 
   findOne(id: string, relations?: string[]): Promise<Server> {
-    return this.serversRepository.findOne(id, { relations });
+    return this.serversRepository.findOne(id, { relations })
+  }
+
+  async sort(input: ServersSortInput) {
+    const servers = await this.serversRepository.findByIds(input.items.map(srv => srv.id))
+
+    return this.serversRepository.save(servers.map(srv => {
+      const updatedSort = input.items.find(sr => sr.id == srv.id)
+
+      if (updatedSort) 
+        return { ...srv, priority: updatedSort.priority }
+      
+      return srv
+    }))
   }
 
   async create(input: ServerCreateInput): Promise<Server> {
@@ -57,7 +71,7 @@ export class ServersService {
   }
 
   async update(id: string, input: ServerUpdateInput): Promise<Server> {
-    const server = await this.findOne(id, ['query']);
+    const server = await this.findOne(id, ['query', 'table']);
 
     if (!server) {
       throw new NotFoundException();

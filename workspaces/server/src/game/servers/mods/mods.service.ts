@@ -18,7 +18,7 @@ export class ModsService {
     return paginate(query, this.modsRepository, {
       sortableColumns: ['id', 'name'],
       searchableColumns: ['id', 'name'],
-      defaultSortBy: [['id', 'DESC']],
+      defaultSortBy: [['name', 'ASC']],
       maxLimit: 500,
     });
   }
@@ -32,6 +32,7 @@ export class ModsService {
 
     mod.name = input.name;
     mod.description = input.description;
+    mod.link = input.link
 
     return this.modsRepository.save(mod);
   }
@@ -45,6 +46,7 @@ export class ModsService {
 
     mod.name = input.name;
     mod.description = input.description;
+    mod.link = input.link
 
     return this.modsRepository.save(mod);
   }

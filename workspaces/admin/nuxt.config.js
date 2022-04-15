@@ -108,6 +108,7 @@ export default mainConfig({
       'TreeTable',
       'TriStateCheckbox',
       'Editor',
+      'SpeedDial'
     ],
     directives: ['Tooltip', 'Ripple', 'BadgeDirective', 'StyleClass'],
   },

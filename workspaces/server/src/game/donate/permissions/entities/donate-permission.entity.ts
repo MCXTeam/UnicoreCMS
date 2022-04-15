@@ -4,13 +4,21 @@ import { Period } from '../../entities/period.entity';
 import { GroupKit } from '../../groups/entities/group-kit.entity';
 import { PermissionType } from '../enums/permission-type.enum';
 
-@Entity()
+@Entity({
+  orderBy: {
+    priority: "ASC",
+    id: "ASC",
+  }
+})
 export class DonatePermission {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
   name: string;
+
+  @Column({ nullable: true })
+  priority?: number;
 
   @Column()
   type: PermissionType;
@@ -21,7 +29,7 @@ export class DonatePermission {
   @Column({ nullable: true })
   sale: number;
 
-  @Column({
+  @Column('longtext', {
     nullable: true,
   })
   description: string;

@@ -7,5 +7,9 @@ export class ModInput {
 
   @IsOptional()
   @IsString()
+  link: string;
+
+  @IsOptional()
+  @IsString()
   description: string;
 }

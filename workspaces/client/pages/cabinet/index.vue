@@ -161,6 +161,7 @@ export default {
         if (e.response?.status == 415) this.$unicore.errorNotification('Файл не является скином Minecraft')
       }
 
+      this.$refs.skin.value=null
       this.skinLoading = false
     },
     async updateCloak() {
@@ -180,6 +181,7 @@ export default {
         if (e.response?.status == 415) this.$unicore.errorNotification('Файл не является плащом Minecraft')
       }
 
+      this.$refs.cloak.value=null
       this.cloakLoading = false
     },
     async deleteSkin() {

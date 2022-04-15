@@ -61,10 +61,15 @@ body {
   color: rgba(var(--vs-text), 0.75);
   line-height: 180%;
   height: 100%;
+  overflow-x: hidden;
 
   &.landing-body {
     overflow: hidden !important;
     padding-bottom: 400px;
+  }
+
+  &.auth-body {
+    overflow: hidden !important;
   }
 }
 

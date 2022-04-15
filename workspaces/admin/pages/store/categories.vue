@@ -105,15 +105,11 @@
             </ValidationProvider>
             <div class="field">
               <label>Описание</label>
-              <Editor v-model="category.description" editorStyle="height: 220px">
-                <template #toolbar>
-                  <span class="ql-formats">
-                    <button class="ql-bold"></button>
-                    <button class="ql-italic"></button>
-                    <button class="ql-underline"></button>
-                  </span>
-                </template>
-              </Editor>
+              <Textarea v-model="category.description" :autoResize="true" rows="5" cols="30" />
+            </div>
+            <div class="field">
+              <label>Приоритет (сортировка)</label>
+              <InputNumber v-model="category.priority" />
             </div>
             <template #footer>
               <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
@@ -164,6 +160,7 @@ export default {
         id: null,
         name: null,
         description: null,
+        priority: null,
         icon: null,
       },
       fileDialog: false,
@@ -255,6 +252,7 @@ export default {
           id: null,
           name: null,
           description: null,
+          priority: null,
           icon: null,
         }
       }

@@ -34,6 +34,10 @@ export class StorageManager {
     return envConfig.apiBaseurl + '/' + filename;
   }
 
+  static path(filename: string) {
+    return destination + '/' + filename;
+  }
+
   /**
    * Удалить файл
    */

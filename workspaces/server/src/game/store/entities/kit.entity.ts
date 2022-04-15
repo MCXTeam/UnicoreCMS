@@ -3,7 +3,6 @@ import { Server } from 'src/game/servers/entities/server.entity';
 import { AfterRemove, Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Category } from './category.entity';
 import { KitItem } from './kit-item.entity';
-import { Product } from './product.entity';
 
 @Entity()
 export class Kit {
@@ -13,7 +12,7 @@ export class Kit {
   @Column()
   name: string;
 
-  @Column('text', {
+  @Column('longtext', {
     nullable: true,
   })
   description: string;

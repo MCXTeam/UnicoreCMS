@@ -322,17 +322,52 @@
                 <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
               </div>
             </ValidationProvider>
-            <ValidationProvider name="ID предмета" rules="required" v-slot="{ errors }">
+            <ValidationProvider name="Тип" rules="required" v-slot="{ errors }">
+              <div class="field">
+                <label>Тип</label>
+                <Dropdown v-model="product.give_method" :options="giveMethods" :optionLabel="null" appendTo="body" />
+                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+              </div>
+            </ValidationProvider>
+            <ValidationProvider
+              v-if="giveMethods.findIndex((gm) => gm == product.give_method) == 0"
+              name="ID предмета"
+              rules="required"
+              v-slot="{ errors }"
+            >
               <div class="field">
                 <label>ID предмета</label>
                 <InputText v-model="product.item_id" />
                 <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
               </div>
             </ValidationProvider>
-            <div class="field">
+            <div class="field" v-if="giveMethods.findIndex((gm) => gm == product.give_method) == 0">
               <label>NBT-теги</label>
               <InputText v-model="product.nbt" />
             </div>
+            <ValidationProvider
+              v-if="giveMethods.findIndex((gm) => gm == product.give_method) == 1 || giveMethods.findIndex((gm) => gm == product.give_method) == 2"
+              name="Команда"
+              rules="required"
+              v-slot="{ errors }"
+            >
+              <div class="field">
+                <label>Команды</label>
+                <Chips v-model="product.commands" />
+                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                <Divider align="left" type="dashed">
+                  <b>Переменные</b>
+                </Divider>
+                <ul>
+                  <li><code>{user.username}</code> - имя пользователя</li>
+                  <li><code>{product.name}</code> - название товара</li>
+                  <li><code>{product.amount}</code> - выбранное пользователем количество товара</li>
+                  <li><code>{server.id}</code> - ID сервера на котором была совершенна покупка</li>
+                  <li><code>{server.name}</code> - название сервера на котором была совершенна покупка</li>
+                </ul>
+                <Divider type="dashed" />
+              </div>
+            </ValidationProvider>
             <div class="field">
               <label>Описание</label>
               <Editor v-model="product.description" editorStyle="height: 160px">
@@ -341,6 +376,8 @@
                     <button class="ql-bold"></button>
                     <button class="ql-italic"></button>
                     <button class="ql-underline"></button>
+                    <button class="ql-link"></button>
+                    <button class="ql-image"></button>
                   </span>
                 </template>
               </Editor>
@@ -436,6 +473,7 @@ export default {
   },
   data() {
     return {
+      giveMethods: ['UnicoreConnect (Предмет)', 'UnicoreConnect (Команды)'/*, 'RCON (Команды)'*/],
       selected: null,
       categories: null,
       servers: null,
@@ -460,6 +498,8 @@ export default {
         sale: null,
         servers: [],
         categories: [],
+        give_method: 0,
+        commands: null,
         icon: null,
         item_id: null,
         nbt: null,
@@ -589,6 +629,8 @@ export default {
       this.updateMode = !!product
       if (product) {
         this.product = this.$_.pick(product, this.$_.deepKeys(this.product))
+        this.product.give_method = this.giveMethods[product.give_method]
+        this.product.servers = this.servers.filter(srv =>  this.product.servers.find(sv => srv.id == sv.id))
       } else {
         this.product = {
           id: null,
@@ -597,6 +639,8 @@ export default {
           price: null,
           sale: null,
           item_id: null,
+          give_method: this.giveMethods[0],
+          commands: null,
           servers: this.filters?.servers?.value || [],
           categories: this.filters?.categories?.value || [],
           icon: null,
@@ -632,6 +676,7 @@ export default {
       try {
         await this.$axios.post('/store/products', {
           ...this.product,
+          give_method: this.giveMethods.findIndex((gm) => gm == this.product.give_method),
           servers: this.product.servers.map((server) => server.id),
           categories: this.product.categories.map((category) => category.id),
         })
@@ -658,6 +703,7 @@ export default {
           this.$_.omit(
             {
               ...this.product,
+              give_method: this.giveMethods.findIndex((gm) => gm == this.product.give_method),
               servers: this.product.servers.map((server) => server.id),
               categories: this.product.categories.map((category) => category.id),
             },

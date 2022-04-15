@@ -18,7 +18,7 @@ export class CategoriesService {
     return paginate(query, this.categoriesRepository, {
       sortableColumns: ['id', 'name'],
       searchableColumns: ['id', 'name'],
-      defaultSortBy: [['id', 'DESC']],
+      defaultSortBy: [['priority', 'DESC'], ['name', 'ASC']],
       maxLimit: 500,
     });
   }
@@ -32,6 +32,7 @@ export class CategoriesService {
 
     category.name = input.name;
     category.description = input.description;
+    category.priority = input.priority
 
     return this.categoriesRepository.save(category);
   }
@@ -45,6 +46,7 @@ export class CategoriesService {
 
     category.name = input.name;
     category.description = input.description;
+    category.priority = input.priority
 
     return this.categoriesRepository.save(category);
   }

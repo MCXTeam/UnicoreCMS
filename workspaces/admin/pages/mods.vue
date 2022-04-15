@@ -110,10 +110,18 @@
                     <button class="ql-bold"></button>
                     <button class="ql-italic"></button>
                     <button class="ql-underline"></button>
+                    <button class="ql-link"></button>
                   </span>
                 </template>
               </Editor>
             </div>
+            <ValidationProvider name="URL" rules="url" v-slot="{ errors }">
+              <div class="field">
+                <label>Ссылка</label>
+                <InputText v-model="mod.link" />
+                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+              </div>
+            </ValidationProvider>
             <template #footer>
               <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
@@ -161,6 +169,7 @@ export default {
       mod: {
         id: null,
         name: null,
+        link: null,
         icon: null,
         description: null,
       },
@@ -238,6 +247,7 @@ export default {
           id: null,
           name: null,
           description: null,
+          link: null,
           icon: null,
         }
       }

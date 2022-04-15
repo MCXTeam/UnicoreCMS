@@ -7,8 +7,17 @@ import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { contentParser } from 'fastify-file-interceptor';
 import { join } from 'path';
 import { AuthAdapter } from './auth/adapters/auth.adapter';
+import { ASCII_NAME } from '@common';
+import * as clc from "cli-color"
 
 async function bootstrap() {
+  console.log(ASCII_NAME.split("\n").map(line => clc.magenta(line)).join(""));
+  console.log(" ");
+  console.log(`\tVersion: ${process.env.npm_package_version}, Starting Server...`);
+  console.log(" ");
+
+  await new Promise(res => setTimeout(res, 2500))
+
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter(), {
     logger: NestLogger,
   });

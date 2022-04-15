@@ -77,6 +77,8 @@ export interface EnvConfig {
 
   googleAnalyticsId: string
   yandexMetrikaId: string
+
+  encryptionKey: string
 }
 
 export const envConfig: EnvConfig = {
@@ -102,7 +104,9 @@ export const envConfig: EnvConfig = {
   databasePassword: env.get("DATABASE_PASSWORD").asString(),
   databaseName: env.get("DATABASE_NAME").required().asString(),
 
-  // JWT
+  encryptionKey: env.get("JWT_KEY").required().asString(),
+
+  // JWT 
   jwtKey: env.get("JWT_KEY").required().asString(),
   jwtExpires: env.get("JWT_EXPIRES").default("5m").asString(),
   jwtRefreshExpires: env.get("JWT_REFRESH_EXPIRES").default("30d").asString(),

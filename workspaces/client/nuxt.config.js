@@ -30,10 +30,13 @@ export default mainConfig({
   ],
 
   modules: [
+    '@nuxtjs/color-mode',
     '@nuxtjs/sitemap',
     ...envConfig.googleAnalyticsId ? ['@nuxtjs/google-analytics'] : [],
     ...envConfig.yandexMetrikaId ? ['@nuxtjs/yandex-metrika'] : [],
   ],
+
+  serverMiddleware: ['~/server-middleware/ssr-handler.ts'],
 
   publicRuntimeConfig: {
     yandexMetrika: {
@@ -43,8 +46,6 @@ export default mainConfig({
       id: envConfig.googleAnalyticsId
     }
   },
-
-  buildModules: ['@nuxtjs/color-mode'],
 
   plugins: [
     { src: '~/plugins/vuesax.ts' },

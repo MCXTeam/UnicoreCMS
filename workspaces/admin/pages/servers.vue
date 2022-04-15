@@ -13,9 +13,8 @@
         <DataTable
           :value="servers"
           :loading="loading"
-          :rows="20"
-          paginator
           :filters.sync="filters"
+          @row-reorder="onServersReorder"
           rowHover
           responsiveLayout="scroll"
           dataKey="id"
@@ -23,14 +22,11 @@
           <template #header>
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
               <h5 class="m-0">Управление серверами</h5>
-              <span class="block mt-2 md:mt-0 p-input-icon-left">
-                <i class="pi pi-search" />
-                <InputText v-model="filters['global'].value" placeholder="Поиск..." />
-              </span>
             </div>
           </template>
-          <Column sortable field="id" header="ID" :styles="{ width: '8rem' }"></Column>
-          <Column sortable field="name" header="Название">
+          <Column :styles="{ width: '3rem' }" :rowReorder="true" headerStyle="width: 3rem" />
+          <Column field="id" header="ID" :styles="{ width: '8rem' }"></Column>
+          <Column field="name" header="Название">
             <template #body="slotProps">
               <div class="flex align-items-center">
                 <Avatar v-if="slotProps.data.icon" :image="`${$config.apiUrl + '/' + slotProps.data.icon}`" shape="circle" />
@@ -41,6 +37,7 @@
           </Column>
           <Column :styles="{ width: '12rem' }">
             <template #body="slotProps">
+              <!-- <SpeedDial :tooltipOptions="{ position: 'top' }" direction="left" :model="actions" /> -->
               <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
               <Button @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary mr-2" />
               <Button
@@ -117,7 +114,7 @@
                   name="ID (a-z)"
                   :rules="{
                     required: true,
-                    regex: /^[a-z]+$/,
+                    regex: /^[a-z1-9]+$/,
                   }"
                   v-slot="{ errors }"
                 >
@@ -177,6 +174,8 @@
                         <button class="ql-bold"></button>
                         <button class="ql-italic"></button>
                         <button class="ql-underline"></button>
+                        <button class="ql-link"></button>
+                        <button class="ql-image"></button>
                       </span>
                     </template>
                   </Editor>
@@ -192,11 +191,13 @@
                   <Button @click="addRow" icon="pi pi-plus" class="p-button-rounded p-button-text" />
                   <DataTable
                     :value="server.table"
+                    @row-reorder="onRowReorder"
                     editMode="row"
                     :editingRows.sync="table"
                     @row-edit-save="onRowEditSave"
                     responsiveLayout="scroll"
                   >
+                    <Column :styles="{ width: '3rem' }" :rowReorder="true" headerStyle="width: 3rem" />
                     <Column field="title" header="Заголовок" :styles="{ width: '40%' }">
                       <template #editor="slotProps">
                         <InputText v-model="slotProps.data[slotProps.column.field]" />
@@ -274,6 +275,29 @@ export default {
   },
   data() {
     return {
+      actions: [
+        {
+          label: 'Редактировать',
+          icon: 'pi pi-pencil',
+          command: () => {
+            this.$toast.add({ severity: 'success', summary: 'Update', detail: 'Data Updated' })
+          },
+        },
+        {
+          label: 'Удалить',
+          icon: 'pi pi-trash',
+          command: () => {
+            this.$toast.add({ severity: 'error', summary: 'Delete', detail: 'Data Deleted' })
+          },
+        },
+        {
+          label: 'Изменить иконку',
+          icon: 'pi pi-images',
+          command: () => {
+            window.location.hash = '/fileupload'
+          },
+        },
+      ],
       servers: null,
       loading: true,
       mods: null,
@@ -315,6 +339,19 @@ export default {
     // });
   },
   methods: {
+    async onServersReorder(event) {
+      this.loading = true
+      await this.$axios.post('/servers/sort', {
+        items: event.value.map((serv, priority) => ({
+          id: serv.id,
+          priority,
+        })),
+      })
+      this.$fetch()
+    },
+    onRowReorder(event) {
+      this.server.table = event.value
+    },
     onRowEditSave(event) {
       let { newData, index } = event
       this.server.table[index] = newData
@@ -385,8 +422,7 @@ export default {
       this.updateMode = !!server
       if (server) {
         this.server = this.$_.pick(await this.$axios.get('/servers/' + server.id).then((res) => res.data), this.$_.deepKeys(this.server))
-        if (!this.server.table)
-          this.server.table = []
+        if (!this.server.table) this.server.table = []
       } else {
         this.server = {
           id: null,
@@ -412,6 +448,7 @@ export default {
       try {
         await this.$axios.post('/servers', {
           ...this.server,
+          table: this.server.table && this.server.table.length ? this.server.table.map((row, priority) => ({ ...row, priority })) : [],
           mods: this.server.mods.map((mod) => mod.id),
         })
         this.$toast.add({
@@ -442,7 +479,7 @@ export default {
       try {
         await this.$axios.patch('/servers/' + this.server.id, {
           ...this.$_(this.server).omitBy(this.$_.isEmpty).omit('id').value(),
-          table: this.table && this.table.length ? this.table : [],
+          table: this.server.table && this.server.table.length ? this.server.table.map((row, priority) => ({ ...row, priority })) : [],
           mods: this.server.mods.map((mod) => mod.id),
         })
         this.$toast.add({

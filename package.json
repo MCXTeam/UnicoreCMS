@@ -4,17 +4,25 @@
   "workspaces": [
     "workspaces/*"
   ],
+  "engines": {
+    "node": ">=14.0.0 <17.0.0",
+    "yarn": "*"
+  },
   "scripts": {
-    "dev": "npm run build --workspace=unicore-common && lerna run dev --parallel --no-bail",
-    "build": "npm run build -w unicore-common && npm run build --workspaces --if-present",
-    "start": "lerna run start --parallel --no-bail",
+    "dev": "engine-version && npm run build --workspace=unicore-common && lerna run dev --parallel --no-bail",
+    "build": "engine-version && npm run build -w unicore-common && npm run build --workspaces --if-present",
+    "start": "engine-version && lerna run start --parallel --no-bail",
     "lint": "npm run lint --workspaces --if-present",
     "format": "npm run format --workspaces --if-present",
-    "sync": "npm run schema:sync -w unicore-server",
-    "seed": "npm run seed:run -w unicore-server"
+    "sync": "engine-version && npm run schema:sync -w unicore-server",
+    "seed": "engine-version && npm run seed:run -w unicore-server",
+    "boot": "engine-version && npx lerna bootstrap && npm run build && npm link -w unicore-server && npm run sync"
   },
   "devDependencies": {
     "lerna": "^4.0.0",
     "typescript": "^4.5.5"
+  },
+  "dependencies": {
+    "engine-version": "^1.0.2"
   }
 }

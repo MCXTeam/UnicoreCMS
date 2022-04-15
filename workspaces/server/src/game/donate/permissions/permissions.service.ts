@@ -1,4 +1,4 @@
-import { MomentWrapper } from '@common';
+import { CommonSortInput, MomentWrapper } from '@common';
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/admin/users/entities/user.entity';
@@ -16,6 +16,7 @@ import { PermissionInput } from './dto/permission.input';
 import { DonatePermission } from './entities/donate-permission.entity';
 import { UsersDonatePermission } from './entities/user-permission.entity';
 import { PermissionType } from './enums/permission-type.enum';
+import * as _ from 'lodash'
 
 @Injectable()
 export class DonatePermissionsService {
@@ -141,7 +142,14 @@ export class DonatePermissionsService {
       .leftJoinAndSelect('perm.kits', 'kits')
       .leftJoinAndSelect('kits.images', 'images')
       .leftJoinAndSelect('images.server', 'server')
-      .orderBy({ type: "DESC" }).getMany()).filter(perm => perm.servers.find(srv => srv.id == id) || perm.type == PermissionType.Web)
+      .orderBy({ "perm.priority": "ASC", "perm.id": "ASC" })
+      .getMany())
+      .filter(perm => perm.servers.find(srv => srv.id == id) || perm.type == PermissionType.Web)
+      .map(dp => ({
+        ...dp,
+        periods: _.orderBy(dp.periods, ["expire"], ["asc"]),
+        kits: _.orderBy(dp.kits.map(kit => ({ ...kit, priority: kit.priority ? kit.priority : 0 })), ["priority"], ["asc"]),
+      }))
 
     return perms.filter((perm) => perm.periods.length);
   }
@@ -154,7 +162,7 @@ export class DonatePermissionsService {
       .leftJoinAndSelect('kits.images', 'images')
       .leftJoinAndSelect('images.server', 'server')
       .where({ type: Not(PermissionType.Web) })
-      .orderBy({ type: "DESC" }).getMany()).filter(perm => perm.servers.find(srv => srv.id == id) || perm.type == PermissionType.Web)
+      .orderBy({ "perm.priority": "ASC", "perm.id": "ASC" }).getMany()).filter(perm => perm.servers.find(srv => srv.id == id) || perm.type == PermissionType.Web)
 
     return perms.filter((perm) => perm.periods.length);
   }
@@ -175,6 +183,19 @@ export class DonatePermissionsService {
 
   findOne(id: number, relations?: string[]): Promise<DonatePermission> {
     return this.donatePermissionsRepository.findOne(id, { relations });
+  }
+
+  async sort(input: CommonSortInput) {
+    const servers = await this.donatePermissionsRepository.findByIds(input.items.map(srv => srv.id))
+
+    return this.donatePermissionsRepository.save(servers.map(donp => {
+      const updatedSort = input.items.find(dp => dp.id == donp.id)
+
+      if (updatedSort) 
+        return { ...donp, priority: updatedSort.priority }
+      
+      return donp
+    }))
   }
 
   async create(input: PermissionInput) {

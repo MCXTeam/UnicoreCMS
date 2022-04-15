@@ -1,17 +1,24 @@
 import { StorageManager } from '@common';
 import { Server } from 'src/game/servers/entities/server.entity';
-import { AfterRemove, Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { AfterRemove, Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Period } from '../../entities/period.entity';
-import { DonateFeaturesDto } from '../dto/donate-features.dto';
+import { GroupFeature } from './group-feature.entity';
 import { GroupKit } from './group-kit.entity';
 
-@Entity()
+@Entity({
+  orderBy: {
+    priority: "ASC"
+  }
+})
 export class DonateGroup {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
   name: string;
+
+  @Column({ nullable: true })
+  priority?: number;
 
   @Column()
   ingame_id: string;
@@ -22,7 +29,7 @@ export class DonateGroup {
   @Column({ nullable: true })
   sale: number;
 
-  @Column({
+  @Column('longtext', {
     nullable: true,
   })
   description: string;
@@ -30,8 +37,12 @@ export class DonateGroup {
   @Column({ nullable: true })
   icon: string;
 
-  @Column('json', { nullable: true })
-  features?: DonateFeaturesDto[];
+  @OneToMany(() => GroupFeature, (feature) => feature.group, {
+    cascade: ['insert', 'update'],
+    eager: true
+  })
+  @JoinTable()
+  features: GroupFeature[]
 
   @ManyToMany(() => GroupKit, (kit) => kit.groups)
   @JoinTable()

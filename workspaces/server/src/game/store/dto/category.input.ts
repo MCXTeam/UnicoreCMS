@@ -1,4 +1,4 @@
-import { IsDefined, IsOptional, IsString } from 'class-validator';
+import { IsDefined, IsInt, IsOptional, IsString } from 'class-validator';
 
 export class CategoryInput {
   @IsDefined()
@@ -8,4 +8,8 @@ export class CategoryInput {
   @IsOptional()
   @IsString()
   description: string;
+
+  @IsOptional()
+  @IsInt()
+  priority: number;
 }

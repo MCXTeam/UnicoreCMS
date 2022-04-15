@@ -3,16 +3,25 @@ import { DonateGroup } from 'src/game/donate/groups/entities/donate-group.entity
 import { DonatePermission } from 'src/game/donate/permissions/entities/donate-permission.entity';
 import { Kit } from 'src/game/store/entities/kit.entity';
 import { Product } from 'src/game/store/entities/product.entity';
-import { AfterRemove, Column, CreateDateColumn, Entity, JoinTable, ManyToMany, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
-import { ServerTableDto } from '../dto/server-table.dto';
+import { AfterRemove, Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 import { Mod } from '../mods/entities/mod.entity';
 import { Online } from '../online/entities/online.entity';
 import { Query } from '../online/entities/query.entity';
+import { RCON } from '../rcon/entities/rcon.entity';
+import { ServerGroup } from './server-group.entity';
+import { ServerTable } from './server-table.entity';
 
-@Entity()
+@Entity({
+  orderBy: {
+    priority: "ASC"
+  }
+})
 export class Server {
   @PrimaryColumn()
   id: string;
+
+  @Column({ nullable: true })
+  priority?: number;
 
   @Column()
   name: string;
@@ -23,7 +32,7 @@ export class Server {
   @Column('text', { nullable: true })
   slogan: string;
 
-  @Column('text', { nullable: true })
+  @Column('longtext', { nullable: true })
   description: string;
 
   @Column('text', { nullable: true })
@@ -35,6 +44,10 @@ export class Server {
   @Column({ nullable: true })
   image: string;
 
+  @ManyToOne(() => ServerGroup, (room) => room.servers, { eager: true })
+  @JoinTable()
+  group: ServerGroup[];
+
   @OneToOne(() => Online, (online) => online.server, {
     cascade: ['insert', 'update'],
   })
@@ -44,6 +57,11 @@ export class Server {
     cascade: ['insert', 'update'],
   })
   query: Query;
+
+  @OneToOne(() => RCON, (rcon) => rcon.server, {
+    cascade: ['insert', 'update'],
+  })
+  rcon: RCON;
 
   @ManyToMany(() => Mod, (mod) => mod.servers)
   @JoinTable()
@@ -65,8 +83,11 @@ export class Server {
   @JoinTable()
   kits?: Kit[];
 
-  @Column('json', { nullable: true })
-  table: ServerTableDto[];
+  @OneToMany(() => ServerTable, (table) => table.server, {
+    cascade: ['insert', 'update'],
+  })
+  @JoinTable()
+  table: ServerTable[]
 
   @CreateDateColumn()
   created: Date;
