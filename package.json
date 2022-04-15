@@ -5,8 +5,7 @@
     "workspaces/*"
   ],
   "engines": {
-    "node": ">=14.0.0 <17.0.0",
-    "yarn": "*"
+    "node": ">=14.0.0 <17.0.0"
   },
   "scripts": {
     "dev": "engine-version && npm run build --workspace=unicore-common && lerna run dev --parallel --no-bail",
@@ -16,7 +15,7 @@
     "format": "npm run format --workspaces --if-present",
     "sync": "engine-version && npm run schema:sync -w unicore-server",
     "seed": "engine-version && npm run seed:run -w unicore-server",
-    "boot": "engine-version && npx lerna bootstrap && npm run build && npm link -w unicore-server && npm run sync"
+    "boot": "npx lerna bootstrap && engine-version && npm run build && npm link -w unicore-server && npm run sync"
   },
   "devDependencies": {
     "lerna": "^4.0.0",
