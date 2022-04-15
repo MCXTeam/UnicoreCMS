@@ -28,7 +28,7 @@ jobs:
           cd /root/UnicoreCMS-main
           git pull origin main
           git status
-          npx run boot
+          npm run boot
           pm2 restart all
     - name: Purge cache
       uses: jakejarvis/cloudflare-purge-action@master

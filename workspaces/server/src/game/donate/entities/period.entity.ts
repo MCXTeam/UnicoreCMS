@@ -2,7 +2,11 @@ import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { DonateGroup } from '../groups/entities/donate-group.entity';
 import { DonatePermission } from '../permissions/entities/donate-permission.entity';
 
-@Entity()
+@Entity({
+  orderBy: {
+    multiplier: "ASC"
+  }
+})
 export class Period {
   @PrimaryGeneratedColumn()
   id: number;

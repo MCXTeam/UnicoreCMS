@@ -15,7 +15,7 @@
     "format": "npm run format --workspaces --if-present",
     "sync": "engine-version && npm run schema:sync -w unicore-server",
     "seed": "engine-version && npm run seed:run -w unicore-server",
-    "boot": "npx lerna bootstrap && engine-version && npm run build && npm link -w unicore-server && npm run sync"
+    "boot": "npx lerna bootstrap && npm run build && npm link -w unicore-server && npm run sync"
   },
   "devDependencies": {
     "lerna": "^4.0.0",

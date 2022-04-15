@@ -145,13 +145,15 @@ export class DonatePermissionsService {
       .orderBy({ "perm.priority": "ASC", "perm.id": "ASC" })
       .getMany())
       .filter(perm => perm.servers.find(srv => srv.id == id) || perm.type == PermissionType.Web)
-      .map(dp => ({
-        ...dp,
-        periods: _.orderBy(dp.periods, ["expire"], ["asc"]),
-        kits: _.orderBy(dp.kits.map(kit => ({ ...kit, priority: kit.priority ? kit.priority : 0 })), ["priority"], ["asc"]),
-      }))
 
-    return perms.filter((perm) => perm.periods.length);
+      return _(perms.filter((group) => group.periods.length).map(perms => ({
+        ...perms,
+        periods: _.orderBy(perms.periods, ["multiplier"], ["asc"]),
+        kits: _(perms.kits.map(kit => ({
+          ...kit, priority: kit.priority ? kit.priority : 0, 
+          images: _(kit.images.map(image => ({...image, priority: image.server.priority ? image.server.priority : 0}))).orderBy(["server.priority", "id"], ["asc", "asc"]).value()
+        }))).orderBy(["priority", "id"], ["asc", "asc"]).value()
+      }))).orderBy(["priority", "id"], ["asc", "asc"]).value()
   }
 
   async findByServerUC(id: string) {
