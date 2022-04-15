@@ -1,12 +1,16 @@
+import { MomentWrapper } from "@common";
+import { Inject } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ConfigField } from "src/admin/config/config.enum";
 import { ConfigService } from "src/admin/config/config.service";
 import { User } from "src/admin/users/entities/user.entity";
-import { Repository } from "typeorm";
+import { MoreThanOrEqual, Repository } from "typeorm";
 import { Vote } from "../../entities/vote.entity";
 
 export class MonitoringHandlerService {
   constructor(
+    @Inject('moment')
+    private moment: MomentWrapper,
     private configService: ConfigService,
     @InjectRepository(Vote) private votesRepo: Repository<Vote>,
     @InjectRepository(User) private usersRepo: Repository<User>,
@@ -19,7 +23,10 @@ export class MonitoringHandlerService {
     if (!user)
       return false
 
-    user.real += Number(cfg[ConfigField.MonitoringReward])
+    if (cfg[ConfigField.VotesTwinkProtect] && this.votesRepo.findOne({ monitoring: monitoring_id, user, created: MoreThanOrEqual(this.moment().subtract(1, "day").toDate()) }, { relations: ["user"] }))
+      return false
+
+    user.virtual += Number(cfg[ConfigField.MonitoringReward])
 
     const vote = new Vote()
     vote.monitoring = monitoring_id

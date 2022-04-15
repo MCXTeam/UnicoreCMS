@@ -6,6 +6,7 @@ import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { Permission } from 'unicore-common';
 import { PayloadType } from '../dto/paginated-store.dto';
 import { CartService } from './cart.service';
+import { CartBuyInput } from './dto/cart-buy.input';
 import { CartInput } from './dto/cart.input.dto';
 import { GiveKitInput } from './dto/give-kit.input';
 import { GiveProductInput } from './dto/give-product.input';
@@ -24,9 +25,9 @@ export class CartController {
     return this.cartService.add(user, body);
   }
 
-  @Post('buy/:id')
-  buy(@CurrentUser() user: User, @IpAddress() ip: string, @Param('id') id: string) {
-    return this.cartService.buy(user, ip, id);
+  @Post('buy')
+  buy(@CurrentUser() user: User, @IpAddress() ip: string, @Body() body: CartBuyInput) {
+    return this.cartService.buy(user, ip, body);
   }
 
   @Delete('server/:id')

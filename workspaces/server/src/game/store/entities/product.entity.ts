@@ -46,6 +46,9 @@ export class Product {
   @Column({ nullable: true })
   sale: number;
 
+  @Column({ nullable: true })
+  prevent_use_virtual: boolean
+
   @Column({ default: GiveMethod.UnicoreConnect })
   give_method: GiveMethod
 

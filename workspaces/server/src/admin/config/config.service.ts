@@ -38,6 +38,7 @@ export class ConfigService {
         },
         { key: ConfigField.LauncherExe, important: true, type: ConfigType.string },
         { key: ConfigField.LauncherJar, important: true, type: ConfigType.string },
+        { key: ConfigField.LinkForum, important: true, type: ConfigType.string, value: "https://unicorecms.ru" },
         { key: ConfigField.LinkDiscord, important: true, type: ConfigType.string, value: "https://t.me/unicore_project" },
         { key: ConfigField.LinkTelegram, important: true, type: ConfigType.string, value: "https://t.me/unicore_project" },
         { key: ConfigField.LinkVk, important: true, type: ConfigType.string, value: "https://t.me/unicore_project" },
@@ -50,6 +51,14 @@ export class ConfigService {
         { key: ConfigField.LinkMinecraftraiting, important: true, type: ConfigType.string, value: "https://unicorecms.ru" },
         { key: ConfigField.LinkTopcraft, important: true, type: ConfigType.string, value: "https://unicorecms.ru" },
         { key: ConfigField.UnbanPrice, important: true, type: ConfigType.number, value: "150" },
+        { key: ConfigField.VirtualPercent, important: true, type: ConfigType.number, value: "75" },
+        { key: ConfigField.VotesTwinkProtect, important: true, type: ConfigType.boolean, value: "true" },
+        { key: ConfigField.StoreKitsVirtualUse, important: true, type: ConfigType.boolean, value: "true" },
+        { key: ConfigField.StoreProductsVirtualUse, important: true, type: ConfigType.boolean, value: "true" },
+        { key: ConfigField.DonateGroupsVirtualUse, important: true, type: ConfigType.boolean, value: "true" },
+        { key: ConfigField.DonatePermsVirtualUse, important: true, type: ConfigType.boolean, value: "true" },
+        { key: ConfigField.EmailActivationRequired, important: true, type: ConfigType.boolean, value: "true" },
+        { key: ConfigField.OrdinaryRegister, important: true, type: ConfigType.boolean, value: "false" },
       ])
       .orIgnore()
       .execute();

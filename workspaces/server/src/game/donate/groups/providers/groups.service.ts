@@ -178,6 +178,7 @@ export class DonateGroupsService {
     group.ingame_id = input.ingame_id;
     group.web_perms = input.web_perms;
     group.features = input.features;
+    group.prevent_use_virtual = input.prevent_use_virtual
 
     group.servers = await this.serversRepository.find({
       id: In(input.servers),
@@ -221,6 +222,7 @@ export class DonateGroupsService {
     group.ingame_id = input.ingame_id;
     group.web_perms = input.web_perms;
     group.features = input.features;
+    group.prevent_use_virtual = input.prevent_use_virtual
 
     group.servers = await this.serversRepository.find({
       id: In(input.servers),

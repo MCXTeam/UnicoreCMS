@@ -1,4 +1,4 @@
-import { IsArray, IsDefined, IsEnum, IsInt, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsArray, IsBoolean, IsDefined, IsEnum, IsInt, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 import { PermissionType } from '../enums/permission-type.enum';
 
 export class PermissionInput {
@@ -48,4 +48,8 @@ export class PermissionInput {
   @IsArray()
   @IsString({ each: true })
   web_perms?: string[];
+
+  @IsOptional()
+  @IsBoolean()
+  prevent_use_virtual?: boolean
 }

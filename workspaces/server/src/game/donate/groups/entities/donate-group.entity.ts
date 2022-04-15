@@ -27,6 +27,9 @@ export class DonateGroup {
   price: number;
 
   @Column({ nullable: true })
+  prevent_use_virtual: boolean
+
+  @Column({ nullable: true })
   sale: number;
 
   @Column('longtext', {

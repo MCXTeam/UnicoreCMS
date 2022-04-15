@@ -346,7 +346,10 @@
               <InputText v-model="product.nbt" />
             </div>
             <ValidationProvider
-              v-if="giveMethods.findIndex((gm) => gm == product.give_method) == 1 || giveMethods.findIndex((gm) => gm == product.give_method) == 2"
+              v-if="
+                giveMethods.findIndex((gm) => gm == product.give_method) == 1 ||
+                giveMethods.findIndex((gm) => gm == product.give_method) == 2
+              "
               name="Команда"
               rules="required"
               v-slot="{ errors }"
@@ -442,6 +445,10 @@
                 </ValidationProvider>
               </div>
             </div>
+            <div class="field-checkbox">
+              <Checkbox :binary="true" v-model="product.prevent_use_virtual" />
+              <label>Запретить оплату бонусной валютой</label>
+            </div>
             <template #footer>
               <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
@@ -473,7 +480,7 @@ export default {
   },
   data() {
     return {
-      giveMethods: ['UnicoreConnect (Предмет)', 'UnicoreConnect (Команды)'/*, 'RCON (Команды)'*/],
+      giveMethods: ['UnicoreConnect (Предмет)', 'UnicoreConnect (Команды)' /*, 'RCON (Команды)'*/],
       selected: null,
       categories: null,
       servers: null,
@@ -503,6 +510,7 @@ export default {
         icon: null,
         item_id: null,
         nbt: null,
+        prevent_use_virtual: false,
       },
       productMany: {
         price: null,
@@ -630,7 +638,7 @@ export default {
       if (product) {
         this.product = this.$_.pick(product, this.$_.deepKeys(this.product))
         this.product.give_method = this.giveMethods[product.give_method]
-        this.product.servers = this.servers.filter(srv =>  this.product.servers.find(sv => srv.id == sv.id))
+        this.product.servers = this.servers.filter((srv) => this.product.servers.find((sv) => srv.id == sv.id))
       } else {
         this.product = {
           id: null,
@@ -645,6 +653,7 @@ export default {
           categories: this.filters?.categories?.value || [],
           icon: null,
           nbt: null,
+          prevent_use_virtual: false,
         }
       }
       this.productDialog = true

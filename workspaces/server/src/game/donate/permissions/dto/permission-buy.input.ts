@@ -1,4 +1,4 @@
-import { IsDefined, IsInt, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsDefined, IsInt, IsOptional, IsString } from 'class-validator';
 
 export class PermissionBuyInput {
   @IsDefined()
@@ -12,4 +12,8 @@ export class PermissionBuyInput {
   @IsDefined()
   @IsInt()
   period: number;
+
+  @IsOptional()
+  @IsBoolean()
+  use_virtual: boolean
 }

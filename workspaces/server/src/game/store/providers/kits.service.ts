@@ -73,6 +73,7 @@ export class KitsService {
     kit.description = input.description;
     kit.price = input.price;
     kit.sale = input.sale;
+    kit.prevent_use_virtual = input.prevent_use_virtual
 
     kit.servers = await this.serversRepository.find({
       id: In(input.servers),
@@ -100,7 +101,10 @@ export class KitsService {
     }
 
     kit.name = input.name;
+    kit.price = input.price;
+    kit.sale = input.sale;
     kit.description = input.description;
+    kit.prevent_use_virtual = input.prevent_use_virtual
 
     kit.servers = await this.serversRepository.find({
       id: In(input.servers),

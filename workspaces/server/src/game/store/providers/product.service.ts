@@ -283,6 +283,7 @@ export class ProductsService {
     product.price = input.price;
     product.sale = input.sale;
     product.give_method = input.give_method
+    product.prevent_use_virtual = input.prevent_use_virtual
 
     if (product.give_method == GiveMethod.UnicoreConnect) {
       product.item_id = input.item_id;
@@ -314,6 +315,7 @@ export class ProductsService {
     product.price = input.price;
     product.sale = input.sale;
     product.give_method = input.give_method
+    product.prevent_use_virtual = input.prevent_use_virtual
 
     if (product.give_method == GiveMethod.UnicoreConnect) {
       product.item_id = input.item_id;

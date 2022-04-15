@@ -293,6 +293,10 @@
                 </ValidationProvider>
               </div>
             </div>
+            <div class="field-checkbox">
+              <Checkbox :binary="true" v-model="kit.prevent_use_virtual" />
+              <label>Запретить оплату бонусной валютой</label>
+            </div>
             <template #footer>
               <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
@@ -349,6 +353,7 @@ export default {
         categories: [],
         items: [],
         icon: null,
+        prevent_use_virtual: false
       },
       fileDialog: false,
       kitDialog: false,
@@ -495,6 +500,7 @@ export default {
           servers: this.filters?.servers?.value || [],
           categories: this.filters?.categories?.value || [],
           items: [],
+          prevent_use_virtual: false
         }
       }
       this.kitDialog = true

@@ -14,8 +14,8 @@
     </div>
 
     <div class="store-table-overflow position-relative" ref="cart">
-      <table class="store-table" v-if="cart.length">
-        <tr :key="cartItem.id" v-for="cartItem in cart.filter((ci) => ci.type == 'kit')">
+      <table class="store-table" v-if="cart.items.length">
+        <tr :key="cartItem.id" v-for="cartItem in cart.items.filter((ci) => ci.type == 'kit')">
           <td class="d-flex align-items-center">
             <Avatar v-if="cartItem.payload.kit.icon" size="large" :image="`${$config.apiUrl}/${cartItem.payload.kit.icon}`"> </Avatar>
             <Avatar v-else size="large"> <i class="bx bxs-image"></i> </Avatar>
@@ -38,7 +38,7 @@
             ></vs-button>
           </td>
         </tr>
-        <tr :key="cartItem.id" v-for="cartItem in cart.filter((ci) => ci.type == 'product')">
+        <tr :key="cartItem.id" v-for="cartItem in cart.items.filter((ci) => ci.type == 'product')">
           <td class="d-flex align-items-center">
             <Avatar v-if="cartItem.payload.product.icon" size="large" :image="`${$config.apiUrl}/${cartItem.payload.product.icon}`">
             </Avatar>
@@ -88,8 +88,13 @@ export default {
   data() {
     return {
       server_id: '0',
-      cart: [],
+      cart: {
+        items: [],
+        price: 0,
+        virtual_sale: 0
+      },
       servers: [],
+      use_virtual: false
     }
   },
 
@@ -102,11 +107,15 @@ export default {
     this.$nuxt.$emit('setStoreSidebar', { component: CartSidebar })
     this.$nuxt.$on('storeCartClear', this.cartClear)
     this.$nuxt.$on('storeCartBuy', this.cartBuy)
+    this.$nuxt.$on('storeCartUseVirtualUpdate', (val) => {
+      this.use_virtual = val
+    })
   },
 
   beforeDestroy() {
     this.$nuxt.$off('storeCartClear')
     this.$nuxt.$off('storeCartBuy')
+    this.$nuxt.$off('storeCartUseVirtualUpdate')
     this.$nuxt.$emit('setStoreSidebar', null)
   },
 
@@ -143,7 +152,10 @@ export default {
       const loading = this.$vs.loading({ target: this.$refs.cart })
       this.$nuxt.$emit('setStoreSidebarLoadingState', true)
       try {
-        await this.$axios.post('/store/cart/buy/' + this.servers[Number(this.server_id)].id)
+        await this.$axios.post('/store/cart/buy', {
+          server_id: this.servers[Number(this.server_id)].id,
+          use_virtual: this.use_virtual
+        })
         await Promise.all([this.$auth.fetchUser(), this.cartFind()])
         this.$nuxt.$emit('storeCartUpdate', this.cart)
         this.$unicore.successNotification('Покупка была совершенна')

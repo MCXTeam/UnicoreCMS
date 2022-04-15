@@ -1,11 +1,19 @@
 <template>
   <div class="panel px-4 py-3 mb-4">
     <h3 class="text-uppercase m-0">Оплата</h3>
-    <div class="d-flex justify-content-between mt-2">
-      <span>Стоимость товаров</span>
-      <b v-text="$utils.formatCurrency(price)" />
+    <div v-if="cart.virtual_sale > 0" class="d-flex justify-content-between align-items-center mt-2">
+      <vs-checkbox v-model="use_virtual"> Использовать бонусы </vs-checkbox>
+      <b>-{{ $utils.formatCurrency(cart.virtual_sale) }}</b>
     </div>
-    <div v-if="cart.length" class="d-flex justify-content-between mt-3">
+    <div class="d-flex justify-content-between mt-2">
+      <span>Итого к оплате:</span>
+      <b v-if="!use_virtual" v-text="$utils.formatCurrency(cart.price)" />
+      <div v-else>
+        <small><strike v-text="$utils.formatCurrency(cart.price)" /></small>
+        <b v-text="$utils.formatCurrency(cart.price - cart.virtual_sale)" />
+      </div>
+    </div>
+    <div v-if="cart.items.length" class="d-flex justify-content-between mt-2">
       <vs-button @click="$nuxt.$emit('storeCartBuy')" :disabled="loading" block size="large">Оплатить</vs-button>
       <vs-button @click="$nuxt.$emit('storeCartClear')" :disabled="loading" danger block size="large">Очистить</vs-button>
     </div>
@@ -20,22 +28,24 @@ export default {
       default: false,
     },
     cart: {
-      type: Array,
-      default: [],
+      type: Object,
+      default: {
+        items: [],
+        price: 0,
+        virtual_sale: 0,
+      },
     },
   },
 
   data() {
     return {
-      price: 0,
+      use_virtual: false,
     }
   },
 
   mounted() {
-    this.calculate()
     this.$nuxt.$on('storeCartUpdate', async (payload) => {
       this.cart = payload
-      this.calculate()
     })
   },
 
@@ -43,15 +53,11 @@ export default {
     this.$nuxt.$off('storeCartUpdate')
   },
 
-  methods: {
-    calculate() {
-      this.price = this.$_.sum(
-        this.cart.map((ci) => {
-          if (ci.type == 'product')
-            return (ci.payload.product.price - (ci.payload.product.price * ci.payload.product.sale) / 100) * ci.payload.amount
-          else return ci.payload.kit.price - (ci.payload.kit.price * ci.payload.kit.sale) / 100
-        })
-      )
+  watch: {
+    use_virtual: {
+      handler: function (val) {
+        this.$nuxt.$emit('storeCartUseVirtualUpdate', val)
+      },
     },
   },
 }

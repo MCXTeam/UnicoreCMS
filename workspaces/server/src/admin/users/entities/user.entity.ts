@@ -58,6 +58,9 @@ export class User {
   @Column({ default: 0 })
   real: number;
 
+  @Column({ default: 0 })
+  virtual: number;
+
   @ManyToMany(() => Role, (role) => role.users, {
     eager: true,
   })
@@ -66,9 +69,6 @@ export class User {
 
   @Column('simple-array', { nullable: true })
   perms: string[];
-
-  // @OneToMany(() => Payment, payment => payment.user)
-  // payments: Payment[]
 
   @OneToOne(() => Skin, (skin) => skin.user, {
     eager: true,

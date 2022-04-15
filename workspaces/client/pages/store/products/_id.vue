@@ -35,6 +35,20 @@
             </div>
           </div>
         </div>
+        <vs-alert
+          v-if="
+            product.payload.prevent_use_virtual &&
+            ((config.public_store_products_virtual_use && product.type == 'product') ||
+              (config.public_store_kits_virtual_use && product.type == 'kit'))
+          "
+          relief
+          class="mt-3"
+        >
+          <template #icon>
+            <i class="bx bxs-bug"></i>
+          </template>
+          Оплата бонусами на данный товар недоступна!
+        </vs-alert>
         <template #footer>
           <div v-if="!invalid" class="d-flex justify-content-center">
             <vs-button v-if="product.type == 'product'" size="large" transparent @click="addToCart()">
@@ -81,6 +95,7 @@
 
 <script>
 import StoreProductsSidebar from '~/components/StoreProductsSidebar.vue'
+import { mapGetters } from 'vuex'
 
 export default {
   layout: 'cabinet',
@@ -106,6 +121,12 @@ export default {
         },
       },
     }
+  },
+
+  computed: {
+    ...mapGetters({
+      config: 'unicore/config',
+    }),
   },
 
   created() {

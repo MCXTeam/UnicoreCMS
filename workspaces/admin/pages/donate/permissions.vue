@@ -132,6 +132,10 @@
                 </ValidationProvider>
               </div>
             </div>
+            <div class="field-checkbox">
+              <Checkbox :binary="true" v-model="permission.prevent_use_virtual" />
+              <label>Запретить оплату бонусной валютой</label>
+            </div>
             <div class="field" v-if="$_.get(permission.type, 'value') == 'game' || $_.get(permission.type, 'value') == 'kit'">
               <label>Серверы</label>
               <MultiSelect
@@ -228,6 +232,7 @@ export default {
         periods: [],
         perms: [],
         web_perms: [],
+        prevent_use_virtual: false
       },
       permissionDialog: false,
       types: [
@@ -307,6 +312,7 @@ export default {
           periods: [],
           perms: [],
           web_perms: [],
+          prevent_use_virtual: false
         }
       }
       this.permissionDialog = true

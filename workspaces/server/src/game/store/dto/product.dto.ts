@@ -1,4 +1,4 @@
-import { IsDecimal, IsDefined, IsInt, IsOptional, IsString, Min, IsArray, Max, IsNumber, IsEnum } from 'class-validator';
+import { IsDecimal, IsDefined, IsInt, IsOptional, IsString, Min, IsArray, Max, IsNumber, IsEnum, IsBoolean } from 'class-validator';
 import { GiveMethod } from '../enums/give-method.enum';
 
 export class ProductInput {
@@ -46,4 +46,8 @@ export class ProductInput {
   @IsArray()
   @IsInt({ each: true })
   categories: number[];
+
+  @IsOptional()
+  @IsBoolean()
+  prevent_use_virtual?: boolean
 }

@@ -208,6 +208,7 @@ export class DonatePermissionsService {
     perm.description = input.description;
     perm.price = input.price;
     perm.sale = input.sale;
+    perm.prevent_use_virtual = input.prevent_use_virtual
 
     perm.periods = await this.periodsRepository.find({
       id: In(input.periods),
@@ -254,6 +255,7 @@ export class DonatePermissionsService {
     perm.description = input.description;
     perm.price = input.price;
     perm.sale = input.sale;
+    perm.prevent_use_virtual = input.prevent_use_virtual
 
     perm.periods = await this.periodsRepository.find({
       id: In(input.periods),

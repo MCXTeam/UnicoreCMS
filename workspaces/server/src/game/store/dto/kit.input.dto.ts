@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsDefined, IsInt, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsArray, IsBoolean, IsDefined, IsInt, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 
 export class KitItemInput {
   @IsDefined()
@@ -45,4 +45,8 @@ export class KitInput {
   @IsArray()
   @Type(() => KitItemInput)
   items: KitItemInput[];
+
+  @IsOptional()
+  @IsBoolean()
+  prevent_use_virtual?: boolean
 }

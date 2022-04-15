@@ -11,6 +11,7 @@ import { User } from 'src/admin/users/entities/user.entity';
 import { CartItemKit } from './entities/cart-item-kit.entity';
 import { Kit } from '../entities/kit.entity';
 import { HistoryModule } from 'src/game/cabinet/history/history.module';
+import { ConfigModule } from 'src/admin/config/config.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { HistoryModule } from 'src/game/cabinet/history/history.module';
     UsersModule,
     ServersModule,
     HistoryModule,
+    ConfigModule
   ],
   providers: [CartService],
   exports: [CartService],

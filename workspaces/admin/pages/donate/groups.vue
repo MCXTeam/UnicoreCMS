@@ -235,6 +235,10 @@
                 </ValidationProvider>
               </div>
             </div>
+            <div class="field-checkbox">
+              <Checkbox :binary="true" v-model="group.prevent_use_virtual" />
+              <label>Запретить оплату бонусной валютой</label>
+            </div>
             <template #footer>
               <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
@@ -283,6 +287,7 @@ export default {
         web_perms: [],
         kits: [],
         periods: [],
+        prevent_use_virtual: false
       },
       groupDialog: false,
       autocompleate: null,
@@ -418,6 +423,7 @@ export default {
           web_perms: [],
           kits: [],
           periods: [],
+          prevent_use_virtual: false
         }
       }
       this.groupDialog = true
