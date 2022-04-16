@@ -82,7 +82,7 @@ export default {
 
   computed: {
     ...mapGetters({
-      config: 'unicore/config',
+      config: 'config',
     }),
   },
 

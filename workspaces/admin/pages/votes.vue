@@ -22,7 +22,7 @@
           <Column field="id" header="ID" sortable></Column>
           <Column field="place" header="Место" sortable />
           <Column field="bonus" header="Бонус">
-            <template #body="slotProps"> {{ $utils.formatCurrency(slotProps.data.bonus) }} </template>
+            <template #body="slotProps"> {{ $utils.formatCurrency('real', slotProps.data.bonus) }} </template>
           </Column>
           <Column :styles="{ width: '12rem' }">
             <template #body="slotProps">
@@ -51,7 +51,7 @@
             <ValidationProvider name="Бонус рублей на баланс" rules="required|min:0" v-slot="{ errors }">
               <div class="field">
                 <label>Бонус рублей на баланс</label>
-                <InputNumber v-model="bonus.bonus" currency="RUB" locale="ru-RU" mode="currency" />
+                <InputNumber v-model="bonus.bonus" mode="decimal" :minFractionDigits="$config.realDecimals" :maxFractionDigits="$config.realDecimals" />
                 <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
               </div>
             </ValidationProvider>

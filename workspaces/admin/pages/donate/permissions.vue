@@ -40,7 +40,7 @@
           <Column field="name" header="Название"></Column>
           <Column field="price" header="Цена">
             <template #body="slotProps">
-              {{ formatCurrency(slotProps.data.price) }}
+              {{ $utils.formatCurrency('real', slotProps.data.price) }}
             </template>
           </Column>
           <Column field="sale" header="Скидка"></Column>
@@ -117,7 +117,7 @@
                 <ValidationProvider name="Цена" rules="required|min:0.01" v-slot="{ errors }">
                   <div class="field">
                     <label>Цена</label>
-                    <InputNumber v-model="permission.price" currency="RUB" locale="ru-RU" mode="currency" />
+                    <InputNumber v-model="permission.price" mode="decimal" :minFractionDigits="$config.realDecimals" :maxFractionDigits="$config.realDecimals" />
                     <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
                   </div>
                 </ValidationProvider>
@@ -132,9 +132,13 @@
                 </ValidationProvider>
               </div>
             </div>
-            <div class="field-checkbox">
-              <Checkbox :binary="true" v-model="permission.prevent_use_virtual" />
-              <label>Запретить оплату бонусной валютой</label>
+            <div class="field">
+              <ValidationProvider name="Процент" rules="min_value:0|max_value:100" v-slot="{ errors }">
+                <label>Индивидуальный процент оплаты бонусами</label>
+                <InputNumber suffix=" %" :useGrouping="false" v-model="permission.virtual_percent" />
+                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                <small>0 - отключить оплату бонусами на данный товар</small>
+              </ValidationProvider>
             </div>
             <div class="field" v-if="$_.get(permission.type, 'value') == 'game' || $_.get(permission.type, 'value') == 'kit'">
               <label>Серверы</label>
@@ -232,7 +236,7 @@ export default {
         periods: [],
         perms: [],
         web_perms: [],
-        prevent_use_virtual: false
+        virtual_percent: false
       },
       permissionDialog: false,
       types: [
@@ -267,10 +271,6 @@ export default {
         })),
       })
       this.$fetch()
-    },
-    formatCurrency(value) {
-      if (value) return value.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' })
-      return
     },
     searchAutocompleate(event) {
       if (!event.query.trim().length) {
@@ -312,7 +312,7 @@ export default {
           periods: [],
           perms: [],
           web_perms: [],
-          prevent_use_virtual: false
+          virtual_percent: false
         }
       }
       this.permissionDialog = true

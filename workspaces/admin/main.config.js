@@ -110,6 +110,9 @@ export default (config) =>
         apiUrl: envConfig.apiBaseurl,
         url: envConfig.baseurl,
         sitename: envConfig.sitename,
+        realDecimals: envConfig.realDecimals,
+        virtualDecimals: envConfig.virtualDecimals,
+        ingameDecimals: envConfig.ingameDecimals,
       },
 
       render: {

@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsBoolean, IsDefined, IsInt, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsArray, IsDefined, IsInt, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 import { GroupFeature } from '../entities/group-feature.entity';
 
 export class GroupInput {
@@ -51,6 +51,8 @@ export class GroupInput {
   periods: number[];
 
   @IsOptional()
-  @IsBoolean()
-  prevent_use_virtual?: boolean
+  @IsInt()
+  @Min(0)
+  @Max(100)
+  virtual_percent?: number
 }

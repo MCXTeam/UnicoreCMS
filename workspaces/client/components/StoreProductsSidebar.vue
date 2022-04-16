@@ -26,8 +26,8 @@
         <Slider :disabled="loading" v-model="priceLocal" :range="true" :min="range.min" :max="range.max" :step="0.01" class="mt-3" />
       </div>
       <div class="d-flex justify-content-between mt-2">
-        <span v-text="$utils.formatCurrency(priceLocal[0])" />
-        <span v-text="$utils.formatCurrency(priceLocal[1])" />
+        <span v-text="$utils.formatCurrency('real', priceLocal[0])" />
+        <span v-text="$utils.formatCurrency('real', priceLocal[1])" />
       </div>
       <vs-button :loading="loading" @click="update()" block size="large" class="mx-0 mt-3 text-uppercase">Применить</vs-button>
     </div>

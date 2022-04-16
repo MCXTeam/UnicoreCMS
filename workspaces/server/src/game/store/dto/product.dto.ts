@@ -48,6 +48,13 @@ export class ProductInput {
   categories: number[];
 
   @IsOptional()
-  @IsBoolean()
-  prevent_use_virtual?: boolean
+  @IsInt()
+  @Min(0)
+  @Max(100)
+  virtual_percent?: number
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  multiple_of?: number
 }

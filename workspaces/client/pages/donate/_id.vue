@@ -13,8 +13,8 @@
               <h5 class="sale-wrapper ms-2 my-0" v-if="donate.sale">-{{ donate.sale }}%</h5>
             </div>
             <h4 v-if="donate.sale" class="mt-0">
-              {{ donate.periods[0].name }} за <strike v-text="$utils.formatCurrency(donate.price * donate.periods[0].multiplier)" />
-              {{ $utils.formatCurrency(donate.price * donate.periods[0].multiplier, donate.sale) }}
+              {{ donate.periods[0].name }} за <strike v-text="$utils.formatCurrency('real', donate.price * donate.periods[0].multiplier)" />
+              {{ $utils.formatCurrency('real', donate.price * donate.periods[0].multiplier, donate.sale) }}
             </h4>
           </div>
           <div class="col">

@@ -107,7 +107,7 @@
             </vs-avatar>
             <div class="d-flex flex-column justify-content-center">
               <h4 class="m-0">{{ $auth.user.username }}</h4>
-              <h5 class="m-0">Баланс: {{ $utils.formatCurrency($auth.user.real) }}</h5>
+              <h5 class="m-0">Баланс: {{ $utils.formatCurrency('real', $auth.user.real) }}</h5>
             </div>
             <vs-avatar @click="$unicore.logout()">
               <i class="bx bx-power-off"></i>
@@ -159,7 +159,7 @@ export default {
   computed: {
     ...mapGetters({
       onlines: 'io/serversOnline',
-      config: 'unicore/config',
+      config: 'config',
     }),
   },
   async mounted() {

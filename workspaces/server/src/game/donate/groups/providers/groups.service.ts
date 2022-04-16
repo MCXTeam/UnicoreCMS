@@ -22,10 +22,15 @@ import { DonateGroup } from '../entities/donate-group.entity';
 import { GroupKit } from '../entities/group-kit.entity';
 import { UsersDonateGroup } from '../entities/user-donate.entity';
 import * as _ from 'lodash'
+import { ConfigService } from 'src/admin/config/config.service';
+import { ConfigField } from 'src/admin/config/config.enum';
+import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
+import { isError } from 'lodash';
 
 @Injectable()
 export class DonateGroupsService {
   constructor(
+    private configService: ConfigService,
     private eventsService: EventsService,
     private historyService: HistoryService,
     @Inject('moment')
@@ -143,17 +148,22 @@ export class DonateGroupsService {
   }
 
   async buy(user: User, ip: string, input: GroupBuyInput) {
+    const cfg = await this.configService.load()
     const group = await this.findOne(input.group, ['servers', 'periods']);
     const server = group?.servers?.find((server) => server.id == input.server);
     const period = group?.periods?.find((period) => period.id == input.period);
 
     if (!group || !server || !period) throw new NotFoundException();
 
-    const price = (group.price - (group.price * group.sale) / 100) * period.multiplier;
+    const price = currencyUtils.roundByType((group.price - (group.price * group.sale) / 100) * period.multiplier, SystemCurrency.REAL);
+    let virtual_sale = currencyUtils.roundByType(input.use_virtual && cfg[ConfigField.DonateGroupsVirtualUse] && group.virtual_percent !== 0 ? 
+      price / 100 * (group.virtual_percent || Number(cfg[ConfigField.VirtualPercent])) : 0, SystemCurrency.VIRTAUL)
 
-    if (user.real < price) throw new BadRequestException();
+    if (virtual_sale >= user.virtual) virtual_sale = user.virtual
+    if (user.real < currencyUtils.roundByType(price - virtual_sale, SystemCurrency.REAL)) throw new BadRequestException();
 
-    user.real = user.real - price;
+    user.real = currencyUtils.roundByType(user.real - (price - virtual_sale), SystemCurrency.REAL)
+    user.virtual = currencyUtils.roundByType(user.virtual - virtual_sale, SystemCurrency.VIRTAUL)
 
     try {
       await this.give(user, server, group, period)
@@ -173,12 +183,12 @@ export class DonateGroupsService {
 
     group.name = input.name;
     group.description = input.description;
-    group.price = input.price;
+    group.price = currencyUtils.roundByType(input.price, SystemCurrency.REAL);
     group.sale = input.sale;
     group.ingame_id = input.ingame_id;
     group.web_perms = input.web_perms;
     group.features = input.features;
-    group.prevent_use_virtual = input.prevent_use_virtual
+    group.virtual_percent = input.virtual_percent
 
     group.servers = await this.serversRepository.find({
       id: In(input.servers),
@@ -217,12 +227,12 @@ export class DonateGroupsService {
 
     group.name = input.name;
     group.description = input.description;
-    group.price = input.price;
+    group.price = currencyUtils.roundByType(input.price, SystemCurrency.REAL);
     group.sale = input.sale;
     group.ingame_id = input.ingame_id;
     group.web_perms = input.web_perms;
     group.features = input.features;
-    group.prevent_use_virtual = input.prevent_use_virtual
+    group.virtual_percent = input.virtual_percent
 
     group.servers = await this.serversRepository.find({
       id: In(input.servers),

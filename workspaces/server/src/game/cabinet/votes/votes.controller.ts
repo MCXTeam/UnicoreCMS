@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { Permission } from 'unicore-common';
+import { VirtualCurrencyUserUpdate } from './dto/virtual-cur-user-update.input';
 import { VoteGiftInput } from './dto/vote-gift.input';
 import { VoteGift } from './entities/vote-gift.entity';
 import { VotesService } from './votes.service';
@@ -35,5 +36,11 @@ export class VotesController {
   @Delete('gifts/:id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.votesService.remove(id);
+  }
+
+  @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
+  @Patch('admin')
+  updateVirtual(@Body() body: VirtualCurrencyUserUpdate) {
+    return this.votesService.updateVirtual(body);
   }
 }

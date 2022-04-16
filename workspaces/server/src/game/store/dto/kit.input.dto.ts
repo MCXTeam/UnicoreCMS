@@ -47,6 +47,8 @@ export class KitInput {
   items: KitItemInput[];
 
   @IsOptional()
-  @IsBoolean()
-  prevent_use_virtual?: boolean
+  @IsInt()
+  @Min(0)
+  @Max(100)
+  virtual_percent?: number
 }

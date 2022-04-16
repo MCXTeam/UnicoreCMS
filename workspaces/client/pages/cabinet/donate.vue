@@ -25,16 +25,26 @@
       <vs-select class="mw-100 mt-3" :key="donate.group.periods.length" placeholder="Выберите период" v-model="donate.period">
         <vs-option v-for="period in donate.group.periods" :key="period.id" :label="period.name" :value="period.id" v-text="period.name" />
       </vs-select>
+      <vs-alert v-if="donate.group.virtual_percent != 0 && config.public_donate_groups_virtual_use" relief class="mt-3">
+        <template #icon>
+          <i class="bx bxs-gift"></i>
+        </template>
+        Вы можете оплатить <b>{{ donate.group.virtual_percent || config.public_virtual_percent }}%</b> от стоимости донат-группы бонусами
+      </vs-alert>
+      <div v-if="calcGroupVirtSale() > 0" class="d-flex justify-content-between align-items-center mt-2">
+        <vs-checkbox v-model="donate.use_virtual"> Использовать бонусы </vs-checkbox>
+        <b>-{{ $utils.formatCurrency('virtual', calcGroupVirtSale()) }}</b>
+      </div>
       <template #footer>
         <div class="d-flex justify-content-center" v-if="donate.period">
-          <vs-button size="large" @click="buyGroup()" transparent>
-            Купить за
-            {{
-              $utils.formatCurrency(
-                donate.group.price * donate.group.periods.find((p) => p.id == donate.period).multiplier,
-                donate.group.sale
-              )
-            }}
+          <vs-button v-if="donate.use_virtual" size="large" @click="buyGroup()" transparent>
+            Купить за &nbsp;<small
+              ><strike>{{ $utils.formatCurrency('real', calcGroupPrice()) }}</strike></small
+            >
+            &nbsp;{{ $utils.formatCurrency('real', calcGroupPrice() - calcGroupVirtSale()) }}
+          </vs-button>
+          <vs-button v-else size="large" @click="buyGroup()" transparent>
+            Купить за {{ $utils.formatCurrency('real', calcGroupPrice()) }}
           </vs-button>
         </div>
       </template>
@@ -71,10 +81,14 @@
       <div class="description-html" v-if="permission.permission.description" v-html="permission.permission.description" />
       <div v-if="permission.permission.type == 'kit'" class="text-center mb-2">
         <div v-for="kit in permission.permission.kits" :key="kit.id">
-          <div v-if="kit.images.find(img => img.server.id == permission.server.id)">
+          <div v-if="kit.images.find((img) => img.server.id == permission.server.id)">
             <h4 v-if="permission.permission.kits.length > 1" class="m-0" v-text="kit.name" />
             <div class="description-html" v-if="kit.description" v-html="kit.description" />
-            <img class="mt-2" width="250px" :src="`${$config.apiUrl}/${kit.images.find(img => img.server.id == permission.server.id).image}`" />
+            <img
+              class="mt-2"
+              width="250px"
+              :src="`${$config.apiUrl}/${kit.images.find((img) => img.server.id == permission.server.id).image}`"
+            />
           </div>
         </div>
       </div>
@@ -87,16 +101,26 @@
           v-text="period.name"
         />
       </vs-select>
+      <vs-alert v-if="permission.permission.virtual_percent != 0 && config.public_donate_perms_virtual_use" relief class="mt-3">
+        <template #icon>
+          <i class="bx bxs-gift"></i>
+        </template>
+        Вы можете оплатить <b>{{ permission.permission.virtual_percent || config.public_virtual_percent }}%</b> от стоимости донат-права бонусами
+      </vs-alert>
+      <div v-if="calcPermissionVirtSale() > 0" class="d-flex justify-content-between align-items-center mt-2">
+        <vs-checkbox v-model="permission.use_virtual"> Использовать бонусы </vs-checkbox>
+        <b>-{{ $utils.formatCurrency('virtual', calcPermissionVirtSale()) }}</b>
+      </div>
       <template #footer>
         <div class="d-flex justify-content-center" v-if="permission.period">
-          <vs-button size="large" @click="buyPermission()" transparent>
-            Купить за
-            {{
-              $utils.formatCurrency(
-                permission.permission.price * permission.permission.periods.find((p) => p.id == permission.period).multiplier,
-                permission.permission.sale
-              )
-            }}
+          <vs-button v-if="permission.use_virtual" size="large" @click="buyPermission()" transparent>
+            Купить за &nbsp;<small
+              ><strike>{{ $utils.formatCurrency('real', calcPermissionPrice()) }}</strike></small
+            >
+            &nbsp;{{ $utils.formatCurrency('real', calcPermissionPrice() - calcPermissionVirtSale()) }}
+          </vs-button>
+          <vs-button v-else size="large" @click="buyPermission()" transparent>
+            Купить за {{ $utils.formatCurrency('real', calcPermissionPrice()) }}
           </vs-button>
         </div>
       </template>
@@ -154,7 +178,9 @@
         </div>
         <div v-if="donateGroups">
           <div
-            v-for="group in donateGroups"
+            v-for="group in donateGroups.filter(
+              (donate) => !donateGroupsMe.find((dgm) => dgm.server.id == donate.server.id && dgm.group.id == group.id && !dgm.expired)
+            )"
             :key="group.id"
             class="d-flex justify-content-between align-items-center cab-donate-block mt-3 pb-3"
           >
@@ -166,10 +192,10 @@
                   <h2 class="text-uppercase m-0" v-text="group.name" />
                   <h5 class="sale-wrapper ms-3 my-0" v-if="group.sale">-{{ group.sale }}%</h5>
                 </div>
-                <span v-if="!group.sale">От {{ $utils.formatCurrency(group.price * group.periods[0].multiplier) }}</span>
+                <span v-if="!group.sale">От {{ $utils.formatCurrency('real', group.price * group.periods[0].multiplier) }}</span>
                 <div v-else class="d-flex">
-                  <strike v-text="$utils.formatCurrency(group.price * group.periods[0].multiplier)"></strike>
-                  <h4 class="ms-2 my-0">От {{ $utils.formatCurrency(group.price * group.periods[0].multiplier, group.sale) }}</h4>
+                  <strike v-text="$utils.formatCurrency('real', group.price * group.periods[0].multiplier)"></strike>
+                  <h4 class="ms-2 my-0">От {{ $utils.formatCurrency('real', group.price * group.periods[0].multiplier, group.sale) }}</h4>
                 </div>
               </div>
             </div>
@@ -245,7 +271,13 @@
         </div>
         <div v-if="donatePermissions">
           <div
-            v-for="perm in donatePermissions"
+            v-for="perm in donatePermissions.filter(
+              (perm) =>
+                !donatePermissionsMe.find(
+                  (dpm) =>
+                    (dpm.permission.type == 'web' || dpm.server.id == permission.server.id) && dpm.permission.id == perm.id && !dpm.expired
+                )
+            )"
             :key="perm.id"
             class="d-flex justify-content-between align-items-center cab-donate-block mt-3 pb-3"
           >
@@ -255,10 +287,10 @@
                   <h4 class="text-uppercase m-0" v-text="perm.name" />
                   <h5 class="sale-wrapper ms-3 my-0" v-if="perm.sale">-{{ perm.sale }}%</h5>
                 </div>
-                <span v-if="!perm.sale">От {{ $utils.formatCurrency(perm.price * perm.periods[0].multiplier) }}</span>
+                <span v-if="!perm.sale">От {{ $utils.formatCurrency('real', perm.price * perm.periods[0].multiplier) }}</span>
                 <div v-else class="d-flex">
-                  <strike v-text="$utils.formatCurrency(perm.price * perm.periods[0].multiplier)"></strike>
-                  <h4 class="ms-2 my-0">От {{ $utils.formatCurrency(perm.price * perm.periods[0].multiplier, perm.sale) }}</h4>
+                  <strike v-text="$utils.formatCurrency('real', perm.price * perm.periods[0].multiplier)"></strike>
+                  <h4 class="ms-2 my-0">От {{ $utils.formatCurrency('real', perm.price * perm.periods[0].multiplier, perm.sale) }}</h4>
                 </div>
               </div>
             </div>
@@ -298,6 +330,8 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 export default {
   layout: 'cabinet',
 
@@ -307,11 +341,13 @@ export default {
         server_id: '',
         period: '',
         group: null,
+        use_virtual: false,
       },
       permission: {
         server_id: '',
         period: '',
         permission: null,
+        use_virtual: false,
       },
       servers: [],
       donateGroups: null,
@@ -322,6 +358,12 @@ export default {
       permissionDialog: false,
       loading: false,
     }
+  },
+
+  computed: {
+    ...mapGetters({
+      config: 'config',
+    }),
   },
 
   watch: {
@@ -348,14 +390,47 @@ export default {
   },
 
   methods: {
+    calcPermissionPrice() {
+      const price =
+        this.permission.permission.price * this.permission.permission.periods.find((p) => p.id == this.permission.period).multiplier
+      return price - (price / 100) * this.permission.permission.sale
+    },
+    calcGroupPrice() {
+      const price = this.donate.group.price * this.donate.group.periods.find((p) => p.id == this.donate.period).multiplier
+      return price - (price / 100) * this.donate.group.sale
+    },
+    calcPermissionVirtSale() {
+      const price = this.calcPermissionPrice()
+      const virt_sale =
+        this.config.public_donate_perms_virtual_use && this.permission.permission.virtual_percent !== 0
+          ? (price / 100) * (this.permission.permission.virtual_percent || this.config.public_virtual_percent)
+          : 0
+
+      if (virt_sale >= this.$auth.user.virtual) return this.$auth.user.virtual
+
+      return virt_sale
+    },
+    calcGroupVirtSale() {
+      const price = this.calcGroupPrice()
+      const virt_sale =
+        this.config.public_donate_groups_virtual_use && this.donate.group.virtual_percent !== 0
+          ? (price / 100) * (this.donate.group.virtual_percent || this.config.public_virtual_percent)
+          : 0
+
+      if (virt_sale >= this.$auth.user.virtual) return this.$auth.user.virtual
+
+      return virt_sale
+    },
     openGroupDialog(id) {
       this.donate.group = this.donateGroups.find((dg) => dg.id == id)
       this.donate.period = this.donate.group.periods[0].id
+      this.donate.use_virtual = false
       this.groupDialog = true
     },
     openPermissionDialog(id) {
       this.permission.permission = this.donatePermissions.find((dg) => dg.id == id)
       this.permission.period = this.permission.permission.periods[0].id
+      this.permission.use_virtual = false
       this.permissionDialog = true
     },
     async buyGroup() {
@@ -365,6 +440,7 @@ export default {
           server: this.servers[Number(this.donate.server_id)].id,
           group: this.donate.group.id,
           period: this.donate.period,
+          use_virtual: this.donate.use_virtual,
         })
         await Promise.all([this.$auth.fetchUser(), this.fetchDonatesMe()])
         this.groupDialog = false
@@ -384,6 +460,7 @@ export default {
           server: this.servers[Number(this.permission.server_id)].id,
           permission: this.permission.permission.id,
           period: this.permission.period,
+          use_virtual: this.permission.use_virtual,
         })
         await Promise.all([this.$auth.fetchUser(), this.fetchPermissionsMe()])
         this.permissionDialog = false

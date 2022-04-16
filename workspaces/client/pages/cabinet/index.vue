@@ -77,7 +77,7 @@
         <p v-if="$auth.user.ban && !$auth.user.ban.expires" class="text-danger">Вы заблокированы навсегда!</p>
       </div>
       <div class="col-xl-4 d-flex align-items-center">
-        <vs-button block size="large" :disabled="!$auth.user.ban" :loading="banLoading" @click="unabn()">Купить разбан за {{$utils.formatCurrency(config.public_unban_price)}}</vs-button>
+        <vs-button block size="large" :disabled="!$auth.user.ban" :loading="banLoading" @click="unabn()">Купить разбан за {{$utils.formatCurrency('real', config.public_unban_price)}}</vs-button>
       </div>
     </div>
     <hr class="my-3" />
@@ -93,7 +93,7 @@
           <Avatar v-else size="xlarge"> <i class="bx bxs-server"></i> </Avatar>
           <div class="ms-3">
             <h3 class="m-0" v-text="m.server.name" />
-            <span>{{ $utils.formatNumber(m.money) }} монет</span>
+            <span>{{ $utils.formatCurrency('ingame', m.money) }} монет</span>
           </div>
         </div>
       </div>
@@ -132,7 +132,7 @@ export default {
 
   computed: {
     ...mapGetters({
-      config: 'unicore/config',
+      config: 'config',
     }),
   },
 

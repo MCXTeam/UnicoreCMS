@@ -5,9 +5,10 @@ import { MulterFile } from 'fastify-file-interceptor';
 import * as JSZip from 'jszip';
 import * as _ from 'lodash';
 import { FilterOperator, paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
+import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
 import { Server } from 'src/game/servers/entities/server.entity';
 import { In, Repository } from 'typeorm';
-import { KitProtectedDto, PaginatedStoreDto, PayloadType, StoreDtoUnprotect } from '../dto/paginated-store.dto';
+import { KitProtectedDto, PaginatedStoreDto, PayloadType } from '../dto/paginated-store.dto';
 import { ProductFromGameInput } from '../dto/product-fromgame.dto';
 import { ProductsManyInput } from '../dto/product-many.input';
 import { ProductInput } from '../dto/product.dto';
@@ -264,7 +265,7 @@ export class ProductsService {
 
     product.give_method = GiveMethod.UnicoreConnect
     product.name = input.name;
-    product.price = input.price;
+    product.price = currencyUtils.roundByType(input.price, SystemCurrency.REAL);
     product.item_id = input.id;
     product.nbt = input.nbt;
 
@@ -280,10 +281,11 @@ export class ProductsService {
 
     product.name = input.name;
     product.description = input.description;
-    product.price = input.price;
+    product.price = currencyUtils.roundByType(input.price, SystemCurrency.REAL);
     product.sale = input.sale;
     product.give_method = input.give_method
-    product.prevent_use_virtual = input.prevent_use_virtual
+    product.virtual_percent = input.virtual_percent
+    product.multiple_of = input.multiple_of
 
     if (product.give_method == GiveMethod.UnicoreConnect) {
       product.item_id = input.item_id;
@@ -312,10 +314,11 @@ export class ProductsService {
 
     product.name = input.name;
     product.description = input.description;
-    product.price = input.price;
+    product.price = currencyUtils.roundByType(input.price, SystemCurrency.REAL);
     product.sale = input.sale;
     product.give_method = input.give_method
-    product.prevent_use_virtual = input.prevent_use_virtual
+    product.virtual_percent = input.virtual_percent
+    product.multiple_of = input.multiple_of
 
     if (product.give_method == GiveMethod.UnicoreConnect) {
       product.item_id = input.item_id;
@@ -380,7 +383,7 @@ export class ProductsService {
         description: product.description,
         give_method: product.give_method,
         nbt: product.nbt,
-        price: product.price,
+        price: currencyUtils.roundByType(product.price, SystemCurrency.REAL),
         sale: product.sale,
         item_id: product.item_id,
         commands: product.commands,
@@ -417,7 +420,7 @@ export class ProductsService {
         entity.name = product.name;
         entity.description = product.description;
         entity.nbt = product.nbt;
-        entity.price = product.price;
+        entity.price = currencyUtils.roundByType(product.price, SystemCurrency.REAL);
         entity.sale = product.sale;
         entity.give_method = product.give_method;
         entity.item_id = product.item_id;
@@ -455,7 +458,7 @@ export class ProductsService {
 
         if (sale === 0) product.sale = null;
 
-        if (price) product.price = price;
+        if (price) product.price = currencyUtils.roundByType(price, SystemCurrency.REAL);
 
         if (servers_.length) product.servers = servers_;
         else if (servers && servers.length) product.servers = await this.serversRepository.find({ where: { id: In(servers) } });

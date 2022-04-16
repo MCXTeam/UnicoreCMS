@@ -9,9 +9,10 @@ import { Period } from '../entities/period.entity';
 import { GroupKit } from '../groups/entities/group-kit.entity';
 import { HistoryModule } from 'src/game/cabinet/history/history.module';
 import { User } from 'src/admin/users/entities/user.entity';
+import { ConfigModule } from 'src/admin/config/config.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([DonatePermission, UsersDonatePermission, Server, Period, GroupKit, User]), HistoryModule],
+  imports: [TypeOrmModule.forFeature([DonatePermission, UsersDonatePermission, Server, Period, GroupKit, User]), HistoryModule, ConfigModule],
   providers: [DonatePermissionsService],
   exports: [DonatePermissionsService],
   controllers: [PermissionsController],

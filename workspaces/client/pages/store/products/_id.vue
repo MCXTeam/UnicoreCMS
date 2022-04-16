@@ -11,20 +11,17 @@
             <Avatar v-else size="xlarge"> <i class="bx bxs-image"></i> </Avatar>
           </div>
         </template>
-        <div class="description-html mt-3" v-if="product.payload.description" v-html="product.payload.description" />
-        <ValidationProvider
-          v-if="product.type == 'product'"
-          class="w-100"
-          name="Количество"
-          rules="required|integer|min_value:1|max_value:10000"
-          v-slot="{ errors }"
-        >
-          <vs-input class="mw-100 mt-4" v-model="product.amount" label="Количество">
-            <template #message-danger v-if="errors[0]">
-              {{ errors[0] }}
-            </template>
-          </vs-input>
-        </ValidationProvider>
+        <div class="description-html mb-3" v-if="product.payload.description" v-html="product.payload.description" />
+        <div v-if="product.type == 'product'" class="mb-4">
+          <h5 class="text-uppercase my-2">Количество ({{ amount }} шт.)</h5>
+          <Slider
+            v-model="amount"
+            @change="multiple_of_fix"
+            :min="product.payload.multiple_of || 1"
+            :max="amount < 10000 ? amount + (product.payload.multiple_of || 1) * 10 : 10000 - (10000 % (product.payload.multiple_of || 1))"
+            :step="product.payload.multiple_of || 1"
+          />
+        </div>
         <div v-else>
           <h3 class="mt-0 text-center">Содержимое набора</h3>
           <div v-if="product.payload.items">
@@ -37,7 +34,7 @@
         </div>
         <vs-alert
           v-if="
-            product.payload.prevent_use_virtual &&
+            product.payload.virtual_percent != 0 &&
             ((config.public_store_products_virtual_use && product.type == 'product') ||
               (config.public_store_kits_virtual_use && product.type == 'kit'))
           "
@@ -45,17 +42,19 @@
           class="mt-3"
         >
           <template #icon>
-            <i class="bx bxs-bug"></i>
+            <i class="bx bxs-gift"></i>
           </template>
-          Оплата бонусами на данный товар недоступна!
+          Вы можете оплатить <b>{{ product.payload.virtual_percent || config.public_virtual_percent }}%</b> от стоимости товара бонусами
         </vs-alert>
         <template #footer>
           <div v-if="!invalid" class="d-flex justify-content-center">
             <vs-button v-if="product.type == 'product'" size="large" transparent @click="addToCart()">
-              Добавить в корзину ({{ $utils.formatCurrency(product.payload.price * product.amount, product.payload.sale) }})</vs-button
+              Добавить в корзину ({{
+                $utils.formatCurrency('real', product.payload.price * amount, product.payload.sale)
+              }})</vs-button
             >
             <vs-button v-else size="large" transparent @click="addToCart()">
-              Добавить в корзину ({{ $utils.formatCurrency(product.payload.price, product.payload.sale) }})</vs-button
+              Добавить в корзину ({{ $utils.formatCurrency('real', product.payload.price, product.payload.sale) }})</vs-button
             >
           </div>
         </template>
@@ -78,8 +77,8 @@
             </div>
           </td>
           <td>
-            <strike v-if="product.payload.sale" v-text="$utils.formatCurrency(product.payload.price)" class="me-1"></strike>
-            <span v-text="$utils.formatCurrency(product.payload.price, product.payload.sale)"></span>
+            <strike v-if="product.payload.sale" v-text="$utils.formatCurrency('real', product.payload.price)" class="me-1"></strike>
+            <span v-text="$utils.formatCurrency('real', product.payload.price, product.payload.sale)"></span>
             <h5 class="m-0">за 1 шт.</h5>
           </td>
           <td align="right">
@@ -105,6 +104,7 @@ export default {
   },
   data() {
     return {
+      amount: 1,
       server: null,
       loading: false,
       page: 0,
@@ -125,7 +125,7 @@ export default {
 
   computed: {
     ...mapGetters({
-      config: 'unicore/config',
+      config: 'config',
     }),
   },
 
@@ -163,10 +163,21 @@ export default {
   },
 
   methods: {
+    multiple_of_fix(value) {
+      const fix = value % this.product.payload.multiple_of
+
+      if (this.amount < 10000) {
+        if (this.product.payload.multiple_of)
+          this.amount = this.amount > this.product.payload.multiple_of ? this.amount - fix : this.product.payload.multiple_of
+        this.step = this.amount
+      } else {
+        this.amount = 10000 - (10000 % (this.product.payload.multiple_of || 1))
+      }
+    },
     async openDialog(product) {
-      product.amount = 1
       this.product = product
       this.productDialog = true
+      this.amount = product.payload.multiple_of || 1
 
       if (product.type == 'kit') {
         this.loading = true
@@ -186,7 +197,7 @@ export default {
           id: this.product.payload.id,
           type: this.product.type,
           server_id: this.server.id,
-          amount: Number(this.product.amount),
+          amount: this.amount,
         })
         this.$unicore.successNotification('Товар добавлен в корзину')
       } catch (e) {

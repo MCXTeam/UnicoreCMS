@@ -77,10 +77,6 @@ declare module '@nuxt/types' {
 }
 
 const unicorePlugin: Plugin = async (context, inject) => {
-  // FETCH STORE RESOURCES
-  const cfg = await context.$axios.get('/config/public').then((res) => res.data)
-  context.store.commit('unicore/SET_CONFIG', cfg)
-  //
   inject('unicore', new UnicorePlugin(context))
 }
 

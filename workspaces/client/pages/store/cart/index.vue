@@ -28,8 +28,8 @@
             </div>
           </td>
           <td>
-            <strike v-if="cartItem.payload.kit.sale" v-text="$utils.formatCurrency(cartItem.payload.kit.price)" class="me-1"></strike>
-            <span v-text="$utils.formatCurrency(cartItem.payload.kit.price, cartItem.payload.kit.sale)"></span>
+            <strike v-if="cartItem.payload.kit.sale" v-text="$utils.formatCurrency('real', cartItem.payload.kit.price)" class="me-1"></strike>
+            <span v-text="$utils.formatCurrency('real', cartItem.payload.kit.price, cartItem.payload.kit.sale)"></span>
             <h5 class="m-0">1 шт.</h5>
           </td>
           <td align="right">
@@ -54,11 +54,11 @@
           <td>
             <strike
               v-if="cartItem.payload.product.sale"
-              v-text="$utils.formatCurrency(cartItem.payload.product.price * cartItem.payload.amount)"
+              v-text="$utils.formatCurrency('real', cartItem.payload.product.price * cartItem.payload.amount)"
               class="me-1"
             ></strike>
             <span
-              v-text="$utils.formatCurrency(cartItem.payload.product.price * cartItem.payload.amount, cartItem.payload.product.sale)"
+              v-text="$utils.formatCurrency('real', cartItem.payload.product.price * cartItem.payload.amount, cartItem.payload.product.sale)"
             ></span>
             <h5 class="m-0">{{ cartItem.payload.amount }} шт.</h5>
           </td>

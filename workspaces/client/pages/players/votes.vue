@@ -10,7 +10,7 @@
         <div v-for="vg in votesGifts" :key="vg.id" class="col-6 col-lg mb-2">
           <div class="mini-profile px-3 py-2" :class="'vote-gift-' + vg.place">
             <h3 class="m-0">{{ vg.place }} место</h3>
-            <span v-text="$utils.formatCurrency(vg.bonus)" />
+            <span v-text="$utils.formatCurrency('real', vg.bonus)" />
           </div>
         </div>
       </div>

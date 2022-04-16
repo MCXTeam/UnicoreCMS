@@ -9,8 +9,8 @@
       </template>
       <div class="text-center">
         <img height="100px" src="/images/chest-minecraft.gif" />
-        <h4 v-if="gift.type == 'real'" class="m-0">{{ $utils.formatCurrency(gift.amount) }} на баланс</h4>
-        <h4 v-if="gift.type == 'money'" class="m-0">{{ $utils.formatNumber(gift.amount) }} монет на сервере {{ gift.server.name }}</h4>
+        <h4 v-if="gift.type == 'real'" class="m-0">{{ $utils.formatCurrency('real', gift.amount) }} на баланс</h4>
+        <h4 v-if="gift.type == 'money'" class="m-0">{{ $utils.formatCurrency('ingame', gift.amount) }} монет на сервере {{ gift.server.name }}</h4>
         <h4 v-if="gift.type == 'donate'" class="m-0">
           Донат-группу "{{ gift.donate_group.name }}" ({{ gift.period.name }}) на сервере {{ gift.server.name }}
         </h4>
@@ -71,11 +71,14 @@
         </div>
         <div class="col ps-xl-5">
           <h3 class="mt-0 mb-3">Что вы получите, проголосовав в трёх рейтингах?</h3>
+          <p class="mt-1">
+            <b>Бонусы</b> - валюта за которую вы можете частично или полностью оплачивать товары из магазина, наборы ресурсов, донат-группы и донат-киты.
+          </p>
           <div class="row">
             <div class="col-xl-6">
               <div class="mini-profile p-4 my-3 h-75">
-                <h2 class="mt-0 mb-2">{{ $utils.formatCurrency(config.public_monitoring_reward * monitorings.length) }}</h2>
-                <span>На баланс</span>
+                <h2 class="mt-0 mb-2">{{ $utils.formatCurrency('virtual', config.public_monitoring_reward * monitorings.length) }}</h2>
+                <span>Бонусов</span>
               </div>
             </div>
             <div class="col-xl-6">
@@ -135,7 +138,7 @@ export default {
 
   computed: {
     ...mapGetters({
-      config: 'unicore/config',
+      config: 'config',
     }),
   },
 

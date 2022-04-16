@@ -17,10 +17,14 @@ import { DonatePermission } from './entities/donate-permission.entity';
 import { UsersDonatePermission } from './entities/user-permission.entity';
 import { PermissionType } from './enums/permission-type.enum';
 import * as _ from 'lodash'
+import { ConfigField } from 'src/admin/config/config.enum';
+import { ConfigService } from 'src/admin/config/config.service';
+import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
 
 @Injectable()
 export class DonatePermissionsService {
   constructor(
+    private configService: ConfigService,
     private eventsService: EventsService,
     private historyService: HistoryService,
     @Inject('moment')
@@ -65,7 +69,7 @@ export class DonatePermissionsService {
       permission: {
         id: permission.id,
       }
-    }, { relations: ['user']});
+    }, { relations: ['user'] });
 
     if (userPermission) {
       if (!userPermission.expired) throw new BadRequestException();
@@ -118,17 +122,22 @@ export class DonatePermissionsService {
   }
 
   async buy(user: User, ip: string, input: PermissionBuyInput) {
+    const cfg = await this.configService.load()
     const permission = await this.findOne(input.permission, ['servers', 'periods']);
     const server = permission?.servers?.find((server) => server.id == input.server);
     const period = permission?.periods?.find((period) => period.id == input.period);
 
     if (!permission || !period || !(server || permission.type == PermissionType.Web)) throw new NotFoundException();
 
-    const price = (permission.price - (permission.price * permission.sale) / 100) * period.multiplier;
+    const price = currencyUtils.roundByType((permission.price - (permission.price * permission.sale) / 100) * period.multiplier, SystemCurrency.REAL)
+    let virtual_sale = currencyUtils.roundByType(input.use_virtual && cfg[ConfigField.DonatePermsVirtualUse] && permission.virtual_percent !== 0 ?
+      price / 100 * (permission.virtual_percent || Number(cfg[ConfigField.VirtualPercent])) : 0, SystemCurrency.VIRTAUL)
 
-    if (user.real < price) throw new BadRequestException();
+    if (virtual_sale >= user.virtual) virtual_sale = user.virtual
+    if (user.real < currencyUtils.roundByType(price - virtual_sale, SystemCurrency.REAL)) throw new BadRequestException();
 
-    user.real = user.real - price;
+    user.real -= currencyUtils.roundByType(price - virtual_sale, SystemCurrency.REAL);
+    user.virtual -= currencyUtils.roundByType(virtual_sale, SystemCurrency.VIRTAUL)
 
     await this.give(user, server, permission, period)
     await this.historyService.create(HistoryType.DonatePermissionPurchase, ip, user, permission, server, period);
@@ -146,14 +155,14 @@ export class DonatePermissionsService {
       .getMany())
       .filter(perm => perm.servers.find(srv => srv.id == id) || perm.type == PermissionType.Web)
 
-      return _(perms.filter((group) => group.periods.length).map(perms => ({
-        ...perms,
-        periods: _.orderBy(perms.periods, ["multiplier"], ["asc"]),
-        kits: _(perms.kits.map(kit => ({
-          ...kit, priority: kit.priority ? kit.priority : 0, 
-          images: _(kit.images.map(image => ({...image, priority: image.server.priority ? image.server.priority : 0}))).orderBy(["server.priority", "id"], ["asc", "asc"]).value()
-        }))).orderBy(["priority", "id"], ["asc", "asc"]).value()
+    return _(perms.filter((group) => group.periods.length).map(perms => ({
+      ...perms,
+      periods: _.orderBy(perms.periods, ["multiplier"], ["asc"]),
+      kits: _(perms.kits.map(kit => ({
+        ...kit, priority: kit.priority ? kit.priority : 0,
+        images: _(kit.images.map(image => ({ ...image, priority: image.server.priority ? image.server.priority : 0 }))).orderBy(["server.priority", "id"], ["asc", "asc"]).value()
       }))).orderBy(["priority", "id"], ["asc", "asc"]).value()
+    }))).orderBy(["priority", "id"], ["asc", "asc"]).value()
   }
 
   async findByServerUC(id: string) {
@@ -193,9 +202,9 @@ export class DonatePermissionsService {
     return this.donatePermissionsRepository.save(servers.map(donp => {
       const updatedSort = input.items.find(dp => dp.id == donp.id)
 
-      if (updatedSort) 
+      if (updatedSort)
         return { ...donp, priority: updatedSort.priority }
-      
+
       return donp
     }))
   }
@@ -206,9 +215,9 @@ export class DonatePermissionsService {
     perm.name = input.name;
     perm.type = input.type;
     perm.description = input.description;
-    perm.price = input.price;
+    perm.price = currencyUtils.roundByType(input.price, SystemCurrency.REAL);
     perm.sale = input.sale;
-    perm.prevent_use_virtual = input.prevent_use_virtual
+    perm.virtual_percent = input.virtual_percent
 
     perm.periods = await this.periodsRepository.find({
       id: In(input.periods),
@@ -253,9 +262,9 @@ export class DonatePermissionsService {
 
     perm.name = input.name;
     perm.description = input.description;
-    perm.price = input.price;
+    perm.price = currencyUtils.roundByType(input.price, SystemCurrency.REAL);
     perm.sale = input.sale;
-    perm.prevent_use_virtual = input.prevent_use_virtual
+    perm.virtual_percent = input.virtual_percent
 
     perm.periods = await this.periodsRepository.find({
       id: In(input.periods),

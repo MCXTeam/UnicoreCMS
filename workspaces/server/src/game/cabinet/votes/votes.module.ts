@@ -1,5 +1,6 @@
 import { Module, OnModuleInit } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from 'src/admin/users/entities/user.entity';
 import { VoteGift } from './entities/vote-gift.entity';
 import { MctopModule } from './monitorings/mctop/mctop.module';
 import { MinecraftRatingModule } from './monitorings/minecraftrating/minecraftrating.module';
@@ -10,7 +11,7 @@ import { VotesService } from './votes.service';
 const register = [TopcraftModule, MctopModule, MinecraftRatingModule].filter(method => method.enabled)
 
 @Module({
-  imports: [...register, TypeOrmModule.forFeature([VoteGift])],
+  imports: [...register, TypeOrmModule.forFeature([VoteGift, User])],
   providers: [VotesService],
   controllers: [VotesController],
 })

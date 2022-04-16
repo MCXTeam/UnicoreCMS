@@ -57,7 +57,7 @@
           </Column>
           <Column field="price" header="Цена" sortable>
             <template #body="slotProps">
-              {{ formatCurrency(slotProps.data.price) }}
+              {{ $utils.formatCurrency('real', slotProps.data.price) }}
             </template>
           </Column>
           <Column field="sale" header="Скидка" sortable></Column>
@@ -278,7 +278,7 @@
                 <ValidationProvider name="Цена" rules="required|min:0.01" v-slot="{ errors }">
                   <div class="field">
                     <label>Цена</label>
-                    <InputNumber v-model="kit.price" currency="RUB" locale="ru-RU" mode="currency" />
+                    <InputNumber v-model="kit.price" mode="decimal" :minFractionDigits="$config.realDecimals" :maxFractionDigits="$config.realDecimals" />
                     <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
                   </div>
                 </ValidationProvider>
@@ -293,9 +293,13 @@
                 </ValidationProvider>
               </div>
             </div>
-            <div class="field-checkbox">
-              <Checkbox :binary="true" v-model="kit.prevent_use_virtual" />
-              <label>Запретить оплату бонусной валютой</label>
+            <div class="field">
+              <ValidationProvider name="Процент" rules="min_value:0|max_value:100" v-slot="{ errors }">
+                <label>Индивидуальный процент оплаты бонусами</label>
+                <InputNumber suffix=" %" :useGrouping="false" v-model="kit.virtual_percent" />
+                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                <small>0 - отключить оплату бонусами на данный товар</small>
+              </ValidationProvider>
             </div>
             <template #footer>
               <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
@@ -353,7 +357,7 @@ export default {
         categories: [],
         items: [],
         icon: null,
-        prevent_use_virtual: false
+        virtual_percent: null
       },
       fileDialog: false,
       kitDialog: false,
@@ -408,10 +412,6 @@ export default {
       if (filters.categories.value) transformed['filter.categories'] = filters.categories.value.map((category) => category.id).join(',')
 
       return transformed
-    },
-    formatCurrency(value) {
-      if (value) return value.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' })
-      return
     },
     onPage(event) {
       this.kits.meta.currentPage = event.page + 1
@@ -500,7 +500,7 @@ export default {
           servers: this.filters?.servers?.value || [],
           categories: this.filters?.categories?.value || [],
           items: [],
-          prevent_use_virtual: false
+          virtual_percent: null
         }
       }
       this.kitDialog = true

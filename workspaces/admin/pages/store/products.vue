@@ -67,7 +67,7 @@
           </Column>
           <Column field="price" header="Цена" sortable>
             <template #body="slotProps">
-              {{ formatCurrency(slotProps.data.price) }}
+              {{ $utils.formatCurrency('real', slotProps.data.price) }}
             </template>
           </Column>
           <Column field="sale" header="Скидка" sortable></Column>
@@ -210,7 +210,7 @@
                 <ValidationProvider name="Цена" rules="min:0.01" v-slot="{ errors }">
                   <div class="field">
                     <label>Цена</label>
-                    <InputNumber v-model="productMany.price" placeholder="Без изменений" currency="RUB" locale="ru-RU" mode="currency" />
+                    <InputNumber v-model="productMany.price" mode="decimal" :minFractionDigits="$config.realDecimals" :maxFractionDigits="$config.realDecimals" />
                     <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
                   </div>
                 </ValidationProvider>
@@ -371,6 +371,14 @@
                 <Divider type="dashed" />
               </div>
             </ValidationProvider>
+            <ValidationProvider name="Количество" rules="min_value:1" v-slot="{ errors }">
+              <div class="field">
+                <label>Количество (кратно)</label>
+                <InputNumber v-model="product.multiple_of" />
+                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                <small>Количество данного товара для покупки должно быть кратно указанному числу</small>
+              </div>
+            </ValidationProvider>
             <div class="field">
               <label>Описание</label>
               <Editor v-model="product.description" editorStyle="height: 160px">
@@ -430,7 +438,7 @@
                 <ValidationProvider name="Цена" rules="required|min:0.01" v-slot="{ errors }">
                   <div class="field">
                     <label>Цена</label>
-                    <InputNumber v-model="product.price" currency="RUB" locale="ru-RU" mode="currency" />
+                    <InputNumber v-model="product.price" mode="decimal" :minFractionDigits="$config.realDecimals" :maxFractionDigits="$config.realDecimals" />
                     <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
                   </div>
                 </ValidationProvider>
@@ -445,9 +453,13 @@
                 </ValidationProvider>
               </div>
             </div>
-            <div class="field-checkbox">
-              <Checkbox :binary="true" v-model="product.prevent_use_virtual" />
-              <label>Запретить оплату бонусной валютой</label>
+            <div class="field">
+              <ValidationProvider name="Процент" rules="min_value:0|max_value:100" v-slot="{ errors }">
+                <label>Индивидуальный процент оплаты бонусами</label>
+                <InputNumber suffix=" %" :useGrouping="false" v-model="product.virtual_percent" />
+                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                <small>0 - отключить оплату бонусами на данный товар</small>
+              </ValidationProvider>
             </div>
             <template #footer>
               <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
@@ -510,7 +522,8 @@ export default {
         icon: null,
         item_id: null,
         nbt: null,
-        prevent_use_virtual: false,
+        virtual_percent: null,
+        multiple_of: null,
       },
       productMany: {
         price: null,
@@ -560,10 +573,6 @@ export default {
       if (filters.categories.value) transformed['filter.categories'] = filters.categories.value.map((category) => category.id).join(',')
 
       return transformed
-    },
-    formatCurrency(value) {
-      if (value) return value.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' })
-      return
     },
     onPage(event) {
       this.products.meta.currentPage = event.page + 1
@@ -653,7 +662,8 @@ export default {
           categories: this.filters?.categories?.value || [],
           icon: null,
           nbt: null,
-          prevent_use_virtual: false,
+          virtual_percent: null,
+          multiple_of: null,
         }
       }
       this.productDialog = true

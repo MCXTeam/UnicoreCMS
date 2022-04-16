@@ -23,7 +23,7 @@ export class Money {
   @JoinColumn()
   user: User;
 
-  @Column('float')
+  @Column('float', { default: 0 })
   money: number;
 
   @CreateDateColumn()

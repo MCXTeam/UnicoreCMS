@@ -10,6 +10,7 @@ import { BanFromAdminInput } from './dto/ban-from-admin.input';
 import { MomentWrapper } from '@common';
 import { ConfigService } from 'src/admin/config/config.service';
 import { ConfigField } from 'src/admin/config/config.enum';
+import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
 
 @Injectable()
 export class BansService {
@@ -79,12 +80,13 @@ export class BansService {
       throw new NotFoundException()
 
     const config = await this.configService.load()
+    const price = currencyUtils.roundByType(config[ConfigField.UnbanPrice] as number, SystemCurrency.REAL)
     
     // Price calc
-    if (user.real < config[ConfigField.UnbanPrice])
+    if (user.real < price)
       throw new BadRequestException()
 
-    user.real -= config[ConfigField.UnbanPrice] as number
+    user.real -= price
     
     await this.usersRepository.save(user)
     await this.bansRepository.delete({ user })

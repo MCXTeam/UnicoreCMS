@@ -8,7 +8,7 @@
             <SkinView2D class="rounded" :width="48" :height="48" :skin="$auth.user.skin" />
           </Avatar>
           <div>
-            <h4 class="m-0">Баланс: {{ $utils.formatCurrency($auth.user.real) }}</h4>
+            <h4 class="m-0">Баланс: {{ $utils.formatCurrency('real', $auth.user.real) }}</h4>
           </div>
         </div>
         <div class="tab-panel w-100">

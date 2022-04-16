@@ -55,10 +55,10 @@ export class User {
   @Column({ nullable: true })
   two_factor_secret_temp?: string;
 
-  @Column({ default: 0 })
+  @Column('float', { default: 0 })
   real: number;
 
-  @Column({ default: 0 })
+  @Column('float', { default: 0 })
   virtual: number;
 
   @ManyToMany(() => Role, (role) => role.users, {

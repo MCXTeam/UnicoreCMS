@@ -10,7 +10,7 @@
           >
             <img width="110px" v-if="bonus.icon" :src="`${$config.apiUrl}/${bonus.icon}`" />
             <div class="w-100 mt-3">
-              <h2 class="m-0" v-text="$utils.formatCurrency(bonus.amount)" />
+              <h2 class="m-0" v-text="$utils.formatCurrency('real', bonus.amount)" />
               <span>{{ bonus.bonus }}% в подарок</span>
             </div>
           </div>
@@ -44,9 +44,9 @@
           </div>
           <div class="col d-flex align-items-center mb-2">
             <h2 v-if="b_active" class="m-0">
-              {{ $utils.formatCurrency(Number(payment.amount) + (payment.amount / 100) * b_active.bonus) }}
+              {{ $utils.formatCurrency('real', Number(payment.amount) + (payment.amount / 100) * b_active.bonus) }}
             </h2>
-            <h2 v-else class="m-0">{{ $utils.formatCurrency(Number(payment.amount)) }}</h2>
+            <h2 v-else class="m-0">{{ $utils.formatCurrency('real', Number(payment.amount)) }}</h2>
           </div>
         </div>
         <div v-for="method in payment_methods" :key="method" class="w-100 mini-profile p-2 my-2">
@@ -89,7 +89,7 @@
             <h3 class="mb-1 mt-3">Валюта</h3>
             <ValidationProvider class="w-100" name="Валюта" rules="required">
               <vs-select placeholder="Тип валюты" v-model="transfer_form.type">
-                <vs-option label="Реальная валюта" value="0">Реальная валюта ({{ $utils.formatCurrency($auth.user.real) }})</vs-option>
+                <vs-option label="Реальная валюта" value="0">Реальная валюта ({{ $utils.formatCurrency('real', $auth.user.real) }})</vs-option>
                 <vs-option label="Монеты" value="1">Монеты</vs-option>
               </vs-select>
             </ValidationProvider>
@@ -105,7 +105,7 @@
               <h3 class="mb-1 mt-3">Сервер</h3>
               <vs-select :loading="loading" :key="servers.length" placeholder="Выберите сервер" v-model="transfer_form.server">
                 <vs-option v-for="(server, index) in servers" :key="server.id" :label="server.name" :value="String(index)"
-                  >{{ server.name }} ({{ $utils.formatNumber(money[index].money) }} монет)</vs-option
+                  >{{ server.name }} ({{ $utils.formatCurrency('ingame', money[index].money) }} монет)</vs-option
                 >
               </vs-select>
             </ValidationProvider>
@@ -141,7 +141,7 @@
               <h3 class="mb-1 mt-3">С сервера</h3>
               <vs-select :loading="loading" :key="servers.length" placeholder="Выберите сервер" v-model="exchange_form.from_server">
                 <vs-option v-for="(server, index) in servers" :key="server.id" :label="server.name" :value="String(index)"
-                  >{{ server.name }} ({{ $utils.formatNumber(money[index].money) }} монет)</vs-option
+                  >{{ server.name }} ({{ $utils.formatCurrency('ingame', money[index].money) }} монет)</vs-option
                 >
               </vs-select>
             </ValidationProvider>
@@ -149,7 +149,7 @@
               <h3 class="mb-1 mt-3">На сервер</h3>
               <vs-select :loading="loading" :key="servers.length" placeholder="Выберите сервер" v-model="exchange_form.server">
                 <vs-option v-for="(server, index) in servers" :key="server.id" :label="server.name" :value="String(index)"
-                  >{{ server.name }} ({{ $utils.formatNumber(money[index].money) }} монет)</vs-option
+                  >{{ server.name }} ({{ $utils.formatCurrency('ingame', money[index].money) }} монет)</vs-option
                 >
               </vs-select>
             </ValidationProvider>
@@ -164,10 +164,10 @@
               <div v-if="!invalid">
                 <div class="ms-2 calculate d-flex flex-column justify-content-center" v-if="exchange_form.type == '0'">
                   <h4 class="m-0">
-                    {{ $utils.formatNumber(exchange_form.amount) }} монет за
-                    {{ $utils.formatCurrency(exchange_form.amount / config.public_economy_rate) }}
+                    {{ $utils.formatCurrency('ingame', exchange_form.amount) }} монет за
+                    {{ $utils.formatCurrency('real', exchange_form.amount / config.public_economy_rate) }}
                   </h4>
-                  <small class="m-0">По курсу: {{ $utils.formatNumber(config.public_economy_rate) }}/{{ $utils.formatCurrency(1) }}</small>
+                  <small class="m-0">По курсу: {{ $utils.formatCurrency('ingame', config.public_economy_rate) }}/{{ $utils.formatCurrency('real', 1) }}</small>
                 </div>
               </div>
             </div>
@@ -190,7 +190,7 @@ export default {
 
   computed: {
     ...mapGetters({
-      config: 'unicore/config',
+      config: 'config',
     }),
   },
 

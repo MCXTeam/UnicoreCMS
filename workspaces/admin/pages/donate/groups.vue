@@ -46,7 +46,7 @@
           </Column>
           <Column field="price" header="Цена">
             <template #body="slotProps">
-              {{ formatCurrency(slotProps.data.price) }}
+              {{ $utils.formatCurrency('real', slotProps.data.price) }}
             </template>
           </Column>
           <Column field="sale" header="Скидка"></Column>
@@ -220,7 +220,7 @@
                 <ValidationProvider name="Цена" rules="required|min:0.01" v-slot="{ errors }">
                   <div class="field">
                     <label>Цена</label>
-                    <InputNumber v-model="group.price" currency="RUB" locale="ru-RU" mode="currency" />
+                    <InputNumber v-model="group.price" mode="decimal" :minFractionDigits="$config.realDecimals" :maxFractionDigits="$config.realDecimals" />
                     <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
                   </div>
                 </ValidationProvider>
@@ -235,9 +235,13 @@
                 </ValidationProvider>
               </div>
             </div>
-            <div class="field-checkbox">
-              <Checkbox :binary="true" v-model="group.prevent_use_virtual" />
-              <label>Запретить оплату бонусной валютой</label>
+            <div class="field">
+              <ValidationProvider name="Процент" rules="min_value:0|max_value:100" v-slot="{ errors }">
+                <label>Индивидуальный процент оплаты бонусами</label>
+                <InputNumber suffix=" %" :useGrouping="false" v-model="group.virtual_percent" />
+                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                <small>0 - отключить оплату бонусами на данный товар</small>
+              </ValidationProvider>
             </div>
             <template #footer>
               <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
@@ -287,7 +291,7 @@ export default {
         web_perms: [],
         kits: [],
         periods: [],
-        prevent_use_virtual: false
+        virtual_percent: false
       },
       groupDialog: false,
       autocompleate: null,
@@ -319,10 +323,6 @@ export default {
         })),
       })
       this.$fetch()
-    },
-    formatCurrency(value) {
-      if (value) return value.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' })
-      return
     },
     onRowReorder(event) {
       this.group.features = event.value
@@ -423,7 +423,7 @@ export default {
           web_perms: [],
           kits: [],
           periods: [],
-          prevent_use_virtual: false
+          virtual_percent: false
         }
       }
       this.groupDialog = true

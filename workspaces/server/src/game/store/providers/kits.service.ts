@@ -73,7 +73,7 @@ export class KitsService {
     kit.description = input.description;
     kit.price = input.price;
     kit.sale = input.sale;
-    kit.prevent_use_virtual = input.prevent_use_virtual
+    kit.virtual_percent = input.virtual_percent
 
     kit.servers = await this.serversRepository.find({
       id: In(input.servers),
@@ -104,7 +104,7 @@ export class KitsService {
     kit.price = input.price;
     kit.sale = input.sale;
     kit.description = input.description;
-    kit.prevent_use_virtual = input.prevent_use_virtual
+    kit.virtual_percent = input.virtual_percent
 
     kit.servers = await this.serversRepository.find({
       id: In(input.servers),

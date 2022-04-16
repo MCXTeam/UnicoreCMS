@@ -21,6 +21,7 @@ import { CartBuyInput } from './dto/cart-buy.input';
 import { ConfigService } from 'src/admin/config/config.service';
 import { ConfigField } from 'src/admin/config/config.enum';
 import { CartFindDto } from './dto/cart-find.dto';
+import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
 
 @Injectable()
 export class CartService {
@@ -43,10 +44,10 @@ export class CartService {
   ) { }
 
   private priceCalc(cartItems, cartKitItems): number {
-    return _.sum([
+    return currencyUtils.roundByType(_.sum([
       ...cartItems.map((cartItem) => (cartItem.product.price - (cartItem.product.price * cartItem.product.sale) / 100) * cartItem.amount),
       ...cartKitItems.map((cartItem) => cartItem.kit.price - (cartItem.kit.price * cartItem.kit.sale) / 100),
-    ]);
+    ]), SystemCurrency.REAL);
   }
 
   private async virtualSaleCalulate(cartItems: CartItem[], cartKitItems: CartItemKit[], user: User, price: number): Promise<number> {
@@ -54,21 +55,15 @@ export class CartService {
       return 0
 
     const cfg = await this.configService.load()
-    const allowed_sale = _.sum([
-      ...cfg[ConfigField.StoreProductsVirtualUse] ? cartItems.filter(cartKitItems => !cartKitItems.product.prevent_use_virtual).map((cartItem) => (cartItem.product.price - (cartItem.product.price * cartItem.product.sale) / 100) * cartItem.amount) : [],
-      ...cfg[ConfigField.StoreKitsVirtualUse] ? cartKitItems.filter(cartKitItems => !cartKitItems.kit.prevent_use_virtual).map((cartItem) => cartItem.kit.price - (cartItem.kit.price * cartItem.kit.sale) / 100) : [],
+    const virtual_sale = _.sum([
+      ...cfg[ConfigField.StoreProductsVirtualUse] ? cartItems.map((cartItem) => ((cartItem.product.price - (cartItem.product.price * cartItem.product.sale) / 100) * cartItem.amount)  / 100 * (cartItem.product.virtual_percent == null ? Number(cfg[ConfigField.VirtualPercent]) : cartItem.product.virtual_percent)) : [],
+      ...cfg[ConfigField.StoreKitsVirtualUse] ? cartKitItems.map((cartItem) => (cartItem.kit.price - (cartItem.kit.price * cartItem.kit.sale) / 100) / 100 * (cartItem.kit.virtual_percent == null ? Number(cfg[ConfigField.VirtualPercent]) : cartItem.kit.virtual_percent)) : [],
     ]);
-    const max_allowed_sale = price / 100 * Number(cfg[ConfigField.VirtualPercent])
-
-    if (allowed_sale == 0) 
-      return 0
-
-    const virtual_sale = allowed_sale <= max_allowed_sale ? allowed_sale : max_allowed_sale
 
     if (user.virtual < virtual_sale)
-      return user.virtual
+      return currencyUtils.roundByType(user.virtual, SystemCurrency.VIRTAUL)
 
-    return virtual_sale
+    return currencyUtils.roundByType(virtual_sale, SystemCurrency.VIRTAUL)
   }
 
   private resolver(repo: Repository<WarehouseItem | CartItem>, server: Server, user: User, product: Product) {
@@ -124,6 +119,9 @@ export class CartService {
     if (body.type == PayloadType.Product) {
       const product = await this.productsRepository.findOne(body.id, { relations: ['servers'] });
 
+      if (product.multiple_of && body.amount % product.multiple_of != 0)
+        throw new BadRequestException();
+
       if (!product || !server || !product.servers.find((srv) => srv.id == server.id)) throw new BadRequestException();
 
       let cartItem = (await this.resolver(this.cartItemsRepository, server, user, product)) as CartItem;
@@ -139,7 +137,7 @@ export class CartService {
         cartItem.amount = body.amount;
       }
 
-      return this.cartItemsRepository.save(cartItem);
+      return new CartItemProtected(await this.cartItemsRepository.save(cartItem));
     } else {
       const kit = await this.kitsRepository.findOne(body.id, { relations: ['servers'] });
 
@@ -151,7 +149,7 @@ export class CartService {
       cartKitItem.server = server;
       cartKitItem.user = user;
 
-      return this.cartItemKitsRepository.save(cartKitItem);
+      return new CartItemKitProtected(await this.cartItemKitsRepository.save(cartKitItem));
     }
   }
 
@@ -286,7 +284,7 @@ export class CartService {
       )
       .flat();
 
-    if (user.real < price - virtual_sale) throw new BadRequestException();
+    if (user.real < currencyUtils.roundByType(price - virtual_sale, SystemCurrency.REAL)) throw new BadRequestException();
 
     const warehouseItems = await this.warehouseItemsRepository.save(await this.warehousePusher(user, cartItems));
 
@@ -294,8 +292,8 @@ export class CartService {
       warehouseItems.push((await this.warehouseItemsRepository.save(await this.warehousePusher(user, [cik])))[0]);
     }
 
-    user.real -= price - virtual_sale;
-    user.virtual -= virtual_sale
+    user.real -= currencyUtils.roundByType(price - virtual_sale, SystemCurrency.REAL);
+    user.virtual -= currencyUtils.roundByType(virtual_sale, SystemCurrency.VIRTAUL)
 
     for (const ci of cartItems) {
       await this.historyService.create(HistoryType.ProductPurchase, ip, user, ci.product, ci.server, ci.amount);

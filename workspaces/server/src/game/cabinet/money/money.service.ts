@@ -14,6 +14,8 @@ import { ConfigService } from 'src/admin/config/config.service';
 import { MoneyUpdateInput } from './dto/money-update.input';
 import { MoneyPayCommandInput } from './dto/money-pay-command.input';
 import { MoneyWDInput } from './dto/monet-wd.input';
+import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
+import { ConfigField } from 'src/admin/config/config.enum';
 
 @Injectable()
 export class MoneyService {
@@ -114,12 +116,12 @@ export class MoneyService {
         throw new NotFoundException();
       }
 
-      user_money.money = input.amount;
+      user_money.money = currencyUtils.roundByType(input.amount, SystemCurrency.INGAME);
       await this.moneyRepository.save(user_money);
 
       return true;
     } else {
-      user.real = input.amount;
+      user.real = currencyUtils.roundByType(input.amount, SystemCurrency.REAL);
       await this.usersRepo.save(user);
       return true;
     }
@@ -184,12 +186,12 @@ export class MoneyService {
         throw new NotFoundException();
       }
 
-      if (user_money.money < input.amount) throw new BadRequestException();
+      if (currencyUtils.roundByType(user_money.money, SystemCurrency.INGAME) < currencyUtils.roundByType(input.amount, SystemCurrency.INGAME)) throw new BadRequestException();
 
-      target_money.money += input.amount;
-      user_money.money -= input.amount;
+      target_money.money += currencyUtils.roundByType(input.amount, SystemCurrency.INGAME);
+      user_money.money -= currencyUtils.roundByType(input.amount, SystemCurrency.INGAME);
 
-      this.historyService.create(HistoryType.MoneyTransfer, ip, user_money.user, user_money.server, target_money.user, input.amount);
+      this.historyService.create(HistoryType.MoneyTransfer, ip, user_money.user, user_money.server, target_money.user, currencyUtils.roundByType(input.amount, SystemCurrency.INGAME));
 
       await this.moneyRepository.save([target_money, user_money]);
 
@@ -199,10 +201,10 @@ export class MoneyService {
 
       if (!target_user) throw new NotFoundException();
 
-      if (user.real < input.amount) throw new BadRequestException();
+      if (currencyUtils.roundByType(user.real, SystemCurrency.REAL) < currencyUtils.roundByType(input.amount, SystemCurrency.REAL)) throw new BadRequestException();
 
-      target_user.real += input.amount;
-      user.real -= input.amount;
+      target_user.real += currencyUtils.roundByType(input.amount, SystemCurrency.REAL);
+      user.real -= currencyUtils.roundByType(input.amount, SystemCurrency.REAL);
 
       this.historyService.create(HistoryType.RealTransfer, ip, user, target_user, input.amount);
 
@@ -220,14 +222,14 @@ export class MoneyService {
         throw new NotFoundException();
       }
 
-      const price = input.amount / (cfg.public_economy_rate as number);
+      const price = currencyUtils.roundByType(input.amount / (cfg[ConfigField.EconomyRate] as number), SystemCurrency.REAL);
 
       if (user.real < price) throw new BadRequestException();
 
-      user.real -= price;
-      user_money.money += input.amount;
+      user.real -= currencyUtils.roundByType(price, SystemCurrency.REAL);
+      user_money.money += currencyUtils.roundByType(input.amount, SystemCurrency.INGAME);
 
-      this.historyService.create(HistoryType.MoneyExchange, ip, user_money.user, user_money.server, input.amount);
+      this.historyService.create(HistoryType.MoneyExchange, ip, user_money.user, user_money.server, currencyUtils.roundByType(input.amount, SystemCurrency.INGAME));
 
       await this.moneyRepository.save(user_money);
       await this.usersRepo.save(user);
@@ -241,12 +243,13 @@ export class MoneyService {
         throw new NotFoundException();
       }
 
-      if (user_money_from.money < input.amount) throw new BadRequestException();
+      if (currencyUtils.roundByType(user_money_from.money, SystemCurrency.INGAME) < currencyUtils.roundByType(input.amount, SystemCurrency.INGAME)) 
+        throw new BadRequestException();
 
-      user_money_from.money -= input.amount;
-      user_money_to.money += input.amount;
+      user_money_from.money -= currencyUtils.roundByType(input.amount, SystemCurrency.INGAME);
+      user_money_to.money += currencyUtils.roundByType(input.amount, SystemCurrency.INGAME);
 
-      this.historyService.create(HistoryType.MoneyServerTransfer, ip, user_money_to.user, user_money_to.server, input.amount);
+      this.historyService.create(HistoryType.MoneyServerTransfer, ip, user_money_to.user, user_money_to.server, currencyUtils.roundByType(input.amount, SystemCurrency.INGAME));
 
       await this.moneyRepository.save([user_money_from, user_money_to]);
 

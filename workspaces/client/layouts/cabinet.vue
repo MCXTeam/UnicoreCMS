@@ -22,7 +22,7 @@
           <div class="ms-3">
             <h4 class="d-block d-lg-none m-0">{{ $auth.user.username }}</h4>
             <h4 class="d-none d-lg-block m-0">Привет, {{ $auth.user.username }}</h4>
-            <h5 class="m-0">Баланс: {{ $utils.formatCurrency($auth.user.real) }}</h5>
+            <h5 class="m-0">Баланс: {{ $utils.formatCurrency('real', $auth.user.real) }}</h5>
           </div>
           <vs-button @click="$unicore.logout()" transparent class="ms-2 d-none d-lg-block" size="large" danger>
             <i class="bx bx-exit"></i>
@@ -87,7 +87,7 @@
           </vs-avatar>
           <div class="d-flex flex-column justify-content-center">
             <h4 class="m-0">{{ $auth.user.username }}</h4>
-            <h5 class="m-0">Баланс: {{ $utils.formatCurrency($auth.user.real) }}</h5>
+            <h5 class="m-0">Баланс: {{ $utils.formatCurrency('real', $auth.user.real) }}</h5>
           </div>
           <vs-avatar @click="$unicore.logout()">
             <i class="bx bx-power-off"></i>

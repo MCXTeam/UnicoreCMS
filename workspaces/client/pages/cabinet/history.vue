@@ -71,7 +71,7 @@
             <!-- Payments -->
             <vs-td v-if="history_type == 'payment' && row.payment" style="max-width: 6rem"> #{{ row.payment.id }} </vs-td>
             <vs-td v-if="history_type == 'payment' && row.payment"> {{ row.payment.method }} </vs-td>
-            <vs-td v-if="history_type == 'payment' && row.payment"> {{ $utils.formatCurrency(row.payment.amount) }} </vs-td>
+            <vs-td v-if="history_type == 'payment' && row.payment"> {{ $utils.formatCurrency('real', row.payment.amount) }} </vs-td>
             <vs-td v-if="history_type == 'payment' && row.payment"> {{ row.payment.status }} </vs-td>
 
             <!-- Products -->
@@ -105,7 +105,7 @@
             <vs-td v-if="history_type == 'money_exchange' && row.server">
               <nuxt-link :to="'/servers/' + row.server.id">{{ row.server.name }}</nuxt-link>
             </vs-td>
-            <vs-td v-if="history_type == 'money_exchange' && row.amount"> {{ $utils.formatNumber(row.amount) }} </vs-td>
+            <vs-td v-if="history_type == 'money_exchange' && row.amount"> {{ $utils.formatCurrency('ingame', row.amount) }} </vs-td>
 
             <!-- MoneyTransfer -->
             <vs-td v-if="history_type == 'money_transfer' && row.target">
@@ -114,13 +114,13 @@
             <vs-td v-if="history_type == 'money_transfer' && row.server">
               <nuxt-link :to="'/servers/' + row.server.id">{{ row.server.name }}</nuxt-link>
             </vs-td>
-            <vs-td v-if="history_type == 'money_transfer' && row.amount"> {{ $utils.formatNumber(row.amount) }} </vs-td>
+            <vs-td v-if="history_type == 'money_transfer' && row.amount"> {{ $utils.formatCurrency('ingame', row.amount) }} </vs-td>
 
             <!-- RealTransfer -->
             <vs-td v-if="history_type == 'real_transfer' && row.target">
               <nuxt-link :to="`/user/` + row.target.username">{{ row.target.username }}</nuxt-link>
             </vs-td>
-            <vs-td v-if="history_type == 'real_transfer' && row.amount"> {{ $utils.formatCurrency(row.amount) }} </vs-td>
+            <vs-td v-if="history_type == 'real_transfer' && row.amount"> {{ $utils.formatCurrency('ingame', row.amount) }} </vs-td>
           </vs-tr>
         </template>
         <template #notFound>

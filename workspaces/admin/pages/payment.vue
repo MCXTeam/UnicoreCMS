@@ -25,7 +25,7 @@
               <div class="flex align-items-center">
                 <Avatar v-if="slotProps.data.icon" :image="`${$config.apiUrl + '/' + slotProps.data.icon}`" shape="circle" />
                 <Avatar v-else icon="pi pi-image" shape="circle" />
-                <span class="ml-2">{{ $utils.formatCurrency(slotProps.data.amount) }}%</span>
+                <span class="ml-2">{{ $utils.formatCurrency('real', slotProps.data.amount) }}%</span>
               </div>
             </template>
           </Column>
@@ -74,7 +74,7 @@
             <ValidationProvider name="Сумма" rules="required|min:0" v-slot="{ errors }">
               <div class="field">
                 <label>Сумма (условие >=)</label>
-                <InputNumber currency="RUB" locale="ru-RU" mode="currency" v-model="bonus.amount" />
+                <InputNumber v-model="bonus.amount" mode="decimal" :minFractionDigits="$config.realDecimals" :maxFractionDigits="$config.realDecimals" />
                 <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
               </div>
             </ValidationProvider>

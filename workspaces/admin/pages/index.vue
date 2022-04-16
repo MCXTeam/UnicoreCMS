@@ -39,14 +39,14 @@
           <div>
             <span class="block text-500 font-medium mb-3">Доход</span>
             <div class="text-900 font-medium text-xl">
-              {{ formatCurrency($_.get(stats, 'payments.amount', 0)) }}
+              {{ $utils.formatCurrency('real', $_.get(stats, 'payments.amount', 0)) }}
             </div>
           </div>
           <div class="flex align-items-center justify-content-center bg-orange-100 border-round" style="width: 2.5rem; height: 2.5rem">
             <i class="pi pi-wallet text-orange-500 text-xl"></i>
           </div>
         </div>
-        <span class="text-green-500 font-medium">+{{ formatCurrency($_.get(stats, 'payments.months[11].amount', 0)) }}</span>
+        <span class="text-green-500 font-medium">+{{ $utils.formatCurrency('real', $_.get(stats, 'payments.months[11].amount', 0)) }}</span>
         <span class="text-500">в этом месяце</span>
       </div>
     </div>
@@ -99,9 +99,9 @@
           </Column>
           <Column field="amount" header="Доход" style="width: 35%">
             <template #body="slotProps">
-              <span v-if="slotProps.data.amount > 0" class="text-green-500"> +{{ formatCurrency(slotProps.data.amount) }} </span>
+              <span v-if="slotProps.data.amount > 0" class="text-green-500"> +{{ $utils.formatCurrency('real', slotProps.data.amount) }} </span>
               <span v-else>
-                {{ formatCurrency(slotProps.data.amount) }}
+                {{ $utils.formatCurrency('real', slotProps.data.amount) }}
               </span>
             </template>
           </Column>
@@ -199,12 +199,6 @@ export default {
     })
   },
   methods: {
-    formatCurrency(value) {
-      return value.toLocaleString('ru-RU', {
-        style: 'currency',
-        currency: 'RUB',
-      })
-    },
     daysCharts() {
       const range = Array.from(
         this.$moment.range(this.$moment().subtract(6, 'day').startOf('day').local(), this.$moment().local()).by('day')

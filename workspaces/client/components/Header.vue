@@ -67,7 +67,7 @@ export default {
     ...mapGetters({
       onlines: 'io/serversOnline',
       name: 'unicore/name',
-      config: 'unicore/config',
+      config: 'config',
     }),
   },
 }

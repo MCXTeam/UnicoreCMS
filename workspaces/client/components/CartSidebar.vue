@@ -3,14 +3,14 @@
     <h3 class="text-uppercase m-0">Оплата</h3>
     <div v-if="cart.virtual_sale > 0" class="d-flex justify-content-between align-items-center mt-2">
       <vs-checkbox v-model="use_virtual"> Использовать бонусы </vs-checkbox>
-      <b>-{{ $utils.formatCurrency(cart.virtual_sale) }}</b>
+      <b>-{{ $utils.formatCurrency('virtual', cart.virtual_sale) }}</b>
     </div>
     <div class="d-flex justify-content-between mt-2">
       <span>Итого к оплате:</span>
-      <b v-if="!use_virtual" v-text="$utils.formatCurrency(cart.price)" />
+      <b v-if="!use_virtual" v-text="$utils.formatCurrency('real', cart.price)" />
       <div v-else>
-        <small><strike v-text="$utils.formatCurrency(cart.price)" /></small>
-        <b v-text="$utils.formatCurrency(cart.price - cart.virtual_sale)" />
+        <small><strike v-text="$utils.formatCurrency('real', cart.price)" /></small>
+        <b v-text="$utils.formatCurrency('real', cart.price - cart.virtual_sale)" />
       </div>
     </div>
     <div v-if="cart.items.length" class="d-flex justify-content-between mt-2">

@@ -7,7 +7,7 @@
         <div class="col-xl-6">
           <h4 class="m-0">Что получаете вы?</h4>
           <div class="mini-profile p-4 my-3 h-75">
-            <h2 class="mt-0 mb-2">{{ $utils.formatCurrency(config.public_referal_reward) }} на баланс</h2>
+            <h2 class="mt-0 mb-2">{{ $utils.formatCurrency('real', config.public_referal_reward) }} на баланс</h2>
             <span
               >Если приглашённый вами игрок отыграет на проекте не менее
               {{
@@ -19,7 +19,7 @@
         <div class="col-xl-6">
           <h4 class="m-0">Что получает игрок?</h4>
           <div class="mini-profile p-4 my-3 h-75">
-            <h2 class="mt-0 mb-2">{{ $utils.formatCurrency(config.public_referal_reward_player) }} на баланс</h2>
+            <h2 class="mt-0 mb-2">{{ $utils.formatCurrency('real', config.public_referal_reward_player) }} на баланс</h2>
             <span
               >Если он отыграет на проекте не менее
               {{
@@ -84,7 +84,7 @@ export default {
 
   computed: {
     ...mapGetters({
-      config: 'unicore/config',
+      config: 'config',
     }),
   },
 

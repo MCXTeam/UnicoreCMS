@@ -2,8 +2,7 @@ import { Plugin } from '@nuxt/types'
 import { UAParser } from 'ua-parser-js'
 
 interface utils {
-  formatCurrency(value: number): string
-  formatNumber(value: number): string
+  formatCurrency(type: string, value: number, sale: number): string
   uaParse(value: string): string
 }
 
@@ -28,21 +27,26 @@ declare module 'vuex/types/index' {
   }
 }
 
-const utilsPlugin: Plugin = (context, inject) => {
+const utilsPlugin: Plugin = async (context, inject) => {
   const parser = new UAParser()
 
+  // FETCH STORE RESOURCES
+  const cfg = await context.$axios.get('/config/public').then((res) => res.data)
+  context.store.commit('SET_CONFIG', cfg)
+  //
+
   inject('utils', {
-    formatCurrency(value: number, sale: number) {
-      if (!value) value = 0
+    formatCurrency(type: string, value: number, sale: number) {
+      var decimals = context.$config[type + "Decimals"]
 
-      if (sale) value = value - (value * sale) / 100
+      if (sale) value = value - value / 100 * sale
 
-      return value.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' })
-    },
+      if (!decimals || decimals <= 0)
+        value = Math.round(value)
+      else
+        value = Math.round(value * Math.pow(10, decimals)) / Math.pow(10, decimals)
 
-    formatNumber(value: number) {
-      if (!value) value = 0
-      return value.toLocaleString('ru-RU', { minimumFractionDigits: 2 })
+      return value.toLocaleString('ru-RU', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) + (type == "real" ? " ₽" : "")
     },
 
     uaParse(value: string) {

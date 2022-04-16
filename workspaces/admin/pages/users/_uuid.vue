@@ -379,15 +379,40 @@
           <div class="col-12">
             <div class="p-4">
               <h4>Экономика</h4>
-              <div class="p-fluid">
-                <div class="field">
-                  <label>Баланс на сайте</label>
-                  <div class="grid">
-                    <div class="col-12 md:col-4">
-                      <InputNumber type="text" v-model="user.real" mode="decimal" :minFractionDigits="2" :maxFractionDigits="2" />
+              <div class="p-fluid grid">
+                <div class="col-12 md:col-6">
+                  <div class="field">
+                    <label>Баланс на сайте (реальная валюта)</label>
+                    <div class="grid">
+                      <div class="col-12 md:col-7">
+                        <InputNumber
+                          v-model="user.real"
+                          mode="decimal"
+                          :minFractionDigits="$config.realDecimals"
+                          :maxFractionDigits="$config.realDecimals"
+                        />
+                      </div>
+                      <div class="col-12 md:col-5">
+                        <Button @click="updateReal()" label="Сохранить" class="p-button mr-2 mb-2" />
+                      </div>
                     </div>
-                    <div class="col-12 md:col-3">
-                      <Button @click="updateReal()" label="Сохранить" class="p-button mr-2 mb-2" />
+                  </div>
+                </div>
+                <div class="col-12 md:col-6">
+                  <div class="field">
+                    <label>Баланс на сайте (бонусная валюта)</label>
+                    <div class="grid">
+                      <div class="col-12 md:col-7">
+                        <InputNumber
+                          v-model="user.virtual"
+                          mode="decimal"
+                          :minFractionDigits="$config.virtualDecimals"
+                          :maxFractionDigits="$config.virtualDecimals"
+                        />
+                      </div>
+                      <div class="col-12 md:col-5">
+                        <Button @click="updateVirtual()" label="Сохранить" class="p-button mr-2 mb-2" />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -408,7 +433,13 @@
                 </Column>
                 <Column field="money" header="Количество" sortable>
                   <template #body="slotProps">
-                    <InputNumber type="text" v-model="slotProps.data.money" mode="decimal" :minFractionDigits="2" :maxFractionDigits="2" />
+                    <InputNumber
+                      type="text"
+                      v-model="slotProps.data.money"
+                      mode="decimal"
+                      :minFractionDigits="$config.ingameDecimals"
+                      :maxFractionDigits="$config.ingameDecimals"
+                    />
                   </template>
                 </Column>
                 <Column :styles="{ width: '4rem' }">
@@ -711,6 +742,19 @@ export default {
         type: 0,
         uuid: this.user.uuid,
         amount: this.user.real,
+      })
+      await this.fetchUser()
+      this.$toast.add({
+        severity: 'success',
+        detail: 'Баланс обновлён',
+        life: 3000,
+      })
+    },
+
+    async updateVirtual() {
+      await this.$axios.patch('/cabinet/votes/admin', {
+        uuid: this.user.uuid,
+        amount: this.user.virtual,
       })
       await this.fetchUser()
       this.$toast.add({

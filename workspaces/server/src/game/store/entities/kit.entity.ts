@@ -24,7 +24,7 @@ export class Kit {
   price: number;
 
   @Column({ nullable: true })
-  prevent_use_virtual: boolean
+  virtual_percent?: number
 
   @Column({ nullable: true })
   sale: number;

@@ -79,6 +79,10 @@ export interface EnvConfig {
   yandexMetrikaId: string
 
   encryptionKey: string
+
+  realDecimals: number
+  virtualDecimals: number
+  ingameDecimals: number
 }
 
 export const envConfig: EnvConfig = {
@@ -174,4 +178,8 @@ export const envConfig: EnvConfig = {
 
   googleAnalyticsId: env.get("GOOGLE_ANALYTICS_ID").asString(),
   yandexMetrikaId: env.get("YANDEX_METRIKA_ID").asString(),
+
+  realDecimals: env.get("REAL_DECIMALS").default(2).asInt(),
+  virtualDecimals: env.get("VIRTUAL_DECIMALS").default(2).asInt(),
+  ingameDecimals: env.get("INGAME_DECIMALS").default(2).asInt(),
 };

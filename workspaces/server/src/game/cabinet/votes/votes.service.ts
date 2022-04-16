@@ -1,6 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/admin/users/entities/user.entity';
+import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
 import { Repository } from 'typeorm';
+import { VirtualCurrencyUserUpdate } from './dto/virtual-cur-user-update.input';
 import { VoteGiftInput } from './dto/vote-gift.input';
 import { VoteGift } from './entities/vote-gift.entity';
 
@@ -11,7 +14,9 @@ export class VotesService {
   constructor(
     @InjectRepository(VoteGift)
     private voteGiftsRepository: Repository<VoteGift>,
-  ) {}
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
+  ) { }
 
   async getMonitorings() {
     return this.monitorings
@@ -63,5 +68,14 @@ export class VotesService {
     }
 
     return this.voteGiftsRepository.remove(vg);
+  }
+
+  async updateVirtual(input: VirtualCurrencyUserUpdate) {
+    const user = await this.usersRepository.findOne(input.uuid)
+    if (!user) throw new NotFoundException();
+
+    user.virtual = currencyUtils.roundByType(input.amount, SystemCurrency.VIRTAUL);
+    await this.usersRepository.save(user);
+    return true;
   }
 }
