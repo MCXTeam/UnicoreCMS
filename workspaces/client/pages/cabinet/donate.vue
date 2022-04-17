@@ -179,7 +179,7 @@
         <div v-if="donateGroups">
           <div
             v-for="group in donateGroups.filter(
-              (donate) => !donateGroupsMe.find((dgm) => dgm.server.id == donate.server.id && dgm.group.id == group.id && !dgm.expired)
+              (don) => !donateGroupsMe.find((dgm) => dgm.server.id == donate.server.id && dgm.group.id == don.id && !dgm.expired)
             )"
             :key="group.id"
             class="d-flex justify-content-between align-items-center cab-donate-block mt-3 pb-3"

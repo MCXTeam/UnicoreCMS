@@ -39,12 +39,18 @@
         <h5 class="text-uppercase mt-0 d-none d-xl-block"><b>UUID:</b> {{ $auth.user.uuid }}</h5>
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h3 class="m-0">Сведения об аккаунте</h3>
-          <vs-button :to="`/user/` + $auth.user.username" class="d-none d-xl-block" size="small"><i class="bx bx-link me-1"></i> Публичный профиль</vs-button>
+          <vs-button :to="`/user/` + $auth.user.username" class="d-none d-xl-block" size="small"
+            ><i class="bx bx-link me-1"></i> Публичный профиль</vs-button
+          >
         </div>
         <table class="player-info-table w-100">
           <tr>
             <td>Логин</td>
             <td v-text="$auth.user.username" />
+          </tr>
+          <tr>
+            <td>Баланс бонусов</td>
+            <td>{{ $utils.formatCurrency('virtual', $auth.user.virtual) }} <i class="bx bx-gift"></i></td>
           </tr>
           <tr>
             <td>Email</td>
@@ -77,7 +83,9 @@
         <p v-if="$auth.user.ban && !$auth.user.ban.expires" class="text-danger">Вы заблокированы навсегда!</p>
       </div>
       <div class="col-xl-4 d-flex align-items-center">
-        <vs-button block size="large" :disabled="!$auth.user.ban" :loading="banLoading" @click="unabn()">Купить разбан за {{$utils.formatCurrency('real', config.public_unban_price)}}</vs-button>
+        <vs-button block size="large" :disabled="!$auth.user.ban" :loading="banLoading" @click="unabn()"
+          >Купить разбан за {{ $utils.formatCurrency('real', config.public_unban_price) }}</vs-button
+        >
       </div>
     </div>
     <hr class="my-3" />
@@ -161,7 +169,7 @@ export default {
         if (e.response?.status == 415) this.$unicore.errorNotification('Файл не является скином Minecraft')
       }
 
-      this.$refs.skin.value=null
+      this.$refs.skin.value = null
       this.skinLoading = false
     },
     async updateCloak() {
@@ -181,7 +189,7 @@ export default {
         if (e.response?.status == 415) this.$unicore.errorNotification('Файл не является плащом Minecraft')
       }
 
-      this.$refs.cloak.value=null
+      this.$refs.cloak.value = null
       this.cloakLoading = false
     },
     async deleteSkin() {
@@ -209,7 +217,7 @@ export default {
         await this.$auth.fetchUser()
         this.$unicore.successNotification('Ваш аккаунт был разблокирован!')
       } catch {
-         this.$unicore.errorNotification('На балансе недостаточно денег для покупки разбана!')
+        this.$unicore.errorNotification('На балансе недостаточно денег для покупки разбана!')
       }
       this.banLoading = false
     },
