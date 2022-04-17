@@ -12,5 +12,4 @@ RUN npm install --global yarn
 
 # Installing UnicoreCMS
 COPY . .
-RUN npx lerna bootstrap
-RUN yarn build
+RUN npm run boot

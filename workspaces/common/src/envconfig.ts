@@ -83,6 +83,9 @@ export interface EnvConfig {
   realDecimals: number
   virtualDecimals: number
   ingameDecimals: number
+
+  colorModePreference: string
+  colorModeFallback: string
 }
 
 export const envConfig: EnvConfig = {
@@ -182,4 +185,7 @@ export const envConfig: EnvConfig = {
   realDecimals: env.get("REAL_DECIMALS").default(2).asInt(),
   virtualDecimals: env.get("VIRTUAL_DECIMALS").default(2).asInt(),
   ingameDecimals: env.get("INGAME_DECIMALS").default(2).asInt(),
+
+  colorModePreference: env.get("COLOR_MODE_PREFERENCE").default("dark").asString(),
+  colorModeFallback: env.get("COLOR_MODE_FALLBACK").default("dark").asString(),
 };

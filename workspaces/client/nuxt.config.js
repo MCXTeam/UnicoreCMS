@@ -21,6 +21,11 @@ export default mainConfig({
     },
   },
 
+  colorMode: {
+    preference: envConfig.colorModePreference,
+    fallback: envConfig.colorModeFallback,
+  },
+
   css: [
     'normalize.css/normalize.css',
     'vuesax/dist/vuesax.css',
