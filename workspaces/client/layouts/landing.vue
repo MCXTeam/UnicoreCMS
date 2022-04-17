@@ -11,7 +11,7 @@
             <h2 class="ms-3 my-0 d-none d-md-block" v-text="$config.sitename" />
           </nuxt-link>
           <nuxt-link to="/servers" class="vs-navbar__item d-none d-lg-block ms-4"> <i class="bx bx-server"></i> Серверы </nuxt-link>
-          <a href="#" class="vs-navbar__item d-none d-lg-block"> <i class="bx bx-chat"></i> Форум </a>
+          <a :href="config.public_link_forum" target="_blank" class="vs-navbar__item d-none d-lg-block"> <i class="bx bx-chat"></i> Форум </a>
           <nuxt-link to="/page/rules" class="vs-navbar__item d-none d-lg-block"> <i class="bx bx-paperclip"></i> Правила </nuxt-link>
           <nuxt-link to="/donate" class="vs-navbar__item d-none d-lg-block"> <i class="bx bx-donate-heart"></i> Донат </nuxt-link>
         </template>
