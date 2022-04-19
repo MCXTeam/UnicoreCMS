@@ -3,8 +3,6 @@ import { envConfig } from 'unicore-common/dist/envconfig'
 
 export default mainConfig({
   ssr: false,
-  rootDir: process.cwd(),
-  buildDir: process.cwd() + '/.nuxt/',
 
   head: {
     titleTemplate: '%s - UnicoreCMS',

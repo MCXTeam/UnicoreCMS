@@ -6,9 +6,6 @@ import { envConfig } from 'unicore-common/dist/envconfig'
 import { sitemapSettings } from './sitemap'
 
 export default mainConfig({
-  rootDir: process.cwd(),
-  buildDir: process.cwd() + '/.nuxt/',
-
   loading: false,
 
   head: {

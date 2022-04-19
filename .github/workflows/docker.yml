@@ -16,4 +16,4 @@ jobs:
         mv .env.example .env
         docker-compose up -d
     - name: Test TypeORM
-        run: docker exec -t -i unicorecms npm run sync
+      run: docker exec -t -i unicorecms npm run sync
