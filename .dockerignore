@@ -1,5 +1,7 @@
 **/node_modules
-workspaces/*/dist
-workspaces/*/.nuxt
+**/.nuxt
+**/dist
 /docker
 docker-*.yml
+/storage
+/logs
