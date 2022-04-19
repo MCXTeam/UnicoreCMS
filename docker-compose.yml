@@ -23,7 +23,7 @@ services:
       - 443:443
 
   mariadb:
-    image: "mariadb:10.8.2"
+    image: mariadb:10.8.2
     container_name: unicorecms-mariadb
     restart: unless-stopped
     ports:
@@ -44,20 +44,9 @@ services:
     build:
       context: .
       dockerfile: ./docker/node/Dockerfile
-    command: npm run start
     volumes:
       - .:/usr/local/app
       - /usr/local/app/node_modules
-      - /usr/local/app/workspaces/admin/node_modules
-      - /usr/local/app/workspaces/client/node_modules
-      - /usr/local/app/workspaces/common/node_modules
-      - /usr/local/app/workspaces/server/node_modules
-      - /usr/local/app/workspaces/admin/.nuxt
-      - /usr/local/app/workspaces/client/.nuxt
-      - /usr/local/app/workspaces/admin/dist
-      - /usr/local/app/workspaces/client/dist
-      - /usr/local/app/workspaces/common/dist
-      - /usr/local/app/workspaces/server/dist
     depends_on:
       - mariadb
     extra_hosts:

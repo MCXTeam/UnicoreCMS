@@ -1,0 +1,22 @@
+{
+  "mctop": {
+    "name": "MCTop",
+    "icon": "/images/mctop.png"
+  },
+  "minecraftrating": {
+    "name": "MRating",
+    "icon": "/images/mrating.png"
+  },
+  "topcraft": {
+    "name": "TopCraft",
+    "icon": "/images/topcraft.png"
+  },
+  "mcrate": {
+    "name": "MCRate",
+    "icon": "/images/mcrate.png"
+  },
+  "monitoringminecraft": {
+    "name": "MineMon",
+    "icon": "/images/monitoringminecraft.png"
+  }
+}

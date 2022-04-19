@@ -96,6 +96,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import monitorings from "~/json/monitorings.json"
 
 export default {
   layout: 'cabinet',
@@ -106,20 +107,7 @@ export default {
       giftDialog: false,
       gift: null,
       loading: false,
-      monitorings_map: {
-        mctop: {
-          name: 'MCTop',
-          icon: '/images/mctop.png',
-        },
-        minecraftrating: {
-          name: 'MRating',
-          icon: '/images/mrating.png',
-        },
-        topcraft: {
-          name: 'TopCraft',
-          icon: '/images/topcraft.png',
-        },
-      },
+      monitorings_map: monitorings,
       gift_code: '',
     }
   },

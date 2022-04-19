@@ -1,15 +1,29 @@
-FROM ubuntu:latest
+FROM node:16-alpine
+
+# Installing deps
+RUN apk update && apk add --no-cache \
+    yarn \
+    tini \
+    build-base \
+    g++ \
+    cairo-dev \
+    jpeg-dev \
+    pango-dev \
+    giflib-dev
 
 WORKDIR /usr/local/app
 
-# Installing node & deps
-RUN apt-get update && apt upgrade --yes
-RUN apt-get install --yes curl
-RUN curl --silent --location https://deb.nodesource.com/setup_16.x | bash -
-RUN apt-get install --yes nodejs
-RUN apt-get install --yes build-essential
-RUN npm install --global yarn
-
 # Installing UnicoreCMS
 COPY . .
-RUN npm run boot
+
+RUN yarn global add nuxt
+RUN npx lerna bootstrap
+RUN yarn workspace unicore-common build
+RUN yarn workspace unicore-server build
+RUN yarn workspace unicore-admin build
+RUN yarn workspace unicore-client build
+RUN npm link -w unicore-server
+
+USER node
+
+CMD ["yarn", "start"]

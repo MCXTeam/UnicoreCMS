@@ -18,14 +18,14 @@
                 <SkinView3D class="rounded" :width="75" :height="150" :skin="$auth.user.skin" :cloak="$auth.user.cloak" ref="SkinBack" />
               </div>
               <div class="d-flex">
-                <input type="file" ref="skin" class="d-none" @change="updateSkin()" />
+                <input type="file" ref="skin" class="d-none" accept="image/png" @change="updateSkin()" />
                 <vs-button @click="$refs.skin.click()" block :loading="skinLoading">Загрузить скин</vs-button>
                 <vs-button @click="deleteSkin($event)" block danger class="w-25" :loading="skinLoading"
                   ><i class="bx bx-trash"></i
                 ></vs-button>
               </div>
               <div class="d-flex">
-                <input type="file" ref="cloak" class="d-none" @change="updateCloak()" />
+                <input type="file" ref="cloak" class="d-none" accept="image/png" @change="updateCloak()" />
                 <vs-button @click="$refs.cloak.click()" block :loading="cloakLoading">Загрузить плащ</vs-button>
                 <vs-button @click="deleteCloak($event)" block danger class="w-25" :loading="cloakLoading"
                   ><i class="bx bx-trash"></i

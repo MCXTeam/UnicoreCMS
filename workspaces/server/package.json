@@ -34,6 +34,7 @@
     "@nestjs/typeorm": "^8.0.3",
     "@nestjs/websockets": "^8.2.6",
     "@nestlab/google-recaptcha": "^2.1.2",
+    "@t00nday/nestjs-oauth2-server": "^1.0.0",
     "@types/cache-manager": "^3.4.3",
     "ascii-art": "^2.8.5",
     "asciimo": "^0.3.1",

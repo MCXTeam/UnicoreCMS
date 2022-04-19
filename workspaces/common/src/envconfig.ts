@@ -70,10 +70,14 @@ export interface EnvConfig {
   mctopEnabled: boolean
   topcraftEnabled: boolean
   minecraftratingEnabled: boolean
+  mcrateEnabled: boolean
+  monitoringminecraftEnabled: boolean
 
   mctopSecretKey: string
   topcraftSecretKey: string
   minecraftratingSecretKey: string
+  mcrateSecretKey: string
+  monitoringminecraftSecretKey: string
 
   googleAnalyticsId: string
   yandexMetrikaId: string
@@ -174,10 +178,14 @@ export const envConfig: EnvConfig = {
   mctopEnabled: env.get("MCTOP_ENABLED").default(0).asBool(),
   topcraftEnabled: env.get("TOPCRAFT_ENABLED").default(0).asBool(),
   minecraftratingEnabled: env.get("MINECRAFTRATING_ENABLED").default(0).asBool(),
+  mcrateEnabled: env.get("MCRATE_ENABLED").default(0).asBool(),
+  monitoringminecraftEnabled: env.get("MONITORINGMINECRAFT_ENABLED").default(0).asBool(),
 
   mctopSecretKey: env.get("MCTOP_SECRET_KEY").asString(),
   topcraftSecretKey: env.get("TOPCRAFT_SECRET_KEY").asString(),
   minecraftratingSecretKey: env.get("MINECRAFTRATING_SECRET_KEY").asString(),
+  mcrateSecretKey: env.get("MCRATE_SECRET_KEY").asString(),
+  monitoringminecraftSecretKey: env.get("MONITORINGMINECRAFT_SECRET_KEY").asString(),
 
   googleAnalyticsId: env.get("GOOGLE_ANALYTICS_ID").asString(),
   yandexMetrikaId: env.get("YANDEX_METRIKA_ID").asString(),

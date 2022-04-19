@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { VotesGroupped } from './votes-groupped.interface';
 import * as _ from 'lodash'
 import { GrouppedPaginate } from '../groupped.dto';
+import { paginate, PaginateQuery } from 'nestjs-paginate';
 
 @Injectable()
 export class VotesListService {
@@ -37,5 +38,17 @@ export class VotesListService {
     const data = chunks[page - 1] || []
 
     return new GrouppedPaginate({ data, meta: { page, total: chunks.length || 1 } })
+  }
+
+  async recent(limit: number) {
+    if (limit > 20) limit = 20
+    const data = await this.votesRepo.createQueryBuilder("vote")
+      .leftJoinAndSelect("vote.user", "user")
+      .leftJoinAndSelect("user.skin", "skin")
+      .distinct(true)
+      .take(limit)
+      .getMany()
+
+    return new GrouppedPaginate({ data })
   }
 }

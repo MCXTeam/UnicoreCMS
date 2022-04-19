@@ -21,6 +21,8 @@
 </template>
 
 <script>
+import monitorings from "~/json/monitorings.json"
+
 export default {
   props: {
     loading: {
@@ -40,6 +42,7 @@ export default {
   data() {
     return {
       use_virtual: false,
+      monitorings
     }
   },
 
