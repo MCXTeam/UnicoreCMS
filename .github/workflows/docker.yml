@@ -14,6 +14,6 @@ jobs:
     - name: Build
       run: |
         mv .env.example .env
-        docker-compose up -d
+        docker-compose --profile nginx --profile prod up
     - name: Test TypeORM
       run: docker exec -t -i unicorecms npm run sync
