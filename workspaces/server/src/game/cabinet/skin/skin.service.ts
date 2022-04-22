@@ -29,7 +29,7 @@ export class SkinService {
 
     skin.user = user;
     skin.file = file.filename;
-    skin.slim = MinecraftSkinType.isSlim(file.filename)
+    skin.slim = MinecraftSkinType.isSlim(StorageManager.path(file.filename))
 
     return this.skinsRepository.save(skin);
   }
