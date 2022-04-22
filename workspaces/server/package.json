@@ -36,6 +36,7 @@
     "@nestlab/google-recaptcha": "^2.1.2",
     "@t00nday/nestjs-oauth2-server": "^1.0.0",
     "@types/cache-manager": "^3.4.3",
+    "@unicorecms/minecraft-skin-type": "^0.1.6",
     "ascii-art": "^2.8.5",
     "asciimo": "^0.3.1",
     "bcrypt": "^5.0.1",
