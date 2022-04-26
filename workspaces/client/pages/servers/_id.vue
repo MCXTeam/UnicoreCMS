@@ -14,7 +14,7 @@
             <h2 class="mt-4 mb-2">Описание сервера</h2>
             <div class="description-html" v-html="server.content" />
           </div>
-          <div class="col-5">
+          <div class="col-xl-5">
             <h3 class="mt-4 mb-2">Информация о сервере</h3>
             <table class="server-table w-100">
               <tr>

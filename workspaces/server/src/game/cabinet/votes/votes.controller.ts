@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
+import { Public } from 'src/auth/decorators/public.decorator';
 import { Permission } from 'unicore-common';
 import { VirtualCurrencyUserUpdate } from './dto/virtual-cur-user-update.input';
 import { VoteGiftInput } from './dto/vote-gift.input';
@@ -10,6 +11,7 @@ import { VotesService } from './votes.service';
 export class VotesController {
   constructor (private votesService: VotesService) {}
 
+  @Public()
   @Get('monitorings')
   find() {
     return this.votesService.getMonitorings()
