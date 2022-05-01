@@ -19,8 +19,6 @@
 
 <script>
 export default {
-  middleware: ['guest'],
-
   head: {
     bodyAttrs: {
       class: 'auth-body',
