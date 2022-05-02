@@ -30,6 +30,7 @@
           <div class="field p-fluid mb-3">
             <label for="password1" class="block text-900 font-medium text-xl mb-2">Пароль</label>
             <Password
+              :feedback="false"
               id="password1"
               :disabled="disabled"
               v-model="login.password"

@@ -114,7 +114,6 @@ export default {
         await this.$auth.setUserToken(data.accessToken, data.refreshToken)
         loading.close()
       } catch (err) {
-        console.log(err)
         loading.close()
         this.$unicore.authErrorNotification(err, `Игрок с данным именем пользователя или email уже существует`)
       }

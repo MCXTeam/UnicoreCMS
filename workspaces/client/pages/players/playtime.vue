@@ -12,7 +12,7 @@
         </template>
         <template #tbody>
           <vs-tr :key="playtime.user.uuid" v-for="(playtime, i) in playtimes.data" :data="playtime">
-            <vs-td> <h3 class="m-0">#{{ (playtimes.meta.total - 1) * 25 +  i + 1}}</h3> </vs-td>
+            <vs-td> <h3 class="m-0">#{{ (playtimes.meta.page - 1) * 25 +  i + 1}}</h3> </vs-td>
             <vs-td>
               <div class="d-flex align-items-center">
                 <Avatar class="rounded shadow me-3">
