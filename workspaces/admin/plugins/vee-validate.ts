@@ -22,7 +22,7 @@ extend(IS_USERNAME, {
   validate(value) {
     return isUsername(value)
   },
-  message: 'Некоретное имя пользователя',
+  message: 'Некорректное имя пользователя',
 })
 
 extend('url', {
@@ -36,5 +36,5 @@ extend(IS_USERNAME_OR_EMAIL, {
   validate(value) {
     return isUsername(value) || rules.email.validate(value)
   },
-  message: 'Некоретный Email или Имя пользователя',
+  message: 'Некорректный Email или Имя пользователя',
 })

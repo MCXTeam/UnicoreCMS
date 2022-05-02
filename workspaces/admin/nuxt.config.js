@@ -22,7 +22,6 @@ export default mainConfig({
       login: '/login',
       logout: '/login',
       home: '/',
-      callback: '/',
     },
   },
 
