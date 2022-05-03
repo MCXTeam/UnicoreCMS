@@ -22,7 +22,7 @@ export class PaymentHandlerService {
     payment.status = PaymentStatuses.WAITING
     payment.amount = amount
     payment.user = user
-    
+
     return this.paymentsRepo.save(payment)
   }
 
@@ -41,9 +41,9 @@ export class PaymentHandlerService {
     if (bonus)
       payment.user.real = payment.amount + (payment.user.real * 100 / bonus.bonus)
 
+    await this.historyService.create(HistoryType.Payment, null, payment.user, payment)
     await this.paymentsRepo.save(payment)
     await this.usersRepo.save(payment.user)
-    await this.historyService.create(HistoryType.Payment, null, payment.user, payment)
 
     return true
   }
