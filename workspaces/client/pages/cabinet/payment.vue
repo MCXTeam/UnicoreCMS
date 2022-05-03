@@ -254,7 +254,7 @@ export default {
     async generateLink(method) {
       this.loading_paylink = true;
       try {
-        const link = await this.$axios.post(`/payment/methods/${method}/link`, { amount: this.payment.amount }).then(res => res.data.link)
+        const link = await this.$axios.post(`/payment/methods/${method}/link`, { amount: Number(this.payment.amount) }).then(res => res.data.link)
         window.location.href = link
       } catch {
         this.$unicore.errorNotification('При генерации платежа для данного метода оплаты произошла ошибка, попробуйте другой метод, либо свяжитесь с администрацией')

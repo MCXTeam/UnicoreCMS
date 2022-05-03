@@ -22,7 +22,7 @@ export class PaymentHandlerService {
     payment.status = PaymentStatuses.WAITING
     payment.amount = amount
     payment.user = user
-
+    
     return this.paymentsRepo.save(payment)
   }
 

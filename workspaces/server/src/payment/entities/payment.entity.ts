@@ -13,10 +13,7 @@ export class Payment {
   @Column()
   method: string;
 
-  @Column('decimal', {
-    precision: 5,
-    scale: 2,
-  })
+  @Column('float')
   amount: number;
 
   @Column({
