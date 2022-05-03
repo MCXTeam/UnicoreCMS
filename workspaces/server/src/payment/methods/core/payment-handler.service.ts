@@ -39,7 +39,7 @@ export class PaymentHandlerService {
 
     const bonus = await this.bonusesRepo.findOne({ order: { amount: 'DESC' }, where: { amount: LessThanOrEqual(payment.amount) } })
     if (bonus)
-      payment.user.real = payment.amount + (payment.user.real * 100 / bonus.bonus)
+      payment.user.real += payment.amount + (payment.amount * 100 / bonus.bonus)
 
     await this.historyService.create(HistoryType.Payment, null, payment.user, payment)
     await this.paymentsRepo.save(payment)
