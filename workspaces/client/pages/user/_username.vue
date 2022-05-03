@@ -24,7 +24,7 @@
           </tr>
           <tr>
             <td>Стаж аккаунта</td>
-            <td v-text="$moment.duration($moment() - $moment(user.created)).format()" />
+            <td v-text="$moment.duration($moment().local() - $moment(user.created).local()).format()" />
           </tr>
           <tr>
             <td>Голосов за этот месяц</td>

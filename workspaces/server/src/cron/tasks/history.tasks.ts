@@ -13,7 +13,7 @@ export class HistoryTasks {
   @Cron(CronExpression.EVERY_HOUR)
   async clean() {
     const historyClean = await this.historyRepository.find({
-      created: LessThan(moment().subtract(30, 'days').toDate()),
+      created: LessThan(moment().utc().subtract(30, 'days').toDate()),
     });
     await this.historyRepository.remove(historyClean);
   }

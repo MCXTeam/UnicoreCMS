@@ -62,7 +62,7 @@
           </tr>
           <tr>
             <td>Стаж аккаунта</td>
-            <td v-text="$moment.duration($moment() - $moment($auth.user.created)).format()" />
+            <td v-text="$moment.duration($moment().local() - $moment($auth.user.created).local()).format()" />
           </tr>
           <tr v-if="inviter">
             <td>Вас пригласил</td>

@@ -16,10 +16,10 @@ export class CartTasks {
   @Cron(CronExpression.EVERY_HOUR)
   async clean() {
     const cartItemsClean = await this.cartItemsRepository.find({
-      updated: LessThan(moment().subtract(30, 'days').toDate()),
+      updated: LessThan(moment().utc().subtract(30, 'days').toDate()),
     });
     const cartItemKitsClean = await this.cartItemKitsRepository.find({
-      updated: LessThan(moment().subtract(30, 'days').toDate()),
+      updated: LessThan(moment().utc().subtract(30, 'days').toDate()),
     });
 
     await this.cartItemsRepository.remove(cartItemsClean);

@@ -1,6 +1,5 @@
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import * as moment from 'moment';
 import { ConfigService } from 'src/admin/config/config.service';
 import { PlaytimeService } from 'src/game/cabinet/playtime/playtime.service';
 import { Referal } from 'src/game/cabinet/referals/entities/referal.entity';

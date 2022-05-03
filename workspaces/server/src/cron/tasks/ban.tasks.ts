@@ -15,7 +15,7 @@ export class BanTasks {
   @Cron(CronExpression.EVERY_10_MINUTES)
   async clean() {
     const expiresBans = await this.bansRepository.createQueryBuilder("ud")
-      .where("ud.expires < :expires", { expires: moment().toDate() })
+      .where("ud.expires < :expires", { expires: moment().utc().toDate() })
       .andWhere({ expires: Not(IsNull()) })
       .getMany();
 

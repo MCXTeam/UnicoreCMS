@@ -13,7 +13,7 @@ export class PaymentTasks {
   @Cron(CronExpression.EVERY_HOUR)
   async clean() {
     const payments = await this.paymentsRepository.find({
-      updated: LessThan(moment().subtract(7, 'days').toDate()),
+      updated: LessThan(moment().utc().subtract(7, 'days').toDate()),
     });
 
     await this.paymentsRepository.remove(payments);

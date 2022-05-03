@@ -10,6 +10,8 @@ import { AuthAdapter } from './auth/adapters/auth.adapter';
 import { ASCII_NAME } from '@common';
 import * as clc from "cli-color"
 
+process.env.TZ = 'UTC'
+
 async function bootstrap() {
   console.log(ASCII_NAME.split("\n").map(line => clc.magenta(line)).join(""));
   console.log(" ");

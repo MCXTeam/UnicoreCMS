@@ -45,11 +45,11 @@ export class OnlineService {
         records: {
           today: {
             online: record?.online || 0,
-            created: moment(record?.updated).toDate(),
+            created: moment(record?.updated).utc().toDate(),
           },
           absolute: {
             online: absolute?.online || 0,
-            created: moment(absolute?.created).toDate(),
+            created: moment(absolute?.created).utc().toDate(),
           },
         },
       },
@@ -78,7 +78,7 @@ export class OnlineService {
 
     // Update today record
     if (onlines.total.online > onlines.total.records.today.online) {
-      if (moment(onlines.total.records.today.created).isSame(moment(), 'day') && id) {
+      if (moment(onlines.total.records.today.created).utc().isSame(moment().utc(), 'day') && id) {
         await this.onlinesRecordsRepository
           .createQueryBuilder()
           .createQueryBuilder()
@@ -92,7 +92,7 @@ export class OnlineService {
 
         today = {
           online: onlines.total.online,
-          created: moment().toDate(),
+          created: moment().utc().toDate(),
         };
       } else {
         const entity = await this.onlinesRecordsRepository.save({
@@ -150,7 +150,7 @@ export class OnlineService {
         record = online.players;
       }
 
-      if (online.players > server.online.record_today || !moment().isSame(server.online.updated, 'd')) {
+      if (online.players > server.online.record_today || !moment().utc().isSame(moment(server.online.updated).utc(), 'd')) {
         record_today = online.players;
       }
 

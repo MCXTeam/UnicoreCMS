@@ -34,7 +34,7 @@ export class VotesTasks {
         total: value.length,
         updated: _(value).maxBy(pt => pt.created).created
       }))
-      .filter(vt => !moment().isSame(vt.updated, 'months'))
+      .filter(vt => !moment().utc().isSame(moment(vt.updated).utc(), 'months'))
       .orderBy(['total'], ['desc'])
       .value()
 

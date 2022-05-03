@@ -46,7 +46,7 @@ export class TokensService {
   }
 
   async generateRefreshToken(user: User, agent?: string, ip?: string): Promise<string> {
-    const expires = this.moment().add(ms(envConfig.jwtRefreshExpires), 'milliseconds').local().toDate();
+    const expires = this.moment().utc().add(ms(envConfig.jwtRefreshExpires), 'milliseconds').local().toDate();
     const token = await this.tokensRepository.save({
       agent,
       ip,
@@ -96,7 +96,7 @@ export class TokensService {
     const payload = (await this.decodeToken(encoded)) as JWTRefreshPayload;
     const token = await this.tokensRepository.findOne({
       uuid: payload.jwtid,
-      expires: MoreThanOrEqual(this.moment().toDate()),
+      expires: MoreThanOrEqual(this.moment().utc().toDate()),
     });
 
     if (!token) {
@@ -119,7 +119,7 @@ export class TokensService {
   ): Promise<Omit<AuthenticatedDto, 'user' | 'refreshToken'>> {
     const { token, user } = await this.resolveRefreshToken(refresh);
 
-    token.updated = this.moment().toDate()
+    token.updated = this.moment().utc().toDate()
     await this.tokensRepository.save(token);
 
     //const refreshToken = await this.updateRefreshToken(user, token, ip);

@@ -21,7 +21,7 @@ export class DonateTasks {
 
   @Cron(CronExpression.EVERY_10_MINUTES)
   async clean() {
-    const expired = moment().toDate()
+    const expired = moment().utc().toDate()
 
     const expiresUD = await this.udRepository.createQueryBuilder("ud")
       .where("ud.expired < :expired", { expired })
