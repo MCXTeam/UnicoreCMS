@@ -297,7 +297,7 @@ export default {
   watch: {
     'payment.amount': {
       handler: function (newValue) {
-        this.b_active = [...this.bonuses].reverse().find((b) => newValue >= b.amount)
+        this.b_active = [...this.bonuses].reverse().find((b) => Number(newValue) >= b.amount)
       },
     },
   },

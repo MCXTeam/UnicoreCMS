@@ -46,7 +46,7 @@ export class TokensService {
   }
 
   async generateRefreshToken(user: User, agent?: string, ip?: string): Promise<string> {
-    const expires = this.moment().utc().add(ms(envConfig.jwtRefreshExpires), 'milliseconds').local().toDate();
+    const expires = this.moment().utc().add(ms(envConfig.jwtRefreshExpires), 'milliseconds').toDate();
     const token = await this.tokensRepository.save({
       agent,
       ip,
