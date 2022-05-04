@@ -39,8 +39,11 @@ export class PaymentHandlerService {
       payment.bill_id = bill_id
 
     const bonus = await this.bonusesRepo.findOne({ order: { amount: 'DESC' }, where: { amount: LessThanOrEqual(payment.amount) } })
+
+    payment.user.real += payment.amount
+
     if (bonus)
-      payment.user.real += payment.amount + (payment.amount * 100 / bonus.bonus)
+      payment.user.real += payment.amount * 100 / bonus.bonus
 
     await this.paymentsRepo.save(payment)
     await this.usersRepo.save(payment.user)

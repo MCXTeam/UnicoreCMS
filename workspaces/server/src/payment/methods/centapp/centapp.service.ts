@@ -33,7 +33,7 @@ export class CentappService implements PaymentCoreService {
   async handler(ip: string, input: any): Promise<PaymentResp> {
     const sign = crypto.createHash('md5').update([input.OutSum, input.InvId, envConfig.centappToken].join(':')).digest('hex').toUpperCase()
 
-    if (sign != input.SignatureValue)
+    if (sign != input.SignatureValue || input.Status == "FAIL")
       return PaymentResp.WrongSign
 
     if (!await this.paymentHandler.handler(input.InvId, input.TrsId))
