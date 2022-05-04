@@ -1,4 +1,4 @@
-import { createWriteStream, existsSync, lstatSync, readFileSync, renameSync, unlinkSync, writeFileSync } from 'fs';
+import { createReadStream, createWriteStream, existsSync, lstatSync, readFileSync, ReadStream, renameSync, unlinkSync, writeFileSync } from 'fs';
 import { nanoid } from 'nanoid';
 import { extname } from 'path';
 import { DiskStorageOptions } from 'multer';
@@ -95,6 +95,15 @@ export class StorageManager {
     const path = destination + '/' + filename;
 
     if (existsSync(path) && lstatSync(path).isFile()) return readFileSync(path);
+    else return null;
+  }
+
+  static readStream(filename?: string): ReadStream | null {
+    if (!filename) return null;
+
+    const path = destination + '/' + filename;
+
+    if (existsSync(path) && lstatSync(path).isFile()) return createReadStream(path);
     else return null;
   }
 }
