@@ -129,7 +129,11 @@ export class SkinService {
       throw new NotFoundException()
 
     const file = StorageManager.readStream(user.skin.file)
+
     if (!file)
+      var default_file = StorageManager.readStream("default_skin.png")
+
+    if (!file && !default_file)
       throw new NotFoundException()
 
     return new StreamableFile(file);
@@ -141,7 +145,11 @@ export class SkinService {
       throw new NotFoundException()
 
     const file = StorageManager.readStream(skin.file)
+
     if (!file)
+      var default_file = StorageManager.readStream("default_skin.png")
+
+    if (!file && !default_file)
       throw new NotFoundException()
 
     return new StreamableFile(file);
@@ -153,7 +161,11 @@ export class SkinService {
       throw new NotFoundException()
 
     const file = StorageManager.readStream(cloak.file)
+
     if (!file)
+      var default_file = StorageManager.readStream("default_cloak.png")
+
+    if (!file && !default_file)
       throw new NotFoundException()
 
     return new StreamableFile(file);
@@ -165,7 +177,11 @@ export class SkinService {
       throw new NotFoundException()
 
     const file = StorageManager.readStream(cloak.file)
+
     if (!file)
+      var default_file = StorageManager.readStream("default_cloak.png")
+
+    if (!file && !default_file)
       throw new NotFoundException()
 
     return new StreamableFile(file);
