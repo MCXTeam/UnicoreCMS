@@ -1,9 +1,10 @@
 import { StorageManager } from '@common';
-import { Controller, Delete, Param, Patch, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Patch, Req, Response, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileFastifyInterceptor, MulterFile } from 'fastify-file-interceptor';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import { Public } from 'src/auth/decorators/public.decorator';
 import { Permission } from 'unicore-common';
 import { skinFileFilter } from './filters/skin.filter';
 import { SkinService } from './skin.service';
@@ -11,6 +12,58 @@ import { SkinService } from './skin.service';
 @Controller('cabinet/skin')
 export class SkinController {
   constructor(private skinsService: SkinService) {}
+
+  @Public()
+  @Get("public/skin/username/:username")
+  streamSkinByUsername(@Response({ passthrough: true }) res, @Param("username") username: string) {
+    const file = this.skinsService.streamSkinByUsername(username)
+
+    res.set({
+      'Content-Type': 'image/png',
+      'Content-Disposition': `attachment; filename="${username}.png"`,
+    });
+
+    return file
+  }
+
+  @Public()
+  @Get("public/skin/uuid/:uuid")
+  streamSkinByUUID(@Response({ passthrough: true }) res, @Param("uuid") uuid: string) {
+    const file = this.skinsService.streamSkinByUUID(uuid)
+
+    res.set({
+      'Content-Type': 'image/png',
+      'Content-Disposition': `attachment; filename="${uuid}.png"`,
+    });
+
+    return file
+  }
+
+  @Public()
+  @Get("public/cloak/username/:username")
+  streamCloakByUsername(@Response({ passthrough: true }) res, @Param("username") username: string) {
+    const file = this.skinsService.streamCloakByUsername(username)
+
+    res.set({
+      'Content-Type': 'image/png',
+      'Content-Disposition': `attachment; filename="${username}.png"`,
+    });
+
+    return file
+  }
+
+  @Public()
+  @Get("public/cloak/uuid/:uuid")
+  streamCloakByUUID(@Response({ passthrough: true }) res, @Param("uuid") uuid: string) {
+    const file = this.skinsService.streamCloakByUUID(uuid)
+
+    res.set({
+      'Content-Type': 'image/png',
+      'Content-Disposition': `attachment; filename="${uuid}.png"`,
+    });
+
+    return file
+  }
 
   @Permissions([Permission.UserCabinetSkin])
   @Patch('skin')

@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException, UnsupportedMediaTypeException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException, StreamableFile, UnsupportedMediaTypeException } from '@nestjs/common';
 import { MulterFile } from 'fastify-file-interceptor';
 import { matchPermission } from 'src/admin/roles/guards/permisson.guard';
 import { Permission } from 'unicore-common';
@@ -121,5 +121,53 @@ export class SkinService {
     if (!user) throw new NotFoundException()
 
     return this.removeSkin(user)
+  }
+
+  async streamSkinByUsername(username: string): Promise<StreamableFile> {
+    const { skin } = await this.usersService.getByUsername(username)
+    if (!skin)
+      throw new NotFoundException()
+
+    const file = StorageManager.readStream(skin.file)
+    if (!file)
+      throw new NotFoundException()
+
+    return new StreamableFile(file);
+  }
+
+  async streamSkinByUUID(uuid: string): Promise<StreamableFile> {
+    const { skin } = await this.usersService.getById(uuid)
+    if (!skin)
+      throw new NotFoundException()
+
+    const file = StorageManager.readStream(skin.file)
+    if (!file)
+      throw new NotFoundException()
+
+    return new StreamableFile(file);
+  }
+
+  async streamCloakByUsername(username: string): Promise<StreamableFile> {
+    const { cloak } = await this.usersService.getByUsername(username)
+    if (!cloak)
+      throw new NotFoundException()
+
+    const file = StorageManager.readStream(cloak.file)
+    if (!file)
+      throw new NotFoundException()
+
+    return new StreamableFile(file);
+  }
+
+  async streamCloakByUUID(uuid: string): Promise<StreamableFile> {
+    const { cloak } = await this.usersService.getById(uuid)
+    if (!cloak)
+      throw new NotFoundException()
+
+    const file = StorageManager.readStream(cloak.file)
+    if (!file)
+      throw new NotFoundException()
+
+    return new StreamableFile(file);
   }
 }
