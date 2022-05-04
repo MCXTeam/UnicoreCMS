@@ -125,10 +125,8 @@ export class SkinService {
 
   async streamSkinByUsername(username: string): Promise<StreamableFile> {
     const user = await this.usersService.getByUsername(username)
-    if (!user || !user.skin)
-      throw new NotFoundException()
-
-    const file = StorageManager.readStream(user.skin.file)
+    if (!user || !user?.skin)
+      var file = StorageManager.readStream(user?.skin?.file)
 
     if (!file)
       var default_file = StorageManager.readStream("default_skin.png")
@@ -136,15 +134,13 @@ export class SkinService {
     if (!file && !default_file)
       throw new NotFoundException()
 
-    return new StreamableFile(file);
+    return new StreamableFile(file || default_file);
   }
 
   async streamSkinByUUID(uuid: string): Promise<StreamableFile> {
-    const { skin } = await this.usersService.getById(uuid)
-    if (!skin)
-      throw new NotFoundException()
-
-    const file = StorageManager.readStream(skin.file)
+    const user = await this.usersService.getById(uuid)
+    if (!user || !user?.skin)
+      var file = StorageManager.readStream(user?.skin?.file)
 
     if (!file)
       var default_file = StorageManager.readStream("default_skin.png")
@@ -152,15 +148,13 @@ export class SkinService {
     if (!file && !default_file)
       throw new NotFoundException()
 
-    return new StreamableFile(file);
+    return new StreamableFile(file || default_file);
   }
 
   async streamCloakByUsername(username: string): Promise<StreamableFile> {
-    const { cloak } = await this.usersService.getByUsername(username)
-    if (!cloak)
-      throw new NotFoundException()
-
-    const file = StorageManager.readStream(cloak.file)
+    const user = await this.usersService.getByUsername(username)
+    if (!user || !user?.cloak)
+      var file = StorageManager.readStream(user?.cloak?.file)
 
     if (!file)
       var default_file = StorageManager.readStream("default_cloak.png")
@@ -168,15 +162,13 @@ export class SkinService {
     if (!file && !default_file)
       throw new NotFoundException()
 
-    return new StreamableFile(file);
+    return new StreamableFile(file || default_file);
   }
 
   async streamCloakByUUID(uuid: string): Promise<StreamableFile> {
-    const { cloak } = await this.usersService.getById(uuid)
-    if (!cloak)
-      throw new NotFoundException()
-
-    const file = StorageManager.readStream(cloak.file)
+    const user = await this.usersService.getById(uuid)
+    if (!user || !user?.cloak)
+      var file = StorageManager.readStream(user?.cloak?.file)
 
     if (!file)
       var default_file = StorageManager.readStream("default_cloak.png")
@@ -184,6 +176,6 @@ export class SkinService {
     if (!file && !default_file)
       throw new NotFoundException()
 
-    return new StreamableFile(file);
+    return new StreamableFile(file || default_file);
   }
 }
