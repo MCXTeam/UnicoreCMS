@@ -7,6 +7,6 @@ export interface PaymentLink {
 }
 
 export abstract class PaymentCoreService {
-  abstract createLink(user: User, input: PaymentCreateDto): Promise<PaymentLink>
+  abstract createLink(user: User, input: PaymentCreateDto, ip: string): Promise<PaymentLink>
   abstract handler(ip: string, input: any): Promise<any>
 }

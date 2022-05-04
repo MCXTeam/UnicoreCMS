@@ -16,8 +16,8 @@ export class QiwiService implements PaymentCoreService {
 
   constructor(private paymentHandler: PaymentHandlerService) { }
 
-  async createLink(user: User, input: PaymentCreateDto): Promise<PaymentLink> {
-    const payment = await this.paymentHandler.create(QiwiModule.id, input.amount, user)
+  async createLink(user: User, input: PaymentCreateDto, ip: string): Promise<PaymentLink> {
+    const payment = await this.paymentHandler.create(QiwiModule.id, input.amount, user, ip)
 
     const url = new URL('https://oplata.qiwi.com/create');
     url.searchParams.append('publicKey', envConfig.qiwiPublicKey)

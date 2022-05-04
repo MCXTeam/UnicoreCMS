@@ -14,8 +14,8 @@ export class CentappController {
 
   @Permissions([Permission.UserPayment])
   @Post('link')
-  link(@CurrentUser() user: User, @Body() body: PaymentCreateDto) {
-    return this.centappService.createLink(user, body)
+  link(@IpAddress() ip: string, @CurrentUser() user: User, @Body() body: PaymentCreateDto) {
+    return this.centappService.createLink(user, body, ip)
   }
 
   @Public()

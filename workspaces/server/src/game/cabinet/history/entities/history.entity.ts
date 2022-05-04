@@ -17,7 +17,7 @@ export class History {
   @Column()
   type: HistoryType;
 
-  @Column()
+  @Column({ nullable: true })
   ip: string;
 
   @ManyToOne(() => User, {

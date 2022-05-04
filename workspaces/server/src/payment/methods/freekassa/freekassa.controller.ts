@@ -14,8 +14,8 @@ export class FreekassaController {
 
   @Permissions([Permission.UserPayment])
   @Post('link')
-  link(@CurrentUser() user: User, @Body() body: PaymentCreateDto) {
-    return this.freekassaService.createLink(user, body)
+  link(@IpAddress() ip: string, @CurrentUser() user: User, @Body() body: PaymentCreateDto) {
+    return this.freekassaService.createLink(user, body, ip)
   }
 
   @Public()

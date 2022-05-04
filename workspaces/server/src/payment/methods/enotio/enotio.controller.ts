@@ -14,8 +14,8 @@ export class EnotioController {
 
   @Permissions([Permission.UserPayment])
   @Post('link')
-  link(@CurrentUser() user: User, @Body() body: PaymentCreateDto) {
-    return this.enotioService.createLink(user, body)
+  link(@IpAddress() ip: string, @CurrentUser() user: User, @Body() body: PaymentCreateDto) {
+    return this.enotioService.createLink(user, body, ip)
   }
 
   @Public()

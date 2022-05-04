@@ -14,8 +14,8 @@ export class UnitpayController {
 
   @Permissions([Permission.UserPayment])
   @Post('link')
-  link(@CurrentUser() user: User, @Body() body: PaymentCreateDto) {
-    return this.unitpayService.createLink(user, body)
+  link(@IpAddress() ip: string, @CurrentUser() user: User, @Body() body: PaymentCreateDto) {
+    return this.unitpayService.createLink(user, body, ip)
   }
 
   @Public()

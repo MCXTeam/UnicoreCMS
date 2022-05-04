@@ -15,8 +15,8 @@ export class AnypayService implements PaymentCoreService {
 
   constructor(private paymentHandler: PaymentHandlerService) { }
 
-  async createLink(user: User, input: PaymentCreateDto): Promise<PaymentLink> {
-    const payment = await this.paymentHandler.create(AnypayModule.id, input.amount, user)
+  async createLink(user: User, input: PaymentCreateDto, ip: string): Promise<PaymentLink> {
+    const payment = await this.paymentHandler.create(AnypayModule.id, input.amount, user, ip)
 
     const params = {
       merchant_id: envConfig.anypayMerchantID,

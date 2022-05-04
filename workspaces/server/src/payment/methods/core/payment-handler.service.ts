@@ -15,13 +15,14 @@ export class PaymentHandlerService {
     @InjectRepository(User) private usersRepo: Repository<User>
   ) { }
 
-  create(method: string, amount: number, user: User): Promise<Payment> {
+  create(method: string, amount: number, user: User, ip: string): Promise<Payment> {
     const payment = new Payment()
 
     payment.method = method
     payment.status = PaymentStatuses.WAITING
     payment.amount = amount
     payment.user = user
+    payment.ip = ip
 
     return this.paymentsRepo.save(payment)
   }
@@ -41,9 +42,9 @@ export class PaymentHandlerService {
     if (bonus)
       payment.user.real += payment.amount + (payment.amount * 100 / bonus.bonus)
 
-    await this.historyService.create(HistoryType.Payment, null, payment.user, payment)
     await this.paymentsRepo.save(payment)
     await this.usersRepo.save(payment.user)
+    await this.historyService.create(HistoryType.Payment, payment.ip, payment.user, payment)
 
     return true
   }

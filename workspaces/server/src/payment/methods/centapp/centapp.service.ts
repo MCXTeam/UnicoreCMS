@@ -13,8 +13,8 @@ import * as crypto from 'crypto';
 export class CentappService implements PaymentCoreService {
   constructor(private paymentHandler: PaymentHandlerService) { }
 
-  async createLink(user: User, input: PaymentCreateDto): Promise<PaymentLink> {
-    const payment = await this.paymentHandler.create(CentappModule.id, input.amount, user)
+  async createLink(user: User, input: PaymentCreateDto, ip: string): Promise<PaymentLink> {
+    const payment = await this.paymentHandler.create(CentappModule.id, input.amount, user, ip)
     const axiosConfig = { headers: { 'Authorization': 'Bearer ' + envConfig.centappToken } }
 
     try {

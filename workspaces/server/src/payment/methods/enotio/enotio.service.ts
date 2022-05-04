@@ -12,8 +12,8 @@ import * as crypto from 'crypto';
 export class EnotioService implements PaymentCoreService {
   constructor(private paymentHandler: PaymentHandlerService) { }
 
-  async createLink(user: User, input: PaymentCreateDto): Promise<PaymentLink> {
-    const payment = await this.paymentHandler.create(EnotioModule.id, input.amount, user)
+  async createLink(user: User, input: PaymentCreateDto, ip: string): Promise<PaymentLink> {
+    const payment = await this.paymentHandler.create(EnotioModule.id, input.amount, user, ip)
 
     const sign = crypto.createHash('md5').update([envConfig.enotioMerchantID, input.amount, envConfig.enotioSecretKey, payment.id].join(':')).digest('hex')
 

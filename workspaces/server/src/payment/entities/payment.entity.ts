@@ -29,6 +29,9 @@ export class Payment {
   @JoinColumn()
   user: User;
 
+  @Column({ nullable: true })
+  ip: string
+
   @CreateDateColumn()
   created: Date;
 

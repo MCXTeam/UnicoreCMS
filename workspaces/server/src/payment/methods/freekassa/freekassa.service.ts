@@ -14,8 +14,8 @@ export class FreekassaService implements PaymentCoreService {
 
   constructor(private paymentHandler: PaymentHandlerService) { }
 
-  async createLink(user: User, input: PaymentCreateDto): Promise<PaymentLink> {
-    const payment = await this.paymentHandler.create(FreekassaModule.id, input.amount, user)
+  async createLink(user: User, input: PaymentCreateDto, ip: string): Promise<PaymentLink> {
+    const payment = await this.paymentHandler.create(FreekassaModule.id, input.amount, user, ip)
 
     const sign = crypto.createHash('md5').update([
       envConfig.freekassaMerchantID,
