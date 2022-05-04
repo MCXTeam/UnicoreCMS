@@ -15,53 +15,33 @@ export class SkinController {
 
   @Public()
   @Get("public/skin/username/:username")
-  streamSkinByUsername(@Response({ passthrough: true }) res, @Param("username") username: string) {
-    const file = this.skinsService.streamSkinByUsername(username)
-
-    res.set({
-      'Content-Type': 'image/png',
-      'Content-Disposition': `attachment; filename="${username}.png"`,
-    });
-
+  async streamSkinByUsername(@Response({ passthrough: true }) res, @Param("username") username: string) {
+    const file = await this.skinsService.streamSkinByUsername(username)
+    res.headers({'Content-Type': 'image/png'});
     return file
   }
 
   @Public()
   @Get("public/skin/uuid/:uuid")
-  streamSkinByUUID(@Response({ passthrough: true }) res, @Param("uuid") uuid: string) {
-    const file = this.skinsService.streamSkinByUUID(uuid)
-
-    res.set({
-      'Content-Type': 'image/png',
-      'Content-Disposition': `attachment; filename="${uuid}.png"`,
-    });
-
+  async streamSkinByUUID(@Response({ passthrough: true }) res, @Param("uuid") uuid: string) {
+    const file = await this.skinsService.streamSkinByUUID(uuid)
+    res.headers({'Content-Type': 'image/png'});
     return file
   }
 
   @Public()
   @Get("public/cloak/username/:username")
-  streamCloakByUsername(@Response({ passthrough: true }) res, @Param("username") username: string) {
-    const file = this.skinsService.streamCloakByUsername(username)
-
-    res.set({
-      'Content-Type': 'image/png',
-      'Content-Disposition': `attachment; filename="${username}.png"`,
-    });
-
+  async streamCloakByUsername(@Response({ passthrough: true }) res, @Param("username") username: string) {
+    const file = await this.skinsService.streamCloakByUsername(username)
+    res.headers({'Content-Type': 'image/png'});
     return file
   }
 
   @Public()
   @Get("public/cloak/uuid/:uuid")
-  streamCloakByUUID(@Response({ passthrough: true }) res, @Param("uuid") uuid: string) {
-    const file = this.skinsService.streamCloakByUUID(uuid)
-
-    res.set({
-      'Content-Type': 'image/png',
-      'Content-Disposition': `attachment; filename="${uuid}.png"`,
-    });
-
+  async streamCloakByUUID(@Response({ passthrough: true }) res, @Param("uuid") uuid: string) {
+    const file = await this.skinsService.streamCloakByUUID(uuid)
+    res.headers({'Content-Type': 'image/png'});
     return file
   }
 

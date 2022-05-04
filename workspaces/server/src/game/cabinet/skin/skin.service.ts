@@ -124,11 +124,11 @@ export class SkinService {
   }
 
   async streamSkinByUsername(username: string): Promise<StreamableFile> {
-    const { skin } = await this.usersService.getByUsername(username)
-    if (!skin)
+    const user = await this.usersService.getByUsername(username)
+    if (!user || !user.skin)
       throw new NotFoundException()
 
-    const file = StorageManager.readStream(skin.file)
+    const file = StorageManager.readStream(user.skin.file)
     if (!file)
       throw new NotFoundException()
 
