@@ -20,6 +20,7 @@ import { Permission } from 'unicore-common';
 import { SettingsService } from 'src/game/cabinet/settings/providers/settings.service';
 import { PasswordChangeInput } from 'src/game/cabinet/settings/dto/password-change.input';
 import { PasswordUpdateInput } from 'src/game/cabinet/settings/dto/password-update.input';
+import { Transactional } from 'typeorm-transactional-cls-hooked';
 
 export async function userPermissionCheck(user: User, actor: User) {
   if (actor.superuser) return true
@@ -95,24 +96,28 @@ export class UsersService {
     }
   }
 
+  @Transactional()
   async getById(uuid: string, relations?: string[]): Promise<User> {
     const user = await this.usersRepository.findOne({ uuid }, { relations });
     if (!user) return null
     return this.rolesModificator(user)
   }
 
+  @Transactional()
   async getByUsername(username: string, relations?: string[]): Promise<User> {
     const user = await this.usersRepository.findOne({ username }, { relations });
     if (!user) return null
     return this.rolesModificator(user)
   }
 
+  @Transactional()
   async getByEmail(email: string, relations?: string[]): Promise<User> {
     const user = await this.usersRepository.findOne({ email }, { relations });
     if (!user) return null
     return this.rolesModificator(user)
   }
 
+  @Transactional()
   async getByUsernameOrEmail(username_or_email: string, relations?: string[]): Promise<User> {
     const user = await this.usersRepository.findOne({
       where: [{ username: username_or_email }, { email: username_or_email }],
@@ -122,6 +127,7 @@ export class UsersService {
     return this.rolesModificator(user)
   }
 
+  @Transactional()
   async getAllUsers(): Promise<string[]> {
     var users = await this.cacheManager.get<string[]>(CacheKey.Users)
     if (users) return users
@@ -130,6 +136,7 @@ export class UsersService {
     return this.cacheManager.set(CacheKey.Playtime, allUsers.map(u => u.username), { ttl: 60 })
   }
 
+  @Transactional()
   async getPublicUser(username: string): Promise<UserPublicDto> {
     const user = await this.getByUsername(username)
     if (!user || user.username == "Kernel") throw new NotFoundException()
@@ -141,12 +148,14 @@ export class UsersService {
     return new UserPublicDto({ ...user, playtimes, votes, referals })
   }
 
+  @Transactional()
   async getKernel(): Promise<User> {
     return this.usersRepository.findOne({
       username: 'Kernel',
     });
   }
 
+  @Transactional()
   async genKernel() {
     await this.usersRepository
       .createQueryBuilder()
@@ -161,12 +170,14 @@ export class UsersService {
       .execute();
   }
 
+  @Transactional()
   async count(): Promise<number> {
     return this.usersRepository.count({
       username: Not('Kernel'),
     });
   }
 
+  @Transactional()
   async create(input: UserInput, actor: User = null): Promise<User> {
     const userExist = await this.usersRepository.findOne({
       where: [{ email: input.username }, { username: input.username }],
@@ -203,6 +214,7 @@ export class UsersService {
     return this.usersRepository.save(user);
   }
 
+  @Transactional()
   async update(uuid: string, input: UserUpdateInput, actor: User = null): Promise<User> {
     const user = await this.getById(uuid);
 
@@ -240,6 +252,7 @@ export class UsersService {
     return this.usersRepository.save(user);
   }
 
+  @Transactional()
   async updatePassord(uuid: string, input: PasswordUpdateInput, actor: User = null) {
     const user = await this.getById(uuid)
     if (!user) throw new NotFoundException()
@@ -252,6 +265,7 @@ export class UsersService {
     return this.settingsService.updatePassword(user, input)
   }
 
+  @Transactional()
   async delete(uuid: string, actor: User = null) {
     const user = await this.getById(uuid)
 
@@ -266,6 +280,7 @@ export class UsersService {
     return this.usersRepository.remove(user)
   }
 
+  @Transactional()
   async deleteMany(input: DeleteManyInput, actor: User = null) {
     const users = await this.usersRepository.findByIds(input.items)
 

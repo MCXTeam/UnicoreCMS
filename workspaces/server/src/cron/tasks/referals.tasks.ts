@@ -32,12 +32,9 @@ export class ReferalsTasks {
       const pt = await this.playtimeService.findOneByUser(ref.user)
 
       if (_.sumBy(pt, (pt) => pt.time) >= config[ConfigField.ReferalTrigger]) {
-        ref.user.real += Number(config[ConfigField.ReferalRewardPlayer]);
-        ref.inviter.real += Number(config[ConfigField.ReferalReward]);
-        ref.rewarded = true
-
-        await this.referalsRepository.save(ref)
-        await this.usersRepository.save([ref.user, ref.inviter])
+        await this.usersRepository.increment({ uuid: ref.user.uuid }, "real", Number(config[ConfigField.ReferalRewardPlayer]))
+        await this.usersRepository.increment({ uuid: ref.inviter.uuid }, "real", Number(config[ConfigField.ReferalReward]))
+        await this.referalsRepository.update({ user: { uuid: ref.user.uuid } }, { rewarded: true })
       }
     }
   }

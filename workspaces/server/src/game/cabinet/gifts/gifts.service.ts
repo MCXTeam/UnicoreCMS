@@ -95,12 +95,10 @@ export class GiftsService {
         break;
       case GiftType.Money:
         const userMoney = await this.moneyService.findOneByUserAndServer(gift.server.id, user)
-        userMoney.money += gift.amount
         await this.moneyRepository.save(userMoney)
         break;
       case GiftType.Real:
-        user.real += gift.amount
-        await this.usersRepository.save(user)
+        await this.usersRepository.increment({ uuid: user.uuid }, "real", gift.amount)
         break;
     }
 

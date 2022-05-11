@@ -77,6 +77,7 @@
     "speakeasy": "^2.0.0",
     "typeorm": "^0.2.41",
     "typeorm-seeding": "^1.6.1",
+    "typeorm-transactional-cls-hooked": "^0.1.21",
     "vk-io": "^4.5.0"
   },
   "devDependencies": {
