@@ -1,7 +1,7 @@
 import { User } from 'src/admin/users/entities/user.entity';
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
 
-@Entity()
+@Entity({ name: "unicore_bans" })
 export class Ban {
   @OneToOne(() => User, {
     cascade: true,
@@ -9,7 +9,7 @@ export class Ban {
     onUpdate: 'CASCADE',
     primary: true,
   })
-  @JoinColumn()
+  @JoinColumn({ name: "user_uuid" })
   user: User;
 
   @ManyToOne(() => User, {
@@ -18,15 +18,15 @@ export class Ban {
     onUpdate: 'CASCADE',
     nullable: true,
   })
-  @JoinColumn()
+  @JoinColumn({ name: "actor_uuid" })
   actor: User;
 
-  @Column()
+  @Column({ name: "reason" })
   reason: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: "expires" })
   expires?: Date;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: "created" })
   created: Date;
 }

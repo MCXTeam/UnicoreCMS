@@ -1,7 +1,7 @@
 import { User } from "src/admin/users/entities/user.entity";
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from "typeorm";
 
-@Entity()
+@Entity({ name: "unicore_referals" })
 export class Referal {
   @OneToOne(() => User, {
     cascade: true,
@@ -10,7 +10,7 @@ export class Referal {
     primary: true,
     nullable: false,
   })
-  @JoinColumn()
+  @JoinColumn({ name: "user_uuid" })
   user: User;
 
   @ManyToOne(() => User, {
@@ -19,9 +19,9 @@ export class Referal {
     onUpdate: 'CASCADE',
     nullable: false,
   })
-  @JoinColumn()
+  @JoinColumn({ name: "inviter_uuid" })
   inviter: User;
 
-  @Column({ nullable: true })
+  @Column({ name: "rewarded", nullable: true })
   rewarded: boolean;
 }

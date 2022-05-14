@@ -1,23 +1,24 @@
 import { User } from 'src/admin/users/entities/user.entity';
 import { Column, Entity, ManyToMany, PrimaryColumn } from 'typeorm';
 
-@Entity()
+@Entity({ name: "unicore_roles" })
 export class Role {
-  @PrimaryColumn()
+  @PrimaryColumn({ name: "id" })
   id: string;
 
-  @Column()
+  @Column({ name: "name" })
   name: string;
 
   @Column('simple-array', {
+    name: "perms",
     nullable: true,
   })
   perms: string[];
 
-  @Column({ default: false })
+  @Column({ default: false, name: "important" })
   important: boolean;
 
-  @Column({ default: 0 })
+  @Column({ default: 0, name: "priority" })
   priority: number;
 
   @ManyToMany(() => User, (user) => user.roles)

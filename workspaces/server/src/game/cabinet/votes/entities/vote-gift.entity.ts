@@ -1,13 +1,13 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity()
+@Entity({ name: "unicore_vote_gifts" })
 export class VoteGift {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: "id" })
   id: number;
 
-  @Column()
+  @Column({ name: "place" })
   place: number;
 
-  @Column('float')
+  @Column('float', { name: "bonus" })
   bonus: number;
 }

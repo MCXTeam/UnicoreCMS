@@ -2,20 +2,21 @@ import { StorageManager } from '@common';
 import { AfterRemove, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Server } from './server.entity';
 
-@Entity()
+@Entity({ name: "unicore_server_groups" })
 export class ServerGroup {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: "id" })
   id: number;
 
-  @Column()
+  @Column({ name: "name" })
   name: string;
 
   @Column('text', {
+    name: "description",
     nullable: true,
   })
   description: string;
 
-  @Column({ nullable: true })
+  @Column({ name: "icon", nullable: true })
   icon: string;
 
   @OneToMany(() => Server, (server) => server.group, {

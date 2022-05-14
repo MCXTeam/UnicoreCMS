@@ -2,9 +2,9 @@ import { StorageManager } from '@common';
 import { User } from 'src/admin/users/entities/user.entity';
 import { AfterRemove, Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 
-@Entity()
+@Entity({ name: "unicore_cloaks" })
 export class Cloak {
-  @Column()
+  @Column({ name: "file" })
   file: string;
 
   @OneToOne(() => User, {
@@ -13,7 +13,7 @@ export class Cloak {
     onUpdate: 'CASCADE',
     primary: true,
   })
-  @JoinColumn()
+  @JoinColumn({ name: "user_uuid" })
   user?: User;
 
   @AfterRemove()

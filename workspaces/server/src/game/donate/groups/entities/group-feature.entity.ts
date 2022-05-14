@@ -2,18 +2,19 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedC
 import { DonateGroup } from './donate-group.entity';
 
 @Entity({
+	name: "unicore_group_features",
   orderBy: {
     priority: "ASC"
   }
 })
 export class GroupFeature {
-	@PrimaryColumn()
+	@PrimaryColumn({ name: "priority" })
   priority: number;
 
-	@Column({ nullable: true })
+	@Column({ nullable: true, name: "title" })
 	title?: string;
 
-	@Column({ nullable: true })
+	@Column({ nullable: true, name: "description" })
 	description?: string;
 
 	@ManyToOne(() => DonateGroup, {
@@ -24,6 +25,6 @@ export class GroupFeature {
 		orphanedRowAction: 'delete',
 		nullable: false,
 	})
-	@JoinColumn()
+	@JoinColumn({ name: "group_id" })
 	group: DonateGroup;
 }

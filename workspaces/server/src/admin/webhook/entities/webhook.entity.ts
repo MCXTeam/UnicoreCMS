@@ -2,20 +2,20 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { WebhookRequestType } from '../enums/webhook-request-type';
 import { WebhookType } from '../enums/webhook-type.enum';
 
-@Entity()
+@Entity({ name: "unicore_webhooks" })
 export class Webhook {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: "id" })
   id: number;
 
-  @Column()
+  @Column({ name: "name" })
   name: string;
 
-  @Column()
+  @Column({ name: "type" })
   type: WebhookType;
 
-  @Column()
+  @Column({ name: "request" })
   request: WebhookRequestType;
 
-  @Column()
+  @Column({ name: "url" })
   url: string;
 }

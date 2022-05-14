@@ -12,40 +12,40 @@ import { ServerGroup } from './server-group.entity';
 import { ServerTable } from './server-table.entity';
 
 @Entity({
+  name: "unicore_servers",
   orderBy: {
     priority: "ASC"
   }
 })
 export class Server {
-  @PrimaryColumn()
+  @PrimaryColumn({ name: "id" })
   id: string;
 
-  @Column({ nullable: true })
+  @Column({ name: "priority", nullable: true })
   priority?: number;
 
-  @Column()
+  @Column({ name: "name" })
   name: string;
 
-  @Column({ nullable: true })
+  @Column({ name: "version", nullable: true })
   version: string;
 
-  @Column('text', { nullable: true })
+  @Column('text', { name: "slogan", nullable: true })
   slogan: string;
 
-  @Column('longtext', { nullable: true })
+  @Column('longtext', { name: "description", nullable: true })
   description: string;
 
-  @Column('text', { nullable: true })
+  @Column('text', { name: "content", nullable: true })
   content: string;
 
-  @Column({ nullable: true })
+  @Column({ name: "icon", nullable: true })
   icon: string;
 
-  @Column({ nullable: true })
+  @Column({ name: "image", nullable: true })
   image: string;
 
   @ManyToOne(() => ServerGroup, (room) => room.servers, { eager: true })
-  @JoinTable()
   group: ServerGroup[];
 
   @OneToOne(() => Online, (online) => online.server, {
@@ -64,35 +64,84 @@ export class Server {
   rcon: RCON;
 
   @ManyToMany(() => Mod, (mod) => mod.servers)
-  @JoinTable()
+  @JoinTable({
+    name: "unicore_servers_mods",
+    joinColumn: {
+      name: "server_id",
+      referencedColumnName: "id"
+    },
+    inverseJoinColumn: {
+      name: "mod_id",
+      referencedColumnName: "id"
+    }
+  })
   mods?: Mod[];
 
   @ManyToMany(() => Product, (product) => product.servers)
-  @JoinTable()
+  @JoinTable({
+    name: "unicore_servers_products",
+    joinColumn: {
+      name: "server_id",
+      referencedColumnName: "id"
+    },
+    inverseJoinColumn: {
+      name: "product_id",
+      referencedColumnName: "id"
+    }
+  })
   products?: Product[];
 
   @ManyToMany(() => DonateGroup, (group) => group.servers)
-  @JoinTable()
+  @JoinTable({
+    name: "unicore_servers_donate_groups",
+    joinColumn: {
+      name: "server_id",
+      referencedColumnName: "id"
+    },
+    inverseJoinColumn: {
+      name: "donate_group_id",
+      referencedColumnName: "id"
+    }
+  })
   donate_groups?: DonateGroup[];
 
   @ManyToMany(() => DonatePermission, (perm) => perm.servers)
-  @JoinTable()
+  @JoinTable({
+    name: "unicore_servers_donate_permissions",
+    joinColumn: {
+      name: "server_id",
+      referencedColumnName: "id"
+    },
+    inverseJoinColumn: {
+      name: "donate_permission_id",
+      referencedColumnName: "id"
+    }
+  })
   donate_permissions?: DonatePermission[];
 
   @ManyToMany(() => Kit, (kit) => kit.servers)
-  @JoinTable()
+  @JoinTable({
+    name: "unicore_servers_kits",
+    joinColumn: {
+      name: "server_id",
+      referencedColumnName: "id"
+    },
+    inverseJoinColumn: {
+      name: "kit_id",
+      referencedColumnName: "id"
+    }
+  })
   kits?: Kit[];
 
   @OneToMany(() => ServerTable, (table) => table.server, {
     cascade: ['insert', 'update'],
   })
-  @JoinTable()
   table: ServerTable[]
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: "created" })
   created: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: "updated" })
   updated: Date;
 
   @AfterRemove()

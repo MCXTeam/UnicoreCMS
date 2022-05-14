@@ -1,12 +1,12 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
 import { Server } from '../../entities/server.entity';
 
-@Entity()
+@Entity({ name: "unicore_queries" })
 export class Query {
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: "host" })
   host?: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: "port" })
   port?: number;
 
   @OneToOne(() => Server, (server) => server.query, {
@@ -15,6 +15,6 @@ export class Query {
     onUpdate: 'CASCADE',
     primary: true,
   })
-  @JoinColumn()
+  @JoinColumn({ name: "server_id" })
   server: Server;
 }

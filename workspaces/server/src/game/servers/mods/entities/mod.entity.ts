@@ -3,24 +3,25 @@ import { AfterRemove, Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 
 import { Server } from '../../entities/server.entity';
 
 @Entity({
+  name: "unicore_mods",
   orderBy: {
     name: "ASC"
   }
 })
 export class Mod {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: "id" })
   id: number;
 
-  @Column()
+  @Column({ name: "name" })
   name: string;
 
-  @Column({ nullable: true })
+  @Column({ name: "link", nullable: true })
   link: string;
 
-  @Column('text', { nullable: true })
+  @Column('text', { name: "description", nullable: true })
   description: string;
 
-  @Column({ nullable: true })
+  @Column({ name: "icon", nullable: true })
   icon: string;
 
   @ManyToMany(() => Server, (server) => server.mods, {

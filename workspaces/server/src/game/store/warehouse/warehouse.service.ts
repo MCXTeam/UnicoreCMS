@@ -50,7 +50,7 @@ export class WarehouseService {
       givedItems[i].amount -= inputItem.amount
     }
 
-    await this.warehouseItemsRepository.save(givedItems)
-    await this.warehouseItemsRepository.delete(givedItems.filter(it => it.amount <= 0).map(it => it.id)) 
+    const removed = await this.warehouseItemsRepository.remove(givedItems.filter(it => it.amount <= 0))
+    await this.warehouseItemsRepository.save(_.without(givedItems, ...removed))
   }
 }

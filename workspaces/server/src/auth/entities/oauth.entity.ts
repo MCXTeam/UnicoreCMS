@@ -2,7 +2,7 @@ import { User } from 'src/admin/users/entities/user.entity';
 import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn, Unique } from 'typeorm';
 import { OauthProvider } from '../strategies/oauth-providers';
 
-@Entity()
+@Entity({ name: "unicore_oauths" })
 export class Oauth {
   @ManyToOne(() => User, {
     cascade: true,
@@ -10,15 +10,15 @@ export class Oauth {
     onUpdate: 'CASCADE',
     primary: true,
   })
-  @JoinColumn()
+  @JoinColumn({ name: "user_uuid" })
   user: User;
 
-  @PrimaryColumn()
+  @PrimaryColumn({ name: "oauth_provider" })
   oauth_provider: OauthProvider;
 
-  @Column()
+  @Column({ name: "oauth_id" })
   oauth_id: number;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: "created" })
   created: Date;
 }

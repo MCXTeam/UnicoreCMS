@@ -1,17 +1,17 @@
 import { Column, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 import { EmailMessageType } from '../enums/email-message-type.enum';
 
-@Entity()
+@Entity({ name: "unicore_email_messages" })
 export class EmailMessage {
-  @PrimaryColumn()
+  @PrimaryColumn({ name: "id" })
   id: EmailMessageType;
 
-  @Column()
+  @Column({ name: "title" })
   title: string;
 
-  @Column('longtext', { nullable: true })
+  @Column('longtext', { nullable: true, name: "content" })
   content: string;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: "updated" })
   updated: Date;
 }

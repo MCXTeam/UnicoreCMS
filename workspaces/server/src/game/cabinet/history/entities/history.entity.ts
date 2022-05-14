@@ -9,15 +9,15 @@ import { Payment } from 'src/payment/entities/payment.entity';
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { HistoryType } from '../enums/history-type.enum';
 
-@Entity()
+@Entity({ name: "unicore_histories" })
 export class History {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: "id" })
   id: number;
 
-  @Column()
+  @Column({ name: "type" })
   type: HistoryType;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: "ip" })
   ip: string;
 
   @ManyToOne(() => User, {
@@ -26,7 +26,7 @@ export class History {
     onUpdate: 'CASCADE',
     nullable: false,
   })
-  @JoinColumn()
+  @JoinColumn({ name: "user_uuid" })
   user: User;
 
   @ManyToOne(() => Product, {
@@ -35,7 +35,7 @@ export class History {
     onUpdate: 'CASCADE',
     nullable: true,
   })
-  @JoinColumn()
+  @JoinColumn({ name: "product_id" })
   product?: Product;
 
   @ManyToOne(() => Kit, {
@@ -44,7 +44,7 @@ export class History {
     onUpdate: 'CASCADE',
     nullable: true,
   })
-  @JoinColumn()
+  @JoinColumn({ name: "kit_id" })
   kit?: Kit;
 
   @ManyToOne(() => Server, {
@@ -53,7 +53,7 @@ export class History {
     onUpdate: 'CASCADE',
     nullable: true,
   })
-  @JoinColumn()
+  @JoinColumn({ name: "server_id" })
   server?: Server;
 
   @ManyToOne(() => DonateGroup, {
@@ -62,7 +62,7 @@ export class History {
     onUpdate: 'CASCADE',
     nullable: true,
   })
-  @JoinColumn()
+  @JoinColumn({ name: "donate_group_id" })
   donate_group?: DonateGroup;
 
   @ManyToOne(() => DonatePermission, {
@@ -71,7 +71,7 @@ export class History {
     onUpdate: 'CASCADE',
     nullable: true,
   })
-  @JoinColumn()
+  @JoinColumn({ name: "donate_permission_id" })
   donate_permission?: DonatePermission;
 
   @ManyToOne(() => Period, {
@@ -80,7 +80,7 @@ export class History {
     onUpdate: 'CASCADE',
     nullable: true,
   })
-  @JoinColumn()
+  @JoinColumn({ name: "period_id" })
   period?: Period;
 
   @ManyToOne(() => Payment, {
@@ -89,7 +89,7 @@ export class History {
     onUpdate: 'CASCADE',
     nullable: true,
   })
-  @JoinColumn()
+  @JoinColumn({ name: "payment_id" })
   payment?: Payment;
  
   @ManyToOne(() => User, {
@@ -98,14 +98,15 @@ export class History {
     onUpdate: 'CASCADE',
     nullable: true,
   })
-  @JoinColumn()
+  @JoinColumn({ name: "target_uuid" })
   target?: User;
 
   @Column('float', {
+    name: "amount",
     nullable: true,
   })
   amount?: number;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: "created" })
   created: Date;
 }

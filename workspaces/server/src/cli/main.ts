@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { ASCII_NAME } from '@common';
 import { CommandFactory } from 'nest-commander';
 import { CommandsModule } from './command.module';

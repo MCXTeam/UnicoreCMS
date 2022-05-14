@@ -1,19 +1,20 @@
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 import { ConfigType } from '../config.enum';
 
-@Entity()
+@Entity({ name: "unicore_configs" })
 export class Config {
-  @PrimaryColumn()
+  @PrimaryColumn({ name: "key" })
   key: string;
 
   @Column('text', {
     nullable: true,
+    name: "value"
   })
   value: string;
 
-  @Column()
+  @Column({ name: "type" })
   type: ConfigType;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: "important" })
   important: boolean;
 }

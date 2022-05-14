@@ -14,60 +14,72 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-@Entity()
+@Entity({ name: "unicore_users" })
 export class User {
-  @PrimaryColumn()
+  @PrimaryColumn({ name: "uuid" })
   @Generated('uuid')
   uuid: string;
 
   @Column({
+    name: "username",
     unique: true,
   })
   username: string;
 
   @Column({
+    name: "email",
     unique: true,
     nullable: true,
   })
   email: string;
 
-  @Column()
+  @Column({ name: "password" })
   password: string;
 
-  @Column({ nullable: true })
+  @Column({ name: "superuser", nullable: true })
   superuser: boolean;
 
-  @Column({ nullable: true })
+  @Column({ name: "activated", nullable: true })
   activated: boolean;
 
-  @Column({ nullable: true })
+  @Column({ name: "access_token", nullable: true })
   accessToken: string;
 
-  @Column({ nullable: true })
+  @Column({ name: "server_id", nullable: true })
   serverId: string;
 
-  @Column({ nullable: true })
+  @Column({ name: "two_factor_enabled", nullable: true })
   two_factor_enabled?: boolean;
 
-  @Column({ nullable: true })
+  @Column({ name: "two_factor_secret", nullable: true })
   two_factor_secret?: string;
 
-  @Column({ nullable: true })
+  @Column({ name: "two_factor_secret_temp", nullable: true })
   two_factor_secret_temp?: string;
 
-  @Column('float', { default: 0 })
+  @Column('float', { name: "real", default: 0 })
   real: number;
 
-  @Column('float', { default: 0 })
+  @Column('float', { name: "virtual", default: 0 })
   virtual: number;
 
   @ManyToMany(() => Role, (role) => role.users, {
     eager: true,
   })
-  @JoinTable()
+  @JoinTable({
+    name: "unicore_users_roles",
+    joinColumn: {
+        name: "user_uuid",
+        referencedColumnName: "uuid"
+    },
+    inverseJoinColumn: {
+        name: "role_id",
+        referencedColumnName: "id"
+    }
+  })
   roles?: Role[];
 
-  @Column('simple-array', { nullable: true })
+  @Column('simple-array', { name: "perms", nullable: true })
   perms: string[];
 
   @OneToOne(() => Skin, (skin) => skin.user, {
@@ -85,9 +97,9 @@ export class User {
   })
   ban?: Ban;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: "created" })
   created: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: "updated" })
   updated: Date;
 }

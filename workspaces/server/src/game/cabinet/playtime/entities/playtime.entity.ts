@@ -2,7 +2,7 @@ import { User } from 'src/admin/users/entities/user.entity';
 import { Server } from 'src/game/servers/entities/server.entity';
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToOne, UpdateDateColumn } from 'typeorm';
 
-@Entity()
+@Entity({ name: "unicore_playtimes" })
 export class Playtime {
   @ManyToOne(() => User, {
     cascade: true,
@@ -10,7 +10,7 @@ export class Playtime {
     onUpdate: 'CASCADE',
     primary: true,
   })
-  @JoinColumn()
+  @JoinColumn({ name: "user_uuid" })
   user: User;
 
   @ManyToOne(() => Server, {
@@ -24,12 +24,13 @@ export class Playtime {
 
   @Column({
     default: 0,
+    name: "time"
   })
   time: number;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: "created" })
   created: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: "updated" })
   updated: Date;
 }

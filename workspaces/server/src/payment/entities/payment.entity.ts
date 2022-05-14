@@ -2,21 +2,22 @@ import { User } from 'src/admin/users/entities/user.entity';
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { PaymentStatuses } from '../enums/payment-statuses.enum';
 
-@Entity()
+@Entity({ name: "unicore_payments" })
 export class Payment {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: "id" })
   id: number;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: "bill_id" })
   bill_id: string
 
-  @Column()
+  @Column({ name: "method" })
   method: string;
 
-  @Column('float')
+  @Column('float', { name: "amount" })
   amount: number;
 
   @Column({
+    name: "status",
     default: PaymentStatuses.WAITING,
   })
   status: PaymentStatuses;
@@ -26,15 +27,15 @@ export class Payment {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn()
+  @JoinColumn({ name: "user_uuid" })
   user: User;
 
-  @Column({ nullable: true })
+  @Column({ name: "ip", nullable: true })
   ip: string
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: "created" })
   created: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: "updated" })
   updated: Date;
 }

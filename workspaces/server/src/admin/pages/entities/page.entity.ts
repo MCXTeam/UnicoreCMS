@@ -1,28 +1,28 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
-@Entity()
+@Entity({ name: "unicore_pages" })
 export class Page {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: "id" })
   id: number;
 
-  @Column({ nullable: true, unique: true })
+  @Column({ nullable: true, unique: true, name: "is_rules" })
   is_rules: boolean;
 
-  @Column()
+  @Column({ name: "title" })
   title: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, name: "path" })
   path: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: "description" })
   description: string;
 
-  @Column('longtext', { nullable: true })
+  @Column('longtext', { nullable: true, name: "content" })
   content: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: "created" })
   created: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: "updated" })
   updated: Date;
 }

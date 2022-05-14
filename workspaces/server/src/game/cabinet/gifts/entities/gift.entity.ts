@@ -8,24 +8,24 @@ import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, Pri
 import { GiftType } from '../enums/gift-type.enum';
 import { GiftActivation } from './gift-activation.entity';
 
-@Entity()
+@Entity({ name: "unicore_gifts" })
 export class Gift {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: "id" })
   id: number;
 
-  @Column({ unique: true })
+  @Column({ name: "promocode", unique: true })
   promocode: string;
 
-  @Column()
+  @Column({ name: "type" })
   type: GiftType;
 
   @OneToMany(() => GiftActivation, (activation) => activation.gift)
   activations: GiftActivation[];
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: "max_activations" })
   max_activations: number;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: "expires" })
   expires: Date;
 
   @ManyToOne(() => Product, {
@@ -34,7 +34,7 @@ export class Gift {
     onUpdate: 'CASCADE',
     eager: true,
   })
-  @JoinColumn()
+  @JoinColumn({ name: "product_id" })
   product?: Product;
 
   @ManyToOne(() => Kit, {
@@ -43,7 +43,7 @@ export class Gift {
     onUpdate: 'CASCADE',
     eager: true,
   })
-  @JoinColumn()
+  @JoinColumn({ name: "kit_id" })
   kit?: Kit;
 
   @ManyToOne(() => DonateGroup, {
@@ -52,7 +52,7 @@ export class Gift {
     onUpdate: 'CASCADE',
     eager: true,
   })
-  @JoinColumn()
+  @JoinColumn({ name: "donate_group_id" })
   donate_group?: DonateGroup;
 
   @ManyToOne(() => DonatePermission, {
@@ -61,7 +61,7 @@ export class Gift {
     onUpdate: 'CASCADE',
     eager: true,
   })
-  @JoinColumn()
+  @JoinColumn({ name: "donate_permission_id" })
   donate_permission?: DonatePermission;
 
   @ManyToOne(() => Server, {
@@ -70,7 +70,7 @@ export class Gift {
     onUpdate: 'CASCADE',
     eager: true,
   })
-  @JoinColumn()
+  @JoinColumn({ name: "server_id" })
   server?: Server;
 
   @ManyToOne(() => Period, {
@@ -79,14 +79,15 @@ export class Gift {
     onUpdate: 'CASCADE',
     eager: true,
   })
-  @JoinColumn()
+  @JoinColumn({ name: "period_id" })
   period?: Period;
 
   @Column('float', {
+    name: "amount",
     nullable: true,
   })
   amount?: number;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: "created" })
   created: Date;
 }

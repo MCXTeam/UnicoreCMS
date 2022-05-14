@@ -1,21 +1,21 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 import { Server } from '../../entities/server.entity';
 
-@Entity()
+@Entity({ name: "unicore_onlines" })
 export class Online {
-  @Column({ nullable: true })
+  @Column({ name: "online", nullable: true })
   online: boolean;
 
-  @Column({ nullable: true })
+  @Column({ name: "players", nullable: true })
   players: number;
 
-  @Column({ nullable: true })
+  @Column({ name: "maxplayers", nullable: true })
   maxplayers: number;
 
-  @Column({ default: 0 })
+  @Column({ name: "record", default: 0 })
   record: number;
 
-  @Column({ default: 0 })
+  @Column({ name: "record_today", default: 0 })
   record_today: number;
 
   @OneToOne(() => Server, (server) => server.online, {
@@ -24,9 +24,9 @@ export class Online {
     onUpdate: 'CASCADE',
     primary: true,
   })
-  @JoinColumn()
+  @JoinColumn({ name: "server_id" })
   server: Server;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: "updated" })
   updated: Date;
 }

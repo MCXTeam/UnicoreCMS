@@ -2,7 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
 import { Kit } from './kit.entity';
 import { Product } from './product.entity';
 
-@Entity()
+@Entity({ name: "unicore_kit_items" })
 export class KitItem {
   @ManyToOne(() => Product, {
     cascade: true,
@@ -12,7 +12,7 @@ export class KitItem {
     eager: true,
     nullable: false,
   })
-  @JoinColumn()
+  @JoinColumn({ name: "product_id" })
   product: Product;
 
   @ManyToOne(() => Kit, {
@@ -23,9 +23,9 @@ export class KitItem {
     primary: true,
     nullable: false,
   })
-  @JoinColumn()
+  @JoinColumn({ name: "kit_id" })
   kit?: Kit;
 
-  @Column()
+  @Column({ name: "amount" })
   amount: number;
 }

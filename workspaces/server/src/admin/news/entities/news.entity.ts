@@ -1,22 +1,22 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity()
+@Entity({ name: "unicore_news" })
 export class News {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: "id" })
   id: number;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: "title" })
   title: string;
 
-  @Column('text')
+  @Column('text', { name: "description" })
   description: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: "image" })
   image: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: "link" })
   link: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: "created" })
   created: Date;
 }

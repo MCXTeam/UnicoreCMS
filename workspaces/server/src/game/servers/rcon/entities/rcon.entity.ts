@@ -1,15 +1,15 @@
 import { Column, Entity, JoinColumn, OneToOne } from "typeorm";
 import { Server } from "../../entities/server.entity";
 
-@Entity()
+@Entity({ name: "unicore_rcons" })
 export class RCON {
-    @Column()
+    @Column({ name: "host" })
     host: string;
 
-    @Column()
+    @Column({ name: "port" })
     port: number;
 
-    @Column()
+    @Column({ name: "password" })
     password: string;
 
     @OneToOne(() => Server, (server) => server.rcon, {
@@ -18,6 +18,6 @@ export class RCON {
         onUpdate: 'CASCADE',
         primary: true,
     })
-    @JoinColumn()
+    @JoinColumn({ name: "server_id" })
     server: Server;
 }
