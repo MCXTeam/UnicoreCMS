@@ -53,6 +53,7 @@
     "i": "^0.3.7",
     "image-size": "^1.0.1",
     "ip-range-check": "^0.2.0",
+    "json-stable-stringify": "^1.0.1",
     "jszip": "^3.7.1",
     "lodash": "^4.17.21",
     "minimatch": "^3.0.5",

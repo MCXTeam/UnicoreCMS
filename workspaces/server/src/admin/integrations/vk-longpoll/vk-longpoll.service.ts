@@ -14,7 +14,7 @@ import { MessageEmbed, WebhookClient } from 'discord.js';
 
 @Injectable()
 export class VkLongpollService {
-  private readonly logger = new Logger(VkLongpollService.name);
+  private readonly logger = new Logger("VkLongpollService");
   protected VK: VK;
 
   constructor(

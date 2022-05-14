@@ -7,7 +7,7 @@ import { ServersService } from 'src/game/servers/servers.service';
 
 @Injectable()
 export class OnlineTasks {
-  private readonly logger = new Logger(OnlineTasks.name);
+  private readonly logger = new Logger("OnlineTasks");
 
   constructor(private eventsService: EventsService, private onlineService: OnlineService, private serversService: ServersService) {}
 

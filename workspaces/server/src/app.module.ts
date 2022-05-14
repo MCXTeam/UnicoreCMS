@@ -1,4 +1,4 @@
-import { CacheModule, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { CacheModule, MiddlewareConsumer, Module, NestModule, OnModuleInit } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { envConfig } from 'unicore-common';
 import { AuthModule } from './auth/auth.module';
@@ -19,6 +19,7 @@ import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { CronModule } from './cron/cron.module';
 import { AppController } from './app.controller';
+import LicenseModule from './common/license/license.module';
 
 @Injectable()
 export class AppLoggerMiddleware implements NestMiddleware {
@@ -39,6 +40,7 @@ export class AppLoggerMiddleware implements NestMiddleware {
 
 @Module({
   imports: [
+    LicenseModule,
     TypeOrmModule.forRoot(ormconfig),
     CacheModule.register({
       isGlobal: true
@@ -82,8 +84,12 @@ export class AppLoggerMiddleware implements NestMiddleware {
   ],
   controllers: [AppController]
 })
-export class AppModule implements NestModule {
+export class AppModule implements NestModule, OnModuleInit {
   configure(consumer: MiddlewareConsumer): void {
     consumer.apply(AppLoggerMiddleware).forRoutes('*');
+  }
+
+  onModuleInit() {
+    
   }
 }

@@ -20,7 +20,7 @@ import { EventsService } from './events.service';
   },
 })
 export class EventsGateway implements OnGatewayInit, OnGatewayConnection {
-  private logger = new Logger(EventsGateway.name);
+  private logger = new Logger("EventsGateway");
   // private gravitService: GravitService
 
   constructor(

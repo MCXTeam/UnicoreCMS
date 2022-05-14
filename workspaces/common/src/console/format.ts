@@ -1,4 +1,5 @@
 import * as clc from "cli-color";
+import * as os from "os";
 import bare from "cli-color/bare";
 import safeStringify from "fast-safe-stringify";
 import { Format } from "logform";
@@ -31,6 +32,9 @@ export const ConsoleFormat = (
       }
     }
 
+    if (message.startsWith("_"))
+      return ""
+
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const color = ColorScheme[level] || ((text: string): string => text);
 
@@ -47,6 +51,6 @@ export const ConsoleFormat = (
         typeof context !== "undefined" ? `${clc.yellow(`[${context}]`)} ` : ""
       }${color(message)}${
         Object.keys(meta).length !== 0 ? ` - ${formattedMeta}` : ""
-      }${typeof ms !== "undefined" ? ` ${clc.yellow(ms)}` : ""}`
+      }${typeof ms !== "undefined" ? ` ${clc.yellow(ms)}` : ""}${os.EOL}`
     );
   });

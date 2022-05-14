@@ -9,3 +9,4 @@ export * from './types';
 export * from './dto';
 export * from './utils';
 export * from './cache-key.enum'
+export * from "./license/license.module"

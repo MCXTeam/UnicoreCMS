@@ -3,7 +3,7 @@ import { Server } from 'src/game/servers/entities/server.entity';
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { DonatePermission } from './donate-permission.entity';
 
-@Entity({ name: "unicore_user_donate_permissions" })
+@Entity({ name: "unicore_users_donate_permissions" })
 export class UsersDonatePermission {
   @PrimaryGeneratedColumn({ name: "id" })
   id: number;

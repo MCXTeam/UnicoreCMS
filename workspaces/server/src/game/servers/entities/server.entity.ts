@@ -99,7 +99,7 @@ export class Server {
       referencedColumnName: "id"
     },
     inverseJoinColumn: {
-      name: "donate_group_id",
+      name: "group_id",
       referencedColumnName: "id"
     }
   })
@@ -113,7 +113,7 @@ export class Server {
       referencedColumnName: "id"
     },
     inverseJoinColumn: {
-      name: "donate_permission_id",
+      name: "permission_id",
       referencedColumnName: "id"
     }
   })

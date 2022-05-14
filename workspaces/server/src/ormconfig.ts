@@ -20,6 +20,26 @@ const importAllFunctions = (
     })
     .flat();
 
+const importEntities = () => {
+  try {
+    // @ts-ignore
+    const imports = importAllFunctions(require.context('.', true, /\.entity\.ts$/))
+    return imports;
+  } catch {
+    return ['./**/*.entity.js']
+  }
+}
+
+const importSeeds = () => {
+  try {
+    // @ts-ignore
+    const imports = importAllFunctions(require.context('./seeds', true, /\.ts$/))
+    return imports;
+  } catch {
+    return ['dist/seeds/*.js']
+  }
+}
+
 export const ormconfig: any = {
   type: envConfig.databaseType,
   host: envConfig.databaseHost,
@@ -28,9 +48,7 @@ export const ormconfig: any = {
   password: envConfig.databasePassword,
   database: envConfig.databaseName,
   timezone: 'Z',
-  // @ts-ignore
-  entities: importAllFunctions(require.context('.', true, /\.entity\.ts$/)),
-  // @ts-ignore
-  seeds: importAllFunctions(require.context('./seeds', true, /\.ts$/)),
+  entities: importEntities(),
+  seeds: importSeeds(),
   namingStrategy: new NamingStrategy(),
 };

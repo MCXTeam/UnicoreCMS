@@ -83,7 +83,7 @@ export class StorageManager {
 
       return filename;
     } catch (e) {
-      const logger = new Logger(StorageManager.name);
+      const logger = new Logger("StorageManager");
       logger.error(e);
       return null;
     }

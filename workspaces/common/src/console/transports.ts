@@ -8,7 +8,7 @@ const format = winston.format.combine(
 );
 
 export const transports = [
-  new winston.transports.Console({ format }),
+  new winston.transports.Console({ format, eol: "" }),
   new winston.transports.File({
     filename: "../../logs/error.log",
     level: "error",

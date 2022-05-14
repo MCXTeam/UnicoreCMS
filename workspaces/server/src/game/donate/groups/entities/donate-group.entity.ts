@@ -66,11 +66,11 @@ export class DonateGroup {
   @JoinTable({
     name: "unicore_donate_groups_periods",
     joinColumn: {
-        name: "period_id",
+        name: "group_id",
         referencedColumnName: "id"
     },
     inverseJoinColumn: {
-        name: "kit_id",
+        name: "period_id",
         referencedColumnName: "id"
     }
   })

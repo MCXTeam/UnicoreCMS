@@ -39,6 +39,12 @@ async function bootstrap() {
   app.useWebSocketAdapter(new AuthAdapter(app));
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.enableCors();
+
+  app.use(function (req, res, next) {
+    res.setHeader("x-powered-by", "UnicoreCMS")
+    next()
+  })
+
   app.listen(envConfig.backendPort, '0.0.0.0');
 }
 bootstrap();
