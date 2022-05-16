@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "engine-version && npm run build --workspace=unicore-common && lerna run dev --parallel --no-bail",
     "build:all": "engine-version && npm run build -w unicore-common && npm run build --workspaces --if-present",
-    "build": "engine-version && npm run build -w unicore-client",
+    "build": "engine-version && npm run postbuild -w unicore-server && npm run build -w unicore-client",
     "start": "engine-version && lerna run start --parallel --no-bail",
     "lint": "npm run lint --workspaces --if-present",
     "format": "npm run format --workspaces --if-present",
