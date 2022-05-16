@@ -30,7 +30,8 @@ jobs:
 
     - name: Prepare artifact
       run: |
-        rm -rf **/node_modules
+        rm -rf ./node_modules
+        rm -rf ./workspaces/*/node_modules
         rm -rf ./workspaces/client/.nuxt
         rm -rf ./workspaces/client/dist
         rm -rf ./workspaces/admin/assets
