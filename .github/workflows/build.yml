@@ -30,6 +30,8 @@ jobs:
 
     - name: Prepare artifact
       run: |
+        rm -rf .git
+        rm -rf .github
         rm -rf ./node_modules
         rm -rf ./workspaces/*/node_modules
         rm -rf ./workspaces/client/.nuxt
@@ -39,6 +41,7 @@ jobs:
         rm -rf ./workspaces/admin/layout
         rm -rf ./workspaces/admin/middleware
         rm -rf ./workspaces/admin/pages
+        rm -rf ./workspaces/server/src
         rm -rf /logs
         rm -rf ./yarn-error.log
         rm -rf ./package-lock.json
