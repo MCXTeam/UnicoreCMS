@@ -1,6 +1,5 @@
 import mainConfig from './main.config'
 import { envConfig } from 'unicore-common/dist/envconfig'
-const WebpackObfuscator = require('webpack-obfuscator');
 
 export default mainConfig({
   ssr: false,
@@ -122,16 +121,4 @@ export default mainConfig({
   router: {
     middleware: ['auth'],
   },
-
-  build: {
-    extend(config, { isDev, isClient }) {
-      if (!isDev && isClient && config.plugins) {
-        config.plugins.push(
-          new WebpackObfuscator({
-            rotateStringArray: true
-          }, ['node_modules/**/*.js', '../../node_modules/**/*.js'])
-        );
-      }
-    }
-  }
 })
