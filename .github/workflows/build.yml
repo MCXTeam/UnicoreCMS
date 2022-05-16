@@ -30,16 +30,17 @@ jobs:
 
     - name: Prepare artifact
       run: |
-        rm -rf ./**/node_modules
-        rm -rf ./node_modules
+        rm -rf **/node_modules
         rm -rf ./workspaces/client/.nuxt
         rm -rf ./workspaces/client/dist
+        rm -rf ./workspaces/admin/assets
+        rm -rf ./workspaces/admin/components
+        rm -rf ./workspaces/admin/layout
+        rm -rf ./workspaces/admin/middleware
+        rm -rf ./workspaces/admin/pages
         rm -rf /logs
-        rm -rf ./**/yarn-error.log
         rm -rf ./yarn-error.log
-        rm -rf ./**/package-lock.json
         rm -rf ./package-lock.json
-        rm -rf ./**/yarn.lock
         rm -rf ./yarn.lock
     - uses: actions/upload-artifact@v3
       with:
