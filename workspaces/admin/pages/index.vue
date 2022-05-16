@@ -88,7 +88,7 @@
       <div class="card h-full">
         <h5>Доход за последние 7 дней</h5>
         <DataTable
-          :value="$_.reverse($_.get(stats, 'payments.days', []))"
+          :value="$_.orderBy($_.get(stats, 'payments.days', []), ['date'], ['desc'])"
           :loading="!$_.get(stats, 'payments.days')"
           responsiveLayout="scroll"
         >
