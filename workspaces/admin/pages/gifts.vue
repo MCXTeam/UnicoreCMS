@@ -1,415 +1,166 @@
 <template>
-  <div class="grid">
-    <div class="col-12">
-      <div class="card">
-        <Toolbar class="mb-4">
-          <template v-slot:start>
-            <div class="my-2">
-              <Button label="Создать" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
-              <Button
-                label="Удалить"
-                icon="pi pi-trash"
-                class="p-button-danger"
-                :disabled="!selected || !selected.length"
-                @click="removeMany()"
-              />
-            </div>
-          </template>
-        </Toolbar>
-
-        <DataTable
-          :value="gifts"
-          :loading="loading"
-          :rows="20"
-          paginator
-          :filters.sync="filters"
-          rowHover
-          responsiveLayout="scroll"
-          :selection.sync="selected"
-          dataKey="id"
-          filterDisplay="menu"
-        >
-          <template #header>
-            <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-              <h5 class="m-0">Управление промо-кодами</h5>
-              <span class="block mt-2 md:mt-0 p-input-icon-left">
-                <i class="pi pi-search" />
-                <InputText v-model="filters['global'].value" placeholder="Поиск..." />
-              </span>
-            </div>
-          </template>
-          <Column selectionMode="multiple" :styles="{ width: '3rem' }"></Column>
-          <Column sortable field="id" header="ID" :styles="{ width: '8rem' }"></Column>
-          <Column field="promocode" header="Промо-код" sortable></Column>
-          <Column field="type" header="Тип" sortable>
-            <template #body="slotProps">
-              {{ types.find((type) => type.value == slotProps.data.type).name }}
-            </template>
-          </Column>
-          <Column field="type" header="Использований" sortable>
-            <template #body="slotProps">
-              {{ slotProps.data.max_activations ? `${slotProps.data.activations}/${slotProps.data.max_activations}` : `${slotProps.data.activations}/∞` }}
-            </template>
-          </Column>
-          <Column field="type" header="Активен до" sortable>
-            <template #body="slotProps">
-              {{ slotProps.data.expires ? $moment(slotProps.data.expires).local().format('MM/DD/YYYY HH:mm:ss') : '∞' }}
-            </template>
-          </Column>
-          <Column :styles="{ width: '12rem' }">
-            <template #body="slotProps">
-              <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
-              <Button @click="removeGift(slotProps.data.id)" icon="pi pi-trash" class="p-button-rounded p-button-warning mt-2" />
-            </template>
-          </Column>
-        </DataTable>
-
-        <ValidationObserver v-slot="{ invalid }">
-          <Dialog
-            :visible.sync="giftDialog"
-            :closable="false"
-            :style="{ width: '600px' }"
-            :modal="true"
-            header="Создание/редактирование промо-кода"
-            class="p-fluid"
-          >
-            <ValidationProvider name="Промо-код" rules="required" v-slot="{ errors }">
-              <div class="field">
-                <label>Промо-код</label>
-                <InputText v-model="gift.promocode" />
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
-              </div>
-            </ValidationProvider>
-            <div class="field">
-              <label>Истекает</label>
-              <Calendar id="time24" v-model="gift.expires" showTime showSeconds appendTo="body" />
-            </div>
-            <ValidationProvider name="Тип" rules="min:1" v-slot="{ errors }">
-              <div class="field">
-                <label>Количество использований</label>
-                <InputNumber v-model="gift.max_activations" />
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
-              </div>
-            </ValidationProvider>
-            <ValidationProvider name="Тип" rules="required" v-slot="{ errors }">
-              <div class="field">
-                <label>Тип</label>
-                <Dropdown v-model="gift.type" :options="types" optionLabel="name" appendTo="body" />
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
-              </div>
-            </ValidationProvider>
-            <div class="field" v-if="['donate', 'permission'].find((v) => v == $_.get(gift.type, 'value'))">
-              <label>Период</label>
-              <ValidationProvider name="Период" rules="required" v-slot="{ errors }">
-                <Dropdown v-model="gift.period" :options="periods" optionLabel="name" appendTo="body" />
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
-              </ValidationProvider>
-            </div>
-            <div class="field" v-if="['donate', 'permission', 'product', 'kit', 'money'].find((v) => v == $_.get(gift.type, 'value')) && (!['permission'].find((v) => v == $_.get(gift.type, 'value')) || gift.donate_permission && gift.donate_permission.type != 'web')">
-              <label>Сервер</label>
-              <ValidationProvider name="Сервер" rules="required" v-slot="{ errors }">
-                <Dropdown v-model="gift.server" :options="servers" optionLabel="name" appendTo="body">
-                  <template #option="slotProps">
-                    <div class="flex align-items-center">
-                      <Avatar v-if="slotProps.option.icon" :image="`${$config.apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
-                      <Avatar v-else icon="pi pi-image" shape="circle" />
-                      <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
-                    </div>
-                  </template>
-                </Dropdown>
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
-              </ValidationProvider>
-            </div>
-            <div class="field" v-if="$_.get(gift.type, 'value') == 'donate'">
-              <label>Донат-группа</label>
-              <ValidationProvider name="Донат-группа" rules="required" v-slot="{ errors }">
-                <Dropdown v-model="gift.donate_group" :options="donate_groups" optionLabel="name" appendTo="body">
-                  <template #option="slotProps">
-                    <div class="flex align-items-center">
-                      <Avatar v-if="slotProps.option.icon" :image="`${$config.apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
-                      <Avatar v-else icon="pi pi-image" shape="circle" />
-                      <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
-                    </div>
-                  </template>
-                </Dropdown>
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
-              </ValidationProvider>
-            </div>
-            <div class="field" v-if="$_.get(gift.type, 'value') == 'permission'">
-              <label>Донат-право</label>
-              <ValidationProvider name="Донат-право" rules="required" v-slot="{ errors }">
-                <Dropdown v-model="gift.donate_permission" :options="donate_permissions" optionLabel="name" appendTo="body">
-                  <template #option="slotProps"> {{ slotProps.option.name }} (#{{ slotProps.option.id }}) </template>
-                </Dropdown>
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
-              </ValidationProvider>
-            </div>
-            <div class="field" v-if="$_.get(gift.type, 'value') == 'product'">
-              <label>Товар</label>
-              <ValidationProvider name="Товар" rules="required" v-slot="{ errors }">
-                <AutoComplete v-model="gift.product" :suggestions="products" @complete="searchProduct($event)" field="name" appendTo="body">
-                  <template #item="slotProps">
-                    <div class="flex align-items-center">
-                      <Avatar v-if="slotProps.item.icon" :image="`${$config.apiUrl + '/' + slotProps.item.icon}`" shape="circle" />
-                      <Avatar v-else icon="pi pi-image" shape="circle" />
-                      <span class="ml-2">{{ slotProps.item.name }} (#{{ slotProps.item.id }})</span>
-                    </div>
-                  </template>
-                </AutoComplete>
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
-              </ValidationProvider>
-            </div>
-            <div class="field" v-if="$_.get(gift.type, 'value') == 'kit'">
-              <label>Кит</label>
-              <ValidationProvider name="Товар" rules="required" v-slot="{ errors }">
-                <AutoComplete v-model="gift.kit" :suggestions="kits" @complete="searchKit($event)" field="name" appendTo="body">
-                  <template #item="slotProps">
-                    <div class="flex align-items-center">
-                      <Avatar v-if="slotProps.item.icon" :image="`${$config.apiUrl + '/' + slotProps.item.icon}`" shape="circle" />
-                      <Avatar v-else icon="pi pi-image" shape="circle" />
-                      <span class="ml-2">{{ slotProps.item.name }} (#{{ slotProps.item.id }})</span>
-                    </div>
-                  </template>
-                </AutoComplete>
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
-              </ValidationProvider>
-            </div>
-            <div class="field" v-if="['real', 'product', 'money'].find((v) => v == $_.get(gift.type, 'value'))">
-              <ValidationProvider name="Количество" rules="required|min:1" v-slot="{ errors }">
-                <div class="field">
-                  <label>Количество</label>
-                  <InputNumber v-model="gift.amount" />
-                  <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
-                </div>
-              </ValidationProvider>
-            </div>
-            <template #footer>
-              <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
-              <Button
-                :disabled="loading || invalid"
-                label="Сохранить"
-                icon="pi pi-check"
-                class="p-button-text"
-                @click="updateMode ? updateGift() : createGift()"
-              />
-            </template>
-          </Dialog>
-        </ValidationObserver>
+  <div>
+    <vs-dialog class="buy-dialog" v-model="giftDialog" v-if="gift">
+      <template #header>
+        <div class="d-flex flex-column align-items-center">
+          <h4 class="mt-2 mb-0">Гифт-код активирован!</h4>
+          <h3 class="mt-2 mb-0">Вы получили:</h3>
+        </div>
+      </template>
+      <div class="text-center">
+        <img height="100px" src="/images/chest-minecraft.gif" />
+        <h4 v-if="gift.type == 'real'" class="m-0">{{ $utils.formatCurrency('real', gift.amount) }} на баланс</h4>
+        <h4 v-if="gift.type == 'money'" class="m-0">{{ $utils.formatCurrency('ingame', gift.amount) }} монет на сервере {{ gift.server.name }}</h4>
+        <h4 v-if="gift.type == 'donate'" class="m-0">
+          Донат-группу "{{ gift.donate_group.name }}" ({{ gift.period.name }}) на сервере {{ gift.server.name }}
+        </h4>
+        <h4 v-if="gift.type == 'permission' && gift.donate_permission.type == 'web'" class="m-0">
+          Донат-право "{{ gift.donate_permission.name }}" ({{ gift.period.name }})
+        </h4>
+        <h4 v-if="gift.type == 'permission' && gift.donate_permission.type != 'web'" class="m-0">
+          Донат-право "{{ gift.donate_permission.name }}" ({{ gift.period.name }}) на сервере {{ gift.server.name }}
+        </h4>
+        <h4 v-if="gift.type == 'product' && gift.donate_permission != 'web'" class="m-0">
+          Товар из магазина "{{ gift.product.name }}" ({{ gift.amount }} шт.) на сервере {{ gift.server.name }}
+        </h4>
+        <h4 v-if="gift.type == 'kit' && gift.donate_permission != 'web'" class="m-0">
+          Кит из магазина "{{ gift.kit.name }}" на сервере {{ gift.server.name }}
+        </h4>
       </div>
-    </div>
+    </vs-dialog>
+    <section class="px-4 pb-3">
+      <h2 class="mt-0 mb-3">Гифт-коды</h2>
+      <div class="row settings-split">
+        <div class="col-xl-6 input-fw pe-xl-4 mb-4">
+          <ValidationObserver v-slot="{ invalid }">
+            <ValidationProvider class="w-100" name="гифт-код" rules="required">
+              <vs-input v-model="gift_code" placeholder="Введите гифт-код" />
+            </ValidationProvider>
+            <vs-button :loadong="loading" @click="activateGift()" :disabled="invalid" class="mt-3" size="large" block
+              >Активировать</vs-button
+            >
+          </ValidationObserver>
+        </div>
+        <div class="col ps-xl-5">
+          <h3 class="m-0">Где найти код?</h3>
+          <p class="mt-1">Переодически мы публикуем коды в наших социальных сетях, чтобы не пропускать их, советуем подписаться.</p>
+          <h3 class="m-0">Что содержат гифт-коды?</h3>
+          <p class="mt-1">
+            Активировав гифт-код вы можете получить деньги на баланс, монеты, игровые предметы или киты, а также донат-группы или
+            донат-права
+          </p>
+        </div>
+      </div>
+    </section>
+    <hr />
+    <section class="px-4 mt-5">
+      <h2 class="mt-0 mb-3">Голосование</h2>
+      <div class="row settings-split">
+        <div class="col-xl-6 input-fw pe-xl-4 mb-4">
+          <table class="player-info-table w-100">
+            <tr v-for="mon in monitorings" :key="mon">
+              <td class="d-flex align-items-center py-2">
+                <img width="30px" :src="monitorings_map[mon].icon" />
+                <h4 class="m-0 ms-3" v-text="monitorings_map[mon].name" />
+              </td>
+              <td>
+                <vs-button block :href="config['public_link_' + mon]">Голосовать на {{ monitorings_map[mon].name }}</vs-button>
+              </td>
+            </tr>
+          </table>
+        </div>
+        <div class="col ps-xl-5">
+          <h3 class="mt-0 mb-3">Что вы получите, проголосовав в {{ monitorings.length }} рейтингах?</h3>
+          <p class="mt-1">
+            <b>Бонусы</b> - валюта за которую вы можете частично или полностью оплачивать товары из магазина, наборы ресурсов, донат-группы и донат-киты.
+          </p>
+          <div class="row">
+            <div class="col-xl-6">
+              <div class="mini-profile p-4 my-3 h-75">
+                <h2 class="mt-0 mb-2">{{ $utils.formatCurrency('virtual', config.public_monitoring_reward * monitorings.length) }}</h2>
+                <span>Бонусов</span>
+              </div>
+            </div>
+            <div class="col-xl-6">
+              <div class="mini-profile p-4 my-3 h-75">
+                <h2 class="mt-0 mb-2">{{ monitorings.length }}</h2>
+                <span>Очка в топе</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
 <script>
-import { FilterMatchMode } from 'primevue/api'
-import { ValidationObserver, ValidationProvider } from 'vee-validate'
+import { mapGetters } from 'vuex'
+import monitorings from "~/json/monitorings.json"
 
 export default {
-  head: {
-    title: 'Гифт-коды',
-  },
-  components: {
-    ValidationObserver,
-    ValidationProvider,
-  },
+  layout: 'cabinet',
+
   data() {
     return {
-      gifts: null,
-      loading: true,
-      selected: null,
-      updateMode: false,
-      gift: {
-        id: null,
-        promocode: null,
-        type: 'real',
-        max_activations: null,
-        expires: null,
-        product: null,
-        kit: null,
-        donate_group: null,
-        donate_permission: null,
-        server: null,
-        period: null,
-        amount: null,
-      },
+      monitorings: [],
       giftDialog: false,
-      filters: {
-        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        servers: { value: null, matchMode: FilterMatchMode.CONTAINS },
-      },
-      types: [
-        { name: 'Реальные деньги', value: 'real' },
-        { name: 'Игровые деньги', value: 'money' },
-        { name: 'Донат-группа', value: 'donate' },
-        { name: 'Донат-право', value: 'permission' },
-        { name: 'Товар', value: 'product' },
-        { name: 'Кит', value: 'kit' },
-      ],
-      servers: null,
-      periods: null,
-      products: null,
-      donate_groups: null,
-      donate_permissions: null,
-      kits: null,
+      gift: null,
+      loading: false,
+      monitorings_map: monitorings,
+      gift_code: '',
     }
   },
-  async fetch() {
-    this.loading = true
-    this.giftDialog = false
-    this.gifts = await this.$axios.get('/cabinet/gifts').then((res) => res.data)
-    this.donate_groups = await this.$axios.get('/donates/groups').then((res) => res.data)
-    this.donate_permissions = await this.$axios.get('/donates/permissions').then((res) => res.data)
-    this.periods = await this.$axios.get('/donates/periods').then((res) => res.data)
-    this.servers = await this.$axios.get('/servers').then((res) => res.data)
-    this.loading = false
+
+  async mounted() {
+    try {
+      await this.$recaptcha.init()
+    } catch (e) {
+      console.error(e)
+    }
   },
+
+  beforeDestroy() {
+    this.$recaptcha.destroy()
+  },
+
+  computed: {
+    ...mapGetters({
+      config: 'config',
+    }),
+  },
+
+  asyncData({ store }) {
+    store.commit('unicore/SET_NAME', 'Личный кабинет')
+  },
+
+  async fetch() {
+    this.monitorings = await this.$axios.get('cabinet/votes/monitorings').then((res) => res.data)
+  },
+
   methods: {
-    async searchProduct(event) {
-      this.products = await this.$axios
-        .get('/store/products', {
-          params: {
-            search: event.query.trim(),
-          },
-        })
-        .then((res) => res.data.data)
-    },
-    async searchKit(event) {
-      this.kits = await this.$axios
-        .get('/store/kits', {
-          params: {
-            search: event.query.trim(),
-          },
-        })
-        .then((res) => res.data.data)
-    },
-    hideDialog() {
-      this.giftDialog = false
-    },
-    async openDialog(gift = null) {
-      this.updateMode = !!gift
-      if (gift) {
-        this.gift = this.$_.pick(await this.$axios.get('/cabinet/gifts/' + gift.id).then((res) => res.data), this.$_.deepKeys(this.gift))
-        this.gift.type = this.types.find((type) => type.value == this.gift.type)
-        this.gift.donate_group = this.donate_groups.find((group) => group.id == this.gift.donate_group?.id)
-        this.gift.donate_permission = this.donate_permissions.find((perm) => perm.id == this.gift.donate_permission?.id)
-        if (this.gift.expires) this.gift.expires = this.$moment(this.gift.expires).local().toDate()
-      } else {
-        this.gift = {
-          id: null,
-          promocode: null,
-          type: 'real',
-          max_activations: null,
-          expires: null,
-          product: null,
-          kit: null,
-          donate_group: null,
-          donate_permission: null,
-          server: null,
-          period: null,
-          amount: null,
-        }
-      }
-      this.giftDialog = true
-    },
-    async createGift() {
+    async activateGift() {
       this.loading = true
       try {
-        await this.$axios.post('/cabinet/gifts', {
-          ...this.gift,
-          type: this.gift.type.value,
-          kit: this.gift.kit?.id,
-          period: this.gift.period?.id,
-          product: this.gift.product?.id,
-          server: this.gift.server?.id,
-          donate_group: this.gift.donate_group?.id,
-          donate_permission: this.gift.donate_permission?.id,
-        })
-        this.$toast.add({
-          severity: 'success',
-          detail: 'Гифт-код успешно добавлен',
-          life: 3000,
-        })
-        await this.$fetch()
-      } catch (err) {
-        this.loading = false
-        this.$toast.add({
-          severity: 'error',
-          detail: 'Введены некоректные данные',
-          life: 3000,
-        })
+        const recaptcha = await this.$recaptcha.execute('gift')
+        this.gift = await this.$axios
+          .post(
+            '/cabinet/gifts/activate',
+            {
+              gift_code: this.gift_code,
+            },
+            { headers: { recaptcha } }
+          )
+          .then((res) => res.data)
+
+        if (this.gift.type == 'real')
+          this.$auth.fetchUser()
+
+        this.giftDialog = true
+      } catch {
+        this.$unicore.errorNotification('Указанный вами промокод не найден, либо вы уже активировали его')
       }
-    },
-    async updateGift() {
-      this.loading = true
-      try {
-        await this.$axios.patch('/cabinet/gifts/' + this.gift.id, {
-          ...this.$_.omit(this.gift, 'id'),
-          type: this.gift.type.value,
-          kit: this.gift.kit?.id,
-          product: this.gift.product?.id,
-          period: this.gift.period?.id,
-          server: this.gift.server?.id,
-          donate_group: this.gift.donate_group?.id,
-          donate_permission: this.gift.donate_permission?.id,
-          expires: this.gift.expires,
-        })
-        this.$toast.add({
-          severity: 'success',
-          detail: 'Промо-код успешно редактирован',
-          life: 3000,
-        })
-        await this.$fetch()
-      } catch (err) {
-        this.loading = false
-        this.$toast.add({
-          severity: 'error',
-          detail: 'Введены некоректные данные',
-          life: 3000,
-        })
-      }
-    },
-    async removeMany() {
-      this.$confirm.require({
-        message: `Данный процесс будет необратим!`,
-        header: `Удаления ${this.selected.length} объектов`,
-        icon: 'pi pi-exclamation-triangle',
-        accept: async () => {
-          this.loading = true
-          try {
-            await this.$axios.delete('/cabinet/gifts/bulk/', {
-              data: {
-                items: this.selected.map((gift) => gift.id),
-              },
-            })
-            this.$toast.add({
-              severity: 'success',
-              detail: 'Права успешно удалены',
-              life: 3000,
-            })
-            this.selected = []
-          } catch {}
-          await this.$fetch()
-        },
-      })
-    },
-    async removeGift(id) {
-      this.$confirm.require({
-        message: `Данный процесс будет необратим!`,
-        header: 'Подтверждение удаления',
-        icon: 'pi pi-exclamation-triangle',
-        accept: async () => {
-          this.loading = true
-          try {
-            await this.$axios.delete('/cabinet/gifts/' + id)
-            this.$toast.add({
-              severity: 'success',
-              detail: 'Промо-код успешно удален',
-              life: 3000,
-            })
-          } catch {}
-          await this.$fetch()
-        },
-      })
+      this.loading = false
     },
   },
 }
