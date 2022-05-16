@@ -37,6 +37,7 @@ jobs:
         rm -rf **/yarn-error.log
         rm -rf **/package-lock.json
         rm -rf **/yarn.lock
+        ls
         mv ./.env.example ./.env
     - uses: actions/upload-artifact@v3
       with:
