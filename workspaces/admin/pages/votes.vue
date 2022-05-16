@@ -143,7 +143,7 @@ export default {
     async updateBonus() {
       this.loading = true
       try {
-        await this.$axios.patch('/cabinet/votes/gifts' + this.bonus.id, this.$_.omit(this.bonus, 'id'))
+        await this.$axios.patch('/cabinet/votes/gifts/' + this.bonus.id, this.$_.omit(this.bonus, 'id'))
         this.$toast.add({
           severity: 'success',
           detail: 'Бонус успешно редактирован',
@@ -168,7 +168,7 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$axios.delete('/cabinet/votes/gifts' + id)
+            await this.$axios.delete('/cabinet/votes/gifts/' + id)
             this.$toast.add({
               severity: 'success',
               detail: 'Бонус успешно удален',
