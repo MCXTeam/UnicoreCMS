@@ -27,3 +27,19 @@ jobs:
         mv .env.example .env
         npx lerna bootstrap
         npm run build
+
+    - name: Prepare artifact
+      run: |
+        rm -rf **/node_modules
+        rm -rf workspaces/client/.nuxt
+        rm -rf workspaces/client/dist
+        rm -rf /logs
+        rm -rf **/yarn-error.log
+        rm -rf **/package-lock.json
+        rm -rf **/yarn.lock
+        mv .env.example .env
+    - uses: actions/upload-artifact@v3
+      with:
+        name: UnicoreCMS
+        path: ./
+

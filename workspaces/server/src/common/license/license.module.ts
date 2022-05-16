@@ -1,7 +1,6 @@
-import { Injectable, Logger, MiddlewareConsumer, Module, NestMiddleware, NestModule, OnModuleInit, ServiceUnavailableException } from "@nestjs/common";
+import { Logger, MiddlewareConsumer, Module, NestModule, OnModuleInit, ServiceUnavailableException } from "@nestjs/common";
 import * as fs from "fs"
 import * as crypto from "crypto"
-import { resolve } from "path";
 import LicenseParser from "./license-parser";
 import { envConfig } from "unicore-common";
 import { Request, Response, NextFunction } from 'express';
@@ -26,35 +25,41 @@ export default class LicenseModule implements OnModuleInit, NestModule {
       const apiDomain = new URL("http://" + request.hostname).hostname.split('.').reverse()
       const domain = this.licenseData.data.domain.split('.').reverse()
 
+      const apiDomainGlow = [...apiDomain].reverse().join(".")
+      if (apiDomainGlow == "localhost" || apiDomainGlow == "127.0.0.1")
+        return next();
+
       for (const i in domain) {
         if (domain[i] != apiDomain[i])
-          return next(new ServiceUnavailableException("Incorrect hostaname (by lecense)"))
+          return next(new ServiceUnavailableException(`${apiDomainGlow} (hostname) not allowed (by license)`))
       }
 
-      next();
+      return next();
     }).forRoutes("*")
   }
 
   onModuleInit() {
     try {
+      if (!fs.existsSync("../../license.pem")) throw Error("License file not found")
+
       const licenseFile = fs.readFileSync("../../license.pem", "utf-8")
       this.licenseData = LicenseParser.parse({ publicKey: Buffer.from(publicKey, 'base64').toString('utf-8'), licenseFile, template });
 
-      if (!this.licenseData.valid) throw Error()
+      if (!this.licenseData.valid) throw Error("License file corrupted")
 
       const domain = new URL(envConfig.baseurl).hostname.split('.').reverse()
       const apiDomain = new URL(envConfig.apiBaseurl).hostname.split('.').reverse()
       const lDomain = this.licenseData.data.domain.split('.').reverse()
 
       for (const i in lDomain) {
-        if (lDomain[i] != domain[i]) throw Error()
-        if (lDomain[i] != apiDomain[i]) throw Error()
+        if (lDomain[i] != domain[i]) throw Error("Domain from \"BASEURL\" not allowed")
+        if (lDomain[i] != apiDomain[i]) throw Error("Domain from \"API_BASEURL\" not allowed")
       }
 
-      const deigest = crypto.createHash("md5").update(fs.readFileSync("./dist/main.js")).digest("hex")
-      if (deigest != this.licenseData.data.deigest) throw Error()
+      const deigest = crypto.createHash("md5").update(fs.readFileSync(__filename)).digest("hex")
+      if (deigest != this.licenseData.data.deigest) throw Error("UnicoreServer bundle corrupted")
     } catch (e) {
-      this.logger.error("Incorrect licence file")
+      this.logger.error(e.message)
       process.exit()
     }
   }
