@@ -105,7 +105,8 @@ export class GiftsService {
     const ga = new GiftActivation()
     ga.gift = gift
     ga.user = user
-    await this.giftsActivationsRepository.save(ga)
+    
+    await this.giftsActivationsRepository.insert(ga)
 
     return new GiftDto(gift)
   }

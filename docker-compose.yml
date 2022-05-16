@@ -63,5 +63,6 @@ services:
     environment:
       PMA_HOST: mariadb
       PMA_PORT: 3306
+      UPLOAD_LIMIT: 100M
     ports:
       - 8081:80
