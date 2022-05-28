@@ -78,8 +78,8 @@
           </td>
           <td>
             <strike v-if="product.payload.sale" v-text="$utils.formatCurrency('real', product.payload.price)" class="me-1"></strike>
-            <span v-text="$utils.formatCurrency('real', product.payload.price, product.payload.sale)"></span>
-            <h5 class="m-0">за 1 шт.</h5>
+            <span v-text="$utils.formatCurrency('real', product.payload.price * product.payload.multiple_of, product.payload.sale)"></span>
+            <h5 class="m-0">за {{product.payload.multiple_of}} шт.</h5>
           </td>
           <td align="right">
             <vs-button @click="openDialog(product)">В корзину <i class="bx bxs-cart-add ms-1"></i></vs-button>
