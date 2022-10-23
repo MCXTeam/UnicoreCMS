@@ -13,13 +13,10 @@ import { EventsModule } from './events/events.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ormconfig } from './ormconfig';
 import { GravitModule } from './auth/gravit/gravit.module';
-
 import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
-
 import { Request, Response, NextFunction } from 'express';
 import { CronModule } from './cron/cron.module';
 import { AppController } from './app.controller';
-import LicenseModule from './common/license/license.module';
 
 @Injectable()
 export class AppLoggerMiddleware implements NestMiddleware {
@@ -40,7 +37,6 @@ export class AppLoggerMiddleware implements NestMiddleware {
 
 @Module({
   imports: [
-    LicenseModule,
     TypeOrmModule.forRoot(ormconfig),
     CacheModule.register({
       isGlobal: true
