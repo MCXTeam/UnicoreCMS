@@ -25,7 +25,8 @@ jobs:
     - name: Build
       run: |
         mv .env.example .env
-        npx lerna bootstrap
+        npm i lerna@4.0.0 -g
+        lerna bootstrap
         npm run build:all
 
     - name: Prepare artifact
