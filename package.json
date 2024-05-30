@@ -22,7 +22,7 @@
     "boot": "npx lerna bootstrap && npm run build && npm link -w unicore-server && npm run sync"
   },
   "devDependencies": {
-    "lerna": "^4.0.0",
+    "lerna": "4.0.0",
     "typescript": "^4.5.5"
   },
   "dependencies": {
