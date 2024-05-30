@@ -19,6 +19,7 @@ COPY . .
 RUN npm i lerna@4.0.0 -g
 RUN lerna bootstrap
 RUN npm run build
+RUN npm link -w unicore-common
 RUN npm link -w unicore-server
 
 USER node
