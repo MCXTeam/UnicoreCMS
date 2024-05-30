@@ -1,0 +1,49 @@
+name: Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+    
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Build
+      run: |
+        mv .env.example .env
+        npx lerna bootstrap
+        npm run build:all
+
+    - name: Prepare artifact
+      run: |
+        rm -rf .git
+        rm -rf .github
+        rm -rf ./node_modules
+        rm -rf ./workspaces/*/node_modules
+        rm -rf ./workspaces/client/.nuxt
+        rm -rf ./workspaces/client/dist
+        rm -rf ./workspaces/admin/.nuxt
+        rm -rf ./workspaces/admin/dist
+        rm -rf ./workspaces/server/src
+        rm -rf /logs
+        rm -rf ./yarn-error.log
+        rm -rf ./package-lock.json
+        rm -rf ./yarn.lock
+    - uses: actions/upload-artifact@v3
+      with:
+        name: UnicoreCMS
+        path: ./
