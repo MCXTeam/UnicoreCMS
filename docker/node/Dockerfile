@@ -16,7 +16,8 @@ WORKDIR /usr/local/app
 # Installing UnicoreCMS
 COPY . .
 
-RUN npx lerna bootstrap
+RUN npm i lerna@4.0.0 -g
+RUN lerna bootstrap
 RUN npm run build
 RUN npm link -w unicore-server
 
