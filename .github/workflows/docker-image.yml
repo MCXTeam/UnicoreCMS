@@ -22,12 +22,14 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
+    - name: Install Lerna
+      run: npm install -g lerna@4.0.0
+
     - name: Build
       run: |
         mv .env.example .env
-        npm i lerna@4.0.0 -g
-        lerna bootstrap
-        npm run build:all
+        npx lerna bootstrap
+        npm run build
 
     - name: Prepare artifact
       run: |
