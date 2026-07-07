@@ -9,13 +9,17 @@ import { Request } from 'express';
 
 @Injectable()
 export class ApiKeyStrategy extends PassportStrategy(HeaderAPIKeyStrategy) {
-  constructor(private usersService: UsersService, private apiService: ApiService) {
+  constructor(
+    private usersService: UsersService,
+    private apiService: ApiService,
+  ) {
     super(
       {
         header: 'Authorization',
         prefix: 'Api-Key ',
       },
       true,
+      // @ts-expect-error @nestjs/passport strips the verify callback from the constructor type, but passport-headerapikey requires it at runtime
       async (apiKey, done, req) => {
         return this.validate(apiKey, done, req);
       },
@@ -25,7 +29,7 @@ export class ApiKeyStrategy extends PassportStrategy(HeaderAPIKeyStrategy) {
   async validate(apiKey: string, done: (error: Error, data) => {}, req: Request) {
     const api = await this.apiService.findOne(apiKey);
     const kernel = await this.usersService.getKernel();
-    const ip = requestIp.getClientIp(req);
+    const ip = req.ip || requestIp.getClientIp(req);
 
     if (
       api &&
@@ -37,6 +41,7 @@ export class ApiKeyStrategy extends PassportStrategy(HeaderAPIKeyStrategy) {
       kernel.perms = api.perms;
 
       done(null, kernel);
+      return;
     }
 
     done(new UnauthorizedException(), null);

@@ -22,7 +22,7 @@
             <span class="text-600">Произошла ошибка - {{ error.statusCode }}</span>
             <div class="col-12 mt-5 text-center">
               <i class="pi pi-fw pi-arrow-left text-blue-500 mr-2" style="vertical-align: center"></i>
-              <router-link to="/" class="text-blue-500">Перейти в панель управления</router-link>
+              <NuxtLink to="/" class="text-blue-500">Перейти в панель управления</NuxtLink>
             </div>
           </div>
         </div>
@@ -33,7 +33,6 @@
 
 <script>
 export default {
-  layout: 'empty',
   props: ['error'],
 }
 </script>

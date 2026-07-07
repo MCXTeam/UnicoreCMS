@@ -1,15 +1,11 @@
-import { Transform } from "class-transformer";
-import { CartProtected, CartUnprotect } from "./cart.dto";
+import { Transform } from 'class-transformer';
+import { CartProtected, CartUnprotect } from './cart.dto';
 
 export class CartFindDto {
   @Transform(({ value }) => value.map((val) => new CartProtected(val)))
-  items: CartProtected
+  items: CartProtected;
 
-  constructor(partial: { 
-    items: CartUnprotect[], 
-    price: number, 
-    virtual_sale: number 
-  }) {
+  constructor(partial: { items: CartUnprotect[]; price: number; virtual_sale: number }) {
     Object.assign(this, partial);
   }
 }

@@ -18,8 +18,14 @@ import { DonateGroupsModule } from 'src/game/donate/groups/groups.module';
 import { CartModule } from 'src/game/store/cart/cart.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Product, Kit, DonateGroup, DonatePermission, Period, Server, User, Gift, GiftActivation, Money]), MoneyModule, DonatePermissionsModule, DonateGroupsModule, CartModule],
+  imports: [
+    TypeOrmModule.forFeature([Product, Kit, DonateGroup, DonatePermission, Period, Server, User, Gift, GiftActivation, Money]),
+    MoneyModule,
+    DonatePermissionsModule,
+    DonateGroupsModule,
+    CartModule,
+  ],
   providers: [GiftsService],
   controllers: [GiftsController],
 })
-export class GiftsModule { }
+export class GiftsModule {}

@@ -11,6 +11,6 @@ import { AnypayService } from './anypay.service';
   controllers: [AnypayController],
 })
 export class AnypayModule implements PaymentCoreModule {
-  static id = "anypay"
+  static id = 'anypay';
   static enabled = envConfig.anypayEnabled;
 }

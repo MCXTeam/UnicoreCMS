@@ -1,11 +1,11 @@
-import { MomentWrapper } from "@common";
-import { Inject } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { ConfigField } from "src/admin/config/config.enum";
-import { ConfigService } from "src/admin/config/config.service";
-import { User } from "src/admin/users/entities/user.entity";
-import { MoreThanOrEqual, Repository } from "typeorm";
-import { Vote } from "../../entities/vote.entity";
+import { MomentWrapper } from '@common';
+import { Inject } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ConfigField } from 'src/admin/config/config.enum';
+import { ConfigService } from 'src/admin/config/config.service';
+import { User } from 'src/admin/users/entities/user.entity';
+import { MoreThanOrEqual, Repository } from 'typeorm';
+import { Vote } from '../../entities/vote.entity';
 
 export class MonitoringHandlerService {
   constructor(
@@ -14,27 +14,36 @@ export class MonitoringHandlerService {
     private configService: ConfigService,
     @InjectRepository(Vote) private votesRepo: Repository<Vote>,
     @InjectRepository(User) private usersRepo: Repository<User>,
-  ) { }
+  ) {}
 
   async handler(monitoring_id: string, username: string): Promise<boolean> {
-    const cfg = await this.configService.load()
-    const user = await this.usersRepo.findOne({ username })
+    const cfg = await this.configService.load();
 
-    if (!user)
-      return false
+    return this.votesRepo.manager.transaction(async (manager) => {
+      const user = await manager.findOne(User, { where: { username }, lock: { mode: 'pessimistic_write' } });
 
-    if (cfg[ConfigField.VotesTwinkProtect] && this.votesRepo.findOne({ monitoring: monitoring_id, user, created: MoreThanOrEqual(this.moment().subtract(1, "day").toDate()) }, { relations: ["user"] }))
-      return false
+      if (!user) return false;
 
-    user.virtual += Number(cfg[ConfigField.MonitoringReward])
+      const recentVote = await manager.findOne(Vote, {
+        where: {
+          monitoring: monitoring_id,
+          user: { uuid: user.uuid },
+          created: MoreThanOrEqual(this.moment().subtract(1, 'day').toDate()),
+        },
+      });
 
-    const vote = new Vote()
-    vote.monitoring = monitoring_id
-    vote.user = user
+      if (recentVote) return false;
 
-    await this.usersRepo.save(user)
-    await this.votesRepo.save(vote)
+      user.virtual += Number(cfg[ConfigField.MonitoringReward]);
 
-    return true
+      const vote = new Vote();
+      vote.monitoring = monitoring_id;
+      vote.user = user;
+
+      await manager.save(user);
+      await manager.save(vote);
+
+      return true;
+    });
   }
 }

@@ -1,10 +1,9 @@
-import { VoteGift } from "src/game/cabinet/votes/entities/vote-gift.entity";
-import { Connection } from "typeorm";
-import { Seeder } from "typeorm-seeding";
+import { VoteGift } from 'src/game/cabinet/votes/entities/vote-gift.entity';
+import { DataSource } from 'typeorm';
 
-export default class CreateVoteGifts implements Seeder {
-  public async run(factory: any, connection: Connection): Promise<any> {
-    await connection.getRepository(VoteGift).save([
+export default class CreateVoteGifts {
+  public async run(dataSource: DataSource): Promise<any> {
+    await dataSource.getRepository(VoteGift).save([
       {
         bonus: 350,
         place: 1,

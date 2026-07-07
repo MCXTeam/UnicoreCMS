@@ -10,7 +10,7 @@
           </template>
         </Toolbar>
 
-        <DataTable :value="api" :loading="loading" :filters.sync="filters" rowHover responsiveLayout="scroll" dataKey="id">
+        <DataTable :value="api" :loading="loading" v-model:filters="filters" rowHover responsiveLayout="scroll" dataKey="id">
           <template #header>
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
               <h5 class="m-0">Управление API-ключами</h5>
@@ -30,9 +30,9 @@
           </Column>
         </DataTable>
 
-        <ValidationObserver v-slot="{ invalid }">
+        <VeeForm as="div" v-slot="{ meta }">
           <Dialog
-            :visible.sync="tokenDialog"
+            v-model:visible="tokenDialog"
             :closable="false"
             :style="{ width: '600px' }"
             :modal="true"
@@ -43,12 +43,13 @@
               <label>API-ключ</label>
               <InputText v-model="token.secret" readonly />
             </div>
-            <ValidationProvider name="Разрешения" rules="required" v-slot="{ errors }">
+            <VeeField v-model="token.perms" name="perms" label="Разрешения" rules="required" v-slot="{ value, errorMessage, handleChange }">
               <div class="field">
                 <label>Разрешения</label>
                 <span class="p-fluid">
                   <AutoComplete
-                    v-model="token.perms"
+                    :modelValue="value"
+                    @update:modelValue="handleChange"
                     :multiple="true"
                     :suggestions="autocompleateFilterd"
                     @complete="searchAutocompleate($event)"
@@ -57,20 +58,20 @@
                     placeholder="Выберите разрешения"
                   />
                 </span>
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
-            </ValidationProvider>
-            <ValidationProvider name="IP-адреса" rules="required" v-slot="{ errors }">
+            </VeeField>
+            <VeeField v-model="token.allow" name="allow" label="IP-адреса" rules="required" v-slot="{ value, errorMessage, handleChange }">
               <div class="field">
                 <label>Доверенные IP-адреса</label>
-                <Chips v-model="token.allow" />
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                <InputChips :modelValue="value" @update:modelValue="handleChange" />
+                <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
-            </ValidationProvider>
+            </VeeField>
             <template #footer>
               <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
-                :disabled="loading || invalid"
+                :disabled="loading || !meta.valid"
                 label="Сохранить"
                 icon="pi pi-check"
                 class="p-button-text"
@@ -78,23 +79,28 @@
               />
             </template>
           </Dialog>
-        </ValidationObserver>
+        </VeeForm>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { FilterMatchMode } from 'primevue/api'
-import { ValidationObserver, ValidationProvider } from 'vee-validate'
+import { FilterMatchMode } from '@primevue/core/api'
+import { Form, Field } from 'vee-validate'
+import { useToast } from 'primevue/usetoast'
+import { useConfirm } from 'primevue/useconfirm'
 
 export default {
-  head: {
-    title: 'API-ключи',
-  },
   components: {
-    ValidationObserver,
-    ValidationProvider,
+    VeeForm: Form,
+    VeeField: Field,
+  },
+  setup() {
+    useHead({ title: 'API-ключи' })
+    const toast = useToast()
+    const confirm = useConfirm()
+    return { toast, confirm }
   },
   data() {
     return {
@@ -114,14 +120,17 @@ export default {
       },
     }
   },
-  async fetch() {
-    this.loading = true
-    this.tokenDialog = false
-    this.autocompleate = await this.$axios.get('/admin/roles/autocompleate').then((res) => res.data)
-    this.api = await this.$axios.get('/admin/api').then((res) => res.data)
-    this.loading = false
+  mounted() {
+    this.load()
   },
   methods: {
+    async load() {
+      this.loading = true
+      this.tokenDialog = false
+      this.autocompleate = await this.$api.get('/admin/roles/autocompleate').then((res) => res.data)
+      this.api = await this.$api.get('/admin/api').then((res) => res.data)
+      this.loading = false
+    },
     searchAutocompleate(event) {
       if (!event.query.trim().length) {
         this.autocompleateFilterd = this.autocompleate
@@ -157,16 +166,16 @@ export default {
     async createToken() {
       this.loading = true
       try {
-        await this.$axios.post('/admin/api', this.token)
-        this.$toast.add({
+        await this.$api.post('/admin/api', this.token)
+        this.toast.add({
           severity: 'success',
           detail: 'API-ключ успешно добавлен',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch (err) {
         this.loading = false
-        this.$toast.add({
+        this.toast.add({
           severity: 'error',
           detail: 'Введены некоректные данные',
           life: 3000,
@@ -176,16 +185,16 @@ export default {
     async updateToken() {
       this.loading = true
       try {
-        await this.$axios.patch('/admin/api/' + this.token.secret, this.$_.omit(this.token, 'secret'))
-        this.$toast.add({
+        await this.$api.patch('/admin/api/' + this.token.secret, this.$_.omit(this.token, 'secret'))
+        this.toast.add({
           severity: 'success',
           detail: 'API-ключ успешно редактирован',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch (err) {
         this.loading = false
-        this.$toast.add({
+        this.toast.add({
           severity: 'error',
           detail: 'Введены некоректные данные',
           life: 3000,
@@ -193,21 +202,21 @@ export default {
       }
     },
     async removeToken(id) {
-      this.$confirm.require({
+      this.confirm.require({
         message: `Данный процесс будет необратим!`,
         header: 'Подтверждение удаления',
         icon: 'pi pi-exclamation-triangle',
         accept: async () => {
           this.loading = true
           try {
-            await this.$axios.delete('/admin/api/' + id)
-            this.$toast.add({
+            await this.$api.delete('/admin/api/' + id)
+            this.toast.add({
               severity: 'success',
               detail: 'API-ключ успешно удален',
               life: 3000,
             })
           } catch {}
-          await this.$fetch()
+          await this.load()
         },
       })
     },

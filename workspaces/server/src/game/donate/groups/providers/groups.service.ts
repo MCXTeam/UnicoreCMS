@@ -1,12 +1,6 @@
 import { CommonSortInput, MomentWrapper, StorageManager } from '@common';
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MulterFile } from 'fastify-file-interceptor';
 import { User } from 'src/admin/users/entities/user.entity';
 import { EventsService } from 'src/events/events.service';
 import { HistoryType } from 'src/game/cabinet/history/enums/history-type.enum';
@@ -21,7 +15,7 @@ import { GroupInput } from '../dto/group.input';
 import { DonateGroup } from '../entities/donate-group.entity';
 import { GroupKit } from '../entities/group-kit.entity';
 import { UsersDonateGroup } from '../entities/user-donate.entity';
-import * as _ from 'lodash'
+import * as _ from 'lodash';
 import { ConfigService } from 'src/admin/config/config.service';
 import { ConfigField } from 'src/admin/config/config.enum';
 import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
@@ -54,23 +48,40 @@ export class DonateGroupsService {
   }
 
   async findByServer(id: string) {
-    const groups = (await this.donateGroupsRepository.createQueryBuilder('group')
-      .leftJoinAndSelect('group.periods', 'periods')
-      .leftJoinAndSelect('group.kits', 'kits')
-      .leftJoinAndSelect('kits.images', 'images')
-      .leftJoinAndSelect('images.server', 'image_server')
-      .leftJoinAndSelect('group.servers', 'servers')
-      .leftJoinAndSelect('group.features', 'features')
-      .orderBy({ price: "ASC" }).getMany()).filter(perm => perm.servers.find(srv => srv.id == id))
+    const groups = (
+      await this.donateGroupsRepository
+        .createQueryBuilder('group')
+        .leftJoinAndSelect('group.periods', 'periods')
+        .leftJoinAndSelect('group.kits', 'kits')
+        .leftJoinAndSelect('kits.images', 'images')
+        .leftJoinAndSelect('images.server', 'image_server')
+        .leftJoinAndSelect('group.servers', 'servers')
+        .leftJoinAndSelect('group.features', 'features')
+        .orderBy({ price: 'ASC' })
+        .getMany()
+    ).filter((perm) => perm.servers.find((srv) => srv.id == id));
 
-    return _(groups.filter((group) => group.periods.length).map(group => ({
-      ...group,
-      periods: _.orderBy(group.periods, ["multiplier"], ["asc"]),
-      kits: _(group.kits.map(kit => ({
-        ...kit, priority: kit.priority ? kit.priority : 0, 
-        images: _(kit.images.map(image => ({...image, priority: image.server.priority ? image.server.priority : 0}))).orderBy(["server.priority", "id"], ["asc", "asc"]).value()
-      }))).orderBy(["priority", "id"], ["asc", "asc"]).value()
-    }))).orderBy(["priority", "id"], ["asc", "asc"]).value()
+    return _(
+      groups
+        .filter((group) => group.periods.length)
+        .map((group) => ({
+          ...group,
+          periods: _.orderBy(group.periods, ['multiplier'], ['asc']),
+          kits: _(
+            group.kits.map((kit) => ({
+              ...kit,
+              priority: kit.priority ? kit.priority : 0,
+              images: _(kit.images.map((image) => ({ ...image, priority: image.server.priority ? image.server.priority : 0 })))
+                .orderBy(['server.priority', 'id'], ['asc', 'asc'])
+                .value(),
+            })),
+          )
+            .orderBy(['priority', 'id'], ['asc', 'asc'])
+            .value(),
+        })),
+    )
+      .orderBy(['priority', 'id'], ['asc', 'asc'])
+      .value();
   }
 
   async findByUserAndServer(server: string, user: string) {
@@ -86,11 +97,11 @@ export class DonateGroupsService {
   }
 
   me(user: User): Promise<UsersDonateGroup[]> {
-    return this.userDonatesRepository.find({ user: { uuid: user.uuid } });
+    return this.userDonatesRepository.findBy({ user: { uuid: user.uuid } });
   }
 
   udgByUUID(uuid: string): Promise<UsersDonateGroup[]> {
-    return this.userDonatesRepository.find({ user: { uuid } });
+    return this.userDonatesRepository.findBy({ user: { uuid } });
   }
 
   async give(user: User, server: Server, group: DonateGroup, period: Period) {
@@ -124,31 +135,31 @@ export class DonateGroupsService {
     // Event!
     this.eventsService.server.to(Permission.KernelUnicoreConnect).emit('give_group', userDonate);
 
+    userDonate.user = { uuid: user.uuid } as User;
     return this.userDonatesRepository.save(userDonate);
   }
 
   async giveByDTO(input: GiveDonateGroupInput) {
-    const user = await this.usersRepository.findOne({ uuid: input.user_uuid })
-    const server = await this.serversRepository.findOne({ id: input.server_id })
-    const group = await this.donateGroupsRepository.findOne({ id: input.group_id })
-    const period = await this.periodsRepository.findOne({ id: input.period_id })
+    const user = await this.usersRepository.findOneBy({ uuid: input.user_uuid });
+    const server = await this.serversRepository.findOneBy({ id: input.server_id });
+    const group = await this.donateGroupsRepository.findOneBy({ id: input.group_id });
+    const period = await this.periodsRepository.findOneBy({ id: input.period_id });
 
-    if (!user || !server || !group || !period)
-      throw new NotFoundException()
+    if (!user || !server || !group || !period) throw new NotFoundException();
 
-    await this.give(user, server, group, period)
+    await this.give(user, server, group, period);
   }
 
   async take(id: number) {
-    const udg = await this.userDonatesRepository.findOne(id, { relations: ["user"] });
-    if (!udg) throw new NotFoundException()
+    const udg = await this.userDonatesRepository.findOne({ where: { id }, relations: ['user'] });
+    if (!udg) throw new NotFoundException();
 
-    await this.userDonatesRepository.remove(udg)
+    await this.userDonatesRepository.remove(udg);
     this.eventsService.server.to(Permission.KernelUnicoreConnect).emit('take_group', udg);
   }
 
   async buy(user: User, ip: string, input: GroupBuyInput) {
-    const cfg = await this.configService.load()
+    const cfg = await this.configService.load();
     const group = await this.findOne(input.group, ['servers', 'periods']);
     const server = group?.servers?.find((server) => server.id == input.server);
     const period = group?.periods?.find((period) => period.id == input.period);
@@ -156,26 +167,46 @@ export class DonateGroupsService {
     if (!group || !server || !period) throw new NotFoundException();
 
     const price = currencyUtils.roundByType((group.price - (group.price * group.sale) / 100) * period.multiplier, SystemCurrency.REAL);
-    let virtual_sale = currencyUtils.roundByType(input.use_virtual && cfg[ConfigField.DonateGroupsVirtualUse] && group.virtual_percent !== 0 ? 
-      price / 100 * (group.virtual_percent || Number(cfg[ConfigField.VirtualPercent])) : 0, SystemCurrency.VIRTAUL)
+    let virtual_sale = currencyUtils.roundByType(
+      input.use_virtual && cfg[ConfigField.DonateGroupsVirtualUse] && group.virtual_percent !== 0
+        ? (price / 100) * (group.virtual_percent || Number(cfg[ConfigField.VirtualPercent]))
+        : 0,
+      SystemCurrency.VIRTAUL,
+    );
 
-    if (virtual_sale >= user.virtual) virtual_sale = user.virtual
-    if (user.real < currencyUtils.roundByType(price - virtual_sale, SystemCurrency.REAL)) throw new BadRequestException();
+    if (virtual_sale >= user.virtual) virtual_sale = user.virtual;
+    const realCost = currencyUtils.roundByType(price - virtual_sale, SystemCurrency.REAL);
+    const virtualCost = currencyUtils.roundByType(virtual_sale, SystemCurrency.VIRTAUL);
 
-    user.real = currencyUtils.roundByType(user.real - (price - virtual_sale), SystemCurrency.REAL)
-    user.virtual = currencyUtils.roundByType(user.virtual - virtual_sale, SystemCurrency.VIRTAUL)
+    const debit = await this.usersRepository
+      .createQueryBuilder()
+      .update(User)
+      .set({ real: () => 'real - :realCost', virtual: () => 'virtual - :virtualCost' })
+      .where('uuid = :uuid AND real >= :realCost AND virtual >= :virtualCost', { uuid: user.uuid, realCost, virtualCost })
+      .execute();
+
+    if (!debit.affected) throw new BadRequestException();
+
+    user.real = currencyUtils.roundByType(user.real - realCost, SystemCurrency.REAL);
+    user.virtual = currencyUtils.roundByType(user.virtual - virtualCost, SystemCurrency.VIRTAUL);
 
     try {
-      await this.give(user, server, group, period)
+      await this.give(user, server, group, period);
     } catch {
+      await this.usersRepository
+        .createQueryBuilder()
+        .update(User)
+        .set({ real: () => 'real + :realCost', virtual: () => 'virtual + :virtualCost' })
+        .where('uuid = :uuid', { uuid: user.uuid, realCost, virtualCost })
+        .execute();
+
       throw new BadRequestException();
     }
     await this.historyService.create(HistoryType.DonateGroupPurchase, ip, user, group, server, period);
-    await this.usersRepository.save(user);
   }
 
   findOne(id: number, relations?: string[]): Promise<DonateGroup> {
-    return this.donateGroupsRepository.findOne(id, { relations });
+    return this.donateGroupsRepository.findOne({ where: { id }, relations });
   }
 
   async create(input: GroupInput) {
@@ -188,17 +219,17 @@ export class DonateGroupsService {
     group.ingame_id = input.ingame_id;
     group.web_perms = input.web_perms;
     group.features = input.features;
-    group.virtual_percent = input.virtual_percent
+    group.virtual_percent = input.virtual_percent;
 
-    group.servers = await this.serversRepository.find({
+    group.servers = await this.serversRepository.findBy({
       id: In(input.servers),
     });
 
-    group.periods = await this.periodsRepository.find({
+    group.periods = await this.periodsRepository.findBy({
       id: In(input.periods),
     });
 
-    group.kits = await this.groupKitsRepository.find({
+    group.kits = await this.groupKitsRepository.findBy({
       id: In(input.kits),
     });
 
@@ -206,16 +237,17 @@ export class DonateGroupsService {
   }
 
   async sort(input: CommonSortInput) {
-    const servers = await this.donateGroupsRepository.findByIds(input.items.map(srv => srv.id))
+    const servers = await this.donateGroupsRepository.findBy({ id: In(input.items.map((srv) => srv.id)) });
 
-    return this.donateGroupsRepository.save(servers.map(dong => {
-      const updatedSort = input.items.find(dg => dg.id == dong.id)
+    return this.donateGroupsRepository.save(
+      servers.map((dong) => {
+        const updatedSort = input.items.find((dg) => dg.id == dong.id);
 
-      if (updatedSort) 
-        return { ...dong, priority: updatedSort.priority }
-      
-      return dong
-    }))
+        if (updatedSort) return { ...dong, priority: updatedSort.priority };
+
+        return dong;
+      }),
+    );
   }
 
   async update(id: number, input: GroupInput) {
@@ -232,17 +264,17 @@ export class DonateGroupsService {
     group.ingame_id = input.ingame_id;
     group.web_perms = input.web_perms;
     group.features = input.features;
-    group.virtual_percent = input.virtual_percent
+    group.virtual_percent = input.virtual_percent;
 
-    group.servers = await this.serversRepository.find({
+    group.servers = await this.serversRepository.findBy({
       id: In(input.servers),
     });
 
-    group.periods = await this.periodsRepository.find({
+    group.periods = await this.periodsRepository.findBy({
       id: In(input.periods),
     });
 
-    group.kits = await this.groupKitsRepository.find({
+    group.kits = await this.groupKitsRepository.findBy({
       id: In(input.kits),
     });
 
@@ -269,7 +301,7 @@ export class DonateGroupsService {
     return this.donateGroupsRepository.remove(groups);
   }
 
-  async updateIcon(id: number, file: MulterFile) {
+  async updateIcon(id: number, file: Express.Multer.File) {
     const group = await this.findOne(id);
 
     if (!group) {

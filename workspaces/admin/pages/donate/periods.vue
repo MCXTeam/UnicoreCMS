@@ -14,7 +14,7 @@
           :loading="loading"
           :rows="50"
           paginator
-          :filters.sync="filters"
+          v-model:filters="filters"
           rowHover
           responsiveLayout="scroll"
           dataKey="id"
@@ -46,40 +46,72 @@
           </Column>
         </DataTable>
 
-        <ValidationObserver v-slot="{ invalid }">
+        <VeeForm v-slot="{ meta }">
           <Dialog
-            :visible.sync="periodDialog"
+            v-model:visible="periodDialog"
             :closable="false"
             :style="{ width: '450px' }"
             :modal="true"
             header="Создание/редактирование периода"
             class="p-fluid"
           >
-            <ValidationProvider name="Название" rules="required" v-slot="{ errors }">
+            <VeeField
+              v-model="period.name"
+              name="name"
+              label="Название"
+              rules="required"
+              v-slot="{ value, errorMessage, handleChange, handleBlur }"
+            >
               <div class="field">
                 <label>Название</label>
-                <InputText v-model="period.name" />
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                <InputText :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" :class="errorMessage && 'p-invalid'" />
+                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
-            </ValidationProvider>
-            <ValidationProvider name="Время в секундах" rules="required|min:0" v-slot="{ errors }">
+            </VeeField>
+            <VeeField
+              v-model="period.expire"
+              name="expire"
+              label="Время в секундах"
+              rules="required|min:0"
+              v-slot="{ value, errorMessage, handleChange, handleBlur }"
+            >
               <div class="field">
                 <label>Время в секундах (0 - вечный)</label>
-                <InputNumber v-model="period.expire" suffix=" сек." />
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                <InputNumber
+                  :modelValue="value"
+                  @update:modelValue="handleChange"
+                  @blur="handleBlur"
+                  suffix=" сек."
+                  :class="errorMessage && 'p-invalid'"
+                />
+                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
-            </ValidationProvider>
-            <ValidationProvider name="Множитель цены" rules="min:0" v-slot="{ errors }">
+            </VeeField>
+            <VeeField
+              v-model="period.multiplier"
+              name="multiplier"
+              label="Множитель цены"
+              rules="min:0"
+              v-slot="{ value, errorMessage, handleChange, handleBlur }"
+            >
               <div class="field">
                 <label>Множитель цены</label>
-                <InputNumber v-model="period.multiplier" mode="decimal" :min-fraction-digits="2" prefix="x" />
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                <InputNumber
+                  :modelValue="value"
+                  @update:modelValue="handleChange"
+                  @blur="handleBlur"
+                  mode="decimal"
+                  :min-fraction-digits="2"
+                  prefix="x"
+                  :class="errorMessage && 'p-invalid'"
+                />
+                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
-            </ValidationProvider>
+            </VeeField>
             <template #footer>
               <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
-                :disabled="loading || invalid"
+                :disabled="loading || !meta.valid"
                 label="Сохранить"
                 icon="pi pi-check"
                 class="p-button-text"
@@ -87,22 +119,22 @@
               />
             </template>
           </Dialog>
-        </ValidationObserver>
+        </VeeForm>
       </div>
     </div>
   </div>
 </template>
 <script>
-import { FilterMatchMode } from 'primevue/api'
-import { ValidationObserver, ValidationProvider } from 'vee-validate'
+import { FilterMatchMode } from '@primevue/core/api'
+import { Form, Field } from 'vee-validate'
 
 export default {
-  head: {
-    title: 'Периоды',
-  },
   components: {
-    ValidationObserver,
-    ValidationProvider,
+    VeeForm: Form,
+    VeeField: Field,
+  },
+  setup() {
+    useHead({ title: 'Периоды' })
   },
   data() {
     return {
@@ -121,13 +153,16 @@ export default {
       },
     }
   },
-  async fetch() {
-    this.periods = await this.$axios.get('/donates/periods').then((res) => res.data)
-
-    this.periodDialog = false
-    this.loading = false
+  mounted() {
+    this.load()
   },
   methods: {
+    async load() {
+      this.periods = await this.$api.get('/donates/periods').then((res) => res.data)
+
+      this.periodDialog = false
+      this.loading = false
+    },
     hideDialog() {
       this.periodDialog = false
     },
@@ -148,13 +183,13 @@ export default {
     async createPeriod() {
       this.loading = true
       try {
-        await this.$axios.post('/donates/periods', this.period)
+        await this.$api.post('/donates/periods', this.period)
         this.$toast.add({
           severity: 'success',
           detail: 'Период успешно добавлен',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch (err) {
         this.$toast.add({
           severity: 'error',
@@ -166,13 +201,13 @@ export default {
     async updatePeriod() {
       this.loading = true
       try {
-        await this.$axios.patch('/donates/periods/' + this.period.id, this.$_.omit(this.period, 'id'))
+        await this.$api.patch('/donates/periods/' + this.period.id, this.$_.omit(this.period, 'id'))
         this.$toast.add({
           severity: 'success',
           detail: 'Период успешно редактирован',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch (err) {
         this.loading = false
         this.$toast.add({
@@ -190,14 +225,14 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$axios.delete('/donates/periods/' + id)
+            await this.$api.delete('/donates/periods/' + id)
             this.$toast.add({
               severity: 'success',
               detail: 'Период успешно удален',
               life: 3000,
             })
           } catch {}
-          await this.$fetch()
+          await this.load()
         },
       })
     },

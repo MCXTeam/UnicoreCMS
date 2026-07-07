@@ -6,10 +6,10 @@ import { BanListService } from './banlist.service';
 @Public()
 @Controller('players/banlist')
 export class BanListController {
-  constructor (private banlistServuce: BanListService) {}
+  constructor(private banlistServuce: BanListService) {}
 
   @Get()
   find(@Paginate() query: PaginateQuery) {
-    return this.banlistServuce.find(query)
+    return this.banlistServuce.find(query);
   }
 }

@@ -11,6 +11,6 @@ import { PaymentHandlerModule } from '../core/payment-handler.module';
   controllers: [FreekassaController],
 })
 export class FreekassaModule implements PaymentCoreModule {
-  static id = "freekassa"
+  static id = 'freekassa';
   static enabled = envConfig.freekassaEnabled;
 }

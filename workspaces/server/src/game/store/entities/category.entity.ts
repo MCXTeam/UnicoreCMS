@@ -4,29 +4,29 @@ import { Kit } from './kit.entity';
 import { Product } from './product.entity';
 
 @Entity({
-  name: "unicore_categories",
+  name: 'unicore_categories',
   orderBy: {
-    priority: "DESC",
-    name: "ASC"
-  }
+    priority: 'DESC',
+    name: 'ASC',
+  },
 })
 export class Category {
-  @PrimaryGeneratedColumn({ name: "id" })
+  @PrimaryGeneratedColumn({ name: 'id' })
   id: number;
 
-  @Column({ name: "name" })
+  @Column({ name: 'name' })
   name: string;
 
-  @Column({ name: "priority", nullable: true })
+  @Column({ name: 'priority', nullable: true })
   priority: number;
 
   @Column('text', {
-    name: "description",
+    name: 'description',
     nullable: true,
   })
   description: string;
 
-  @Column({ name: "icon", nullable: true })
+  @Column({ name: 'icon', nullable: true })
   icon: string;
 
   @ManyToMany(() => Product, (product) => product.categories, {

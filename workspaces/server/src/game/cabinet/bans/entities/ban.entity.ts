@@ -1,15 +1,17 @@
 import { User } from 'src/admin/users/entities/user.entity';
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn } from 'typeorm';
 
-@Entity({ name: "unicore_bans" })
+@Entity({ name: 'unicore_bans' })
 export class Ban {
+  @PrimaryColumn({ name: 'user_uuid' })
+  userUuid: string;
+
   @OneToOne(() => User, {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
-    primary: true,
   })
-  @JoinColumn({ name: "user_uuid" })
+  @JoinColumn({ name: 'user_uuid' })
   user: User;
 
   @ManyToOne(() => User, {
@@ -18,15 +20,15 @@ export class Ban {
     onUpdate: 'CASCADE',
     nullable: true,
   })
-  @JoinColumn({ name: "actor_uuid" })
+  @JoinColumn({ name: 'actor_uuid' })
   actor: User;
 
-  @Column({ name: "reason" })
+  @Column({ name: 'reason' })
   reason: string;
 
-  @Column({ nullable: true, name: "expires" })
+  @Column({ nullable: true, name: 'expires' })
   expires?: Date;
 
-  @CreateDateColumn({ name: "created" })
+  @CreateDateColumn({ name: 'created' })
   created: Date;
 }

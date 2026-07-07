@@ -10,17 +10,17 @@ import { EnotioService } from './enotio.service';
 
 @Controller('payment/methods/enotio')
 export class EnotioController {
-  constructor (private enotioService: EnotioService) {}
+  constructor(private enotioService: EnotioService) {}
 
   @Permissions([Permission.UserPayment])
   @Post('link')
   link(@IpAddress() ip: string, @CurrentUser() user: User, @Body() body: PaymentCreateDto) {
-    return this.enotioService.createLink(user, body, ip)
+    return this.enotioService.createLink(user, body, ip);
   }
 
   @Public()
   @Post('handler')
   handler(@IpAddress() ip: string, @Body() body) {
-    return this.enotioService.handler(ip, body)
+    return this.enotioService.handler(ip, body);
   }
 }

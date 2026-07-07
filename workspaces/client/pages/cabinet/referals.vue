@@ -35,57 +35,53 @@
       <h2 class="mt-4 mb-3">Ваша реферальная ссылка</h2>
       <div class="row">
         <div class="col-xl-9 input-fw d-flex align-items-center">
-          <vs-input v-model="link" readonly></vs-input>
+          <InputText class="w-100" v-model="link" readonly />
         </div>
         <div class="col d-flex align-items-center">
-          <vs-button @click="copyLink()" block size="large">Копировать</vs-button>
+          <Button @click="copyLink()" class="w-full" size="large" label="Копировать" />
         </div>
       </div>
       <h3 class="mb-3 mt-4">Приглашённые вами игроки</h3>
-      <vs-table class="no-overflow-table large-table">
-        <template #thead>
-          <vs-tr>
-            <vs-th>Дата </vs-th>
-            <vs-th style="width: 35%">Логин </vs-th>
-            <vs-th style="width: 35%">Время в игре </vs-th>
-          </vs-tr>
-        </template>
-        <template #tbody>
-          <vs-tr :key="referal.uuid" v-for="referal in referals" :data="referal">
-            <vs-td> {{ $moment(referal.user.created).local().format('DD.MM.YYYY, HH:mm:ss') }} </vs-td>
-            <vs-td>
-              <div class="d-flex align-items-center">
-                <Avatar class="rounded shadow me-3">
-                  <SkinView2D class="rounded" :width="32" :height="32" :skin="referal.user.skin" />
-                </Avatar>
-                <nuxt-link :to="`/user/` + referal.user.username">{{ referal.user.username }}</nuxt-link>
-              </div>
-            </vs-td>
-            <vs-td>{{ $moment.duration(referal.playtime, 'minutes').format('y [years], w [weeks], d [days], h [hours], m [minutes]') }}</vs-td>
-          </vs-tr>
-        </template>
-        <template #notFound>
+      <DataTable class="no-overflow-table large-table" :value="referals">
+        <Column header="Дата">
+          <template #body="{ data }"> {{ $moment(data.user.created).local().format('DD.MM.YYYY, HH:mm:ss') }} </template>
+        </Column>
+        <Column headerStyle="width: 35%" header="Логин">
+          <template #body="{ data }">
+            <div class="d-flex align-items-center">
+              <Avatar class="rounded shadow me-3">
+                <SkinView2D class="rounded" :width="32" :height="32" :skin="data.user.skin" />
+              </Avatar>
+              <NuxtLink :to="`/user/` + data.user.username">{{ data.user.username }}</NuxtLink>
+            </div>
+          </template>
+        </Column>
+        <Column headerStyle="width: 35%" header="Время в игре">
+          <template #body="{ data }">
+            {{ $moment.duration(data.playtime, 'minutes').format('y [years], w [weeks], d [days], h [hours], m [minutes]') }}
+          </template>
+        </Column>
+        <template #empty>
           <span>Похоже, что вы ещё никого не пригласили...</span>
         </template>
-      </vs-table>
+      </DataTable>
     </section>
   </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { useConfigStore } from '~/stores/config'
+
+definePageMeta({
+  layout: 'cabinet',
+  middleware: ['auth', 'verify'],
+  title: 'Личный кабинет',
+})
 
 export default {
-  layout: 'cabinet',
-
-  asyncData({ store }) {
-    store.commit('unicore/SET_NAME', 'Личный кабинет')
-  },
-
-  computed: {
-    ...mapGetters({
-      config: 'config',
-    }),
+  setup() {
+    const configStore = useConfigStore()
+    return { config: computed(() => configStore.config) }
   },
 
   data() {
@@ -96,14 +92,15 @@ export default {
   },
 
   mounted() {
-    this.link = `${this.$config.url}/start?ref=${this.$auth.user.username}`
-  },
-
-  async fetch() {
-    this.referals = await this.$axios.get('/cabinet/referals/me').then((res) => res.data)
+    this.link = `${this.$pub.baseurl}/start?ref=${this.$auth.user.username}`
+    this.load()
   },
 
   methods: {
+    async load() {
+      this.referals = await this.$api.get('/cabinet/referals/me').then((res) => res.data)
+    },
+
     async copyLink() {
       await navigator.clipboard.writeText(this.link)
       this.$unicore.successNotification('Ссылка скопирована в буфер обмена')

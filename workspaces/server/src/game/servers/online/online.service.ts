@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { MoreThanOrEqual, Repository } from 'typeorm';
 import { Online } from './entities/online.entity';
 import * as _ from 'lodash';
-import { query, QueryResult } from 'gamedig';
+import { pingMinecraft } from './minecraft-ping';
 import { Server } from '../entities/server.entity';
 import * as moment from 'moment';
 import { UpdateOnline } from './interfaces/update-online.interface';
@@ -25,16 +25,23 @@ export class OnlineService {
   ) {}
 
   async find(): Promise<Onlines> {
-    const servers = _.orderBy(await this.onlineRepository.find({
-      relations: ['server'],
-    }), ["server.priority"], ["asc"]);
+    const servers = _.orderBy(
+      await this.onlineRepository.find({
+        relations: ['server'],
+      }),
+      ['server.priority'],
+      ['asc'],
+    );
     const record = await this.onlinesRecordsRepository.findOne({
       order: { created: 'DESC' },
       where: { created: MoreThanOrEqual(moment().startOf('day').toDate()) },
     });
-    const absolute = await this.onlinesAbsoluteRecordsRepository.findOne({
-      order: { online: 'DESC' },
-    });
+    const absolute = (
+      await this.onlinesAbsoluteRecordsRepository.find({
+        order: { online: 'DESC' },
+        take: 1,
+      })
+    )[0];
 
     return {
       servers,
@@ -68,7 +75,6 @@ export class OnlineService {
       })
     )?.id;
 
-    // Update absolute record
     if (onlines.total.online > onlines.total.records.absolute.online) {
       const entity = await this.onlinesAbsoluteRecordsRepository.save({
         online: onlines.total.online,
@@ -76,11 +82,9 @@ export class OnlineService {
       absolute = { online: entity.online, created: entity.created };
     }
 
-    // Update today record
     if (onlines.total.online > onlines.total.records.today.online) {
       if (moment(onlines.total.records.today.created).utc().isSame(moment().utc(), 'day') && id) {
         await this.onlinesRecordsRepository
-          .createQueryBuilder()
           .createQueryBuilder()
           .update(OnlinesRecord)
           .set({
@@ -122,16 +126,12 @@ export class OnlineService {
     }
 
     let online: Pick<Online, 'maxplayers' | 'online' | 'players'>;
-    const onlineState: QueryResult | null = await query({
-      type: 'minecraft',
-      host: server.query.host,
-      port: server.query.port,
-    }).catch(() => null);
+    const status = await pingMinecraft(server.query.host, server.query.port || 25565, 3000).catch(() => null);
 
-    if (onlineState) {
+    if (status) {
       online = {
-        maxplayers: onlineState.maxplayers,
-        players: onlineState.players.length,
+        maxplayers: status.max,
+        players: status.online,
         online: true,
       };
     } else {
@@ -155,7 +155,6 @@ export class OnlineService {
       }
 
       await this.onlineRepository
-        .createQueryBuilder()
         .createQueryBuilder()
         .update(Online)
         .set({ ...online, record, record_today })

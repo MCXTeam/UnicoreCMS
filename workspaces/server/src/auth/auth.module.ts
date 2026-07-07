@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import type { StringValue } from 'ms';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -28,7 +29,7 @@ import { Referal } from 'src/game/cabinet/referals/entities/referal.entity';
     TypeOrmModule.forFeature([RefreshToken, User, Referal]),
     JwtModule.register({
       secret: envConfig.jwtKey,
-      signOptions: { expiresIn: envConfig.jwtExpires },
+      signOptions: { expiresIn: envConfig.jwtExpires as StringValue },
     }),
   ],
   providers: [

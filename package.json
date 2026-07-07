@@ -2,30 +2,30 @@
   "name": "unicore-cms",
   "version": "1.2.0",
   "private": true,
-  "workspaces": [
-    "workspaces/*"
-  ],
+  "packageManager": "pnpm@9.15.9",
   "engines": {
-    "node": ">=14.0.0 <17.0.0"
+    "node": ">=20 <25"
   },
   "scripts": {
-    "dev": "engine-version && npm run build --workspace=unicore-common && lerna run dev --parallel --no-bail",
-    "build:all": "engine-version && npm run build -w unicore-common && npm run build --workspaces --if-present",
-    "build": "engine-version && npm run postbuild -w unicore-server && npm run build:client && npm run build:admin",
-    "build:client": "npm run build -w unicore-client",
-    "build:admin": "npm run build -w unicore-admin",
-    "start": "engine-version && lerna run start --parallel --no-bail",
-    "lint": "npm run lint --workspaces --if-present",
-    "format": "npm run format --workspaces --if-present",
-    "sync": "engine-version && npm run schema:sync -w unicore-server",
-    "seed": "engine-version && npm run seed:run -w unicore-server",
-    "boot": "npx lerna bootstrap && npm run build && npm link -w unicore-server && npm run sync"
+    "dev": "pnpm --filter unicore-common run build && pnpm -r --parallel run dev",
+    "build": "pnpm -r run build",
+    "build:server": "pnpm --filter unicore-common run build && pnpm --filter unicore-server run build",
+    "build:client": "pnpm --filter unicore-client run build",
+    "build:admin": "pnpm --filter unicore-admin run build",
+    "start": "pnpm -r --parallel run start",
+    "lint": "pnpm -r run lint",
+    "format": "pnpm -r run format",
+    "sync": "pnpm --filter unicore-server run schema:sync",
+    "seed": "pnpm --filter unicore-server run seed:run",
+    "boot": "pnpm install && pnpm run build:server && pnpm run sync"
   },
   "devDependencies": {
-    "lerna": "4.0.0",
-    "typescript": "^4.5.5"
+    "typescript": "~5.9.2"
   },
-  "dependencies": {
-    "engine-version": "^1.0.2"
+  "pnpm": {
+    "overrides": {
+      "canvas": "^3.1.0",
+      "discord-api-types": "0.38.49"
+    }
   }
 }

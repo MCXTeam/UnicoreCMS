@@ -10,7 +10,9 @@
     <div class="container">
       <div class="h-100 d-flex flex-column justify-content-center">
         <div class="header-content">
-          <h1 class="mb-3"><b v-text="$config.sitename" /> - Ваш сайт готов к работе</h1>
+          <h1 class="mb-3">
+            <b>{{ $pub.sitename }}</b> - Ваш сайт готов к работе
+          </h1>
           <p class="mt-0 mb-2">
             Next-gen Headless система управления контентом и электронная коммерция для Minecraft <br />
             написанная на NestJS и NuxtJS
@@ -21,29 +23,41 @@
                 <div class="circle me-2" />
                 <span class="text-uppercase">В игре</span>
               </div>
-              <h1 class="mt-2"><number :to="onlines.total.online" :duration="1" /></h1>
+              <h1 class="mt-2">
+                <ClientOnly>
+                  <CountTo :startVal="0" :endVal="onlines.total.online" :duration="1000" />
+                  <template #fallback>{{ onlines.total.online }}</template>
+                </ClientOnly>
+              </h1>
             </div>
             <div>
               <div class="d-flex align-items-center">
                 <div class="circle me-2" />
                 <span class="text-uppercase">Всего</span>
               </div>
-              <h1 class="mt-2"><number :to="users" :duration="1" /></h1>
+              <h1 class="mt-2">
+                <ClientOnly>
+                  <CountTo :startVal="0" :endVal="users" :duration="1000" />
+                  <template #fallback>{{ users }}</template>
+                </ClientOnly>
+              </h1>
             </div>
           </div>
           <div class="mt-4 download-content" style="max-width: 400px">
-            <vs-button :href="config.public_launcher_exe" target="download" block class="mb-2" size="xl">Скачать лаунчер <i class="bx bxl-windows ms-2"></i></vs-button>
+            <Button as="a" :href="config.public_launcher_exe" target="download" class="w-full mb-2" size="large"
+              >Скачать лаунчер <i class="bx bxl-windows ms-2"></i
+            ></Button>
             <div class="d-flex justify-content-between">
               <span>Клиент также доступен на</span>
               <div class="d-flex">
-                <vs-button :href="config.public_launcher_jar" target="download" transparent class="m-0">Linux</vs-button>
-                <vs-button :href="config.public_launcher_jar" target="download" transparent class="m-0">MacOS</vs-button>
+                <Button as="a" :href="config.public_launcher_jar" target="download" text class="m-0" label="Linux" />
+                <Button as="a" :href="config.public_launcher_jar" target="download" text class="m-0" label="MacOS" />
               </div>
             </div>
           </div>
         </div>
         <div class="header-content-sm">
-          <h1 class="mb-3" v-text="name" />
+          <h1 class="mb-3">{{ uiStore.pageName }}</h1>
         </div>
       </div>
       <img class="header-render d-none d-lg-block" src="/images/render.png" />
@@ -51,24 +65,18 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup lang="ts">
+import { useConfigStore } from '~/stores/config'
+import { useIoStore } from '~/stores/io'
+import { useUiStore } from '~/stores/ui'
 
-export default {
-  data() {
-    return {
-      users: 0,
-    }
-  },
-  async fetch() {
-    this.users = await this.$axios.get('/users/count').then((res) => res.data)
-  },
-  computed: {
-    ...mapGetters({
-      onlines: 'io/serversOnline',
-      name: 'unicore/name',
-      config: 'config',
-    }),
-  },
-}
+const { $api } = useNuxtApp()
+const ioStore = useIoStore()
+const configStore = useConfigStore()
+const uiStore = useUiStore()
+
+const onlines = computed(() => ioStore.serversOnline)
+const config = computed(() => configStore.config)
+
+const { data: users } = await useAsyncData('header-users-count', () => $api.get('/users/count').then((r) => r.data), { default: () => 0 })
 </script>

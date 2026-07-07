@@ -20,7 +20,7 @@ export class ApiService {
   }
 
   findOne(secret: string): Promise<ApiToken> {
-    return this.apiTokensRepository.findOne(secret);
+    return this.apiTokensRepository.findOneBy({ secret });
   }
 
   create(input: ApiInput) {

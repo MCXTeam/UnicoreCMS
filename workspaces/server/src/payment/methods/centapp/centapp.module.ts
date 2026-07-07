@@ -11,6 +11,6 @@ import { CentappService } from './centapp.service';
   controllers: [CentappController],
 })
 export class CentappModule implements PaymentCoreModule {
-  static id = "centapp"
+  static id = 'centapp';
   static enabled = envConfig.centappEnabled;
 }

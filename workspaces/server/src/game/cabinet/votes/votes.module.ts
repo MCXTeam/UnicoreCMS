@@ -10,7 +10,9 @@ import { TopcraftModule } from './monitorings/topcraft/topcraft.module';
 import { VotesController } from './votes.controller';
 import { VotesService } from './votes.service';
 
-const register = [TopcraftModule, MctopModule, MinecraftRatingModule, McrateModule, MonitoringminecraftModule].filter(method => method.enabled)
+const register = [TopcraftModule, MctopModule, MinecraftRatingModule, McrateModule, MonitoringminecraftModule].filter(
+  (method) => method.enabled,
+);
 
 @Module({
   imports: [...register, TypeOrmModule.forFeature([VoteGift, User])],
@@ -18,9 +20,9 @@ const register = [TopcraftModule, MctopModule, MinecraftRatingModule, McrateModu
   controllers: [VotesController],
 })
 export class VotesModule implements OnModuleInit {
-  constructor (private votesService: VotesService) {}
+  constructor(private votesService: VotesService) {}
 
   onModuleInit() {
-    this.votesService.setMonitorings(register.map(m => m.id))
+    this.votesService.setMonitorings(register.map((m) => m.id));
   }
 }

@@ -1,7 +1,6 @@
 import { StorageManager } from '@common';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MulterFile } from 'fastify-file-interceptor';
 import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { In, Repository } from 'typeorm';
 import { CategoryInput } from './../dto/category.input';
@@ -18,13 +17,16 @@ export class CategoriesService {
     return paginate(query, this.categoriesRepository, {
       sortableColumns: ['id', 'name'],
       searchableColumns: ['id', 'name'],
-      defaultSortBy: [['priority', 'DESC'], ['name', 'ASC']],
+      defaultSortBy: [
+        ['priority', 'DESC'],
+        ['name', 'ASC'],
+      ],
       maxLimit: 500,
     });
   }
 
   findOne(id: number, relations?: string[]) {
-    return this.categoriesRepository.findOne(id, { relations });
+    return this.categoriesRepository.findOne({ where: { id }, relations });
   }
 
   create(input: CategoryInput) {
@@ -32,7 +34,7 @@ export class CategoriesService {
 
     category.name = input.name;
     category.description = input.description;
-    category.priority = input.priority
+    category.priority = input.priority;
 
     return this.categoriesRepository.save(category);
   }
@@ -46,7 +48,7 @@ export class CategoriesService {
 
     category.name = input.name;
     category.description = input.description;
-    category.priority = input.priority
+    category.priority = input.priority;
 
     return this.categoriesRepository.save(category);
   }
@@ -71,7 +73,7 @@ export class CategoriesService {
     return this.categoriesRepository.remove(products);
   }
 
-  async updateIcon(id: number, file: MulterFile) {
+  async updateIcon(id: number, file: Express.Multer.File) {
     const category = await this.findOne(id);
 
     if (!category) {

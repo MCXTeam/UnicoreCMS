@@ -51,10 +51,10 @@ export class ProductInput {
   @IsInt()
   @Min(0)
   @Max(100)
-  virtual_percent?: number
+  virtual_percent?: number;
 
   @IsOptional()
   @IsInt()
   @Min(1)
-  multiple_of?: number
+  multiple_of?: number;
 }

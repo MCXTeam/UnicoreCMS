@@ -54,5 +54,5 @@ export class GroupInput {
   @IsInt()
   @Min(0)
   @Max(100)
-  virtual_percent?: number
+  virtual_percent?: number;
 }

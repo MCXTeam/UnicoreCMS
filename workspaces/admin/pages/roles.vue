@@ -14,7 +14,7 @@
           :loading="loading"
           :rows="50"
           paginator
-          :filters.sync="filters"
+          v-model:filters="filters"
           rowHover
           responsiveLayout="scroll"
           dataKey="id"
@@ -49,42 +49,51 @@
           </Column>
         </DataTable>
 
-        <ValidationObserver v-slot="{ invalid }">
+        <VeeForm as="div" v-slot="{ meta }">
           <Dialog
-            :visible.sync="roleDialog"
+            v-model:visible="roleDialog"
             :closable="false"
             :style="{ width: '450px' }"
             :modal="true"
             header="Создание/редактирование роли"
             class="p-fluid"
           >
-            <ValidationProvider
-              name="ID (a-z)"
+            <VeeField
+              v-model="role.id"
+              name="id"
+              label="ID (a-z)"
               :rules="{
                 required: true,
                 regex: /^[a-z]+$/,
               }"
-              v-slot="{ errors }"
+              v-slot="{ value, errorMessage, handleChange, handleBlur }"
             >
               <div class="field">
                 <label>ID</label>
-                <InputText :disabled="updateMode" v-model="role.id" autofocus />
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                <InputText :disabled="updateMode" :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" autofocus />
+                <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
-            </ValidationProvider>
-            <ValidationProvider name="Название" rules="required|alpha_dash" v-slot="{ errors }">
+            </VeeField>
+            <VeeField
+              v-model="role.name"
+              name="name"
+              label="Название"
+              rules="required|alpha_dash"
+              v-slot="{ value, errorMessage, handleChange, handleBlur }"
+            >
               <div class="field">
                 <label>Название</label>
-                <InputText v-model="role.name" />
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                <InputText :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" />
+                <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
-            </ValidationProvider>
-            <ValidationProvider name="Разрешения" rules="required" v-slot="{ errors }">
+            </VeeField>
+            <VeeField v-model="role.perms" name="perms" label="Разрешения" rules="required" v-slot="{ value, errorMessage, handleChange }">
               <div class="field">
                 <label>Разрешения</label>
                 <span class="p-fluid">
                   <AutoComplete
-                    v-model="role.perms"
+                    :modelValue="value"
+                    @update:modelValue="handleChange"
                     :multiple="true"
                     :suggestions="autocompleateFilterd"
                     @complete="searchAutocompleate($event)"
@@ -93,20 +102,26 @@
                     placeholder="Выберите разрешения"
                   />
                 </span>
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
-            </ValidationProvider>
-            <ValidationProvider name="Приоритет" rules="required" v-slot="{ errors }">
+            </VeeField>
+            <VeeField
+              v-model="role.priority"
+              name="priority"
+              label="Приоритет"
+              rules="required"
+              v-slot="{ value, errorMessage, handleChange, handleBlur }"
+            >
               <div class="field">
                 <label>Приоритет</label>
-                <InputNumber v-model="role.priority" />
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                <InputNumber :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" />
+                <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
-            </ValidationProvider>
+            </VeeField>
             <template #footer>
               <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
-                :disabled="loading || invalid"
+                :disabled="loading || !meta.valid"
                 label="Сохранить"
                 icon="pi pi-check"
                 class="p-button-text"
@@ -114,23 +129,28 @@
               />
             </template>
           </Dialog>
-        </ValidationObserver>
+        </VeeForm>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { FilterMatchMode } from 'primevue/api'
-import { ValidationObserver, ValidationProvider } from 'vee-validate'
+import { FilterMatchMode } from '@primevue/core/api'
+import { Form, Field } from 'vee-validate'
+import { useToast } from 'primevue/usetoast'
+import { useConfirm } from 'primevue/useconfirm'
 
 export default {
-  head: {
-    title: 'Роли',
-  },
   components: {
-    ValidationObserver,
-    ValidationProvider,
+    VeeForm: Form,
+    VeeField: Field,
+  },
+  setup() {
+    useHead({ title: 'Роли' })
+    const toast = useToast()
+    const confirm = useConfirm()
+    return { toast, confirm }
   },
   data() {
     return {
@@ -151,15 +171,18 @@ export default {
       },
     }
   },
-  async fetch() {
-    this.roles = await this.$axios.get('/admin/roles').then((res) => res.data)
-
-    this.autocompleate = await this.$axios.get('/admin/roles/autocompleate').then((res) => res.data)
-
-    this.roleDialog = false
-    this.loading = false
+  mounted() {
+    this.load()
   },
   methods: {
+    async load() {
+      this.roles = await this.$api.get('/admin/roles').then((res) => res.data)
+
+      this.autocompleate = await this.$api.get('/admin/roles/autocompleate').then((res) => res.data)
+
+      this.roleDialog = false
+      this.loading = false
+    },
     searchAutocompleate(event) {
       if (!event.query.trim().length) {
         this.autocompleateFilterd = this.autocompleate
@@ -196,23 +219,23 @@ export default {
     async createRole() {
       this.loading = true
       try {
-        await this.$axios.post('/admin/roles', this.role)
-        this.$toast.add({
+        await this.$api.post('/admin/roles', this.role)
+        this.toast.add({
           severity: 'success',
           detail: 'Роль успешно добавлена',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch (err) {
         this.loading = false
         if (err.response.status === 409) {
-          this.$toast.add({
+          this.toast.add({
             severity: 'error',
             detail: 'Роль с данным ID уже присутствует',
             life: 3000,
           })
         } else {
-          this.$toast.add({
+          this.toast.add({
             severity: 'error',
             detail: 'Введены некоректные данные',
             life: 3000,
@@ -223,16 +246,16 @@ export default {
     async updateRole() {
       this.loading = true
       try {
-        await this.$axios.patch('/admin/roles/' + this.role.id, this.$_.omit(this.role, 'id'))
-        this.$toast.add({
+        await this.$api.patch('/admin/roles/' + this.role.id, this.$_.omit(this.role, 'id'))
+        this.toast.add({
           severity: 'success',
           detail: 'Роль успешно редактирована',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch (err) {
         this.loading = false
-        this.$toast.add({
+        this.toast.add({
           severity: 'error',
           detail: 'Введены некоректные данные',
           life: 3000,
@@ -240,21 +263,21 @@ export default {
       }
     },
     async removeRole(id) {
-      this.$confirm.require({
+      this.confirm.require({
         message: `Данный процесс будет необратим!`,
         header: 'Подтверждение удаления',
         icon: 'pi pi-exclamation-triangle',
         accept: async () => {
           this.loading = true
           try {
-            await this.$axios.delete('/admin/roles/' + id)
-            this.$toast.add({
+            await this.$api.delete('/admin/roles/' + id)
+            this.toast.add({
               severity: 'success',
               detail: 'Роль успешно удалена',
               life: 3000,
             })
           } catch {}
-          await this.$fetch()
+          await this.load()
         },
       })
     },

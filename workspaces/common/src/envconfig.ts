@@ -21,6 +21,8 @@ export interface EnvConfig {
   jwtKey: string;
   jwtExpires: string;
   jwtRefreshExpires: string;
+  trustProxy: boolean | number | string;
+  corsOrigins: string[];
   apiBaseurl: string;
   discordClientID: string;
   discordclientSecret: string;
@@ -37,59 +39,55 @@ export interface EnvConfig {
   smtpPassword: string;
   mailFrom: string;
 
-  anypayEnabled: boolean
-  anypayMerchantID: string
-  anypaySecretKey: string
+  anypayEnabled: boolean;
+  anypayMerchantID: string;
+  anypaySecretKey: string;
 
-  centappEnabled: boolean
-  centappShopID: string
-  centappToken: string
+  centappEnabled: boolean;
+  centappShopID: string;
+  centappToken: string;
 
-  enotioEnabled: boolean
-  enotioMerchantID: string
-  enotioSecretKey: string
-  enotioSecretKeySecond: string
+  enotioEnabled: boolean;
+  enotioMerchantID: string;
+  enotioSecretKey: string;
+  enotioSecretKeySecond: string;
 
-  freekassaEnabled: boolean
-  freekassaMerchantID: string
-  freekassaSecretKey: string
-  freekassaSecretKeySecond: string
+  freekassaEnabled: boolean;
+  freekassaMerchantID: string;
+  freekassaSecretKey: string;
+  freekassaSecretKeySecond: string;
 
-  payokEnabled: boolean
-  payokShopID: string
-  payokSecretKey: string
+  payokEnabled: boolean;
+  payokShopID: string;
+  payokSecretKey: string;
 
-  qiwiEnabled: boolean
-  qiwiPublicKey: string
-  qiwiSecretKey: string
+  unitpayEnabled: boolean;
+  unitpayPublicKey: string;
+  unitpaySecretKey: string;
 
-  unitpayEnabled: boolean
-  unitpayPublicKey: string
-  unitpaySecretKey: string
+  mctopEnabled: boolean;
+  topcraftEnabled: boolean;
+  minecraftratingEnabled: boolean;
+  mcrateEnabled: boolean;
+  monitoringminecraftEnabled: boolean;
 
-  mctopEnabled: boolean
-  topcraftEnabled: boolean
-  minecraftratingEnabled: boolean
-  mcrateEnabled: boolean
-  monitoringminecraftEnabled: boolean
+  mctopSecretKey: string;
+  topcraftSecretKey: string;
+  minecraftratingSecretKey: string;
+  mcrateSecretKey: string;
+  monitoringminecraftSecretKey: string;
 
-  mctopSecretKey: string
-  topcraftSecretKey: string
-  minecraftratingSecretKey: string
-  mcrateSecretKey: string
-  monitoringminecraftSecretKey: string
+  googleAnalyticsId: string;
+  yandexMetrikaId: string;
 
-  googleAnalyticsId: string
-  yandexMetrikaId: string
+  encryptionKey: string;
 
-  encryptionKey: string
+  realDecimals: number;
+  virtualDecimals: number;
+  ingameDecimals: number;
 
-  realDecimals: number
-  virtualDecimals: number
-  ingameDecimals: number
-
-  colorModePreference: string
-  colorModeFallback: string
+  colorModePreference: string;
+  colorModeFallback: string;
 }
 
 export const envConfig: EnvConfig = {
@@ -117,14 +115,30 @@ export const envConfig: EnvConfig = {
 
   encryptionKey: env.get("JWT_KEY").required().asString(),
 
-  // JWT 
+  // JWT
   jwtKey: env.get("JWT_KEY").required().asString(),
   jwtExpires: env.get("JWT_EXPIRES").default("5m").asString(),
   jwtRefreshExpires: env.get("JWT_REFRESH_EXPIRES").default("30d").asString(),
 
+  trustProxy: (() => {
+    const raw = env.get("TRUST_PROXY").asString();
+    if (!raw) return false;
+    if (raw === "true") return true;
+    if (raw === "false") return false;
+    if (/^\d+$/.test(raw)) return Number(raw);
+    return raw;
+  })(),
+  corsOrigins: env
+    .get("CORS_ORIGINS")
+    .default("")
+    .asString()
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean),
+
   // RECAPTHA
-  recaptchaSecret: env.get("RECAPTCHA_SECRET").required().asString(),
-  recaptchaPublic: env.get("RECAPTCHA_PUBLIC").required().asString(),
+  recaptchaSecret: env.get("RECAPTCHA_SECRET").default("").asString(),
+  recaptchaPublic: env.get("RECAPTCHA_PUBLIC").default("").asString(),
 
   // OAUTH
   discordClientID: env.get("DISCORD_CLIENT_ID").asString(),
@@ -162,14 +176,10 @@ export const envConfig: EnvConfig = {
   freekassaMerchantID: env.get("FREEKASSA_MERCHANT_ID").asString(),
   freekassaSecretKey: env.get("FREEKASSA_SECRET_KEY").asString(),
   freekassaSecretKeySecond: env.get("FREEKASSA_SECRET_KEY_SECOND").asString(),
-  
+
   payokEnabled: env.get("PAYOK_ENABLED").default(0).asBool(),
   payokShopID: env.get("PAYOK_SHOP_ID").asString(),
   payokSecretKey: env.get("PAYOK_SECRET_KEY").asString(),
-
-  qiwiEnabled: env.get("QIWI_ENABLED").default(0).asBool(),
-  qiwiPublicKey: env.get("QIWI_PUBLIC_KEY").asString(),
-  qiwiSecretKey: env.get("QIWI_SECRET_KEY").asString(),
 
   unitpayEnabled: env.get("UNITPAY_ENABLED").default(0).asBool(),
   unitpayPublicKey: env.get("UNITPAY_PUBLIC_KEY").asString(),
@@ -177,15 +187,23 @@ export const envConfig: EnvConfig = {
 
   mctopEnabled: env.get("MCTOP_ENABLED").default(0).asBool(),
   topcraftEnabled: env.get("TOPCRAFT_ENABLED").default(0).asBool(),
-  minecraftratingEnabled: env.get("MINECRAFTRATING_ENABLED").default(0).asBool(),
+  minecraftratingEnabled: env
+    .get("MINECRAFTRATING_ENABLED")
+    .default(0)
+    .asBool(),
   mcrateEnabled: env.get("MCRATE_ENABLED").default(0).asBool(),
-  monitoringminecraftEnabled: env.get("MONITORINGMINECRAFT_ENABLED").default(0).asBool(),
+  monitoringminecraftEnabled: env
+    .get("MONITORINGMINECRAFT_ENABLED")
+    .default(0)
+    .asBool(),
 
   mctopSecretKey: env.get("MCTOP_SECRET_KEY").asString(),
   topcraftSecretKey: env.get("TOPCRAFT_SECRET_KEY").asString(),
   minecraftratingSecretKey: env.get("MINECRAFTRATING_SECRET_KEY").asString(),
   mcrateSecretKey: env.get("MCRATE_SECRET_KEY").asString(),
-  monitoringminecraftSecretKey: env.get("MONITORINGMINECRAFT_SECRET_KEY").asString(),
+  monitoringminecraftSecretKey: env
+    .get("MONITORINGMINECRAFT_SECRET_KEY")
+    .asString(),
 
   googleAnalyticsId: env.get("GOOGLE_ANALYTICS_ID").asString(),
   yandexMetrikaId: env.get("YANDEX_METRIKA_ID").asString(),
@@ -194,6 +212,83 @@ export const envConfig: EnvConfig = {
   virtualDecimals: env.get("VIRTUAL_DECIMALS").default(2).asInt(),
   ingameDecimals: env.get("INGAME_DECIMALS").default(2).asInt(),
 
-  colorModePreference: env.get("COLOR_MODE_PREFERENCE").default("dark").asString(),
+  colorModePreference: env
+    .get("COLOR_MODE_PREFERENCE")
+    .default("dark")
+    .asString(),
   colorModeFallback: env.get("COLOR_MODE_FALLBACK").default("dark").asString(),
 };
+
+const weakSecrets = [
+  "qwerty123",
+  "changeme",
+  "secret",
+  "password",
+  "change_me",
+];
+const isProd = process.env.NODE_ENV === "production";
+
+if (envConfig.jwtKey.length < 16 || weakSecrets.includes(envConfig.jwtKey)) {
+  const message =
+    "JWT_KEY is weak or a shipped default. Set a long random secret (>= 16 chars).";
+  if (isProd) throw new Error(message);
+  else console.warn("[SECURITY WARNING] " + message);
+}
+
+const requireSecrets = (
+  enabled: boolean,
+  name: string,
+  keys: Record<string, string>,
+) => {
+  if (!enabled) return;
+  const missing = Object.entries(keys)
+    .filter(([, value]) => !value)
+    .map(([key]) => key);
+  if (missing.length)
+    throw new Error(
+      `"${name}" is enabled but required secrets are missing: ${missing.join(", ")}`,
+    );
+};
+
+requireSecrets(envConfig.anypayEnabled, "anypay", {
+  ANYPAY_MERCHANT_ID: envConfig.anypayMerchantID,
+  ANYPAY_SECRET_KEY: envConfig.anypaySecretKey,
+});
+requireSecrets(envConfig.centappEnabled, "centapp", {
+  CENTAPP_SHOP_ID: envConfig.centappShopID,
+  CENTAPP_TOKEN: envConfig.centappToken,
+});
+requireSecrets(envConfig.enotioEnabled, "enotio", {
+  ENOTIO_MERCHANT_ID: envConfig.enotioMerchantID,
+  ENOTIO_SECRET_KEY: envConfig.enotioSecretKey,
+  ENOTIO_SECRET_KEY_SECOND: envConfig.enotioSecretKeySecond,
+});
+requireSecrets(envConfig.freekassaEnabled, "freekassa", {
+  FREEKASSA_MERCHANT_ID: envConfig.freekassaMerchantID,
+  FREEKASSA_SECRET_KEY: envConfig.freekassaSecretKey,
+  FREEKASSA_SECRET_KEY_SECOND: envConfig.freekassaSecretKeySecond,
+});
+requireSecrets(envConfig.payokEnabled, "payok", {
+  PAYOK_SHOP_ID: envConfig.payokShopID,
+  PAYOK_SECRET_KEY: envConfig.payokSecretKey,
+});
+requireSecrets(envConfig.unitpayEnabled, "unitpay", {
+  UNITPAY_PUBLIC_KEY: envConfig.unitpayPublicKey,
+  UNITPAY_SECRET_KEY: envConfig.unitpaySecretKey,
+});
+
+requireSecrets(envConfig.mctopEnabled, "mctop", {
+  MCTOP_SECRET_KEY: envConfig.mctopSecretKey,
+});
+requireSecrets(envConfig.topcraftEnabled, "topcraft", {
+  TOPCRAFT_SECRET_KEY: envConfig.topcraftSecretKey,
+});
+requireSecrets(envConfig.minecraftratingEnabled, "minecraftrating", {
+  MINECRAFTRATING_SECRET_KEY: envConfig.minecraftratingSecretKey,
+});
+requireSecrets(envConfig.mcrateEnabled, "mcrate", {
+  MCRATE_SECRET_KEY: envConfig.mcrateSecretKey,
+});
+requireSecrets(envConfig.monitoringminecraftEnabled, "monitoringminecraft", {
+  MONITORINGMINECRAFT_SECRET_KEY: envConfig.monitoringminecraftSecretKey,
+});

@@ -22,6 +22,7 @@ import { ConfigService } from 'src/admin/config/config.service';
 import { ConfigField } from 'src/admin/config/config.enum';
 import { CartFindDto } from './dto/cart-find.dto';
 import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
+import { Transactional } from 'typeorm-transactional';
 
 @Injectable()
 export class CartService {
@@ -41,33 +42,46 @@ export class CartService {
     private usersRepository: Repository<User>,
     private serversService: ServersService,
     private historyService: HistoryService,
-  ) { }
+  ) {}
 
   private priceCalc(cartItems, cartKitItems): number {
-    return currencyUtils.roundByType(_.sum([
-      ...cartItems.map((cartItem) => (cartItem.product.price - (cartItem.product.price * cartItem.product.sale) / 100) * cartItem.amount),
-      ...cartKitItems.map((cartItem) => cartItem.kit.price - (cartItem.kit.price * cartItem.kit.sale) / 100),
-    ]), SystemCurrency.REAL);
+    return currencyUtils.roundByType(
+      _.sum([
+        ...cartItems.map((cartItem) => (cartItem.product.price - (cartItem.product.price * cartItem.product.sale) / 100) * cartItem.amount),
+        ...cartKitItems.map((cartItem) => cartItem.kit.price - (cartItem.kit.price * cartItem.kit.sale) / 100),
+      ]),
+      SystemCurrency.REAL,
+    );
   }
 
   private async virtualSaleCalulate(cartItems: CartItem[], cartKitItems: CartItemKit[], user: User, price: number): Promise<number> {
-    if (user.virtual == 0) 
-      return 0
+    if (user.virtual == 0) return 0;
 
-    const cfg = await this.configService.load()
+    const cfg = await this.configService.load();
     const virtual_sale = _.sum([
-      ...cfg[ConfigField.StoreProductsVirtualUse] ? cartItems.map((cartItem) => ((cartItem.product.price - (cartItem.product.price * cartItem.product.sale) / 100) * cartItem.amount)  / 100 * (cartItem.product.virtual_percent == null ? Number(cfg[ConfigField.VirtualPercent]) : cartItem.product.virtual_percent)) : [],
-      ...cfg[ConfigField.StoreKitsVirtualUse] ? cartKitItems.map((cartItem) => (cartItem.kit.price - (cartItem.kit.price * cartItem.kit.sale) / 100) / 100 * (cartItem.kit.virtual_percent == null ? Number(cfg[ConfigField.VirtualPercent]) : cartItem.kit.virtual_percent)) : [],
+      ...(cfg[ConfigField.StoreProductsVirtualUse]
+        ? cartItems.map(
+            (cartItem) =>
+              (((cartItem.product.price - (cartItem.product.price * cartItem.product.sale) / 100) * cartItem.amount) / 100) *
+              (cartItem.product.virtual_percent == null ? Number(cfg[ConfigField.VirtualPercent]) : cartItem.product.virtual_percent),
+          )
+        : []),
+      ...(cfg[ConfigField.StoreKitsVirtualUse]
+        ? cartKitItems.map(
+            (cartItem) =>
+              ((cartItem.kit.price - (cartItem.kit.price * cartItem.kit.sale) / 100) / 100) *
+              (cartItem.kit.virtual_percent == null ? Number(cfg[ConfigField.VirtualPercent]) : cartItem.kit.virtual_percent),
+          )
+        : []),
     ]);
 
-    if (user.virtual < virtual_sale)
-      return currencyUtils.roundByType(user.virtual, SystemCurrency.VIRTAUL)
+    if (user.virtual < virtual_sale) return currencyUtils.roundByType(user.virtual, SystemCurrency.VIRTAUL);
 
-    return currencyUtils.roundByType(virtual_sale, SystemCurrency.VIRTAUL)
+    return currencyUtils.roundByType(virtual_sale, SystemCurrency.VIRTAUL);
   }
 
   private resolver(repo: Repository<WarehouseItem | CartItem>, server: Server, user: User, product: Product) {
-    return repo.findOne({ server, user, product });
+    return repo.findOneBy({ server: { id: server.id }, user: { uuid: user.uuid }, product: { id: product.id } });
   }
 
   private async warehousePusher(user: User, cartItems: CartItem[]) {
@@ -92,7 +106,7 @@ export class CartService {
   }
 
   async find(user: User) {
-    return this.cartItemsRepository.find({ user });
+    return this.cartItemsRepository.findBy({ user: { uuid: user.uuid } });
   }
 
   async findByServer(user: User, server_id: string) {
@@ -100,29 +114,29 @@ export class CartService {
 
     if (!server) throw new BadRequestException();
 
-    const products = await this.cartItemsRepository.find({ user, server });
-    const kits = await this.cartItemKitsRepository.find({ user, server });
-    const price = this.priceCalc(products, kits)
+    const products = await this.cartItemsRepository.findBy({ user: { uuid: user.uuid }, server: { id: server.id } });
+    const kits = await this.cartItemKitsRepository.findBy({ user: { uuid: user.uuid }, server: { id: server.id } });
+    const price = this.priceCalc(products, kits);
 
     return new CartFindDto({
       items: [
-        ...kits.map((payload) => ({ type: PayloadType.Kit, payload })), 
-        ...products.map((payload) => ({ type: PayloadType.Product, payload }))
+        ...kits.map((payload) => ({ type: PayloadType.Kit, payload })),
+        ...products.map((payload) => ({ type: PayloadType.Product, payload })),
       ],
-      price, virtual_sale: await this.virtualSaleCalulate(products, kits, user, price)
-    })
+      price,
+      virtual_sale: await this.virtualSaleCalulate(products, kits, user, price),
+    });
   }
 
   async add(user: User, body: CartInput) {
     const server = await this.serversService.findOne(body.server_id);
 
     if (body.type == PayloadType.Product) {
-      const product = await this.productsRepository.findOne(body.id, { relations: ['servers'] });
-
-      if (product.multiple_of && body.amount % product.multiple_of != 0)
-        throw new BadRequestException();
+      const product = await this.productsRepository.findOne({ where: { id: body.id }, relations: ['servers'] });
 
       if (!product || !server || !product.servers.find((srv) => srv.id == server.id)) throw new BadRequestException();
+
+      if (product.multiple_of && body.amount % product.multiple_of != 0) throw new BadRequestException();
 
       let cartItem = (await this.resolver(this.cartItemsRepository, server, user, product)) as CartItem;
 
@@ -139,7 +153,7 @@ export class CartService {
 
       return new CartItemProtected(await this.cartItemsRepository.save(cartItem));
     } else {
-      const kit = await this.kitsRepository.findOne(body.id, { relations: ['servers'] });
+      const kit = await this.kitsRepository.findOne({ where: { id: body.id }, relations: ['servers'] });
 
       if (!kit || !server || !kit.servers.find((srv) => srv.id == server.id)) throw new BadRequestException();
 
@@ -158,8 +172,8 @@ export class CartService {
 
     if (!server) throw new BadRequestException();
 
-    const cartItems = await this.cartItemsRepository.find({ user, server });
-    const cartKitItems = await this.cartItemKitsRepository.find({ user, server });
+    const cartItems = await this.cartItemsRepository.findBy({ user: { uuid: user.uuid }, server: { id: server.id } });
+    const cartKitItems = await this.cartItemKitsRepository.findBy({ user: { uuid: user.uuid }, server: { id: server.id } });
 
     return [
       ...(await this.cartItemKitsRepository.remove(cartKitItems)).map((payload) => ({ type: PayloadType.Kit, payload })),
@@ -168,11 +182,12 @@ export class CartService {
   }
 
   async clear(user_uuid: string) {
-    const user = await this.usersRepository.findOne(user_uuid);
-    const cartItems = await this.cartItemsRepository.find({ user });
-    const cartKitItems = await this.cartItemKitsRepository.find({ user });
+    const user = await this.usersRepository.findOneBy({ uuid: user_uuid });
 
     if (!user) throw new BadRequestException();
+
+    const cartItems = await this.cartItemsRepository.findBy({ user: { uuid: user.uuid } });
+    const cartKitItems = await this.cartItemKitsRepository.findBy({ user: { uuid: user.uuid } });
 
     return [
       ...(await this.cartItemKitsRepository.remove(cartKitItems)).map((payload) => ({ type: PayloadType.Kit, payload })),
@@ -182,16 +197,16 @@ export class CartService {
 
   async removeOwn(user: User, type: PayloadType, id: number) {
     if (type == PayloadType.Product) {
-      const cartItem = await this.cartItemsRepository.findOne({ user, id });
+      const cartItem = await this.cartItemsRepository.findOneBy({ user: { uuid: user.uuid }, id });
       return new CartItemProtected(await this.cartItemsRepository.remove(cartItem));
     } else {
-      const cartItemKit = await this.cartItemKitsRepository.findOne({ user, id });
+      const cartItemKit = await this.cartItemKitsRepository.findOneBy({ user: { uuid: user.uuid }, id });
       return new CartItemKitProtected(await this.cartItemKitsRepository.remove(cartItemKit));
     }
   }
 
   async remove(id: number) {
-    const cartItem = await this.cartItemsRepository.findOne(id);
+    const cartItem = await this.cartItemsRepository.findOneBy({ id });
 
     return this.cartItemsRepository.remove(cartItem);
   }
@@ -203,28 +218,26 @@ export class CartService {
     virtualItem.server = server;
     virtualItem.user = user;
 
-    return (await this.warehouseItemsRepository.save(await this.warehousePusher(user, [virtualItem])))[0]
+    return (await this.warehouseItemsRepository.save(await this.warehousePusher(user, [virtualItem])))[0];
   }
 
   async giveProductByDTO(input: GiveProductInput) {
-    const user = await this.usersRepository.findOne(input.user_uuid)
-    const server = await this.serversService.findOne(input.server_id)
-    const product = await this.productsRepository.findOne(input.product_id)
+    const user = await this.usersRepository.findOneBy({ uuid: input.user_uuid });
+    const server = await this.serversService.findOne(input.server_id);
+    const product = await this.productsRepository.findOneBy({ id: Number(input.product_id) });
 
-    if (!user || !server || !product)
-      throw new NotFoundException()
+    if (!user || !server || !product) throw new NotFoundException();
 
-    await this.giveItem(user, product, server, input.amount)
+    await this.giveItem(user, product, server, input.amount);
   }
 
   async giveKit(user: User, server: Server, kit: Kit | number) {
-    const warehouseItems: WarehouseItem[] = []
+    const warehouseItems: WarehouseItem[] = [];
 
-    if (typeof kit === "number") {
-      kit = await this.kitsRepository.findOne(kit, { relations: ['items'] })
+    if (typeof kit === 'number') {
+      kit = await this.kitsRepository.findOne({ where: { id: kit }, relations: ['items'] });
 
-      if (!kit)
-        return false
+      if (!kit) return false;
     }
 
     const pusherTask = kit.items.map((item) => {
@@ -235,40 +248,44 @@ export class CartService {
       virtualItem.user = user;
 
       return virtualItem;
-    })
+    });
 
     for (const cik of pusherTask) {
       warehouseItems.push((await this.warehouseItemsRepository.save(await this.warehousePusher(user, [cik])))[0]);
     }
 
-    return warehouseItems
+    return warehouseItems;
   }
 
   async giveKitByDTO(input: GiveKitInput) {
-    const user = await this.usersRepository.findOne(input.user_uuid)
-    const server = await this.serversService.findOne(input.server_id)
-    const kit = await this.kitsRepository.findOne(input.kit_id, { relations: ['items'] })
+    const user = await this.usersRepository.findOneBy({ uuid: input.user_uuid });
+    const server = await this.serversService.findOne(input.server_id);
+    const kit = await this.kitsRepository.findOne({ where: { id: Number(input.kit_id) }, relations: ['items'] });
 
-    if (!user || !server || !kit)
-      throw new NotFoundException()
+    if (!user || !server || !kit) throw new NotFoundException();
 
-    await this.giveKit(user, server, kit)
+    await this.giveKit(user, server, kit);
   }
 
+  @Transactional()
   async buy(user: User, ip: string, body: CartBuyInput) {
-    
     const server = await this.serversService.findOne(body.server_id);
 
     if (!server) throw new BadRequestException();
 
-    const cartItems = await this.cartItemsRepository.find({ where: { user, server }, relations: ['server', 'product'] });
-    const cartKitItems = await this.cartItemKitsRepository.find({ where: { user, server }, relations: ['server', 'kit', 'kit.items'] });
+    const cartItems = await this.cartItemsRepository.find({
+      where: { user: { uuid: user.uuid }, server: { id: server.id } },
+      relations: ['server', 'product'],
+    });
+    const cartKitItems = await this.cartItemKitsRepository.find({
+      where: { user: { uuid: user.uuid }, server: { id: server.id } },
+      relations: ['server', 'kit', 'kit.items'],
+    });
 
-    const price = this.priceCalc(cartItems, cartKitItems)
+    const price = this.priceCalc(cartItems, cartKitItems);
     let virtual_sale = 0;
 
-    if (body.use_virtual)
-      virtual_sale = await this.virtualSaleCalulate(cartItems, cartKitItems, user, price);
+    if (body.use_virtual) virtual_sale = await this.virtualSaleCalulate(cartItems, cartKitItems, user, price);
 
     const cartItemsKits = cartKitItems
       .map((cartItem) =>
@@ -284,16 +301,41 @@ export class CartService {
       )
       .flat();
 
-    if (user.real < currencyUtils.roundByType(price - virtual_sale, SystemCurrency.REAL)) throw new BadRequestException();
+    const realCost = currencyUtils.roundByType(price - virtual_sale, SystemCurrency.REAL);
+    const virtualCost = currencyUtils.roundByType(virtual_sale, SystemCurrency.VIRTAUL);
 
-    const warehouseItems = await this.warehouseItemsRepository.save(await this.warehousePusher(user, cartItems));
+    const debit = await this.usersRepository
+      .createQueryBuilder()
+      .update(User)
+      .set({ real: () => 'real - :realCost', virtual: () => 'virtual - :virtualCost' })
+      .where('uuid = :uuid AND real >= :realCost AND virtual >= :virtualCost', { uuid: user.uuid, realCost, virtualCost })
+      .execute();
 
-    for (const cik of cartItemsKits) {
-      warehouseItems.push((await this.warehouseItemsRepository.save(await this.warehousePusher(user, [cik])))[0]);
+    if (!debit.affected) throw new BadRequestException();
+
+    user.real -= realCost;
+    user.virtual -= virtualCost;
+
+    const warehouseUser = { uuid: user.uuid } as User;
+
+    let warehouseItems: WarehouseItem[];
+
+    try {
+      warehouseItems = await this.warehouseItemsRepository.save(await this.warehousePusher(warehouseUser, cartItems));
+
+      for (const cik of cartItemsKits) {
+        warehouseItems.push((await this.warehouseItemsRepository.save(await this.warehousePusher(warehouseUser, [cik])))[0]);
+      }
+    } catch (e) {
+      await this.usersRepository
+        .createQueryBuilder()
+        .update(User)
+        .set({ real: () => 'real + :realCost', virtual: () => 'virtual + :virtualCost' })
+        .where('uuid = :uuid', { uuid: user.uuid, realCost, virtualCost })
+        .execute();
+
+      throw e;
     }
-
-    user.real -= currencyUtils.roundByType(price - virtual_sale, SystemCurrency.REAL);
-    user.virtual -= currencyUtils.roundByType(virtual_sale, SystemCurrency.VIRTAUL)
 
     for (const ci of cartItems) {
       await this.historyService.create(HistoryType.ProductPurchase, ip, user, ci.product, ci.server, ci.amount);
@@ -303,7 +345,6 @@ export class CartService {
       await this.historyService.create(HistoryType.KitPurchase, ip, user, cik.kit, cik.server);
     }
 
-    await this.usersRepository.save(user);
     await this.cartItemsRepository.remove(cartItems);
     await this.cartItemKitsRepository.remove(cartKitItems);
     return warehouseItems.map((wi) => new CartItemProtected(wi));

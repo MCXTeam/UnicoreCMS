@@ -1,35 +1,23 @@
-import { Injectable } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
-import { Server } from "../entities/server.entity";
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Server } from '../entities/server.entity';
 
 @Injectable()
 export class RconService {
-    private connections = new Array()
+  private connections = new Array();
 
-    constructor (@InjectRepository(Server) private serversRepository: Repository<Server>) {}
+  constructor(@InjectRepository(Server) private serversRepository: Repository<Server>) {}
 
-    init() {
+  init() {}
 
-    }
+  private reconnectionHandler() {}
 
-    private reconnectionHandler() {
+  private createConnection() {}
 
-    }
+  getConnections() {}
 
-    private createConnection() {
+  getConnection() {}
 
-    }
-
-    getConnections() {
-        
-    }
-
-    getConnection() {
-        
-    }
-
-    sendCommand() {
-
-    }
+  sendCommand() {}
 }

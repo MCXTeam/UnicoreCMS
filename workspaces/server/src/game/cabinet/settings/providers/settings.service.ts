@@ -9,28 +9,25 @@ import { PasswordUpdateInput } from '../dto/password-update.input';
 
 @Injectable()
 export class SettingsService {
-  constructor (
+  constructor(
     @InjectRepository(User) private usersRepo: Repository<User>,
-    @InjectRepository(RefreshToken) private tokensRepo: Repository<RefreshToken>
+    @InjectRepository(RefreshToken) private tokensRepo: Repository<RefreshToken>,
   ) {}
 
   async updatePassword(user: User, input: PasswordUpdateInput) {
     user.password = bcrypt.hashSync(input.password, 10);
-    await this.usersRepo.save(user)
+    await this.usersRepo.save(user);
 
-    if (input.close)
-      await this.tokensRepo.delete({ user })
+    if (input.close) await this.tokensRepo.delete({ user });
   }
 
   async changePassword(user: User, input: PasswordChangeInput) {
-    const compare = bcrypt.compareSync(input.password_old, user.password)
-    if (!compare)
-      throw new BadRequestException()
+    const compare = bcrypt.compareSync(input.password_old, user.password);
+    if (!compare) throw new BadRequestException();
 
     user.password = bcrypt.hashSync(input.password, 10);
-    await this.usersRepo.save(user)
+    await this.usersRepo.save(user);
 
-    if (input.close)
-      await this.tokensRepo.delete({ user })
+    if (input.close) await this.tokensRepo.delete({ user });
   }
 }

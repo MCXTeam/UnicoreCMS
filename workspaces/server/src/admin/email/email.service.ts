@@ -27,7 +27,7 @@ export class EmailService {
   constructor(
     @Inject('moment')
     private moment: MomentWrapper,
-    @InjectRepository(RefreshToken) 
+    @InjectRepository(RefreshToken)
     private tokensRepo: Repository<RefreshToken>,
     @InjectRepository(EmailMessage)
     private emailMessagesRepository: Repository<EmailMessage>,
@@ -44,11 +44,11 @@ export class EmailService {
     return this.emailMessagesRepository.find();
   }
 
-  findOne(id: string): Promise<EmailMessage> {
-    return this.emailMessagesRepository.findOne(id);
+  findOne(id: EmailMessageType): Promise<EmailMessage> {
+    return this.emailMessagesRepository.findOneBy({ id });
   }
 
-  async update(id: string, input: EmailInput): Promise<EmailMessage> {
+  async update(id: EmailMessageType, input: EmailInput): Promise<EmailMessage> {
     const message = await this.findOne(id);
 
     if (!message) {
@@ -77,15 +77,15 @@ export class EmailService {
 
   async sendActivation(user: User) {
     if (
-      (await this.emailActivationsRepository.count({
+      (await this.emailActivationsRepository.countBy({
         created: MoreThan(this.moment().utc().subtract(5, 'minutes').toDate()),
-        user,
+        user: { uuid: user.uuid },
       })) > 2
     ) {
       throw new ThrottlerException();
     }
 
-    const { content, title } = await this.emailMessagesRepository.findOne(EmailMessageType.Activation);
+    const { content, title } = await this.emailMessagesRepository.findOneBy({ id: EmailMessageType.Activation });
 
     const activation = new EmailActivation();
     const code = customAlphabet('1234567890', 6)();
@@ -103,7 +103,7 @@ export class EmailService {
   }
 
   async checkCode(user: User, input: VerifyInput): Promise<UserDto> {
-    const exist = await this.emailActivationsRepository.findOne({ user, code: input.code });
+    const exist = await this.emailActivationsRepository.findOneBy({ user: { uuid: user.uuid }, code: input.code });
 
     if (exist) {
       await this.emailActivationsRepository.delete({ user });
@@ -118,34 +118,40 @@ export class EmailService {
   }
 
   async sendPasswordLink(ip: string, input: PasswordLinkInput) {
-    const user = await this.usersRepository.findOne({ email: input.email })
-    if (!user) throw new NotFoundException()
+    const user = await this.usersRepository.findOneBy({ email: input.email });
+    if (!user) return;
 
     if (
-      (await this.passwordResetRepository.count({where: [
-        {
-          created: MoreThan(this.moment().utc().subtract(5, 'minutes').toDate()),
-          user,
-        },
-        {
-          created: MoreThan(this.moment().utc().subtract(5, 'minutes').toDate()),
-          ip,
-        }
-      ]})) > 2
+      (await this.passwordResetRepository.count({
+        where: [
+          {
+            created: MoreThan(this.moment().utc().subtract(5, 'minutes').toDate()),
+            user: { uuid: user.uuid },
+          },
+          {
+            created: MoreThan(this.moment().utc().subtract(5, 'minutes').toDate()),
+            ip,
+          },
+        ],
+      })) > 2
     ) {
       throw new ThrottlerException();
     }
 
-    const { content, title } = await this.emailMessagesRepository.findOne(EmailMessageType.Reset);
+    const { content, title } = await this.emailMessagesRepository.findOneBy({ id: EmailMessageType.Reset });
 
     const activation = new PasswordReset();
     const hash = nanoid(32);
 
-    const link = new URL(envConfig.baseurl)
-    link.pathname = "/auth/password"
-    link.searchParams.append("hash", hash)
+    const link = new URL(envConfig.baseurl);
+    link.pathname = '/auth/password';
+    link.searchParams.append('hash', hash);
 
-    const html = content.replace('{IP}', ip).replace('{USERNAME}', user.username).replace('{SITENAME}', envConfig.sitename).replace('{LINK}', link.href);
+    const html = content
+      .replace('{IP}', ip)
+      .replace('{USERNAME}', user.username)
+      .replace('{SITENAME}', envConfig.sitename)
+      .replace('{LINK}', link.href);
 
     activation.user = user;
     activation.hash = hash;
@@ -159,7 +165,7 @@ export class EmailService {
   }
 
   async checkHash(input: PasswordResetInput): Promise<UserDto> {
-    const exist = await this.passwordResetRepository.findOne({ hash: input.hash }, { relations: ['user'] });
+    const exist = await this.passwordResetRepository.findOne({ where: { hash: input.hash }, relations: ['user'] });
 
     if (exist) {
       if (input.password) {
@@ -167,11 +173,10 @@ export class EmailService {
         exist.user.password = bcrypt.hashSync(input.password, 10);
         await this.usersRepository.save(exist.user);
 
-        if (input.close)
-          await this.tokensRepo.delete({ user: exist.user })
-      } 
+        if (input.close) await this.tokensRepo.delete({ user: exist.user });
+      }
 
-      return new UserDto(exist.user)
+      return new UserDto(exist.user);
     } else {
       throw new NotFoundException();
     }

@@ -11,6 +11,6 @@ import { MctopService } from './mctop.service';
   controllers: [MctopController],
 })
 export class MctopModule implements MonitoringCoreModule {
-  static id = "mctop"
+  static id = 'mctop';
   static enabled = envConfig.mctopEnabled;
 }

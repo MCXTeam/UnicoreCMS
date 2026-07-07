@@ -11,6 +11,6 @@ import { PaymentHandlerModule } from '../core/payment-handler.module';
   controllers: [PayokController],
 })
 export class PayokModule implements PaymentCoreModule {
-  static id = "payok"
+  static id = 'payok';
   static enabled = envConfig.payokEnabled;
 }

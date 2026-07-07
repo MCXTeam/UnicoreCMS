@@ -1,6 +1,5 @@
 <template>
   <div>
-    <ConfirmDialog />
-    <Nuxt />
+    <slot />
   </div>
 </template>

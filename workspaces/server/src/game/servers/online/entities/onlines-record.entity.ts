@@ -1,16 +1,16 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity({ name: "unicore_onlines_records" })
+@Entity({ name: 'unicore_onlines_records' })
 export class OnlinesRecord {
-  @PrimaryGeneratedColumn({ name: "id" })
+  @PrimaryGeneratedColumn({ name: 'id' })
   id: number;
 
-  @Column({ default: 0, name: "online" })
+  @Column({ default: 0, name: 'online' })
   online: number;
 
-  @CreateDateColumn({ name: "updated" })
+  @CreateDateColumn({ name: 'updated' })
   updated: Date;
 
-  @CreateDateColumn({ name: "created" })
+  @CreateDateColumn({ name: 'created' })
   created: Date;
 }

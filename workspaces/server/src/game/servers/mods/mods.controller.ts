@@ -1,6 +1,6 @@
 import { DeleteManyInput, imageFileFilter, StorageManager } from '@common';
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
-import { FileFastifyInterceptor, MulterFile } from 'fastify-file-interceptor';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { Permission } from 'unicore-common';
@@ -48,12 +48,12 @@ export class ModsController {
   @Permissions([Permission.AdminDashboard, Permission.EditorModsUpdate])
   @Patch('icon/:id')
   @UseInterceptors(
-    FileFastifyInterceptor('file', {
+    FileInterceptor('file', {
       storage: StorageManager.disk(),
       fileFilter: imageFileFilter,
     }),
   )
-  updateMedia(@Param('id', ParseIntPipe) id: number, @UploadedFile() file: MulterFile) {
+  updateMedia(@Param('id', ParseIntPipe) id: number, @UploadedFile() file: Express.Multer.File) {
     return this.modsService.updateMedia(id, file);
   }
 

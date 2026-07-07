@@ -13,7 +13,7 @@
         <DataTable
           :value="servers"
           :loading="loading"
-          :filters.sync="filters"
+          v-model:filters="filters"
           @row-reorder="onServersReorder"
           rowHover
           responsiveLayout="scroll"
@@ -29,7 +29,7 @@
           <Column field="name" header="Название">
             <template #body="slotProps">
               <div class="flex align-items-center">
-                <Avatar v-if="slotProps.data.icon" :image="`${$config.apiUrl + '/' + slotProps.data.icon}`" shape="circle" />
+                <Avatar v-if="slotProps.data.icon" :image="`${apiUrl + '/' + slotProps.data.icon}`" shape="circle" />
                 <Avatar v-else icon="pi pi-image" shape="circle" />
                 <span class="ml-2">{{ slotProps.data.name }}</span>
               </div>
@@ -37,7 +37,6 @@
           </Column>
           <Column :styles="{ width: '12rem' }">
             <template #body="slotProps">
-              <!-- <SpeedDial :tooltipOptions="{ position: 'top' }" direction="left" :model="actions" /> -->
               <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
               <Button @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary mr-2" />
               <Button
@@ -50,11 +49,11 @@
           </Column>
         </DataTable>
 
-        <Dialog :visible.sync="fileDialog" :style="{ width: '600px' }" :modal="true" header="Редактирование медиа" class="p-fluid">
+        <Dialog v-model:visible="fileDialog" :style="{ width: '600px' }" :modal="true" header="Редактирование медиа" class="p-fluid">
           <label>Иконка сервера</label>
           <div class="grid mb-4 pt-2">
             <div class="col-6">
-              <Avatar v-if="server.icon" :image="`${$config.apiUrl + '/' + server.icon}`" size="xlarge" shape="circle" />
+              <Avatar v-if="server.icon" :image="`${apiUrl + '/' + server.icon}`" size="xlarge" shape="circle" />
               <Avatar v-else icon="pi pi-image" size="xlarge" shape="circle" />
             </div>
             <div class="col-6">
@@ -78,7 +77,7 @@
           <div class="grid mb-4 pt-2">
             <div class="col-12 md:col-6">
               <Avatar v-if="!server.image" icon="pi pi-image" size="xlarge" />
-              <ImagePreview v-else width="200" :src="`${$config.apiUrl + '/' + server.image}`" preview />
+              <Image v-else width="200" :src="`${apiUrl + '/' + server.image}`" preview />
             </div>
             <div class="col-12 md:col-6">
               <div class="field mb-0 mt-2">
@@ -99,9 +98,9 @@
           </div>
         </Dialog>
 
-        <ValidationObserver v-slot="{ invalid }">
+        <VeeForm v-slot="{ meta }">
           <Dialog
-            :visible.sync="serverDialog"
+            v-model:visible="serverDialog"
             :closable="false"
             :style="{ width: '600px' }"
             :modal="true"
@@ -110,38 +109,69 @@
           >
             <div class="grid">
               <div class="col-12 md:col-6">
-                <ValidationProvider
-                  name="ID (a-z)"
+                <VeeField
+                  v-model="server.id"
+                  name="id"
+                  label="ID (a-z)"
                   :rules="{
                     required: true,
                     regex: /^[a-z1-9]+$/,
                   }"
-                  v-slot="{ errors }"
+                  v-slot="{ value, errorMessage, handleChange, handleBlur }"
                 >
                   <div class="field">
                     <label>ID</label>
-                    <InputText :disabled="updateMode" v-model="server.id" autofocus />
-                    <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                    <InputText
+                      :disabled="updateMode"
+                      :modelValue="value"
+                      @update:modelValue="handleChange"
+                      @blur="handleBlur"
+                      :class="errorMessage && 'p-invalid'"
+                      autofocus
+                    />
+                    <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
                   </div>
-                </ValidationProvider>
+                </VeeField>
               </div>
               <div class="col-12 md:col-6">
-                <ValidationProvider name="Название" rules="required" v-slot="{ errors }">
+                <VeeField
+                  v-model="server.name"
+                  name="name"
+                  label="Название"
+                  rules="required"
+                  v-slot="{ value, errorMessage, handleChange, handleBlur }"
+                >
                   <div class="field">
                     <label>Название</label>
-                    <InputText v-model="server.name" />
-                    <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                    <InputText
+                      :modelValue="value"
+                      @update:modelValue="handleChange"
+                      @blur="handleBlur"
+                      :class="errorMessage && 'p-invalid'"
+                    />
+                    <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
                   </div>
-                </ValidationProvider>
+                </VeeField>
               </div>
               <div class="col-12">
-                <ValidationProvider name="Версия" rules="required" v-slot="{ errors }">
+                <VeeField
+                  v-model="server.version"
+                  name="version"
+                  label="Версия"
+                  rules="required"
+                  v-slot="{ value, errorMessage, handleChange, handleBlur }"
+                >
                   <div class="field">
                     <label>Версия</label>
-                    <InputText v-model="server.version" />
-                    <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                    <InputText
+                      :modelValue="value"
+                      @update:modelValue="handleChange"
+                      @blur="handleBlur"
+                      :class="errorMessage && 'p-invalid'"
+                    />
+                    <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
                   </div>
-                </ValidationProvider>
+                </VeeField>
                 <div class="field">
                   <label>Слоган</label>
                   <InputText v-model="server.slogan" />
@@ -153,15 +183,15 @@
                     :multiple="true"
                     :suggestions="mods"
                     @complete="searchMod($event)"
-                    field="name"
+                    optionLabel="name"
                     appendTo="body"
                     placeholder="Выберите моды"
                   >
-                    <template #item="slotProps">
+                    <template #option="slotProps">
                       <div class="flex align-items-center">
-                        <Avatar v-if="slotProps.item.icon" :image="`${$config.apiUrl + '/' + slotProps.item.icon}`" shape="circle" />
+                        <Avatar v-if="slotProps.option.icon" :image="`${apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
                         <Avatar v-else icon="pi pi-image" shape="circle" />
-                        <span class="ml-2">{{ slotProps.item.name }} (#{{ slotProps.item.id }})</span>
+                        <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                       </div>
                     </template>
                   </AutoComplete>
@@ -193,7 +223,7 @@
                     :value="server.table"
                     @row-reorder="onRowReorder"
                     editMode="row"
-                    :editingRows.sync="table"
+                    v-model:editingRows="table"
                     @row-edit-save="onRowEditSave"
                     responsiveLayout="scroll"
                   >
@@ -226,28 +256,51 @@
                 </div>
               </div>
               <div class="col-12 md:col-6">
-                <ValidationProvider name="Query хост" rules="required" v-slot="{ errors }">
+                <VeeField
+                  v-model="server.query.host"
+                  name="query_host"
+                  label="Query хост"
+                  rules="required"
+                  v-slot="{ value, errorMessage, handleChange, handleBlur }"
+                >
                   <div class="field">
                     <label>Query хост</label>
-                    <InputText v-model="server.query.host" />
-                    <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                    <InputText
+                      :modelValue="value"
+                      @update:modelValue="handleChange"
+                      @blur="handleBlur"
+                      :class="errorMessage && 'p-invalid'"
+                    />
+                    <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
                   </div>
-                </ValidationProvider>
+                </VeeField>
               </div>
               <div class="col-12 md:col-6">
-                <ValidationProvider name="Query порт" rules="required|min_value:0|max_value:65535" v-slot="{ errors }">
+                <VeeField
+                  v-model="server.query.port"
+                  name="query_port"
+                  label="Query порт"
+                  rules="required|min_value:0|max_value:65535"
+                  v-slot="{ value, errorMessage, handleChange, handleBlur }"
+                >
                   <div class="field">
                     <label>Query порт</label>
-                    <InputNumber :useGrouping="false" v-model="server.query.port" />
-                    <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                    <InputNumber
+                      :useGrouping="false"
+                      :modelValue="value"
+                      @update:modelValue="handleChange"
+                      @blur="handleBlur"
+                      :class="errorMessage && 'p-invalid'"
+                    />
+                    <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
                   </div>
-                </ValidationProvider>
+                </VeeField>
               </div>
             </div>
             <template #footer>
               <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
-                :disabled="loading || invalid"
+                :disabled="loading || !meta.valid"
                 label="Сохранить"
                 icon="pi pi-check"
                 class="p-button-text"
@@ -255,23 +308,25 @@
               />
             </template>
           </Dialog>
-        </ValidationObserver>
+        </VeeForm>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { FilterMatchMode } from 'primevue/api'
-import { ValidationObserver, ValidationProvider } from 'vee-validate'
+import { FilterMatchMode } from '@primevue/core/api'
+import { Form, Field } from 'vee-validate'
 
 export default {
-  head: {
-    title: 'Серверы',
-  },
   components: {
-    ValidationObserver,
-    ValidationProvider,
+    VeeForm: Form,
+    VeeField: Field,
+  },
+  setup() {
+    useHead({ title: 'Серверы' })
+    const config = useRuntimeConfig()
+    return { apiUrl: config.public.apiBaseurl }
   },
   data() {
     return {
@@ -326,28 +381,26 @@ export default {
       },
     }
   },
-  async fetch() {
-    this.loading = true
-    this.serverDialog = false
-    this.fileDialog = false
-    this.servers = await this.$axios.get('/servers').then((res) => res.data)
-    this.loading = false
-  },
   mounted() {
-    // this.socket.on("servers/online", (payload) => {
-    //   console.log(payload)
-    // });
+    this.load()
   },
   methods: {
+    async load() {
+      this.loading = true
+      this.serverDialog = false
+      this.fileDialog = false
+      this.servers = await this.$api.get('/servers').then((res) => res.data)
+      this.loading = false
+    },
     async onServersReorder(event) {
       this.loading = true
-      await this.$axios.post('/servers/sort', {
+      await this.$api.post('/servers/sort', {
         items: event.value.map((serv, priority) => ({
           id: serv.id,
           priority,
         })),
       })
-      this.$fetch()
+      this.load()
     },
     onRowReorder(event) {
       this.server.table = event.value
@@ -367,7 +420,7 @@ export default {
       this.table = []
     },
     async searchMod(event) {
-      this.mods = await this.$axios
+      this.mods = await this.$api
         .get('/servers/mods', {
           params: {
             search: event.query,
@@ -383,7 +436,7 @@ export default {
       formData.append('file', event.files[0])
 
       try {
-        await this.$axios.patch(`/servers/${type}/${this.server.id}`, formData, {
+        await this.$api.patch(`/servers/${type}/${this.server.id}`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -393,7 +446,7 @@ export default {
           detail: 'Иконка успешно обновлена',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch {
         this.fileDialog = false
         this.$toast.add({
@@ -404,24 +457,24 @@ export default {
       }
     },
     async openFileDialog(server) {
-      this.server = this.$_.pick(await this.$axios.get('/servers/' + server.id).then((res) => res.data), this.$_.deepKeys(this.server))
+      this.server = this.$_.pick(await this.$api.get('/servers/' + server.id).then((res) => res.data), this.$_.deepKeys(this.server))
       this.fileDialog = true
     },
     async removeMedia(type) {
       try {
-        await this.$axios.delete(`/servers/${type}/${this.server.id}`)
+        await this.$api.delete(`/servers/${type}/${this.server.id}`)
         this.$toast.add({
           severity: 'success',
           detail: 'Медиа успешно удалена',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch {}
     },
     async openDialog(server = null) {
       this.updateMode = !!server
       if (server) {
-        this.server = this.$_.pick(await this.$axios.get('/servers/' + server.id).then((res) => res.data), this.$_.deepKeys(this.server))
+        this.server = this.$_.pick(await this.$api.get('/servers/' + server.id).then((res) => res.data), this.$_.deepKeys(this.server))
         if (!this.server.table) this.server.table = []
       } else {
         this.server = {
@@ -446,7 +499,7 @@ export default {
     async createServer() {
       this.loading = true
       try {
-        await this.$axios.post('/servers', {
+        await this.$api.post('/servers', {
           ...this.server,
           table: this.server.table && this.server.table.length ? this.server.table.map((row, priority) => ({ ...row, priority })) : [],
           mods: this.server.mods.map((mod) => mod.id),
@@ -456,7 +509,7 @@ export default {
           detail: 'Сервер успешно добавлен',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch (err) {
         this.loading = false
         if (err.response.status === 409) {
@@ -477,7 +530,7 @@ export default {
     async updateServer() {
       this.loading = true
       try {
-        await this.$axios.patch('/servers/' + this.server.id, {
+        await this.$api.patch('/servers/' + this.server.id, {
           ...this.$_(this.server).omitBy(this.$_.isEmpty).omit('id').value(),
           table: this.server.table && this.server.table.length ? this.server.table.map((row, priority) => ({ ...row, priority })) : [],
           mods: this.server.mods.map((mod) => mod.id),
@@ -487,7 +540,7 @@ export default {
           detail: 'Сервер успешно редактирован',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch (err) {
         this.loading = false
         this.$toast.add({
@@ -505,14 +558,14 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$axios.delete('/servers/' + id)
+            await this.$api.delete('/servers/' + id)
             this.$toast.add({
               severity: 'success',
               detail: 'Сервер успешно удален',
               life: 3000,
             })
           } catch {}
-          await this.$fetch()
+          await this.load()
         },
       })
     },

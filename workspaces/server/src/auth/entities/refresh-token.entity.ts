@@ -1,26 +1,26 @@
 import { User } from 'src/admin/users/entities/user.entity';
 import { Column, CreateDateColumn, Entity, Generated, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
-@Entity({ name: "unicore_refresh_tokens" })
+@Entity({ name: 'unicore_refresh_tokens' })
 export class RefreshToken {
-  @PrimaryGeneratedColumn({ name: "id" })
+  @PrimaryGeneratedColumn({ name: 'id' })
   id: number;
 
   @Generated('uuid')
   @Column({
-    name: "uuid",
+    name: 'uuid',
     unique: true,
   })
   uuid: string;
 
   @Column({
-    name: "ip",
+    name: 'ip',
     nullable: true,
   })
   ip?: string;
 
   @Column({
-    name: "agent",
+    name: 'agent',
     nullable: true,
   })
   agent?: string;
@@ -30,15 +30,15 @@ export class RefreshToken {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn({ name: "user_uuid" })
+  @JoinColumn({ name: 'user_uuid' })
   user: User;
 
-  @Column({ name: "expires" })
+  @Column({ name: 'expires' })
   expires: Date;
 
-  @UpdateDateColumn({ name: "updated" })
+  @UpdateDateColumn({ name: 'updated' })
   updated: Date;
 
-  @CreateDateColumn({ name: "created" })
+  @CreateDateColumn({ name: 'created' })
   created: Date;
 }

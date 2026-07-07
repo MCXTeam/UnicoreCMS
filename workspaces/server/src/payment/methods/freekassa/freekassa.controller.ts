@@ -10,17 +10,17 @@ import { FreekassaService } from './freekassa.service';
 
 @Controller('payment/methods/freekassa')
 export class FreekassaController {
-  constructor(private freekassaService: FreekassaService) { }
+  constructor(private freekassaService: FreekassaService) {}
 
   @Permissions([Permission.UserPayment])
   @Post('link')
   link(@IpAddress() ip: string, @CurrentUser() user: User, @Body() body: PaymentCreateDto) {
-    return this.freekassaService.createLink(user, body, ip)
+    return this.freekassaService.createLink(user, body, ip);
   }
 
   @Public()
   @Post('handler')
   handler(@IpAddress() ip: string, @Body() body) {
-    return this.freekassaService.handler(ip, body)
+    return this.freekassaService.handler(ip, body);
   }
 }

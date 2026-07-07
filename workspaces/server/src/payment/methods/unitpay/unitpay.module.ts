@@ -11,6 +11,6 @@ import { UnitpayService } from './unitpay.service';
   controllers: [UnitpayController],
 })
 export class UnitpayModule implements PaymentCoreModule {
-  static id = "unitpay"
+  static id = 'unitpay';
   static enabled = envConfig.unitpayEnabled;
 }

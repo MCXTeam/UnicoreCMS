@@ -86,7 +86,7 @@ export class GravitService {
     const valid = await this.authService.validateCredentials(user, password);
     if (!valid) throw new HttpException({ error: GravitError.WrongPassword }, HttpStatus.UNAUTHORIZED);
 
-    if (user.two_factor_enabled && input?.context) {
+    if (user.two_factor_enabled) {
       if (!totp) throw new HttpException({ error: GravitError.Require2FA }, HttpStatus.UNAUTHORIZED);
 
       if (!this.twoFactorService.verify(user, totp)) throw new HttpException({ error: GravitError.WrongPassword }, HttpStatus.UNAUTHORIZED);
@@ -126,23 +126,23 @@ export class GravitService {
   }
 
   async deleteSession(input: any) {
-    const user = await this.usersRepository.findOne({
+    const user = await this.usersRepository.findOneBy({
       username: input.user?.username,
     });
 
     if (user) {
-      const tokens = await this.tokensRepository.find({ user, agent: 'launcher' });
+      const tokens = await this.tokensRepository.findBy({ user: { uuid: user.uuid }, agent: 'launcher' });
       await this.tokensRepository.remove(tokens);
     }
   }
 
   async exitUser(input: any) {
-    const user = await this.usersRepository.findOne({
+    const user = await this.usersRepository.findOneBy({
       username: input.username,
     });
 
     if (user) {
-      const tokens = await this.tokensRepository.find({ user, agent: 'launcher' });
+      const tokens = await this.tokensRepository.findBy({ user: { uuid: user.uuid }, agent: 'launcher' });
       await this.tokensRepository.remove(tokens);
     }
   }
@@ -154,12 +154,12 @@ export class GravitService {
       throw new ForbiddenException();
     }
 
-    const token = await this.tokensRepository.findOne(
-      {
+    const token = await this.tokensRepository.findOne({
+      where: {
         uuid: minecraftTokenPayload.ref,
       },
-      { relations: ['user'] },
-    );
+      relations: ['user'],
+    });
 
     if (!token?.user || token?.user.accessToken != input.accessToken) throw new ForbiddenException();
 
@@ -168,7 +168,7 @@ export class GravitService {
   }
 
   async checkServer(input: GravitCheckServer) {
-    const user = await this.usersRepository.findOne({
+    const user = await this.usersRepository.findOneBy({
       username: input.username,
       serverId: input.serverId,
     });

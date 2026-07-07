@@ -10,30 +10,34 @@ import * as crypto from 'crypto';
 
 @Injectable()
 export class EnotioService implements PaymentCoreService {
-  constructor(private paymentHandler: PaymentHandlerService) { }
+  constructor(private paymentHandler: PaymentHandlerService) {}
 
   async createLink(user: User, input: PaymentCreateDto, ip: string): Promise<PaymentLink> {
-    const payment = await this.paymentHandler.create(EnotioModule.id, input.amount, user, ip)
+    const payment = await this.paymentHandler.create(EnotioModule.id, input.amount, user, ip);
 
-    const sign = crypto.createHash('md5').update([envConfig.enotioMerchantID, input.amount, envConfig.enotioSecretKey, payment.id].join(':')).digest('hex')
+    const sign = crypto
+      .createHash('md5')
+      .update([envConfig.enotioMerchantID, input.amount, envConfig.enotioSecretKey, payment.id].join(':'))
+      .digest('hex');
 
     const url = new URL('https://enot.io/pay');
-    url.searchParams.append('m', envConfig.enotioMerchantID)
-    url.searchParams.append('oa', String(input.amount))
-    url.searchParams.append('o', String(payment.id))
-    url.searchParams.append('s', sign)
+    url.searchParams.append('m', envConfig.enotioMerchantID);
+    url.searchParams.append('oa', String(input.amount));
+    url.searchParams.append('o', String(payment.id));
+    url.searchParams.append('s', sign);
 
-    return { link: url.href }
+    return { link: url.href };
   }
 
   async handler(ip: string, input: any): Promise<PaymentResp> {
-    const sign = crypto.createHash('md5').update([envConfig.enotioMerchantID, input.amount, envConfig.enotioSecretKeySecond, input.merchant_id].join(':')).digest('hex')
+    const sign = crypto
+      .createHash('md5')
+      .update([envConfig.enotioMerchantID, input.amount, envConfig.enotioSecretKeySecond, input.merchant_id].join(':'))
+      .digest('hex');
 
-    if (sign != input.sign_2)
-      return PaymentResp.WrongSign
+    if (sign != input.sign_2) return PaymentResp.WrongSign;
 
-    if (!await this.paymentHandler.handler(input.merchant_id, input.intid))
-      return PaymentResp.WrongPayID
+    if (!(await this.paymentHandler.handler(input.merchant_id, input.intid))) return PaymentResp.WrongPayID;
 
     return PaymentResp.OK;
   }

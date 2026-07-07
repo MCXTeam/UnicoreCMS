@@ -8,49 +8,61 @@
       <span class="text-600 font-medium">Войдите, чтобы продолжить</span>
     </div>
 
-    <ValidationObserver v-slot="{ invalid }">
-      <form @submit.prevent="Login" class="w-full md:w-10 mx-auto">
-        <ValidationProvider name="Email" rules="required|isUsernameOrEmail" v-slot="{ errors }">
-          <div class="field p-fluid mb-3">
-            <label for="email1" class="block text-900 text-xl font-medium mb-2">Email или логин</label>
-            <InputText
-              id="email1"
-              :disabled="disabled"
-              v-model="login.username_or_email"
-              type="text"
-              class="w-full"
-              :class="errors[0] && 'p-invalid'"
-              placeholder="Email или логин"
-              style="padding: 1rem"
-            />
-            <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
-          </div>
-        </ValidationProvider>
-        <ValidationProvider name="Пароль" rules="required|min:6|max:32" v-slot="{ errors }">
-          <div class="field p-fluid mb-3">
-            <label for="password1" class="block text-900 font-medium text-xl mb-2">Пароль</label>
-            <Password
-              :feedback="false"
-              id="password1"
-              :disabled="disabled"
-              v-model="login.password"
-              placeholder="Пароль"
-              :toggleMask="true"
-              class="w-full"
-              :class="errors[0] && 'p-invalid'"
-              inputClass="w-full"
-              inputStyle="padding:1rem"
-            ></Password>
-            <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
-          </div>
-        </ValidationProvider>
-        <Button :disabled="loading || invalid" type="submit" label="Войти" class="w-full p-3 text-xl mt-5"></Button>
-      </form>
-    </ValidationObserver>
+    <Form @submit="Login" v-slot="{ meta }" class="w-full md:w-10 mx-auto">
+      <Field
+        v-model="login.username_or_email"
+        name="username_or_email"
+        label="Email или логин"
+        rules="required|isUsernameOrEmail"
+        v-slot="{ value, errorMessage, handleChange, handleBlur }"
+      >
+        <div class="field p-fluid mb-3">
+          <label for="email1" class="block text-900 text-xl font-medium mb-2">Email или логин</label>
+          <InputText
+            id="email1"
+            :disabled="disabled"
+            :modelValue="value"
+            @update:modelValue="handleChange"
+            @blur="handleBlur"
+            type="text"
+            class="w-full"
+            :class="errorMessage && 'p-invalid'"
+            placeholder="Email или логин"
+            style="padding: 1rem"
+          />
+          <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+        </div>
+      </Field>
+      <Field
+        v-model="login.password"
+        name="password"
+        label="Пароль"
+        rules="required|min:6|max:32"
+        v-slot="{ value, errorMessage, handleChange, handleBlur }"
+      >
+        <div class="field p-fluid mb-3">
+          <label for="password1" class="block text-900 font-medium text-xl mb-2">Пароль</label>
+          <Password
+            :feedback="false"
+            id="password1"
+            :disabled="disabled"
+            :modelValue="value"
+            @update:modelValue="handleChange"
+            @blur="handleBlur"
+            placeholder="Пароль"
+            :toggleMask="true"
+            class="w-full"
+            :class="errorMessage && 'p-invalid'"
+            inputClass="w-full"
+            inputStyle="padding:1rem"
+          ></Password>
+          <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+        </div>
+      </Field>
+      <Button :disabled="loading || !meta.valid" type="submit" label="Войти" class="w-full p-3 text-xl mt-5"></Button>
 
-    <ValidationObserver v-slot="{ invalid }">
       <Dialog
-        :visible.sync="totpRequired"
+        v-model:visible="totpRequired"
         :closable="false"
         :closeOnEscape="false"
         :style="{ width: '450px' }"
@@ -58,93 +70,72 @@
         header="Двухфакторная аутификация"
         class="p-fluid"
       >
-        <ValidationProvider name="Код из приложения" rules="required|min:0" v-slot="{ errors }">
+        <Field
+          v-model="login.totp"
+          name="totp"
+          label="Код из приложения"
+          rules="required"
+          v-slot="{ value, errorMessage, handleChange, handleBlur }"
+        >
           <div class="field">
             <label>Код из приложения</label>
-            <InputText v-model="login.totp" autofocus />
-            <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+            <InputText :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" autofocus />
+            <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
           </div>
-        </ValidationProvider>
+        </Field>
         <template #footer>
-          <Button
-            :disabled="invalid"
-            label="Войти"
-            icon="pi pi-check"
-            class="p-button-text"
-            @click="Login()"
-          />
+          <Button :disabled="loading" label="Войти" icon="pi pi-check" class="p-button-text" @click="Login" />
         </template>
       </Dialog>
-    </ValidationObserver>
+    </Form>
   </div>
 </template>
 
-<script>
-import { ValidationObserver, ValidationProvider } from 'vee-validate'
+<script setup>
+import { Form, Field } from 'vee-validate'
+import { useReCaptcha } from 'vue-recaptcha-v3'
+import { useToast } from 'primevue/usetoast'
+import { useAuthStore } from '~/stores/auth'
 
-export default {
-  layout: 'auth',
-  head: {
-    title: 'Авторизация',
-  },
-  components: {
-    ValidationObserver,
-    ValidationProvider,
-  },
-  data() {
-    return {
-      disabled: false,
-      loading: false,
-      login: {
-        username_or_email: '',
-        password: '',
-        totp: null
-      },
-      totpRequired: false,
+definePageMeta({ layout: 'auth' })
+useHead({ title: 'Авторизация' })
+
+const authStore = useAuthStore()
+const toast = useToast()
+const recaptcha = useReCaptcha()
+const { $api } = useNuxtApp()
+
+const disabled = ref(false)
+const loading = ref(false)
+const totpRequired = ref(false)
+const login = reactive({
+  username_or_email: '',
+  password: '',
+  totp: null,
+})
+
+async function Login() {
+  loading.value = true
+  try {
+    await recaptcha?.recaptchaLoaded?.()
+    const token = await recaptcha?.executeRecaptcha?.('login')
+    const { data } = await $api.post('/auth/login', login, { headers: { recaptcha: token } })
+    authStore.setTokens(data.accessToken, data.refreshToken)
+    authStore.setUser(data.user)
+    await navigateTo('/')
+  } catch (err) {
+    if (err?.response?.data?.message === 'require2fa') {
+      totpRequired.value = true
+    } else {
+      toast.add({
+        severity: 'error',
+        summary: 'Ошибка авторизации',
+        detail: totpRequired.value ? 'Код из приложения не подходит, попробуйте еще раз' : 'Неправильный логин или пароль',
+        life: 3000,
+      })
     }
-  },
-  async mounted() {
-    try {
-      await this.$recaptcha.init()
-    } catch (e) {
-      console.error(e)
-    }
-  },
-  beforeDestroy() {
-    this.$recaptcha.destroy()
-  },
-  methods: {
-    async Login() {
-      this.loading = true
-      try {
-        const recaptcha = await this.$recaptcha.execute('login')
-        await this.$auth.loginWith('local', {
-          data: this.login,
-          headers: { recaptcha },
-        })
-      } catch (err) {
-        if (err?.response?.data?.message == 'require2fa') {
-          this.totpRequired = true
-        } else {
-          if (this.totpRequired) {
-            this.$toast.add({
-              severity: 'error',
-              summary: 'Ошибка авторизации',
-              detail: 'Код из приложения не подходит, попробуйте еще раз',
-              life: 3000,
-            })
-          } else {
-            this.$toast.add({
-              severity: 'error',
-              summary: 'Ошибка авторизации',
-              detail: 'Неправельный логин или пароль',
-              life: 3000,
-            })
-          }
-        }
-        this.loading = false
-      }
-    },
-  },
+  } finally {
+    loading.value = false
+  }
 }
 </script>

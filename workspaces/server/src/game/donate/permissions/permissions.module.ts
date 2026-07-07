@@ -12,7 +12,11 @@ import { User } from 'src/admin/users/entities/user.entity';
 import { ConfigModule } from 'src/admin/config/config.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([DonatePermission, UsersDonatePermission, Server, Period, GroupKit, User]), HistoryModule, ConfigModule],
+  imports: [
+    TypeOrmModule.forFeature([DonatePermission, UsersDonatePermission, Server, Period, GroupKit, User]),
+    HistoryModule,
+    ConfigModule,
+  ],
   providers: [DonatePermissionsService],
   exports: [DonatePermissionsService],
   controllers: [PermissionsController],

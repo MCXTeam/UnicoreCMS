@@ -1,5 +1,5 @@
 export enum GiveMethod {
-    UnicoreConnect,
-    UnicoreConnectCommand,
-    RCON
+  UnicoreConnect,
+  UnicoreConnectCommand,
+  RCON,
 }

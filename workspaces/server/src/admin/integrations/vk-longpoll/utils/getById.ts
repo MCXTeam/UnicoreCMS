@@ -19,6 +19,6 @@ export function getById(api: API, id?: number): Promise<IProfile | GroupsGroupFu
           .getById({
             group_id: String(Math.abs(id)),
           })
-          .then(([group]) => group)
+          .then(([group]: any) => group)
     : Promise.resolve(null);
 }

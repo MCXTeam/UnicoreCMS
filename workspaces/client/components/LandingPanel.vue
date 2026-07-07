@@ -1,7 +1,7 @@
 <template>
   <div>
-    <no-ssr>
-      <div v-if="$auth.loggedIn" class="panel d-none d-xl-flex flex-column align-items-center py-4 mb-5">
+    <ClientOnly>
+      <div v-if="$auth.user" class="panel d-none d-xl-flex flex-column align-items-center py-4 mb-5">
         <h3 class="mb-4 mt-0"><i class="bx bx-user"></i> Привет, {{ $auth.user.username }}</h3>
         <div class="d-flex align-items-center w-100 mb-2 mini-profile p-2">
           <Avatar class="rounded shadow me-3" size="large">
@@ -12,27 +12,27 @@
           </div>
         </div>
         <div class="tab-panel w-100">
-          <vs-button to="/cabinet" transparent block class="m-0" size="large">Личный кабинет</vs-button>
-          <vs-button to="/store" transparent block class="m-0" size="large">Магазин</vs-button>
-          <vs-button to="/players" transparent block class="m-0" size="large">Игроки</vs-button>
-          <vs-button @click="$unicore.logout()" transparent block class="m-0" size="large" danger>Выйти из системы</vs-button>
+          <Button as="NuxtLink" to="/cabinet" text class="m-0 w-full" size="large" label="Личный кабинет" />
+          <Button as="NuxtLink" to="/store" text class="m-0 w-full" size="large" label="Магазин" />
+          <Button as="NuxtLink" to="/players" text class="m-0 w-full" size="large" label="Игроки" />
+          <Button @click="$unicore.logout()" text severity="danger" class="m-0 w-full" size="large" label="Выйти из системы" />
         </div>
       </div>
       <div v-else class="panel d-flex flex-column align-items-center py-4 mb-5">
         <h2 class="mb-4 mt-0"><i class="bx bx-key"></i> Авторизация</h2>
-        <vs-button to="/auth" size="xl" class="px-4">Войти</vs-button>
+        <Button as="NuxtLink" to="/auth" size="large" class="px-4" label="Войти" />
         <div class="d-flex mt-3">
-          <vs-button to="/auth/register" transparent class="m-0">Регистрация</vs-button>
-          <vs-button to="/auth/reset" transparent class="m-0">Сбросить пароль</vs-button>
+          <Button as="NuxtLink" to="/auth/register" text class="m-0" label="Регистрация" />
+          <Button as="NuxtLink" to="/auth/reset" text class="m-0" label="Сбросить пароль" />
         </div>
       </div>
-    </no-ssr>
+    </ClientOnly>
     <div class="panel d-flex flex-column align-items-center text-center py-4 mb-5">
       <h2 class="mb-4 mt-0"><i class="bx bx-gift"></i> Голосование</h2>
       <img src="/images/chest-minecraft.gif" height="180px" />
       <p class="mb-3">Голосуй за нас и получай приятные бонусы: игровую валюту, кейсы, предметы!</p>
       <div class="d-flex">
-        <vs-button to="/cabinet/gifts" transparent class="m-0" size="large">Голосовать</vs-button>
+        <Button as="NuxtLink" to="/cabinet/gifts" text class="m-0" size="large" label="Голосовать" />
       </div>
     </div>
     <h2 class="mt-0">Серверы</h2>
@@ -40,23 +40,20 @@
       <div v-for="online in onlines.servers" :key="online.server.id" class="mb-4">
         <div class="onlines d-flex justify-content-between align-items-end mb-3">
           <div class="d-flex">
-            <Avatar v-if="online.server.icon" size="xlarge" :image="`${$config.apiUrl}/${online.server.icon}`"> </Avatar>
+            <Avatar v-if="online.server.icon" size="xlarge" :image="`${$pub.apiBaseurl}/${online.server.icon}`" />
             <Avatar v-else size="xlarge"> <i class="bx bxs-server"></i> </Avatar>
             <div class="ms-3">
               <span>Версия: {{ online.server.version }}</span>
-              <nuxt-link :to="`/servers/${online.server.id}`">
+              <NuxtLink :to="`/servers/${online.server.id}`">
                 <h3 class="mb-1 mt-0">{{ online.server.name }}</h3>
-              </nuxt-link>
+              </NuxtLink>
             </div>
           </div>
           <div class="d-flex flex-column align-items-end">
-            <vs-tooltip>
-              <h2 v-if="online.online" class="mb-1 mt-0"><number :to="online.players" :duration="1" /></h2>
+            <div v-tooltip.top="`Рекорд: ${online.record} / Сегодня: ${online.record_today}`">
+              <h2 v-if="online.online" class="mb-1 mt-0"><CountTo :startVal="0" :endVal="online.players" :duration="1000" /></h2>
               <h2 v-else class="mb-1 mt-0 text-uppercase">Off</h2>
-              <template #tooltip>
-                Рекорд: <number :to="online.record" :duration="1" /> / Сегодня: <number :to="online.record_today" :duration="1" />
-              </template>
-            </vs-tooltip>
+            </div>
             <span v-if="online.online">из {{ online.maxplayers }}</span>
           </div>
         </div>
@@ -64,20 +61,14 @@
       </div>
       <div class="text-center">
         <p class="m-0">
-          Общий онлайн: <b><number :to="onlines.total.online" :duration="1" /></b>
+          Общий онлайн: <b><CountTo :startVal="0" :endVal="onlines.total.online" :duration="1000" /></b>
         </p>
-        <vs-tooltip>
-          <p class="m-0">
-            Рекорд за сегодня: <b><number :to="onlines.total.records.today.online" :duration="1" /></b>
-          </p>
-          <template #tooltip>{{ $moment(onlines.total.records.today.created).local().format('D MMMM YYYY, HH:mm') }}</template>
-        </vs-tooltip>
-        <vs-tooltip>
-          <p class="m-0">
-            Рекорд за всё время: <b><number :to="onlines.total.records.absolute.online" :duration="1" /></b>
-          </p>
-          <template #tooltip>{{ $moment(onlines.total.records.absolute.created).local().format('D MMMM YYYY, HH:mm') }}</template>
-        </vs-tooltip>
+        <p class="m-0" v-tooltip.top="$moment(onlines.total.records.today.created).local().format('D MMMM YYYY, HH:mm')">
+          Рекорд за сегодня: <b><CountTo :startVal="0" :endVal="onlines.total.records.today.online" :duration="1000" /></b>
+        </p>
+        <p class="m-0" v-tooltip.top="$moment(onlines.total.records.absolute.created).local().format('D MMMM YYYY, HH:mm')">
+          Рекорд за всё время: <b><CountTo :startVal="0" :endVal="onlines.total.records.absolute.online" :duration="1000" /></b>
+        </p>
       </div>
     </div>
     <div v-else class="d-flex flex-column align-items-center">
@@ -92,7 +83,7 @@
       <Skeleton width="70%" class="mb-2"></Skeleton>
       <Skeleton width="70%" class="mb-2"></Skeleton>
     </div>
-    <no-ssr>
+    <ClientOnly>
       <div class="d-flex flex-column social-blocks pt-3">
         <a v-if="config.public_link_discord" class="px-4 py-3 mt-3 discord" :href="config.public_link_discord" target="_blank">
           <h2 class="m-0 d-flex align-items-center"><i class="bx bxl-discord-alt me-2"></i> Discord</h2>
@@ -107,12 +98,19 @@
           <h2 class="m-0 d-flex align-items-center"><i class="bx bxl-youtube me-2"></i> YouTube</h2>
         </a>
       </div>
-    </no-ssr>
+    </ClientOnly>
   </div>
 </template>
 
-<script>
-export default {
-  props: ["config", "onlines"]
-}
+<script setup lang="ts">
+defineProps({
+  config: {
+    type: Object,
+    default: () => ({}),
+  },
+  onlines: {
+    type: Object,
+    default: () => ({}),
+  },
+})
 </script>

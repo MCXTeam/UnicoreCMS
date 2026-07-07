@@ -19,6 +19,8 @@ import { GiftInput } from './dto/gift.input';
 import { GiftActivation } from './entities/gift-activation.entity';
 import { Gift } from './entities/gift.entity';
 import { GiftType } from './enums/gift-type.enum';
+import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
+import { Transactional } from 'typeorm-transactional';
 
 @Injectable()
 export class GiftsService {
@@ -48,8 +50,8 @@ export class GiftsService {
     private moneyService: MoneyService,
     private donateGroupsService: DonateGroupsService,
     private donatePermissionsService: DonatePermissionsService,
-    private cartService: CartService
-  ) { }
+    private cartService: CartService,
+  ) {}
 
   find(): Promise<Gift[]> {
     const qb = this.giftsRepository.createQueryBuilder('gift').loadRelationCountAndMap('gift.activations', 'gift.activations').getMany();
@@ -58,11 +60,12 @@ export class GiftsService {
   }
 
   findOne(id: number, relations?: string[]): Promise<Gift> {
-    return this.giftsRepository.findOne(id, { relations });
+    return this.giftsRepository.findOne({ where: { id }, relations });
   }
 
+  @Transactional()
   async activate(user: User, promocode: string) {
-    const gift = await this.giftsRepository.findOne({ where: { promocode }, relations: ['activations'] })
+    const gift = await this.giftsRepository.findOne({ where: { promocode }, relations: ['activations'] });
 
     if (!gift) {
       throw new NotFoundException();
@@ -76,43 +79,66 @@ export class GiftsService {
       throw new NotFoundException();
     }
 
-    if (await this.giftsActivationsRepository.findOne({ where: { user, gift }, relations: ['user', 'gift'] })) {
+    const ga = new GiftActivation();
+    ga.gift = gift;
+    ga.user = user;
+
+    try {
+      await this.giftsActivationsRepository.insert(ga);
+    } catch {
       throw new ConflictException();
     }
 
-    switch (gift.type) {
-      case GiftType.Product:
-        await this.cartService.giveItem(user, gift.product, gift.server, gift.amount)
-        break;
-      case GiftType.Kit:
-        await this.cartService.giveKit(user, gift.server, gift.kit.id)
-        break;
-      case GiftType.Donate:
-        await this.donateGroupsService.give(user, gift.server, gift.donate_group, gift.period)
-        break;
-      case GiftType.Permission:
-        await this.donatePermissionsService.give(user, gift.server, gift.donate_permission, gift.period)
-        break;
-      case GiftType.Money:
-        const userMoney = await this.moneyService.findOneByUserAndServer(gift.server.id, user)
-        await this.moneyRepository.save(userMoney)
-        break;
-      case GiftType.Real:
-        await this.usersRepository.increment({ uuid: user.uuid }, "real", gift.amount)
-        break;
+    if (gift.max_activations) {
+      const activations = await this.giftsActivationsRepository.count({ where: { gift: { id: gift.id } } });
+
+      if (activations > gift.max_activations) {
+        await this.giftsActivationsRepository
+          .createQueryBuilder()
+          .delete()
+          .where('gift_id = :giftId AND user_uuid = :uuid', { giftId: gift.id, uuid: user.uuid })
+          .execute();
+        throw new NotFoundException();
+      }
     }
 
-    const ga = new GiftActivation()
-    ga.gift = gift
-    ga.user = user
-    
-    await this.giftsActivationsRepository.insert(ga)
+    try {
+      switch (gift.type) {
+        case GiftType.Product:
+          await this.cartService.giveItem(user, gift.product, gift.server, gift.amount);
+          break;
+        case GiftType.Kit:
+          await this.cartService.giveKit(user, gift.server, gift.kit.id);
+          break;
+        case GiftType.Donate:
+          await this.donateGroupsService.give(user, gift.server, gift.donate_group, gift.period);
+          break;
+        case GiftType.Permission:
+          await this.donatePermissionsService.give(user, gift.server, gift.donate_permission, gift.period);
+          break;
+        case GiftType.Money:
+          const userMoney = await this.moneyService.findOneByUserAndServer(gift.server.id, user);
+          userMoney.money = currencyUtils.roundByType(userMoney.money + gift.amount, SystemCurrency.INGAME);
+          await this.moneyRepository.save(userMoney);
+          break;
+        case GiftType.Real:
+          await this.usersRepository.increment({ uuid: user.uuid }, 'real', gift.amount);
+          break;
+      }
+    } catch (e) {
+      await this.giftsActivationsRepository
+        .createQueryBuilder()
+        .delete()
+        .where('gift_id = :giftId AND user_uuid = :uuid', { giftId: gift.id, uuid: user.uuid })
+        .execute();
+      throw e;
+    }
 
-    return new GiftDto(gift)
+    return new GiftDto(gift);
   }
 
   async create(input: GiftInput) {
-    if (await this.giftsRepository.findOne({ promocode: input.promocode })) {
+    if (await this.giftsRepository.findOneBy({ promocode: input.promocode })) {
       throw new NotFoundException();
     }
 
@@ -134,26 +160,26 @@ export class GiftsService {
     switch (input.type) {
       case GiftType.Product:
         gift.amount = input.amount;
-        gift.product = await this.productsRepository.findOneOrFail(input.product);
-        gift.server = await this.serversRepository.findOneOrFail(input.server);
+        gift.product = await this.productsRepository.findOneByOrFail({ id: input.product });
+        gift.server = await this.serversRepository.findOneByOrFail({ id: input.server });
         break;
       case GiftType.Kit:
-        gift.kit = await this.kitsRepository.findOneOrFail(input.kit);
-        gift.server = await this.serversRepository.findOneOrFail(input.server);
+        gift.kit = await this.kitsRepository.findOneByOrFail({ id: input.kit });
+        gift.server = await this.serversRepository.findOneByOrFail({ id: input.server });
         break;
       case GiftType.Donate:
-        gift.donate_group = await this.donateGroupsRepository.findOneOrFail(input.donate_group);
-        gift.period = await this.periodsRepository.findOneOrFail(input.period);
-        gift.server = await this.serversRepository.findOneOrFail(input.server);
+        gift.donate_group = await this.donateGroupsRepository.findOneByOrFail({ id: input.donate_group });
+        gift.period = await this.periodsRepository.findOneByOrFail({ id: input.period });
+        gift.server = await this.serversRepository.findOneByOrFail({ id: input.server });
         break;
       case GiftType.Permission:
-        gift.donate_permission = await this.donatePermissionsRepository.findOneOrFail(input.donate_permission);
-        gift.period = await this.periodsRepository.findOneOrFail(input.period);
-        gift.server = await this.serversRepository.findOneOrFail(input.server);
+        gift.donate_permission = await this.donatePermissionsRepository.findOneByOrFail({ id: input.donate_permission });
+        gift.period = await this.periodsRepository.findOneByOrFail({ id: input.period });
+        gift.server = await this.serversRepository.findOneByOrFail({ id: input.server });
         break;
       case GiftType.Money:
         gift.amount = input.amount;
-        gift.server = await this.serversRepository.findOneOrFail(input.server);
+        gift.server = await this.serversRepository.findOneByOrFail({ id: input.server });
         break;
       case GiftType.Real:
         gift.amount = input.amount;
@@ -186,26 +212,26 @@ export class GiftsService {
     switch (input.type) {
       case GiftType.Product:
         gift.amount = input.amount;
-        gift.product = await this.productsRepository.findOneOrFail(input.product);
-        gift.server = await this.serversRepository.findOneOrFail(input.server);
+        gift.product = await this.productsRepository.findOneByOrFail({ id: input.product });
+        gift.server = await this.serversRepository.findOneByOrFail({ id: input.server });
         break;
       case GiftType.Kit:
-        gift.kit = await this.kitsRepository.findOneOrFail(input.kit);
-        gift.server = await this.serversRepository.findOneOrFail(input.server);
+        gift.kit = await this.kitsRepository.findOneByOrFail({ id: input.kit });
+        gift.server = await this.serversRepository.findOneByOrFail({ id: input.server });
         break;
       case GiftType.Donate:
-        gift.donate_group = await this.donateGroupsRepository.findOneOrFail(input.donate_group);
-        gift.period = await this.periodsRepository.findOneOrFail(input.period);
-        gift.server = await this.serversRepository.findOneOrFail(input.server);
+        gift.donate_group = await this.donateGroupsRepository.findOneByOrFail({ id: input.donate_group });
+        gift.period = await this.periodsRepository.findOneByOrFail({ id: input.period });
+        gift.server = await this.serversRepository.findOneByOrFail({ id: input.server });
         break;
       case GiftType.Permission:
-        gift.donate_permission = await this.donatePermissionsRepository.findOneOrFail(input.donate_permission);
-        gift.period = await this.periodsRepository.findOneOrFail(input.period);
-        gift.server = await this.serversRepository.findOneOrFail(input.server);
+        gift.donate_permission = await this.donatePermissionsRepository.findOneByOrFail({ id: input.donate_permission });
+        gift.period = await this.periodsRepository.findOneByOrFail({ id: input.period });
+        gift.server = await this.serversRepository.findOneByOrFail({ id: input.server });
         break;
       case GiftType.Money:
         gift.amount = input.amount;
-        gift.server = await this.serversRepository.findOneOrFail(input.server);
+        gift.server = await this.serversRepository.findOneByOrFail({ id: input.server });
         break;
       case GiftType.Real:
         gift.amount = input.amount;

@@ -1,21 +1,56 @@
 {
   "name": "unicore-common",
   "version": "1.2.0",
-  "main": "dist/index.js",
   "private": true,
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./public-config": {
+      "types": "./dist/public-config.d.ts",
+      "import": "./dist/public-config.mjs",
+      "require": "./dist/public-config.js"
+    },
+    "./enums": {
+      "types": "./dist/enums/index.d.ts",
+      "import": "./dist/enums/index.mjs",
+      "require": "./dist/enums/index.js"
+    },
+    "./validation": {
+      "types": "./dist/validation/index.d.ts",
+      "import": "./dist/validation/index.mjs",
+      "require": "./dist/validation/index.js"
+    },
+    "./console": {
+      "types": "./dist/console/index.d.ts",
+      "import": "./dist/console/index.mjs",
+      "require": "./dist/console/index.js"
+    },
+    "./dist/*": "./dist/*.js"
+  },
   "scripts": {
-    "dev": "tsc -w --preserveWatchOutput",
-    "build": "tsc --preserveWatchOutput",
+    "dev": "tsup --watch",
+    "build": "tsup",
     "format": "prettier --write --list-different ."
   },
   "dependencies": {
-    "dotenv": "^14.3.2",
-    "env-var": "^7.1.1",
-    "nest-winston": "^1.6.2",
-    "validator": "^13.7.0",
-    "winston": "^3.5.0"
+    "cli-color": "^2.0.4",
+    "dotenv": "^17.2.1",
+    "env-var": "^7.5.0",
+    "fast-safe-stringify": "^2.1.1",
+    "logform": "^2.7.0",
+    "nest-winston": "^1.10.2",
+    "validator": "^13.15.15",
+    "winston": "^3.19.0"
   },
   "devDependencies": {
-    "@types/dotenv": "^8.2.0"
+    "@types/cli-color": "^2.0.6",
+    "@types/node": "^22.10.2",
+    "tsup": "^8.5.0"
   }
 }

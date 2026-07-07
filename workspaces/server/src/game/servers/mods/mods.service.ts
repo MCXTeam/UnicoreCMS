@@ -1,7 +1,6 @@
 import { StorageManager } from '@common';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MulterFile } from 'fastify-file-interceptor';
 import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { In, Repository } from 'typeorm';
 import { ModInput } from './dto/mod.input';
@@ -24,7 +23,7 @@ export class ModsService {
   }
 
   findOne(id: number, relations?: string[]) {
-    return this.modsRepository.findOne(id, { relations });
+    return this.modsRepository.findOne({ where: { id }, relations });
   }
 
   async create(input: ModInput): Promise<Mod> {
@@ -32,7 +31,7 @@ export class ModsService {
 
     mod.name = input.name;
     mod.description = input.description;
-    mod.link = input.link
+    mod.link = input.link;
 
     return this.modsRepository.save(mod);
   }
@@ -46,7 +45,7 @@ export class ModsService {
 
     mod.name = input.name;
     mod.description = input.description;
-    mod.link = input.link
+    mod.link = input.link;
 
     return this.modsRepository.save(mod);
   }
@@ -71,7 +70,7 @@ export class ModsService {
     return this.modsRepository.remove(mods);
   }
 
-  async updateMedia(id: number, file: MulterFile) {
+  async updateMedia(id: number, file: Express.Multer.File) {
     const mod = await this.findOne(id);
 
     if (!mod) {

@@ -62,13 +62,13 @@ export class AuthService {
       const refreshToken = await this.tokensService.generateRefreshToken(user, agent, ip);
 
       if (input.ref) {
-        const inviter = await this.usersService.getByUsername(input.ref)
+        const inviter = await this.usersService.getByUsername(input.ref);
 
-        if (inviter) {
-          const referal = new Referal()
-          referal.inviter = inviter
-          referal.user = user
-          await this.referalsRepository.save(referal)
+        if (inviter && inviter.uuid !== user.uuid) {
+          const referal = new Referal();
+          referal.inviter = inviter;
+          referal.user = user;
+          await this.referalsRepository.save(referal);
         }
       }
 

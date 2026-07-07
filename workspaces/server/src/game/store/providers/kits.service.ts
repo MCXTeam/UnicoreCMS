@@ -1,7 +1,6 @@
 import { StorageManager } from '@common';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MulterFile } from 'fastify-file-interceptor';
 import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { Server } from 'src/game/servers/entities/server.entity';
 import { In, Repository } from 'typeorm';
@@ -63,7 +62,7 @@ export class KitsService {
   }
 
   findOne(id: number, relations?: string[]) {
-    return this.kitsRepository.findOne(id, { relations });
+    return this.kitsRepository.findOne({ where: { id }, relations });
   }
 
   async create(input: KitInput) {
@@ -73,20 +72,20 @@ export class KitsService {
     kit.description = input.description;
     kit.price = input.price;
     kit.sale = input.sale;
-    kit.virtual_percent = input.virtual_percent
+    kit.virtual_percent = input.virtual_percent;
 
-    kit.servers = await this.serversRepository.find({
+    kit.servers = await this.serversRepository.findBy({
       id: In(input.servers),
     });
 
-    kit.categories = await this.categoriesRepository.find({
+    kit.categories = await this.categoriesRepository.findBy({
       id: In(input.categories),
     });
 
     kit.items = await Promise.all(
       input.items.map(async (item) => ({
         amount: item.amount,
-        product: await this.productsRepository.findOne(item.product_id),
+        product: await this.productsRepository.findOneBy({ id: item.product_id }),
       })),
     );
 
@@ -104,20 +103,20 @@ export class KitsService {
     kit.price = input.price;
     kit.sale = input.sale;
     kit.description = input.description;
-    kit.virtual_percent = input.virtual_percent
+    kit.virtual_percent = input.virtual_percent;
 
-    kit.servers = await this.serversRepository.find({
+    kit.servers = await this.serversRepository.findBy({
       id: In(input.servers),
     });
 
-    kit.categories = await this.categoriesRepository.find({
+    kit.categories = await this.categoriesRepository.findBy({
       id: In(input.categories),
     });
 
     kit.items = await Promise.all(
       input.items.map(async (item) => ({
         amount: item.amount,
-        product: await this.productsRepository.findOne(item.product_id),
+        product: await this.productsRepository.findOneBy({ id: item.product_id }),
       })),
     );
 
@@ -144,7 +143,7 @@ export class KitsService {
     return this.kitsRepository.remove(products);
   }
 
-  async updateIcon(id: number, file: MulterFile) {
+  async updateIcon(id: number, file: Express.Multer.File) {
     const kit = await this.findOne(id);
 
     if (!kit) {

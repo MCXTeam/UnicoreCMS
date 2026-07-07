@@ -16,7 +16,7 @@ export class GiftsController {
   @Recaptcha({ action: 'gift' })
   @Post('activate')
   giftActivate(@CurrentUser() user: User, @Body('gift_code') code: string) {
-    return this.giftsService.activate(user, code)
+    return this.giftsService.activate(user, code);
   }
 
   @Permissions([Permission.AdminDashboard, Permission.EditorCabinetGiftsCreate])

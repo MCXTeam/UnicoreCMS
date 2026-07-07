@@ -1,4 +1,4 @@
-import { ThrottlerException, ThrottlerGuard } from '@nestjs/throttler';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import { ExecutionContext, Injectable } from '@nestjs/common';
 import * as requestIp from 'request-ip';
 import { User } from 'src/admin/users/entities/user.entity';
@@ -7,29 +7,23 @@ import { Permission } from 'unicore-common';
 
 @Injectable()
 export class ThrottlerCoreGuard extends ThrottlerGuard {
-  protected getTracker(req: any): string {
-    return requestIp.getClientIp(req);
+  protected async getTracker(req: Record<string, any>): Promise<string> {
+    return req.ip || requestIp.getClientIp(req);
   }
 
-  protected async handleRequest(context: ExecutionContext, limit: number, ttl: number): Promise<boolean> {
-    const req = context.switchToHttp().getRequest()
-    const user = req.user as User
-    const ip = this.getTracker(req)
+  protected async shouldSkip(context: ExecutionContext): Promise<boolean> {
+    const req = context.switchToHttp().getRequest();
+    const user = req.user as User;
 
-    if (ip == "127.0.0.1")
-      return true
+    if (
+      user &&
+      (await matchPermission(
+        [[Permission.KernelUnicoreConnect, Permission.KernelUnicoreProvider, Permission.AdminDashboard], { or: true }],
+        { user },
+      ))
+    )
+      return true;
 
-    if (user && matchPermission([[Permission.KernelUnicoreConnect, Permission.KernelUnicoreProvider, Permission.AdminDashboard], { or: true }], { user }))
-      return true
-
-    const key = this.generateKey(context, ip);
-    const ttls = await this.storageService.getRecord(key);
-
-    if (ttls.length >= limit) {
-      throw new ThrottlerException();
-    }
-
-    await this.storageService.addRecord(key, ttl);
-    return true;
+    return false;
   }
 }

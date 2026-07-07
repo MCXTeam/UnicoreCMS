@@ -1,7 +1,6 @@
 import { StorageManager } from '@common';
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MulterFile } from 'fastify-file-interceptor';
 import { In, Repository } from 'typeorm';
 import { ServerCreateInput } from './dto/server-create.input';
 import { ServerUpdateInput } from './dto/server-update.input';
@@ -19,27 +18,28 @@ export class ServersService {
     private serversRepository: Repository<Server>,
     @InjectRepository(Mod)
     private modsRepository: Repository<Mod>,
-  ) { }
+  ) {}
 
   find(relations: string[] = new Array()): Promise<Server[]> {
     return this.serversRepository.find({ relations });
   }
 
   findOne(id: string, relations?: string[]): Promise<Server> {
-    return this.serversRepository.findOne(id, { relations })
+    return this.serversRepository.findOne({ where: { id }, relations });
   }
 
   async sort(input: ServersSortInput) {
-    const servers = await this.serversRepository.findByIds(input.items.map(srv => srv.id))
+    const servers = await this.serversRepository.findBy({ id: In(input.items.map((srv) => srv.id)) });
 
-    return this.serversRepository.save(servers.map(srv => {
-      const updatedSort = input.items.find(sr => sr.id == srv.id)
+    return this.serversRepository.save(
+      servers.map((srv) => {
+        const updatedSort = input.items.find((sr) => sr.id == srv.id);
 
-      if (updatedSort) 
-        return { ...srv, priority: updatedSort.priority }
-      
-      return srv
-    }))
+        if (updatedSort) return { ...srv, priority: updatedSort.priority };
+
+        return srv;
+      }),
+    );
   }
 
   async create(input: ServerCreateInput): Promise<Server> {
@@ -62,8 +62,8 @@ export class ServersService {
     server.query.host = input.query.host;
     server.query.port = input.query.port;
 
-    server.mods = await this.modsRepository.find({
-      id: In(input.mods),
+    server.mods = await this.modsRepository.findBy({
+      id: In(input.mods ?? []),
     });
 
     // server.query = await this.queryRepository.save(server.query)
@@ -87,8 +87,8 @@ export class ServersService {
     server.query.host = input.query.host;
     server.query.port = input.query.port;
 
-    server.mods = await this.modsRepository.find({
-      id: In(input.mods),
+    server.mods = await this.modsRepository.findBy({
+      id: In(input.mods ?? []),
     });
 
     return this.serversRepository.save(server);
@@ -104,7 +104,7 @@ export class ServersService {
     return this.serversRepository.remove(server);
   }
 
-  async updateMedia(id: string, type: ServerMedia, file: MulterFile) {
+  async updateMedia(id: string, type: ServerMedia, file: Express.Multer.File) {
     const server = await this.findOne(id);
 
     if (!server) {

@@ -1,6 +1,6 @@
-import { All, Controller, Redirect } from "@nestjs/common";
-import { envConfig } from "unicore-common";
-import { Public } from "./auth/decorators/public.decorator";
+import { All, Controller, Redirect } from '@nestjs/common';
+import { envConfig } from 'unicore-common';
+import { Public } from './auth/decorators/public.decorator';
 
 @Controller()
 export class AppController {

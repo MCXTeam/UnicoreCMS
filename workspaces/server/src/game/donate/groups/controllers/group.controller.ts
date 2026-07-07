@@ -12,7 +12,7 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileFastifyInterceptor, MulterFile } from 'fastify-file-interceptor';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
@@ -101,12 +101,12 @@ export class DonateGroupsController {
   @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsUpdate])
   @Patch('icon/:id')
   @UseInterceptors(
-    FileFastifyInterceptor('file', {
+    FileInterceptor('file', {
       storage: StorageManager.disk(),
       fileFilter: imageFileFilter,
     }),
   )
-  updateMedia(@Param('id', ParseIntPipe) id: number, @UploadedFile() file: MulterFile) {
+  updateMedia(@Param('id', ParseIntPipe) id: number, @UploadedFile() file: Express.Multer.File) {
     return this.donateGroupsService.updateIcon(id, file);
   }
 

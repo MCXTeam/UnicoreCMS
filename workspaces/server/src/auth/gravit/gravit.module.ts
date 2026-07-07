@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import type { StringValue } from 'ms';
 import { GravitService } from './gravit.service';
 import { GravitController } from './gravit.controller';
 import UsersModule from 'src/admin/users/users.module';
@@ -17,7 +18,7 @@ import { RefreshToken } from '../entities/refresh-token.entity';
     SettingsModule,
     JwtModule.register({
       secret: envConfig.jwtKey,
-      signOptions: { expiresIn: envConfig.jwtExpires },
+      signOptions: { expiresIn: envConfig.jwtExpires as StringValue },
     }),
     TypeOrmModule.forFeature([User, RefreshToken]),
   ],

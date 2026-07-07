@@ -1,8 +1,14 @@
 # compiled output
 **/dist
+**/.output
+**/.nuxt
+**/.nitro
+**/.data
+**/.cache
 **/node_modules
 **/package-lock.json
 **/yarn.lock
+.pnpm-store/
 
 # Logs
 logs
@@ -42,3 +48,5 @@ lerna-debug.log*
 
 docker/mysql-data
 license.pem
+# Playwright MCP
+.playwright-mcp/

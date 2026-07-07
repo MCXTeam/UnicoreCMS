@@ -15,5 +15,5 @@ export class PermissionBuyInput {
 
   @IsOptional()
   @IsBoolean()
-  use_virtual: boolean
+  use_virtual: boolean;
 }

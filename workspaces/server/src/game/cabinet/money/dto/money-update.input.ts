@@ -1,5 +1,5 @@
-import { IsDefined, IsEnum, IsNumber, IsOptional, IsString } from "class-validator";
-import { MoneyTransferType } from "./money.input";
+import { IsDefined, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { MoneyTransferType } from './money.input';
 
 export class MoneyUpdateInput {
   @IsDefined()

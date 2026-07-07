@@ -11,6 +11,6 @@ import { EnotioService } from './enotio.service';
   controllers: [EnotioController],
 })
 export class EnotioModule implements PaymentCoreModule {
-  static id = "enotio"
+  static id = 'enotio';
   static enabled = envConfig.enotioEnabled;
 }

@@ -1,67 +1,55 @@
 <template>
   <div class="panel px-4 py-3 mb-4">
     <h3 class="text-uppercase m-0">Оплата</h3>
-    <div v-if="cart.virtual_sale > 0" class="d-flex justify-content-between align-items-center mt-2">
-      <vs-checkbox v-model="use_virtual"> Использовать бонусы </vs-checkbox>
-      <b>-{{ $utils.formatCurrency('virtual', cart.virtual_sale) }}</b>
+    <div v-if="cartState.virtual_sale > 0" class="d-flex justify-content-between align-items-center mt-2">
+      <div class="d-flex align-items-center gap-2">
+        <Checkbox v-model="use_virtual" :binary="true" inputId="use_virtual" />
+        <label for="use_virtual">Использовать бонусы</label>
+      </div>
+      <b>-{{ $utils.formatCurrency('virtual', cartState.virtual_sale) }}</b>
     </div>
     <div class="d-flex justify-content-between mt-2">
       <span>Итого к оплате:</span>
-      <b v-if="!use_virtual" v-text="$utils.formatCurrency('real', cart.price)" />
+      <b v-if="!use_virtual">{{ $utils.formatCurrency('real', cartState.price) }}</b>
       <div v-else>
-        <small><strike v-text="$utils.formatCurrency('real', cart.price)" /></small>
-        <b v-text="$utils.formatCurrency('real', cart.price - cart.virtual_sale)" />
+        <small
+          ><strike>{{ $utils.formatCurrency('real', cartState.price) }}</strike></small
+        >
+        <b>{{ $utils.formatCurrency('real', cartState.price - cartState.virtual_sale) }}</b>
       </div>
     </div>
-    <div v-if="cart.items.length" class="d-flex justify-content-between mt-2">
-      <vs-button @click="$nuxt.$emit('storeCartBuy')" :disabled="loading" block size="large">Оплатить</vs-button>
-      <vs-button @click="$nuxt.$emit('storeCartClear')" :disabled="loading" danger block size="large">Очистить</vs-button>
+    <div v-if="cartState.items.length" class="d-flex justify-content-between mt-2 gap-2">
+      <Button @click="buyBus.emit()" :disabled="loading" size="large" class="flex-fill" label="Оплатить" />
+      <Button @click="clearBus.emit()" :disabled="loading" severity="danger" size="large" class="flex-fill" label="Очистить" />
     </div>
   </div>
 </template>
 
-<script>
-import monitorings from "~/json/monitorings.json"
+<script setup lang="ts">
+import { useEventBus } from '@vueuse/core'
 
-export default {
-  props: {
-    loading: {
-      type: Boolean,
-      default: false,
-    },
-    cart: {
-      type: Object,
-      default: {
-        items: [],
-        price: 0,
-        virtual_sale: 0,
-      },
-    },
+const props = defineProps({
+  loading: {
+    type: Boolean,
+    default: false,
   },
+  cart: {
+    type: Object,
+    default: () => ({ items: [], price: 0, virtual_sale: 0 }),
+  },
+})
 
-  data() {
-    return {
-      use_virtual: false,
-      monitorings
-    }
-  },
+const use_virtual = ref(false)
+const cartState = ref(props.cart)
 
-  mounted() {
-    this.$nuxt.$on('storeCartUpdate', async (payload) => {
-      this.cart = payload
-    })
-  },
+const buyBus = useEventBus('storeCartBuy')
+const clearBus = useEventBus('storeCartClear')
+const virtualBus = useEventBus('storeCartUseVirtualUpdate')
+const updateBus = useEventBus('storeCartUpdate')
 
-  beforeDestroy() {
-    this.$nuxt.$off('storeCartUpdate')
-  },
+updateBus.on((payload: any) => {
+  cartState.value = payload
+})
 
-  watch: {
-    use_virtual: {
-      handler: function (val) {
-        this.$nuxt.$emit('storeCartUseVirtualUpdate', val)
-      },
-    },
-  },
-}
+watch(use_virtual, (val) => virtualBus.emit(val))
 </script>

@@ -16,7 +16,7 @@ export class PeriodsService {
   }
 
   findOne(id: number): Promise<Period> {
-    return this.periodsRepository.findOne(id);
+    return this.periodsRepository.findOneBy({ id });
   }
 
   async create(input: PeriodInput): Promise<Period> {

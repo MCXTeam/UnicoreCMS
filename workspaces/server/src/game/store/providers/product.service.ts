@@ -1,7 +1,6 @@
 import { StorageManager } from '@common';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MulterFile } from 'fastify-file-interceptor';
 import * as JSZip from 'jszip';
 import * as _ from 'lodash';
 import { FilterOperator, paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
@@ -49,7 +48,7 @@ export class ProductsService {
     private categoriesRepository: Repository<Category>,
     @InjectRepository(Kit)
     private kitsRepository: Repository<Kit>,
-  ) { }
+  ) {}
 
   async find(query: PaginateQuery): Promise<Paginated<Product>> {
     const queryBuilder = this.productsRepository
@@ -122,7 +121,7 @@ export class ProductsService {
     }
 
     const idsProducts = (await queryBuilderProducts.getMany()).map((product) => product.id);
-    const idsKits = (await queryBuilderProducts.getMany()).map((kit) => kit.id);
+    const idsKits = (await queryBuilderKits.getMany()).map((kit) => kit.id);
 
     const qbProducts = this.productsRepository
       .createQueryBuilder('product')
@@ -174,7 +173,7 @@ export class ProductsService {
   }
 
   async kit(id: number) {
-    const kit = await this.kitsRepository.findOne(id, { relations: ['categories', 'items'] });
+    const kit = await this.kitsRepository.findOne({ where: { id }, relations: ['categories', 'items'] });
 
     if (!kit) throw new NotFoundException();
 
@@ -182,41 +181,40 @@ export class ProductsService {
   }
 
   findOne(id: number, relations?: string[]) {
-    return this.productsRepository.findOne(id, { relations });
+    return this.productsRepository.findOne({ where: { id }, relations });
   }
 
   async servers(): Promise<StoreServer[]> {
     const servers = await Promise.all(
-      (
-        await this.serversRepository.find()
-      ).map(async (serv: StoreServer) => {
-        serv.products_count = await this.productsRepository
-          .createQueryBuilder('product')
-          .leftJoinAndSelect('product.servers', 'servers')
-          .where('servers.id = :id', { id: serv.id })
-          .getCount() + await this.kitsRepository
+      (await this.serversRepository.find()).map(async (serv: StoreServer) => {
+        serv.products_count =
+          (await this.productsRepository
+            .createQueryBuilder('product')
+            .leftJoinAndSelect('product.servers', 'servers')
+            .where('servers.id = :id', { id: serv.id })
+            .getCount()) +
+          (await this.kitsRepository
             .createQueryBuilder('kit')
             .leftJoinAndSelect('kit.servers', 'servers')
             .where('servers.id = :id', { id: serv.id })
-            .getCount();
+            .getCount());
 
         serv.categories_count = _(
-          (
-            [
-              await this.productsRepository
-                .createQueryBuilder('product')
-                .leftJoinAndSelect('product.servers', 'servers')
-                .leftJoinAndSelect('product.categories', 'categories')
-                .where('servers.id = :id', { id: serv.id })
-                .getMany(),
-              await this.kitsRepository
-                .createQueryBuilder('kit')
-                .leftJoinAndSelect('kit.servers', 'servers')
-                .leftJoinAndSelect('kit.categories', 'categories')
-                .where('servers.id = :id', { id: serv.id })
-                .getMany(),
-            ].flat()
-          )
+          [
+            await this.productsRepository
+              .createQueryBuilder('product')
+              .leftJoinAndSelect('product.servers', 'servers')
+              .leftJoinAndSelect('product.categories', 'categories')
+              .where('servers.id = :id', { id: serv.id })
+              .getMany(),
+            await this.kitsRepository
+              .createQueryBuilder('kit')
+              .leftJoinAndSelect('kit.servers', 'servers')
+              .leftJoinAndSelect('kit.categories', 'categories')
+              .where('servers.id = :id', { id: serv.id })
+              .getMany(),
+          ]
+            .flat()
             .map((prod) => prod.categories)
             .flat(),
         )
@@ -231,7 +229,7 @@ export class ProductsService {
   }
 
   async server(id: string): Promise<StoreServer> {
-    const server: StoreServer = await this.serversRepository.findOne(id);
+    const server: StoreServer = await this.serversRepository.findOneBy({ id });
 
     if (!server) throw new NotFoundException();
 
@@ -248,14 +246,18 @@ export class ProductsService {
         .flat(),
     )
       .uniqBy((cat) => cat.id)
-      .map(cat => ({
-        ...cat, priority: cat.priority ? cat.priority : 0
-      }) as Category)
-      .orderBy(["priority", "name"], ["desc", "asc"])
+      .map(
+        (cat) =>
+          ({
+            ...cat,
+            priority: cat.priority ? cat.priority : 0,
+          }) as Category,
+      )
+      .orderBy(['priority', 'name'], ['desc', 'asc'])
       .value();
 
-    server.min_price = (await this.productsRepository.findOne({ order: { price: 'ASC' } }))?.price || 0;
-    server.max_price = (await this.productsRepository.findOne({ order: { price: 'DESC' } }))?.price || 0;
+    server.min_price = (await this.productsRepository.findOne({ where: {}, order: { price: 'ASC' } }))?.price || 0;
+    server.max_price = (await this.productsRepository.findOne({ where: {}, order: { price: 'DESC' } }))?.price || 0;
 
     return server;
   }
@@ -263,13 +265,13 @@ export class ProductsService {
   async createFromGame(input: ProductFromGameInput) {
     const product = new Product();
 
-    product.give_method = GiveMethod.UnicoreConnect
+    product.give_method = GiveMethod.UnicoreConnect;
     product.name = input.name;
     product.price = currencyUtils.roundByType(input.price, SystemCurrency.REAL);
     product.item_id = input.id;
     product.nbt = input.nbt;
 
-    product.servers = await this.serversRepository.find({
+    product.servers = await this.serversRepository.findBy({
       id: input.server,
     });
 
@@ -283,22 +285,22 @@ export class ProductsService {
     product.description = input.description;
     product.price = currencyUtils.roundByType(input.price, SystemCurrency.REAL);
     product.sale = input.sale;
-    product.give_method = input.give_method
-    product.virtual_percent = input.virtual_percent
-    product.multiple_of = input.multiple_of
+    product.give_method = input.give_method;
+    product.virtual_percent = input.virtual_percent;
+    product.multiple_of = input.multiple_of;
 
     if (product.give_method == GiveMethod.UnicoreConnect) {
       product.item_id = input.item_id;
       product.nbt = input.nbt;
     } else {
-      product.commands = input.commands
+      product.commands = input.commands;
     }
 
-    product.servers = await this.serversRepository.find({
+    product.servers = await this.serversRepository.findBy({
       id: In(input.servers),
     });
 
-    product.categories = await this.categoriesRepository.find({
+    product.categories = await this.categoriesRepository.findBy({
       id: In(input.categories),
     });
 
@@ -316,25 +318,25 @@ export class ProductsService {
     product.description = input.description;
     product.price = currencyUtils.roundByType(input.price, SystemCurrency.REAL);
     product.sale = input.sale;
-    product.give_method = input.give_method
-    product.virtual_percent = input.virtual_percent
-    product.multiple_of = input.multiple_of
+    product.give_method = input.give_method;
+    product.virtual_percent = input.virtual_percent;
+    product.multiple_of = input.multiple_of;
 
     if (product.give_method == GiveMethod.UnicoreConnect) {
       product.item_id = input.item_id;
       product.nbt = input.nbt;
-      product.commands = null
+      product.commands = null;
     } else {
-      product.commands = input.commands
+      product.commands = input.commands;
       product.item_id = null;
       product.nbt = null;
     }
 
-    product.servers = await this.serversRepository.find({
+    product.servers = await this.serversRepository.findBy({
       id: In(input.servers),
     });
 
-    product.categories = await this.categoriesRepository.find({
+    product.categories = await this.categoriesRepository.findBy({
       id: In(input.categories),
     });
 
@@ -410,7 +412,12 @@ export class ProductsService {
 
     if (!content) throw new BadRequestException();
 
-    const mapping: ProductMap[] = JSON.parse(content);
+    let mapping: ProductMap[];
+    try {
+      mapping = JSON.parse(content);
+    } catch {
+      throw new BadRequestException();
+    }
     const products: Product[] = [];
 
     await Promise.all(
@@ -474,7 +481,7 @@ export class ProductsService {
     return this.productsRepository.save(productsEdited);
   }
 
-  async updateIcon(id: number, file: MulterFile) {
+  async updateIcon(id: number, file: Express.Multer.File) {
     const product = await this.findOne(id);
 
     if (!product) {

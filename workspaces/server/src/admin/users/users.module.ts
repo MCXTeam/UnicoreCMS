@@ -11,9 +11,10 @@ import { SettingsModule } from 'src/game/cabinet/settings/settings.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Role, Vote]), 
-    forwardRef(() => PlaytimeModule), forwardRef(() => ReferalsModule),
-    SettingsModule
+    TypeOrmModule.forFeature([User, Role, Vote]),
+    forwardRef(() => PlaytimeModule),
+    forwardRef(() => ReferalsModule),
+    SettingsModule,
   ],
   providers: [UsersService],
   exports: [UsersService],

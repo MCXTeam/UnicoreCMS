@@ -1,8 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MulterFile } from 'fastify-file-interceptor';
 import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
-import { IsNull, Repository } from 'typeorm';
+import { In, IsNull, Repository } from 'typeorm';
 import { WebhookType } from '../webhook/enums/webhook-type.enum';
 import { WebhooksService } from '../webhook/webhooks.service';
 import { NewsInput } from './dto/news.input';
@@ -18,7 +17,7 @@ export class NewsService {
     private webhooksService: WebhooksService,
   ) {}
 
-  create(input: NewsInput, file?: MulterFile): Promise<News> {
+  create(input: NewsInput, file?: Express.Multer.File): Promise<News> {
     const news = new News();
 
     news.title = input.title;
@@ -51,26 +50,28 @@ export class NewsService {
   }
 
   async findForMap(): Promise<number[]> {
-    return (await this.newsRepository.find({ 
-      where: {
-        link: IsNull()
-      },
-      order: {
-        created: 'DESC'
-      }
-    })).map(news => news.id)
+    return (
+      await this.newsRepository.find({
+        where: {
+          link: IsNull(),
+        },
+        order: {
+          created: 'DESC',
+        },
+      })
+    ).map((news) => news.id);
   }
 
   async findOne(id: number) {
-    const news = await this.newsRepository.findOne(id)
-    if (!news) throw new NotFoundException()
-    return news
+    const news = await this.newsRepository.findOneBy({ id });
+    if (!news) throw new NotFoundException();
+    return news;
   }
 
   async update(id: number, input: NewsInput): Promise<News> {
-    const news = await this.newsRepository.findOne(id)
+    const news = await this.newsRepository.findOneBy({ id });
 
-    if (!news) throw new NotFoundException()
+    if (!news) throw new NotFoundException();
 
     news.title = input.title;
     news.description = input.description;
@@ -79,7 +80,7 @@ export class NewsService {
   }
 
   async remove(id: number) {
-    const news = await this.newsRepository.findOne(id);
+    const news = await this.newsRepository.findOneBy({ id });
 
     if (!news) {
       throw new NotFoundException();
@@ -89,12 +90,12 @@ export class NewsService {
   }
 
   async removeMany(ids: number[]) {
-    const news = await this.newsRepository.findByIds(ids);
+    const news = await this.newsRepository.findBy({ id: In(ids) });
 
     return this.newsRepository.remove(news);
   }
 
-  async updateMedia(id: number, file: MulterFile) {
+  async updateMedia(id: number, file: Express.Multer.File) {
     const news = await this.findOne(id);
 
     if (!news) {

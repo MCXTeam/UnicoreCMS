@@ -3,23 +3,23 @@ import { DonateGroup } from '../groups/entities/donate-group.entity';
 import { DonatePermission } from '../permissions/entities/donate-permission.entity';
 
 @Entity({
-  name: "unicore_periods",
+  name: 'unicore_periods',
   orderBy: {
-    multiplier: "ASC"
-  }
+    multiplier: 'ASC',
+  },
 })
 export class Period {
-  @PrimaryGeneratedColumn({ name: "id" })
+  @PrimaryGeneratedColumn({ name: 'id' })
   id: number;
 
-  @Column({ name: "name" })
+  @Column({ name: 'name' })
   name: string;
 
-  @Column({ name: "expire" })
+  @Column({ name: 'expire' })
   expire: number;
 
   @Column('float', {
-    name: "multiplier",
+    name: 'multiplier',
     default: 1,
   })
   multiplier: number;

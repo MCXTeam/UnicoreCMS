@@ -13,5 +13,5 @@ export class PasswordResetInput {
 
   @IsOptional()
   @IsBoolean()
-  close: boolean
+  close: boolean;
 }

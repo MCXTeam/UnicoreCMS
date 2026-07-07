@@ -4,7 +4,7 @@ import { ConsoleFormat } from "./format";
 const format = winston.format.combine(
   winston.format.timestamp(),
   winston.format.ms(),
-  ConsoleFormat("UnicoreServer", { prettyPrint: true })
+  ConsoleFormat("UnicoreServer", { prettyPrint: true }),
 );
 
 export const transports = [

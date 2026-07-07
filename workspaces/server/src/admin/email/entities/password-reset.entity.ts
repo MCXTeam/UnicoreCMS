@@ -1,15 +1,15 @@
 import { User } from 'src/admin/users/entities/user.entity';
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity({ name: "unicore_password_resets" })
+@Entity({ name: 'unicore_password_resets' })
 export class PasswordReset {
-  @PrimaryGeneratedColumn({ name: "id" })
+  @PrimaryGeneratedColumn({ name: 'id' })
   id: number;
 
-  @Column({ name: "hash" })
+  @Column({ name: 'hash' })
   hash: string;
 
-  @Column({ name: "ip" })
+  @Column({ name: 'ip' })
   ip: string;
 
   @ManyToOne(() => User, {
@@ -17,9 +17,9 @@ export class PasswordReset {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn({ name: "user_uuid" })
+  @JoinColumn({ name: 'user_uuid' })
   user: User;
 
-  @CreateDateColumn({ name: "created" })
+  @CreateDateColumn({ name: 'created' })
   created: Date;
 }

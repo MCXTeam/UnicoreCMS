@@ -10,17 +10,17 @@ import { PayokService } from './payok.service';
 
 @Controller('payment/methods/payok')
 export class PayokController {
-  constructor(private payokService: PayokService) { }
+  constructor(private payokService: PayokService) {}
 
   @Permissions([Permission.UserPayment])
   @Post('link')
   link(@IpAddress() ip: string, @CurrentUser() user: User, @Body() body: PaymentCreateDto) {
-    return this.payokService.createLink(user, body, ip)
+    return this.payokService.createLink(user, body, ip);
   }
 
   @Public()
   @Post('handler')
   handler(@IpAddress() ip: string, @Body() body) {
-    return this.payokService.handler(ip, body)
+    return this.payokService.handler(ip, body);
   }
 }

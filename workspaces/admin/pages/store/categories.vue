@@ -3,7 +3,7 @@
     <div class="col-12">
       <div class="card">
         <Toolbar class="mb-4">
-          <template v-slot:start>
+          <template #start>
             <div class="my-2">
               <Button label="Создать" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
               <Button
@@ -21,12 +21,12 @@
           :loading="loading"
           :rows="categories.meta.itemsPerPage"
           paginator
-          :filters.sync="filters"
+          v-model:filters="filters"
           :totalRecords="categories.meta.totalItems"
           :rowsPerPageOptions="[20, 50, 100, 500]"
           @page="onPage($event)"
           @sort="onSort($event)"
-          :selection.sync="selected"
+          v-model:selection="selected"
           rowHover
           lazy
           responsiveLayout="scroll"
@@ -46,7 +46,7 @@
           <Column sortable field="name" header="Название">
             <template #body="slotProps">
               <div class="flex align-items-center">
-                <Avatar v-if="slotProps.data.icon" :image="`${$config.apiUrl + '/' + slotProps.data.icon}`" shape="circle" />
+                <Avatar v-if="slotProps.data.icon" :image="`${apiUrl + '/' + slotProps.data.icon}`" shape="circle" />
                 <Avatar v-else icon="pi pi-image" shape="circle" />
                 <span class="ml-2">{{ slotProps.data.name }}</span>
               </div>
@@ -66,9 +66,9 @@
           </Column>
         </DataTable>
 
-        <Dialog :visible.sync="fileDialog" :style="{ width: '400px' }" :modal="true" header="Иконка категории" class="p-fluid">
+        <Dialog v-model:visible="fileDialog" :style="{ width: '400px' }" :modal="true" header="Иконка категории" class="p-fluid">
           <div class="flex align-items-center justify-content-center flex-wrap w-full">
-            <Avatar v-if="category.icon" :image="`${$config.apiUrl + '/' + category.icon}`" size="xlarge" shape="circle" />
+            <Avatar v-if="category.icon" :image="`${apiUrl + '/' + category.icon}`" size="xlarge" shape="circle" />
             <Avatar v-else icon="pi pi-image" size="xlarge" shape="circle" />
             <div class="field ml-6 mb-0">
               <Button label="Загрузить" icon="pi pi-upload" @click="$refs.fileInput.choose()" />
@@ -87,22 +87,34 @@
           </div>
         </Dialog>
 
-        <ValidationObserver v-slot="{ invalid }">
+        <VeeForm v-slot="{ meta }">
           <Dialog
-            :visible.sync="categoryDialog"
+            v-model:visible="categoryDialog"
             :closable="false"
             :style="{ width: '450px' }"
             :modal="true"
             header="Создание/редактирование Категории"
             class="p-fluid"
           >
-            <ValidationProvider name="Название" rules="required" v-slot="{ errors }">
+            <VeeField
+              v-model="category.name"
+              name="name"
+              label="Название"
+              rules="required"
+              v-slot="{ value, errorMessage, handleChange, handleBlur }"
+            >
               <div class="field">
                 <label>Название</label>
-                <InputText v-model="category.name" autofocus />
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                <InputText
+                  :modelValue="value"
+                  @update:modelValue="handleChange"
+                  @blur="handleBlur"
+                  autofocus
+                  :class="errorMessage && 'p-invalid'"
+                />
+                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
-            </ValidationProvider>
+            </VeeField>
             <div class="field">
               <label>Описание</label>
               <Textarea v-model="category.description" :autoResize="true" rows="5" cols="30" />
@@ -114,7 +126,7 @@
             <template #footer>
               <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
-                :disabled="loading || invalid"
+                :disabled="loading || !meta.valid"
                 label="Сохранить"
                 icon="pi pi-check"
                 class="p-button-text"
@@ -122,7 +134,7 @@
               />
             </template>
           </Dialog>
-        </ValidationObserver>
+        </VeeForm>
       </div>
     </div>
   </div>
@@ -130,16 +142,18 @@
 
 <script>
 import { sortTransform } from '~/helpers'
-import { FilterMatchMode } from 'primevue/api'
-import { ValidationObserver, ValidationProvider } from 'vee-validate'
+import { FilterMatchMode } from '@primevue/core/api'
+import { Form, Field } from 'vee-validate'
 
 export default {
-  head: {
-    title: 'Категории',
-  },
   components: {
-    ValidationObserver,
-    ValidationProvider,
+    VeeForm: Form,
+    VeeField: Field,
+  },
+  setup() {
+    const rc = useRuntimeConfig()
+    useHead({ title: 'Категории' })
+    return { apiUrl: rc.public.apiBaseurl }
   },
   data() {
     return {
@@ -170,46 +184,49 @@ export default {
       },
     }
   },
-  async fetch() {
-    this.loading = true
-    this.selected = null
-    this.categories = await this.$axios
-      .get('/store/categories', {
-        params: {
-          page: this.categories.meta.currentPage,
-          limit: this.categories.meta.itemsPerPage,
-          sortBy: this.categories.meta.sortBy,
-          search: this.filters.global.value,
-        },
-      })
-      .then((res) => res.data)
-
-    this.categoryDialog = false
-    this.fileDialog = false
-    this.loading = false
-    this.selected = null
+  mounted() {
+    this.load()
   },
   methods: {
+    async load() {
+      this.loading = true
+      this.selected = null
+      this.categories = await this.$api
+        .get('/store/categories', {
+          params: {
+            page: this.categories.meta.currentPage,
+            limit: this.categories.meta.itemsPerPage,
+            sortBy: this.categories.meta.sortBy,
+            search: this.filters.global.value,
+          },
+        })
+        .then((res) => res.data)
+
+      this.categoryDialog = false
+      this.fileDialog = false
+      this.loading = false
+      this.selected = null
+    },
     onPage(event) {
       this.categories.meta.currentPage = event.page + 1
       this.categories.meta.itemsPerPage = event.rows
 
-      this.$fetch()
+      this.load()
     },
     onSort(event) {
       this.categories.meta.sortBy = sortTransform(event.sortOrder, event.sortField)
 
-      this.$fetch()
+      this.load()
     },
     onFilter() {
-      this.$fetch()
+      this.load()
     },
     async uploadIcon(event) {
       let formData = new FormData()
       formData.append('file', event.files[0])
 
       try {
-        await this.$axios.patch(`/store/categories/icon/` + this.category.id, formData, {
+        await this.$api.patch(`/store/categories/icon/` + this.category.id, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -219,7 +236,7 @@ export default {
           detail: 'Иконка успешно обновлена',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch {
         this.fileDialog = false
         this.$toast.add({
@@ -231,13 +248,13 @@ export default {
     },
     async removeIcon() {
       try {
-        await this.$axios.delete(`/store/categories/icon/` + this.category.id)
+        await this.$api.delete(`/store/categories/icon/` + this.category.id)
         this.$toast.add({
           severity: 'success',
           detail: 'Иконка успешно удалена',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch {}
     },
     hideDialog() {
@@ -265,13 +282,13 @@ export default {
     async createCategory() {
       this.loading = true
       try {
-        await this.$axios.post('/store/categories', this.category)
+        await this.$api.post('/store/categories', this.category)
         this.$toast.add({
           severity: 'success',
           detail: 'Категория успешно добавлена',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch (err) {
         this.loading = false
         this.$toast.add({
@@ -284,13 +301,13 @@ export default {
     async updateCategory() {
       this.loading = true
       try {
-        await this.$axios.patch('/store/categories/' + this.category.id, this.$_.omit(this.category, 'id'))
+        await this.$api.patch('/store/categories/' + this.category.id, this.$_.omit(this.category, 'id'))
         this.$toast.add({
           severity: 'success',
           detail: 'Категория успешно редактирована',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch (err) {
         this.loading = false
         this.$toast.add({
@@ -308,14 +325,14 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$axios.delete('/store/categories/' + id)
+            await this.$api.delete('/store/categories/' + id)
             this.$toast.add({
               severity: 'success',
               detail: 'Категория успешно удалена',
               life: 3000,
             })
           } catch {}
-          await this.$fetch()
+          await this.load()
         },
       })
     },
@@ -327,7 +344,7 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$axios.delete('/store/categories/bulk/', {
+            await this.$api.delete('/store/categories/bulk/', {
               data: {
                 items: this.selected.map((category) => category.id),
               },
@@ -339,7 +356,7 @@ export default {
             })
             this.selected = []
           } catch {}
-          await this.$fetch()
+          await this.load()
         },
       })
     },

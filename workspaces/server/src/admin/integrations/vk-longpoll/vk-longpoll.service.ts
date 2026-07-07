@@ -10,11 +10,11 @@ import { getById, getPostLink } from './utils';
 import { replaceAsync, StorageManager } from '@common';
 import { WebhookType } from 'src/admin/webhook/enums/webhook-type.enum';
 import { VK_LINK_PREFIX } from './constants/vk-link-prefix';
-import { MessageEmbed, WebhookClient } from 'discord.js';
+import { EmbedBuilder, WebhookClient } from 'discord.js';
 
 @Injectable()
 export class VkLongpollService {
-  private readonly logger = new Logger("VkLongpollService");
+  private readonly logger = new Logger('VkLongpollService');
   protected VK: VK;
 
   constructor(
@@ -108,7 +108,7 @@ export class VkLongpollService {
   async DiscordParse(url: string, payload: any) {
     const webhookClient = new WebhookClient({ url });
     let { text, attachments } = payload;
-    const embed = new MessageEmbed();
+    const embed = new EmbedBuilder();
     const postAuthor = await getById(this.VK.api, payload.from_id);
     const imageurl = attachments?.find((att) => att.type == 'photo')?.photo?.sizes?.at(-1)?.url;
 

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <nuxt-link
+    <NuxtLink
       :to="`/servers/${server.id}`"
       class="mb-4 panel server-block p-5 d-flex align-items-center justify-content-between without-underline"
       v-for="server in servers"
@@ -10,33 +10,22 @@
         <h1 class="m-0">{{ server.name }} <small v-text="server.version" /></h1>
         <h4 class="m-0" v-text="server.slogan" />
       </div>
-      <img v-if="server.icon" :src="`${$config.apiUrl}/${server.icon}`" width="96px" />
-      <div class="image" :style="server.image && `background-image: url('${$config.apiUrl}/${server.image}')`" />
-    </nuxt-link>
+      <img v-if="server.icon" :src="`${$pub.apiBaseurl}/${server.icon}`" width="96px" />
+      <div class="image" :style="server.image && `background-image: url('${$pub.apiBaseurl}/${server.image}')`" />
+    </NuxtLink>
   </div>
 </template>
 
-<script>
-export default {
-  layout: 'landing',
+<script setup lang="ts">
+import { useUiStore } from '~/stores/ui'
 
-  data() {
-    return {
-      servers: null,
-    }
-  },
+definePageMeta({ layout: 'landing' })
+useHead({ title: 'Серверы' })
 
-  head() {
-    return {
-      title: `Серверы`,
-    }
-  },
+const { $api, $pub } = useNuxtApp()
+const ui = useUiStore()
 
-  async asyncData({ $axios, $config, store }) {
-    store.commit('unicore/SET_NAME', `Игровые серверы ${$config.sitename}`)
-    const servers = await $axios.get('/servers').then((res) => res.data)
+const { data: servers } = await useAsyncData<any>('servers', () => $api.get('/servers').then((res) => res.data))
 
-    return { servers }
-  },
-}
+ui.setName(`Игровые серверы ${$pub.sitename}`)
 </script>

@@ -12,7 +12,7 @@ export class PaymentTasks {
 
   @Cron(CronExpression.EVERY_HOUR)
   async clean() {
-    const payments = await this.paymentsRepository.find({
+    const payments = await this.paymentsRepository.findBy({
       updated: LessThan(moment().utc().subtract(7, 'days').toDate()),
     });
 

@@ -27,7 +27,7 @@
   --bs-black-rgb: 0, 0, 0;
 }
 
-.dark-mode {
+.dark {
   --vs-primary: #{$dark-primary};
   --vs-theme-bg: #{$dark-theme-bg};
   --vs-theme-color: #{$dark-theme-color};
@@ -44,8 +44,6 @@
   --vs-shadow-opacity: #{$dark-shadow-opacity};
   --vs-dark: #{$dark-dark};
   --vs-background-opacity: #{$dark-background-opacity};
-
-  @import 'primevue/resources/themes/bootstrap4-dark-blue/theme.css';
 }
 
 .vs-loading {
@@ -63,11 +61,6 @@ body {
   height: 100%;
   overflow-x: hidden;
 
-  &.landing-body {
-    overflow: hidden !important;
-    padding-bottom: 400px;
-  }
-
   &.auth-body {
     overflow: hidden !important;
   }
@@ -82,7 +75,7 @@ h6 {
   color: rgba(var(--vs-text), 0.85);
 }
 
-html:not(.dark-mode) .vs-notification__content__header h4 {
+html:not(.dark) .vs-notification__content__header h4 {
   color: var(--vs-theme-layout);
 }
 
@@ -157,7 +150,9 @@ a:visited {
 
 .auth-layout,
 .error-layout {
-  background: url('/images/bg.jpg') center no-repeat, linear-gradient(180deg, var(--vs-theme-bg) 120px, rgba(var(--vs-primary), 0.3));
+  background:
+    url('/images/bg.jpg') center no-repeat,
+    linear-gradient(180deg, var(--vs-theme-bg) 120px, rgba(var(--vs-primary), 0.3));
   background-blend-mode: overlay;
 
   .header-render {
@@ -254,11 +249,15 @@ hr {
 }
 
 .ql-align-right {
-	text-align: right;
+  text-align: right;
 }
 .ql-align-center {
-	text-align: center;
+  text-align: center;
 }
 .ql-align-left {
-	text-align: left;
+  text-align: left;
+}
+
+.p-error {
+  color: #e24c4c;
 }

@@ -18,7 +18,8 @@ footer.app-footer {
       color: rgba(var(--vs-text), 0.75) !important;
       font-size: 16px;
 
-      &:hover, &:visited:hover {
+      &:hover,
+      &:visited:hover {
         text-decoration-color: rgba(var(--vs-text), 0.35);
       }
     }

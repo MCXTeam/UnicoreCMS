@@ -14,5 +14,5 @@ class ServerSortInput {
 export class ServersSortInput {
   @IsArray()
   @Type(() => ServerSortInput)
-  items: ServerSortInput[]
+  items: ServerSortInput[];
 }

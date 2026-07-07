@@ -1,4 +1,14 @@
-import { createReadStream, createWriteStream, existsSync, lstatSync, readFileSync, ReadStream, renameSync, unlinkSync, writeFileSync } from 'fs';
+import {
+  createReadStream,
+  createWriteStream,
+  existsSync,
+  lstatSync,
+  readFileSync,
+  ReadStream,
+  renameSync,
+  unlinkSync,
+  writeFileSync,
+} from 'fs';
 import { nanoid } from 'nanoid';
 import { extname } from 'path';
 import { DiskStorageOptions } from 'multer';
@@ -6,10 +16,15 @@ import { diskStorage } from 'multer';
 import { Request } from 'express';
 import axios from 'axios';
 import { parse as urlParse } from 'url';
+import { promises as dns } from 'dns';
+import { isIP } from 'net';
 import { Logger } from '@nestjs/common';
 import { envConfig } from 'unicore-common';
 
 const destination = '../../storage';
+
+export const STORAGE_MAX_IMAGE_UPLOAD = 2 * 1024 * 1024;
+export const STORAGE_MAX_REMOTE_DOWNLOAD = 10 * 1024 * 1024;
 
 export class StorageManager {
   /**
@@ -50,7 +65,9 @@ export class StorageManager {
   }
 
   static save(origin: string, buffer: Buffer): string {
-    const name = nanoid() + extname(origin);
+    const ext = extname(origin).toLowerCase();
+    const safeExt = ['.png', '.jpg', '.jpeg', '.gif', '.webp'].includes(ext) ? ext : '.png';
+    const name = nanoid() + safeExt;
     const path = destination + '/' + name;
 
     writeFileSync(path, buffer);
@@ -69,33 +86,152 @@ export class StorageManager {
   }
 
   static async saveFromUrl(url: string): Promise<string> {
+    if (!(await StorageManager.isSafeUrl(url))) {
+      new Logger('StorageManager').error(`Blocked unsafe url: ${url}`);
+      return null;
+    }
+
     try {
       const filename = nanoid() + extname(urlParse(url).pathname);
       const save_path = destination + '/' + filename;
 
-      await axios
-        .get(url, {
-          responseType: 'stream',
-        })
-        .then(function (response) {
-          response.data.pipe(createWriteStream(save_path));
+      const response = await axios.get(url, {
+        responseType: 'stream',
+        maxRedirects: 0,
+        maxContentLength: STORAGE_MAX_REMOTE_DOWNLOAD,
+        maxBodyLength: STORAGE_MAX_REMOTE_DOWNLOAD,
+        timeout: 15000,
+      });
+
+      const contentLength = Number(response.headers['content-length']);
+      if (!Number.isNaN(contentLength) && contentLength > STORAGE_MAX_REMOTE_DOWNLOAD) {
+        response.data.destroy();
+        return null;
+      }
+
+      const cleanup = () => {
+        try {
+          if (existsSync(save_path) && lstatSync(save_path).isFile()) unlinkSync(save_path);
+        } catch {}
+      };
+
+      const writer = createWriteStream(save_path);
+      let downloaded = 0;
+
+      await new Promise<void>((resolve, reject) => {
+        response.data.on('data', (chunk: Buffer) => {
+          downloaded += chunk.length;
+          if (downloaded > STORAGE_MAX_REMOTE_DOWNLOAD) {
+            response.data.destroy();
+            writer.destroy();
+            cleanup();
+            reject(new Error('Downloaded file exceeds size limit'));
+          }
         });
+        response.data.on('error', (err: Error) => {
+          cleanup();
+          reject(err);
+        });
+        writer.on('error', (err: Error) => {
+          cleanup();
+          reject(err);
+        });
+        writer.on('finish', resolve);
+        response.data.pipe(writer);
+      });
 
       return filename;
     } catch (e) {
-      const logger = new Logger("StorageManager");
+      const logger = new Logger('StorageManager');
       logger.error(e);
       return null;
     }
   }
 
-  static read(filename?: string): Buffer | null {
+  static async isSafeUrl(url: string): Promise<boolean> {
+    let parsed: URL;
+
+    try {
+      parsed = new URL(url);
+    } catch {
+      return false;
+    }
+
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return false;
+
+    const hostname = parsed.hostname.replace(/^\[|\]$/g, '');
+    if (!hostname) return false;
+
+    try {
+      const addresses = isIP(hostname) ? [{ address: hostname }] : await dns.lookup(hostname, { all: true });
+
+      if (!addresses.length) return false;
+
+      for (const { address } of addresses) {
+        if (StorageManager.isPrivateAddress(address)) return false;
+      }
+    } catch {
+      return false;
+    }
+
+    return true;
+  }
+
+  private static isPrivateAddress(ip: string): boolean {
+    const family = isIP(ip);
+
+    if (family === 4) return StorageManager.isPrivateV4(ip);
+    if (family === 6) return StorageManager.isPrivateV6(ip);
+
+    return true;
+  }
+
+  private static isPrivateV4(ip: string): boolean {
+    const parts = ip.split('.').map((p) => parseInt(p, 10));
+    if (parts.length !== 4 || parts.some((n) => Number.isNaN(n) || n < 0 || n > 255)) return true;
+
+    const [a, b] = parts;
+
+    if (a === 0) return true;
+    if (a === 10) return true;
+    if (a === 127) return true;
+    if (a === 169 && b === 254) return true;
+    if (a === 172 && b >= 16 && b <= 31) return true;
+    if (a === 192 && b === 168) return true;
+    if (a === 100 && b >= 64 && b <= 127) return true;
+
+    return false;
+  }
+
+  private static isPrivateV6(ip: string): boolean {
+    const lower = ip.toLowerCase();
+
+    if (lower === '::' || lower === '::1') return true;
+
+    const mapped = lower.match(/^::ffff:(\d{1,3}(?:\.\d{1,3}){3})$/);
+    if (mapped) return StorageManager.isPrivateV4(mapped[1]);
+
+    const first = lower.split(':')[0];
+    if (!first) return true;
+
+    const fh = parseInt(first, 16);
+    if (Number.isNaN(fh)) return true;
+
+    if ((fh & 0xfe00) === 0xfc00) return true;
+    if ((fh & 0xffc0) === 0xfe80) return true;
+
+    return false;
+  }
+
+  static read(filename?: string, maxBytes?: number): Buffer | null {
     if (!filename) return null;
 
     const path = destination + '/' + filename;
 
-    if (existsSync(path) && lstatSync(path).isFile()) return readFileSync(path);
-    else return null;
+    if (existsSync(path) && lstatSync(path).isFile()) {
+      if (typeof maxBytes === 'number' && lstatSync(path).size > maxBytes) return null;
+      return readFileSync(path);
+    } else return null;
   }
 
   static readStream(filename?: string): ReadStream | null {

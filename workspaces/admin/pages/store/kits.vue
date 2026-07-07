@@ -21,14 +21,13 @@
           :loading="loading"
           :rows="kits.meta.itemsPerPage"
           paginator
-          :filters.sync="filters"
+          v-model:filters="filters"
           :totalRecords="kits.meta.totalItems"
           :rowsPerPageOptions="[20, 50, 100, 500]"
           @page="onPage($event)"
           @sort="onSort($event)"
-          @row-reorder="onKitsReorder"
           @filter="onFilter"
-          :selection.sync="selected"
+          v-model:selection="selected"
           rowHover
           lazy
           responsiveLayout="scroll"
@@ -49,7 +48,7 @@
           <Column field="name" header="Название" sortable>
             <template #body="slotProps">
               <div class="flex align-items-center">
-                <Avatar v-if="slotProps.data.icon" :image="`${$config.apiUrl + '/' + slotProps.data.icon}`" shape="circle" />
+                <Avatar v-if="slotProps.data.icon" :image="`${apiUrl + '/' + slotProps.data.icon}`" shape="circle" />
                 <Avatar v-else icon="pi pi-image" shape="circle" />
                 <span class="ml-2">{{ slotProps.data.name }}</span>
               </div>
@@ -78,7 +77,7 @@
               >
                 <template #option="slotProps">
                   <div class="p-multiselect-representative-option">
-                    <Avatar v-if="slotProps.option.icon" :image="`${$config.apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
+                    <Avatar v-if="slotProps.option.icon" :image="`${apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
                     <Avatar v-else icon="pi pi-image" shape="circle" />
                     <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                   </div>
@@ -94,18 +93,18 @@
               <div class="mb-3 font-bold">Категории</div>
               <AutoComplete
                 v-model="filterModel.value"
-                :multiple="true"
+                multiple
                 :suggestions="categories"
                 @complete="searchCategory($event)"
-                field="name"
+                optionLabel="name"
                 placeholder="Выберите категории"
                 style="max-width: 200px"
               >
-                <template #item="slotProps">
+                <template #option="slotProps">
                   <div class="flex align-items-center">
-                    <Avatar v-if="slotProps.item.icon" :image="`${$config.apiUrl + '/' + slotProps.item.icon}`" shape="circle" />
+                    <Avatar v-if="slotProps.option.icon" :image="`${apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
                     <Avatar v-else icon="pi pi-image" shape="circle" />
-                    <span class="ml-2">{{ slotProps.item.name }} (#{{ slotProps.item.id }})</span>
+                    <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                   </div>
                 </template>
               </AutoComplete>
@@ -125,9 +124,9 @@
           </Column>
         </DataTable>
 
-        <Dialog :visible.sync="fileDialog" :style="{ width: '400px' }" :modal="true" header="Иконка кита" class="p-fluid">
+        <Dialog v-model:visible="fileDialog" :style="{ width: '400px' }" :modal="true" header="Иконка кита" class="p-fluid">
           <div class="flex align-items-center justify-content-center flex-wrap w-full">
-            <Avatar v-if="kit.icon" :image="`${$config.apiUrl + '/' + kit.icon}`" size="xlarge" shape="circle" />
+            <Avatar v-if="kit.icon" :image="`${apiUrl + '/' + kit.icon}`" size="xlarge" shape="circle" />
             <Avatar v-else icon="pi pi-image" size="xlarge" shape="circle" />
             <div class="field ml-6 mb-0">
               <Button label="Загрузить" icon="pi pi-upload" @click="$refs.fileInput.choose()" />
@@ -146,22 +145,34 @@
           </div>
         </Dialog>
 
-        <ValidationObserver v-slot="{ invalid }">
+        <VeeForm v-slot="{ meta }">
           <Dialog
-            :visible.sync="kitDialog"
+            v-model:visible="kitDialog"
             :closable="false"
             :style="{ width: '600px' }"
             :modal="true"
             header="Создание/редактирование кита"
             class="p-fluid"
           >
-            <ValidationProvider name="Название" rules="required" v-slot="{ errors }">
+            <VeeField
+              v-model="kit.name"
+              name="name"
+              label="Название"
+              rules="required"
+              v-slot="{ value, errorMessage, handleChange, handleBlur }"
+            >
               <div class="field">
                 <label>Название</label>
-                <InputText v-model="kit.name" autofocus />
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                <InputText
+                  :modelValue="value"
+                  @update:modelValue="handleChange"
+                  @blur="handleBlur"
+                  autofocus
+                  :class="errorMessage && 'p-invalid'"
+                />
+                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
-            </ValidationProvider>
+            </VeeField>
             <div class="field">
               <label>Описание</label>
               <Editor v-model="kit.description" editorStyle="height: 160px">
@@ -182,7 +193,7 @@
               <DataTable
                 :value="kit.items"
                 editMode="row"
-                :editingRows.sync="kitItems"
+                v-model:editingRows="kitItems"
                 @row-edit-save="onKitItemEditSave"
                 responsiveLayout="scroll"
               >
@@ -191,7 +202,7 @@
                     <div class="flex align-items-center">
                       <Avatar
                         v-if="$_.get(slotProps.data, 'product.icon')"
-                        :image="`${$config.apiUrl + '/' + $_.get(slotProps.data, 'product.icon')}`"
+                        :image="`${apiUrl + '/' + $_.get(slotProps.data, 'product.icon')}`"
                         shape="circle"
                       />
                       <Avatar v-else icon="pi pi-image" shape="circle" />
@@ -200,17 +211,17 @@
                   </template>
                   <template #editor="slotProps">
                     <AutoComplete
-                      v-model="slotProps.data[slotProps.column.field]"
+                      v-model="slotProps.data[slotProps.field]"
                       :suggestions="products"
                       @complete="searchProduct($event)"
-                      field="name"
+                      optionLabel="name"
                       appendTo="body"
                     >
-                      <template #item="slotProps">
+                      <template #option="slotProps">
                         <div class="flex align-items-center">
-                          <Avatar v-if="slotProps.item.icon" :image="`${$config.apiUrl + '/' + slotProps.item.icon}`" shape="circle" />
+                          <Avatar v-if="slotProps.option.icon" :image="`${apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
                           <Avatar v-else icon="pi pi-image" shape="circle" />
-                          <span class="ml-2">{{ slotProps.item.name }} (#{{ slotProps.item.id }})</span>
+                          <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                         </div>
                       </template>
                     </AutoComplete>
@@ -218,7 +229,7 @@
                 </Column>
                 <Column field="amount" header="Количество" :styles="{ width: '50%' }">
                   <template #editor="slotProps">
-                    <InputNumber placehol v-model="slotProps.data[slotProps.column.field]" />
+                    <InputNumber v-model="slotProps.data[slotProps.field]" />
                   </template>
                 </Column>
                 <Column :rowEditor="true" :styles="{ width: '10%', 'min-width': '8rem' }" :bodyStyle="{ 'text-align': 'right' }"></Column>
@@ -246,7 +257,7 @@
               >
                 <template #option="slotProps">
                   <div class="p-multiselect-representative-option">
-                    <Avatar v-if="slotProps.option.icon" :image="`${$config.apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
+                    <Avatar v-if="slotProps.option.icon" :image="`${apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
                     <Avatar v-else icon="pi pi-image" shape="circle" />
                     <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                   </div>
@@ -257,54 +268,85 @@
               <label>Категории</label>
               <AutoComplete
                 v-model="kit.categories"
-                :multiple="true"
+                multiple
                 :suggestions="categories"
                 @complete="searchCategory($event)"
-                field="name"
+                optionLabel="name"
                 appendTo="body"
                 placeholder="Выберите катагории"
               >
-                <template #item="slotProps">
+                <template #option="slotProps">
                   <div class="flex align-items-center">
-                    <Avatar v-if="slotProps.item.icon" :image="`${$config.apiUrl + '/' + slotProps.item.icon}`" shape="circle" />
+                    <Avatar v-if="slotProps.option.icon" :image="`${apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
                     <Avatar v-else icon="pi pi-image" shape="circle" />
-                    <span class="ml-2">{{ slotProps.item.name }} (#{{ slotProps.item.id }})</span>
+                    <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                   </div>
                 </template>
               </AutoComplete>
             </div>
             <div class="grid">
               <div class="col-6">
-                <ValidationProvider name="Цена" rules="required|min:0.01" v-slot="{ errors }">
+                <VeeField
+                  v-model="kit.price"
+                  name="price"
+                  label="Цена"
+                  rules="required|min:0.01"
+                  v-slot="{ value, errorMessage, handleChange, handleBlur }"
+                >
                   <div class="field">
                     <label>Цена</label>
-                    <InputNumber v-model="kit.price" mode="decimal" :minFractionDigits="$config.realDecimals" :maxFractionDigits="$config.realDecimals" />
-                    <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                    <InputNumber
+                      :modelValue="value"
+                      @update:modelValue="handleChange"
+                      @blur="handleBlur"
+                      mode="decimal"
+                      :minFractionDigits="realDecimals"
+                      :maxFractionDigits="realDecimals"
+                    />
+                    <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
                   </div>
-                </ValidationProvider>
+                </VeeField>
               </div>
               <div class="col-6">
-                <ValidationProvider name="Скидка" rules="min_value:0|max_value:99" v-slot="{ errors }">
+                <VeeField
+                  v-model="kit.sale"
+                  name="sale"
+                  label="Скидка"
+                  rules="min_value:0|max_value:99"
+                  v-slot="{ value, errorMessage, handleChange, handleBlur }"
+                >
                   <div class="field">
                     <label>Скидка</label>
-                    <InputNumber suffix=" %" :useGrouping="false" v-model="kit.sale" />
-                    <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                    <InputNumber
+                      suffix=" %"
+                      :useGrouping="false"
+                      :modelValue="value"
+                      @update:modelValue="handleChange"
+                      @blur="handleBlur"
+                    />
+                    <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
                   </div>
-                </ValidationProvider>
+                </VeeField>
               </div>
             </div>
             <div class="field">
-              <ValidationProvider name="Процент" rules="min_value:0|max_value:100" v-slot="{ errors }">
+              <VeeField
+                v-model="kit.virtual_percent"
+                name="virtual_percent"
+                label="Процент"
+                rules="min_value:0|max_value:100"
+                v-slot="{ value, errorMessage, handleChange, handleBlur }"
+              >
                 <label>Индивидуальный процент оплаты бонусами</label>
-                <InputNumber suffix=" %" :useGrouping="false" v-model="kit.virtual_percent" />
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                <InputNumber suffix=" %" :useGrouping="false" :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" />
+                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
                 <small>0 - отключить оплату бонусами на данный товар</small>
-              </ValidationProvider>
+              </VeeField>
             </div>
             <template #footer>
               <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
-                :disabled="loading || invalid"
+                :disabled="loading || !meta.valid"
                 label="Сохранить"
                 icon="pi pi-check"
                 class="p-button-text"
@@ -312,7 +354,7 @@
               />
             </template>
           </Dialog>
-        </ValidationObserver>
+        </VeeForm>
       </div>
     </div>
   </div>
@@ -320,15 +362,18 @@
 
 <script>
 import { sortTransform } from '~/helpers'
-import { ValidationObserver, ValidationProvider } from 'vee-validate'
+import { FilterMatchMode } from '@primevue/core/api'
+import { Form, Field } from 'vee-validate'
 
 export default {
-  head: {
-    title: 'Киты',
-  },
   components: {
-    ValidationObserver,
-    ValidationProvider,
+    VeeForm: Form,
+    VeeField: Field,
+  },
+  setup() {
+    const rc = useRuntimeConfig()
+    useHead({ title: 'Киты' })
+    return { apiUrl: rc.public.apiBaseurl, realDecimals: rc.public.realDecimals }
   },
   data() {
     return {
@@ -357,39 +402,42 @@ export default {
         categories: [],
         items: [],
         icon: null,
-        virtual_percent: null
+        virtual_percent: null,
       },
       fileDialog: false,
       kitDialog: false,
       filters: {
-        global: { value: null },
-        servers: { value: null },
-        categories: { value: null },
+        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+        servers: { value: null, matchMode: FilterMatchMode.IN },
+        categories: { value: null, matchMode: FilterMatchMode.IN },
       },
       kitItems: null,
     }
   },
-  async fetch() {
-    this.loading = true
-    this.kits = await this.$axios
-      .get('/store/kits', {
-        params: {
-          page: this.kits.meta.currentPage,
-          limit: this.kits.meta.itemsPerPage,
-          sortBy: this.kits.meta.sortBy,
-          search: this.filters.global.value,
-          ...this.filtersTansformer(this.filters),
-        },
-      })
-      .then((res) => res.data)
-    this.servers = await this.$axios.get('/servers').then((res) => res.data)
-
-    this.kitDialog = false
-    this.fileDialog = false
-    this.loading = false
-    this.selected = null
+  mounted() {
+    this.load()
   },
   methods: {
+    async load() {
+      this.loading = true
+      this.kits = await this.$api
+        .get('/store/kits', {
+          params: {
+            page: this.kits.meta.currentPage,
+            limit: this.kits.meta.itemsPerPage,
+            sortBy: this.kits.meta.sortBy,
+            search: this.filters.global.value,
+            ...this.filtersTansformer(this.filters),
+          },
+        })
+        .then((res) => res.data)
+      this.servers = await this.$api.get('/servers').then((res) => res.data)
+
+      this.kitDialog = false
+      this.fileDialog = false
+      this.loading = false
+      this.selected = null
+    },
     onKitItemEditSave(event) {
       let { newData, index } = event
       this.kit.items[index] = newData
@@ -417,18 +465,18 @@ export default {
       this.kits.meta.currentPage = event.page + 1
       this.kits.meta.itemsPerPage = event.rows
 
-      this.$fetch()
+      this.load()
     },
     onSort(event) {
       this.kits.meta.sortBy = sortTransform(event.sortOrder, event.sortField)
 
-      this.$fetch()
+      this.load()
     },
     onFilter() {
-      this.$fetch()
+      this.load()
     },
     async searchCategory(event) {
-      this.categories = await this.$axios
+      this.categories = await this.$api
         .get('/store/categories', {
           params: {
             search: event.query.trim(),
@@ -437,7 +485,7 @@ export default {
         .then((res) => res.data.data)
     },
     async searchProduct(event) {
-      this.products = await this.$axios
+      this.products = await this.$api
         .get('/store/products', {
           params: {
             search: event.query.trim(),
@@ -450,7 +498,7 @@ export default {
       formData.append('file', event.files[0])
 
       try {
-        await this.$axios.patch(`/store/kits/icon/` + this.kit.id, formData, {
+        await this.$api.patch(`/store/kits/icon/` + this.kit.id, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -460,7 +508,7 @@ export default {
           detail: 'Иконка успешно обновлена',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch {
         this.fileDialog = false
         this.$toast.add({
@@ -472,13 +520,13 @@ export default {
     },
     async removeIcon() {
       try {
-        await this.$axios.delete(`/store/kits/icon/` + this.kit.id)
+        await this.$api.delete(`/store/kits/icon/` + this.kit.id)
         this.$toast.add({
           severity: 'success',
           detail: 'Иконка успешно удалена',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch {}
     },
     hideDialog() {
@@ -488,7 +536,7 @@ export default {
     async openDialog(kit = null) {
       this.updateMode = !!kit
       if (kit) {
-        this.kit = this.$_.pick(await this.$axios.get('/store/kits/' + kit.id).then((res) => res.data), this.$_.deepKeys(this.kit))
+        this.kit = this.$_.pick(await this.$api.get('/store/kits/' + kit.id).then((res) => res.data), this.$_.deepKeys(this.kit))
       } else {
         this.kit = {
           id: null,
@@ -500,19 +548,19 @@ export default {
           servers: this.filters?.servers?.value || [],
           categories: this.filters?.categories?.value || [],
           items: [],
-          virtual_percent: null
+          virtual_percent: null,
         }
       }
       this.kitDialog = true
     },
     async openFileDialog(kit) {
-      this.kit = this.$_.pick(await this.$axios.get('/store/kits/' + kit.id).then((res) => res.data), this.$_.deepKeys(this.kit))
+      this.kit = this.$_.pick(await this.$api.get('/store/kits/' + kit.id).then((res) => res.data), this.$_.deepKeys(this.kit))
       this.fileDialog = true
     },
     async createKit() {
       this.loading = true
       try {
-        await this.$axios.post('/store/kits', {
+        await this.$api.post('/store/kits', {
           ...this.kit,
           servers: this.kit.servers.map((server) => server.id),
           items: this.kit.items.map((item) => ({ product_id: item.product.id, amount: item.amount })),
@@ -523,7 +571,7 @@ export default {
           detail: 'Кит успешно добавлен',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch (err) {
         this.loading = false
         this.$toast.add({
@@ -536,7 +584,7 @@ export default {
     async updateKit() {
       this.loading = true
       try {
-        await this.$axios.patch(
+        await this.$api.patch(
           '/store/kits/' + this.kit.id,
           this.$_.omit(
             {
@@ -545,15 +593,15 @@ export default {
               items: this.kit.items.map((item) => ({ product_id: item.product.id, amount: item.amount })),
               categories: this.kit.categories.map((category) => category.id),
             },
-            'id'
-          )
+            'id',
+          ),
         )
         this.$toast.add({
           severity: 'success',
           detail: 'Кит успешно редактирован',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch (err) {
         this.loading = false
         this.$toast.add({
@@ -571,14 +619,14 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$axios.delete('/store/kits/' + id)
+            await this.$api.delete('/store/kits/' + id)
             this.$toast.add({
               severity: 'success',
               detail: 'Кит успешно удален',
               life: 3000,
             })
           } catch {}
-          await this.$fetch()
+          await this.load()
         },
       })
     },
@@ -590,7 +638,7 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$axios.delete('/store/kits/bulk/', {
+            await this.$api.delete('/store/kits/bulk/', {
               data: {
                 items: this.selected.map((category) => category.id),
               },
@@ -602,7 +650,7 @@ export default {
             })
             this.selected = []
           } catch {}
-          await this.$fetch()
+          await this.load()
         },
       })
     },

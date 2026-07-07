@@ -2,22 +2,23 @@
   <div class="px-4">
     <div class="d-flex justify-content-between">
       <h2 class="mt-0 mb-4">Корзина покупок</h2>
-      <vs-select
+      <Select
         :loading="!servers.length"
         :key="servers.length"
         placeholder="Выберите сервер"
         v-model="server_id"
+        :options="serverOptions"
+        optionLabel="label"
+        optionValue="value"
         style="max-width: 150px"
-      >
-        <vs-option v-for="(server, index) in servers" :key="server.id" :label="server.name" :value="String(index)" v-text="server.name" />
-      </vs-select>
+      />
     </div>
 
-    <div class="store-table-overflow position-relative" ref="cart">
+    <div class="store-table-overflow position-relative">
       <table class="store-table" v-if="cart.items.length">
         <tr :key="cartItem.id" v-for="cartItem in cart.items.filter((ci) => ci.type == 'kit')">
           <td class="d-flex align-items-center">
-            <Avatar v-if="cartItem.payload.kit.icon" size="large" :image="`${$config.apiUrl}/${cartItem.payload.kit.icon}`"> </Avatar>
+            <Avatar v-if="cartItem.payload.kit.icon" size="large" :image="`${$pub.apiBaseurl}/${cartItem.payload.kit.icon}`"> </Avatar>
             <Avatar v-else size="large"> <i class="bx bxs-image"></i> </Avatar>
             <div class="ms-3">
               <h4 class="m-0">
@@ -28,19 +29,23 @@
             </div>
           </td>
           <td>
-            <strike v-if="cartItem.payload.kit.sale" v-text="$utils.formatCurrency('real', cartItem.payload.kit.price)" class="me-1"></strike>
+            <strike
+              v-if="cartItem.payload.kit.sale"
+              v-text="$utils.formatCurrency('real', cartItem.payload.kit.price)"
+              class="me-1"
+            ></strike>
             <span v-text="$utils.formatCurrency('real', cartItem.payload.kit.price, cartItem.payload.kit.sale)"></span>
             <h5 class="m-0">1 шт.</h5>
           </td>
           <td align="right">
-            <vs-button :ref="`cartItem-${cartItem.type}-${cartItem.payload.id}`" :loading="false" @click="cartDelete(cartItem)" danger
+            <Button :loading="deletingKey == `${cartItem.type}-${cartItem.payload.id}`" @click="cartDelete(cartItem)" severity="danger"
               ><i class="bx bx-trash"></i
-            ></vs-button>
+            ></Button>
           </td>
         </tr>
         <tr :key="cartItem.id" v-for="cartItem in cart.items.filter((ci) => ci.type == 'product')">
           <td class="d-flex align-items-center">
-            <Avatar v-if="cartItem.payload.product.icon" size="large" :image="`${$config.apiUrl}/${cartItem.payload.product.icon}`">
+            <Avatar v-if="cartItem.payload.product.icon" size="large" :image="`${$pub.apiBaseurl}/${cartItem.payload.product.icon}`">
             </Avatar>
             <Avatar v-else size="large"> <i class="bx bxs-image"></i> </Avatar>
             <div class="ms-3">
@@ -58,14 +63,16 @@
               class="me-1"
             ></strike>
             <span
-              v-text="$utils.formatCurrency('real', cartItem.payload.product.price * cartItem.payload.amount, cartItem.payload.product.sale)"
+              v-text="
+                $utils.formatCurrency('real', cartItem.payload.product.price * cartItem.payload.amount, cartItem.payload.product.sale)
+              "
             ></span>
             <h5 class="m-0">{{ cartItem.payload.amount }} шт.</h5>
           </td>
           <td align="right">
-            <vs-button :ref="`cartItem-${cartItem.type}-${cartItem.payload.id}`" :loading="false" @click="cartDelete(cartItem)" danger
+            <Button :loading="deletingKey == `${cartItem.type}-${cartItem.payload.id}`" @click="cartDelete(cartItem)" severity="danger"
               ><i class="bx bx-trash"></i
-            ></vs-button>
+            ></Button>
           </td>
         </tr>
       </table>
@@ -75,103 +82,122 @@
 </template>
 
 <script>
-import CartSidebar from '~/components/CartSidebar.vue'
+import { useEventBus } from '@vueuse/core'
+
+definePageMeta({
+  layout: 'cabinet',
+  middleware: ['auth', 'verify'],
+  title: 'Корзина',
+})
 
 export default {
-  layout: 'cabinet',
-  head: {
-    title: 'Корзина',
-  },
-  asyncData({ store }) {
-    store.commit('unicore/SET_NAME', 'Корзина')
-  },
-  data() {
+  setup() {
+    useHead({ title: 'Корзина' })
     return {
-      server_id: '0',
-      cart: {
-        items: [],
-        price: 0,
-        virtual_sale: 0
-      },
-      servers: [],
-      use_virtual: false
+      ui: useUiStore(),
+      cartUpdateBus: useEventBus('storeCartUpdate'),
+      cartClearBus: useEventBus('storeCartClear'),
+      cartBuyBus: useEventBus('storeCartBuy'),
+      cartUseVirtualBus: useEventBus('storeCartUseVirtualUpdate'),
     }
   },
 
-  async fetch() {
-    this.servers = await this.$axios.get('/store/products/protected/servers').then((res) => res.data)
-    if (this.servers.length) this.cartFind()
+  data() {
+    return {
+      server_id: '0',
+      deletingKey: null,
+      cart: {
+        items: [],
+        price: 0,
+        virtual_sale: 0,
+      },
+      servers: [],
+      use_virtual: false,
+    }
   },
 
-  mounted() {
-    this.$nuxt.$emit('setStoreSidebar', { component: CartSidebar })
-    this.$nuxt.$on('storeCartClear', this.cartClear)
-    this.$nuxt.$on('storeCartBuy', this.cartBuy)
-    this.$nuxt.$on('storeCartUseVirtualUpdate', (val) => {
+  computed: {
+    serverOptions() {
+      return this.servers.map((server, index) => ({ label: server.name, value: String(index) }))
+    },
+  },
+
+  async mounted() {
+    await this.load()
+    this.ui.setStoreSidebar({ component: 'CartSidebar', payload: { cart: this.cart, loading: false } })
+    this.offClear = this.cartClearBus.on(this.cartClear)
+    this.offBuy = this.cartBuyBus.on(this.cartBuy)
+    this.offUseVirtual = this.cartUseVirtualBus.on((val) => {
       this.use_virtual = val
     })
   },
 
-  beforeDestroy() {
-    this.$nuxt.$off('storeCartClear')
-    this.$nuxt.$off('storeCartBuy')
-    this.$nuxt.$off('storeCartUseVirtualUpdate')
-    this.$nuxt.$emit('setStoreSidebar', null)
+  beforeUnmount() {
+    this.offClear?.()
+    this.offBuy?.()
+    this.offUseVirtual?.()
+    this.ui.setStoreSidebar(null)
   },
 
   methods: {
+    async load() {
+      this.servers = await this.$api.get('/store/products/protected/servers').then((res) => res.data)
+      if (this.servers.length) await this.cartFind()
+    },
+
     async cartFind() {
-      const loading = this.$vs.loading({ target: this.$refs.cart })
+      const loading = this.$unicore.loading()
       try {
-        this.cart = await this.$axios.get('/store/cart/' + this.servers[Number(this.server_id)].id).then((res) => res.data)
-        this.$nuxt.$emit('storeCartUpdate', this.cart)
+        this.cart = await this.$api.get('/store/cart/' + this.servers[Number(this.server_id)].id).then((res) => res.data)
+        this.cartUpdateBus.emit(this.cart)
       } catch {}
       loading.close()
     },
 
     async cartDelete(item) {
-      this.$nuxt.$emit('setStoreSidebarLoadingState', true)
-      this.$refs[`cartItem-${item.type}-${item.payload.id}`][0].loading = true
-      await this.$axios.delete(`/store/cart/item/${item.type}/${item.payload.id}`)
+      this.ui.setStoreSidebarLoading(true)
+      this.deletingKey = `${item.type}-${item.payload.id}`
+      await this.$api.delete(`/store/cart/item/${item.type}/${item.payload.id}`)
       await this.cartFind()
-      this.$nuxt.$emit('setStoreSidebarLoadingState', false)
+      this.deletingKey = null
+      this.ui.setStoreSidebarLoading(false)
     },
 
     async cartClear() {
-      const loading = this.$vs.loading({ target: this.$refs.cart })
-      this.$nuxt.$emit('setStoreSidebarLoadingState', true)
+      const loading = this.$unicore.loading()
+      this.ui.setStoreSidebarLoading(true)
       try {
-        await this.$axios.delete('/store/cart/server/' + this.servers[Number(this.server_id)].id)
+        await this.$api.delete('/store/cart/server/' + this.servers[Number(this.server_id)].id)
         await this.cartFind()
       } catch {}
       loading.close()
-      this.$nuxt.$emit('setStoreSidebarLoadingState', false)
+      this.ui.setStoreSidebarLoading(false)
     },
 
     async cartBuy() {
-      const loading = this.$vs.loading({ target: this.$refs.cart })
-      this.$nuxt.$emit('setStoreSidebarLoadingState', true)
+      const loading = this.$unicore.loading()
+      this.ui.setStoreSidebarLoading(true)
       try {
-        await this.$axios.post('/store/cart/buy', {
+        await this.$api.post('/store/cart/buy', {
           server_id: this.servers[Number(this.server_id)].id,
-          use_virtual: this.use_virtual
+          use_virtual: this.use_virtual,
         })
         await Promise.all([this.$auth.fetchUser(), this.cartFind()])
-        this.$nuxt.$emit('storeCartUpdate', this.cart)
+        this.cartUpdateBus.emit(this.cart)
         this.$unicore.successNotification('Покупка была совершенна')
       } catch {
         this.$unicore.errorNotification('На балансе недостаточно средств для совершения данной покупки')
       }
       loading.close()
-      this.$nuxt.$emit('setStoreSidebarLoadingState', false)
+      this.ui.setStoreSidebarLoading(false)
     },
   },
 
   watch: {
     server_id: {
-      handler: async function (val) {
+      handler: async function () {
         await this.cartFind()
-        this.$nuxt.$emit('storeCartUpdate', this.cart)
+        this.cartUpdateBus.emit(this.cart)
       },
     },
   },

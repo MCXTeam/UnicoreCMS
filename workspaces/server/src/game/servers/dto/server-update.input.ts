@@ -33,6 +33,8 @@ export class ServerUpdateInput {
   @Type(() => ServerTable)
   table: ServerTable[];
 
+  @IsOptional()
+  @IsArray()
   @IsInt({ each: true })
   mods: number[];
 }

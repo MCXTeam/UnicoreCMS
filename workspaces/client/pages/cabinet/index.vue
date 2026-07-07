@@ -7,9 +7,9 @@
             <div class="col-xxl-6 d-flex flex-column align-items-center">
               <SkinView3D class="rounded" :width="140" :height="200" :skin="$auth.user.skin" :cloak="$auth.user.cloak" ref="Skin3D" />
               <div class="skin-animation">
-                <i @click="$refs.Skin3D.setAnimation(null)" class="bx bx-male"></i>
-                <i @click="$refs.Skin3D.setAnimation('walk')" class="bx bx-walk"></i>
-                <i @click="$refs.Skin3D.setAnimation('run')" class="bx bx-run"></i>
+                <i @click="Skin3D.setAnimation(null)" class="bx bx-male"></i>
+                <i @click="Skin3D.setAnimation('walk')" class="bx bx-walk"></i>
+                <i @click="Skin3D.setAnimation('run')" class="bx bx-run"></i>
               </div>
             </div>
             <div class="col mt-4 mt-xxl-0">
@@ -17,19 +17,15 @@
                 <SkinView3D class="rounded" :width="75" :height="150" :skin="$auth.user.skin" :cloak="$auth.user.cloak" ref="SkinFront" />
                 <SkinView3D class="rounded" :width="75" :height="150" :skin="$auth.user.skin" :cloak="$auth.user.cloak" ref="SkinBack" />
               </div>
-              <div class="d-flex">
+              <div class="d-flex gap-2 mt-3">
                 <input type="file" ref="skin" class="d-none" accept="image/png" @change="updateSkin()" />
-                <vs-button @click="$refs.skin.click()" block :loading="skinLoading">Загрузить скин</vs-button>
-                <vs-button @click="deleteSkin($event)" block danger class="w-25" :loading="skinLoading"
-                  ><i class="bx bx-trash"></i
-                ></vs-button>
+                <Button @click="skin.click()" class="w-full" :loading="skinLoading" label="Загрузить скин" />
+                <Button @click="deleteSkin()" severity="danger" class="w-25" :loading="skinLoading"><i class="bx bx-trash"></i></Button>
               </div>
-              <div class="d-flex">
+              <div class="d-flex gap-2 mt-2">
                 <input type="file" ref="cloak" class="d-none" accept="image/png" @change="updateCloak()" />
-                <vs-button @click="$refs.cloak.click()" block :loading="cloakLoading">Загрузить плащ</vs-button>
-                <vs-button @click="deleteCloak($event)" block danger class="w-25" :loading="cloakLoading"
-                  ><i class="bx bx-trash"></i
-                ></vs-button>
+                <Button @click="cloak.click()" class="w-full" :loading="cloakLoading" label="Загрузить плащ" />
+                <Button @click="deleteCloak()" severity="danger" class="w-25" :loading="cloakLoading"><i class="bx bx-trash"></i></Button>
               </div>
             </div>
           </div>
@@ -39,9 +35,9 @@
         <h5 class="text-uppercase mt-0 d-none d-xl-block"><b>UUID:</b> {{ $auth.user.uuid }}</h5>
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h3 class="m-0">Сведения об аккаунте</h3>
-          <vs-button :to="`/user/` + $auth.user.username" class="d-none d-xl-block" size="small"
-            ><i class="bx bx-link me-1"></i> Публичный профиль</vs-button
-          >
+          <NuxtLink :to="`/user/${$auth.user.username}`" class="d-none d-xl-block">
+            <Button size="small"><i class="bx bx-link me-1"></i> Публичный профиль</Button>
+          </NuxtLink>
         </div>
         <table class="player-info-table w-100">
           <tr>
@@ -83,9 +79,9 @@
         <p v-if="$auth.user.ban && !$auth.user.ban.expires" class="text-danger">Вы заблокированы навсегда!</p>
       </div>
       <div class="col-xl-4 d-flex align-items-center">
-        <vs-button block size="large" :disabled="!$auth.user.ban" :loading="banLoading" @click="unabn()"
-          >Купить разбан за {{ $utils.formatCurrency('real', config.public_unban_price) }}</vs-button
-        >
+        <Button class="w-full" size="large" :disabled="!$auth.user.ban" :loading="banLoading" @click="unabn()">
+          Купить разбан за {{ $utils.formatCurrency('real', config.public_unban_price) }}
+        </Button>
       </div>
     </div>
     <hr class="my-3" />
@@ -93,11 +89,11 @@
       <h2 class="m-0">Балансы валюты на серверах</h2>
       <p>
         Информация о балансе внутриигровой валюты на серверах. Обмен, перевод и пополненение осуществляется во вкладке
-        <nuxt-link to="/cabinet/payment">“ПОПОЛНЕНИЕ И ПЕРЕВОД”</nuxt-link>
+        <NuxtLink to="/cabinet/payment">“ПОПОЛНЕНИЕ И ПЕРЕВОД”</NuxtLink>
       </p>
       <div class="row mt-2" v-if="money">
         <div class="col-xl-4 d-flex align-items-center mb-3" v-for="m in money" :key="m.server.id">
-          <Avatar v-if="m.server.icon" size="xlarge" :image="`${$config.apiUrl}/${m.server.icon}`"> </Avatar>
+          <Avatar v-if="m.server.icon" size="xlarge" :image="`${$pub.apiBaseurl}/${m.server.icon}`"> </Avatar>
           <Avatar v-else size="xlarge"> <i class="bx bxs-server"></i> </Avatar>
           <div class="ms-3">
             <h3 class="m-0" v-text="m.server.name" />
@@ -118,118 +114,112 @@
   </section>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+import { useConfigStore } from '~/stores/config'
 
-export default {
-  layout: 'cabinet',
+definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'] })
+useHead({ title: 'Личный кабинет' })
 
-  data() {
-    return {
-      inviter: null,
-      money: null,
-      skinLoading: false,
-      cloakLoading: false,
-      banLoading: false,
-    }
-  },
+const { $api, $auth, $unicore } = useNuxtApp()
+const config = computed(() => useConfigStore().config)
 
-  asyncData({ store }) {
-    store.commit('unicore/SET_NAME', 'Личный кабинет')
-  },
+const Skin3D = ref(null)
+const SkinFront = ref(null)
+const SkinBack = ref(null)
+const skin = ref(null)
+const cloak = ref(null)
 
-  computed: {
-    ...mapGetters({
-      config: 'config',
-    }),
-  },
+const inviter = ref(null)
+const money = ref(null)
+const skinLoading = ref(false)
+const cloakLoading = ref(false)
+const banLoading = ref(false)
 
-  async fetch() {
-    this.money = await this.$axios.get('/cabinet/money/me').then((res) => res.data)
-    try {
-      this.inviter = await this.$axios.get('/cabinet/referals/me/inviter').then((res) => res.data)
-    } catch {}
-  },
+onMounted(async () => {
+  Skin3D.value.viewer.playerObject.rotation.set(0, 0.3, 0)
 
-  methods: {
-    async updateSkin() {
-      this.skinLoading = true
-      const skinData = new FormData()
-      skinData.append('file', this.$refs.skin.files[0])
+  SkinFront.value.viewer.controls.enableRotate = false
 
-      try {
-        await this.$axios.patch('/cabinet/skin/skin', skinData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        })
-        await this.$auth.fetchUser()
-        this.$unicore.successNotification('Ваш скин был обновлён!')
-      } catch (e) {
-        if (e.response?.status == 415) this.$unicore.errorNotification('Файл не является скином Minecraft')
-      }
+  SkinBack.value.viewer.controls.enableRotate = false
+  SkinBack.value.viewer.playerObject.rotation.set(0, 3.15, 0)
 
-      this.$refs.skin.value = null
-      this.skinLoading = false
-    },
-    async updateCloak() {
-      this.cloakLoading = true
-      const cloakData = new FormData()
-      cloakData.append('file', this.$refs.cloak.files[0])
+  money.value = await $api.get('/cabinet/money/me').then((res) => res.data)
+  try {
+    inviter.value = await $api.get('/cabinet/referals/me/inviter').then((res) => res.data)
+  } catch {}
+})
 
-      try {
-        await this.$axios.patch('/cabinet/skin/cloak', cloakData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        })
-        await this.$auth.fetchUser()
-        this.$unicore.successNotification('Ваш плащ был обновлён!')
-      } catch (e) {
-        if (e.response?.status == 415) this.$unicore.errorNotification('Файл не является плащом Minecraft')
-      }
+async function updateSkin() {
+  skinLoading.value = true
+  const skinData = new FormData()
+  skinData.append('file', skin.value.files[0])
 
-      this.$refs.cloak.value = null
-      this.cloakLoading = false
-    },
-    async deleteSkin() {
-      this.skinLoading = true
-      try {
-        await this.$axios.delete('/cabinet/skin/skin')
-        await this.$auth.fetchUser()
-        this.$unicore.successNotification('Ваш скин был удалён!')
-      } catch {}
-      this.skinLoading = false
-    },
-    async deleteCloak() {
-      this.cloakLoading = true
-      try {
-        await this.$axios.delete('/cabinet/skin/cloak')
-        await this.$auth.fetchUser()
-        this.$unicore.successNotification('Ваш плащ был удалён!')
-      } catch {}
-      this.cloakLoading = false
-    },
-    async unabn() {
-      this.banLoading = true
-      try {
-        await this.$axios.post('/bans/unban')
-        await this.$auth.fetchUser()
-        this.$unicore.successNotification('Ваш аккаунт был разблокирован!')
-      } catch {
-        this.$unicore.errorNotification('На балансе недостаточно денег для покупки разбана!')
-      }
-      this.banLoading = false
-    },
-  },
+  try {
+    await $api.patch('/cabinet/skin/skin', skinData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+    await $auth.fetchUser()
+    $unicore.successNotification('Ваш скин был обновлён!')
+  } catch (e) {
+    if (e.response?.status == 415) $unicore.errorNotification('Файл не является скином Minecraft')
+  }
 
-  mounted() {
-    this.$refs.Skin3D.viewer.playerObject.rotation.set(0, 0.3, 0)
+  skin.value.value = null
+  skinLoading.value = false
+}
 
-    this.$refs.SkinFront.control.enableRotate = false
+async function updateCloak() {
+  cloakLoading.value = true
+  const cloakData = new FormData()
+  cloakData.append('file', cloak.value.files[0])
 
-    this.$refs.SkinBack.control.enableRotate = false
-    this.$refs.SkinBack.viewer.playerObject.rotation.set(0, 3.15, 0)
-  },
+  try {
+    await $api.patch('/cabinet/skin/cloak', cloakData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+    await $auth.fetchUser()
+    $unicore.successNotification('Ваш плащ был обновлён!')
+  } catch (e) {
+    if (e.response?.status == 415) $unicore.errorNotification('Файл не является плащом Minecraft')
+  }
+
+  cloak.value.value = null
+  cloakLoading.value = false
+}
+
+async function deleteSkin() {
+  skinLoading.value = true
+  try {
+    await $api.delete('/cabinet/skin/skin')
+    await $auth.fetchUser()
+    $unicore.successNotification('Ваш скин был удалён!')
+  } catch {}
+  skinLoading.value = false
+}
+
+async function deleteCloak() {
+  cloakLoading.value = true
+  try {
+    await $api.delete('/cabinet/skin/cloak')
+    await $auth.fetchUser()
+    $unicore.successNotification('Ваш плащ был удалён!')
+  } catch {}
+  cloakLoading.value = false
+}
+
+async function unabn() {
+  banLoading.value = true
+  try {
+    await $api.post('/bans/unban')
+    await $auth.fetchUser()
+    $unicore.successNotification('Ваш аккаунт был разблокирован!')
+  } catch {
+    $unicore.errorNotification('На балансе недостаточно денег для покупки разбана!')
+  }
+  banLoading.value = false
 }
 </script>

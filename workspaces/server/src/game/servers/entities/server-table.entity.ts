@@ -2,29 +2,31 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedC
 import { Server } from './server.entity';
 
 @Entity({
-	name: "unicore_server_tables",
+  name: 'unicore_server_tables',
   orderBy: {
-    priority: "ASC"
-  }
+    priority: 'ASC',
+  },
 })
 export class ServerTable {
-  @PrimaryColumn({ name: "priority" })
+  @PrimaryColumn({ name: 'priority' })
   priority?: number;
 
-	@Column({ nullable: true, name: "title" })
-	title?: string;
+  @Column({ nullable: true, name: 'title' })
+  title?: string;
 
-	@Column({ nullable: true, name: "description" })
-	description?: string;
+  @Column({ nullable: true, name: 'description' })
+  description?: string;
 
-	@ManyToOne(() => Server, {
-    primary: true,
-		cascade: true,
-		onDelete: 'CASCADE',
-		onUpdate: 'CASCADE',
-		orphanedRowAction: 'delete',
-		nullable: false,
-	})
-	@JoinColumn({ name: "server_id" })
-	server: Server;
+  @PrimaryColumn({ name: 'server_id' })
+  serverId: string;
+
+  @ManyToOne(() => Server, {
+    cascade: true,
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+    orphanedRowAction: 'delete',
+    nullable: false,
+  })
+  @JoinColumn({ name: 'server_id' })
+  server: Server;
 }

@@ -10,46 +10,59 @@ import * as crypto from 'crypto';
 
 @Injectable()
 export class UnitpayService implements PaymentCoreService {
-  private ips = ['31.186.100.49', '52.29.152.23', '52.19.56.234']
+  private ips = ['31.186.100.49', '52.29.152.23', '52.19.56.234'];
 
-  constructor(private paymentHandler: PaymentHandlerService) { }
+  constructor(private paymentHandler: PaymentHandlerService) {}
 
   async createLink(user: User, input: PaymentCreateDto, ip: string): Promise<PaymentLink> {
-    const payment = await this.paymentHandler.create(UnitpayModule.id, input.amount, user, ip)
+    const payment = await this.paymentHandler.create(UnitpayModule.id, input.amount, user, ip);
 
     const params = {
       sum: input.amount,
       account: payment.id,
       desc: `Payment: #${payment.id} (${user.username})`,
-      currency: 'RUB'
-    }
+      currency: 'RUB',
+    };
 
-    const sign = crypto.createHash('sha256').update([params.account, params.currency, params.desc, params.sum, envConfig.unitpaySecretKey].join('{up}')).digest('hex')
+    const sign = crypto
+      .createHash('sha256')
+      .update([params.account, params.currency, params.desc, params.sum, envConfig.unitpaySecretKey].join('{up}'))
+      .digest('hex');
 
     const url = new URL('https://unitpay.ru/pay/' + envConfig.unitpayPublicKey);
     for (const param in params) {
-      url.searchParams.append(param, params[param])
+      url.searchParams.append(param, params[param]);
     }
 
-    url.searchParams.append('sign', sign)
+    url.searchParams.append('sign', sign);
 
-    return { link: url.href }
+    return { link: url.href };
   }
 
   async handler(ip: string, input: any): Promise<any> {
-    if (!this.ips.find(i => i == ip))
-      return { error: { message: PaymentResp.BadIp } }
+    if (!this.ips.find((i) => i == ip)) return { error: { message: PaymentResp.BadIp } };
 
-    const sign = crypto.createHash('sha256').update([input.method, input.params, envConfig.unitpaySecretKey].join('{up}')).digest('hex')
+    const sign = crypto
+      .createHash('sha256')
+      .update(
+        [
+          input.method,
+          ...Object.keys(input.params)
+            .filter((k) => k != 'sign' && k != 'signature')
+            .sort()
+            .map((k) => input.params[k]),
+          envConfig.unitpaySecretKey,
+        ].join('{up}'),
+      )
+      .digest('hex');
 
-    if (sign != input.params.signature)
-      return { error: { message: PaymentResp.WrongSign } }
+    if (sign != input.params.signature) return { error: { message: PaymentResp.WrongSign } };
 
     if (input.method == 'pay') {
-      if (!await this.paymentHandler.handler(input.params.account, input.params.unitpayId))
-        return { error: { message: PaymentResp.WrongPayID } }
+      if (!(await this.paymentHandler.handler(input.params.account, input.params.unitpayId)))
+        return { error: { message: PaymentResp.WrongPayID } };
     }
 
-    return { result: { message: PaymentResp.OK } }
+    return { result: { message: PaymentResp.OK } };
   }
 }

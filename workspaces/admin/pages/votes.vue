@@ -9,7 +9,7 @@
             </div>
           </template>
         </Toolbar>
-        <DataTable :value="bonuses" :loading="loading" :filters.sync="filters" rowHover responsiveLayout="scroll" dataKey="id">
+        <DataTable :value="bonuses" :loading="loading" v-model:filters="filters" rowHover responsiveLayout="scroll" dataKey="id">
           <template #header>
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
               <h5 class="m-0">Управление бонусами голосования</h5>
@@ -32,33 +32,45 @@
           </Column>
         </DataTable>
 
-        <ValidationObserver v-slot="{ invalid }">
+        <VeeForm v-slot="{ meta }">
           <Dialog
-            :visible.sync="bonusDialog"
+            v-model:visible="bonusDialog"
             :closable="false"
             :style="{ width: '450px' }"
             :modal="true"
             header="Создание/редактирование бонуса"
             class="p-fluid"
           >
-            <ValidationProvider name="Место" rules="required|min:0" v-slot="{ errors }">
+            <VeeField v-model="bonus.place" name="place" label="Место" rules="required|min:0" v-slot="{ value, errorMessage, handleChange }">
               <div class="field">
                 <label>Место</label>
-                <InputNumber v-model="bonus.place" />
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                <InputNumber :modelValue="value" @update:modelValue="handleChange" />
+                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
-            </ValidationProvider>
-            <ValidationProvider name="Бонус рублей на баланс" rules="required|min:0" v-slot="{ errors }">
+            </VeeField>
+            <VeeField
+              v-model="bonus.bonus"
+              name="bonus"
+              label="Бонус рублей на баланс"
+              rules="required|min:0"
+              v-slot="{ value, errorMessage, handleChange }"
+            >
               <div class="field">
                 <label>Бонус рублей на баланс</label>
-                <InputNumber v-model="bonus.bonus" mode="decimal" :minFractionDigits="$config.realDecimals" :maxFractionDigits="$config.realDecimals" />
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                <InputNumber
+                  :modelValue="value"
+                  @update:modelValue="handleChange"
+                  mode="decimal"
+                  :minFractionDigits="runtimeConfig.realDecimals"
+                  :maxFractionDigits="runtimeConfig.realDecimals"
+                />
+                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
-            </ValidationProvider>
+            </VeeField>
             <template #footer>
               <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
-                :disabled="loading || invalid"
+                :disabled="loading || !meta.valid"
                 label="Сохранить"
                 icon="pi pi-check"
                 class="p-button-text"
@@ -66,22 +78,23 @@
               />
             </template>
           </Dialog>
-        </ValidationObserver>
+        </VeeForm>
       </div>
     </div>
   </div>
 </template>
 <script>
-import { FilterMatchMode } from 'primevue/api'
-import { ValidationObserver, ValidationProvider } from 'vee-validate'
+import { FilterMatchMode } from '@primevue/core/api'
+import { Form, Field } from 'vee-validate'
 
 export default {
-  head: {
-    title: 'Бонусы голосования',
-  },
   components: {
-    ValidationObserver,
-    ValidationProvider,
+    VeeForm: Form,
+    VeeField: Field,
+  },
+  setup() {
+    useHead({ title: 'Бонусы голосования' })
+    return { runtimeConfig: useRuntimeConfig().public }
   },
   data() {
     return {
@@ -99,12 +112,15 @@ export default {
       },
     }
   },
-  async fetch() {
-    this.bonuses = await this.$axios.get('/cabinet/votes/gifts').then((res) => res.data)
-    this.bonusDialog = false
-    this.loading = false
+  mounted() {
+    this.load()
   },
   methods: {
+    async load() {
+      this.bonuses = await this.$api.get('/cabinet/votes/gifts').then((res) => res.data)
+      this.bonusDialog = false
+      this.loading = false
+    },
     hideDialog() {
       this.bonusDialog = false
     },
@@ -124,13 +140,13 @@ export default {
     async createBonus() {
       this.loading = true
       try {
-        await this.$axios.post('/cabinet/votes/gifts', this.bonus)
+        await this.$api.post('/cabinet/votes/gifts', this.bonus)
         this.$toast.add({
           severity: 'success',
           detail: 'Бонус успешно добавлен',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch (err) {
         this.$toast.add({
           severity: 'error',
@@ -143,13 +159,13 @@ export default {
     async updateBonus() {
       this.loading = true
       try {
-        await this.$axios.patch('/cabinet/votes/gifts/' + this.bonus.id, this.$_.omit(this.bonus, 'id'))
+        await this.$api.patch('/cabinet/votes/gifts/' + this.bonus.id, this.$_.omit(this.bonus, 'id'))
         this.$toast.add({
           severity: 'success',
           detail: 'Бонус успешно редактирован',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch (err) {
         this.loading = false
         this.$toast.add({
@@ -168,14 +184,14 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$axios.delete('/cabinet/votes/gifts/' + id)
+            await this.$api.delete('/cabinet/votes/gifts/' + id)
             this.$toast.add({
               severity: 'success',
               detail: 'Бонус успешно удален',
               life: 3000,
             })
           } catch {}
-          await this.$fetch()
+          await this.load()
         },
       })
     },

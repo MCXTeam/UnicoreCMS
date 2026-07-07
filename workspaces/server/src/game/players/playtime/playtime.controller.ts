@@ -5,10 +5,10 @@ import { PlaytimeListService } from './playtime.service';
 @Public()
 @Controller('players/playtime')
 export class PlaytimeListController {
-  constructor (private ptlServuce: PlaytimeListService) {}
+  constructor(private ptlServuce: PlaytimeListService) {}
 
   @Get()
   find(@Query('page', ParseIntPipe) page: number) {
-    return this.ptlServuce.find(page)
+    return this.ptlServuce.find(page);
   }
 }

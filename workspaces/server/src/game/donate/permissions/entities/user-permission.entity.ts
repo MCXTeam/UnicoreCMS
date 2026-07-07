@@ -3,9 +3,9 @@ import { Server } from 'src/game/servers/entities/server.entity';
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { DonatePermission } from './donate-permission.entity';
 
-@Entity({ name: "unicore_users_donate_permissions" })
+@Entity({ name: 'unicore_users_donate_permissions' })
 export class UsersDonatePermission {
-  @PrimaryGeneratedColumn({ name: "id" })
+  @PrimaryGeneratedColumn({ name: 'id' })
   id: number;
 
   @ManyToOne(() => User, {
@@ -13,7 +13,7 @@ export class UsersDonatePermission {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn({ name: "user_uuid" })
+  @JoinColumn({ name: 'user_uuid' })
   user: User;
 
   @ManyToOne(() => DonatePermission, {
@@ -22,7 +22,7 @@ export class UsersDonatePermission {
     onUpdate: 'CASCADE',
     eager: true,
   })
-  @JoinColumn({ name: "permission_id" })
+  @JoinColumn({ name: 'permission_id' })
   permission: DonatePermission;
 
   @ManyToOne(() => Server, {
@@ -31,15 +31,15 @@ export class UsersDonatePermission {
     onUpdate: 'CASCADE',
     eager: true,
   })
-  @JoinColumn({ name: "server_id" })
+  @JoinColumn({ name: 'server_id' })
   server: Server;
 
   @Column({
-    name: "expired",
+    name: 'expired',
     nullable: true,
   })
   expired: Date;
 
-  @CreateDateColumn({ name: "created" })
+  @CreateDateColumn({ name: 'created' })
   created: Date;
 }

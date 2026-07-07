@@ -10,17 +10,17 @@ import { UnitpayService } from './unitpay.service';
 
 @Controller('payment/methods/unitpay')
 export class UnitpayController {
-  constructor(private unitpayService: UnitpayService) { }
+  constructor(private unitpayService: UnitpayService) {}
 
   @Permissions([Permission.UserPayment])
   @Post('link')
   link(@IpAddress() ip: string, @CurrentUser() user: User, @Body() body: PaymentCreateDto) {
-    return this.unitpayService.createLink(user, body, ip)
+    return this.unitpayService.createLink(user, body, ip);
   }
 
   @Public()
   @Post('handler')
   handler(@IpAddress() ip: string, @Body() body) {
-    return this.unitpayService.handler(ip, body)
+    return this.unitpayService.handler(ip, body);
   }
 }

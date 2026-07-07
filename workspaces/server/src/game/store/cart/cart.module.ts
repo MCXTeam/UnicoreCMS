@@ -19,7 +19,7 @@ import { ConfigModule } from 'src/admin/config/config.module';
     UsersModule,
     ServersModule,
     HistoryModule,
-    ConfigModule
+    ConfigModule,
   ],
   providers: [CartService],
   exports: [CartService],

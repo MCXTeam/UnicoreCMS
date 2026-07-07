@@ -1,27 +1,43 @@
-FROM node:16-alpine
+# syntax=docker/dockerfile:1
 
-# Installing deps
-RUN apk update && apk add --no-cache \
-    yarn \
-    tini \
-    build-base \
-    g++ \
-    cairo-dev \
-    jpeg-dev \
-    pango-dev \
-    giflib-dev
+# ---- builder ----
+FROM node:22-bookworm-slim AS builder
 
+RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
 WORKDIR /usr/local/app
 
-# Installing UnicoreCMS
+# Install all workspace deps (frozen to the committed pnpm-lock.yaml)
 COPY . .
+RUN pnpm install --frozen-lockfile
 
-RUN npm i lerna@4.0.0 -g
-RUN lerna bootstrap
-RUN npm run build
-RUN npm link -w unicore-common
-RUN npm link -w unicore-server
+# Build common + server + frontends
+RUN pnpm run build
+
+# ---- runtime ----
+FROM node:22-bookworm-slim AS runtime
+
+ENV NODE_ENV=production
+
+# tini for PID1 signal handling + runtime shared libs required by node-canvas (skin rendering)
+RUN corepack enable \
+ && corepack prepare pnpm@9.15.9 --activate \
+ && apt-get update \
+ && apt-get install -y --no-install-recommends \
+      tini \
+      libcairo2 \
+      libpango-1.0-0 \
+      libpangocairo-1.0-0 \
+      libjpeg62-turbo \
+      libgif7 \
+      librsvg2-2 \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /usr/local/app
+COPY --from=builder /usr/local/app .
+
+RUN mkdir -p storage logs && chown -R node:node storage logs
 
 USER node
 
-CMD ["yarn", "start"]
+ENTRYPOINT ["tini", "--"]
+CMD ["pnpm", "run", "start"]

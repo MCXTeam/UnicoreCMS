@@ -1,6 +1,6 @@
-import { instanceToPlain, Transform, Type } from "class-transformer";
-import { Paginated } from "nestjs-paginate";
-import { UserProtectedDto } from "src/admin/users/dto/user-protected.dto";
+import { instanceToPlain, Transform, Type } from 'class-transformer';
+import { Paginated } from 'nestjs-paginate';
+import { UserProtectedDto } from 'src/admin/users/dto/user-protected.dto';
 
 export class BanDto {
   @Transform(({ value }) => value && instanceToPlain(new UserProtectedDto(value)))

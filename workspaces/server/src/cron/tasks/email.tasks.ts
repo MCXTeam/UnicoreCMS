@@ -15,10 +15,10 @@ export class EmailTasks {
 
   @Cron(CronExpression.EVERY_HOUR)
   async clean() {
-    const prClean = await this.prRepository.find({
+    const prClean = await this.prRepository.findBy({
       created: LessThan(moment().utc().subtract(1, 'hour').toDate()),
     });
-    const eaClean = await this.eaRepository.find({
+    const eaClean = await this.eaRepository.findBy({
       created: LessThan(moment().utc().subtract(1, 'hour').toDate()),
     });
 

@@ -53,5 +53,5 @@ export class PermissionInput {
   @IsInt()
   @Min(0)
   @Max(100)
-  virtual_percent?: number
+  virtual_percent?: number;
 }

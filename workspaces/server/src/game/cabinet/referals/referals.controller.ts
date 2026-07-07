@@ -5,15 +5,15 @@ import { ReferalsService } from './referals.service';
 
 @Controller('cabinet/referals')
 export class ReferalsController {
-  constructor (private referalsService: ReferalsService) {}
+  constructor(private referalsService: ReferalsService) {}
 
   @Get('me/inviter')
   meInviter(@CurrentUser() user: User) {
-    return this.referalsService.getInviter(user)
+    return this.referalsService.getInviter(user);
   }
 
   @Get('me')
   meReferals(@CurrentUser() user: User) {
-    return this.referalsService.getReferals(user)
+    return this.referalsService.getReferals(user);
   }
 }

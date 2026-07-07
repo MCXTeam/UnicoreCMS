@@ -11,7 +11,7 @@ import { Kit } from 'src/game/store/entities/kit.entity';
 import { Product } from 'src/game/store/entities/product.entity';
 import { Payment } from 'src/payment/entities/payment.entity';
 import { Repository } from 'typeorm';
-import { Transactional } from 'typeorm-transactional-cls-hooked';
+import { Transactional } from 'typeorm-transactional';
 import { PaginatedHistoryDto } from './dto/history.dto';
 import { History } from './entities/history.entity';
 import { HistoryType } from './enums/history-type.enum';
@@ -20,14 +20,14 @@ import { HistoryType } from './enums/history-type.enum';
 export class HistoryService {
   constructor(
     @InjectRepository(History) private historyRepository: Repository<History>,
-    private usersService: UsersService
-  ) { }
+    private usersService: UsersService,
+  ) {}
 
   async findByUUID(query: PaginateQuery, uuid: string) {
-    const user = await this.usersService.getById(uuid)
-    if (!user) throw new NotFoundException()
+    const user = await this.usersService.getById(uuid);
+    if (!user) throw new NotFoundException();
 
-    return this.find(query, user)
+    return this.find(query, user);
   }
 
   async find(query: PaginateQuery, user: User) {
@@ -45,15 +45,17 @@ export class HistoryService {
       .leftJoinAndSelect('target.cloak', 'cloak')
       .where({ user });
 
-    return new PaginatedHistoryDto(await paginate(query, qb, {
-      sortableColumns: ['created'],
-      searchableColumns: ['created'],
-      defaultSortBy: [['created', 'DESC']],
-      filterableColumns: {
-        type: [FilterOperator.EQ]
-      },
-      maxLimit: 25,
-    }));
+    return new PaginatedHistoryDto(
+      await paginate(query, qb, {
+        sortableColumns: ['created'],
+        searchableColumns: ['created'],
+        defaultSortBy: [['created', 'DESC']],
+        filterableColumns: {
+          type: [FilterOperator.EQ],
+        },
+        maxLimit: 25,
+      }),
+    );
   }
 
   create(type: HistoryType.ProductPurchase, ip: string, user: User, product: Product, server: Server, amount: number);

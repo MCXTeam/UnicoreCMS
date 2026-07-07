@@ -6,21 +6,21 @@ import { Enchantment } from './enchantment.entity';
 import { KitItem } from './kit-item.entity';
 import { GiveMethod } from '../enums/give-method.enum';
 
-@Entity({ name: "unicore_products" })
+@Entity({ name: 'unicore_products' })
 export class Product {
-  @PrimaryGeneratedColumn({ name: "id" })
+  @PrimaryGeneratedColumn({ name: 'id' })
   id: number;
 
-  @Column({ name: "name" })
+  @Column({ name: 'name' })
   name: string;
 
-  @Column({ nullable: true, name: "icon" })
+  @Column({ nullable: true, name: 'icon' })
   icon: string;
 
-  @Column('longtext', { nullable: true, name: "description" })
+  @Column('longtext', { nullable: true, name: 'description' })
   description: string;
 
-  @Column('text', { nullable: true, name: "nbt" })
+  @Column('text', { nullable: true, name: 'nbt' })
   nbt: string;
 
   @ManyToMany(() => Server, (server) => server.products)
@@ -33,51 +33,51 @@ export class Product {
     eager: true,
   })
   @JoinTable({
-    name: "unicore_products_categories",
+    name: 'unicore_products_categories',
     joinColumn: {
-        name: "product_id",
-        referencedColumnName: "id"
+      name: 'product_id',
+      referencedColumnName: 'id',
     },
     inverseJoinColumn: {
-        name: "category_id",
-        referencedColumnName: "id"
-    }
+      name: 'category_id',
+      referencedColumnName: 'id',
+    },
   })
   categories: Category[];
 
   @ManyToMany(() => Enchantment, (enchantment) => enchantment.products)
   @JoinTable({
-    name: "unicore_products_enchantments",
+    name: 'unicore_products_enchantments',
     joinColumn: {
-        name: "product_id",
-        referencedColumnName: "id"
+      name: 'product_id',
+      referencedColumnName: 'id',
     },
     inverseJoinColumn: {
-        name: "enchantment_id",
-        referencedColumnName: "id"
-    }
+      name: 'enchantment_id',
+      referencedColumnName: 'id',
+    },
   })
   enchantments: Enchantment[];
 
-  @Column('float', { name: "price" })
+  @Column('float', { name: 'price' })
   price: number;
 
-  @Column({ nullable: true, name: "sale" })
+  @Column({ nullable: true, name: 'sale' })
   sale: number;
 
-  @Column({ nullable: true, name: "virtual_percent" })
-  virtual_percent?: number
+  @Column({ nullable: true, name: 'virtual_percent' })
+  virtual_percent?: number;
 
-  @Column({ nullable: true, name: "multiple_of" })
-  multiple_of?: number
+  @Column({ nullable: true, name: 'multiple_of' })
+  multiple_of?: number;
 
-  @Column({ default: GiveMethod.UnicoreConnect, name: "give_method" })
-  give_method: GiveMethod
+  @Column({ default: GiveMethod.UnicoreConnect, name: 'give_method' })
+  give_method: GiveMethod;
 
-  @Column({ nullable: true, name: "item_id" })
+  @Column({ nullable: true, name: 'item_id' })
   item_id?: string;
 
-  @Column('simple-array', { nullable: true, name: "commands" })
+  @Column('simple-array', { nullable: true, name: 'commands' })
   commands?: string[];
 
   @AfterRemove()

@@ -1,7 +1,7 @@
-import { instanceToPlain, Transform, Type } from "class-transformer";
-import { Paginated } from "nestjs-paginate";
-import { UserProtectedDto } from "src/admin/users/dto/user-protected.dto";
-import { ProductProtectedDto } from "src/game/store/dto/paginated-store.dto";
+import { instanceToPlain, Transform, Type } from 'class-transformer';
+import { Paginated } from 'nestjs-paginate';
+import { UserProtectedDto } from 'src/admin/users/dto/user-protected.dto';
+import { ProductProtectedDto } from 'src/game/store/dto/paginated-store.dto';
 
 export class HistoryDto {
   @Type(() => ProductProtectedDto)

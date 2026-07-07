@@ -11,6 +11,6 @@ import { MinecraftRatingService } from './minecraftrating.service';
   controllers: [MinecraftRatingController],
 })
 export class MinecraftRatingModule implements MonitoringCoreModule {
-  static id = "minecraftrating"
+  static id = 'minecraftrating';
   static enabled = envConfig.minecraftratingEnabled;
 }

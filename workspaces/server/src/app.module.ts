@@ -1,5 +1,8 @@
-import { CacheModule, MiddlewareConsumer, Module, NestModule, OnModuleInit } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, OnModuleInit } from '@nestjs/common';
+import { CacheModule } from '@nestjs/cache-manager';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { addTransactionalDataSource } from 'typeorm-transactional';
 import { envConfig } from 'unicore-common';
 import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
@@ -37,20 +40,29 @@ export class AppLoggerMiddleware implements NestMiddleware {
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot(ormconfig),
+    TypeOrmModule.forRootAsync({
+      useFactory: () => ormconfig,
+      dataSourceFactory: async (options) => {
+        if (!options) throw new Error('Invalid TypeORM data source options');
+        return addTransactionalDataSource(new DataSource(options));
+      },
+    }),
     CacheModule.register({
-      isGlobal: true
+      isGlobal: true,
     }),
     GoogleRecaptchaModule.forRoot({
-      secretKey: envConfig.recaptchaSecret,
+      secretKey: envConfig.recaptchaSecret || 'disabled',
       response: (req) => req.headers.recaptcha,
       actions: ['login', 'register', 'reset', 'verify', 'gift'],
       network: GoogleRecaptchaNetwork.Recaptcha,
+      skipIf: !envConfig.recaptchaSecret,
     }),
-    ThrottlerModule.forRoot({
-      ttl: 120,
-      limit: 10,
-    }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 120000,
+        limit: 10,
+      },
+    ]),
     MailerModule.forRoot({
       defaults: {
         from: envConfig.mailFrom,
@@ -77,14 +89,12 @@ export class AppLoggerMiddleware implements NestMiddleware {
     PaymentModule,
     CronModule,
   ],
-  controllers: [AppController]
+  controllers: [AppController],
 })
 export class AppModule implements NestModule, OnModuleInit {
   configure(consumer: MiddlewareConsumer): void {
     consumer.apply(AppLoggerMiddleware).forRoutes('*');
   }
 
-  onModuleInit() {
-    
-  }
+  onModuleInit() {}
 }

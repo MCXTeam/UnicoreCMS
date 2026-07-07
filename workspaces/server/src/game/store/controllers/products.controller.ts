@@ -1,17 +1,6 @@
 import { DeleteManyInput, imageFileFilter, StorageManager, zipFileFilter } from '@common';
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  ParseIntPipe,
-  Patch,
-  Post,
-  UploadedFile,
-  UseInterceptors,
-} from '@nestjs/common';
-import { FileFastifyInterceptor, MulterFile } from 'fastify-file-interceptor';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { Permission } from 'unicore-common';
@@ -79,13 +68,13 @@ export class ProductsController {
   @Permissions([Permission.AdminDashboard, Permission.EditorStoreProductsImport])
   @Post('import')
   @UseInterceptors(
-    FileFastifyInterceptor('file', {
+    FileInterceptor('file', {
       storage: StorageManager.disk(),
       fileFilter: zipFileFilter,
+      limits: { fileSize: 50 * 1024 * 1024, files: 1 },
     }),
   )
-  importItems(@Body() body: ProductsImportInput, @UploadedFile() file: MulterFile) {
-    console.log(body);
+  importItems(@Body() body: ProductsImportInput, @UploadedFile() file: Express.Multer.File) {
     return this.productsService.importItems(body, file.filename);
   }
 
@@ -116,12 +105,12 @@ export class ProductsController {
   @Permissions([Permission.AdminDashboard, Permission.EditorStoreProductsUpdate])
   @Patch('icon/:id')
   @UseInterceptors(
-    FileFastifyInterceptor('file', {
+    FileInterceptor('file', {
       storage: StorageManager.disk(),
       fileFilter: imageFileFilter,
     }),
   )
-  updateMedia(@Param('id', ParseIntPipe) id: number, @UploadedFile() file: MulterFile) {
+  updateMedia(@Param('id', ParseIntPipe) id: number, @UploadedFile() file: Express.Multer.File) {
     return this.productsService.updateIcon(id, file);
   }
 

@@ -19,7 +19,11 @@ import { TokensService } from './tokens.service';
 @UseGuards(ThrottlerCoreGuard)
 @Controller('auth')
 export class AuthController {
-  constructor(private tokensService: TokensService, private authService: AuthService, private emailService: EmailService) {}
+  constructor(
+    private tokensService: TokensService,
+    private authService: AuthService,
+    private emailService: EmailService,
+  ) {}
 
   @Public()
   @Recaptcha({ action: 'login' })
@@ -52,6 +56,7 @@ export class AuthController {
   }
 
   @Public()
+  @Recaptcha({ action: 'reset' })
   @Post('reset')
   resetReq(@IpAddress() ip: string, @Body() input: PasswordLinkInput) {
     return this.emailService.sendPasswordLink(ip, input);
@@ -84,24 +89,24 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('sessions/me')
   sessionsMe(@CurrentUser() user: User, @Body('token') token: string) {
-    return this.tokensService.sessions(user, token)
+    return this.tokensService.sessions(user, token);
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete('sessions_all')
   closeMeSessions(@CurrentUser() user: User) {
-    return this.tokensService.revokeRefreshTokensByUser(user)
+    return this.tokensService.revokeRefreshTokensByUser(user);
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete('sessions_other')
   closeMeOtherSessions(@CurrentUser() user: User, @Body('token') token: string) {
-    return this.tokensService.revokeRefreshTokensByUserOther(user, token)
+    return this.tokensService.revokeRefreshTokensByUserOther(user, token);
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete('sessions/:uuid')
   closeMeSession(@CurrentUser() user: User, @Param('uuid') id: number) {
-    return this.tokensService.revokeRefreshTokenBySessionAndUser(user, id)
+    return this.tokensService.revokeRefreshTokenBySessionAndUser(user, id);
   }
 }

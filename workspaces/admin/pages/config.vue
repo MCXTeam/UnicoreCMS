@@ -10,7 +10,7 @@
           </template>
         </Toolbar>
 
-        <DataTable :value="config" :loading="loading" :filters.sync="filters" rowHover responsiveLayout="scroll" dataKey="key">
+        <DataTable :value="config" :loading="loading" v-model:filters="filters" rowHover responsiveLayout="scroll" dataKey="key">
           <template #header>
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
               <h5 class="m-0">Управление переменными</h5>
@@ -31,43 +31,43 @@
           </Column>
         </DataTable>
 
-        <ValidationObserver v-slot="{ invalid }">
+        <VeeForm v-slot="{ meta }">
           <Dialog
-            :visible.sync="cfgDialog"
+            v-model:visible="cfgDialog"
             :closable="false"
             :style="{ width: '600px' }"
             :modal="true"
             header="Создание/редактирование переменной"
             class="p-fluid"
           >
-            <ValidationProvider
-              name="Ключ (a-z)"
-              :rules="{
-                required: true,
-                regex: /^[a-z_]+$/,
-              }"
-              v-slot="{ errors }"
+            <VeeField
+              v-model="cfgField.key"
+              name="key"
+              label="Ключ (a-z)"
+              :rules="{ required: true, regex: /^[a-z_]+$/ }"
+              v-slot="{ value, errorMessage, handleChange }"
             >
               <div class="field">
                 <label>Ключ</label>
-                <InputText :disabled="updateMode" v-model="cfgField.key" />
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                <InputText :disabled="updateMode" :modelValue="value" @update:modelValue="handleChange" />
+                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
-            </ValidationProvider>
-            <ValidationProvider name="Тип" rules="required" v-slot="{ errors }">
+            </VeeField>
+            <VeeField v-model="cfgField.type" name="type" label="Тип" rules="required" v-slot="{ value, errorMessage, handleChange }">
               <div class="field">
                 <label>Тип</label>
-                <Dropdown
+                <Select
                   :disabled="cfgField.important"
-                  v-model="cfgField.type"
+                  :modelValue="value"
+                  @update:modelValue="handleChange"
                   :options="types"
                   optionLabel="name"
                   optionValue="id"
                   appendTo="body"
-                ></Dropdown>
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                ></Select>
+                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
-            </ValidationProvider>
+            </VeeField>
             <div class="field">
               <label>Значение</label>
               <InputText v-model="cfgField.value" />
@@ -75,7 +75,7 @@
             <template #footer>
               <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
-                :disabled="loading || invalid"
+                :disabled="loading || !meta.valid"
                 label="Сохранить"
                 icon="pi pi-check"
                 class="p-button-text"
@@ -83,24 +83,24 @@
               />
             </template>
           </Dialog>
-        </ValidationObserver>
+        </VeeForm>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { FilterMatchMode } from 'primevue/api'
-import { ValidationObserver, ValidationProvider } from 'vee-validate'
+import { FilterMatchMode } from '@primevue/core/api'
+import { Form, Field } from 'vee-validate'
 
 export default {
-  head: {
-    title: 'Конфигурация',
+  components: {
+    VeeForm: Form,
+    VeeField: Field,
   },
 
-  components: {
-    ValidationObserver,
-    ValidationProvider,
+  setup() {
+    useHead({ title: 'Конфигурация' })
   },
 
   data() {
@@ -126,14 +126,17 @@ export default {
     }
   },
 
-  async fetch() {
-    this.loading = true
-    this.cfgDialog = false
-    this.config = await this.$axios.get('/config').then((res) => res.data)
-    this.loading = false
+  mounted() {
+    this.load()
   },
 
   methods: {
+    async load() {
+      this.loading = true
+      this.cfgDialog = false
+      this.config = await this.$api.get('/config').then((res) => res.data)
+      this.loading = false
+    },
     hideDialog() {
       this.cfgDialog = false
     },
@@ -154,13 +157,13 @@ export default {
     async createCfg() {
       this.loading = true
       try {
-        await this.$axios.post('/config', this.cfgField)
+        await this.$api.post('/config', this.cfgField)
         this.$toast.add({
           severity: 'success',
           detail: 'Переменная успешно добавлен',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch (err) {
         this.loading = false
         this.$toast.add({
@@ -173,13 +176,13 @@ export default {
     async updateCfg() {
       this.loading = true
       try {
-        await this.$axios.patch('/config', this.cfgField)
+        await this.$api.patch('/config', this.cfgField)
         this.$toast.add({
           severity: 'success',
           detail: 'Переменная успешно редактирована',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch (err) {
         this.loading = false
         this.$toast.add({
@@ -197,14 +200,14 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$axios.delete('/config/' + key)
+            await this.$api.delete('/config/' + key)
             this.$toast.add({
               severity: 'success',
               detail: 'Переменная успешно удалена',
               life: 3000,
             })
           } catch {}
-          await this.$fetch()
+          await this.load()
         },
       })
     },

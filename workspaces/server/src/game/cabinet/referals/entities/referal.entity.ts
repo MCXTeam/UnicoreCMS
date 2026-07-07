@@ -1,16 +1,18 @@
-import { User } from "src/admin/users/entities/user.entity";
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from "typeorm";
+import { User } from 'src/admin/users/entities/user.entity';
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn } from 'typeorm';
 
-@Entity({ name: "unicore_referals" })
+@Entity({ name: 'unicore_referals' })
 export class Referal {
+  @PrimaryColumn({ name: 'user_uuid' })
+  userUuid: string;
+
   @OneToOne(() => User, {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
-    primary: true,
     nullable: false,
   })
-  @JoinColumn({ name: "user_uuid" })
+  @JoinColumn({ name: 'user_uuid' })
   user: User;
 
   @ManyToOne(() => User, {
@@ -19,9 +21,9 @@ export class Referal {
     onUpdate: 'CASCADE',
     nullable: false,
   })
-  @JoinColumn({ name: "inviter_uuid" })
+  @JoinColumn({ name: 'inviter_uuid' })
   inviter: User;
 
-  @Column({ name: "rewarded", nullable: true })
+  @Column({ name: 'rewarded', nullable: true })
   rewarded: boolean;
 }

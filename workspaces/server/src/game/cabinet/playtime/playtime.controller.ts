@@ -14,7 +14,7 @@ export class PlaytimeController {
 
   @Get('me')
   async me(@CurrentUser() user: User) {
-    return (await this.playtimeService.findOneByUser(user)).map(pt => instanceToPlain(new PlaytimeDto(pt)));
+    return (await this.playtimeService.findOneByUser(user)).map((pt) => instanceToPlain(new PlaytimeDto(pt)));
   }
 
   @Permissions([Permission.KernelUnicoreConnect])

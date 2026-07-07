@@ -1,7 +1,11 @@
+export type JWTTokenType = 'access' | 'refresh' | 'minecraft';
+
 export class JWTPayload {
   sub: string;
 
   api?: boolean;
+
+  type?: JWTTokenType;
 
   iat?: number;
 

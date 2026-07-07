@@ -1,7 +1,6 @@
 import { CommonSortInput, StorageManager } from '@common';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MulterFile } from 'fastify-file-interceptor';
 import { Server } from 'src/game/servers/entities/server.entity';
 import { In, Repository } from 'typeorm';
 import { GroupKitInput } from '../dto/group-kit.input';
@@ -22,7 +21,7 @@ export class GroupKitsService {
   }
 
   findOne(id: number, relations?: string[]): Promise<GroupKit> {
-    return this.groupKitsRepository.findOne(id, { relations });
+    return this.groupKitsRepository.findOne({ where: { id }, relations });
   }
 
   async create(input: GroupKitInput): Promise<GroupKit> {
@@ -35,16 +34,17 @@ export class GroupKitsService {
   }
 
   async sort(input: CommonSortInput) {
-    const servers = await this.groupKitsRepository.findByIds(input.items.map(srv => srv.id))
+    const servers = await this.groupKitsRepository.findBy({ id: In(input.items.map((srv) => srv.id)) });
 
-    return this.groupKitsRepository.save(servers.map(kit => {
-      const updatedSort = input.items.find(kt => kt.id == kit.id)
+    return this.groupKitsRepository.save(
+      servers.map((kit) => {
+        const updatedSort = input.items.find((kt) => kt.id == kit.id);
 
-      if (updatedSort) 
-        return { ...kit, priority: updatedSort.priority }
-      
-      return kit
-    }))
+        if (updatedSort) return { ...kit, priority: updatedSort.priority };
+
+        return kit;
+      }),
+    );
   }
 
   async update(id: number, input: GroupKitInput): Promise<GroupKit> {
@@ -80,44 +80,43 @@ export class GroupKitsService {
     return this.groupKitsRepository.remove(groups);
   }
 
-  async updateMedia(server_id: string, id: number, file: MulterFile) {
-    const server = await this.serversRepository.findOne(server_id);
+  async updateMedia(server_id: string, id: number, file: Express.Multer.File) {
+    const server = await this.serversRepository.findOneBy({ id: server_id });
     const kit = await this.findOne(id);
-    
 
     if (!kit || !server) {
       StorageManager.remove(file.filename);
       throw new NotFoundException();
     }
 
-    var gkImage = kit.images.find(img => img.server.id == server.id)
+    var gkImage = kit.images.find((img) => img.server.id == server.id);
 
     if (gkImage) {
       StorageManager.remove(gkImage.image);
     } else {
-      gkImage = new GroupKitImage()
-      gkImage.server = server
+      gkImage = new GroupKitImage();
+      gkImage.server = server;
     }
 
     gkImage.image = file.filename;
 
-    kit.images = kit.images.filter(img => img.server.id != server.id).concat([gkImage])
+    kit.images = kit.images.filter((img) => img.server.id != server.id).concat([gkImage]);
 
     return this.groupKitsRepository.save(kit);
   }
 
   async removeMedia(server_id: string, id: number) {
-    const server = await this.serversRepository.findOne(server_id);
+    const server = await this.serversRepository.findOneBy({ id: server_id });
     const kit = await this.findOne(id);
 
     if (!kit || !server) {
       throw new NotFoundException();
     }
 
-    var gkImage = kit.images.find(img => img.server.id == server.id)
+    var gkImage = kit.images.find((img) => img.server.id == server.id);
 
     if (gkImage) {
-      kit.images = kit.images.filter(img => img.server.id != server.id)
+      kit.images = kit.images.filter((img) => img.server.id != server.id);
     }
 
     return this.groupKitsRepository.save(kit);

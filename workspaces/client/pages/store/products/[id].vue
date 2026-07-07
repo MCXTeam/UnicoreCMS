@@ -1,0 +1,260 @@
+<template>
+  <section class="px-4">
+    <Dialog
+      class="buy-dialog"
+      v-if="product"
+      v-model:visible="productDialog"
+      modal
+      :closable="!loading"
+      :closeOnEscape="!loading"
+      :dismissableMask="!loading"
+    >
+      <template #header>
+        <div class="d-flex flex-column align-items-center">
+          <h4 class="mt-2 mb-0">Сервер: {{ server.name }}</h4>
+          <h3 class="mt-0" v-if="product.type == 'product'" v-text="product.payload.name" />
+          <h3 class="mt-0" v-else>Набор: {{ product.payload.name }}</h3>
+          <Avatar v-if="product.payload.icon" size="xlarge" :image="`${apiUrl}/${product.payload.icon}`"> </Avatar>
+          <Avatar v-else size="xlarge"> <i class="bx bxs-image"></i> </Avatar>
+        </div>
+      </template>
+      <div class="description-html mb-3" v-if="product.payload.description" v-html="$sanitize(product.payload.description)" />
+      <div v-if="product.type == 'product'" class="mb-4">
+        <h5 class="text-uppercase my-2">Количество ({{ amount }} шт.)</h5>
+        <Slider
+          v-model="amount"
+          @change="multiple_of_fix"
+          :min="product.payload.multiple_of || 1"
+          :max="amount < 10000 ? amount + (product.payload.multiple_of || 1) * 10 : 10000 - (10000 % (product.payload.multiple_of || 1))"
+          :step="product.payload.multiple_of || 1"
+        />
+      </div>
+      <div v-else>
+        <h3 class="mt-0 text-center">Содержимое набора</h3>
+        <div v-if="product.payload.items">
+          <div class="d-flex mb-1" v-for="item in product.payload.items" :key="item.product.id">
+            <Avatar v-if="item.product.icon" :image="`${apiUrl}/${item.product.icon}`"> </Avatar>
+            <Avatar v-else> <i class="bx bxs-image"></i> </Avatar>
+            <h4 class="ms-2 my-0">{{ item.product.name }} x{{ item.amount }}</h4>
+          </div>
+        </div>
+      </div>
+      <Message
+        v-if="
+          product.payload.virtual_percent != 0 &&
+          ((config.public_store_products_virtual_use && product.type == 'product') ||
+            (config.public_store_kits_virtual_use && product.type == 'kit'))
+        "
+        severity="info"
+        :closable="false"
+        class="mt-3"
+      >
+        <i class="bx bxs-gift me-2"></i>
+        Вы можете оплатить <b>{{ product.payload.virtual_percent || config.public_virtual_percent }}%</b> от стоимости товара бонусами
+      </Message>
+      <template #footer>
+        <div class="d-flex justify-content-center">
+          <Button v-if="product.type == 'product'" size="large" text @click="addToCart()">
+            Добавить в корзину ({{ $utils.formatCurrency('real', product.payload.price * amount, product.payload.sale) }})
+          </Button>
+          <Button v-else size="large" text @click="addToCart()">
+            Добавить в корзину ({{ $utils.formatCurrency('real', product.payload.price, product.payload.sale) }})
+          </Button>
+        </div>
+      </template>
+    </Dialog>
+
+    <h2 class="mt-0 mb-4 text-center" v-if="server">Каталог {{ server.name }}</h2>
+    <div class="store-table-overflow position-relative">
+      <table class="store-table" v-if="products.data.length">
+        <tr :key="product.payload.id" v-for="product in products.data">
+          <td class="d-flex align-items-center">
+            <Avatar v-if="product.payload.icon" size="large" :image="`${apiUrl}/${product.payload.icon}`"> </Avatar>
+            <Avatar v-else size="large"> <i class="bx bxs-image"></i> </Avatar>
+            <div class="ms-3">
+              <h4 class="m-0">
+                {{ product.payload.name }} <small class="sale-wrapper ms-2" v-if="product.type == 'kit'">Набор</small>
+                <small class="sale-wrapper ms-2" v-if="product.payload.sale">-{{ product.payload.sale }}%</small>
+              </h4>
+              <span v-text="joinCategoryNames(product.payload.categories)" />
+            </div>
+          </td>
+          <td>
+            <strike v-if="product.payload.sale" v-text="$utils.formatCurrency('real', product.payload.price)" class="me-1"></strike>
+            <span v-text="$utils.formatCurrency('real', product.payload.price * product.payload.multiple_of, product.payload.sale)"></span>
+            <h5 class="m-0">за {{ product.payload.multiple_of }} шт.</h5>
+          </td>
+          <td align="right">
+            <Button @click="openDialog(product)">В корзину <i class="bx bxs-cart-add ms-1"></i></Button>
+          </td>
+        </tr>
+      </table>
+      <h4 class="text-center m-0" v-else>Нет результатов</h4>
+    </div>
+    <Paginator
+      v-if="products.data.length"
+      class="mt-4"
+      :rows="products.meta.itemsPerPage"
+      :totalRecords="products.meta.totalItems"
+      :first="(products.meta.currentPage - 1) * products.meta.itemsPerPage"
+      @page="onPage"
+    />
+  </section>
+</template>
+
+<script setup lang="ts">
+import { useUiStore, type StoreFilters } from '~/stores/ui'
+import { useConfigStore } from '~/stores/config'
+
+definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'Магазин' })
+useHead({ title: 'Магазин' })
+
+const { $api, $unicore } = useNuxtApp()
+const apiUrl = useRuntimeConfig().public.apiBaseurl
+const route = useRoute()
+const ui = useUiStore()
+const configStore = useConfigStore()
+const config = computed(() => configStore.config)
+
+const amount = ref(1)
+const server = ref<any>(null)
+const loading = ref(false)
+const productDialog = ref(false)
+const product = ref<any>(null)
+const products = reactive<{ data: any[]; meta: Record<string, any> }>({
+  data: [],
+  meta: {
+    itemsPerPage: 20,
+    totalItems: 0,
+    currentPage: 1,
+    totalPages: 1,
+    sortBy: null,
+  },
+})
+
+function joinCategoryNames(categories: Array<{ name: string }>) {
+  return categories.map((c) => c.name).join(', ')
+}
+
+function multiple_of_fix(value: number | number[]) {
+  const current = Array.isArray(value) ? value[0] : value
+  const fix = current % product.value.payload.multiple_of
+
+  if (amount.value < 10000) {
+    if (product.value.payload.multiple_of)
+      amount.value = amount.value > product.value.payload.multiple_of ? amount.value - fix : product.value.payload.multiple_of
+  } else {
+    amount.value = 10000 - (10000 % (product.value.payload.multiple_of || 1))
+  }
+}
+
+async function openDialog(item: any) {
+  product.value = item
+  productDialog.value = true
+  amount.value = item.payload.multiple_of || 1
+
+  if (item.type == 'kit') {
+    loading.value = true
+    try {
+      product.value.payload = await $api.get(`/store/products/protected/kit/${product.value.payload.id}`).then((res) => res.data)
+    } catch {
+      productDialog.value = false
+    }
+    loading.value = false
+  }
+}
+
+async function addToCart() {
+  loading.value = true
+  try {
+    await $api.post('/store/cart/add', {
+      id: product.value.payload.id,
+      type: product.value.type,
+      server_id: server.value.id,
+      amount: amount.value,
+    })
+    $unicore.successNotification('Товар добавлен в корзину')
+  } catch (e) {
+    $unicore.errorNotification('Произошла неизвестная ошибка')
+  }
+  productDialog.value = false
+  loading.value = false
+}
+
+async function catalog(params: StoreFilters = {}) {
+  const priceFilter: number[] = []
+
+  if (params.price) {
+    priceFilter[0] = params.price[0] - 0.01
+    priceFilter[1] = params.price[1] + 0.01
+  }
+
+  const l = $unicore.loading()
+  ui.setStoreSidebarLoading(true)
+  try {
+    const res = await $api
+      .get('/store/products/protected/products', {
+        params: {
+          page: products.meta.currentPage,
+          limit: products.meta.itemsPerPage,
+          sortBy: params.sort,
+          search: params.search,
+          'filter.server': route.params.id,
+          'filter.categories': params.category ? params.category : null,
+          'filter.price': priceFilter.length && '$btw:' + priceFilter.join(','),
+        },
+      })
+      .then((r) => r.data)
+    products.data = res.data
+    products.meta = res.meta
+  } catch {}
+  ui.setStoreSidebarLoading(false)
+  l.close()
+}
+
+function onPage(event: { page: number }) {
+  products.meta.currentPage = event.page + 1
+}
+
+watch(
+  () => products.meta.currentPage,
+  () => {
+    catalog()
+  },
+)
+
+watch(
+  () => ui.storeFilters,
+  async (filters) => {
+    if (!filters) return
+    try {
+      await catalog(filters)
+    } catch {}
+  },
+)
+
+onMounted(async () => {
+  try {
+    server.value = await $api.get(`/store/products/protected/servers/${route.params.id}`).then((res) => res.data)
+  } catch (_) {
+    showError(createError({ statusCode: 404, statusMessage: 'Not Found' }))
+    return
+  }
+  ui.setStoreSidebar({
+    component: 'StoreProductsSidebar',
+    payload: {
+      price: [server.value.min_price, server.value.max_price],
+      categories: server.value.categories,
+      range: {
+        min: server.value.min_price,
+        max: server.value.max_price,
+      },
+    },
+  })
+  catalog()
+})
+
+onBeforeUnmount(() => {
+  ui.setStoreSidebar(null)
+})
+</script>

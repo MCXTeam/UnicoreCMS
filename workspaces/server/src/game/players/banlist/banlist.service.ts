@@ -7,7 +7,7 @@ import { PaginatedBansDto } from './dto/paginated-bans.dto';
 
 @Injectable()
 export class BanListService {
-  constructor(@InjectRepository(Ban) private bansRepository: Repository<Ban>) { }
+  constructor(@InjectRepository(Ban) private bansRepository: Repository<Ban>) {}
 
   async find(query: PaginateQuery) {
     const qb = this.bansRepository
@@ -15,13 +15,15 @@ export class BanListService {
       .leftJoinAndSelect('ban.actor', 'actor')
       .leftJoinAndSelect('ban.user', 'user')
       .leftJoinAndSelect('user.skin', 'skin')
-      .leftJoinAndSelect('user.cloak', 'cloak')
+      .leftJoinAndSelect('user.cloak', 'cloak');
 
-    return new PaginatedBansDto(await paginate(query, qb, {
-      sortableColumns: ['created'],
-      searchableColumns: ['created'],
-      defaultSortBy: [['created', 'DESC']],
-      maxLimit: 25,
-    }));
+    return new PaginatedBansDto(
+      await paginate(query, qb, {
+        sortableColumns: ['created'],
+        searchableColumns: ['created'],
+        defaultSortBy: [['created', 'DESC']],
+        maxLimit: 25,
+      }),
+    );
   }
 }

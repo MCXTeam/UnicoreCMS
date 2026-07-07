@@ -1,6 +1,6 @@
 <template>
   <div>
-    <vs-dialog class="buy-dialog" v-model="giftDialog" v-if="gift">
+    <Dialog class="buy-dialog" v-model:visible="giftDialog" modal v-if="gift">
       <template #header>
         <div class="d-flex flex-column align-items-center">
           <h4 class="mt-2 mb-0">Гифт-код активирован!</h4>
@@ -10,7 +10,9 @@
       <div class="text-center">
         <img height="100px" src="/images/chest-minecraft.gif" />
         <h4 v-if="gift.type == 'real'" class="m-0">{{ $utils.formatCurrency('real', gift.amount) }} на баланс</h4>
-        <h4 v-if="gift.type == 'money'" class="m-0">{{ $utils.formatCurrency('ingame', gift.amount) }} монет на сервере {{ gift.server.name }}</h4>
+        <h4 v-if="gift.type == 'money'" class="m-0">
+          {{ $utils.formatCurrency('ingame', gift.amount) }} монет на сервере {{ gift.server.name }}
+        </h4>
         <h4 v-if="gift.type == 'donate'" class="m-0">
           Донат-группу "{{ gift.donate_group.name }}" ({{ gift.period.name }}) на сервере {{ gift.server.name }}
         </h4>
@@ -27,19 +29,31 @@
           Кит из магазина "{{ gift.kit.name }}" на сервере {{ gift.server.name }}
         </h4>
       </div>
-    </vs-dialog>
+    </Dialog>
     <section class="px-4 pb-3">
       <h2 class="mt-0 mb-3">Гифт-коды</h2>
       <div class="row settings-split">
         <div class="col-xl-6 input-fw pe-xl-4 mb-4">
-          <ValidationObserver v-slot="{ invalid }">
-            <ValidationProvider class="w-100" name="гифт-код" rules="required">
-              <vs-input v-model="gift_code" placeholder="Введите гифт-код" />
-            </ValidationProvider>
-            <vs-button :loadong="loading" @click="activateGift()" :disabled="invalid" class="mt-3" size="large" block
-              >Активировать</vs-button
-            >
-          </ValidationObserver>
+          <Form v-slot="{ meta }">
+            <Field v-model="gift_code" name="гифт-код" rules="required" v-slot="{ value, errorMessage, handleChange, handleBlur }">
+              <InputText
+                :modelValue="value"
+                @update:modelValue="handleChange"
+                @blur="handleBlur"
+                placeholder="Введите гифт-код"
+                class="w-100"
+              />
+              <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+            </Field>
+            <Button
+              :loading="loading"
+              @click="activateGift()"
+              :disabled="!meta.valid"
+              class="mt-3 w-full"
+              size="large"
+              label="Активировать"
+            />
+          </Form>
         </div>
         <div class="col ps-xl-5">
           <h3 class="m-0">Где найти код?</h3>
@@ -64,7 +78,7 @@
                 <h4 class="m-0 ms-3" v-text="monitorings_map[mon].name" />
               </td>
               <td>
-                <vs-button block :href="config['public_link_' + mon]">Голосовать на {{ monitorings_map[mon].name }}</vs-button>
+                <Button as="a" :href="config['public_link_' + mon]" class="w-full">Голосовать на {{ monitorings_map[mon].name }}</Button>
               </td>
             </tr>
           </table>
@@ -72,7 +86,8 @@
         <div class="col ps-xl-5">
           <h3 class="mt-0 mb-3">Что вы получите, проголосовав в {{ monitorings.length }} рейтингах?</h3>
           <p class="mt-1">
-            <b>Бонусы</b> - валюта за которую вы можете частично или полностью оплачивать товары из магазина, наборы ресурсов, донат-группы и донат-киты.
+            <b>Бонусы</b> - валюта за которую вы можете частично или полностью оплачивать товары из магазина, наборы ресурсов, донат-группы
+            и донат-киты.
           </p>
           <div class="row">
             <div class="col-xl-6">
@@ -94,74 +109,51 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
-import monitorings from "~/json/monitorings.json"
+<script setup>
+import { Form, Field } from 'vee-validate'
+import { useReCaptcha } from 'vue-recaptcha-v3'
+import monitoringsMap from '~/json/monitorings.json'
+import { useConfigStore } from '~/stores/config'
 
-export default {
-  layout: 'cabinet',
+definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'] })
+useHead({ title: 'Личный кабинет' })
 
-  data() {
-    return {
-      monitorings: [],
-      giftDialog: false,
-      gift: null,
-      loading: false,
-      monitorings_map: monitorings,
-      gift_code: '',
-    }
-  },
+const { $api, $auth, $unicore } = useNuxtApp()
+const recaptcha = useReCaptcha()
+const config = computed(() => useConfigStore().config)
 
-  async mounted() {
-    try {
-      await this.$recaptcha.init()
-    } catch (e) {
-      console.error(e)
-    }
-  },
+const monitorings_map = monitoringsMap
+const monitorings = ref([])
+const giftDialog = ref(false)
+const gift = ref(null)
+const loading = ref(false)
+const gift_code = ref('')
 
-  beforeDestroy() {
-    this.$recaptcha.destroy()
-  },
+onMounted(async () => {
+  monitorings.value = await $api.get('cabinet/votes/monitorings').then((res) => res.data)
+})
 
-  computed: {
-    ...mapGetters({
-      config: 'config',
-    }),
-  },
+async function activateGift() {
+  loading.value = true
+  try {
+    await recaptcha?.recaptchaLoaded?.()
+    const token = await recaptcha?.executeRecaptcha?.('gift')
+    gift.value = await $api
+      .post(
+        '/cabinet/gifts/activate',
+        {
+          gift_code: gift_code.value,
+        },
+        { headers: { recaptcha: token } },
+      )
+      .then((res) => res.data)
 
-  asyncData({ store }) {
-    store.commit('unicore/SET_NAME', 'Личный кабинет')
-  },
+    if (gift.value.type == 'real') $auth.fetchUser()
 
-  async fetch() {
-    this.monitorings = await this.$axios.get('cabinet/votes/monitorings').then((res) => res.data)
-  },
-
-  methods: {
-    async activateGift() {
-      this.loading = true
-      try {
-        const recaptcha = await this.$recaptcha.execute('gift')
-        this.gift = await this.$axios
-          .post(
-            '/cabinet/gifts/activate',
-            {
-              gift_code: this.gift_code,
-            },
-            { headers: { recaptcha } }
-          )
-          .then((res) => res.data)
-
-        if (this.gift.type == 'real')
-          this.$auth.fetchUser()
-
-        this.giftDialog = true
-      } catch {
-        this.$unicore.errorNotification('Указанный вами промокод не найден, либо вы уже активировали его')
-      }
-      this.loading = false
-    },
-  },
+    giftDialog.value = true
+  } catch {
+    $unicore.errorNotification('Указанный вами промокод не найден, либо вы уже активировали его')
+  }
+  loading.value = false
 }
 </script>

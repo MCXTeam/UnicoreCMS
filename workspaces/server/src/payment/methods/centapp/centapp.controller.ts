@@ -10,17 +10,17 @@ import { CentappService } from './centapp.service';
 
 @Controller('payment/methods/centapp')
 export class CentappController {
-  constructor (private centappService: CentappService) {}
+  constructor(private centappService: CentappService) {}
 
   @Permissions([Permission.UserPayment])
   @Post('link')
   link(@IpAddress() ip: string, @CurrentUser() user: User, @Body() body: PaymentCreateDto) {
-    return this.centappService.createLink(user, body, ip)
+    return this.centappService.createLink(user, body, ip);
   }
 
   @Public()
   @Post('handler')
   handler(@IpAddress() ip: string, @Body() body) {
-    return this.centappService.handler(ip, body)
+    return this.centappService.handler(ip, body);
   }
 }

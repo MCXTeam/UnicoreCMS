@@ -11,6 +11,6 @@ import { TopcraftService } from './topcraft.service';
   controllers: [TopcraftController],
 })
 export class TopcraftModule implements MonitoringCoreModule {
-  static id = "topcraft"
+  static id = 'topcraft';
   static enabled = envConfig.topcraftEnabled;
 }

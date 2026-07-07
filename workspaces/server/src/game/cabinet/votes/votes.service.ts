@@ -9,21 +9,21 @@ import { VoteGift } from './entities/vote-gift.entity';
 
 @Injectable()
 export class VotesService {
-  private monitorings: string[] = new Array()
+  private monitorings: string[] = new Array();
 
   constructor(
     @InjectRepository(VoteGift)
     private voteGiftsRepository: Repository<VoteGift>,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
-  ) { }
+  ) {}
 
   async getMonitorings() {
-    return this.monitorings
+    return this.monitorings;
   }
 
   async setMonitorings(monitorings: string[]) {
-    this.monitorings = monitorings
+    this.monitorings = monitorings;
   }
 
   find(): Promise<VoteGift[]> {
@@ -35,7 +35,7 @@ export class VotesService {
   }
 
   findOne(id: number): Promise<VoteGift> {
-    return this.voteGiftsRepository.findOne(id);
+    return this.voteGiftsRepository.findOneBy({ id });
   }
 
   async create(input: VoteGiftInput): Promise<VoteGift> {
@@ -48,7 +48,7 @@ export class VotesService {
   }
 
   async update(id: number, input: VoteGiftInput): Promise<VoteGift> {
-    const vg = await this.voteGiftsRepository.findOne(id);
+    const vg = await this.voteGiftsRepository.findOneBy({ id });
 
     if (!vg) {
       throw new NotFoundException();
@@ -61,7 +61,7 @@ export class VotesService {
   }
 
   async remove(id: number): Promise<VoteGift> {
-    const vg = await this.voteGiftsRepository.findOne(id);
+    const vg = await this.voteGiftsRepository.findOneBy({ id });
 
     if (!vg) {
       throw new NotFoundException();
@@ -71,7 +71,7 @@ export class VotesService {
   }
 
   async updateVirtual(input: VirtualCurrencyUserUpdate) {
-    const user = await this.usersRepository.findOne(input.uuid)
+    const user = await this.usersRepository.findOneBy({ uuid: input.uuid });
     if (!user) throw new NotFoundException();
 
     user.virtual = currencyUtils.roundByType(input.amount, SystemCurrency.VIRTAUL);

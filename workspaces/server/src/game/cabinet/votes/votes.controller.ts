@@ -9,12 +9,12 @@ import { VotesService } from './votes.service';
 
 @Controller('cabinet/votes')
 export class VotesController {
-  constructor (private votesService: VotesService) {}
+  constructor(private votesService: VotesService) {}
 
   @Public()
   @Get('monitorings')
   find() {
-    return this.votesService.getMonitorings()
+    return this.votesService.getMonitorings();
   }
 
   @Get('gifts')

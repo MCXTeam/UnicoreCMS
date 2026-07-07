@@ -12,6 +12,7 @@ export default {
   props: {
     model: Array,
   },
+  emits: ['menuitem-click'],
   methods: {
     onMenuItemClick(event) {
       this.$emit('menuitem-click', event)

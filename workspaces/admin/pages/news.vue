@@ -22,14 +22,14 @@
           lazy
           paginator
           :rows="news.meta.itemsPerPage"
-          :filters.sync="filters"
+          v-model:filters="filters"
           dataKey="id"
           :totalRecords="news.meta.totalItems"
           :loading="loading"
           :rowsPerPageOptions="[20, 50, 100]"
           @page="onPage($event)"
           @sort="onSort($event)"
-          :selection.sync="selected"
+          v-model:selection="selected"
           responsiveLayout="scroll"
         >
           <template #header>
@@ -62,12 +62,12 @@
             </template>
           </Column>
         </DataTable>
-        <Dialog :visible.sync="fileDialog" :style="{ width: '500px' }" :modal="true" header="Картинка новости" class="p-fluid">
+        <Dialog v-model:visible="fileDialog" :style="{ width: '500px' }" :modal="true" header="Картинка новости" class="p-fluid">
           <div class="flex align-items-center justify-content-center flex-wrap w-full">
             <div class="grid mb-4 pt-2">
               <div class="col-12 md:col-6">
                 <Avatar v-if="!newsSingle.image" icon="pi pi-image" size="xlarge" />
-                <ImagePreview v-else width="200" :src="`${$config.apiUrl + '/' + newsSingle.image}`" preview />
+                <Image v-else width="200" :src="`${runtimeConfig.apiBaseurl + '/' + newsSingle.image}`" preview />
               </div>
               <div class="col-12 md:col-6">
                 <div class="field mb-0">
@@ -88,26 +88,32 @@
             </div>
           </div>
         </Dialog>
-        <ValidationObserver v-slot="{ invalid }">
+        <VeeForm v-slot="{ meta }">
           <Dialog
-            :visible.sync="newsSingleDialog"
+            v-model:visible="newsSingleDialog"
             :closable="false"
             :style="{ width: '600px' }"
             :modal="true"
             header="Создание/редактирование новости"
             class="p-fluid"
           >
-            <ValidationProvider name="Название" rules="required" v-slot="{ errors }">
+            <VeeField v-model="newsSingle.title" name="title" label="Название" rules="required" v-slot="{ value, errorMessage, handleChange }">
               <div class="field">
                 <label>Название</label>
-                <InputText v-model="newsSingle.title" autofocus />
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                <InputText :modelValue="value" @update:modelValue="handleChange" autofocus />
+                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
-            </ValidationProvider>
-            <ValidationProvider name="Содержимое" rules="required" v-slot="{ errors }">
+            </VeeField>
+            <VeeField
+              v-model="newsSingle.description"
+              name="description"
+              label="Содержимое"
+              rules="required"
+              v-slot="{ value, errorMessage, handleChange }"
+            >
               <div class="field">
                 <label>Содержимое</label>
-                <Editor v-model="newsSingle.description" editorStyle="height: 220px">
+                <Editor :modelValue="value" @update:modelValue="handleChange" editorStyle="height: 220px">
                   <template #toolbar>
                     <span class="ql-formats">
                       <button class="ql-bold"></button>
@@ -116,9 +122,9 @@
                     </span>
                   </template>
                 </Editor>
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
-            </ValidationProvider>
+            </VeeField>
             <div v-if="!updateMode">
               <FileUpload ref="fileInputSecond" :showUploadButton="false" name="file" accept="image/*">
                 <template #empty>
@@ -129,7 +135,7 @@
             <template #footer>
               <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
-                :disabled="loading || invalid"
+                :disabled="loading || !meta.valid"
                 label="Сохранить"
                 icon="pi pi-check"
                 class="p-button-text"
@@ -137,7 +143,7 @@
               />
             </template>
           </Dialog>
-        </ValidationObserver>
+        </VeeForm>
       </div>
     </div>
   </div>
@@ -145,16 +151,17 @@
 
 <script>
 import { sortTransform } from '~/helpers'
-import { FilterMatchMode } from 'primevue/api'
-import { ValidationObserver, ValidationProvider } from 'vee-validate'
+import { FilterMatchMode } from '@primevue/core/api'
+import { Form, Field } from 'vee-validate'
 
 export default {
-  head: {
-    title: 'Новости',
-  },
   components: {
-    ValidationObserver,
-    ValidationProvider,
+    VeeForm: Form,
+    VeeField: Field,
+  },
+  setup() {
+    useHead({ title: 'Новости' })
+    return { runtimeConfig: useRuntimeConfig().public }
   },
   data() {
     return {
@@ -185,30 +192,33 @@ export default {
       },
     }
   },
-  async fetch() {
-    this.loading = true
-    this.selected = null
-    this.news = await this.$axios
-      .get('/news', {
-        params: {
-          page: this.news.meta.currentPage,
-          limit: this.news.meta.itemsPerPage,
-          search: this.filters.global.value,
-          sortBy: this.news.meta.sortBy,
-        },
-      })
-      .then((res) => res.data)
-    this.newsSingleDialog = false
-    this.fileDialog = false
-    this.loading = false
+  mounted() {
+    this.load()
   },
   methods: {
+    async load() {
+      this.loading = true
+      this.selected = null
+      this.news = await this.$api
+        .get('/news', {
+          params: {
+            page: this.news.meta.currentPage,
+            limit: this.news.meta.itemsPerPage,
+            search: this.filters.global.value,
+            sortBy: this.news.meta.sortBy,
+          },
+        })
+        .then((res) => res.data)
+      this.newsSingleDialog = false
+      this.fileDialog = false
+      this.loading = false
+    },
     async uploadImage(event) {
       let formData = new FormData()
       formData.append('file', event.files[0])
 
       try {
-        await this.$axios.patch(`/news/image/` + this.newsSingle.id, formData, {
+        await this.$api.patch(`/news/image/` + this.newsSingle.id, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -218,7 +228,7 @@ export default {
           detail: 'Картинка успешно обновлена',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch {
         this.fileDialog = false
         this.$toast.add({
@@ -230,13 +240,13 @@ export default {
     },
     async removeImage() {
       try {
-        await this.$axios.delete(`/news/image/` + this.newsSingle.id)
+        await this.$api.delete(`/news/image/` + this.newsSingle.id)
         this.$toast.add({
           severity: 'success',
           detail: 'Картинка успешно удалена',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch {}
     },
     hideDialog() {
@@ -264,15 +274,15 @@ export default {
     onPage(event) {
       this.news.meta.currentPage = event.page + 1
       this.news.meta.itemsPerPage = event.rows
-      this.$fetch()
+      this.load()
     },
     onSort(event) {
       this.news.meta.sortBy = sortTransform(event.sortOrder, event.sortField)
 
-      this.$fetch()
+      this.load()
     },
     onFilter() {
-      this.$fetch()
+      this.load()
     },
     async removeMany() {
       this.$confirm.require({
@@ -282,7 +292,7 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$axios.delete('/news/bulk/', {
+            await this.$api.delete('/news/bulk/', {
               data: {
                 items: this.selected.map((newsSingle) => newsSingle.id),
               },
@@ -294,7 +304,7 @@ export default {
             })
             this.selected = []
           } catch {}
-          await this.$fetch()
+          await this.load()
         },
       })
     },
@@ -308,7 +318,7 @@ export default {
       if (this.$refs.fileInputSecond.files[0]) formData.append('file', this.$refs.fileInputSecond.files[0])
 
       try {
-        await this.$axios.post('/news', formData, {
+        await this.$api.post('/news', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -318,7 +328,7 @@ export default {
           detail: 'Новость успешно добавлена',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch (err) {
         this.loading = false
         this.$toast.add({
@@ -331,13 +341,13 @@ export default {
     async updateNewsSingle() {
       this.loading = true
       try {
-        await this.$axios.patch('/news/' + this.newsSingle.id, this.$_.omit(this.newsSingle, 'id', 'image'))
+        await this.$api.patch('/news/' + this.newsSingle.id, this.$_.omit(this.newsSingle, 'id', 'image'))
         this.$toast.add({
           severity: 'success',
           detail: 'Новость успешно редактирована',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch (err) {
         this.loading = false
         this.$toast.add({
@@ -355,14 +365,14 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$axios.delete('/news/' + id)
+            await this.$api.delete('/news/' + id)
             this.$toast.add({
               severity: 'success',
               detail: 'Новость успешно удалена',
               life: 3000,
             })
           } catch {}
-          await this.$fetch()
+          await this.load()
         },
       })
     },

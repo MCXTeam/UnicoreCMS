@@ -10,16 +10,16 @@ export class BanTasks {
   constructor(
     @InjectRepository(Ban)
     private bansRepository: Repository<Ban>,
-  ) { }
+  ) {}
 
   @Cron(CronExpression.EVERY_10_MINUTES)
   async clean() {
-    const expiresBans = await this.bansRepository.createQueryBuilder("ud")
-      .where("ud.expires < :expires", { expires: moment().utc().toDate() })
+    const expiresBans = await this.bansRepository
+      .createQueryBuilder('ud')
+      .where('ud.expires < :expires', { expires: moment().utc().toDate() })
       .andWhere({ expires: Not(IsNull()) })
       .getMany();
 
-
-    await this.bansRepository.remove(expiresBans)
+    await this.bansRepository.remove(expiresBans);
   }
 }

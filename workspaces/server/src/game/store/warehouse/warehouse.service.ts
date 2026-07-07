@@ -24,7 +24,7 @@ export class WarehouseService {
 
     if (!server || !user) throw new BadRequestException();
 
-    return this.warehouseItemsRepository.find({ user, server })
+    return this.warehouseItemsRepository.findBy({ user: { uuid: user.uuid }, server: { id: server.id } });
   }
 
   async findOwn(user: User, server_id: string) {
@@ -32,25 +32,27 @@ export class WarehouseService {
 
     if (!server) throw new BadRequestException();
 
-    return (await this.warehouseItemsRepository.find({ user, server })).map((wi) => new CartItemProtected(wi));
+    return (await this.warehouseItemsRepository.findBy({ user: { uuid: user.uuid }, server: { id: server.id } })).map(
+      (wi) => new CartItemProtected(wi),
+    );
   }
 
   async take(id: number) {
-    const item = await this.warehouseItemsRepository.findOne(id);
+    const item = await this.warehouseItemsRepository.findOneBy({ id });
     if (!item) throw new NotFoundException();
-    await this.warehouseItemsRepository.remove(item)
+    await this.warehouseItemsRepository.remove(item);
     return true;
   }
 
   async afterGive(input: WarehouseGivedInput[]) {
-    const givedItems = await this.warehouseItemsRepository.findByIds(input.map(it => it.id));
+    const givedItems = await this.warehouseItemsRepository.findBy({ id: In(input.map((it) => it.id)) });
 
     for (const i in givedItems) {
-      const inputItem = input.find(it => it.id == givedItems[i].id)
-      givedItems[i].amount -= inputItem.amount
+      const inputItem = input.find((it) => it.id == givedItems[i].id);
+      givedItems[i].amount -= inputItem.amount;
     }
 
-    const removed = await this.warehouseItemsRepository.remove(givedItems.filter(it => it.amount <= 0))
-    await this.warehouseItemsRepository.save(_.without(givedItems, ...removed))
+    const removed = await this.warehouseItemsRepository.remove(givedItems.filter((it) => it.amount <= 0));
+    await this.warehouseItemsRepository.save(_.without(givedItems, ...removed));
   }
 }

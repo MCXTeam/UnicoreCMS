@@ -1,6 +1,6 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { envConfig } from 'unicore-common';
 import { JWTPayload } from '../interfaces/jwt-payload';
 import { UsersService } from 'src/admin/users/users.service';
@@ -17,6 +17,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JWTPayload) {
+    if (payload.type !== 'access') {
+      throw new UnauthorizedException();
+    }
+
     const user = await this.usersService.getById(payload.sub);
 
     if (!user) {

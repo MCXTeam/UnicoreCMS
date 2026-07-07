@@ -14,7 +14,7 @@ export class TokenTasks {
 
   @Cron(CronExpression.EVERY_HOUR)
   async clean() {
-    const expiresTokens = await this.tokensRepository.find({
+    const expiresTokens = await this.tokensRepository.findBy({
       expires: LessThan(moment().toDate()),
     });
     await this.tokensRepository.remove(expiresTokens);

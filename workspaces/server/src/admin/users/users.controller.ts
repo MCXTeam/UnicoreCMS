@@ -24,7 +24,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Создать одного пользователя' })
   @Post()
   async create(@CurrentUser() actor: User, @Body() createUserDto: UserInput) {
-    return new UserDto(await this.usersService.create(createUserDto, actor))
+    return new UserDto(await this.usersService.create(createUserDto, actor));
   }
 
   @Permissions([Permission.AdminDashboard, Permission.AdminUsersRead])
@@ -38,37 +38,37 @@ export class UsersController {
   @ApiOperation({ summary: 'Найти одного пользователя' })
   @Get(':uuid')
   async findOne(@Param('uuid') uuid: string) {
-    const user = await this.usersService.getById(uuid)
-    if (!user) throw new NotFoundException()
+    const user = await this.usersService.getById(uuid);
+    if (!user) throw new NotFoundException();
 
-    return new UserBasicDto(user)
+    return new UserBasicDto(user);
   }
 
   @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
   @ApiOperation({ summary: 'Обновить одного пользователя' })
   @Patch(':uuid')
   async update(@CurrentUser() actor: User, @Param('uuid') uuid: string, @Body() updateUserDto: UserUpdateInput) {
-    return new UserDto(await this.usersService.update(uuid, updateUserDto, actor))
+    return new UserDto(await this.usersService.update(uuid, updateUserDto, actor));
   }
 
   @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
   @Patch(':uuid/password')
   async updatePassword(@CurrentUser() actor: User, @Param('uuid') uuid: string, @Body() body: PasswordUpdateInput) {
-    return this.usersService.updatePassord(uuid, body, actor)
+    return this.usersService.updatePassord(uuid, body, actor);
   }
 
   @Permissions([Permission.AdminDashboard, Permission.AdminUsersDelete])
   @ApiOperation({ summary: 'Удалить одного пользователя' })
   @Delete(':uuid')
   async remove(@CurrentUser() actor: User, @Param('uuid') uuid: string) {
-    return new UserDto(await this.usersService.delete(uuid, actor))
+    return new UserDto(await this.usersService.delete(uuid, actor));
   }
 
   @Permissions([Permission.AdminDashboard, Permission.AdminUsersDeleteMany])
   @ApiOperation({ summary: 'Удалить несколько пользователей' })
   @Delete('bulk/:ids')
   removeMany(@CurrentUser() actor: User, @Body() body: DeleteManyInput) {
-    return this.usersService.deleteMany(body, actor)
+    return this.usersService.deleteMany(body, actor);
   }
 
   @Public()
@@ -101,12 +101,12 @@ export class UsersController {
   @Public()
   @Get('public/user/:username')
   async getPublicUser(@Param('username') username: string) {
-    return this.usersService.getPublicUser(username)
+    return this.usersService.getPublicUser(username);
   }
 
   @Public()
   @Get('public/users')
   async getAllUsers() {
-    return this.usersService.getAllUsers()
+    return this.usersService.getAllUsers();
   }
 }

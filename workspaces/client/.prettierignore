@@ -94,3 +94,8 @@ sw.*
 
 # Vim swap files
 *.swp
+
+_legacy
+.output
+.nuxt
+dist

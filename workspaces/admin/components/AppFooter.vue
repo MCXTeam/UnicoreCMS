@@ -5,9 +5,3 @@
     <a href="https://unicorecms.ru/" target="_blank" class="font-medium text-white ml-1">UnicoreCMS</a>
   </div>
 </template>
-
-<script>
-export default {
-  name: 'AppFooter',
-}
-</script>

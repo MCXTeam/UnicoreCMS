@@ -22,15 +22,16 @@ export class TokensService {
     private tokensRepository: Repository<RefreshToken>,
     private usersService: UsersService,
     private jwt: JwtService,
-  ) { }
+  ) {}
 
   async generateAccessToken(user: User): Promise<string> {
     const payload: JWTPayload = {
       sub: user.uuid,
+      type: 'access',
     };
 
     return this.jwt.sign(payload, {
-      expiresIn: envConfig.jwtExpires,
+      expiresIn: envConfig.jwtExpires as ms.StringValue,
     });
   }
 
@@ -38,15 +39,19 @@ export class TokensService {
     const payload: JWTMinecraftPayload = {
       sub: user.uuid,
       ref: refreshPayload.jwtid,
+      type: 'minecraft',
     };
 
     return this.jwt.sign(payload, {
-      expiresIn: envConfig.jwtRefreshExpires,
+      expiresIn: envConfig.jwtRefreshExpires as ms.StringValue,
     });
   }
 
   async generateRefreshToken(user: User, agent?: string, ip?: string): Promise<string> {
-    const expires = this.moment().utc().add(ms(envConfig.jwtRefreshExpires), 'milliseconds').toDate();
+    const expires = this.moment()
+      .utc()
+      .add(ms(envConfig.jwtRefreshExpires as ms.StringValue), 'milliseconds')
+      .toDate();
     const token = await this.tokensRepository.save({
       agent,
       ip,
@@ -57,10 +62,11 @@ export class TokensService {
     const payload: JWTRefreshPayload = {
       sub: user.uuid,
       jwtid: token.uuid,
+      type: 'refresh',
     };
 
     return this.jwt.signAsync(payload, {
-      expiresIn: envConfig.jwtRefreshExpires,
+      expiresIn: envConfig.jwtRefreshExpires as ms.StringValue,
     });
   }
 
@@ -73,10 +79,11 @@ export class TokensService {
     const payload: JWTRefreshPayload = {
       sub: user.uuid,
       jwtid: refreshToken.uuid,
+      type: 'refresh',
     };
 
     return this.jwt.signAsync(payload, {
-      expiresIn: envConfig.jwtRefreshExpires,
+      expiresIn: envConfig.jwtRefreshExpires as ms.StringValue,
     });
   }
 
@@ -94,7 +101,12 @@ export class TokensService {
 
   async resolveRefreshToken(encoded: string): Promise<{ user: User; token: RefreshToken }> {
     const payload = (await this.decodeToken(encoded)) as JWTRefreshPayload;
-    const token = await this.tokensRepository.findOne({
+
+    if (payload.type !== 'refresh' || !payload.jwtid) {
+      throw new UnprocessableEntityException('Invalid refresh token');
+    }
+
+    const token = await this.tokensRepository.findOneBy({
       uuid: payload.jwtid,
       expires: MoreThanOrEqual(this.moment().utc().toDate()),
     });
@@ -119,7 +131,7 @@ export class TokensService {
   ): Promise<Omit<AuthenticatedDto, 'user' | 'refreshToken'>> {
     const { token, user } = await this.resolveRefreshToken(refresh);
 
-    token.updated = this.moment().utc().toDate()
+    token.updated = this.moment().utc().toDate();
     await this.tokensRepository.save(token);
 
     //const refreshToken = await this.updateRefreshToken(user, token, ip);
@@ -130,17 +142,22 @@ export class TokensService {
 
   async revokeRefreshToken(encoded: string): Promise<void> {
     const payload = (await this.decodeToken(encoded)) as JWTRefreshPayload;
-    const token = await this.tokensRepository.findOne({
+
+    if (payload.type !== 'refresh' || !payload.jwtid) {
+      throw new UnprocessableEntityException('Invalid refresh token');
+    }
+
+    const token = await this.tokensRepository.findOneBy({
       uuid: payload.jwtid,
     });
 
-    if (token && payload) {
+    if (token) {
       await this.tokensRepository.remove(token);
     }
   }
 
   async revokeRefreshTokenBySession(uuid: string): Promise<void> {
-    const token = await this.tokensRepository.findOne({ uuid });
+    const token = await this.tokensRepository.findOneBy({ uuid });
 
     if (token) {
       await this.tokensRepository.remove(token);
@@ -148,7 +165,7 @@ export class TokensService {
   }
 
   async revokeRefreshTokensByUser(user: User): Promise<void> {
-    const token = await this.tokensRepository.find({ user });
+    const token = await this.tokensRepository.findBy({ user: { uuid: user.uuid } });
 
     if (token) {
       await this.tokensRepository.remove(token);
@@ -160,19 +177,19 @@ export class TokensService {
 
     if (token) {
       try {
-        payload = await this.decodeToken(token) as JWTRefreshPayload
-      } catch { }
+        payload = (await this.decodeToken(token)) as JWTRefreshPayload;
+      } catch {}
     }
 
-    const tok = await this.tokensRepository.find({ user, uuid: Not(payload?.jwtid) });
+    if (!payload?.jwtid) return;
 
-    if (token) {
-      await this.tokensRepository.remove(tok);
-    }
+    const tok = await this.tokensRepository.findBy({ user: { uuid: user.uuid }, uuid: Not(payload.jwtid) });
+
+    await this.tokensRepository.remove(tok);
   }
 
   async revokeRefreshTokenBySessionAndUser(user: User, id: number): Promise<void> {
-    const token = await this.tokensRepository.findOne({ user, id });
+    const token = await this.tokensRepository.findOneBy({ user: { uuid: user.uuid }, id });
 
     if (token) {
       await this.tokensRepository.remove(token);
@@ -184,14 +201,17 @@ export class TokensService {
 
     if (token) {
       try {
-        const payload = await this.decodeToken(token) as JWTRefreshPayload
-        curnet = await this.tokensRepository.findOne({ uuid: payload.jwtid })
-      } catch { }
+        const payload = (await this.decodeToken(token)) as JWTRefreshPayload;
+        curnet = await this.tokensRepository.findOneBy({ uuid: payload.jwtid });
+      } catch {}
     }
 
-    return { curnet, all: await this.tokensRepository.find({
-      where: { user },
-      order: { updated: "DESC" }
-    }) }
+    return {
+      curnet,
+      all: await this.tokensRepository.find({
+        where: { user: { uuid: user.uuid } },
+        order: { updated: 'DESC' },
+      }),
+    };
   }
 }

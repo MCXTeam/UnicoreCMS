@@ -8,16 +8,16 @@ import { HistoryService } from './history.service';
 
 @Controller('cabinet/history')
 export class HistoryController {
-  constructor (private histiryService: HistoryService) {}
+  constructor(private histiryService: HistoryService) {}
 
   @Get('me')
   findOwn(@Paginate() query: PaginateQuery, @CurrentUser() user: User) {
-    return this.histiryService.find(query, user)
+    return this.histiryService.find(query, user);
   }
 
   @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsUpdate])
   @Get('user/:uuid')
   find(@Paginate() query: PaginateQuery, @Param('uuid') uuid: string) {
-    return this.histiryService.findByUUID(query, uuid)
+    return this.histiryService.findByUUID(query, uuid);
   }
 }

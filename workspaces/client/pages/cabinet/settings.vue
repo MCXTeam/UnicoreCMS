@@ -5,40 +5,73 @@
       <p class="mt-0 mb-3">
         В целях безопасности мы рекомендуем выбрать пароль, который ещё не использовался вами в других учётных записях.
       </p>
-      <ValidationObserver v-slot="{ invalid }">
+      <Form v-slot="{ meta }">
         <h3 class="mb-1 mt-0">Текущий пароль</h3>
-        <ValidationProvider class="w-100" name="Текущий пароль" rules="required|min:6|max:24" v-slot="{ errors }" ref="password">
-          <vs-input type="password" v-model="password_form.password_old" placeholder="Текущий пароль">
-            <template #message-danger v-if="errors[0]">
-              {{ errors[0] }}
-            </template>
-          </vs-input>
-        </ValidationProvider>
-        <h3 class="mb-1 mt-3">Новый пароль</h3>
-        <ValidationProvider class="w-100" name="password" rules="required|min:6|max:24" v-slot="{ errors }" ref="password">
-          <vs-input type="password" v-model="password_form.password" placeholder="Новый пароль">
-            <template #message-danger v-if="errors[0]">
-              {{ errors[0] }}
-            </template>
-          </vs-input>
-        </ValidationProvider>
-        <h3 class="mb-1 mt-3">Введите новый пароль ещё раз</h3>
-        <ValidationProvider
-          class="w-100"
-          name="Подтверждение нового пароля"
-          rules="required|confirmed:password"
-          v-slot="{ errors }"
-          ref="password"
+        <Field
+          v-model="password_form.password_old"
+          name="Текущий пароль"
+          rules="required|min:6|max:24"
+          v-slot="{ value, errorMessage, handleChange, handleBlur }"
         >
-          <vs-input type="password" v-model="password_form.password_confirm" placeholder="Введите новый пароль ещё раз">
-            <template #message-danger v-if="errors[0]">
-              {{ errors[0] }}
-            </template>
-          </vs-input>
-        </ValidationProvider>
-        <vs-checkbox class="mb-1 mt-3" v-model="password_form.close">Завершить все сеансы</vs-checkbox>
-        <vs-button @click="Password()" :disabled="invalid" class="mt-3" size="large" block>Сменить пароль</vs-button>
-      </ValidationObserver>
+          <Password
+            :feedback="false"
+            :toggleMask="true"
+            :modelValue="value"
+            @update:modelValue="handleChange"
+            @blur="handleBlur"
+            placeholder="Текущий пароль"
+            class="w-100"
+            inputClass="w-100"
+            :class="errorMessage && 'p-invalid'"
+          />
+          <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+        </Field>
+        <h3 class="mb-1 mt-3">Новый пароль</h3>
+        <Field
+          v-model="password_form.password"
+          name="password"
+          rules="required|min:6|max:24"
+          v-slot="{ value, errorMessage, handleChange, handleBlur }"
+        >
+          <Password
+            :feedback="false"
+            :toggleMask="true"
+            :modelValue="value"
+            @update:modelValue="handleChange"
+            @blur="handleBlur"
+            placeholder="Новый пароль"
+            class="w-100"
+            inputClass="w-100"
+            :class="errorMessage && 'p-invalid'"
+          />
+          <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+        </Field>
+        <h3 class="mb-1 mt-3">Введите новый пароль ещё раз</h3>
+        <Field
+          v-model="password_form.password_confirm"
+          name="Подтверждение нового пароля"
+          rules="required|confirmed:@password"
+          v-slot="{ value, errorMessage, handleChange, handleBlur }"
+        >
+          <Password
+            :feedback="false"
+            :toggleMask="true"
+            :modelValue="value"
+            @update:modelValue="handleChange"
+            @blur="handleBlur"
+            placeholder="Введите новый пароль ещё раз"
+            class="w-100"
+            inputClass="w-100"
+            :class="errorMessage && 'p-invalid'"
+          />
+          <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+        </Field>
+        <div class="flex align-items-center gap-2 mb-1 mt-3">
+          <Checkbox v-model="password_form.close" :binary="true" inputId="sessionsClose" />
+          <label for="sessionsClose">Завершить все сеансы</label>
+        </div>
+        <Button @click="changePassword()" :disabled="!meta.valid" class="mt-3 w-full" size="large" label="Сменить пароль" />
+      </Form>
     </div>
     <div class="col ps-xl-5 mt-5 mt-xl-0">
       <h2 class="mb-2 mt-0">Двухфакторная авторизация</h2>
@@ -61,12 +94,24 @@
             <canvas ref="qrcode" />
           </div>
           <div class="col">
-            <ValidationObserver v-slot="{ invalid }" @submit.prevent="setPassword">
-              <ValidationProvider class="w-100" name="Код из приложения" rules="required">
-                <vs-input v-model="two_factor_form.code" placeholder="Код из приложения" />
-              </ValidationProvider>
-              <vs-button :disabled="invalid" @click="TwoFactorEnable()" class="mt-3" size="large" block>Подключить</vs-button>
-            </ValidationObserver>
+            <Form v-slot="{ meta }">
+              <Field
+                v-model="two_factor_form.code"
+                name="Код из приложения"
+                rules="required"
+                v-slot="{ value, errorMessage, handleChange, handleBlur }"
+              >
+                <InputText
+                  :modelValue="value"
+                  @update:modelValue="handleChange"
+                  @blur="handleBlur"
+                  placeholder="Код из приложения"
+                  class="w-100"
+                />
+                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+              </Field>
+              <Button :disabled="!meta.valid" @click="TwoFactorEnable()" class="mt-3 w-full" size="large" label="Подключить" />
+            </Form>
           </div>
         </div>
       </div>
@@ -74,12 +119,24 @@
         <p class="m-0">Статус: <b class="text-success">Подключена</b></p>
         <p class="m-0">Аккаунт: <b v-text="$auth.user.username" /></p>
         <p class="mt-0 mb-3">На основе времени: <b>Да (30 секунд)</b></p>
-        <ValidationObserver v-slot="{ invalid }" @submit.prevent="setPassword">
-          <ValidationProvider class="w-100" name="Код из приложения" rules="required">
-            <vs-input v-model="two_factor_form.code" placeholder="Код из приложения" />
-          </ValidationProvider>
-          <vs-button :disabled="invalid" @click="TwoFactorDisable()" class="mt-3" size="large" block>Отключить</vs-button>
-        </ValidationObserver>
+        <Form v-slot="{ meta }">
+          <Field
+            v-model="two_factor_form.code"
+            name="Код из приложения"
+            rules="required"
+            v-slot="{ value, errorMessage, handleChange, handleBlur }"
+          >
+            <InputText
+              :modelValue="value"
+              @update:modelValue="handleChange"
+              @blur="handleBlur"
+              placeholder="Код из приложения"
+              class="w-100"
+            />
+            <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+          </Field>
+          <Button :disabled="!meta.valid" @click="TwoFactorDisable()" class="mt-3 w-full" size="large" label="Отключить" />
+        </Form>
       </div>
       <div v-if="!two_factor && !$auth.user.two_factor_enabled">
         <Skeleton width="100%" height="120px" class="mb-3 mt-4"></Skeleton>
@@ -99,89 +156,85 @@
     </div>
   </div>
 </template>
-<script>
+
+<script setup>
 import QRCode from 'qrcode-with-logos'
+import { Form, Field } from 'vee-validate'
 
-export default {
-  layout: 'cabinet',
+definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'] })
+useHead({ title: 'Личный кабинет' })
 
-  data() {
-    return {
-      password_form: {
-        password_old: '',
-        password: '',
-        password_confirm: '',
-        close: true,
-      },
-      two_factor_form: {
-        code: '',
-      },
-      two_factor: null,
-    }
-  },
+const { $api, $auth, $unicore } = useNuxtApp()
 
-  asyncData({ store }) {
-    store.commit('unicore/SET_NAME', 'Личный кабинет')
-  },
+const qrcode = ref(null)
+const password_form = reactive({
+  password_old: '',
+  password: '',
+  password_confirm: '',
+  close: true,
+})
+const two_factor_form = reactive({
+  code: '',
+})
+const two_factor = ref(null)
 
-  async fetch() {
-    if (!this.$auth.user.two_factor_enabled) this.GenerateQR()
-  },
+onMounted(async () => {
+  if (!$auth.user.two_factor_enabled) await GenerateQR()
+})
 
-  methods: {
-    async Password() {
-      if (this.password_form.password_old == this.password_form.password)
-        return this.$unicore.errorNotification('Новый пароль не может совпадать со старым')
+async function changePassword() {
+  if (password_form.password_old == password_form.password) return $unicore.errorNotification('Новый пароль не может совпадать со старым')
 
-      const loading = this.$vs.loading()
-      try {
-        await this.$axios.post('/cabinet/settings/password', this.password_form).then((res) => res.data)
-        this.$unicore.successNotification('Ваш пароль был изменён')
-        if (this.password_form.close) this.$unicore.logout()
-      } catch {
-        this.$unicore.errorNotification('Указан неверный текущий пароль')
-      }
-      loading.close()
+  const loading = $unicore.loading()
+  try {
+    await $api.post('/cabinet/settings/password', password_form).then((res) => res.data)
+    $unicore.successNotification('Ваш пароль был изменён')
+    if (password_form.close) $unicore.logout()
+  } catch {
+    $unicore.errorNotification('Указан неверный текущий пароль')
+  }
+  loading.close()
+}
+
+async function GenerateQR() {
+  two_factor.value = await $api.get('/cabinet/2fa/generate').then((res) => res.data)
+  await new QRCode({
+    canvas: qrcode.value,
+    content: two_factor.value.otpauth_url,
+    logo: {
+      src: '/icon.png',
     },
-    async GenerateQR() {
-      this.two_factor = await this.$axios.get('/cabinet/2fa/generate').then((res) => res.data)
-      await new QRCode({
-        canvas: this.$refs.qrcode,
-        content: this.two_factor.otpauth_url,
-        logo: {
-          src: '/icon.png',
-        },
-        width: 150,
-        nodeQrCodeOptions: {
-          margin: 1,
-        },
-      }).toImage()
+    width: 150,
+    nodeQrCodeOptions: {
+      margin: 1,
     },
-    async TwoFactorEnable() {
-      const loading = this.$vs.loading()
-      try {
-        await this.$axios.post('/cabinet/2fa/enable', this.two_factor_form).then((res) => res.data)
-        await this.$auth.fetchUser()
-        this.two_factor_form.code = ''
-        this.two_factor = null
-        this.$unicore.successNotification('Двухфакторная авторизация успешно подключена к вашему аккаунту')
-      } catch {
-        this.$unicore.errorNotification('Код из приложения не подходит, попробуйте еще раз')
-      }
-      loading.close()
-    },
-    async TwoFactorDisable() {
-      const loading = this.$vs.loading()
-      try {
-        await this.$axios.post('/cabinet/2fa/disable', this.two_factor_form).then((res) => res.data)
-        await Promise.all([this.$auth.fetchUser(), this.GenerateQR()])
-        this.two_factor_form.code = ''
-        this.$unicore.successNotification('Двухфакторная авторизация успешно отключена от вашего аккаунта')
-      } catch {
-        this.$unicore.errorNotification('Код из приложения не подходит, попробуйте еще раз')
-      }
-      loading.close()
-    },
-  },
+  }).toImage()
+}
+
+async function TwoFactorEnable() {
+  const loading = $unicore.loading()
+  try {
+    await $api.post('/cabinet/2fa/enable', two_factor_form).then((res) => res.data)
+    await $auth.fetchUser()
+    two_factor_form.code = ''
+    two_factor.value = null
+    $unicore.successNotification('Двухфакторная авторизация успешно подключена к вашему аккаунту')
+  } catch {
+    $unicore.errorNotification('Код из приложения не подходит, попробуйте еще раз')
+  }
+  loading.close()
+}
+
+async function TwoFactorDisable() {
+  const loading = $unicore.loading()
+  try {
+    await $api.post('/cabinet/2fa/disable', two_factor_form).then((res) => res.data)
+    await Promise.all([$auth.fetchUser(), GenerateQR()])
+    two_factor_form.code = ''
+    $unicore.successNotification('Двухфакторная авторизация успешно отключена от вашего аккаунта')
+  } catch {
+    $unicore.errorNotification('Код из приложения не подходит, попробуйте еще раз')
+  }
+  loading.close()
 }
 </script>

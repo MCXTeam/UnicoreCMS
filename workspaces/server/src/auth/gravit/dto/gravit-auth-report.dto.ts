@@ -15,7 +15,7 @@ export class GravitAuthReportDto {
     this.minecraftAccessToken = user.accessToken;
     this.oauthAccessToken = accessToken;
     this.oauthRefreshToken = refreshToken;
-    this.oauthExpire = Math.round(ms(envConfig.jwtExpires) / 1000);
+    this.oauthExpire = Math.round(ms(envConfig.jwtExpires as ms.StringValue) / 1000);
     this.session = instanceToPlain(new GravitSessionDto(user)) as GravitSessionDto;
   }
 }

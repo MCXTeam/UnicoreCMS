@@ -1,16 +1,16 @@
-import { Module, OnModuleInit } from "@nestjs/common";
-import { TypeOrmModule } from "@nestjs/typeorm";
-import { Server } from "../entities/server.entity";
-import { RconService } from "./rcon.service";
+import { Module, OnModuleInit } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Server } from '../entities/server.entity';
+import { RconService } from './rcon.service';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Server])],
-    providers: [RconService]
+  imports: [TypeOrmModule.forFeature([Server])],
+  providers: [RconService],
 })
 export class RconModule implements OnModuleInit {
-    constructor (private rconService: RconService) {}
+  constructor(private rconService: RconService) {}
 
-    onModuleInit() {
-        this.rconService.init()
-    }
+  onModuleInit() {
+    this.rconService.init();
+  }
 }

@@ -16,7 +16,7 @@ import { MoneyPayCommandInput } from './dto/money-pay-command.input';
 import { MoneyWDInput } from './dto/monet-wd.input';
 import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
 import { ConfigField } from 'src/admin/config/config.enum';
-import { Transactional } from 'typeorm-transactional-cls-hooked';
+import { Transactional } from 'typeorm-transactional';
 
 @Injectable()
 export class MoneyService {
@@ -29,7 +29,7 @@ export class MoneyService {
     private usersService: UsersService,
     private historyService: HistoryService,
     private configService: ConfigService,
-  ) { }
+  ) {}
 
   private async generate(server: Server, user: User) {
     const money = new Money();
@@ -49,7 +49,7 @@ export class MoneyService {
     }
 
     const servers = await this.serversService.find();
-    const money = await this.moneyRepository.find({
+    const money = await this.moneyRepository.findBy({
       user: {
         uuid: user.uuid,
       },
@@ -72,7 +72,10 @@ export class MoneyService {
 
     if (!user || !server || !server_id) throw new NotFoundException();
 
-    const money = await this.moneyRepository.findOne({ user, server }, { relations: ['user', 'server'] });
+    const money = await this.moneyRepository.findOne({
+      where: { user: { uuid: (user as User).uuid }, server: { id: server.id } },
+      relations: ['user', 'server'],
+    });
 
     if (money) return money;
     else {
@@ -88,7 +91,10 @@ export class MoneyService {
 
     if (!user || !server || !server_id) throw new NotFoundException();
 
-    const money = await this.moneyRepository.findOne({ user, server }, { relations: ['user', 'server'] });
+    const money = await this.moneyRepository.findOne({
+      where: { user: { uuid: (user as User).uuid }, server: { id: server.id } },
+      relations: ['user', 'server'],
+    });
 
     if (money) return money;
     else {
@@ -100,19 +106,19 @@ export class MoneyService {
   async findTopByServer(id: string): Promise<Money[]> {
     return this.moneyRepository.find({
       where: {
-        server: { id }
+        server: { id },
       },
       order: {
-        money: "DESC"
+        money: 'DESC',
       },
-      relations: ["server", "user"],
-      take: 10
-    })
+      relations: ['server', 'user'],
+      take: 10,
+    });
   }
 
   @Transactional()
   async update(input: MoneyUpdateInput) {
-    const user = await this.usersRepo.findOne(input.uuid)
+    const user = await this.usersRepo.findOneBy({ uuid: input.uuid });
     if (!user) throw new NotFoundException();
 
     if (input.type == MoneyTransferType.Money) {
@@ -135,8 +141,7 @@ export class MoneyService {
 
   @Transactional()
   async payCommand(input: MoneyPayCommandInput) {
-    if (input.target_uuid == input.user_uuid)
-      throw new BadRequestException();
+    if (input.target_uuid == input.user_uuid) throw new BadRequestException();
 
     try {
       var target_money = await this.findOneByUserUuidAndServer(input.server_id, input.target_uuid);
@@ -145,13 +150,28 @@ export class MoneyService {
       throw new NotFoundException();
     }
 
-    if (user_money.money < input.amount) throw new BadRequestException();
+    const amount = currencyUtils.roundByType(input.amount, SystemCurrency.INGAME);
 
-    await this.moneyRepository.decrement({ user: { uuid: input.user_uuid }, server: { id: input.server_id } }, "money", currencyUtils.roundByType(input.amount, SystemCurrency.INGAME))
-    await this.moneyRepository.increment({ user: { uuid: input.target_uuid }, server: { id: input.server_id } }, "money", currencyUtils.roundByType(input.amount, SystemCurrency.INGAME))
-    await this.historyService.create(HistoryType.MoneyTransfer, input.user_ip, user_money.user, user_money.server, target_money.user, input.amount);
+    const debit = await this.moneyRepository
+      .createQueryBuilder()
+      .update(Money)
+      .set({ money: () => 'money - :amount' })
+      .where('user_uuid = :uuid AND server_id = :server AND money >= :amount', { uuid: input.user_uuid, server: input.server_id, amount })
+      .execute();
 
-    return  this.findOneByUserUuidAndServer(input.server_id, input.user_uuid);
+    if (!debit.affected) throw new BadRequestException();
+
+    await this.moneyRepository.increment({ user: { uuid: input.target_uuid }, server: { id: input.server_id } }, 'money', amount);
+    await this.historyService.create(
+      HistoryType.MoneyTransfer,
+      input.user_ip,
+      user_money.user,
+      user_money.server,
+      target_money.user,
+      input.amount,
+    );
+
+    return this.findOneByUserUuidAndServer(input.server_id, input.user_uuid);
   }
 
   @Transactional()
@@ -162,7 +182,11 @@ export class MoneyService {
       throw new NotFoundException();
     }
 
-    user_money.money += input.amount;
+    await this.moneyRepository.increment(
+      { user: { uuid: input.user_uuid }, server: { id: input.server_id } },
+      'money',
+      currencyUtils.roundByType(input.amount, SystemCurrency.INGAME),
+    );
 
     return true;
   }
@@ -175,17 +199,23 @@ export class MoneyService {
       throw new NotFoundException();
     }
 
-    if (user_money.money < input.amount) throw new BadRequestException();
+    const amount = currencyUtils.roundByType(input.amount, SystemCurrency.INGAME);
 
-    await this.moneyRepository.decrement({ user: { uuid: input.user_uuid }, server: { id: input.server_id } }, "money", currencyUtils.roundByType(input.amount, SystemCurrency.INGAME))
+    const debit = await this.moneyRepository
+      .createQueryBuilder()
+      .update(Money)
+      .set({ money: () => 'money - :amount' })
+      .where('user_uuid = :uuid AND server_id = :server AND money >= :amount', { uuid: input.user_uuid, server: input.server_id, amount })
+      .execute();
+
+    if (!debit.affected) throw new BadRequestException();
 
     return true;
   }
 
   @Transactional()
   async transfer(user: User, ip: string, input: MoneyInput): Promise<boolean> {
-    if (user.username == input.username)
-      throw new BadRequestException();
+    if (user.username == input.username) throw new BadRequestException();
 
     if (input.type == MoneyTransferType.Money) {
       try {
@@ -195,11 +225,19 @@ export class MoneyService {
         throw new NotFoundException();
       }
 
-      if (currencyUtils.roundByType(user_money.money, SystemCurrency.INGAME) < currencyUtils.roundByType(input.amount, SystemCurrency.INGAME)) throw new BadRequestException();
+      const amount = currencyUtils.roundByType(input.amount, SystemCurrency.INGAME);
 
-      await this.moneyRepository.decrement({ user: { uuid: user.uuid }, server: { id: input.server } }, "money", currencyUtils.roundByType(input.amount, SystemCurrency.INGAME))
-      await this.moneyRepository.increment({ user: { uuid: user.uuid }, server: { id: input.server } }, "money", currencyUtils.roundByType(input.amount, SystemCurrency.INGAME))
-      await this.historyService.create(HistoryType.MoneyTransfer, ip, user_money.user, user_money.server, target_money.user, currencyUtils.roundByType(input.amount, SystemCurrency.INGAME));
+      const debit = await this.moneyRepository
+        .createQueryBuilder()
+        .update(Money)
+        .set({ money: () => 'money - :amount' })
+        .where('user_uuid = :uuid AND server_id = :server AND money >= :amount', { uuid: user.uuid, server: input.server, amount })
+        .execute();
+
+      if (!debit.affected) throw new BadRequestException();
+
+      await this.moneyRepository.increment({ user: { uuid: target_money.user.uuid }, server: { id: input.server } }, 'money', amount);
+      await this.historyService.create(HistoryType.MoneyTransfer, ip, user_money.user, user_money.server, target_money.user, amount);
 
       return true;
     } else {
@@ -207,10 +245,18 @@ export class MoneyService {
 
       if (!target_user) throw new NotFoundException();
 
-      if (currencyUtils.roundByType(user.real, SystemCurrency.REAL) < currencyUtils.roundByType(input.amount, SystemCurrency.REAL)) throw new BadRequestException();
+      const realAmount = currencyUtils.roundByType(input.amount, SystemCurrency.REAL);
 
-      await this.usersRepo.increment({ uuid: target_user.uuid }, "real", currencyUtils.roundByType(input.amount, SystemCurrency.REAL))
-      await this.usersRepo.decrement({ uuid: user.uuid }, "real", currencyUtils.roundByType(input.amount, SystemCurrency.REAL))
+      const debit = await this.usersRepo
+        .createQueryBuilder()
+        .update(User)
+        .set({ real: () => 'real - :realAmount' })
+        .where('uuid = :uuid AND real >= :realAmount', { uuid: user.uuid, realAmount })
+        .execute();
+
+      if (!debit.affected) throw new BadRequestException();
+
+      await this.usersRepo.increment({ uuid: target_user.uuid }, 'real', realAmount);
       await this.historyService.create(HistoryType.RealTransfer, ip, user, target_user, input.amount);
 
       return true;
@@ -230,11 +276,29 @@ export class MoneyService {
 
       const price = currencyUtils.roundByType(input.amount / (cfg[ConfigField.EconomyRate] as number), SystemCurrency.REAL);
 
-      if (user.real < price) throw new BadRequestException();
+      if (price <= 0) throw new BadRequestException();
 
-      await this.usersRepo.decrement({ uuid: user.uuid }, "real", currencyUtils.roundByType(price, SystemCurrency.REAL))
-      await this.moneyRepository.increment({ user: { uuid: user.uuid }, server: { id: input.server } }, "money", currencyUtils.roundByType(input.amount, SystemCurrency.INGAME))
-      await this.historyService.create(HistoryType.MoneyExchange, ip, user_money.user, user_money.server, currencyUtils.roundByType(input.amount, SystemCurrency.INGAME));
+      const debit = await this.usersRepo
+        .createQueryBuilder()
+        .update(User)
+        .set({ real: () => 'real - :price' })
+        .where('uuid = :uuid AND real >= :price', { uuid: user.uuid, price })
+        .execute();
+
+      if (!debit.affected) throw new BadRequestException();
+
+      await this.moneyRepository.increment(
+        { user: { uuid: user.uuid }, server: { id: input.server } },
+        'money',
+        currencyUtils.roundByType(input.amount, SystemCurrency.INGAME),
+      );
+      await this.historyService.create(
+        HistoryType.MoneyExchange,
+        ip,
+        user_money.user,
+        user_money.server,
+        currencyUtils.roundByType(input.amount, SystemCurrency.INGAME),
+      );
 
       return true;
     } else {
@@ -245,12 +309,25 @@ export class MoneyService {
         throw new NotFoundException();
       }
 
-      if (currencyUtils.roundByType(user_money_from.money, SystemCurrency.INGAME) < currencyUtils.roundByType(input.amount, SystemCurrency.INGAME))
-        throw new BadRequestException();
+      const amount = currencyUtils.roundByType(input.amount, SystemCurrency.INGAME);
 
-      await this.moneyRepository.decrement({ user: { uuid: user.uuid }, server: { id: input.server } }, "money", currencyUtils.roundByType(input.amount, SystemCurrency.INGAME))
-      await this.moneyRepository.increment({ user: { uuid: user.uuid }, server: { id: input.server } }, "money", currencyUtils.roundByType(input.amount, SystemCurrency.INGAME))
-      await this.historyService.create(HistoryType.MoneyServerTransfer, ip, user_money_to.user, user_money_to.server, currencyUtils.roundByType(input.amount, SystemCurrency.INGAME));
+      const debit = await this.moneyRepository
+        .createQueryBuilder()
+        .update(Money)
+        .set({ money: () => 'money - :amount' })
+        .where('user_uuid = :uuid AND server_id = :server AND money >= :amount', { uuid: user.uuid, server: input.from_server, amount })
+        .execute();
+
+      if (!debit.affected) throw new BadRequestException();
+
+      await this.moneyRepository.increment({ user: { uuid: user.uuid }, server: { id: input.server } }, 'money', amount);
+      await this.historyService.create(
+        HistoryType.MoneyServerTransfer,
+        ip,
+        user_money_to.user,
+        user_money_to.server,
+        currencyUtils.roundByType(input.amount, SystemCurrency.INGAME),
+      );
 
       return true;
     }

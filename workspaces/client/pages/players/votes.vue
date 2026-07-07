@@ -2,7 +2,9 @@
   <div class="px-4">
     <div class="d-flex align-items-center justify-content-between w-100">
       <h2 class="m-0">Топ голосующих за {{ $moment().format('MMMM') }}</h2>
-      <vs-button size="large" to="/cabinet/gifts">Голосовать</vs-button>
+      <NuxtLink to="/cabinet/gifts">
+        <Button size="large" label="Голосовать" />
+      </NuxtLink>
     </div>
     <div v-if="votesGifts.length">
       <h4 class="m-0">Что вы получите заняв призовое место?</h4>
@@ -15,88 +17,79 @@
         </div>
       </div>
     </div>
-    <div ref="votes">
-      <vs-table class="no-overflow-table mt-4 large-table">
-        <template #thead>
-          <vs-tr>
-            <vs-th style="width: 4rem; max-width: 4rem">Место</vs-th>
-            <vs-th style="width: 30%">Игрок</vs-th>
-            <vs-th style="width: 30%">Голосов</vs-th>
-            <vs-th>Последний голос</vs-th>
-          </vs-tr>
-        </template>
-        <template #tbody>
-          <vs-tr :key="vote.user.uuid" v-for="(vote, i) in votes.data" :data="vote">
-            <vs-td>
-              <h3 class="m-0">#{{ (votes.meta.total - 1) * 25 + i + 1 }}</h3>
-            </vs-td>
-            <vs-td>
-              <div class="d-flex align-items-center">
-                <Avatar class="rounded shadow me-3">
-                  <SkinView2D class="rounded" :width="32" :height="32" :skin="vote.user.skin" />
-                </Avatar>
-                <nuxt-link :to="`/user/` + vote.user.username">{{ vote.user.username }}</nuxt-link>
-              </div>
-            </vs-td>
-            <vs-td> {{ vote.total }} </vs-td>
-            <vs-td> {{ $moment(vote.updated).local().format('DD.MM.YYYY, HH:mm:ss') }} </vs-td>
-          </vs-tr>
-        </template>
-        <template #notFound>
+    <div>
+      <DataTable
+        class="no-overflow-table mt-4 large-table"
+        :value="votes.data"
+        lazy
+        paginator
+        :rows="25"
+        :totalRecords="votes.meta.total * 25"
+        :loading="loading"
+        dataKey="user.uuid"
+        @page="onPage($event)"
+      >
+        <Column header="Место" headerStyle="width: 4rem; max-width: 4rem">
+          <template #body="{ index }">
+            <h3 class="m-0">#{{ (votes.meta.total - 1) * 25 + index + 1 }}</h3>
+          </template>
+        </Column>
+        <Column header="Игрок" headerStyle="width: 30%">
+          <template #body="{ data }">
+            <div class="d-flex align-items-center">
+              <Avatar class="rounded shadow me-3">
+                <SkinView2D class="rounded" :width="32" :height="32" :skin="data.user.skin" />
+              </Avatar>
+              <NuxtLink :to="`/user/` + data.user.username">{{ data.user.username }}</NuxtLink>
+            </div>
+          </template>
+        </Column>
+        <Column header="Голосов" headerStyle="width: 30%">
+          <template #body="{ data }">{{ data.total }}</template>
+        </Column>
+        <Column header="Последний голос">
+          <template #body="{ data }">{{ $moment(data.updated).local().format('DD.MM.YYYY, HH:mm:ss') }}</template>
+        </Column>
+        <template #empty>
           <span>Нет результатов</span>
         </template>
-      </vs-table>
-      <vs-pagination v-if="votes.data.length" class="mt-4" v-model="votes.meta.page" :length="votes.meta.total" />
+      </DataTable>
     </div>
   </div>
 </template>
 
-<script>
-export default {
-  layout: 'cabinet',
+<script setup lang="ts">
+import { useUiStore } from '~/stores/ui'
 
-  head: {
-    title: 'Топ-голосующих',
-  },
+definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'] })
+useHead({ title: 'Топ-голосующих' })
+useUiStore().setName('Игроки')
 
-  asyncData({ store }) {
-    store.commit('unicore/SET_NAME', 'Игроки')
-  },
+const { $api } = useNuxtApp()
 
-  data() {
-    return {
-      votesGifts: [],
-      votes: {
-        data: [],
-        meta: {
-          page: 1,
-          total: 1,
-        },
-      },
-    }
+const loading = ref(false)
+const votesGifts = ref<any[]>([])
+const votes = ref<any>({
+  data: [],
+  meta: {
+    page: 1,
+    total: 1,
   },
+})
 
-  async fetch() {
-    const loading = this.$vs.loading({ target: this.$refs.votes })
-    this.votes = await this.$axios.get('players/votes-list', { params: { page: this.votes.meta.page } }).then((res) => res.data)
-    this.votesGifts = await this.$axios.get('cabinet/votes/gifts').then((res) => res.data)
-    loading.close()
-  },
-
-  methods: {
-    async load() {
-      const loading = this.$vs.loading({ target: this.$refs.votes })
-      this.votes = await this.$axios.get('players/votes-list', { params: { page: this.votes.meta.page } }).then((res) => res.data)
-      loading.close()
-    },
-  },
-
-  watch: {
-    'votes.meta.page': {
-      handler: function () {
-        this.load()
-      },
-    },
-  },
+async function load() {
+  loading.value = true
+  votes.value = await $api.get('players/votes-list', { params: { page: votes.value.meta.page } }).then((res) => res.data)
+  loading.value = false
 }
+
+function onPage(event: any) {
+  votes.value.meta.page = event.page + 1
+  load()
+}
+
+onMounted(async () => {
+  await load()
+  votesGifts.value = await $api.get('cabinet/votes/gifts').then((res) => res.data)
+})
 </script>

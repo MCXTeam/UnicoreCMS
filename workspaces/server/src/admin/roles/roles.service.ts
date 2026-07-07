@@ -69,7 +69,7 @@ export class RolesService {
   }
 
   findOne(id: string): Promise<Role> {
-    return this.rolesRepository.findOne(id);
+    return this.rolesRepository.findOneBy({ id });
   }
 
   async create(input: RoleCreateInput): Promise<Role> {

@@ -1,9 +1,9 @@
 <template>
   <div class="layout-topbar">
-    <router-link to="/" class="layout-topbar-logo">
+    <NuxtLink to="/" class="layout-topbar-logo">
       <img alt="Logo" src="/logo.png" />
       <span>UNICORECMS</span>
-    </router-link>
+    </NuxtLink>
     <button class="p-link layout-menu-button layout-topbar-button" @click="onMenuToggle">
       <i class="pi pi-bars"></i>
     </button>
@@ -23,13 +23,13 @@
     </button>
     <ul class="layout-topbar-menu hidden lg:flex origin-top">
       <li>
-        <nuxt-link class="p-link layout-topbar-button" :to="'/users/' + $auth.user.uuid">
+        <NuxtLink class="p-link layout-topbar-button" :to="'/users/' + authStore.user?.uuid">
           <i class="pi pi-user"></i>
           <span>Профиль</span>
-        </nuxt-link>
+        </NuxtLink>
       </li>
       <li>
-        <button class="p-link layout-topbar-button" @click="$auth.logout()">
+        <button class="p-link layout-topbar-button" @click="logout">
           <i class="pi pi-sign-out"></i>
           <span>Выйти</span>
         </button>
@@ -39,13 +39,24 @@
 </template>
 
 <script>
+import { useAuthStore } from '~/stores/auth'
+
 export default {
+  emits: ['menu-toggle', 'topbar-menu-toggle'],
+  setup() {
+    const authStore = useAuthStore()
+    return { authStore }
+  },
   methods: {
     onMenuToggle(event) {
       this.$emit('menu-toggle', event)
     },
     onTopbarMenuToggle(event) {
       this.$emit('topbar-menu-toggle', event)
+    },
+    async logout() {
+      await this.authStore.logout()
+      navigateTo('/login')
     },
     topbarImage() {
       return '/images/logo-white.svg'

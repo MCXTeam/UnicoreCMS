@@ -14,5 +14,5 @@ class CommonSortInputEntity {
 export class CommonSortInput {
   @IsArray()
   @Type(() => CommonSortInputEntity)
-  items: CommonSortInputEntity[]
+  items: CommonSortInputEntity[];
 }

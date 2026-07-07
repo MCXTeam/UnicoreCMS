@@ -3,9 +3,9 @@ import { Server } from 'src/game/servers/entities/server.entity';
 import { CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Kit } from '../../entities/kit.entity';
 
-@Entity({ name: "unicore_cart_item_kits" })
+@Entity({ name: 'unicore_cart_item_kits' })
 export class CartItemKit {
-  @PrimaryGeneratedColumn({ name: "id" })
+  @PrimaryGeneratedColumn({ name: 'id' })
   id: number;
 
   @ManyToOne(() => Kit, {
@@ -15,7 +15,7 @@ export class CartItemKit {
     eager: true,
     nullable: false,
   })
-  @JoinColumn({ name: "kit_id" })
+  @JoinColumn({ name: 'kit_id' })
   kit: Kit;
 
   @ManyToOne(() => User, {
@@ -24,7 +24,7 @@ export class CartItemKit {
     onUpdate: 'CASCADE',
     nullable: false,
   })
-  @JoinColumn({ name: "user_uuid" })
+  @JoinColumn({ name: 'user_uuid' })
   user: User;
 
   @ManyToOne(() => Server, {
@@ -33,12 +33,12 @@ export class CartItemKit {
     onUpdate: 'CASCADE',
     nullable: false,
   })
-  @JoinColumn({ name: "server_id" })
+  @JoinColumn({ name: 'server_id' })
   server: Server;
 
-  @CreateDateColumn({ name: "created" })
+  @CreateDateColumn({ name: 'created' })
   created: Date;
 
-  @UpdateDateColumn({ name: "updated" })
+  @UpdateDateColumn({ name: 'updated' })
   updated: Date;
 }

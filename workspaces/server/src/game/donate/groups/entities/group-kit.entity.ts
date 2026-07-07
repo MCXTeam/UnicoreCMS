@@ -4,24 +4,24 @@ import { DonateGroup } from './donate-group.entity';
 import { GroupKitImage } from './group-kit-image.entity';
 
 @Entity({
-  name: "unicore_group_kits",
+  name: 'unicore_group_kits',
   orderBy: {
-    priority: "ASC"
-  }
+    priority: 'ASC',
+  },
 })
 export class GroupKit {
-  @PrimaryGeneratedColumn({ name: "id" })
+  @PrimaryGeneratedColumn({ name: 'id' })
   id: number;
 
-  @Column({ name: "name" })
+  @Column({ name: 'name' })
   name: string;
 
-  @Column({ nullable: true, name: "priority" })
+  @Column({ nullable: true, name: 'priority' })
   priority?: number;
 
   @Column('text', {
     nullable: true,
-    name: "description"
+    name: 'description',
   })
   description?: string;
 
@@ -41,7 +41,7 @@ export class GroupKit {
 
   @OneToMany(() => GroupKitImage, (item) => item.kit, {
     cascade: ['insert', 'update'],
-    eager: true
+    eager: true,
   })
-  images: GroupKitImage[]
+  images: GroupKitImage[];
 }

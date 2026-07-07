@@ -1,7 +1,6 @@
 import { StorageManager } from '@common';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MulterFile } from 'fastify-file-interceptor';
 import { Repository } from 'typeorm';
 import { BonusInput } from './dto/bonus.dto';
 import { Bonus } from './entities/bonus.entity';
@@ -22,7 +21,7 @@ export class BonusesService {
   }
 
   findOne(id: number): Promise<Bonus> {
-    return this.bonusesRepository.findOne(id);
+    return this.bonusesRepository.findOneBy({ id });
   }
 
   async create(input: BonusInput): Promise<Bonus> {
@@ -35,7 +34,7 @@ export class BonusesService {
   }
 
   async update(id: number, input: BonusInput): Promise<Bonus> {
-    const bonus = await this.bonusesRepository.findOne(id);
+    const bonus = await this.bonusesRepository.findOneBy({ id });
 
     if (!bonus) {
       throw new NotFoundException();
@@ -48,7 +47,7 @@ export class BonusesService {
   }
 
   async remove(id: number): Promise<Bonus> {
-    const bonus = await this.bonusesRepository.findOne(id);
+    const bonus = await this.bonusesRepository.findOneBy({ id });
 
     if (!bonus) {
       throw new NotFoundException();
@@ -57,8 +56,8 @@ export class BonusesService {
     return this.bonusesRepository.remove(bonus);
   }
 
-  async updateIcon(id: number, file: MulterFile) {
-    const bonus = await this.bonusesRepository.findOne(id);
+  async updateIcon(id: number, file: Express.Multer.File) {
+    const bonus = await this.bonusesRepository.findOneBy({ id });
 
     if (!bonus) {
       StorageManager.remove(file.filename);
@@ -72,7 +71,7 @@ export class BonusesService {
   }
 
   async removeIcon(id: number) {
-    const bonus = await this.bonusesRepository.findOne(id);
+    const bonus = await this.bonusesRepository.findOneBy({ id });
 
     if (!bonus) {
       throw new NotFoundException();

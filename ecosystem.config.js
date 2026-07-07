@@ -1,22 +1,27 @@
 module.exports = {
   apps: [
     {
+      name: 'unicore-server',
+      cwd: './workspaces/server',
+      script: 'dist/main.js',
+    },
+    {
       name: 'unicore-client',
-      script: './node_modules/nuxt/bin/nuxt.js',
-      cwd: "./workspaces/client",
-      args: 'start'
+      cwd: './workspaces/client',
+      script: '.output/server/index.mjs',
+      env: {
+        HOST: '0.0.0.0',
+        PORT: process.env.CLIENT_PORT || 3000,
+      },
     },
     {
       name: 'unicore-admin',
-      script: './node_modules/nuxt/bin/nuxt.js',
-      cwd: "./workspaces/admin",
-      args: 'start'
+      cwd: './workspaces/admin',
+      script: '.output/server/index.mjs',
+      env: {
+        HOST: '0.0.0.0',
+        PORT: process.env.ADMIN_PORT || 4000,
+      },
     },
-    {
-      name: 'unicore-server',
-      script: './dist/main.js',
-      cwd: "./workspaces/server",
-      args: 'start'
-    }
-  ]
-}
+  ],
+};

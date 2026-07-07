@@ -13,10 +13,10 @@
             У нас собственная система авторизации, потому для начала Вам необходимо зарегистрироваться, не забыв перед этим ознакомиться с
             нашими правилами.
           </p>
-          <no-ssr>
+          <ClientOnly>
             <div v-if="!$auth.loggedIn" class="d-flex flex-wrap">
-              <vs-button size="xl" to="/auth/register">Зарегистрироваться</vs-button>
-              <vs-button size="xl" to="/auth">Войти</vs-button>
+              <NuxtLink to="/auth/register" class="me-2 mb-2"><Button label="Зарегистрироваться" size="large" /></NuxtLink>
+              <NuxtLink to="/auth" class="mb-2"><Button label="Войти" size="large" /></NuxtLink>
             </div>
             <div v-else-if="$auth.user" class="d-flex align-items-center p-2">
               <Avatar class="rounded shadow">
@@ -26,7 +26,7 @@
                 <h2 class="m-0">Привет, {{ $auth.user.username }}</h2>
               </div>
             </div>
-          </no-ssr>
+          </ClientOnly>
         </div>
       </div>
       <div class="start-block d-flex">
@@ -42,14 +42,14 @@
             установить её.
           </p>
           <div class="mt-4 download-content" style="max-width: 400px">
-            <vs-button :href="config.public_launcher_exe" target="download" block class="mb-2" size="xl"
-              >Скачать лаунчер <i class="bx bxl-windows ms-2"></i
-            ></vs-button>
+            <a :href="config.public_launcher_exe" target="download" class="d-block mb-2">
+              <Button size="large" class="w-full">Скачать лаунчер <i class="bx bxl-windows ms-2"></i></Button>
+            </a>
             <div class="d-flex justify-content-between">
               <span>Клиент также доступен на</span>
               <div class="d-flex">
-                <vs-button :href="config.public_launcher_jar" target="download" transparent class="m-0">Linux</vs-button>
-                <vs-button :href="config.public_launcher_jar" target="download" transparent class="m-0">MacOS</vs-button>
+                <a :href="config.public_launcher_jar" target="download" class="m-0"><Button text label="Linux" /></a>
+                <a :href="config.public_launcher_jar" target="download" class="m-0"><Button text label="MacOS" /></a>
               </div>
             </div>
           </div>
@@ -63,37 +63,28 @@
             Поздравляем, Вы великолепны! Теперь осталось только выбрать сервер по Вашему вкусу и приступить к игре. При возникновении
             проблем обратитесь в группу ВКонтакте или на наш форум.
           </p>
-          <vs-button size="xl" to="/servers">Серверы</vs-button>
+          <NuxtLink to="/servers"><Button label="Серверы" size="large" /></NuxtLink>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup lang="ts">
+import { useConfigStore } from '~/stores/config'
+import { useUiStore } from '~/stores/ui'
 
-export default {
-  layout: 'landing',
+definePageMeta({ layout: 'landing' })
+useHead({ title: 'Начать игру' })
 
-  head: {
-    title: 'Начать игру',
-  },
+const { $pub } = useNuxtApp()
+const config = computed(() => useConfigStore().config as Record<string, any>)
 
-  computed: {
-    ...mapGetters({
-      config: 'config',
-    }),
-  },
+useUiStore().setName(`Начать игру на ${$pub.sitename}`)
 
-  mounted() {
-    if (this.$route.query.ref && process.client) {
-      localStorage.setItem('ref', this.$route.query.ref)
-    }
-  },
+const route = useRoute()
 
-  asyncData({ store, $config }) {
-    store.commit('unicore/SET_NAME', `Начать игру на ${$config.sitename}`)
-  },
-}
+onMounted(() => {
+  if (route.query.ref) localStorage.setItem('ref', String(route.query.ref))
+})
 </script>

@@ -1,80 +1,74 @@
 <template>
   <div class="px-4">
     <h2 class="m-0">Топ онлайна</h2>
-    <div ref="playtimes">
-      <vs-table class="no-overflow-table mt-4 large-table">
-        <template #thead>
-          <vs-tr>
-            <vs-th style="width: 4rem; max-width: 4rem">Место</vs-th>
-            <vs-th style="width: 60%">Игрок</vs-th>
-            <vs-th>Время в игре</vs-th>
-          </vs-tr>
-        </template>
-        <template #tbody>
-          <vs-tr :key="playtime.user.uuid" v-for="(playtime, i) in playtimes.data" :data="playtime">
-            <vs-td> <h3 class="m-0">#{{ (playtimes.meta.page - 1) * 25 +  i + 1}}</h3> </vs-td>
-            <vs-td>
-              <div class="d-flex align-items-center">
-                <Avatar class="rounded shadow me-3">
-                  <SkinView2D class="rounded" :width="32" :height="32" :skin="playtime.user.skin" />
-                </Avatar>
-                <nuxt-link :to="`/user/` + playtime.user.username">{{ playtime.user.username }}</nuxt-link>
-              </div>
-            </vs-td>
-            <vs-td> {{ $moment.duration(playtime.time, 'minutes').format('y [years], w [weeks], d [days], h [hours], m [minutes]') }} </vs-td>
-          </vs-tr>
-        </template>
-        <template #notFound>
+    <div>
+      <DataTable
+        class="no-overflow-table mt-4 large-table"
+        :value="playtimes.data"
+        lazy
+        paginator
+        :rows="25"
+        :totalRecords="playtimes.meta.total * 25"
+        :loading="loading"
+        dataKey="user.uuid"
+        @page="onPage($event)"
+      >
+        <Column header="Место" headerStyle="width: 4rem; max-width: 4rem">
+          <template #body="{ index }">
+            <h3 class="m-0">#{{ (playtimes.meta.page - 1) * 25 + index + 1 }}</h3>
+          </template>
+        </Column>
+        <Column header="Игрок" headerStyle="width: 60%">
+          <template #body="{ data }">
+            <div class="d-flex align-items-center">
+              <Avatar class="rounded shadow me-3">
+                <SkinView2D class="rounded" :width="32" :height="32" :skin="data.user.skin" />
+              </Avatar>
+              <NuxtLink :to="`/user/` + data.user.username">{{ data.user.username }}</NuxtLink>
+            </div>
+          </template>
+        </Column>
+        <Column header="Время в игре">
+          <template #body="{ data }">
+            {{ $moment.duration(data.time, 'minutes').format('y [years], w [weeks], d [days], h [hours], m [minutes]') }}
+          </template>
+        </Column>
+        <template #empty>
           <span>Нет результатов</span>
         </template>
-      </vs-table>
-      <vs-pagination v-if="playtimes.data.length" class="mt-4" v-model="playtimes.meta.page" :length="playtimes.meta.total" />
+      </DataTable>
     </div>
   </div>
 </template>
 
-<script>
-import SkinViewer2D from '../../../admin/components/SkinView2D.vue'
+<script setup lang="ts">
+import { useUiStore } from '~/stores/ui'
 
-export default {
-  layout: 'cabinet',
+definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'] })
+useHead({ title: 'Топ-онлайн' })
+useUiStore().setName('Игроки')
 
-  head: {
-    title: 'Топ-онлайн',
+const { $api } = useNuxtApp()
+
+const loading = ref(false)
+const playtimes = ref<any>({
+  data: [],
+  meta: {
+    page: 1,
+    total: 1,
   },
+})
 
-  components: {
-    SkinViewer2D,
-  },
-
-  asyncData({ store }) {
-    store.commit('unicore/SET_NAME', 'Игроки')
-  },
-
-  data() {
-    return {
-      playtimes: {
-        data: [],
-        meta: {
-          page: 1,
-          total: 1,
-        },
-      },
-    }
-  },
-
-  async fetch() {
-    const loading = this.$vs.loading({ target: this.$refs.playtimes })
-    this.playtimes = await this.$axios.get('players/playtime', { params: { page: this.playtimes.meta.page } }).then((res) => res.data)
-    loading.close()
-  },
-
-  watch: {
-    'playtimes.meta.page': {
-      handler: function () {
-        this.$fetch()
-      },
-    },
-  },
+async function load() {
+  loading.value = true
+  playtimes.value = await $api.get('players/playtime', { params: { page: playtimes.value.meta.page } }).then((res) => res.data)
+  loading.value = false
 }
+
+function onPage(event: any) {
+  playtimes.value.meta.page = event.page + 1
+  load()
+}
+
+onMounted(load)
 </script>

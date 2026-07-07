@@ -1,5 +1,5 @@
 import { StorageManager } from '@common';
-import faker from '@faker-js/faker';
+import { faker } from '@faker-js/faker';
 import { readFileSync } from 'fs';
 import * as JSZip from 'jszip';
 import * as _ from 'lodash';
@@ -17,13 +17,12 @@ import { Category } from 'src/game/store/entities/category.entity';
 import { Kit } from 'src/game/store/entities/kit.entity';
 import { Product } from 'src/game/store/entities/product.entity';
 import { ProductMap } from 'src/game/store/providers/product.service';
-import { Connection } from 'typeorm';
-import { Seeder } from 'typeorm-seeding';
+import { DataSource } from 'typeorm';
 import { Permission } from 'unicore-common';
 
-export default class CreateServers implements Seeder {
-  public async run(factory: any, connection: Connection): Promise<any> {
-    const hitechMods = await connection.getRepository(Mod).save([
+export default class CreateServers {
+  public async run(dataSource: DataSource): Promise<any> {
+    const hitechMods = await dataSource.getRepository(Mod).save([
       {
         name: 'Applied Energistics 2',
         description: faker.lorem.text(),
@@ -45,7 +44,7 @@ export default class CreateServers implements Seeder {
         icon: 'default/mods/industrial-foregoing.png',
       },
     ]);
-    const technomagicMods = await connection.getRepository(Mod).save([
+    const technomagicMods = await dataSource.getRepository(Mod).save([
       {
         name: 'Avarita',
         description: faker.lorem.text(),
@@ -62,7 +61,7 @@ export default class CreateServers implements Seeder {
         icon: 'default/mods/draconic-evolution.png',
       },
     ]);
-    const skytechMods = await connection.getRepository(Mod).save([
+    const skytechMods = await dataSource.getRepository(Mod).save([
       {
         name: 'ExNihilo',
         description: faker.lorem.text(),
@@ -177,10 +176,10 @@ export default class CreateServers implements Seeder {
 
     const onlines = [{ server: servers[0] }, { server: servers[1] }, { server: servers[2] }];
 
-    const servers_ = await connection.getRepository(Server).save(servers);
-    await connection.createQueryBuilder().insert().into(Query).values(queries).execute();
-    await connection.createQueryBuilder().insert().into(Online).values(onlines).execute();
-    const categories = await connection.getRepository(Category).save([
+    const servers_ = await dataSource.getRepository(Server).save(servers);
+    await dataSource.createQueryBuilder().insert().into(Query).values(queries).execute();
+    await dataSource.createQueryBuilder().insert().into(Online).values(onlines).execute();
+    const categories = await dataSource.getRepository(Category).save([
       {
         name: 'Minecraft',
         icon: 'default/minecraft.png',
@@ -216,9 +215,9 @@ export default class CreateServers implements Seeder {
         }),
       );
 
-      const productsEntities = await connection.getRepository(Product).save(products);
+      const productsEntities = await dataSource.getRepository(Product).save(products);
 
-      await connection.getRepository(Kit).save([
+      await dataSource.getRepository(Kit).save([
         {
           name: 'Ресурсы',
           icon: 'default/minecraft.png',
@@ -245,9 +244,9 @@ export default class CreateServers implements Seeder {
           price: 25,
         },
       ]);
-    } catch (_) { }
+    } catch (_) {}
 
-    const periods = await connection.getRepository(Period).save([
+    const periods = await dataSource.getRepository(Period).save([
       {
         name: '1 месяц',
         expire: 2592000,
@@ -270,238 +269,238 @@ export default class CreateServers implements Seeder {
       },
     ]);
 
-    const groupKits = await connection.getRepository(GroupKit).save([
+    const groupKits = await dataSource.getRepository(GroupKit).save([
       {
-        name: "VIP",
-        description: "Можно выдать раз в 30 дней (/kit vip)",
-        images: servers_.map(srv => ({
+        name: 'VIP',
+        description: 'Можно выдать раз в 30 дней (/kit vip)',
+        images: servers_.map((srv) => ({
           server: srv,
-          image: "default/vip_kit.png"
+          image: 'default/vip_kit.png',
         })),
       },
       {
-        name: "Premium",
-        description: "Можно выдать раз в 30 дней (/kit premium)",
-        images: servers_.map(srv => ({
+        name: 'Premium',
+        description: 'Можно выдать раз в 30 дней (/kit premium)',
+        images: servers_.map((srv) => ({
           server: srv,
-          image: "default/premium_kit.png"
+          image: 'default/premium_kit.png',
         })),
       },
       {
-        name: "Elite",
-        description: "Можно выдать раз в 30 дней (/kit elite)",
-        images: servers_.map(srv => ({
+        name: 'Elite',
+        description: 'Можно выдать раз в 30 дней (/kit elite)',
+        images: servers_.map((srv) => ({
           server: srv,
-          image: "default/elite_kit.png"
+          image: 'default/elite_kit.png',
         })),
       },
-    ])
+    ]);
 
-    await connection.getRepository(DonateGroup).save([
+    await dataSource.getRepository(DonateGroup).save([
       {
-        ingame_id: "vip",
-        name: "Vip",
-        icon: "default/vip.png",
+        ingame_id: 'vip',
+        name: 'Vip',
+        icon: 'default/vip.png',
         price: 100,
         sale: 10,
-        kits: groupKits.filter(kit => kit.name == 'VIP'),
+        kits: groupKits.filter((kit) => kit.name == 'VIP'),
         servers: servers_,
         periods: periods,
         features: [
           {
-            title: "150 тыс. блоков",
-            description: "Максимальный размер региона, который Вы можете заприватить"
+            title: '150 тыс. блоков',
+            description: 'Максимальный размер региона, который Вы можете заприватить',
           },
           {
-            title: "4 региона",
-            description: "Максимальное число приватов, которые Вы можете создать"
+            title: '4 региона',
+            description: 'Максимальное число приватов, которые Вы можете создать',
           },
           {
-            title: "Набор флагов VIP",
-            description: "Creeper-explosion, ghast-fireball, snow-fall, ice-form, ice-melt и leaf-decay"
+            title: 'Набор флагов VIP',
+            description: 'Creeper-explosion, ghast-fireball, snow-fall, ice-form, ice-melt и leaf-decay',
           },
           {
-            title: "/tpahere",
-            description: "Телепортировать игрока к себе"
+            title: '/tpahere',
+            description: 'Телепортировать игрока к себе',
           },
           {
-            title: "/back",
-            description: "Вернуться на точку смерти"
+            title: '/back',
+            description: 'Вернуться на точку смерти',
           },
           {
-            title: "/fly",
-            description: "Включить режим полёта"
+            title: '/fly',
+            description: 'Включить режим полёта',
           },
           {
-            title: "Резервный слот",
-            description: "Вход на заполенный сервер"
+            title: 'Резервный слот',
+            description: 'Вход на заполенный сервер',
           },
           {
-            title: "/near",
-            description: "Вывести список всех игроков в радиусе 200 блоков"
+            title: '/near',
+            description: 'Вывести список всех игроков в радиусе 200 блоков',
           },
           {
-            title: "/heal",
-            description: "Полностью восстановить Вашу шкалу здоровья"
+            title: '/heal',
+            description: 'Полностью восстановить Вашу шкалу здоровья',
           },
-        ].map((v, priority) => ({ ...v, priority }))
+        ].map((v, priority) => ({ ...v, priority })),
       },
       {
-        ingame_id: "premium",
-        name: "Premium",
-        icon: "default/premium.png",
+        ingame_id: 'premium',
+        name: 'Premium',
+        icon: 'default/premium.png',
         price: 250,
         sale: 10,
-        kits: groupKits.filter(kit => kit.name == 'Premium'),
+        kits: groupKits.filter((kit) => kit.name == 'Premium'),
         servers: servers_,
         periods: periods,
         features: [
           {
-            title: "Всё включено!",
-            description: "Все возможности VIP!"
+            title: 'Всё включено!',
+            description: 'Все возможности VIP!',
           },
           {
-            title: "150 тыс. блоков",
-            description: "Максимальный размер региона, который Вы можете заприватить"
+            title: '150 тыс. блоков',
+            description: 'Максимальный размер региона, который Вы можете заприватить',
           },
           {
-            title: "6 регионов",
-            description: "Максимальное число приватов, которые Вы можете создать"
+            title: '6 регионов',
+            description: 'Максимальное число приватов, которые Вы можете создать',
           },
           {
-            title: "Флаги Premium",
-            description: "mob-spawning, mob-damage, lava-fire, deny-spawn и все флаги группы VIP"
+            title: 'Флаги Premium',
+            description: 'mob-spawning, mob-damage, lava-fire, deny-spawn и все флаги группы VIP',
           },
           {
-            title: "/hat",
-            description: "Надеть на голову тот блок или предмет, который Вы держите в руке"
+            title: '/hat',
+            description: 'Надеть на голову тот блок или предмет, который Вы держите в руке',
           },
           {
-            title: "Приватный варп",
-            description: "Доступна 1 приватная точка телепортирования (warp)"
+            title: 'Приватный варп',
+            description: 'Доступна 1 приватная точка телепортирования (warp)',
           },
           {
-            title: "Смена плаща HD",
-            description: "Можно установить плащ высокого качества"
+            title: 'Смена плаща HD',
+            description: 'Можно установить плащ высокого качества',
           },
           {
-            title: "Смена скина HD",
-            description: "Можно установить скин высокого качества"
+            title: 'Смена скина HD',
+            description: 'Можно установить скин высокого качества',
           },
           {
-            title: "Цвет на табличках",
-            description: "Можно писать разными цветами на табличках"
+            title: 'Цвет на табличках',
+            description: 'Можно писать разными цветами на табличках',
           },
-        ].map((v, priority) => ({ ...v, priority }))
+        ].map((v, priority) => ({ ...v, priority })),
       },
       {
-        ingame_id: "elite",
-        name: "Elite",
-        icon: "default/elite.png",
+        ingame_id: 'elite',
+        name: 'Elite',
+        icon: 'default/elite.png',
         price: 500,
         sale: 10,
-        kits: groupKits.filter(kit => kit.name == 'Elite'),
+        kits: groupKits.filter((kit) => kit.name == 'Elite'),
         servers: servers_,
         periods: periods,
         web_perms: [Permission.UserCabinetSkinHd, Permission.UserCabinetCloakHd],
         features: [
           {
-            title: "Всё включено!",
-            description: "Все возможности Premium!"
+            title: 'Всё включено!',
+            description: 'Все возможности Premium!',
           },
           {
-            title: "200 тыс. блоков",
-            description: "Максимальный размер региона, который Вы можете заприватить"
+            title: '200 тыс. блоков',
+            description: 'Максимальный размер региона, который Вы можете заприватить',
           },
           {
-            title: "8 регионов",
-            description: "Максимальное число приватов, которые Вы можете создать"
+            title: '8 регионов',
+            description: 'Максимальное число приватов, которые Вы можете создать',
           },
           {
-            title: "Флаги Deluxe",
-            description: "invincible, feed-min-hunger, feed-max-hunger, water-flow, lava-flow, entry и все флаги групп VIP и PREMIUM"
+            title: 'Флаги Deluxe',
+            description: 'invincible, feed-min-hunger, feed-max-hunger, water-flow, lava-flow, entry и все флаги групп VIP и PREMIUM',
           },
           {
-            title: "/getpos",
-            description: "Получить данные о Вашем местоположении"
+            title: '/getpos',
+            description: 'Получить данные о Вашем местоположении',
           },
           {
-            title: "/jumpto",
-            description: "Прыгнуть туда, куда Вы смотрите"
+            title: '/jumpto',
+            description: 'Прыгнуть туда, куда Вы смотрите',
           },
           {
-            title: "/ext",
-            description: "Мгновенно потушить себя"
+            title: '/ext',
+            description: 'Мгновенно потушить себя',
           },
           {
-            title: "/ext [игрок]",
-            description: "Потушить другого игрока"
+            title: '/ext [игрок]',
+            description: 'Потушить другого игрока',
           },
           {
-            title: "/heal [игрок]",
-            description: "Вылечить другого игрока"
+            title: '/heal [игрок]',
+            description: 'Вылечить другого игрока',
           },
-        ].map((v, priority) => ({ ...v, priority }))
-      }
-    ])
+        ].map((v, priority) => ({ ...v, priority })),
+      },
+    ]);
 
-    await connection.getRepository(DonatePermission).save([
+    await dataSource.getRepository(DonatePermission).save([
       {
-        name: "Загрузка HD-скина",
+        name: 'Загрузка HD-скина',
         type: PermissionType.Web,
         price: 5,
         sale: 5,
         web_perms: [Permission.UserCabinetSkinHd],
-        periods: periods.filter(p => p.expire == 0)
+        periods: periods.filter((p) => p.expire == 0),
       },
       {
-        name: "Загрузка HD-плаща",
+        name: 'Загрузка HD-плаща',
         type: PermissionType.Web,
         price: 5,
         sale: 5,
         web_perms: [Permission.UserCabinetCloakHd],
-        periods: periods.filter(p => p.expire == 0)
+        periods: periods.filter((p) => p.expire == 0),
       },
       {
-        name: "Сохранение инвентаря",
-        description: "Позволяет использовать команду /fly",
+        name: 'Сохранение инвентаря',
+        description: 'Позволяет использовать команду /fly',
         type: PermissionType.Game,
         price: 20,
         sale: 5,
         perms: ['inventorykeep'],
         periods: periods,
-        servers: servers_
+        servers: servers_,
       },
       {
-        name: "Полёт",
-        description: "Позволяет использовать команду /fly",
+        name: 'Полёт',
+        description: 'Позволяет использовать команду /fly',
         type: PermissionType.Game,
         price: 20,
         sale: 5,
         perms: ['essentials.fly'],
         periods: periods,
-        servers: servers_
+        servers: servers_,
       },
       {
-        name: "Восстановление здоровья",
-        description: "Позволяет использовать команду /heal",
+        name: 'Восстановление здоровья',
+        description: 'Позволяет использовать команду /heal',
         type: PermissionType.Game,
         price: 20,
         sale: 5,
         perms: ['essentials.heal'],
         periods: periods,
-        servers: servers_
+        servers: servers_,
       },
       {
-        name: "Кит Vip",
+        name: 'Кит Vip',
         type: PermissionType.Kit,
         price: 35,
         sale: 5,
         perms: ['essentials.kit.vip'],
         periods: periods,
         servers: servers_,
-        kits: groupKits.filter(kit => kit.name == 'VIP')
+        kits: groupKits.filter((kit) => kit.name == 'VIP'),
       },
-    ])
+    ]);
   }
 }

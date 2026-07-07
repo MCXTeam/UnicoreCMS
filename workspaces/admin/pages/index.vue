@@ -7,7 +7,8 @@
             <span class="block text-6xl font-bold mb-1">UnicoreCMS</span>
             <div class="text-6xl text-primary font-bold mb-3">Headless CMS для Minecraft</div>
             <p class="mt-0 mb-4 text-700 line-height-3">
-              CMS для модовых проектов Minecraft. Современные технологии и профессиональный подход, невероятная производительность и скорость.
+              CMS для модовых проектов Minecraft. Современные технологии и профессиональный подход, невероятная производительность и
+              скорость.
             </p>
             <a href="https://unicorecms.ru/docs" target="_blank">
               <Button label="Документация" type="button" class="mr-3 p-button-raised"></Button>
@@ -99,7 +100,9 @@
           </Column>
           <Column field="amount" header="Доход" style="width: 35%">
             <template #body="slotProps">
-              <span v-if="slotProps.data.amount > 0" class="text-green-500"> +{{ $utils.formatCurrency('real', slotProps.data.amount) }} </span>
+              <span v-if="slotProps.data.amount > 0" class="text-green-500">
+                +{{ $utils.formatCurrency('real', slotProps.data.amount) }}
+              </span>
               <span v-else>
                 {{ $utils.formatCurrency('real', slotProps.data.amount) }}
               </span>
@@ -130,10 +133,16 @@
           <h5>Текущий статус серверов</h5>
         </div>
         <ul class="list-none p-0 m-0">
-          <li v-for="online in onlines.servers" :key="online.server.id" class="flex flex-column md:flex-row md:align-items-center md:justify-content-between mb-4">
+          <li
+            v-for="online in onlines.servers"
+            :key="online.server.id"
+            class="flex flex-column md:flex-row md:align-items-center md:justify-content-between mb-4"
+          >
             <div>
               <span class="text-900 font-medium mr-2 mb-1 md:mb-0" v-text="online.server.name" />
-              <div v-if="online.online" class="mt-1 text-600">{{ online.players }}/{{ online.maxplayers }}, рекорд: {{ online.record }}, cегодня {{ online.record_today }}</div>
+              <div v-if="online.online" class="mt-1 text-600">
+                {{ online.players }}/{{ online.maxplayers }}, рекорд: {{ online.record }}, cегодня {{ online.record_today }}
+              </div>
               <div v-else class="mt-1 text-600">Оффлайн, рекорд: {{ online.record }}, cегодня {{ online.record_today }}</div>
             </div>
           </li>
@@ -144,9 +153,15 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import Chart from 'primevue/chart'
+import { useIoStore } from '~/stores/io'
 
 export default {
+  components: { Chart },
+  setup() {
+    const ioStore = useIoStore()
+    return { ioStore }
+  },
   data() {
     return {
       products: null,
@@ -171,9 +186,8 @@ export default {
       },
       barOptions: {
         scales: {
-          scaleOverride: true,
-          scaleStartValue: 0,
           y: {
+            beginAtZero: true,
             ticks: {
               precision: 0,
             },
@@ -182,26 +196,23 @@ export default {
       },
     }
   },
-  async fetch() {
-    this.stats = await this.$axios.get('/admin/dashboard/stats').then((res) => res.data)
-
-    this.daysCharts()
-  },
   computed: {
-    ...mapGetters({
-      onlines: 'io/serversOnline'
-    }),
+    onlines() {
+      return this.ioStore.serversOnline
+    },
   },
   async mounted() {
-    this.socket = this.$nuxtSocket({})
-    this.socket.emit('servers/online', {}, (res) => {
-      this.$store.commit('io/SERVERS_ONLINE', res)
+    this.stats = await this.$api.get('/admin/dashboard/stats').then((res) => res.data)
+    this.daysCharts()
+
+    this.$socket.emit('servers/online', {}, (res) => {
+      this.ioStore.setServersOnline(res)
     })
   },
   methods: {
     daysCharts() {
       const range = Array.from(
-        this.$moment.range(this.$moment().subtract(6, 'day').startOf('day').local(), this.$moment().local()).by('day')
+        this.$moment.range(this.$moment().subtract(6, 'day').startOf('day').local(), this.$moment().local()).by('day'),
       )
       this.barData.labels = range.map((r) => r.format('dddd'))
       this.barData.datasets = []
@@ -236,7 +247,7 @@ export default {
     },
     monthsCharts() {
       const range = Array.from(
-        this.$moment.range(this.$moment().subtract(11, 'month').startOf('month').local(), this.$moment().local()).by('month')
+        this.$moment.range(this.$moment().subtract(11, 'month').startOf('month').local(), this.$moment().local()).by('month'),
       )
       this.barData.labels = range.map((r) => r.format('MMMM'))
       this.barData.datasets = []

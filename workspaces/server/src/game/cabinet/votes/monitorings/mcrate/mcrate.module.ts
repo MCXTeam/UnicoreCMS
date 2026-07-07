@@ -11,6 +11,6 @@ import { McrateService } from './mcrate.service';
   controllers: [McrateController],
 })
 export class McrateModule implements MonitoringCoreModule {
-  static id = "mcrate"
+  static id = 'mcrate';
   static enabled = envConfig.mcrateEnabled;
 }

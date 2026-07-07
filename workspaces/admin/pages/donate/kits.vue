@@ -22,7 +22,7 @@
           :loading="loading"
           rowHover
           responsiveLayout="scroll"
-          :selection.sync="selected"
+          v-model:selection="selected"
           @row-reorder="onKitsReorder"
           dataKey="id"
         >
@@ -44,17 +44,12 @@
           </Column>
         </DataTable>
 
-        <Dialog :visible.sync="fileDialog" :style="{ width: '600px' }" :modal="true" header="Редактирование картинкок" class="p-fluid">
+        <Dialog v-model:visible="fileDialog" :style="{ width: '600px' }" :modal="true" header="Редактирование картинкок" class="p-fluid">
           <div v-for="server in servers" :key="server.id" class="grid mb-4 pt-2">
             <div class="col-12 md:col-6">
               <h4 v-text="server.name" />
               <Avatar v-if="!kit.images.find((img) => img.server.id == server.id)" icon="pi pi-image" size="xlarge" />
-              <ImagePreview
-                v-else
-                width="200"
-                :src="`${$config.apiUrl + '/' + kit.images.find((img) => img.server.id == server.id).image}`"
-                preview
-              />
+              <Image v-else width="200" :src="`${apiUrl + '/' + kit.images.find((img) => img.server.id == server.id).image}`" preview />
             </div>
             <div class="col-12 md:col-6">
               <div class="field mb-0 mt-2">
@@ -75,22 +70,28 @@
           </div>
         </Dialog>
 
-        <ValidationObserver v-slot="{ invalid }">
+        <VeeForm v-slot="{ meta }">
           <Dialog
-            :visible.sync="kitDialog"
+            v-model:visible="kitDialog"
             :closable="false"
             :style="{ width: '600px' }"
             :modal="true"
             header="Создание/редактирование кита"
             class="p-fluid"
           >
-            <ValidationProvider name="Название" rules="required" v-slot="{ errors }">
+            <VeeField
+              v-model="kit.name"
+              name="name"
+              label="Название"
+              rules="required"
+              v-slot="{ value, errorMessage, handleChange, handleBlur }"
+            >
               <div class="field">
                 <label>Название</label>
-                <InputText v-model="kit.name" />
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                <InputText :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" :class="errorMessage && 'p-invalid'" />
+                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
-            </ValidationProvider>
+            </VeeField>
             <div class="field">
               <label>Описание</label>
               <Editor v-model="kit.description" editorStyle="height: 220px">
@@ -107,7 +108,7 @@
             <template #footer>
               <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
-                :disabled="loading || invalid"
+                :disabled="loading || !meta.valid"
                 label="Сохранить"
                 icon="pi pi-check"
                 class="p-button-text"
@@ -115,22 +116,24 @@
               />
             </template>
           </Dialog>
-        </ValidationObserver>
+        </VeeForm>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { ValidationObserver, ValidationProvider } from 'vee-validate'
+import { Form, Field } from 'vee-validate'
 
 export default {
-  head: {
-    title: 'Донат-киты',
-  },
   components: {
-    ValidationObserver,
-    ValidationProvider,
+    VeeForm: Form,
+    VeeField: Field,
+  },
+  setup() {
+    useHead({ title: 'Донат-киты' })
+    const config = useRuntimeConfig()
+    return { apiUrl: config.public.apiBaseurl }
   },
   data() {
     return {
@@ -147,41 +150,45 @@ export default {
         images: [],
       },
       servers: null,
-      kitDialog: false
+      kitDialog: false,
     }
   },
-  async fetch() {
-    this.loading = true
-    this.kitDialog = false
-    this.fileDialog = false
-    this.kits = await this.$axios.get('/donates/group-kits').then((res) => res.data)
-    this.servers = await this.$axios.get('/servers').then((res) => res.data)
-    this.loading = false
+  mounted() {
+    this.load()
   },
   methods: {
+    async load() {
+      this.loading = true
+      this.kitDialog = false
+      this.fileDialog = false
+      this.kits = await this.$api.get('/donates/group-kits').then((res) => res.data)
+      this.servers = await this.$api.get('/servers').then((res) => res.data)
+      this.loading = false
+    },
     async onKitsReorder(event) {
       this.loading = true
-      await this.$axios.post('/donates/group-kits/sort', {
+      await this.$api.post('/donates/group-kits/sort', {
         items: event.value.map((kit, priority) => ({
           id: kit.id,
           priority,
         })),
       })
-      this.$fetch()
+      this.load()
     },
     hideDialog() {
       this.kitDialog = false
     },
     preUpdateImage(id) {
       this.kitServer = id
-      this.$refs['imageInput-' + id][0].choose()
+      const input = this.$refs['imageInput-' + id]
+      ;(Array.isArray(input) ? input[0] : input).choose()
     },
     async uploadImage(event) {
       let formData = new FormData()
       formData.append('file', event.files[0])
 
       try {
-        await this.$axios.patch(`/donates/group-kits/image/${this.kitServer}/${this.kit.id}`, formData, {
+        await this.$api.patch(`/donates/group-kits/image/${this.kitServer}/${this.kit.id}`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -191,7 +198,7 @@ export default {
           detail: 'Картинка успешно обновлена',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch {
         this.fileDialog = false
         this.$toast.add({
@@ -203,13 +210,13 @@ export default {
     },
     async removeImage(id) {
       try {
-        await this.$axios.delete(`/donates/group-kits/image/${id}/${this.kit.id}`)
+        await this.$api.delete(`/donates/group-kits/image/${id}/${this.kit.id}`)
         this.$toast.add({
           severity: 'success',
           detail: 'Картинка успешно удалена',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch {}
     },
     async openFileDialog(kit) {
@@ -233,13 +240,13 @@ export default {
     async createKit() {
       this.loading = true
       try {
-        await this.$axios.post('/donates/group-kits', this.kit)
+        await this.$api.post('/donates/group-kits', this.kit)
         this.$toast.add({
           severity: 'success',
           detail: 'Кит успешно добавлен',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch (err) {
         this.loading = false
         this.$toast.add({
@@ -252,13 +259,13 @@ export default {
     async updateKit() {
       this.loading = true
       try {
-        await this.$axios.patch('/donates/group-kits/' + this.kit.id, this.$_.omit(this.kit, 'id'))
+        await this.$api.patch('/donates/group-kits/' + this.kit.id, this.$_.omit(this.kit, 'id'))
         this.$toast.add({
           severity: 'success',
           detail: 'Кит успешно редактирован',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch (err) {
         this.loading = false
         this.$toast.add({
@@ -276,7 +283,7 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$axios.delete('/donates/group-kits/bulk/', {
+            await this.$api.delete('/donates/group-kits/bulk/', {
               data: {
                 items: this.selected.map((kit) => kit.id),
               },
@@ -288,7 +295,7 @@ export default {
             })
             this.selected = []
           } catch {}
-          await this.$fetch()
+          await this.load()
         },
       })
     },
@@ -300,14 +307,14 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$axios.delete('/donates/group-kits/' + id)
+            await this.$api.delete('/donates/group-kits/' + id)
             this.$toast.add({
               severity: 'success',
               detail: 'Кит успешно удален',
               life: 3000,
             })
           } catch {}
-          await this.$fetch()
+          await this.load()
         },
       })
     },

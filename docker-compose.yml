@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   nginx:
     image: nginx:1.21.6
@@ -38,15 +36,22 @@ services:
 
   app:
     container_name: unicorecms
-    profiles: 
+    profiles:
       - prod
     restart: always
     build:
       context: .
       dockerfile: ./docker/node/Dockerfile
+    env_file: .env
+    environment:
+      DATABASE_HOST: mariadb
     volumes:
-      - .:/usr/local/app
-      - /usr/local/app/node_modules
+      - ./storage:/usr/local/app/storage
+      - ./logs:/usr/local/app/logs
+    ports:
+      - "${CLIENT_PORT:-3000}:${CLIENT_PORT:-3000}"
+      - "${ADMIN_PORT:-4000}:${ADMIN_PORT:-4000}"
+      - "${SERVER_PORT:-5000}:${SERVER_PORT:-5000}"
     depends_on:
       - mariadb
     extra_hosts:

@@ -5,179 +5,228 @@
         <h2 class="mt-0 mb-4">Транзакции и покупки</h2>
       </div>
       <div class="col input-fw">
-        <vs-select class="mb-4" placeholder="Тип операции" v-model="history_type">
-          <vs-option label="Пополнение баланса" value="payment">Пополнение баланса</vs-option>
-          <vs-option label="Покупки в магазиине (товары)" value="product_purchase">Покупки в магазиине (товары)</vs-option>
-          <vs-option label="Покупки в магазиине (киты)" value="kit_purchase">Покупки в магазиине (киты)</vs-option>
-          <vs-option label="Покупки донат-групп" value="donate_group_purchase">Покупки донат-групп</vs-option>
-          <vs-option label="Покупки донат-прав" value="donate_permission_purchase">Покупки донат-прав</vs-option>
-          <vs-option label="Покупка монет" value="money_exchange">Покупка монет</vs-option>
-          <vs-option label="Перевод монет" value="money_transfer">Перевод монет</vs-option>
-          <vs-option label="Перевод реальной валюты" value="real_transfer">Перевод реальной валюты</vs-option>
-        </vs-select>
+        <Select
+          class="mb-4 w-100"
+          placeholder="Тип операции"
+          v-model="history_type"
+          :options="typeOptions"
+          optionLabel="label"
+          optionValue="value"
+        />
       </div>
     </div>
-    <div class="position-relative" ref="history">
-      <vs-table class="no-overflow-table large-table" :key="history_type">
-        <template #thead>
-          <vs-tr>
-            <vs-th style="max-width: 200px"> Дата </vs-th>
-            <vs-th v-if="history_type != 'payment'"> IP </vs-th>
+    <div class="position-relative">
+      <DataTable
+        class="no-overflow-table large-table"
+        :key="history_type"
+        :value="history.data"
+        lazy
+        :paginator="history.data.length > 0"
+        :rows="history.meta.itemsPerPage"
+        :totalRecords="history.meta.totalItems"
+        :loading="loading"
+        @page="onPage($event)"
+      >
+        <Column style="max-width: 200px" header="Дата">
+          <template #body="{ data }"> {{ $moment(data.created).local().format('D MMMM YYYY, HH:mm:ss') }} </template>
+        </Column>
+        <Column v-if="history_type != 'payment'" header="IP">
+          <template #body="{ data }"
+            ><span v-if="data.ip"> {{ data.ip }} </span></template
+          >
+        </Column>
 
-            <!-- Payments -->
-            <vs-th v-if="history_type == 'payment'" style="max-width: 6rem"> ID платежа </vs-th>
-            <vs-th v-if="history_type == 'payment'"> Платёжная система </vs-th>
-            <vs-th v-if="history_type == 'payment'"> Сумма </vs-th>
-            <vs-th v-if="history_type == 'payment'"> Статус </vs-th>
+        <Column v-if="history_type == 'payment'" style="max-width: 6rem" header="ID платежа">
+          <template #body="{ data }"
+            ><span v-if="data.payment"> #{{ data.payment.id }} </span></template
+          >
+        </Column>
+        <Column v-if="history_type == 'payment'" header="Платёжная система">
+          <template #body="{ data }"
+            ><span v-if="data.payment"> {{ data.payment.method }} </span></template
+          >
+        </Column>
+        <Column v-if="history_type == 'payment'" header="Сумма">
+          <template #body="{ data }"
+            ><span v-if="data.payment"> {{ $utils.formatCurrency('real', data.payment.amount) }} </span></template
+          >
+        </Column>
+        <Column v-if="history_type == 'payment'" header="Статус">
+          <template #body="{ data }"
+            ><span v-if="data.payment"> {{ data.payment.status }} </span></template
+          >
+        </Column>
 
-            <!-- Products -->
-            <vs-th v-if="history_type == 'product_purchase'"> Товар </vs-th>
-            <vs-th v-if="history_type == 'product_purchase'"> Сервер </vs-th>
-            <vs-th v-if="history_type == 'product_purchase'" style="max-width: 6rem"> Количество </vs-th>
+        <Column v-if="history_type == 'product_purchase'" header="Товар">
+          <template #body="{ data }"
+            ><span v-if="data.product"> {{ data.product.name }} </span></template
+          >
+        </Column>
+        <Column v-if="history_type == 'product_purchase'" header="Сервер">
+          <template #body="{ data }">
+            <NuxtLink v-if="data.server" :to="'/servers/' + data.server.id">{{ data.server.name }}</NuxtLink>
+          </template>
+        </Column>
+        <Column v-if="history_type == 'product_purchase'" style="max-width: 6rem" header="Количество">
+          <template #body="{ data }"
+            ><span v-if="data.amount"> {{ data.amount }} шт. </span></template
+          >
+        </Column>
 
-            <!-- Kits -->
-            <vs-th v-if="history_type == 'kit_purchase'"> Кит </vs-th>
-            <vs-th v-if="history_type == 'kit_purchase'"> Сервер </vs-th>
+        <Column v-if="history_type == 'kit_purchase'" header="Кит">
+          <template #body="{ data }"
+            ><span v-if="data.kit"> {{ data.kit.name }} </span></template
+          >
+        </Column>
+        <Column v-if="history_type == 'kit_purchase'" header="Сервер">
+          <template #body="{ data }">
+            <NuxtLink v-if="data.server" :to="'/servers/' + data.server.id">{{ data.server.name }}</NuxtLink>
+          </template>
+        </Column>
 
-            <!-- DonateGroups -->
-            <vs-th v-if="history_type == 'donate_group_purchase'"> Донат-группа </vs-th>
-            <vs-th v-if="history_type == 'donate_group_purchase'"> Период </vs-th>
-            <vs-th v-if="history_type == 'donate_group_purchase'"> Сервер </vs-th>
+        <Column v-if="history_type == 'donate_group_purchase'" header="Донат-группа">
+          <template #body="{ data }"
+            ><span v-if="data.donate_group"> {{ data.donate_group.name }} </span></template
+          >
+        </Column>
+        <Column v-if="history_type == 'donate_group_purchase'" header="Период">
+          <template #body="{ data }"
+            ><span v-if="data.period"> {{ data.period.name }} </span></template
+          >
+        </Column>
+        <Column v-if="history_type == 'donate_group_purchase'" header="Сервер">
+          <template #body="{ data }">
+            <NuxtLink v-if="data.server" :to="'/servers/' + data.server.id">{{ data.server.name }}</NuxtLink>
+          </template>
+        </Column>
 
-            <!-- DonateGroups -->
-            <vs-th v-if="history_type == 'donate_permission_purchase'"> Донат-право </vs-th>
-            <vs-th v-if="history_type == 'donate_permission_purchase'"> Период </vs-th>
-            <vs-th v-if="history_type == 'donate_permission_purchase'"> Сервер </vs-th>
+        <Column v-if="history_type == 'donate_permission_purchase'" header="Донат-право">
+          <template #body="{ data }"
+            ><span v-if="data.donate_permission"> {{ data.donate_permission.name }} </span></template
+          >
+        </Column>
+        <Column v-if="history_type == 'donate_permission_purchase'" header="Период">
+          <template #body="{ data }"
+            ><span v-if="data.period"> {{ data.period.name }} </span></template
+          >
+        </Column>
+        <Column v-if="history_type == 'donate_permission_purchase'" header="Сервер">
+          <template #body="{ data }">
+            <NuxtLink v-if="data.server" :to="'/servers/' + data.server.id">{{ data.server.name }}</NuxtLink>
+          </template>
+        </Column>
 
-            <!-- MoneyExchange -->
-            <vs-th v-if="history_type == 'money_exchange'"> Сервер </vs-th>
-            <vs-th v-if="history_type == 'money_exchange'"> Количество </vs-th>
+        <Column v-if="history_type == 'money_exchange'" header="Сервер">
+          <template #body="{ data }">
+            <NuxtLink v-if="data.server" :to="'/servers/' + data.server.id">{{ data.server.name }}</NuxtLink>
+          </template>
+        </Column>
+        <Column v-if="history_type == 'money_exchange'" header="Количество">
+          <template #body="{ data }"
+            ><span v-if="data.amount"> {{ $utils.formatCurrency('ingame', data.amount) }} </span></template
+          >
+        </Column>
 
-            <!-- MoneyTransfer -->
-            <vs-th v-if="history_type == 'money_transfer'"> Игрок </vs-th>
-            <vs-th v-if="history_type == 'money_transfer'"> Сервер </vs-th>
-            <vs-th v-if="history_type == 'money_transfer'"> Количество </vs-th>
+        <Column v-if="history_type == 'money_transfer'" header="Игрок">
+          <template #body="{ data }">
+            <NuxtLink v-if="data.target" :to="`/user/` + data.target.username">{{ data.target.username }}</NuxtLink>
+          </template>
+        </Column>
+        <Column v-if="history_type == 'money_transfer'" header="Сервер">
+          <template #body="{ data }">
+            <NuxtLink v-if="data.server" :to="'/servers/' + data.server.id">{{ data.server.name }}</NuxtLink>
+          </template>
+        </Column>
+        <Column v-if="history_type == 'money_transfer'" header="Количество">
+          <template #body="{ data }"
+            ><span v-if="data.amount"> {{ $utils.formatCurrency('ingame', data.amount) }} </span></template
+          >
+        </Column>
 
-            <!-- RealTransfer -->
-            <vs-th v-if="history_type == 'real_transfer'"> Игрок </vs-th>
-            <vs-th v-if="history_type == 'real_transfer'"> Количество </vs-th>
-          </vs-tr>
-        </template>
-        <template #tbody>
-          <vs-tr :key="row.id" v-for="row in history.data" :data="row">
-            <vs-td> {{ $moment(row.created).local().format('D MMMM YYYY, HH:mm:ss') }} </vs-td>
-            <vs-td v-if="history_type != 'payment' && row.ip"> {{ row.ip }} </vs-td>
+        <Column v-if="history_type == 'real_transfer'" header="Игрок">
+          <template #body="{ data }">
+            <NuxtLink v-if="data.target" :to="`/user/` + data.target.username">{{ data.target.username }}</NuxtLink>
+          </template>
+        </Column>
+        <Column v-if="history_type == 'real_transfer'" header="Количество">
+          <template #body="{ data }"
+            ><span v-if="data.amount"> {{ $utils.formatCurrency('ingame', data.amount) }} </span></template
+          >
+        </Column>
 
-            <!-- Payments -->
-            <vs-td v-if="history_type == 'payment' && row.payment" style="max-width: 6rem"> #{{ row.payment.id }} </vs-td>
-            <vs-td v-if="history_type == 'payment' && row.payment"> {{ row.payment.method }} </vs-td>
-            <vs-td v-if="history_type == 'payment' && row.payment"> {{ $utils.formatCurrency('real', row.payment.amount) }} </vs-td>
-            <vs-td v-if="history_type == 'payment' && row.payment"> {{ row.payment.status }} </vs-td>
-
-            <!-- Products -->
-            <vs-td v-if="history_type == 'product_purchase' && row.product"> {{ row.product.name }} </vs-td>
-            <vs-td v-if="history_type == 'product_purchase' && row.server">
-              <nuxt-link :to="'/servers/' + row.server.id">{{ row.server.name }}</nuxt-link>
-            </vs-td>
-            <vs-td v-if="history_type == 'product_purchase' && row.amount"> {{ row.amount }} шт. </vs-td>
-
-            <!-- Kits -->
-            <vs-td v-if="history_type == 'kit_purchase' && row.kit"> {{ row.kit.name }} </vs-td>
-            <vs-td v-if="history_type == 'kit_purchase' && row.server">
-              <nuxt-link :to="'/servers/' + row.server.id">{{ row.server.name }}</nuxt-link>
-            </vs-td>
-
-            <!-- DonateGroups -->
-            <vs-td v-if="history_type == 'donate_group_purchase' && row.donate_group"> {{ row.donate_group.name }} </vs-td>
-            <vs-td v-if="history_type == 'donate_group_purchase' && row.period"> {{ row.period.name }} </vs-td>
-            <vs-td v-if="history_type == 'donate_group_purchase' && row.server">
-              <nuxt-link :to="'/servers/' + row.server.id">{{ row.server.name }}</nuxt-link>
-            </vs-td>
-
-            <!-- DonateGroups -->
-            <vs-td v-if="history_type == 'donate_permission_purchase' && row.donate_permission"> {{ row.donate_permission.name }} </vs-td>
-            <vs-td v-if="history_type == 'donate_permission_purchase' && row.period"> {{ row.period.name }} </vs-td>
-            <vs-td v-if="history_type == 'donate_permission_purchase' && row.server">
-              <nuxt-link :to="'/servers/' + row.server.id">{{ row.server.name }}</nuxt-link>
-            </vs-td>
-
-            <!-- MoneyExchange -->
-            <vs-td v-if="history_type == 'money_exchange' && row.server">
-              <nuxt-link :to="'/servers/' + row.server.id">{{ row.server.name }}</nuxt-link>
-            </vs-td>
-            <vs-td v-if="history_type == 'money_exchange' && row.amount"> {{ $utils.formatCurrency('ingame', row.amount) }} </vs-td>
-
-            <!-- MoneyTransfer -->
-            <vs-td v-if="history_type == 'money_transfer' && row.target">
-               <nuxt-link :to="`/user/` + row.target.username">{{ row.target.username }}</nuxt-link>
-            </vs-td>
-            <vs-td v-if="history_type == 'money_transfer' && row.server">
-              <nuxt-link :to="'/servers/' + row.server.id">{{ row.server.name }}</nuxt-link>
-            </vs-td>
-            <vs-td v-if="history_type == 'money_transfer' && row.amount"> {{ $utils.formatCurrency('ingame', row.amount) }} </vs-td>
-
-            <!-- RealTransfer -->
-            <vs-td v-if="history_type == 'real_transfer' && row.target">
-              <nuxt-link :to="`/user/` + row.target.username">{{ row.target.username }}</nuxt-link>
-            </vs-td>
-            <vs-td v-if="history_type == 'real_transfer' && row.amount"> {{ $utils.formatCurrency('ingame', row.amount) }} </vs-td>
-          </vs-tr>
-        </template>
-        <template #notFound>
+        <template #empty>
           <span>История пуста...</span>
         </template>
-      </vs-table>
-      <vs-pagination v-if="history.data.length" class="mt-4" v-model="history.meta.currentPage" :length="history.meta.totalPages" />
+      </DataTable>
     </div>
   </div>
 </template>
 
 <script>
-export default {
+definePageMeta({
   layout: 'cabinet',
+  middleware: ['auth', 'verify'],
+  title: 'Личный кабинет',
+})
 
-  asyncData({ store }) {
-    store.commit('unicore/SET_NAME', 'Личный кабинет')
-  },
-
+export default {
   data() {
     return {
+      loading: false,
       history_type: 'payment',
+      typeOptions: [
+        { label: 'Пополнение баланса', value: 'payment' },
+        { label: 'Покупки в магазиине (товары)', value: 'product_purchase' },
+        { label: 'Покупки в магазиине (киты)', value: 'kit_purchase' },
+        { label: 'Покупки донат-групп', value: 'donate_group_purchase' },
+        { label: 'Покупки донат-прав', value: 'donate_permission_purchase' },
+        { label: 'Покупка монет', value: 'money_exchange' },
+        { label: 'Перевод монет', value: 'money_transfer' },
+        { label: 'Перевод реальной валюты', value: 'real_transfer' },
+      ],
       history: {
         data: [],
         meta: {
           currentPage: 1,
           totalPages: 1,
+          itemsPerPage: 10,
+          totalItems: 0,
         },
       },
     }
   },
 
-  async fetch() {
-    const loading = this.$vs.loading({ target: this.$refs.history })
+  mounted() {
+    this.load()
+  },
 
-    this.history = await this.$axios
-      .get('/cabinet/history/me', {
-        params: {
-          page: this.history.meta.currentPage,
-          'filter.type': '$eq:' + this.history_type,
-        },
-      })
-      .then((res) => res.data)
+  methods: {
+    async load() {
+      this.loading = true
 
-    loading.close()
+      this.history = await this.$api
+        .get('/cabinet/history/me', {
+          params: {
+            page: this.history.meta.currentPage,
+            'filter.type': '$eq:' + this.history_type,
+          },
+        })
+        .then((res) => res.data)
+
+      this.loading = false
+    },
+
+    onPage(event) {
+      this.history.meta.currentPage = event.page + 1
+      this.load()
+    },
   },
 
   watch: {
-    'history.meta.currentPage': {
-      handler: function (newValue) {
-        this.$fetch()
-      },
-    },
     history_type: {
-      handler: function (newValue) {
+      handler() {
         this.history.meta.currentPage = 1
-        this.$fetch()
+        this.load()
       },
     },
   },

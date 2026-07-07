@@ -10,6 +10,6 @@ import UsersModule from 'src/admin/users/users.module';
   imports: [TypeOrmModule.forFeature([Playtime]), ServersModule, forwardRef(() => UsersModule)],
   providers: [PlaytimeService],
   controllers: [PlaytimeController],
-  exports: [PlaytimeService]
+  exports: [PlaytimeService],
 })
 export class PlaytimeModule {}

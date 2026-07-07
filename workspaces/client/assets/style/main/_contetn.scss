@@ -72,8 +72,7 @@
 }
 
 .mini-profile {
-  @extend .rounded,
-  .shadow-sm;
+  @extend .rounded, .shadow-sm;
   background-color: var(--vs-theme-bg);
 }
 
@@ -215,7 +214,9 @@ a.server-block:hover {
 
 .skin-view {
   @extend .shadow;
-  background: url('/images/bg.jpg') center, linear-gradient(180deg, var(--vs-theme-bg) 120px, rgba(var(--vs-primary), 0.3));
+  background:
+    url('/images/bg.jpg') center,
+    linear-gradient(180deg, var(--vs-theme-bg) 120px, rgba(var(--vs-primary), 0.3));
   background-blend-mode: overlay;
   background-size: cover;
   border-radius: 12px;
@@ -239,7 +240,7 @@ a.server-block:hover {
     }
   }
 
-  .skin-2d>canvas {
+  .skin-2d > canvas {
     opacity: 0.7;
     transition: opacity 200ms;
 
@@ -296,7 +297,7 @@ a.server-block:hover {
   line-height: 24px;
 }
 
-.dark-mode .sale-wrapper {
+.dark .sale-wrapper {
   color: rgba(0, 0, 0, 0.8);
 }
 
@@ -313,7 +314,6 @@ a.server-block:hover {
 }
 
 .input-fw {
-
   .vs-input-parent,
   .vs-input-content,
   .vs-input,
@@ -332,7 +332,7 @@ a.server-block:hover {
   @include media-breakpoint-up(xl) {
     padding: 20px 0;
 
-    >.col-xl-6 {
+    > .col-xl-6 {
       position: relative;
 
       &::before {
@@ -354,7 +354,6 @@ a.server-block:hover {
 
 .buy-dialog,
 .store-filters {
-
   .vs-input-parent,
   .vs-input-content,
   .vs-input,
@@ -375,7 +374,7 @@ a.server-block:hover {
   }
 }
 
-.calculate>* {
+.calculate > * {
   line-height: 20px;
 }
 
@@ -449,12 +448,10 @@ a.server-block:hover {
       font-size: 42px;
       padding: 10px;
       box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.15);
-      @extend .rounded,
-      .shadow-sm;
+      @extend .rounded, .shadow-sm;
     }
   }
 }
-
 
 .social-blocks {
   a {
@@ -468,7 +465,7 @@ a.server-block:hover {
 
     &.discord {
       @extend .rounded;
-      background-color: #7289DA;
+      background-color: #7289da;
       h2 {
         color: #fff !important;
       }
@@ -476,7 +473,7 @@ a.server-block:hover {
 
     &.vk {
       @extend .rounded;
-      background-color: #4E8ACE;
+      background-color: #4e8ace;
       h2 {
         color: #fff !important;
       }
@@ -484,7 +481,7 @@ a.server-block:hover {
 
     &.telegram {
       @extend .rounded;
-      background-color: #32AFED;
+      background-color: #32afed;
       h2 {
         color: #fff !important;
       }
@@ -492,7 +489,7 @@ a.server-block:hover {
 
     &.youtube {
       @extend .rounded;
-      background-color: #FF0000;
+      background-color: #ff0000;
       h2 {
         color: #fff !important;
       }
@@ -501,19 +498,19 @@ a.server-block:hover {
 }
 
 .vote-gift-1 h3 {
-  color: #FFC451 !important;
+  color: #ffc451 !important;
 }
 
 .vote-gift-2 h3 {
-  color: #BCBCBC !important;
+  color: #bcbcbc !important;
 }
 
-html:not(.dark-mode) {
+html:not(.dark) {
   .vote-gift-2 h3 {
     color: #7c7c7c !important;
   }
 }
 
 .vote-gift-3 h3 {
-  color: #CF871B !important;
+  color: #cf871b !important;
 }

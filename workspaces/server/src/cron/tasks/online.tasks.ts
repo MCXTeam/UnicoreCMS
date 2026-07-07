@@ -7,26 +7,33 @@ import { ServersService } from 'src/game/servers/servers.service';
 
 @Injectable()
 export class OnlineTasks {
-  private readonly logger = new Logger("OnlineTasks");
+  private readonly logger = new Logger('OnlineTasks');
+  private running = false;
 
-  constructor(private eventsService: EventsService, private onlineService: OnlineService, private serversService: ServersService) {}
+  constructor(
+    private eventsService: EventsService,
+    private onlineService: OnlineService,
+    private serversService: ServersService,
+  ) {}
 
   @Cron(CronExpression.EVERY_5_SECONDS)
   async updateOnline() {
-    const servers = await this.serversService.find(['online', 'query']);
-    const serversUpdated: UpdateOnline[] = new Array();
+    if (this.running) return;
+    this.running = true;
 
-    for (var server of servers) {
-      const serverInstance = await this.onlineService.updateOnline(server);
-      serversUpdated.push(serverInstance);
-    }
+    try {
+      const servers = await this.serversService.find(['online', 'query']);
+      const serversUpdated: UpdateOnline[] = await Promise.all(servers.map((server) => this.onlineService.updateOnline(server)));
 
-    if (serversUpdated.find((upd) => upd.updated)) {
-      const onlines = await this.onlineService.updateOnlinesRecords();
-      // Online updated
-      // Send events...
-      this.eventsService.server.to('public').emit('servers/online', onlines);
-      this.logger.debug('Online updated');
+      if (serversUpdated.find((upd) => upd.updated)) {
+        const onlines = await this.onlineService.updateOnlinesRecords();
+        this.eventsService.server.to('public').emit('servers/online', onlines);
+        this.logger.debug('Online updated');
+      }
+    } catch (error) {
+      this.logger.error(`Online update failed: ${error}`);
+    } finally {
+      this.running = false;
     }
   }
 }

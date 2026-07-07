@@ -3,7 +3,7 @@
     <h2 class="mt-0 mb-4">Статистика на серверах</h2>
     <div v-if="playtime">
       <div v-for="pt in playtime" :key="pt.server.id" class="d-flex align-items-center mb-4">
-        <Avatar v-if="pt.server.icon" size="xlarge" :image="`${$config.apiUrl}/${pt.server.icon}`"> </Avatar>
+        <Avatar v-if="pt.server.icon" size="xlarge" :image="`${$pub.apiBaseurl}/${pt.server.icon}`"> </Avatar>
         <Avatar v-else size="xlarge"> <i class="bx bxs-server"></i> </Avatar>
         <div class="ms-4">
           <h2 class="text-uppercase m-0" v-text="pt.server.name" />
@@ -27,22 +27,14 @@
   </section>
 </template>
 
-<script>
-export default {
-  layout: 'cabinet',
+<script setup>
+definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'] })
+useHead({ title: 'Личный кабинет' })
 
-  data() {
-    return {
-      playtime: null,
-    }
-  },
+const { $api } = useNuxtApp()
+const playtime = ref(null)
 
-  asyncData({ store }) {
-    store.commit('unicore/SET_NAME', 'Личный кабинет')
-  },
-
-  async fetch() {
-    this.playtime = await this.$axios.get('/cabinet/playtime/me').then((res) => res.data)
-  },
-}
+onMounted(async () => {
+  playtime.value = await $api.get('/cabinet/playtime/me').then((res) => res.data)
+})
 </script>

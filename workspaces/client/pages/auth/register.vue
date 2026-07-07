@@ -1,123 +1,143 @@
 <template>
-  <ValidationObserver v-slot="{ invalid }" class="d-flex flex-column align-items-center w-100" tag="form" @submit.prevent="register">
+  <Form v-slot="{ meta }" class="d-flex flex-column align-items-center w-100" @submit="register">
     <h3 data-aos="zoom-in-right" data-aos-delay="150" class="text-uppercase text-center mb-4">
-      Регистрация учётной записи {{ $config.sitename }}
+      Регистрация учётной записи {{ $pub.sitename }}
     </h3>
-    <vs-dialog scroll overflow-hidden auto-width v-model="rules.active" :loading="!rules.title">
-      <template #header>
-        <h1 v-text="rules.title" />
-      </template>
-      <div class="m-3" v-html="rules.content" />
-    </vs-dialog>
+    <Dialog v-model:visible="rules.active" modal dismissableMask :header="rules.title || ''" :style="{ width: '50rem' }">
+      <div class="m-3" v-html="$sanitize(rules.content)" />
+    </Dialog>
 
-    <ValidationProvider class="w-100" name="Имя пользователя" rules="required|isUsername" v-slot="{ errors }">
-      <vs-input data-aos="zoom-in-right" data-aos-delay="300" placeholder="Имя пользователя" v-model="form.username" class="mb-3">
-        <template #icon>
-          <i class="bx bx-user"></i>
-        </template>
-        <template #message-danger v-if="errors[0]">
-          {{ errors[0] }}
-        </template>
-      </vs-input>
-    </ValidationProvider>
-    <ValidationProvider class="w-100" name="Email" rules="required|email" v-slot="{ errors }">
-      <vs-input data-aos="zoom-in-right" data-aos-delay="450" placeholder="Email" v-model="form.email" class="mb-3">
-        <template #icon>
-          <i class="bx bx-mail-send"></i>
-        </template>
-        <template #message-danger v-if="errors[0]">
-          {{ errors[0] }}
-        </template>
-      </vs-input>
-    </ValidationProvider>
-    <ValidationProvider class="w-100" name="password" rules="required|min:6|max:24" v-slot="{ errors }" ref="password">
-      <vs-input data-aos="zoom-in-right" data-aos-delay="600" type="password" placeholder="Пароль" v-model="form.password" class="mb-3">
-        <template #icon>
-          <i class="bx bx-lock-open-alt"></i>
-        </template>
-        <template #message-danger v-if="errors[0]">
-          {{ errors[0] }}
-        </template>
-      </vs-input>
-    </ValidationProvider>
-    <ValidationProvider
-      class="w-100"
-      name="Подтверждение пароля"
-      rules="required|confirmed:password"
-      v-slot="{ errors }"
-      data-vv-as="password"
+    <Field
+      v-model="form.username"
+      name="Имя пользователя"
+      rules="required|isUsername"
+      v-slot="{ value, errorMessage, handleChange, handleBlur }"
     >
-      <vs-input
+      <IconField data-aos="zoom-in-right" data-aos-delay="300" class="w-100 mb-3">
+        <InputIcon class="bx bx-user" />
+        <InputText
+          :modelValue="value"
+          @update:modelValue="handleChange"
+          @blur="handleBlur"
+          placeholder="Имя пользователя"
+          class="w-100"
+          :class="errorMessage && 'p-invalid'"
+        />
+      </IconField>
+      <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+    </Field>
+    <Field v-model="form.email" name="Email" rules="required|email" v-slot="{ value, errorMessage, handleChange, handleBlur }">
+      <IconField data-aos="zoom-in-right" data-aos-delay="450" class="w-100 mb-3">
+        <InputIcon class="bx bx-mail-send" />
+        <InputText
+          :modelValue="value"
+          @update:modelValue="handleChange"
+          @blur="handleBlur"
+          placeholder="Email"
+          class="w-100"
+          :class="errorMessage && 'p-invalid'"
+        />
+      </IconField>
+      <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+    </Field>
+    <Field v-model="form.password" name="password" rules="required|min:6|max:24" v-slot="{ value, errorMessage, handleChange, handleBlur }">
+      <Password
+        data-aos="zoom-in-right"
+        data-aos-delay="600"
+        :modelValue="value"
+        @update:modelValue="handleChange"
+        @blur="handleBlur"
+        :feedback="false"
+        :toggleMask="true"
+        placeholder="Пароль"
+        class="w-100 mb-3"
+        inputClass="w-100"
+        :class="errorMessage && 'p-invalid'"
+      />
+      <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+    </Field>
+    <Field
+      v-model="form.password_confirm"
+      name="Подтверждение пароля"
+      rules="required|confirmed:@password"
+      v-slot="{ value, errorMessage, handleChange, handleBlur }"
+    >
+      <Password
         data-aos="zoom-in-right"
         data-aos-delay="750"
-        type="password"
+        :modelValue="value"
+        @update:modelValue="handleChange"
+        @blur="handleBlur"
+        :feedback="false"
+        :toggleMask="true"
         placeholder="Подтверждение пароля"
-        v-model="form.password_confirm"
-      >
-        <template #icon>
-          <i class="bx bx-lock-open-alt"></i>
-        </template>
-        <template #message-danger v-if="errors[0]">
-          {{ errors[0] }}
-        </template>
-      </vs-input>
-    </ValidationProvider>
-    <ValidationProvider class="w-100" :rules="{ required: { allowFalse: false } }">
+        class="w-100"
+        inputClass="w-100"
+        :class="errorMessage && 'p-invalid'"
+      />
+      <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+    </Field>
+    <Field v-model="form.confirmed" name="Правила" :rules="rulesAccepted" v-slot="{ value, handleChange }">
       <div data-aos="zoom-in-right" data-aos-delay="900" class="my-3 w-100">
-        <vs-checkbox v-model="form.confirmed"
-          >Я прочитал и принамаю <a @click="rules.active = true" class="mx-1">правила</a> проекта</vs-checkbox
-        >
+        <div class="d-flex align-items-center gap-2">
+          <Checkbox :modelValue="value" @update:modelValue="handleChange" :binary="true" inputId="rules_accept" />
+          <label for="rules_accept">Я прочитал и принимаю <a @click="rules.active = true" class="mx-1">правила</a> проекта</label>
+        </div>
       </div>
-    </ValidationProvider>
+    </Field>
     <div class="w-100" data-aos="zoom-in-right" data-aos-delay="1050">
-      <vs-button :disabled="invalid" type="submit" size="xl" block>Зарегистрироваться</vs-button>
+      <Button :disabled="!meta.valid" type="submit" size="large" label="Зарегистрироваться" class="w-100" />
     </div>
     <p data-aos="zoom-in-right" data-aos-delay="1200" class="mb-0 mt-4 d-flex align-items-center mb-4">
-      Уже зарегистрированны? <nuxt-link class="ms-2" to="/auth">Войти</nuxt-link>
+      Уже зарегистрированны? <NuxtLink class="ms-2" to="/auth">Войти</NuxtLink>
     </p>
-  </ValidationObserver>
+  </Form>
 </template>
 
-<script>
-export default {
-  layout: 'auth',
-  middleware: 'guest',
-  
-  data() {
-    return {
-      form: {
-        username: '',
-        email: '',
-        password: '',
-        password_confirm: '',
-        confirmed: false,
-      },
-      rules: {
-        title: null,
-        content: null,
-        active: false,
-      },
-    }
-  },
-  async mounted() {
-    const rules = await this.$axios.get('/pages/rules').then((res) => res.data)
+<script setup lang="ts">
+import { Form, Field } from 'vee-validate'
+import { useReCaptcha } from 'vue-recaptcha-v3'
 
-    this.rules.title = rules.title
-    this.rules.content = rules.content
-  },
-  methods: {
-    async register() {
-      const loading = this.$vs.loading()
-      try {
-        const recaptcha = await this.$recaptcha.execute('register')
-        const data = await this.$axios.post('/auth/register', { ...this.form, ref: localStorage.getItem("ref") }, { headers: { recaptcha } }).then((res) => res.data)
-        await this.$auth.setUserToken(data.accessToken, data.refreshToken)
-        loading.close()
-      } catch (err) {
-        loading.close()
-        this.$unicore.authErrorNotification(err, `Игрок с данным именем пользователя или email уже существует`)
-      }
-    },
-  },
+definePageMeta({ layout: 'auth', middleware: 'guest' })
+
+const { $unicore, $auth, $api } = useNuxtApp()
+const recaptcha = useReCaptcha()
+
+const form = reactive({
+  username: '',
+  email: '',
+  password: '',
+  password_confirm: '',
+  confirmed: false,
+})
+
+const rules = reactive({
+  title: null as string | null,
+  content: null as string | null,
+  active: false,
+})
+
+const rulesAccepted = (value: unknown) => value === true || 'Необходимо принять правила проекта'
+
+onMounted(async () => {
+  const { data } = await $api.get('/pages/rules')
+  rules.title = data.title
+  rules.content = data.content
+})
+
+async function register() {
+  const loading = $unicore.loading()
+  try {
+    await recaptcha?.recaptchaLoaded?.()
+    const token = await recaptcha?.executeRecaptcha?.('register')
+    const { data } = await $api.post('/auth/register', { ...form, ref: localStorage.getItem('ref') }, { headers: { recaptcha: token } })
+    $auth.setTokens(data.accessToken, data.refreshToken)
+    await $auth.fetchUser()
+    await navigateTo('/cabinet')
+  } catch (err: any) {
+    $unicore.authErrorNotification(err, 'Игрок с данным именем пользователя или email уже существует')
+  } finally {
+    loading.close()
+  }
 }
 </script>

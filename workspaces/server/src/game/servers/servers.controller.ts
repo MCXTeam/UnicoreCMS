@@ -12,7 +12,7 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileFastifyInterceptor, MulterFile } from 'fastify-file-interceptor';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { Permission } from 'unicore-common';
@@ -71,12 +71,16 @@ export class ServersController {
   @Permissions([Permission.AdminDashboard, Permission.AdminServersUpdate])
   @Patch(':type/:id')
   @UseInterceptors(
-    FileFastifyInterceptor('file', {
+    FileInterceptor('file', {
       storage: StorageManager.disk(),
       fileFilter: imageFileFilter,
     }),
   )
-  updateMedia(@Param('id') id: string, @Param('type', new ParseEnumPipe(ServerMedia)) type: ServerMedia, @UploadedFile() file: MulterFile) {
+  updateMedia(
+    @Param('id') id: string,
+    @Param('type', new ParseEnumPipe(ServerMedia)) type: ServerMedia,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
     return this.serversService.updateMedia(id, type, file);
   }
 

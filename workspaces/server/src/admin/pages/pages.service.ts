@@ -38,21 +38,21 @@ export class PagesService {
   }
 
   findOne(id: number): Promise<Page> {
-    return this.pagesRepository.findOne(id);
+    return this.pagesRepository.findOneBy({ id });
   }
 
   findByPath(path: string): Promise<Page> {
-    return this.pagesRepository.findOne({ path });
+    return this.pagesRepository.findOneBy({ path });
   }
 
   rules(): Promise<Page> {
-    return this.pagesRepository.findOne({
+    return this.pagesRepository.findOneBy({
       is_rules: true,
     });
   }
 
   async create(input: PageInput): Promise<Page> {
-    if (await this.pagesRepository.findOne({ path: input.path })) {
+    if (await this.pagesRepository.findOneBy({ path: input.path })) {
       throw new ConflictException();
     }
 
@@ -73,7 +73,7 @@ export class PagesService {
       throw new NotFoundException();
     }
 
-    if (input.path != page.path && (await this.pagesRepository.findOne({ path: input.path }))) {
+    if (input.path != page.path && (await this.pagesRepository.findOneBy({ path: input.path }))) {
       throw new ConflictException();
     }
 

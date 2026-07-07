@@ -19,6 +19,9 @@ export class UserDto {
   @Exclude()
   password: string;
 
+  @Exclude()
+  accessToken: string;
+
   two_factor_enabled?: boolean;
 
   @Exclude()
@@ -38,7 +41,7 @@ export class UserDto {
   roles: string[];
 
   @Type(() => BanDto)
-  ban: BanDto
+  ban: BanDto;
 
   created: Date;
 
@@ -63,6 +66,9 @@ export class UserBasicDto {
   @Exclude()
   password: string;
 
+  @Exclude()
+  accessToken: string;
+
   two_factor_enabled?: boolean;
 
   @Exclude()
@@ -86,10 +92,9 @@ export class UserBasicDto {
   updated: Date;
 
   @Type(() => BanDto)
-  ban: BanDto
+  ban: BanDto;
 
   constructor(partial: Partial<User>) {
     Object.assign(this, partial);
   }
 }
-

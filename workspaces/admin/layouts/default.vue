@@ -1,14 +1,12 @@
 <template>
   <div :class="containerClass" @click="onWrapperClick">
-    <Toast />
-    <ConfirmDialog />
     <AppTopbar @menu-toggle="onMenuToggle" />
     <div class="layout-sidebar" @click="onSidebarClick">
       <AppMenu :model="menu" @menuitem-click="onMenuItemClick" />
     </div>
     <div class="layout-main-container">
       <div class="layout-main">
-        <Nuxt />
+        <slot />
       </div>
       <AppFooter />
     </div>
@@ -19,14 +17,22 @@
 </template>
 
 <script>
+import { useToast } from 'primevue/usetoast'
+import { usePrimeVue } from 'primevue/config'
+
 export default {
-  middleware: ["admin"],
+  setup() {
+    const toast = useToast()
+    const primevue = usePrimeVue()
+    return { toast, primevue }
+  },
   data() {
     return {
       layoutMode: 'static',
       staticMenuInactive: false,
       overlayMenuActive: false,
       mobileMenuActive: false,
+      menuClick: false,
       menu: [
         {
           label: 'Основное',
@@ -153,16 +159,6 @@ export default {
         {
           label: 'Утилиты',
           items: [
-            // {
-            //   label: 'Управление хранилищем',
-            //   icon: 'pi pi-fw pi-folder',
-            //   to: '/',
-            // },
-            // {
-            //   label: 'Слияние базы данных',
-            //   icon: 'pi pi-fw pi-clone',
-            //   to: '/users',
-            // },
             {
               label: 'API-Ключи',
               icon: 'pi pi-fw pi-reply',
@@ -180,8 +176,7 @@ export default {
   },
   watch: {
     $route() {
-      this.menuActive = false
-      this.$toast.removeAllGroups()
+      this.toast.removeAllGroups()
     },
   },
   methods: {
@@ -192,7 +187,7 @@ export default {
       }
       this.menuClick = false
     },
-    onMenuToggle() {
+    onMenuToggle(event) {
       this.menuClick = true
       if (this.isDesktop()) {
         if (this.layoutMode === 'overlay') {
@@ -207,7 +202,7 @@ export default {
       } else {
         this.mobileMenuActive = !this.mobileMenuActive
       }
-      event.preventDefault()
+      event?.preventDefault()
     },
     onSidebarClick() {
       this.menuClick = true
@@ -250,14 +245,11 @@ export default {
           'layout-static-sidebar-inactive': this.staticMenuInactive && this.layoutMode === 'static',
           'layout-overlay-sidebar-active': this.overlayMenuActive && this.layoutMode === 'overlay',
           'layout-mobile-sidebar-active': this.mobileMenuActive,
-          'p-input-filled': this.$primevue.config.inputStyle === 'filled',
-          'p-ripple-disabled': this.$primevue.config.ripple === false,
+          'p-input-filled': this.primevue.config.inputStyle === 'filled',
+          'p-ripple-disabled': this.primevue.config.ripple === false,
         },
       ]
     },
-  },
-  mounted() {
-    this.socket = this.$nuxtSocket({})
   },
   beforeUpdate() {
     if (this.mobileMenuActive) this.addClass(document.body, 'body-overflow-hidden')

@@ -2,24 +2,24 @@ import { StorageManager } from '@common';
 import { AfterRemove, Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Product } from './product.entity';
 
-@Entity({ name: "unicore_enchantments" })
+@Entity({ name: 'unicore_enchantments' })
 export class Enchantment {
-  @PrimaryGeneratedColumn({ name: "id" })
+  @PrimaryGeneratedColumn({ name: 'id' })
   id: number;
 
-  @Column({ name: "name" })
+  @Column({ name: 'name' })
   name: string;
 
   @Column('text', {
-    name: "description",
+    name: 'description',
     nullable: true,
   })
   description: string;
 
-  @Column('float', { name: "price" })
+  @Column('float', { name: 'price' })
   price: number;
 
-  @Column({ nullable: true, name: "icon" })
+  @Column({ nullable: true, name: 'icon' })
   icon: string;
 
   @ManyToMany(() => Product, (product) => product.enchantments, {

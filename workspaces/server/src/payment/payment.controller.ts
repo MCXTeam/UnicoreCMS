@@ -6,20 +6,20 @@ import { PaymentService } from './payment.service';
 
 @Controller('payment')
 export class PaymentController {
-  constructor (private paymentService: PaymentService) {}
+  constructor(private paymentService: PaymentService) {}
 
   @Get('methods')
   find() {
-    return this.paymentService.getMethods()
+    return this.paymentService.getMethods();
   }
 
   @Public()
   @Redirect(envConfig.baseurl, 302)
   @All('redirect/:status/:method')
   redirect(@Param('status') status: PaymentStatusesRedirect, @Param('method') method: string) {
-    const url = new URL(`${envConfig.baseurl}/payment/`)
-    url.searchParams.append('status', status)
-    url.searchParams.append('method', method)
+    const url = new URL(`${envConfig.baseurl}/payment/`);
+    url.searchParams.append('status', status);
+    url.searchParams.append('method', method);
 
     return { url: url.href };
   }

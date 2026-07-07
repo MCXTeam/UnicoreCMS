@@ -6,56 +6,51 @@
       </div>
       <div class="col">
         <h4 class="mt-0 mb-1">Завершить сеансы</h4>
-        <vs-button-group class="mb-4">
-          <vs-button @click="sessionsOther()" block flat>Другие</vs-button>
-          <vs-button @click="sessionsAll()" block flat>Все</vs-button>
-        </vs-button-group>
+        <div class="p-buttonset d-flex mb-4">
+          <Button @click="sessionsOther()" text label="Другие" class="flex-fill" />
+          <Button @click="sessionsAll()" text label="Все" class="flex-fill" />
+        </div>
       </div>
     </div>
-    <vs-table class="no-overflow-table large-table">
-      <template #thead>
-        <vs-tr>
-          <vs-th style="width: 35%"> Устройство </vs-th>
-          <vs-th style="width: 15%"> IP </vs-th>
-          <vs-th style="width: 20%"> Последняя активность </vs-th>
-          <vs-th style="width: 20%"> Создан </vs-th>
-          <vs-th style="width: 10%"> </vs-th>
-        </vs-tr>
-      </template>
-      <template #tbody>
-        <vs-tr :key="session.id" v-for="session in sessions.all" :data="session">
-          <vs-td>
-            <vs-tooltip>
-              {{
-                session.agent == 'launcher'
-                  ? 'Лаунчер'
-                  : $utils.uaParse(session.agent).raw + (session.id == sessions.curnet.id ? ' (Текущий)' : '')
-              }}
-              <template #tooltip> UUID: {{ session.uuid }} </template>
-            </vs-tooltip>
-          </vs-td>
-          <vs-td> {{ session.ip }} </vs-td>
-          <vs-td> {{ $moment(session.updated).local().format('D MMMM YYYY, HH:mm:ss') }} </vs-td>
-          <vs-td> {{ $moment(session.created).local().format('D MMMM YYYY, HH:mm:ss') }} </vs-td>
-          <vs-td>
-            <vs-button :ref="`session-${session.id}`" :loading="false" danger @click="sessionDelete(session.id)"><i class="bx bx-trash"></i></vs-button>
-          </vs-td>
-        </vs-tr>
-      </template>
-    </vs-table>
+    <DataTable class="no-overflow-table large-table" :value="sessions.all">
+      <Column headerStyle="width: 35%" header="Устройство">
+        <template #body="{ data }">
+          <span v-tooltip="`UUID: ${data.uuid}`">
+            {{
+              data.agent == 'launcher' ? 'Лаунчер' : $utils.uaParse(data.agent).raw + (data.id == sessions.curnet.id ? ' (Текущий)' : '')
+            }}
+          </span>
+        </template>
+      </Column>
+      <Column headerStyle="width: 15%" header="IP">
+        <template #body="{ data }"> {{ data.ip }} </template>
+      </Column>
+      <Column headerStyle="width: 20%" header="Последняя активность">
+        <template #body="{ data }"> {{ $moment(data.updated).local().format('D MMMM YYYY, HH:mm:ss') }} </template>
+      </Column>
+      <Column headerStyle="width: 20%" header="Создан">
+        <template #body="{ data }"> {{ $moment(data.created).local().format('D MMMM YYYY, HH:mm:ss') }} </template>
+      </Column>
+      <Column headerStyle="width: 10%">
+        <template #body="{ data }">
+          <Button :loading="deletingId == data.id" severity="danger" @click="sessionDelete(data.id)"><i class="bx bx-trash"></i></Button>
+        </template>
+      </Column>
+    </DataTable>
   </div>
 </template>
 
 <script>
-export default {
+definePageMeta({
   layout: 'cabinet',
+  middleware: ['auth', 'verify'],
+  title: 'Личный кабинет',
+})
 
-  asyncData({ store }) {
-    store.commit('unicore/SET_NAME', 'Личный кабинет')
-  },
-
+export default {
   data() {
     return {
+      deletingId: null,
       sessions: {
         curnet: null,
         all: [],
@@ -63,40 +58,45 @@ export default {
     }
   },
 
-  async fetch() {
-    this.sessions = await this.$axios
-      .post('/auth/sessions/me', {
-        token: this.$auth.strategy.refreshToken.get(),
-      })
-      .then((res) => res.data)
-
-    if (!this.sessions.curnet) this.$unicore.logout()
+  mounted() {
+    this.load()
   },
 
   methods: {
+    async load() {
+      this.sessions = await this.$api
+        .post('/auth/sessions/me', {
+          token: this.$auth.refreshToken,
+        })
+        .then((res) => res.data)
+
+      if (!this.sessions.curnet) this.$unicore.logout()
+    },
+
     async sessionDelete(id) {
-      this.$refs[`session-${id}`][0].loading = true
-      await this.$axios.delete(`/auth/sessions/${id}`)
-      await this.$fetch()
+      this.deletingId = id
+      await this.$api.delete(`/auth/sessions/${id}`)
+      await this.load()
+      this.deletingId = null
     },
 
     async sessionsAll() {
-      const loading = this.$vs.loading()
-      await this.$axios.delete(`/auth/sessions_all`)
-      await this.$fetch()
+      const loading = this.$unicore.loading()
+      await this.$api.delete(`/auth/sessions_all`)
+      await this.load()
       loading.close()
     },
 
     async sessionsOther() {
-      const loading = this.$vs.loading()
-      await this.$axios.delete(`/auth/sessions_other`, {
+      const loading = this.$unicore.loading()
+      await this.$api.delete(`/auth/sessions_other`, {
         data: {
-          token: this.$auth.strategy.refreshToken.get()
-        }
+          token: this.$auth.refreshToken,
+        },
       })
-      await this.$fetch()
+      await this.load()
       loading.close()
-    }
-  }
+    },
+  },
 }
 </script>

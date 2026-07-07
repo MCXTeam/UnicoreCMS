@@ -22,10 +22,10 @@
           :loading="loading"
           :rows="20"
           paginator
-          :filters.sync="filters"
+          v-model:filters="filters"
           rowHover
           responsiveLayout="scroll"
-          :selection.sync="selected"
+          v-model:selection="selected"
           @row-reorder="onPermsReorder"
           dataKey="id"
         >
@@ -62,29 +62,49 @@
           </Column>
         </DataTable>
 
-        <ValidationObserver v-slot="{ invalid }">
+        <VeeForm v-slot="{ meta }">
           <Dialog
-            :visible.sync="permissionDialog"
+            v-model:visible="permissionDialog"
             :closable="false"
             :style="{ width: '600px' }"
             :modal="true"
             header="Создание/редактирование права"
             class="p-fluid"
           >
-            <ValidationProvider name="Название" rules="required" v-slot="{ errors }">
+            <VeeField
+              v-model="permission.name"
+              name="name"
+              label="Название"
+              rules="required"
+              v-slot="{ value, errorMessage, handleChange, handleBlur }"
+            >
               <div class="field">
                 <label>Название</label>
-                <InputText v-model="permission.name" />
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                <InputText :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" :class="errorMessage && 'p-invalid'" />
+                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
-            </ValidationProvider>
-            <ValidationProvider name="Тип" rules="required" v-slot="{ errors }">
+            </VeeField>
+            <VeeField
+              v-model="permission.type"
+              name="type"
+              label="Тип"
+              rules="required"
+              v-slot="{ value, errorMessage, handleChange, handleBlur }"
+            >
               <div class="field">
                 <label>Тип</label>
-                <Dropdown v-model="permission.type" :options="types" optionLabel="name" appendTo="body" />
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                <Select
+                  :modelValue="value"
+                  @update:modelValue="handleChange"
+                  @blur="handleBlur"
+                  :options="types"
+                  optionLabel="name"
+                  appendTo="body"
+                  :class="errorMessage && 'p-invalid'"
+                />
+                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
-            </ValidationProvider>
+            </VeeField>
             <div class="field">
               <label>Доступные периоды</label>
               <MultiSelect
@@ -114,31 +134,71 @@
             </div>
             <div class="grid">
               <div class="col-6">
-                <ValidationProvider name="Цена" rules="required|min:0.01" v-slot="{ errors }">
+                <VeeField
+                  v-model="permission.price"
+                  name="price"
+                  label="Цена"
+                  rules="required|min:0.01"
+                  v-slot="{ value, errorMessage, handleChange, handleBlur }"
+                >
                   <div class="field">
                     <label>Цена</label>
-                    <InputNumber v-model="permission.price" mode="decimal" :minFractionDigits="$config.realDecimals" :maxFractionDigits="$config.realDecimals" />
-                    <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                    <InputNumber
+                      :modelValue="value"
+                      @update:modelValue="handleChange"
+                      @blur="handleBlur"
+                      mode="decimal"
+                      :minFractionDigits="realDecimals"
+                      :maxFractionDigits="realDecimals"
+                      :class="errorMessage && 'p-invalid'"
+                    />
+                    <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
                   </div>
-                </ValidationProvider>
+                </VeeField>
               </div>
               <div class="col-6">
-                <ValidationProvider name="Скидка" rules="min_value:0|max_value:99" v-slot="{ errors }">
+                <VeeField
+                  v-model="permission.sale"
+                  name="sale"
+                  label="Скидка"
+                  rules="min_value:0|max_value:99"
+                  v-slot="{ value, errorMessage, handleChange, handleBlur }"
+                >
                   <div class="field">
                     <label>Скидка</label>
-                    <InputNumber suffix=" %" :useGrouping="false" v-model="permission.sale" />
-                    <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                    <InputNumber
+                      suffix=" %"
+                      :useGrouping="false"
+                      :modelValue="value"
+                      @update:modelValue="handleChange"
+                      @blur="handleBlur"
+                      :class="errorMessage && 'p-invalid'"
+                    />
+                    <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
                   </div>
-                </ValidationProvider>
+                </VeeField>
               </div>
             </div>
             <div class="field">
-              <ValidationProvider name="Процент" rules="min_value:0|max_value:100" v-slot="{ errors }">
+              <VeeField
+                v-model="permission.virtual_percent"
+                name="virtual_percent"
+                label="Процент"
+                rules="min_value:0|max_value:100"
+                v-slot="{ value, errorMessage, handleChange, handleBlur }"
+              >
                 <label>Индивидуальный процент оплаты бонусами</label>
-                <InputNumber suffix=" %" :useGrouping="false" v-model="permission.virtual_percent" />
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                <InputNumber
+                  suffix=" %"
+                  :useGrouping="false"
+                  :modelValue="value"
+                  @update:modelValue="handleChange"
+                  @blur="handleBlur"
+                  :class="errorMessage && 'p-invalid'"
+                />
+                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
                 <small>0 - отключить оплату бонусами на данный товар</small>
-              </ValidationProvider>
+              </VeeField>
             </div>
             <div class="field" v-if="$_.get(permission.type, 'value') == 'game' || $_.get(permission.type, 'value') == 'kit'">
               <label>Серверы</label>
@@ -154,7 +214,7 @@
               >
                 <template #option="slotProps">
                   <div class="p-multiselect-representative-option">
-                    <Avatar v-if="slotProps.option.icon" :image="`${$config.apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
+                    <Avatar v-if="slotProps.option.icon" :image="`${apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
                     <Avatar v-else icon="pi pi-image" shape="circle" />
                     <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                   </div>
@@ -163,7 +223,7 @@
             </div>
             <div class="field" v-if="$_.get(permission.type, 'value') == 'game' || $_.get(permission.type, 'value') == 'kit'">
               <label>Права</label>
-              <Chips v-model="permission.perms" placeholder="Выберите разрешения" />
+              <InputChips v-model="permission.perms" placeholder="Выберите разрешения" />
             </div>
             <div class="field" v-if="$_.get(permission.type, 'value') == 'web'">
               <label>Веб-права</label>
@@ -193,7 +253,7 @@
             <template #footer>
               <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
-                :disabled="loading || invalid"
+                :disabled="loading || !meta.valid"
                 label="Сохранить"
                 icon="pi pi-check"
                 class="p-button-text"
@@ -201,22 +261,27 @@
               />
             </template>
           </Dialog>
-        </ValidationObserver>
+        </VeeForm>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { ValidationObserver, ValidationProvider } from 'vee-validate'
+import { Form, Field } from 'vee-validate'
 
 export default {
-  head: {
-    title: 'Донат-права',
-  },
   components: {
-    ValidationObserver,
-    ValidationProvider,
+    VeeForm: Form,
+    VeeField: Field,
+  },
+  setup() {
+    useHead({ title: 'Донат-права' })
+    const config = useRuntimeConfig()
+    return {
+      apiUrl: config.public.apiBaseurl,
+      realDecimals: config.public.realDecimals,
+    }
   },
   data() {
     return {
@@ -236,7 +301,7 @@ export default {
         periods: [],
         perms: [],
         web_perms: [],
-        virtual_percent: false
+        virtual_percent: false,
       },
       permissionDialog: false,
       types: [
@@ -249,28 +314,32 @@ export default {
       servers: null,
       periods: null,
       kits: null,
+      filters: null,
     }
   },
-  async fetch() {
-    this.loading = true
-    this.permissionDialog = false
-    this.permissions = await this.$axios.get('/donates/permissions').then((res) => res.data)
-    this.kits = await this.$axios.get('/donates/group-kits').then((res) => res.data)
-    this.periods = await this.$axios.get('/donates/periods').then((res) => res.data)
-    this.servers = await this.$axios.get('/servers').then((res) => res.data)
-    this.autocompleate = await this.$axios.get('/admin/roles/autocompleate').then((res) => res.data)
-    this.loading = false
+  mounted() {
+    this.load()
   },
   methods: {
+    async load() {
+      this.loading = true
+      this.permissionDialog = false
+      this.permissions = await this.$api.get('/donates/permissions').then((res) => res.data)
+      this.kits = await this.$api.get('/donates/group-kits').then((res) => res.data)
+      this.periods = await this.$api.get('/donates/periods').then((res) => res.data)
+      this.servers = await this.$api.get('/servers').then((res) => res.data)
+      this.autocompleate = await this.$api.get('/admin/roles/autocompleate').then((res) => res.data)
+      this.loading = false
+    },
     async onPermsReorder(event) {
       this.loading = true
-      await this.$axios.post('/donates/permissions/sort', {
+      await this.$api.post('/donates/permissions/sort', {
         items: event.value.map((p, priority) => ({
           id: p.id,
           priority,
         })),
       })
-      this.$fetch()
+      this.load()
     },
     searchAutocompleate(event) {
       if (!event.query.trim().length) {
@@ -295,8 +364,8 @@ export default {
       this.updateMode = !!permission
       if (permission) {
         this.permission = this.$_.pick(
-          await this.$axios.get('/donates/permissions/' + permission.id).then((res) => res.data),
-          this.$_.deepKeys(this.permission)
+          await this.$api.get('/donates/permissions/' + permission.id).then((res) => res.data),
+          this.$_.deepKeys(this.permission),
         )
         this.permission.type = this.types.find((type) => type.value == this.permission.type)
       } else {
@@ -312,7 +381,7 @@ export default {
           periods: [],
           perms: [],
           web_perms: [],
-          virtual_percent: false
+          virtual_percent: false,
         }
       }
       this.permissionDialog = true
@@ -320,7 +389,7 @@ export default {
     async createPermission() {
       this.loading = true
       try {
-        await this.$axios.post('/donates/permissions', {
+        await this.$api.post('/donates/permissions', {
           ...this.permission,
           type: this.permission.type.value,
           kits: this.permission.kits.map((kit) => kit.id),
@@ -332,7 +401,7 @@ export default {
           detail: 'Право успешно добавлена',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch (err) {
         this.loading = false
         this.$toast.add({
@@ -345,7 +414,7 @@ export default {
     async updatePermission() {
       this.loading = true
       try {
-        await this.$axios.patch('/donates/permissions/' + this.permission.id, {
+        await this.$api.patch('/donates/permissions/' + this.permission.id, {
           ...this.$_.omit(this.permission, 'id'),
           type: this.permission.type.value,
           kits: this.permission.kits.map((kit) => kit.id),
@@ -357,7 +426,7 @@ export default {
           detail: 'Право успешно редактировано',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch (err) {
         this.loading = false
         this.$toast.add({
@@ -375,7 +444,7 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$axios.delete('/donates/permissions/bulk/', {
+            await this.$api.delete('/donates/permissions/bulk/', {
               data: {
                 items: this.selected.map((permission) => permission.id),
               },
@@ -387,7 +456,7 @@ export default {
             })
             this.selected = []
           } catch {}
-          await this.$fetch()
+          await this.load()
         },
       })
     },
@@ -399,14 +468,14 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$axios.delete('/donates/permissions/' + id)
+            await this.$api.delete('/donates/permissions/' + id)
             this.$toast.add({
               severity: 'success',
               detail: 'Право успешно удалено',
               life: 3000,
             })
           } catch {}
-          await this.$fetch()
+          await this.load()
         },
       })
     },

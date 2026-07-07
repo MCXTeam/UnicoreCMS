@@ -36,7 +36,7 @@ export class PlaytimeService {
     }
 
     const servers = await this.serversService.find();
-    const pt = await this.playtimeRepository.find({
+    const pt = await this.playtimeRepository.findBy({
       user: {
         uuid: user.uuid,
       },
@@ -60,8 +60,8 @@ export class PlaytimeService {
 
     if (!user) throw new NotFoundException();
 
-    const pt = await this.playtimeRepository.findOne(
-      {
+    const pt = await this.playtimeRepository.findOne({
+      where: {
         user: {
           uuid: user.uuid,
         },
@@ -69,8 +69,8 @@ export class PlaytimeService {
           id: server_id,
         },
       },
-      { relations: ['user', 'server'] },
-    );
+      relations: ['user', 'server'],
+    });
 
     if (pt) return pt;
     else {
@@ -85,14 +85,14 @@ export class PlaytimeService {
   async findTopByServer(id: string): Promise<Playtime[]> {
     return this.playtimeRepository.find({
       where: {
-        server: { id }
+        server: { id },
       },
       order: {
-        time: "DESC"
+        time: 'DESC',
       },
-      relations: ["server", "user"],
-      take: 10
-    })
+      relations: ['server', 'user'],
+      take: 10,
+    });
   }
 
   async update(input: PlaytimeInput[]) {

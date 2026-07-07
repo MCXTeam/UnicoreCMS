@@ -10,17 +10,17 @@ import { AnypayService } from './anypay.service';
 
 @Controller('payment/methods/anypay')
 export class AnypayController {
-  constructor (private anypayService: AnypayService) {}
+  constructor(private anypayService: AnypayService) {}
 
   @Permissions([Permission.UserPayment])
   @Post('link')
   link(@IpAddress() ip: string, @CurrentUser() user: User, @Body() body: PaymentCreateDto) {
-    return this.anypayService.createLink(user, body, ip)
+    return this.anypayService.createLink(user, body, ip);
   }
 
   @Public()
   @Post('handler')
   handler(@IpAddress() ip: string, @Body() body) {
-    return this.anypayService.handler(ip, body)
+    return this.anypayService.handler(ip, body);
   }
 }

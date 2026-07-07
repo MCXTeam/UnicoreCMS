@@ -1,36 +1,41 @@
 import { User } from 'src/admin/users/entities/user.entity';
 import { Server } from 'src/game/servers/entities/server.entity';
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToOne, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 
-@Entity({ name: "unicore_playtimes" })
+@Entity({ name: 'unicore_playtimes' })
 export class Playtime {
+  @PrimaryColumn({ name: 'user_uuid' })
+  userUuid: string;
+
   @ManyToOne(() => User, {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
-    primary: true,
   })
-  @JoinColumn({ name: "user_uuid" })
+  @JoinColumn({ name: 'user_uuid' })
   user: User;
+
+  @PrimaryColumn({ name: 'server_id' })
+  serverId: string;
 
   @ManyToOne(() => Server, {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
     eager: true,
-    primary: true,
   })
+  @JoinColumn({ name: 'server_id' })
   server: Server;
 
   @Column({
     default: 0,
-    name: "time"
+    name: 'time',
   })
   time: number;
 
-  @CreateDateColumn({ name: "created" })
+  @CreateDateColumn({ name: 'created' })
   created: Date;
 
-  @UpdateDateColumn({ name: "updated" })
+  @UpdateDateColumn({ name: 'updated' })
   updated: Date;
 }

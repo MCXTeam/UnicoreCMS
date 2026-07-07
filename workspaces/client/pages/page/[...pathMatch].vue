@@ -1,0 +1,24 @@
+<template>
+  <div class="panel description-html" v-html="$sanitize(page.content)" />
+</template>
+
+<script setup lang="ts">
+import { useUiStore } from '~/stores/ui'
+
+definePageMeta({ layout: 'landing' })
+
+const { $api } = useNuxtApp()
+const route = useRoute()
+
+const path = Array.isArray(route.params.pathMatch) ? route.params.pathMatch.join('/') : route.params.pathMatch
+
+const { data: page, error } = await useAsyncData<any>(`page-${path}`, () => $api.post('/pages/path', { path }).then((res) => res.data))
+
+if (error.value || !page.value) throw createError({ statusCode: 404, fatal: true })
+
+useUiStore().setName(page.value.title)
+useHead({
+  title: page.value.title,
+  meta: [{ name: 'description', content: page.value.description }],
+})
+</script>

@@ -30,7 +30,40 @@ import { Vote } from 'src/game/cabinet/votes/entities/vote.entity';
 import { VoteGift } from 'src/game/cabinet/votes/entities/vote-gift.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([RefreshToken, History, CartItem, CartItemKit, UsersDonateGroup, UsersDonatePermission, Payment, Referal, User, PasswordReset, EmailActivation, Ban, Vote, VoteGift]), ServersModule, OnlineModule, ConfigModule, PlaytimeModule],
-  providers: [TokenTasks, HistoryTasks, OnlineTasks, CartTasks, DonateTasks, PaymentTasks, ReferalsTasks, HistoryTasks, EmailTasks, BanTasks, VotesTasks],
+  imports: [
+    TypeOrmModule.forFeature([
+      RefreshToken,
+      History,
+      CartItem,
+      CartItemKit,
+      UsersDonateGroup,
+      UsersDonatePermission,
+      Payment,
+      Referal,
+      User,
+      PasswordReset,
+      EmailActivation,
+      Ban,
+      Vote,
+      VoteGift,
+    ]),
+    ServersModule,
+    OnlineModule,
+    ConfigModule,
+    PlaytimeModule,
+  ],
+  providers: [
+    TokenTasks,
+    HistoryTasks,
+    OnlineTasks,
+    CartTasks,
+    DonateTasks,
+    PaymentTasks,
+    ReferalsTasks,
+    HistoryTasks,
+    EmailTasks,
+    BanTasks,
+    VotesTasks,
+  ],
 })
-export class CronModule { }
+export class CronModule {}

@@ -39,7 +39,7 @@ export class DashboardService {
         result = await Promise.all(
           range.map(async (date) => ({
             date: this.moment(date).utc().toDate(),
-            count: await this.usersRepository.count({
+            count: await this.usersRepository.countBy({
               created: Between(this.moment(date).toDate(), this.moment(date).endOf('day').toDate()),
             }),
           })),
@@ -67,7 +67,7 @@ export class DashboardService {
         result = await Promise.all(
           range.map(async (date) => ({
             date: this.moment(date).utc().toDate(),
-            count: await this.historyRepository.count({
+            count: await this.historyRepository.countBy({
               type: In(HistoryGroupType.Purchase),
               created: Between(this.moment(date).toDate(), this.moment(date).endOf('day').toDate()),
             }),
@@ -93,7 +93,7 @@ export class DashboardService {
         result = await Promise.all(
           range.map(async (date) => ({
             date: this.moment(date).utc().toDate(),
-            count: await this.paymentsRepository.count({
+            count: await this.paymentsRepository.countBy({
               status: PaymentStatuses.PAID,
               created: Between(this.moment(date).toDate(), this.moment(date).endOf('day').toDate()),
             }),
@@ -127,7 +127,7 @@ export class DashboardService {
         result = await Promise.all(
           range.map(async (date) => ({
             date: this.moment(date).toDate(),
-            count: await this.usersRepository.count({
+            count: await this.usersRepository.countBy({
               created: Between(this.moment(date).toDate(), this.moment(date).endOf('month').toDate()),
             }),
           })),
@@ -155,7 +155,7 @@ export class DashboardService {
         result = await Promise.all(
           range.map(async (date) => ({
             date: this.moment(date).toDate(),
-            count: await this.historyRepository.count({
+            count: await this.historyRepository.countBy({
               type: In(HistoryGroupType.Purchase),
               created: Between(this.moment(date).toDate(), this.moment(date).endOf('month').toDate()),
             }),
@@ -181,7 +181,7 @@ export class DashboardService {
         result = await Promise.all(
           range.map(async (date) => ({
             date: this.moment(date).toDate(),
-            count: await this.paymentsRepository.count({
+            count: await this.paymentsRepository.countBy({
               status: PaymentStatuses.PAID,
               created: Between(this.moment(date).toDate(), this.moment(date).endOf('month').toDate()),
             }),
@@ -213,7 +213,7 @@ export class DashboardService {
       payments: {
         days: await this.daysStatBuilder(StatType.Payment),
         months: await this.monthsStatBuilder(StatType.Payment),
-        count: await this.paymentsRepository.count({
+        count: await this.paymentsRepository.countBy({
           status: PaymentStatuses.PAID,
         }),
         amount: Number(
@@ -229,7 +229,7 @@ export class DashboardService {
       purchases: {
         days: await this.daysStatBuilder(StatType.Purchase),
         months: await this.monthsStatBuilder(StatType.Purchase),
-        count: await this.historyRepository.count({
+        count: await this.historyRepository.countBy({
           type: In(HistoryGroupType.Purchase),
         }),
         amount: Number(

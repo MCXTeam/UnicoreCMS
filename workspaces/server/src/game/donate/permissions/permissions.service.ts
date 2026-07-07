@@ -16,7 +16,7 @@ import { PermissionInput } from './dto/permission.input';
 import { DonatePermission } from './entities/donate-permission.entity';
 import { UsersDonatePermission } from './entities/user-permission.entity';
 import { PermissionType } from './enums/permission-type.enum';
-import * as _ from 'lodash'
+import * as _ from 'lodash';
 import { ConfigField } from 'src/admin/config/config.enum';
 import { ConfigService } from 'src/admin/config/config.service';
 import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
@@ -41,35 +41,38 @@ export class DonatePermissionsService {
     private periodsRepository: Repository<Period>,
     @InjectRepository(GroupKit)
     private groupKitsRepository: Repository<GroupKit>,
-  ) { }
+  ) {}
 
   find(relations: string[] = new Array()): Promise<DonatePermission[]> {
     return this.donatePermissionsRepository.find({ relations });
   }
 
   me(user: User): Promise<UsersDonatePermission[]> {
-    return this.userPermissionsRepository.find({ user: { uuid: user.uuid } });
+    return this.userPermissionsRepository.findBy({ user: { uuid: user.uuid } });
   }
 
   udpByUUID(uuid: string): Promise<UsersDonatePermission[]> {
-    return this.userPermissionsRepository.find({ user: { uuid } });
+    return this.userPermissionsRepository.findBy({ user: { uuid } });
   }
 
   async give(user: User, server: Server, permission: DonatePermission, period: Period) {
     let userPermission = await this.userPermissionsRepository.findOne({
-      user: {
-        uuid: user.uuid,
+      where: {
+        user: {
+          uuid: user.uuid,
+        },
+        server:
+          permission.type == PermissionType.Web
+            ? null
+            : {
+                id: server.id,
+              },
+        permission: {
+          id: permission.id,
+        },
       },
-      server:
-        permission.type == PermissionType.Web
-          ? null
-          : {
-            id: server.id,
-          },
-      permission: {
-        id: permission.id,
-      }
-    }, { relations: ['user'] });
+      relations: ['user'],
+    });
 
     if (userPermission) {
       if (!userPermission.expired) throw new BadRequestException();
@@ -79,8 +82,7 @@ export class DonatePermissionsService {
       userPermission = new UsersDonatePermission();
       userPermission.expired = period.expire ? this.moment().utc().add(period.expire, 'seconds').toDate() : null;
 
-      if (permission.type != PermissionType.Web)
-        userPermission.server = server;
+      if (permission.type != PermissionType.Web) userPermission.server = server;
 
       userPermission.permission = permission;
       userPermission.user = user;
@@ -90,90 +92,137 @@ export class DonatePermissionsService {
     if (userPermission.permission.type != PermissionType.Web)
       this.eventsService.server.to(Permission.KernelUnicoreConnect).emit('give_permission', userPermission);
 
+    userPermission.user = { uuid: user.uuid } as User;
     return this.userPermissionsRepository.save(userPermission);
   }
 
   async giveByDTO(input: GiveDonatePermInput) {
     var server = null;
-    const user = await this.usersRepository.findOne({ uuid: input.user_uuid })
-    const permission = await this.donatePermissionsRepository.findOne({ id: input.permission_id })
-    const period = await this.periodsRepository.findOne({ id: input.period_id })
+    const user = await this.usersRepository.findOneBy({ uuid: input.user_uuid });
+    const permission = await this.donatePermissionsRepository.findOneBy({ id: input.permission_id });
+    const period = await this.periodsRepository.findOneBy({ id: input.period_id });
 
     if (input.server_id) {
-      server = await this.serversRepository.findOne({ id: input.server_id })
-      if (!server)
-        throw new NotFoundException()
+      server = await this.serversRepository.findOneBy({ id: input.server_id });
+      if (!server) throw new NotFoundException();
     }
 
-    if (!user || !permission || !period)
-      throw new NotFoundException()
+    if (!user || !permission || !period) throw new NotFoundException();
 
-    await this.give(user, server, permission, period)
+    if (permission.type != PermissionType.Web && !server) throw new BadRequestException();
+
+    await this.give(user, server, permission, period);
   }
 
   async take(id: number) {
-    const udp = await this.userPermissionsRepository.findOne(id, { relations: ["user"] });
-    if (!udp) throw new NotFoundException()
+    const udp = await this.userPermissionsRepository.findOne({ where: { id }, relations: ['user'] });
+    if (!udp) throw new NotFoundException();
 
-    await this.userPermissionsRepository.remove(udp)
+    await this.userPermissionsRepository.remove(udp);
 
     if (udp.permission.type != PermissionType.Web)
       this.eventsService.server.to(Permission.KernelUnicoreConnect).emit('take_permission', udp);
   }
 
   async buy(user: User, ip: string, input: PermissionBuyInput) {
-    const cfg = await this.configService.load()
+    const cfg = await this.configService.load();
     const permission = await this.findOne(input.permission, ['servers', 'periods']);
     const server = permission?.servers?.find((server) => server.id == input.server);
     const period = permission?.periods?.find((period) => period.id == input.period);
 
     if (!permission || !period || !(server || permission.type == PermissionType.Web)) throw new NotFoundException();
 
-    const price = currencyUtils.roundByType((permission.price - (permission.price * permission.sale) / 100) * period.multiplier, SystemCurrency.REAL)
-    let virtual_sale = currencyUtils.roundByType(input.use_virtual && cfg[ConfigField.DonatePermsVirtualUse] && permission.virtual_percent !== 0 ?
-      price / 100 * (permission.virtual_percent || Number(cfg[ConfigField.VirtualPercent])) : 0, SystemCurrency.VIRTAUL)
+    const price = currencyUtils.roundByType(
+      (permission.price - (permission.price * permission.sale) / 100) * period.multiplier,
+      SystemCurrency.REAL,
+    );
+    let virtual_sale = currencyUtils.roundByType(
+      input.use_virtual && cfg[ConfigField.DonatePermsVirtualUse] && permission.virtual_percent !== 0
+        ? (price / 100) * (permission.virtual_percent || Number(cfg[ConfigField.VirtualPercent]))
+        : 0,
+      SystemCurrency.VIRTAUL,
+    );
 
-    if (virtual_sale >= user.virtual) virtual_sale = user.virtual
-    if (user.real < currencyUtils.roundByType(price - virtual_sale, SystemCurrency.REAL)) throw new BadRequestException();
+    if (virtual_sale >= user.virtual) virtual_sale = user.virtual;
+    const realCost = currencyUtils.roundByType(price - virtual_sale, SystemCurrency.REAL);
+    const virtualCost = currencyUtils.roundByType(virtual_sale, SystemCurrency.VIRTAUL);
 
-    user.real -= currencyUtils.roundByType(price - virtual_sale, SystemCurrency.REAL);
-    user.virtual -= currencyUtils.roundByType(virtual_sale, SystemCurrency.VIRTAUL)
+    const debit = await this.usersRepository
+      .createQueryBuilder()
+      .update(User)
+      .set({ real: () => 'real - :realCost', virtual: () => 'virtual - :virtualCost' })
+      .where('uuid = :uuid AND real >= :realCost AND virtual >= :virtualCost', { uuid: user.uuid, realCost, virtualCost })
+      .execute();
 
-    await this.give(user, server, permission, period)
+    if (!debit.affected) throw new BadRequestException();
+
+    user.real -= realCost;
+    user.virtual -= virtualCost;
+
+    try {
+      await this.give(user, server, permission, period);
+    } catch (e) {
+      await this.usersRepository
+        .createQueryBuilder()
+        .update(User)
+        .set({ real: () => 'real + :realCost', virtual: () => 'virtual + :virtualCost' })
+        .where('uuid = :uuid', { uuid: user.uuid, realCost, virtualCost })
+        .execute();
+
+      throw e;
+    }
     await this.historyService.create(HistoryType.DonatePermissionPurchase, ip, user, permission, server, period);
-    await this.usersRepository.save(user);
   }
 
   async findByServer(id: string) {
-    const perms = (await this.donatePermissionsRepository.createQueryBuilder('perm')
-      .leftJoinAndSelect('perm.periods', 'periods')
-      .leftJoinAndSelect('perm.servers', 'servers')
-      .leftJoinAndSelect('perm.kits', 'kits')
-      .leftJoinAndSelect('kits.images', 'images')
-      .leftJoinAndSelect('images.server', 'server')
-      .orderBy({ "perm.priority": "ASC", "perm.id": "ASC" })
-      .getMany())
-      .filter(perm => perm.servers.find(srv => srv.id == id) || perm.type == PermissionType.Web)
+    const perms = (
+      await this.donatePermissionsRepository
+        .createQueryBuilder('perm')
+        .leftJoinAndSelect('perm.periods', 'periods')
+        .leftJoinAndSelect('perm.servers', 'servers')
+        .leftJoinAndSelect('perm.kits', 'kits')
+        .leftJoinAndSelect('kits.images', 'images')
+        .leftJoinAndSelect('images.server', 'server')
+        .orderBy({ 'perm.priority': 'ASC', 'perm.id': 'ASC' })
+        .getMany()
+    ).filter((perm) => perm.servers.find((srv) => srv.id == id) || perm.type == PermissionType.Web);
 
-    return _(perms.filter((group) => group.periods.length).map(perms => ({
-      ...perms,
-      periods: _.orderBy(perms.periods, ["multiplier"], ["asc"]),
-      kits: _(perms.kits.map(kit => ({
-        ...kit, priority: kit.priority ? kit.priority : 0,
-        images: _(kit.images.map(image => ({ ...image, priority: image.server.priority ? image.server.priority : 0 }))).orderBy(["server.priority", "id"], ["asc", "asc"]).value()
-      }))).orderBy(["priority", "id"], ["asc", "asc"]).value()
-    }))).orderBy(["priority", "id"], ["asc", "asc"]).value()
+    return _(
+      perms
+        .filter((group) => group.periods.length)
+        .map((perms) => ({
+          ...perms,
+          periods: _.orderBy(perms.periods, ['multiplier'], ['asc']),
+          kits: _(
+            perms.kits.map((kit) => ({
+              ...kit,
+              priority: kit.priority ? kit.priority : 0,
+              images: _(kit.images.map((image) => ({ ...image, priority: image.server.priority ? image.server.priority : 0 })))
+                .orderBy(['server.priority', 'id'], ['asc', 'asc'])
+                .value(),
+            })),
+          )
+            .orderBy(['priority', 'id'], ['asc', 'asc'])
+            .value(),
+        })),
+    )
+      .orderBy(['priority', 'id'], ['asc', 'asc'])
+      .value();
   }
 
   async findByServerUC(id: string) {
-    const perms = (await this.donatePermissionsRepository.createQueryBuilder('perm')
-      .leftJoinAndSelect('perm.periods', 'periods')
-      .leftJoinAndSelect('perm.servers', 'servers')
-      .leftJoinAndSelect('perm.kits', 'kits')
-      .leftJoinAndSelect('kits.images', 'images')
-      .leftJoinAndSelect('images.server', 'server')
-      .where({ type: Not(PermissionType.Web) })
-      .orderBy({ "perm.priority": "ASC", "perm.id": "ASC" }).getMany()).filter(perm => perm.servers.find(srv => srv.id == id) || perm.type == PermissionType.Web)
+    const perms = (
+      await this.donatePermissionsRepository
+        .createQueryBuilder('perm')
+        .leftJoinAndSelect('perm.periods', 'periods')
+        .leftJoinAndSelect('perm.servers', 'servers')
+        .leftJoinAndSelect('perm.kits', 'kits')
+        .leftJoinAndSelect('kits.images', 'images')
+        .leftJoinAndSelect('images.server', 'server')
+        .where({ type: Not(PermissionType.Web) })
+        .orderBy({ 'perm.priority': 'ASC', 'perm.id': 'ASC' })
+        .getMany()
+    ).filter((perm) => perm.servers.find((srv) => srv.id == id) || perm.type == PermissionType.Web);
 
     return perms.filter((perm) => perm.periods.length);
   }
@@ -193,20 +242,21 @@ export class DonatePermissionsService {
   }
 
   findOne(id: number, relations?: string[]): Promise<DonatePermission> {
-    return this.donatePermissionsRepository.findOne(id, { relations });
+    return this.donatePermissionsRepository.findOne({ where: { id }, relations });
   }
 
   async sort(input: CommonSortInput) {
-    const servers = await this.donatePermissionsRepository.findByIds(input.items.map(srv => srv.id))
+    const servers = await this.donatePermissionsRepository.findBy({ id: In(input.items.map((srv) => srv.id)) });
 
-    return this.donatePermissionsRepository.save(servers.map(donp => {
-      const updatedSort = input.items.find(dp => dp.id == donp.id)
+    return this.donatePermissionsRepository.save(
+      servers.map((donp) => {
+        const updatedSort = input.items.find((dp) => dp.id == donp.id);
 
-      if (updatedSort)
-        return { ...donp, priority: updatedSort.priority }
+        if (updatedSort) return { ...donp, priority: updatedSort.priority };
 
-      return donp
-    }))
+        return donp;
+      }),
+    );
   }
 
   async create(input: PermissionInput) {
@@ -217,9 +267,9 @@ export class DonatePermissionsService {
     perm.description = input.description;
     perm.price = currencyUtils.roundByType(input.price, SystemCurrency.REAL);
     perm.sale = input.sale;
-    perm.virtual_percent = input.virtual_percent
+    perm.virtual_percent = input.virtual_percent;
 
-    perm.periods = await this.periodsRepository.find({
+    perm.periods = await this.periodsRepository.findBy({
       id: In(input.periods),
     });
 
@@ -232,7 +282,7 @@ export class DonatePermissionsService {
     switch (input.type) {
       case PermissionType.Game:
         perm.perms = input.perms;
-        perm.servers = await this.serversRepository.find({
+        perm.servers = await this.serversRepository.findBy({
           id: In(input.servers),
         });
         break;
@@ -241,10 +291,10 @@ export class DonatePermissionsService {
         break;
       case PermissionType.Kit:
         perm.perms = input.perms;
-        perm.kits = await this.groupKitsRepository.find({
+        perm.kits = await this.groupKitsRepository.findBy({
           id: In(input.kits),
         });
-        perm.servers = await this.serversRepository.find({
+        perm.servers = await this.serversRepository.findBy({
           id: In(input.servers),
         });
         break;
@@ -264,9 +314,9 @@ export class DonatePermissionsService {
     perm.description = input.description;
     perm.price = currencyUtils.roundByType(input.price, SystemCurrency.REAL);
     perm.sale = input.sale;
-    perm.virtual_percent = input.virtual_percent
+    perm.virtual_percent = input.virtual_percent;
 
-    perm.periods = await this.periodsRepository.find({
+    perm.periods = await this.periodsRepository.findBy({
       id: In(input.periods),
     });
 
@@ -279,7 +329,7 @@ export class DonatePermissionsService {
     switch (input.type) {
       case PermissionType.Game:
         perm.perms = input.perms;
-        perm.servers = await this.serversRepository.find({
+        perm.servers = await this.serversRepository.findBy({
           id: In(input.servers),
         });
         break;
@@ -288,10 +338,10 @@ export class DonatePermissionsService {
         break;
       case PermissionType.Kit:
         perm.perms = input.perms;
-        perm.kits = await this.groupKitsRepository.find({
+        perm.kits = await this.groupKitsRepository.findBy({
           id: In(input.kits),
         });
-        perm.servers = await this.serversRepository.find({
+        perm.servers = await this.serversRepository.findBy({
           id: In(input.servers),
         });
         break;

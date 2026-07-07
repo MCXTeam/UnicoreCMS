@@ -5,15 +5,15 @@ import { VotesListService } from './votes-list.service';
 @Public()
 @Controller('players/votes-list')
 export class VotesListController {
-  constructor (private vlServuce: VotesListService) {}
+  constructor(private vlServuce: VotesListService) {}
 
   @Get()
   find(@Query('page', ParseIntPipe) page: number) {
-    return this.vlServuce.find(page)
+    return this.vlServuce.find(page);
   }
 
-  @Get("recent/:limit")
+  @Get('recent/:limit')
   recent(@Param('limit', ParseIntPipe) page: number) {
-    return this.vlServuce.recent(page)
+    return this.vlServuce.recent(page);
   }
 }

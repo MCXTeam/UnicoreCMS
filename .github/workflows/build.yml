@@ -10,23 +10,25 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [16.x]
-    
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
       with:
-        node-version: ${{ matrix.node-version }}
+        version: 9
+
+    - name: Use Node.js 22
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+        cache: pnpm
 
     - name: Build
       run: |
         mv .env.example .env
-        npx lerna bootstrap
-        npm run build:all
+        pnpm install --frozen-lockfile
+        pnpm run build
 
     - name: Prepare artifact
       run: |
@@ -40,11 +42,7 @@ jobs:
         rm -rf ./workspaces/admin/dist
         rm -rf ./workspaces/server/src
         rm -rf /logs
-        rm -rf ./yarn-error.log
-        rm -rf ./package-lock.json
-        rm -rf ./yarn.lock
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: UnicoreCMS
         path: ./
-

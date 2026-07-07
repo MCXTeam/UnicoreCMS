@@ -19,7 +19,7 @@
           <AppSubmenu :items="visible(item) && item.items" @menuitem-click="$emit('menuitem-click', $event)"></AppSubmenu>
         </template>
         <template v-else>
-          <router-link
+          <NuxtLink
             v-if="item.to"
             :to="item.to"
             :class="[item.class, 'p-ripple', { 'p-disabled': item.disabled }]"
@@ -27,7 +27,6 @@
             @click="onMenuItemClick($event, item, i)"
             :target="item.target"
             :aria-label="item.label"
-            exact
             role="menuitem"
             v-ripple
           >
@@ -35,7 +34,7 @@
             <span>{{ item.label }}</span>
             <i v-if="item.items" class="pi pi-fw pi-angle-down menuitem-toggle-icon"></i>
             <Badge v-if="item.badge" :value="item.badge"></Badge>
-          </router-link>
+          </NuxtLink>
           <a
             v-if="!item.to"
             :href="item.url || '#'"
@@ -65,6 +64,7 @@
     </template>
   </ul>
 </template>
+
 <script>
 export default {
   props: {
@@ -74,6 +74,7 @@ export default {
       default: false,
     },
   },
+  emits: ['menuitem-click'],
   data() {
     return {
       activeIndex: null,
@@ -88,7 +89,6 @@ export default {
       if (!item.to && !item.url) {
         event.preventDefault()
       }
-      //execute command
       if (item.command) {
         item.command({ originalEvent: event, item: item })
       }

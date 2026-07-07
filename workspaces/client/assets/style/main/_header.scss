@@ -93,14 +93,14 @@
   }
 }
 
-.dark-mode .header {
+.dark .header {
   &::before {
     background: url('/images/bg.jpg'), linear-gradient(180deg, var(--vs-theme-bg) 120px, rgba(var(--vs-background), 0.15));
     background-position: center;
   }
 }
 
-html:not(.dark-mode) .header {
+html:not(.dark) .header {
   .download-content {
     span {
       color: rgba(var(--vs-second), 0.75);

@@ -13,6 +13,6 @@ export class SettingsController {
   @Permissions([Permission.UserCabinetPasswordChange])
   @Post('password')
   passord(@CurrentUser() user: User, @Body() body: PasswordChangeInput) {
-    return this.settingsService.changePassword(user, body)
+    return this.settingsService.changePassword(user, body);
   }
 }

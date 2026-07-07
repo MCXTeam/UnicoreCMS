@@ -17,23 +17,22 @@ const ColorScheme: Record<string, bare.Format> = {
 
 export const ConsoleFormat = (
   appName = "NestWinston",
-  options?: NestLikeConsoleFormatOptions
+  options?: NestLikeConsoleFormatOptions,
 ): Format =>
   format.printf(({ context, level, timestamp, message, ms, ...meta }) => {
     if (typeof timestamp !== "undefined") {
       // Only format the timestamp to a locale representation if it's ISO 8601 format. Any format
       // that is not a valid date string will throw, just ignore it (it will be printed as-is).
       try {
-        if (timestamp === new Date(timestamp).toISOString()) {
-          timestamp = new Date(timestamp).toLocaleString();
+        if (timestamp === new Date(timestamp as string).toISOString()) {
+          timestamp = new Date(timestamp as string).toLocaleString();
         }
       } catch (error) {
         // eslint-disable-next-line no-empty
       }
     }
 
-    if (message.startsWith("_"))
-      return ""
+    if (String(message).startsWith("_")) return "";
 
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const color = ColorScheme[level] || ((text: string): string => text);
@@ -49,7 +48,7 @@ export const ConsoleFormat = (
         typeof timestamp !== "undefined" ? `${timestamp} ` : ""
       }${
         typeof context !== "undefined" ? `${clc.yellow(`[${context}]`)} ` : ""
-      }${color(message)}${
+      }${color(message as string)}${
         Object.keys(meta).length !== 0 ? ` - ${formattedMeta}` : ""
       }${typeof ms !== "undefined" ? ` ${clc.yellow(ms)}` : ""}${os.EOL}`
     );

@@ -1,6 +1,6 @@
 import { imageFileFilter, StorageManager } from '@common';
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
-import { FileFastifyInterceptor, MulterFile } from 'fastify-file-interceptor';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { Permission } from 'unicore-common';
 import { BonusesService } from './bonuses.service';
@@ -37,12 +37,12 @@ export class BonusesController {
   @Permissions([Permission.AdminDashboard, Permission.EditorPaymentBonusesUpdate])
   @Patch('icon/:id')
   @UseInterceptors(
-    FileFastifyInterceptor('file', {
+    FileInterceptor('file', {
       storage: StorageManager.disk(),
       fileFilter: imageFileFilter,
     }),
   )
-  updateMedia(@Param('id', ParseIntPipe) id: number, @UploadedFile() file: MulterFile) {
+  updateMedia(@Param('id', ParseIntPipe) id: number, @UploadedFile() file: Express.Multer.File) {
     return this.bonusesService.updateIcon(id, file);
   }
 

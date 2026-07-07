@@ -38,27 +38,27 @@ export class ConfigService {
         },
         { key: ConfigField.LauncherExe, important: true, type: ConfigType.string },
         { key: ConfigField.LauncherJar, important: true, type: ConfigType.string },
-        { key: ConfigField.LinkForum, important: true, type: ConfigType.string, value: "https://unicorecms.ru" },
-        { key: ConfigField.LinkDiscord, important: true, type: ConfigType.string, value: "https://t.me/unicore_project" },
-        { key: ConfigField.LinkTelegram, important: true, type: ConfigType.string, value: "https://t.me/unicore_project" },
-        { key: ConfigField.LinkVk, important: true, type: ConfigType.string, value: "https://t.me/unicore_project" },
-        { key: ConfigField.LinkYoutube, important: true, type: ConfigType.string, value: "https://t.me/unicore_project" },
-        { key: ConfigField.ReferalTrigger, important: true, type: ConfigType.number, value: "600" },
-        { key: ConfigField.ReferalReward, important: true, type: ConfigType.number, value: "20" },
-        { key: ConfigField.ReferalRewardPlayer, important: true, type: ConfigType.number, value: "20" },
-        { key: ConfigField.MonitoringReward, important: true, type: ConfigType.number, value: "2" },
-        { key: ConfigField.LinkMctop, important: true, type: ConfigType.string, value: "https://unicorecms.ru" },
-        { key: ConfigField.LinkMinecraftraiting, important: true, type: ConfigType.string, value: "https://unicorecms.ru" },
-        { key: ConfigField.LinkTopcraft, important: true, type: ConfigType.string, value: "https://unicorecms.ru" },
-        { key: ConfigField.UnbanPrice, important: true, type: ConfigType.number, value: "150" },
-        { key: ConfigField.VirtualPercent, important: true, type: ConfigType.number, value: "75" },
-        { key: ConfigField.VotesTwinkProtect, important: true, type: ConfigType.boolean, value: "true" },
-        { key: ConfigField.StoreKitsVirtualUse, important: true, type: ConfigType.boolean, value: "true" },
-        { key: ConfigField.StoreProductsVirtualUse, important: true, type: ConfigType.boolean, value: "true" },
-        { key: ConfigField.DonateGroupsVirtualUse, important: true, type: ConfigType.boolean, value: "true" },
-        { key: ConfigField.DonatePermsVirtualUse, important: true, type: ConfigType.boolean, value: "true" },
-        { key: ConfigField.EmailActivationRequired, important: true, type: ConfigType.boolean, value: "true" },
-        { key: ConfigField.OrdinaryRegister, important: true, type: ConfigType.boolean, value: "false" },
+        { key: ConfigField.LinkForum, important: true, type: ConfigType.string, value: 'https://unicorecms.ru' },
+        { key: ConfigField.LinkDiscord, important: true, type: ConfigType.string, value: 'https://t.me/unicore_project' },
+        { key: ConfigField.LinkTelegram, important: true, type: ConfigType.string, value: 'https://t.me/unicore_project' },
+        { key: ConfigField.LinkVk, important: true, type: ConfigType.string, value: 'https://t.me/unicore_project' },
+        { key: ConfigField.LinkYoutube, important: true, type: ConfigType.string, value: 'https://t.me/unicore_project' },
+        { key: ConfigField.ReferalTrigger, important: true, type: ConfigType.number, value: '600' },
+        { key: ConfigField.ReferalReward, important: true, type: ConfigType.number, value: '20' },
+        { key: ConfigField.ReferalRewardPlayer, important: true, type: ConfigType.number, value: '20' },
+        { key: ConfigField.MonitoringReward, important: true, type: ConfigType.number, value: '2' },
+        { key: ConfigField.LinkMctop, important: true, type: ConfigType.string, value: 'https://unicorecms.ru' },
+        { key: ConfigField.LinkMinecraftraiting, important: true, type: ConfigType.string, value: 'https://unicorecms.ru' },
+        { key: ConfigField.LinkTopcraft, important: true, type: ConfigType.string, value: 'https://unicorecms.ru' },
+        { key: ConfigField.UnbanPrice, important: true, type: ConfigType.number, value: '150' },
+        { key: ConfigField.VirtualPercent, important: true, type: ConfigType.number, value: '75' },
+        { key: ConfigField.VotesTwinkProtect, important: true, type: ConfigType.boolean, value: 'true' },
+        { key: ConfigField.StoreKitsVirtualUse, important: true, type: ConfigType.boolean, value: 'true' },
+        { key: ConfigField.StoreProductsVirtualUse, important: true, type: ConfigType.boolean, value: 'true' },
+        { key: ConfigField.DonateGroupsVirtualUse, important: true, type: ConfigType.boolean, value: 'true' },
+        { key: ConfigField.DonatePermsVirtualUse, important: true, type: ConfigType.boolean, value: 'true' },
+        { key: ConfigField.EmailActivationRequired, important: true, type: ConfigType.boolean, value: 'true' },
+        { key: ConfigField.OrdinaryRegister, important: true, type: ConfigType.boolean, value: 'false' },
       ])
       .orIgnore()
       .execute();
@@ -83,7 +83,7 @@ export class ConfigService {
   }
 
   async create(input: ConfigInput) {
-    if (await this.configRepo.findOne(input.key)) throw new BadRequestException();
+    if (await this.configRepo.findOneBy({ key: input.key })) throw new BadRequestException();
 
     const cfg = new Config();
 
@@ -95,7 +95,7 @@ export class ConfigService {
   }
 
   async update(input: ConfigInput) {
-    const cfg = await this.configRepo.findOne(input.key);
+    const cfg = await this.configRepo.findOneBy({ key: input.key });
 
     if (!cfg) throw new NotFoundException();
 
@@ -106,7 +106,7 @@ export class ConfigService {
   }
 
   async delate(key: string) {
-    const cfg = await this.configRepo.findOne({ key, important: IsNull() });
+    const cfg = await this.configRepo.findOneBy({ key, important: IsNull() });
 
     if (!cfg) throw new NotFoundException();
 

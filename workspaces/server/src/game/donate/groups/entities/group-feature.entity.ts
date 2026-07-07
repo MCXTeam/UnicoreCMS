@@ -2,29 +2,31 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedC
 import { DonateGroup } from './donate-group.entity';
 
 @Entity({
-	name: "unicore_group_features",
+  name: 'unicore_group_features',
   orderBy: {
-    priority: "ASC"
-  }
+    priority: 'ASC',
+  },
 })
 export class GroupFeature {
-	@PrimaryColumn({ name: "priority" })
+  @PrimaryColumn({ name: 'priority' })
   priority: number;
 
-	@Column({ nullable: true, name: "title" })
-	title?: string;
+  @Column({ nullable: true, name: 'title' })
+  title?: string;
 
-	@Column({ nullable: true, name: "description" })
-	description?: string;
+  @Column({ nullable: true, name: 'description' })
+  description?: string;
 
-	@ManyToOne(() => DonateGroup, {
-		cascade: true,
-		primary: true,
-		onDelete: 'CASCADE',
-		onUpdate: 'CASCADE',
-		orphanedRowAction: 'delete',
-		nullable: false,
-	})
-	@JoinColumn({ name: "group_id" })
-	group: DonateGroup;
+  @PrimaryColumn({ name: 'group_id' })
+  groupId: number;
+
+  @ManyToOne(() => DonateGroup, {
+    cascade: true,
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+    orphanedRowAction: 'delete',
+    nullable: false,
+  })
+  @JoinColumn({ name: 'group_id' })
+  group: DonateGroup;
 }

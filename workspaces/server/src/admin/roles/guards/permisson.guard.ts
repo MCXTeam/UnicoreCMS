@@ -6,7 +6,8 @@ import * as minimath from 'minimatch';
 import * as _ from 'lodash';
 import { PERMISSIONS_KEY } from '../decorators/permission.decorator';
 import { Role } from '../entities/role.entity';
-import { getConnection, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
+import { getDataSourceByName } from 'typeorm-transactional';
 import { UsersDonateGroup } from 'src/game/donate/groups/entities/user-donate.entity';
 import { UsersDonatePermission } from 'src/game/donate/permissions/entities/user-permission.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -21,7 +22,7 @@ export function transformPermissions(userPart: Partial<User>) {
   const user = { ...userPart };
   if (!user?.perms) user.perms = [];
   if (!user?.roles) user.roles = [];
-  user.perms.push(...user.roles.map((role) => role.perms).flat())
+  user.perms.push(...user.roles.map((role) => role.perms).flat());
 
   if (user.perms.length) {
     // Проходимся по правам пользователя
@@ -48,10 +49,17 @@ export function transformPermissions(userPart: Partial<User>) {
 }
 
 export async function matchPermission(args: PermissionArgs, request: any): Promise<boolean> {
-  const connection = getConnection()
-  const user_dgroups = await connection.getRepository(UsersDonateGroup).find({ where: { user: request.user }, relations: ['user'] })
-  const user_dperms = await connection.getRepository(UsersDonatePermission).find({ where: { user: request.user }, relations: ['user'] })
-  const add_perms = [user_dperms.map(udp => udp.permission.web_perms).flat(), user_dgroups.map(udg => udg.group.web_perms).flat()].flat()
+  const connection = getDataSourceByName('default');
+  const user_dgroups = await connection
+    .getRepository(UsersDonateGroup)
+    .find({ where: { user: { uuid: request.user.uuid } }, relations: ['user'] });
+  const user_dperms = await connection
+    .getRepository(UsersDonatePermission)
+    .find({ where: { user: { uuid: request.user.uuid } }, relations: ['user'] });
+  const add_perms = [
+    user_dperms.map((udp) => udp.permission.web_perms).flat(),
+    user_dgroups.map((udg) => udg.group.web_perms).flat(),
+  ].flat();
   const user: User = request.user;
 
   // Первым делом проверяем пользователя на SuperUser aka root
@@ -145,9 +153,7 @@ export async function matchPermission(args: PermissionArgs, request: any): Promi
 
 @Injectable()
 export class PermissionGuard implements CanActivate {
-  constructor(
-    private reflector: Reflector,
-  ) {}
+  constructor(private reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const permissions = this.reflector.getAllAndOverride<PermissionArgs>(PERMISSIONS_KEY, [context.getHandler(), context.getClass()]);

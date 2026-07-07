@@ -4,30 +4,30 @@ import { AfterRemove, Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryG
 import { Category } from './category.entity';
 import { KitItem } from './kit-item.entity';
 
-@Entity({ name: "unicore_kits" })
+@Entity({ name: 'unicore_kits' })
 export class Kit {
-  @PrimaryGeneratedColumn({ name: "id" })
+  @PrimaryGeneratedColumn({ name: 'id' })
   id: number;
 
-  @Column({ name: "name" })
+  @Column({ name: 'name' })
   name: string;
 
   @Column('longtext', {
-    name: "description",
+    name: 'description',
     nullable: true,
   })
   description: string;
 
-  @Column({ name: "icon", nullable: true })
+  @Column({ name: 'icon', nullable: true })
   icon: string;
 
-  @Column('float', { name: "price" })
+  @Column('float', { name: 'price' })
   price: number;
 
-  @Column({ nullable: true, name: "virtual_percent" })
-  virtual_percent?: number
+  @Column({ nullable: true, name: 'virtual_percent' })
+  virtual_percent?: number;
 
-  @Column({ nullable: true, name: "sale" })
+  @Column({ nullable: true, name: 'sale' })
   sale: number;
 
   @ManyToMany(() => Server, (server) => server.kits)
@@ -37,15 +37,15 @@ export class Kit {
     eager: true,
   })
   @JoinTable({
-    name: "unicore_kits_categories",
+    name: 'unicore_kits_categories',
     joinColumn: {
-        name: "kit_id",
-        referencedColumnName: "id"
+      name: 'kit_id',
+      referencedColumnName: 'id',
     },
     inverseJoinColumn: {
-        name: "category_id",
-        referencedColumnName: "id"
-    }
+      name: 'category_id',
+      referencedColumnName: 'id',
+    },
   })
   categories: Category[];
 

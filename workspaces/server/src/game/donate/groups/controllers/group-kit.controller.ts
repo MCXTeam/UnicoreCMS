@@ -12,7 +12,7 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileFastifyInterceptor, MulterFile } from 'fastify-file-interceptor';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { Permission } from 'unicore-common';
 import { GroupKitInput } from '../dto/group-kit.input';
@@ -73,12 +73,12 @@ export class GroupKitsController {
   @Permissions([Permission.AdminDashboard, Permission.EditorDonateKitsUpdate])
   @Patch('image/:server/:id')
   @UseInterceptors(
-    FileFastifyInterceptor('file', {
+    FileInterceptor('file', {
       storage: StorageManager.disk(),
       fileFilter: imageFileFilter,
     }),
   )
-  updateMedia(@Param('server') server: string, @Param('id', ParseIntPipe) id: number, @UploadedFile() file: MulterFile) {
+  updateMedia(@Param('server') server: string, @Param('id', ParseIntPipe) id: number, @UploadedFile() file: Express.Multer.File) {
     return this.groupKitsService.updateMedia(server, id, file);
   }
 

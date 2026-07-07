@@ -11,6 +11,6 @@ import { MonitoringminecraftService } from './monitoringminecraft.service';
   controllers: [MonitoringminecraftController],
 })
 export class MonitoringminecraftModule implements MonitoringCoreModule {
-  static id = "monitoringminecraft"
+  static id = 'monitoringminecraft';
   static enabled = envConfig.monitoringminecraftEnabled;
 }

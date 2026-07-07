@@ -1,5 +1,6 @@
-import { INestApplicationContext } from '@nestjs/common';
+import { INestApplicationContext, UnauthorizedException } from '@nestjs/common';
 import { IoAdapter } from '@nestjs/platform-socket.io';
+import * as minimatch from 'minimatch';
 import { ApiService } from 'src/admin/api/api.service';
 import { UserDto } from 'src/admin/users/dto/user.dto';
 import { UsersService } from 'src/admin/users/users.service';
@@ -33,6 +34,16 @@ export class AuthAdapter extends IoAdapter {
         try {
           if (socket.handshake.headers?.authorization?.startsWith('Api-Key ')) {
             const apiToken = await this.apiService.findOne(socket.handshake.headers?.authorization.slice(8));
+            const ip = socket.handshake.address || socket.conn?.remoteAddress;
+
+            if (
+              !apiToken ||
+              !apiToken.allow ||
+              !apiToken.allow.length ||
+              !apiToken.allow.filter((ipPattern) => minimatch.match([ip], ipPattern).length).flat().length
+            ) {
+              throw new UnauthorizedException();
+            }
             const user = await this.usersService.getKernel();
             user.perms = apiToken.perms;
             socket.join([...new UserDto(user).perms, userRoom(user), ApiKeyRoom(apiToken)]);

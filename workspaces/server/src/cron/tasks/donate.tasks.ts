@@ -16,30 +16,32 @@ export class DonateTasks {
     private udRepository: Repository<UsersDonateGroup>,
     @InjectRepository(UsersDonatePermission)
     private upRepository: Repository<UsersDonatePermission>,
-    private eventsService: EventsService
-  ) { }
+    private eventsService: EventsService,
+  ) {}
 
   @Cron(CronExpression.EVERY_10_MINUTES)
   async clean() {
-    const expired = moment().utc().toDate()
+    const expired = moment().utc().toDate();
 
-    const expiresUD = await this.udRepository.createQueryBuilder("ud")
-      .where("ud.expired < :expired", { expired })
-      .andWhere("ud.expired != 0", { expired })
+    const expiresUD = await this.udRepository
+      .createQueryBuilder('ud')
+      .where('ud.expired < :expired', { expired })
+      .andWhere('ud.expired != 0', { expired })
       .getMany();
 
-    const expiresUP = await this.upRepository.createQueryBuilder("up")
-      .where("up.expired < :expired", { expired })
-      .andWhere("up.expired != 0", { expired })
+    const expiresUP = await this.upRepository
+      .createQueryBuilder('up')
+      .where('up.expired < :expired', { expired })
+      .andWhere('up.expired != 0', { expired })
       .getMany();
 
-    (await this.udRepository.remove(expiresUD)).map(udg => {
+    (await this.udRepository.remove(expiresUD)).map((udg) => {
       this.eventsService.server.to(Permission.KernelUnicoreConnect).emit('take_group', udg);
     });
 
-    (await this.upRepository.remove(expiresUP)).map(udp => {
+    (await this.upRepository.remove(expiresUP)).map((udp) => {
       if (udp.permission.type != PermissionType.Web)
         this.eventsService.server.to(Permission.KernelUnicoreConnect).emit('take_permission', udp);
-    })
+    });
   }
 }

@@ -4,6 +4,7 @@ import { Permissions } from '../roles/decorators/permission.decorator';
 import { EmailInput } from './dto/email.input';
 import { TestEmailInput } from './dto/test-email.input';
 import { EmailService } from './email.service';
+import { EmailMessageType } from './enums/email-message-type.enum';
 
 @Permissions([Permission.AdminDashboard])
 @Controller('admin/email')
@@ -18,7 +19,7 @@ export class EmailController {
 
   @Permissions([Permission.AdminEmailRead])
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: EmailMessageType) {
     const message = await this.emailService.findOne(id);
 
     if (!message) {
@@ -30,7 +31,7 @@ export class EmailController {
 
   @Permissions([Permission.AdminEmailUpdate])
   @Patch(':id')
-  update(@Param('id') id: string, @Body() body: EmailInput) {
+  update(@Param('id') id: EmailMessageType, @Body() body: EmailInput) {
     return this.emailService.update(id, body);
   }
 

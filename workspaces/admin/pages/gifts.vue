@@ -22,10 +22,10 @@
           :loading="loading"
           :rows="20"
           paginator
-          :filters.sync="filters"
+          v-model:filters="filters"
           rowHover
           responsiveLayout="scroll"
-          :selection.sync="selected"
+          v-model:selection="selected"
           dataKey="id"
           filterDisplay="menu"
         >
@@ -48,7 +48,11 @@
           </Column>
           <Column field="type" header="Использований" sortable>
             <template #body="slotProps">
-              {{ slotProps.data.max_activations ? `${slotProps.data.activations}/${slotProps.data.max_activations}` : `${slotProps.data.activations}/∞` }}
+              {{
+                slotProps.data.max_activations
+                  ? `${slotProps.data.activations}/${slotProps.data.max_activations}`
+                  : `${slotProps.data.activations}/∞`
+              }}
             </template>
           </Column>
           <Column field="type" header="Активен до" sortable>
@@ -64,129 +68,186 @@
           </Column>
         </DataTable>
 
-        <ValidationObserver v-slot="{ invalid }">
+        <VeeForm v-slot="{ meta }">
           <Dialog
-            :visible.sync="giftDialog"
+            v-model:visible="giftDialog"
             :closable="false"
             :style="{ width: '600px' }"
             :modal="true"
             header="Создание/редактирование промо-кода"
             class="p-fluid"
           >
-            <ValidationProvider name="Промо-код" rules="required" v-slot="{ errors }">
+            <VeeField
+              v-model="gift.promocode"
+              name="promocode"
+              label="Промо-код"
+              rules="required"
+              v-slot="{ value, errorMessage, handleChange, handleBlur }"
+            >
               <div class="field">
                 <label>Промо-код</label>
-                <InputText v-model="gift.promocode" />
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                <InputText :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" :class="errorMessage && 'p-invalid'" />
+                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
-            </ValidationProvider>
+            </VeeField>
             <div class="field">
               <label>Истекает</label>
-              <Calendar id="time24" v-model="gift.expires" showTime showSeconds appendTo="body" />
+              <DatePicker id="time24" v-model="gift.expires" showTime showSeconds appendTo="body" />
             </div>
-            <ValidationProvider name="Тип" rules="min:1" v-slot="{ errors }">
+            <VeeField
+              v-model="gift.max_activations"
+              name="max_activations"
+              label="Тип"
+              rules="min:1"
+              v-slot="{ value, errorMessage, handleChange, handleBlur }"
+            >
               <div class="field">
                 <label>Количество использований</label>
-                <InputNumber v-model="gift.max_activations" />
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                <InputNumber :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" />
+                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
-            </ValidationProvider>
-            <ValidationProvider name="Тип" rules="required" v-slot="{ errors }">
+            </VeeField>
+            <VeeField v-model="gift.type" name="type" label="Тип" rules="required" v-slot="{ value, errorMessage, handleChange }">
               <div class="field">
                 <label>Тип</label>
-                <Dropdown v-model="gift.type" :options="types" optionLabel="name" appendTo="body" />
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                <Select :modelValue="value" @update:modelValue="handleChange" :options="types" optionLabel="name" appendTo="body" />
+                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
-            </ValidationProvider>
+            </VeeField>
             <div class="field" v-if="['donate', 'permission'].find((v) => v == $_.get(gift.type, 'value'))">
               <label>Период</label>
-              <ValidationProvider name="Период" rules="required" v-slot="{ errors }">
-                <Dropdown v-model="gift.period" :options="periods" optionLabel="name" appendTo="body" />
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
-              </ValidationProvider>
+              <VeeField v-model="gift.period" name="period" label="Период" rules="required" v-slot="{ value, errorMessage, handleChange }">
+                <Select :modelValue="value" @update:modelValue="handleChange" :options="periods" optionLabel="name" appendTo="body" />
+                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+              </VeeField>
             </div>
-            <div class="field" v-if="['donate', 'permission', 'product', 'kit', 'money'].find((v) => v == $_.get(gift.type, 'value')) && (!['permission'].find((v) => v == $_.get(gift.type, 'value')) || gift.donate_permission && gift.donate_permission.type != 'web')">
+            <div
+              class="field"
+              v-if="
+                ['donate', 'permission', 'product', 'kit', 'money'].find((v) => v == $_.get(gift.type, 'value')) &&
+                (!['permission'].find((v) => v == $_.get(gift.type, 'value')) ||
+                  (gift.donate_permission && gift.donate_permission.type != 'web'))
+              "
+            >
               <label>Сервер</label>
-              <ValidationProvider name="Сервер" rules="required" v-slot="{ errors }">
-                <Dropdown v-model="gift.server" :options="servers" optionLabel="name" appendTo="body">
+              <VeeField v-model="gift.server" name="server" label="Сервер" rules="required" v-slot="{ value, errorMessage, handleChange }">
+                <Select :modelValue="value" @update:modelValue="handleChange" :options="servers" optionLabel="name" appendTo="body">
                   <template #option="slotProps">
                     <div class="flex align-items-center">
-                      <Avatar v-if="slotProps.option.icon" :image="`${$config.apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
+                      <Avatar v-if="slotProps.option.icon" :image="`${apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
                       <Avatar v-else icon="pi pi-image" shape="circle" />
                       <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                     </div>
                   </template>
-                </Dropdown>
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
-              </ValidationProvider>
+                </Select>
+                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+              </VeeField>
             </div>
             <div class="field" v-if="$_.get(gift.type, 'value') == 'donate'">
               <label>Донат-группа</label>
-              <ValidationProvider name="Донат-группа" rules="required" v-slot="{ errors }">
-                <Dropdown v-model="gift.donate_group" :options="donate_groups" optionLabel="name" appendTo="body">
+              <VeeField
+                v-model="gift.donate_group"
+                name="donate_group"
+                label="Донат-группа"
+                rules="required"
+                v-slot="{ value, errorMessage, handleChange }"
+              >
+                <Select :modelValue="value" @update:modelValue="handleChange" :options="donate_groups" optionLabel="name" appendTo="body">
                   <template #option="slotProps">
                     <div class="flex align-items-center">
-                      <Avatar v-if="slotProps.option.icon" :image="`${$config.apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
+                      <Avatar v-if="slotProps.option.icon" :image="`${apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
                       <Avatar v-else icon="pi pi-image" shape="circle" />
                       <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                     </div>
                   </template>
-                </Dropdown>
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
-              </ValidationProvider>
+                </Select>
+                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+              </VeeField>
             </div>
             <div class="field" v-if="$_.get(gift.type, 'value') == 'permission'">
               <label>Донат-право</label>
-              <ValidationProvider name="Донат-право" rules="required" v-slot="{ errors }">
-                <Dropdown v-model="gift.donate_permission" :options="donate_permissions" optionLabel="name" appendTo="body">
+              <VeeField
+                v-model="gift.donate_permission"
+                name="donate_permission"
+                label="Донат-право"
+                rules="required"
+                v-slot="{ value, errorMessage, handleChange }"
+              >
+                <Select
+                  :modelValue="value"
+                  @update:modelValue="handleChange"
+                  :options="donate_permissions"
+                  optionLabel="name"
+                  appendTo="body"
+                >
                   <template #option="slotProps"> {{ slotProps.option.name }} (#{{ slotProps.option.id }}) </template>
-                </Dropdown>
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
-              </ValidationProvider>
+                </Select>
+                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+              </VeeField>
             </div>
             <div class="field" v-if="$_.get(gift.type, 'value') == 'product'">
               <label>Товар</label>
-              <ValidationProvider name="Товар" rules="required" v-slot="{ errors }">
-                <AutoComplete v-model="gift.product" :suggestions="products" @complete="searchProduct($event)" field="name" appendTo="body">
-                  <template #item="slotProps">
+              <VeeField v-model="gift.product" name="product" label="Товар" rules="required" v-slot="{ value, errorMessage, handleChange }">
+                <AutoComplete
+                  :modelValue="value"
+                  @update:modelValue="handleChange"
+                  :suggestions="products"
+                  @complete="searchProduct($event)"
+                  optionLabel="name"
+                  appendTo="body"
+                >
+                  <template #option="slotProps">
                     <div class="flex align-items-center">
-                      <Avatar v-if="slotProps.item.icon" :image="`${$config.apiUrl + '/' + slotProps.item.icon}`" shape="circle" />
+                      <Avatar v-if="slotProps.option.icon" :image="`${apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
                       <Avatar v-else icon="pi pi-image" shape="circle" />
-                      <span class="ml-2">{{ slotProps.item.name }} (#{{ slotProps.item.id }})</span>
+                      <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                     </div>
                   </template>
                 </AutoComplete>
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
-              </ValidationProvider>
+                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+              </VeeField>
             </div>
             <div class="field" v-if="$_.get(gift.type, 'value') == 'kit'">
               <label>Кит</label>
-              <ValidationProvider name="Товар" rules="required" v-slot="{ errors }">
-                <AutoComplete v-model="gift.kit" :suggestions="kits" @complete="searchKit($event)" field="name" appendTo="body">
-                  <template #item="slotProps">
+              <VeeField v-model="gift.kit" name="kit" label="Товар" rules="required" v-slot="{ value, errorMessage, handleChange }">
+                <AutoComplete
+                  :modelValue="value"
+                  @update:modelValue="handleChange"
+                  :suggestions="kits"
+                  @complete="searchKit($event)"
+                  optionLabel="name"
+                  appendTo="body"
+                >
+                  <template #option="slotProps">
                     <div class="flex align-items-center">
-                      <Avatar v-if="slotProps.item.icon" :image="`${$config.apiUrl + '/' + slotProps.item.icon}`" shape="circle" />
+                      <Avatar v-if="slotProps.option.icon" :image="`${apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
                       <Avatar v-else icon="pi pi-image" shape="circle" />
-                      <span class="ml-2">{{ slotProps.item.name }} (#{{ slotProps.item.id }})</span>
+                      <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                     </div>
                   </template>
                 </AutoComplete>
-                <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
-              </ValidationProvider>
+                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+              </VeeField>
             </div>
             <div class="field" v-if="['real', 'product', 'money'].find((v) => v == $_.get(gift.type, 'value'))">
-              <ValidationProvider name="Количество" rules="required|min:1" v-slot="{ errors }">
+              <VeeField
+                v-model="gift.amount"
+                name="amount"
+                label="Количество"
+                rules="required|min:1"
+                v-slot="{ value, errorMessage, handleChange, handleBlur }"
+              >
                 <div class="field">
                   <label>Количество</label>
-                  <InputNumber v-model="gift.amount" />
-                  <small v-show="errors[0]" class="p-error" v-text="errors[0]"></small>
+                  <InputNumber :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" />
+                  <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
                 </div>
-              </ValidationProvider>
+              </VeeField>
             </div>
             <template #footer>
               <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
-                :disabled="loading || invalid"
+                :disabled="loading || !meta.valid"
                 label="Сохранить"
                 icon="pi pi-check"
                 class="p-button-text"
@@ -194,23 +255,25 @@
               />
             </template>
           </Dialog>
-        </ValidationObserver>
+        </VeeForm>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { FilterMatchMode } from 'primevue/api'
-import { ValidationObserver, ValidationProvider } from 'vee-validate'
+import { FilterMatchMode } from '@primevue/core/api'
+import { Form, Field } from 'vee-validate'
 
 export default {
-  head: {
-    title: 'Гифт-коды',
-  },
   components: {
-    ValidationObserver,
-    ValidationProvider,
+    VeeForm: Form,
+    VeeField: Field,
+  },
+  setup() {
+    const rc = useRuntimeConfig()
+    useHead({ title: 'Гифт-коды' })
+    return { apiUrl: rc.public.apiBaseurl }
   },
   data() {
     return {
@@ -253,19 +316,22 @@ export default {
       kits: null,
     }
   },
-  async fetch() {
-    this.loading = true
-    this.giftDialog = false
-    this.gifts = await this.$axios.get('/cabinet/gifts').then((res) => res.data)
-    this.donate_groups = await this.$axios.get('/donates/groups').then((res) => res.data)
-    this.donate_permissions = await this.$axios.get('/donates/permissions').then((res) => res.data)
-    this.periods = await this.$axios.get('/donates/periods').then((res) => res.data)
-    this.servers = await this.$axios.get('/servers').then((res) => res.data)
-    this.loading = false
+  mounted() {
+    this.load()
   },
   methods: {
+    async load() {
+      this.loading = true
+      this.giftDialog = false
+      this.gifts = await this.$api.get('/cabinet/gifts').then((res) => res.data)
+      this.donate_groups = await this.$api.get('/donates/groups').then((res) => res.data)
+      this.donate_permissions = await this.$api.get('/donates/permissions').then((res) => res.data)
+      this.periods = await this.$api.get('/donates/periods').then((res) => res.data)
+      this.servers = await this.$api.get('/servers').then((res) => res.data)
+      this.loading = false
+    },
     async searchProduct(event) {
-      this.products = await this.$axios
+      this.products = await this.$api
         .get('/store/products', {
           params: {
             search: event.query.trim(),
@@ -274,7 +340,7 @@ export default {
         .then((res) => res.data.data)
     },
     async searchKit(event) {
-      this.kits = await this.$axios
+      this.kits = await this.$api
         .get('/store/kits', {
           params: {
             search: event.query.trim(),
@@ -288,7 +354,7 @@ export default {
     async openDialog(gift = null) {
       this.updateMode = !!gift
       if (gift) {
-        this.gift = this.$_.pick(await this.$axios.get('/cabinet/gifts/' + gift.id).then((res) => res.data), this.$_.deepKeys(this.gift))
+        this.gift = this.$_.pick(await this.$api.get('/cabinet/gifts/' + gift.id).then((res) => res.data), this.$_.deepKeys(this.gift))
         this.gift.type = this.types.find((type) => type.value == this.gift.type)
         this.gift.donate_group = this.donate_groups.find((group) => group.id == this.gift.donate_group?.id)
         this.gift.donate_permission = this.donate_permissions.find((perm) => perm.id == this.gift.donate_permission?.id)
@@ -314,7 +380,7 @@ export default {
     async createGift() {
       this.loading = true
       try {
-        await this.$axios.post('/cabinet/gifts', {
+        await this.$api.post('/cabinet/gifts', {
           ...this.gift,
           type: this.gift.type.value,
           kit: this.gift.kit?.id,
@@ -329,7 +395,7 @@ export default {
           detail: 'Гифт-код успешно добавлен',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch (err) {
         this.loading = false
         this.$toast.add({
@@ -342,7 +408,7 @@ export default {
     async updateGift() {
       this.loading = true
       try {
-        await this.$axios.patch('/cabinet/gifts/' + this.gift.id, {
+        await this.$api.patch('/cabinet/gifts/' + this.gift.id, {
           ...this.$_.omit(this.gift, 'id'),
           type: this.gift.type.value,
           kit: this.gift.kit?.id,
@@ -358,7 +424,7 @@ export default {
           detail: 'Промо-код успешно редактирован',
           life: 3000,
         })
-        await this.$fetch()
+        await this.load()
       } catch (err) {
         this.loading = false
         this.$toast.add({
@@ -376,7 +442,7 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$axios.delete('/cabinet/gifts/bulk/', {
+            await this.$api.delete('/cabinet/gifts/bulk/', {
               data: {
                 items: this.selected.map((gift) => gift.id),
               },
@@ -388,7 +454,7 @@ export default {
             })
             this.selected = []
           } catch {}
-          await this.$fetch()
+          await this.load()
         },
       })
     },
@@ -400,14 +466,14 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$axios.delete('/cabinet/gifts/' + id)
+            await this.$api.delete('/cabinet/gifts/' + id)
             this.$toast.add({
               severity: 'success',
               detail: 'Промо-код успешно удален',
               life: 3000,
             })
           } catch {}
-          await this.$fetch()
+          await this.load()
         },
       })
     },

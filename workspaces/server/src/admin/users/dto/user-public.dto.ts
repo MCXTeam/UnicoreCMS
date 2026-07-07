@@ -29,19 +29,23 @@ export class UserPublicDto {
 
   @Expose()
   @Type(() => PlaytimeDto)
-  playtimes: PlaytimeDto[]
+  playtimes: PlaytimeDto[];
 
   @Expose()
-  votes: number
+  votes: number;
 
   @Expose()
-  referals: any
+  referals: any;
 
-  constructor(partial: Partial<User & {
-    votes: number,
-    playtimes: Playtime[],
-    referals: any
-  }>) {
+  constructor(
+    partial: Partial<
+      User & {
+        votes: number;
+        playtimes: Playtime[];
+        referals: any;
+      }
+    >,
+  ) {
     Object.assign(this, partial);
   }
 }
