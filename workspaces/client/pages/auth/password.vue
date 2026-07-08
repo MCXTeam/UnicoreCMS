@@ -2,19 +2,19 @@
   <Form v-slot="{ meta }" class="d-flex flex-column align-items-center w-100" @submit="reset">
     <h3 data-aos="zoom-in-right" data-aos-delay="150" class="text-uppercase text-center mb-4">Восстановление пароля</h3>
     <Field v-model="form.password" name="password" rules="required|min:6|max:24" v-slot="{ value, errorMessage, handleChange, handleBlur }">
-      <Password
-        data-aos="zoom-in-right"
-        data-aos-delay="300"
-        :modelValue="value"
-        @update:modelValue="handleChange"
-        @blur="handleBlur"
-        :feedback="false"
-        :toggleMask="true"
-        placeholder="Новый пароль"
-        class="w-100 mb-3"
-        inputClass="w-100"
-        :class="errorMessage && 'p-invalid'"
-      />
+      <div data-aos="zoom-in-right" data-aos-delay="300" class="w-100 mb-3">
+        <Password
+          :modelValue="value"
+          @update:modelValue="handleChange"
+          @blur="handleBlur"
+          :feedback="false"
+          :toggleMask="true"
+          placeholder="Новый пароль"
+          class="w-100"
+          inputClass="w-100"
+          :class="errorMessage && 'p-invalid'"
+        />
+      </div>
       <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
     </Field>
     <Field
@@ -23,19 +23,19 @@
       rules="required|confirmed:@password"
       v-slot="{ value, errorMessage, handleChange, handleBlur }"
     >
-      <Password
-        data-aos="zoom-in-right"
-        data-aos-delay="450"
-        :modelValue="value"
-        @update:modelValue="handleChange"
-        @blur="handleBlur"
-        :feedback="false"
-        :toggleMask="true"
-        placeholder="Подтверждение пароля"
-        class="w-100"
-        inputClass="w-100"
-        :class="errorMessage && 'p-invalid'"
-      />
+      <div data-aos="zoom-in-right" data-aos-delay="450" class="w-100">
+        <Password
+          :modelValue="value"
+          @update:modelValue="handleChange"
+          @blur="handleBlur"
+          :feedback="false"
+          :toggleMask="true"
+          placeholder="Подтверждение пароля"
+          class="w-100"
+          inputClass="w-100"
+          :class="errorMessage && 'p-invalid'"
+        />
+      </div>
       <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
     </Field>
     <Field v-model="form.close" name="Сеансы" :rules="sessionsRequired" v-slot="{ value, handleChange }">

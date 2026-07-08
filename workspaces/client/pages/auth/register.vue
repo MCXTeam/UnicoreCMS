@@ -41,19 +41,19 @@
       <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
     </Field>
     <Field v-model="form.password" name="password" rules="required|min:6|max:24" v-slot="{ value, errorMessage, handleChange, handleBlur }">
-      <Password
-        data-aos="zoom-in-right"
-        data-aos-delay="600"
-        :modelValue="value"
-        @update:modelValue="handleChange"
-        @blur="handleBlur"
-        :feedback="false"
-        :toggleMask="true"
-        placeholder="Пароль"
-        class="w-100 mb-3"
-        inputClass="w-100"
-        :class="errorMessage && 'p-invalid'"
-      />
+      <div data-aos="zoom-in-right" data-aos-delay="600" class="w-100 mb-3">
+        <Password
+          :modelValue="value"
+          @update:modelValue="handleChange"
+          @blur="handleBlur"
+          :feedback="false"
+          :toggleMask="true"
+          placeholder="Пароль"
+          class="w-100"
+          inputClass="w-100"
+          :class="errorMessage && 'p-invalid'"
+        />
+      </div>
       <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
     </Field>
     <Field
@@ -62,19 +62,19 @@
       rules="required|confirmed:@password"
       v-slot="{ value, errorMessage, handleChange, handleBlur }"
     >
-      <Password
-        data-aos="zoom-in-right"
-        data-aos-delay="750"
-        :modelValue="value"
-        @update:modelValue="handleChange"
-        @blur="handleBlur"
-        :feedback="false"
-        :toggleMask="true"
-        placeholder="Подтверждение пароля"
-        class="w-100"
-        inputClass="w-100"
-        :class="errorMessage && 'p-invalid'"
-      />
+      <div data-aos="zoom-in-right" data-aos-delay="750" class="w-100">
+        <Password
+          :modelValue="value"
+          @update:modelValue="handleChange"
+          @blur="handleBlur"
+          :feedback="false"
+          :toggleMask="true"
+          placeholder="Подтверждение пароля"
+          class="w-100"
+          inputClass="w-100"
+          :class="errorMessage && 'p-invalid'"
+        />
+      </div>
       <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
     </Field>
     <Field v-model="form.confirmed" name="Правила" :rules="rulesAccepted" v-slot="{ value, handleChange }">

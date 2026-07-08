@@ -50,19 +50,19 @@
           rules="required|min:6|max:24"
           v-slot="{ value, errorMessage, handleChange, handleBlur }"
         >
-          <Password
-            data-aos="zoom-in-right"
-            data-aos-delay="450"
-            :modelValue="value"
-            @update:modelValue="handleChange"
-            @blur="handleBlur"
-            :feedback="false"
-            :toggleMask="true"
-            placeholder="Пароль"
-            class="w-100"
-            inputClass="w-100"
-            :class="errorMessage && 'p-invalid'"
-          />
+          <div data-aos="zoom-in-right" data-aos-delay="450" class="w-100">
+            <Password
+              :modelValue="value"
+              @update:modelValue="handleChange"
+              @blur="handleBlur"
+              :feedback="false"
+              :toggleMask="true"
+              placeholder="Пароль"
+              class="w-100"
+              inputClass="w-100"
+              :class="errorMessage && 'p-invalid'"
+            />
+          </div>
           <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
         </Field>
         <div
