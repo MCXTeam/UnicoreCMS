@@ -23,6 +23,12 @@
     </button>
     <ul class="layout-topbar-menu hidden lg:flex origin-top">
       <li>
+        <button class="p-link layout-topbar-button" @click="toggleTheme">
+          <i :class="colorMode.value === 'dark' ? 'pi pi-sun' : 'pi pi-moon'"></i>
+          <span>Тема</span>
+        </button>
+      </li>
+      <li>
         <NuxtLink class="p-link layout-topbar-button" :to="'/users/' + authStore.user?.uuid">
           <i class="pi pi-user"></i>
           <span>Профиль</span>
@@ -45,9 +51,13 @@ export default {
   emits: ['menu-toggle', 'topbar-menu-toggle'],
   setup() {
     const authStore = useAuthStore()
-    return { authStore }
+    const colorMode = useColorMode()
+    return { authStore, colorMode }
   },
   methods: {
+    toggleTheme() {
+      this.colorMode.preference = this.colorMode.value === 'dark' ? 'light' : 'dark'
+    },
     onMenuToggle(event) {
       this.$emit('menu-toggle', event)
     },

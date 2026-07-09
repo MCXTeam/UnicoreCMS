@@ -2,6 +2,32 @@
 
 :root {
   --font-family: 'Brutal Type', 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  --primary-color: var(--p-primary-color);
+  --primary-color-text: var(--p-primary-contrast-color);
+  --text-color: var(--p-text-color);
+  --text-color-secondary: var(--p-text-muted-color);
+  --surface-900: var(--p-text-color);
+  --surface-border: var(--p-content-border-color);
+  --focus-ring: 0 0 0 0.2rem color-mix(in srgb, var(--p-primary-color) 35%, transparent);
+
+  --surface-0: var(--p-surface-0);
+  --surface-50: var(--p-surface-50);
+  --surface-ground: var(--p-surface-100);
+  --surface-card: var(--p-surface-0);
+  --surface-overlay: var(--p-surface-0);
+  --surface-hover: var(--p-surface-100);
+  --maskbg: rgba(0, 0, 0, 0.4);
+}
+
+:root.dark {
+  --surface-0: var(--p-surface-900);
+  --surface-50: var(--p-surface-800);
+  --surface-ground: var(--p-surface-950);
+  --surface-card: var(--p-surface-900);
+  --surface-overlay: var(--p-surface-800);
+  --surface-hover: var(--p-surface-800);
+  --maskbg: rgba(0, 0, 0, 0.6);
 }
 
 body {

@@ -23,11 +23,14 @@ export default defineNuxtPlugin(async () => {
     },
     uaParse(value: string) {
       const res = parser.setUA(value).getResult()
+      const join = (...parts: (string | undefined)[]) => parts.filter(Boolean).join(' ') || 'Неизвестно'
+      const browser = join(res.browser.name, res.browser.version)
+      const os = join(res.os.name, res.os.version)
 
       return {
-        browser: `${res.browser.name} ${res.browser.version}`,
-        os: `${res.os.name} ${res.os.version}`,
-        raw: `${res.browser.name} ${res.browser.version}, ${res.os.name} ${res.os.version}`,
+        browser,
+        os,
+        raw: `${browser}, ${os}`,
       }
     },
   }

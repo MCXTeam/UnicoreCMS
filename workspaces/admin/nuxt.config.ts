@@ -10,7 +10,14 @@ export default defineNuxtConfig({
     host: '0.0.0.0',
   },
 
-  modules: ['@primevue/nuxt-module', '@pinia/nuxt', '@vueuse/nuxt'],
+  modules: ['@primevue/nuxt-module', '@pinia/nuxt', '@vueuse/nuxt', '@nuxtjs/color-mode'],
+
+  colorMode: {
+    preference: 'system',
+    fallback: 'light',
+    classSuffix: '',
+    storageKey: 'unicore-admin-color-mode',
+  },
 
   css: ['primeicons/primeicons.css', 'primeflex/primeflex.css', '~/assets/fonts/main.scss', '~/assets/styles/layout.scss'],
 

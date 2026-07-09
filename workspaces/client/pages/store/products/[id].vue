@@ -81,8 +81,10 @@
           </td>
           <td>
             <strike v-if="product.payload.sale" v-text="$utils.formatCurrency('real', product.payload.price)" class="me-1"></strike>
-            <span v-text="$utils.formatCurrency('real', product.payload.price * product.payload.multiple_of, product.payload.sale)"></span>
-            <h5 class="m-0">за {{ product.payload.multiple_of }} шт.</h5>
+            <span
+              v-text="$utils.formatCurrency('real', product.payload.price * (product.payload.multiple_of || 1), product.payload.sale)"
+            ></span>
+            <h5 class="m-0" v-if="product.type == 'product'">за {{ product.payload.multiple_of || 1 }} шт.</h5>
           </td>
           <td align="right">
             <Button @click="openDialog(product)">В корзину <i class="bx bxs-cart-add ms-1"></i></Button>
@@ -201,7 +203,7 @@ async function catalog(params: StoreFilters = {}) {
           search: params.search,
           'filter.server': route.params.id,
           'filter.categories': params.category ? params.category : null,
-          'filter.price': priceFilter.length && '$btw:' + priceFilter.join(','),
+          'filter.price': priceFilter.length ? '$btw:' + priceFilter.join(',') : undefined,
         },
       })
       .then((r) => r.data)

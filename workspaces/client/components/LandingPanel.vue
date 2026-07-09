@@ -21,9 +21,9 @@
       <div v-else class="panel d-flex flex-column align-items-center py-4 mb-5">
         <h2 class="mb-4 mt-0"><i class="bx bx-key"></i> Авторизация</h2>
         <Button as="NuxtLink" to="/auth" size="large" class="px-4" label="Войти" />
-        <div class="d-flex mt-3">
-          <Button as="NuxtLink" to="/auth/register" text class="m-0" label="Регистрация" />
-          <Button as="NuxtLink" to="/auth/reset" text class="m-0" label="Сбросить пароль" />
+        <div class="d-flex mt-3 justify-content-center gap-2">
+          <Button as="NuxtLink" to="/auth/register" text size="small" class="m-0" label="Регистрация" />
+          <Button as="NuxtLink" to="/auth/reset" text size="small" class="m-0" label="Сбросить пароль" />
         </div>
       </div>
     </ClientOnly>

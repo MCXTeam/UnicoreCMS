@@ -429,7 +429,7 @@ a.server-block:hover {
     margin-bottom: 50px;
 
     h1 {
-      margin-top: 45px;
+      margin-top: 0;
       color: rgba(var(--vs-primary), 1);
       text-transform: uppercase;
     }
@@ -443,7 +443,7 @@ a.server-block:hover {
       color: #fff !important;
       display: flex;
       align-items: center;
-      justify-content: flex-end;
+      justify-content: center;
       font-weight: 800;
       font-size: 42px;
       padding: 10px;
