@@ -50,3 +50,7 @@ docker/mysql-data
 license.pem
 # Playwright MCP
 .playwright-mcp/
+
+# Markdown (кроме README)
+*.md
+!README.md
