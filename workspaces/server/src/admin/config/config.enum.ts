@@ -23,6 +23,14 @@ export enum ConfigField {
   DonatePermsVirtualUse = 'public_donate_perms_virtual_use',
   EmailActivationRequired = 'public_email_activation_required',
   OrdinaryRegister = 'public_ordinary_register',
+  RconPreset = 'rcon_preset',
+  RconTplGiveItem = 'rcon_tpl_give_item',
+  RconTplGroupAdd = 'rcon_tpl_group_add',
+  RconTplGroupAddTemp = 'rcon_tpl_group_add_temp',
+  RconTplGroupRemove = 'rcon_tpl_group_remove',
+  RconTplPermSet = 'rcon_tpl_perm_set',
+  RconTplPermSetTemp = 'rcon_tpl_perm_set_temp',
+  RconTplPermUnset = 'rcon_tpl_perm_unset',
 }
 
 export enum ConfigType {

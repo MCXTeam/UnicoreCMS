@@ -1,7 +1,9 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsDefined, IsInt, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsDefined, IsEnum, IsInt, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { DeliveryMode } from 'unicore-common';
 import { ServerTable } from '../entities/server-table.entity';
 import { Query } from '../online/entities/query.entity';
+import { RconInput } from './rcon.input';
 
 export class ServerUpdateInput {
   @IsDefined()
@@ -27,6 +29,15 @@ export class ServerUpdateInput {
   @IsDefined()
   @Type(() => Query)
   query: Query;
+
+  @IsOptional()
+  @IsEnum(DeliveryMode)
+  delivery_mode?: DeliveryMode;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => RconInput)
+  rcon?: RconInput;
 
   @IsDefined()
   @IsArray()

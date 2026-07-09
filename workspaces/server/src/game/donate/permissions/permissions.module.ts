@@ -10,12 +10,14 @@ import { GroupKit } from '../groups/entities/group-kit.entity';
 import { HistoryModule } from 'src/game/cabinet/history/history.module';
 import { User } from 'src/admin/users/entities/user.entity';
 import { ConfigModule } from 'src/admin/config/config.module';
+import { RconModule } from 'src/game/servers/rcon/rcon.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([DonatePermission, UsersDonatePermission, Server, Period, GroupKit, User]),
     HistoryModule,
     ConfigModule,
+    RconModule,
   ],
   providers: [DonatePermissionsService],
   exports: [DonatePermissionsService],

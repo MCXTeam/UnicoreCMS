@@ -1,6 +1,7 @@
 import { StorageManager } from '@common';
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { DeliveryMode } from 'unicore-common';
 import { In, Repository } from 'typeorm';
 import { ServerCreateInput } from './dto/server-create.input';
 import { ServerUpdateInput } from './dto/server-update.input';
@@ -10,6 +11,7 @@ import { ServerMedia } from './enums/server-media.enum';
 import { Mod } from './mods/entities/mod.entity';
 import { Online } from './online/entities/online.entity';
 import { Query } from './online/entities/query.entity';
+import { RCON } from './rcon/entities/rcon.entity';
 
 @Injectable()
 export class ServersService {
@@ -62,16 +64,24 @@ export class ServersService {
     server.query.host = input.query.host;
     server.query.port = input.query.port;
 
+    server.delivery_mode = input.delivery_mode ?? DeliveryMode.Plugin;
+
+    if (input.rcon) {
+      server.rcon = new RCON();
+      server.rcon.host = input.rcon.host;
+      server.rcon.port = input.rcon.port;
+      server.rcon.password = input.rcon.password;
+    }
+
     server.mods = await this.modsRepository.findBy({
       id: In(input.mods ?? []),
     });
 
-    // server.query = await this.queryRepository.save(server.query)
     return this.serversRepository.save(server);
   }
 
   async update(id: string, input: ServerUpdateInput): Promise<Server> {
-    const server = await this.findOne(id, ['query', 'table']);
+    const server = await this.findOne(id, ['query', 'table', 'rcon']);
 
     if (!server) {
       throw new NotFoundException();
@@ -86,6 +96,19 @@ export class ServersService {
 
     server.query.host = input.query.host;
     server.query.port = input.query.port;
+
+    if (input.delivery_mode != null) {
+      server.delivery_mode = input.delivery_mode;
+    }
+
+    if (input.rcon) {
+      if (!server.rcon) {
+        server.rcon = new RCON();
+      }
+      server.rcon.host = input.rcon.host;
+      server.rcon.port = input.rcon.port;
+      server.rcon.password = input.rcon.password;
+    }
 
     server.mods = await this.modsRepository.findBy({
       id: In(input.mods ?? []),

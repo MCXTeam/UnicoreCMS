@@ -8,6 +8,11 @@
               <Button label="Создать" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
             </div>
           </template>
+          <template v-slot:end>
+            <div class="my-2">
+              <Button label="Выдача (RCON)" icon="pi pi-cog" class="p-button-help" @click="rconSettingsDialog = true" />
+            </div>
+          </template>
         </Toolbar>
 
         <DataTable
@@ -296,6 +301,67 @@
                   </div>
                 </VeeField>
               </div>
+              <div class="col-12">
+                <Divider align="left"><span class="font-medium">Способ выдачи</span></Divider>
+                <div class="field">
+                  <label>Как выдавать товары и привилегии</label>
+                  <Select v-model="server.delivery_mode" :options="deliveryModes" optionLabel="label" optionValue="value" appendTo="body" />
+                  <small class="text-color-secondary">
+                    RCON — CMS сама подключается к серверу и выполняет команды по шаблонам. Плагин — выдача через склад UnicoreConnect.
+                  </small>
+                </div>
+              </div>
+              <template v-if="server.delivery_mode === 1">
+                <div class="col-12 md:col-6">
+                  <div class="field">
+                    <label>RCON хост</label>
+                    <InputText v-model="server.rcon.host" placeholder="127.0.0.1" @update:modelValue="rconTest.ok = null" />
+                  </div>
+                </div>
+                <div class="col-12 md:col-6">
+                  <div class="field">
+                    <label>RCON порт</label>
+                    <InputNumber
+                      v-model="server.rcon.port"
+                      :useGrouping="false"
+                      placeholder="25575"
+                      @update:modelValue="rconTest.ok = null"
+                    />
+                  </div>
+                </div>
+                <div class="col-12 md:col-6">
+                  <div class="field">
+                    <label>RCON пароль</label>
+                    <Password
+                      v-model="server.rcon.password"
+                      :feedback="false"
+                      toggleMask
+                      inputClass="w-full"
+                      @update:modelValue="rconTest.ok = null"
+                    />
+                  </div>
+                </div>
+                <div class="col-12 md:col-6 flex align-items-end">
+                  <div class="field w-full">
+                    <Button
+                      label="Проверить соединение"
+                      icon="pi pi-bolt"
+                      class="p-button-secondary w-full"
+                      :loading="rconTest.loading"
+                      @click="testRcon"
+                    />
+                    <Tag
+                      v-if="rconTest.ok !== null"
+                      class="mt-2"
+                      :severity="rconTest.ok ? 'success' : 'danger'"
+                      :value="rconTest.message"
+                    />
+                  </div>
+                </div>
+                <div class="col-12" v-if="updateMode">
+                  <Button label="Очередь команд" icon="pi pi-list" class="p-button-outlined p-button-secondary" @click="openRconQueue" />
+                </div>
+              </template>
             </div>
             <template #footer>
               <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
@@ -309,6 +375,9 @@
             </template>
           </Dialog>
         </VeeForm>
+
+        <RconIssuanceDialog v-model:visible="rconSettingsDialog" />
+        <RconQueue v-model:visible="rconQueueDialog" :serverId="server.id" />
       </div>
     </div>
   </div>
@@ -359,6 +428,13 @@ export default {
       updateMode: false,
       fileDialog: false,
       table: [],
+      deliveryModes: [
+        { label: 'Плагин (UnicoreConnect)', value: 0 },
+        { label: 'RCON (CMS выполняет команды)', value: 1 },
+      ],
+      rconSettingsDialog: false,
+      rconQueueDialog: false,
+      rconTest: { loading: false, ok: null, message: null },
       server: {
         id: null,
         name: null,
@@ -372,6 +448,12 @@ export default {
         query: {
           host: null,
           port: null,
+        },
+        delivery_mode: 0,
+        rcon: {
+          host: null,
+          port: null,
+          password: null,
         },
         mods: [],
       },
@@ -473,9 +555,15 @@ export default {
     },
     async openDialog(server = null) {
       this.updateMode = !!server
+      this.rconTest = { loading: false, ok: null, message: null }
       if (server) {
-        this.server = this.$_.pick(await this.$api.get('/servers/' + server.id).then((res) => res.data), this.$_.deepKeys(this.server))
+        this.server = this.$_.pick(
+          await this.$api.get('/servers/' + server.id + '/admin').then((res) => res.data),
+          this.$_.deepKeys(this.server),
+        )
         if (!this.server.table) this.server.table = []
+        if (!this.server.rcon) this.server.rcon = { host: null, port: null, password: null }
+        if (this.server.delivery_mode == null) this.server.delivery_mode = 0
       } else {
         this.server = {
           id: null,
@@ -491,6 +579,12 @@ export default {
             host: null,
             port: null,
           },
+          delivery_mode: 0,
+          rcon: {
+            host: null,
+            port: null,
+            password: null,
+          },
           mods: [],
         }
       }
@@ -499,11 +593,14 @@ export default {
     async createServer() {
       this.loading = true
       try {
-        await this.$api.post('/servers', {
+        const payload = {
           ...this.server,
+          delivery_mode: this.server.delivery_mode,
           table: this.server.table && this.server.table.length ? this.server.table.map((row, priority) => ({ ...row, priority })) : [],
           mods: this.server.mods.map((mod) => mod.id),
-        })
+        }
+        if (this.server.delivery_mode !== 1) delete payload.rcon
+        await this.$api.post('/servers', payload)
         this.$toast.add({
           severity: 'success',
           detail: 'Сервер успешно добавлен',
@@ -530,11 +627,18 @@ export default {
     async updateServer() {
       this.loading = true
       try {
-        await this.$api.patch('/servers/' + this.server.id, {
+        const payload = {
           ...this.$_(this.server).omitBy(this.$_.isEmpty).omit('id').value(),
+          delivery_mode: this.server.delivery_mode,
           table: this.server.table && this.server.table.length ? this.server.table.map((row, priority) => ({ ...row, priority })) : [],
           mods: this.server.mods.map((mod) => mod.id),
-        })
+        }
+        if (this.server.delivery_mode === 1) {
+          payload.rcon = this.server.rcon
+        } else {
+          delete payload.rcon
+        }
+        await this.$api.patch('/servers/' + this.server.id, payload)
         this.$toast.add({
           severity: 'success',
           detail: 'Сервер успешно редактирован',
@@ -549,6 +653,28 @@ export default {
           life: 3000,
         })
       }
+    },
+    async testRcon() {
+      if (!this.server.rcon || !this.server.rcon.host || !this.server.rcon.password) {
+        this.rconTest = { loading: false, ok: false, message: 'Заполните хост и пароль' }
+        return
+      }
+      this.rconTest = { loading: true, ok: null, message: null }
+      try {
+        const res = await this.$api
+          .post('/rcon/test', {
+            host: this.server.rcon.host,
+            port: this.server.rcon.port || 25575,
+            password: this.server.rcon.password,
+          })
+          .then((r) => r.data)
+        this.rconTest = { loading: false, ok: res.ok, message: res.ok ? 'Соединение успешно' : res.error || 'Ошибка соединения' }
+      } catch {
+        this.rconTest = { loading: false, ok: false, message: 'Ошибка соединения' }
+      }
+    },
+    openRconQueue() {
+      this.rconQueueDialog = true
     },
     async removeServer(id) {
       this.$confirm.require({

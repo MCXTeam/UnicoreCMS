@@ -12,6 +12,7 @@ import { CartItemKit } from './entities/cart-item-kit.entity';
 import { Kit } from '../entities/kit.entity';
 import { HistoryModule } from 'src/game/cabinet/history/history.module';
 import { ConfigModule } from 'src/admin/config/config.module';
+import { RconModule } from 'src/game/servers/rcon/rcon.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ConfigModule } from 'src/admin/config/config.module';
     ServersModule,
     HistoryModule,
     ConfigModule,
+    RconModule,
   ],
   providers: [CartService],
   exports: [CartService],

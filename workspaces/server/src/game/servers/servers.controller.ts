@@ -51,6 +51,18 @@ export class ServersController {
   }
 
   @Permissions([Permission.AdminDashboard, Permission.AdminServersUpdate])
+  @Get(':id/admin')
+  async findOneAdmin(@Param('id') id: string) {
+    const server = await this.serversService.findOne(id, ['mods', 'query', 'table', 'rcon']);
+
+    if (!server) {
+      throw new NotFoundException();
+    }
+
+    return server;
+  }
+
+  @Permissions([Permission.AdminDashboard, Permission.AdminServersUpdate])
   @Patch(':id')
   update(@Param('id') id: string, @Body() body: ServerUpdateInput) {
     return this.serversService.update(id, body);

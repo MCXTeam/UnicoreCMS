@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { DEFAULT_ISSUANCE_PRESET, RCON_PRESETS } from 'unicore-common';
 import { IsNull, Not, Repository } from 'typeorm';
 import { ConfigField, ConfigType } from './config.enum';
 import { ConfigInput } from './dto/config.input';
@@ -25,6 +26,9 @@ export class ConfigService {
   }
 
   async init() {
+    const presetOps = (RCON_PRESETS.find((p) => p.id === DEFAULT_ISSUANCE_PRESET) ?? RCON_PRESETS[0]).ops;
+    const vanillaOps = (RCON_PRESETS.find((p) => p.id === 'vanilla') ?? RCON_PRESETS[0]).ops;
+
     await this.configRepo
       .createQueryBuilder()
       .insert()
@@ -59,6 +63,14 @@ export class ConfigService {
         { key: ConfigField.DonatePermsVirtualUse, important: true, type: ConfigType.boolean, value: 'true' },
         { key: ConfigField.EmailActivationRequired, important: true, type: ConfigType.boolean, value: 'true' },
         { key: ConfigField.OrdinaryRegister, important: true, type: ConfigType.boolean, value: 'false' },
+        { key: ConfigField.RconPreset, important: true, type: ConfigType.string, value: DEFAULT_ISSUANCE_PRESET },
+        { key: ConfigField.RconTplGiveItem, important: true, type: ConfigType.string, value: presetOps.giveItem ?? vanillaOps.giveItem ?? '' },
+        { key: ConfigField.RconTplGroupAdd, important: true, type: ConfigType.string, value: presetOps.groupAdd ?? '' },
+        { key: ConfigField.RconTplGroupAddTemp, important: true, type: ConfigType.string, value: presetOps.groupAddTemp ?? '' },
+        { key: ConfigField.RconTplGroupRemove, important: true, type: ConfigType.string, value: presetOps.groupRemove ?? '' },
+        { key: ConfigField.RconTplPermSet, important: true, type: ConfigType.string, value: presetOps.permSet ?? '' },
+        { key: ConfigField.RconTplPermSetTemp, important: true, type: ConfigType.string, value: presetOps.permSetTemp ?? '' },
+        { key: ConfigField.RconTplPermUnset, important: true, type: ConfigType.string, value: presetOps.permUnset ?? '' },
       ])
       .orIgnore()
       .execute();

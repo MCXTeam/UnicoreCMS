@@ -580,7 +580,7 @@ export default {
   },
   data() {
     return {
-      giveMethods: ['UnicoreConnect (Предмет)', 'UnicoreConnect (Команды)' /*, 'RCON (Команды)'*/],
+      giveMethods: ['UnicoreConnect (Предмет)', 'UnicoreConnect (Команды)', 'RCON (Команды)'],
       selected: null,
       categories: null,
       servers: null,

@@ -1,4 +1,5 @@
 import { StorageManager } from '@common';
+import { DeliveryMode } from 'unicore-common';
 import { DonateGroup } from 'src/game/donate/groups/entities/donate-group.entity';
 import { DonatePermission } from 'src/game/donate/permissions/entities/donate-permission.entity';
 import { Kit } from 'src/game/store/entities/kit.entity';
@@ -56,6 +57,9 @@ export class Server {
 
   @Column({ name: 'image', nullable: true })
   image: string;
+
+  @Column({ name: 'delivery_mode', type: 'int', default: DeliveryMode.Plugin })
+  delivery_mode: DeliveryMode;
 
   @ManyToOne(() => ServerGroup, (room) => room.servers, { eager: true })
   group: ServerGroup[];

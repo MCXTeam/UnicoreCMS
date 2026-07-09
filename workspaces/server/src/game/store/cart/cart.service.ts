@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/admin/users/entities/user.entity';
 import { Server } from 'src/game/servers/entities/server.entity';
+import { IssuanceService } from 'src/game/servers/rcon/issuance.service';
 import { ServersService } from 'src/game/servers/servers.service';
 import { Repository } from 'typeorm';
 import { Product } from '../entities/product.entity';
@@ -42,6 +43,7 @@ export class CartService {
     private usersRepository: Repository<User>,
     private serversService: ServersService,
     private historyService: HistoryService,
+    private issuanceService: IssuanceService,
   ) {}
 
   private priceCalc(cartItems, cartKitItems): number {
@@ -212,6 +214,11 @@ export class CartService {
   }
 
   async giveItem(user: User, product: Product, server: Server, amount: number) {
+    if (this.issuanceService.isRcon(server)) {
+      await this.issuanceService.deliverProduct(user, server, product, amount);
+      return null;
+    }
+
     const virtualItem = new CartItem();
     virtualItem.product = product;
     virtualItem.amount = amount;
@@ -251,7 +258,11 @@ export class CartService {
     });
 
     for (const cik of pusherTask) {
-      warehouseItems.push((await this.warehouseItemsRepository.save(await this.warehousePusher(user, [cik])))[0]);
+      if (this.issuanceService.isRcon(server)) {
+        await this.issuanceService.deliverProduct(user, server, cik.product, cik.amount);
+      } else {
+        warehouseItems.push((await this.warehouseItemsRepository.save(await this.warehousePusher(user, [cik])))[0]);
+      }
     }
 
     return warehouseItems;
@@ -321,10 +332,20 @@ export class CartService {
     let warehouseItems: WarehouseItem[];
 
     try {
-      warehouseItems = await this.warehouseItemsRepository.save(await this.warehousePusher(warehouseUser, cartItems));
+      if (this.issuanceService.isRcon(server)) {
+        for (const ci of cartItems) {
+          await this.issuanceService.deliverProduct(user, server, ci.product, ci.amount);
+        }
+        for (const cik of cartItemsKits) {
+          await this.issuanceService.deliverProduct(user, server, cik.product, cik.amount);
+        }
+        warehouseItems = [];
+      } else {
+        warehouseItems = await this.warehouseItemsRepository.save(await this.warehousePusher(warehouseUser, cartItems));
 
-      for (const cik of cartItemsKits) {
-        warehouseItems.push((await this.warehouseItemsRepository.save(await this.warehousePusher(warehouseUser, [cik])))[0]);
+        for (const cik of cartItemsKits) {
+          warehouseItems.push((await this.warehouseItemsRepository.save(await this.warehousePusher(warehouseUser, [cik])))[0]);
+        }
       }
     } catch (e) {
       await this.usersRepository

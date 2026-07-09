@@ -12,6 +12,7 @@ import { Referal } from 'src/game/cabinet/referals/entities/referal.entity';
 import { UsersDonateGroup } from 'src/game/donate/groups/entities/user-donate.entity';
 import { UsersDonatePermission } from 'src/game/donate/permissions/entities/user-permission.entity';
 import { OnlineModule } from 'src/game/servers/online/online.module';
+import { RconModule } from 'src/game/servers/rcon/rcon.module';
 import { ServersModule } from 'src/game/servers/servers.module';
 import { CartItemKit } from 'src/game/store/cart/entities/cart-item-kit.entity';
 import { CartItem } from 'src/game/store/cart/entities/cart-item.entity';
@@ -25,6 +26,7 @@ import { PaymentTasks } from './tasks/payment-cleaner.tasks';
 import { ReferalsTasks } from './tasks/referals.tasks';
 import { TokenTasks } from './tasks/tokens.tasks';
 import { BanTasks } from './tasks/ban.tasks';
+import { RconTasks } from './tasks/rcon.tasks';
 import { VotesTasks } from './tasks/votes.tasks';
 import { Vote } from 'src/game/cabinet/votes/entities/vote.entity';
 import { VoteGift } from 'src/game/cabinet/votes/entities/vote-gift.entity';
@@ -49,6 +51,7 @@ import { VoteGift } from 'src/game/cabinet/votes/entities/vote-gift.entity';
     ]),
     ServersModule,
     OnlineModule,
+    RconModule,
     ConfigModule,
     PlaytimeModule,
   ],
@@ -64,6 +67,7 @@ import { VoteGift } from 'src/game/cabinet/votes/entities/vote-gift.entity';
     EmailTasks,
     BanTasks,
     VotesTasks,
+    RconTasks,
   ],
 })
 export class CronModule {}

@@ -12,9 +12,10 @@ import { User } from 'src/admin/users/entities/user.entity';
 import { UsersDonateGroup } from './entities/user-donate.entity';
 import { HistoryModule } from 'src/game/cabinet/history/history.module';
 import { ConfigModule } from 'src/admin/config/config.module';
+import { RconModule } from 'src/game/servers/rcon/rcon.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([GroupKit, DonateGroup, Period, Server, User, UsersDonateGroup]), HistoryModule, ConfigModule],
+  imports: [TypeOrmModule.forFeature([GroupKit, DonateGroup, Period, Server, User, UsersDonateGroup]), HistoryModule, ConfigModule, RconModule],
   providers: [DonateGroupsService, GroupKitsService],
   exports: [DonateGroupsService],
   controllers: [GroupKitsController, DonateGroupsController],

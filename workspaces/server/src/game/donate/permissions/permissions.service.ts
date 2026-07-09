@@ -6,6 +6,7 @@ import { EventsService } from 'src/events/events.service';
 import { HistoryType } from 'src/game/cabinet/history/enums/history-type.enum';
 import { HistoryService } from 'src/game/cabinet/history/history.service';
 import { Server } from 'src/game/servers/entities/server.entity';
+import { IssuanceService } from 'src/game/servers/rcon/issuance.service';
 import { In, Not, Repository } from 'typeorm';
 import { Permission } from 'unicore-common';
 import { Period } from '../entities/period.entity';
@@ -27,6 +28,7 @@ export class DonatePermissionsService {
     private configService: ConfigService,
     private eventsService: EventsService,
     private historyService: HistoryService,
+    private issuanceService: IssuanceService,
     @Inject('moment')
     private moment: MomentWrapper,
     @InjectRepository(User)
@@ -88,9 +90,18 @@ export class DonatePermissionsService {
       userPermission.user = user;
     }
 
-    // Event!
-    if (userPermission.permission.type != PermissionType.Web)
+    if (userPermission.permission.type != PermissionType.Web) {
       this.eventsService.server.to(Permission.KernelUnicoreConnect).emit('give_permission', userPermission);
+
+      if (this.issuanceService.isRcon(server)) {
+        await this.issuanceService.deliverPermission(
+          { username: user.username, uuid: user.uuid },
+          server,
+          { name: permission.name, perms: permission.perms },
+          period.expire || 0,
+        );
+      }
+    }
 
     userPermission.user = { uuid: user.uuid } as User;
     return this.userPermissionsRepository.save(userPermission);
@@ -115,13 +126,22 @@ export class DonatePermissionsService {
   }
 
   async take(id: number) {
-    const udp = await this.userPermissionsRepository.findOne({ where: { id }, relations: ['user'] });
+    const udp = await this.userPermissionsRepository.findOne({ where: { id }, relations: ['user', 'server'] });
     if (!udp) throw new NotFoundException();
 
     await this.userPermissionsRepository.remove(udp);
 
-    if (udp.permission.type != PermissionType.Web)
+    if (udp.permission.type != PermissionType.Web) {
       this.eventsService.server.to(Permission.KernelUnicoreConnect).emit('take_permission', udp);
+
+      if (this.issuanceService.isRcon(udp.server)) {
+        await this.issuanceService.removePermission(
+          { username: udp.user.username, uuid: udp.user.uuid },
+          udp.server,
+          { name: udp.permission.name, perms: udp.permission.perms },
+        );
+      }
+    }
   }
 
   async buy(user: User, ip: string, input: PermissionBuyInput) {

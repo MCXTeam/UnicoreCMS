@@ -6,6 +6,7 @@ import { EventsService } from 'src/events/events.service';
 import { HistoryType } from 'src/game/cabinet/history/enums/history-type.enum';
 import { HistoryService } from 'src/game/cabinet/history/history.service';
 import { Server } from 'src/game/servers/entities/server.entity';
+import { IssuanceService } from 'src/game/servers/rcon/issuance.service';
 import { In, Repository } from 'typeorm';
 import { Permission } from 'unicore-common';
 import { Period } from '../../entities/period.entity';
@@ -27,6 +28,7 @@ export class DonateGroupsService {
     private configService: ConfigService,
     private eventsService: EventsService,
     private historyService: HistoryService,
+    private issuanceService: IssuanceService,
     @Inject('moment')
     private moment: MomentWrapper,
     @InjectRepository(User)
@@ -132,8 +134,16 @@ export class DonateGroupsService {
       userDonate.user = user;
     }
 
-    // Event!
     this.eventsService.server.to(Permission.KernelUnicoreConnect).emit('give_group', userDonate);
+
+    if (this.issuanceService.isRcon(server)) {
+      await this.issuanceService.deliverGroup(
+        { username: user.username, uuid: user.uuid },
+        server,
+        { ingame_id: group.ingame_id, name: group.name },
+        period.expire || 0,
+      );
+    }
 
     userDonate.user = { uuid: user.uuid } as User;
     return this.userDonatesRepository.save(userDonate);
@@ -151,11 +161,19 @@ export class DonateGroupsService {
   }
 
   async take(id: number) {
-    const udg = await this.userDonatesRepository.findOne({ where: { id }, relations: ['user'] });
+    const udg = await this.userDonatesRepository.findOne({ where: { id }, relations: ['user', 'server', 'group'] });
     if (!udg) throw new NotFoundException();
 
     await this.userDonatesRepository.remove(udg);
     this.eventsService.server.to(Permission.KernelUnicoreConnect).emit('take_group', udg);
+
+    if (this.issuanceService.isRcon(udg.server)) {
+      await this.issuanceService.removeGroup(
+        { username: udg.user.username, uuid: udg.user.uuid },
+        udg.server,
+        { ingame_id: udg.group.ingame_id, name: udg.group.name },
+      );
+    }
   }
 
   async buy(user: User, ip: string, input: GroupBuyInput) {

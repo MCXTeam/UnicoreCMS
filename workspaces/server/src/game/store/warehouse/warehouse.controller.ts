@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseArrayPipe, Post } from '@nestjs/common';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
@@ -23,7 +23,7 @@ export class WarehouseController {
 
   @Permissions([Permission.KernelUnicoreConnect])
   @Post()
-  afterGive(@Body() body: WarehouseGivedInput[]) {
+  afterGive(@Body(new ParseArrayPipe({ items: WarehouseGivedInput })) body: WarehouseGivedInput[]) {
     return this.warehouseService.afterGive(body);
   }
 

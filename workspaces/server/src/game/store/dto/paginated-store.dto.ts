@@ -20,7 +20,7 @@ export class ProductProtectedDto {
   give_method: string;
 
   @Exclude()
-  command: string;
+  commands: string[];
 
   constructor(partial: Partial<Product>) {
     Object.assign(this, partial);
