@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsDefined, IsInt, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
-import { GroupFeature } from '../entities/group-feature.entity';
+import { IsArray, IsDefined, IsInt, IsNumber, IsOptional, IsString, Max, Min, ValidateNested } from 'class-validator';
+import { GroupFeatureInput } from './group-feature.input';
+import { IsDonateWebPerm, PRICE_MIN, SanitizeHtml } from '@common';
 
 export class GroupInput {
   @IsDefined()
@@ -13,10 +14,12 @@ export class GroupInput {
 
   @IsOptional()
   @IsString()
+  @SanitizeHtml()
   description?: string;
 
   @IsDefined()
   @IsNumber()
+  @Min(PRICE_MIN)
   price: number;
 
   @IsOptional()
@@ -27,8 +30,9 @@ export class GroupInput {
 
   @IsDefined()
   @IsArray()
-  @Type(() => GroupFeature)
-  features: GroupFeature[];
+  @ValidateNested({ each: true })
+  @Type(() => GroupFeatureInput)
+  features: GroupFeatureInput[];
 
   @IsDefined()
   @IsArray()
@@ -38,6 +42,7 @@ export class GroupInput {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
+  @IsDonateWebPerm({ each: true })
   web_perms: string[];
 
   @IsDefined()

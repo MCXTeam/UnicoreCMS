@@ -14,6 +14,7 @@ import { GiveDonateGroupInput } from '../dto/give-donate-group.input';
 import { GroupBuyInput } from '../dto/group-buy.input';
 import { GroupInput } from '../dto/group.input';
 import { DonateGroup } from '../entities/donate-group.entity';
+import { GroupFeature } from '../entities/group-feature.entity';
 import { GroupKit } from '../entities/group-kit.entity';
 import { UsersDonateGroup } from '../entities/user-donate.entity';
 import * as _ from 'lodash';
@@ -168,11 +169,10 @@ export class DonateGroupsService {
     this.eventsService.server.to(Permission.KernelUnicoreConnect).emit('take_group', udg);
 
     if (this.issuanceService.isRcon(udg.server)) {
-      await this.issuanceService.removeGroup(
-        { username: udg.user.username, uuid: udg.user.uuid },
-        udg.server,
-        { ingame_id: udg.group.ingame_id, name: udg.group.name },
-      );
+      await this.issuanceService.removeGroup({ username: udg.user.username, uuid: udg.user.uuid }, udg.server, {
+        ingame_id: udg.group.ingame_id,
+        name: udg.group.name,
+      });
     }
   }
 
@@ -236,7 +236,7 @@ export class DonateGroupsService {
     group.sale = input.sale;
     group.ingame_id = input.ingame_id;
     group.web_perms = input.web_perms;
-    group.features = input.features;
+    group.features = input.features.map((feature) => Object.assign(new GroupFeature(), feature));
     group.virtual_percent = input.virtual_percent;
 
     group.servers = await this.serversRepository.findBy({
@@ -281,7 +281,7 @@ export class DonateGroupsService {
     group.sale = input.sale;
     group.ingame_id = input.ingame_id;
     group.web_perms = input.web_perms;
-    group.features = input.features;
+    group.features = input.features.map((feature) => Object.assign(new GroupFeature(), feature));
     group.virtual_percent = input.virtual_percent;
 
     group.servers = await this.serversRepository.findBy({

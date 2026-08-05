@@ -1,7 +1,7 @@
 import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { User } from 'src/admin/users/entities/user.entity';
-import { Permission } from 'unicore-common';
+import { filterDonateWebPerms, Permission } from 'unicore-common';
 import * as minimath from 'minimatch';
 import * as _ from 'lodash';
 import { PERMISSIONS_KEY } from 'src/common/constants';
@@ -56,10 +56,9 @@ export async function matchPermission(args: PermissionArgs, request: any): Promi
   const user_dperms = await connection
     .getRepository(UsersDonatePermission)
     .find({ where: { user: { uuid: request.user.uuid } }, relations: ['user'] });
-  const add_perms = [
-    user_dperms.map((udp) => udp.permission.web_perms).flat(),
-    user_dgroups.map((udg) => udg.group.web_perms).flat(),
-  ].flat();
+  const add_perms = filterDonateWebPerms(
+    [user_dperms.map((udp) => udp.permission.web_perms).flat(), user_dgroups.map((udg) => udg.group.web_perms).flat()].flat(),
+  );
   const user: User = request.user;
 
   // Первым делом проверяем пользователя на SuperUser aka root

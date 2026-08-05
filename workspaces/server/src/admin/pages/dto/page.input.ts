@@ -1,4 +1,5 @@
 import { IsDefined, IsOptional, IsString } from 'class-validator';
+import { SanitizeHtml } from '@common';
 
 export class PageInput {
   @IsDefined()
@@ -15,5 +16,6 @@ export class PageInput {
 
   @IsOptional()
   @IsString()
+  @SanitizeHtml()
   content: string;
 }

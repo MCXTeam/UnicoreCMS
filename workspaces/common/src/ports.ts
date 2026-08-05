@@ -10,6 +10,7 @@ import {
   DEFAULT_CLIENT_PORT,
   MAX_PORT,
   MIN_PORT,
+  PUBLIC_ENV_KEYS,
 } from "./constants";
 
 const processEnv: NodeJS.ProcessEnv =
@@ -48,6 +49,16 @@ const readEnvFile = (): Record<string, string> => {
 };
 
 const envFile = readEnvFile();
+
+export const loadPublicEnvFile = (): void => {
+  if (!isNodeRuntime) return;
+
+  for (const key of PUBLIC_ENV_KEYS) {
+    const value = envFile[key];
+    if (value !== undefined && processEnv[key] === undefined)
+      processEnv[key] = value;
+  }
+};
 
 const toPort = (value: string | undefined): number | undefined => {
   if (!value) return undefined;

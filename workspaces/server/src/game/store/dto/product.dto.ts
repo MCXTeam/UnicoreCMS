@@ -1,5 +1,6 @@
 import { IsDecimal, IsDefined, IsInt, IsOptional, IsString, Min, IsArray, Max, IsNumber, IsEnum, IsBoolean } from 'class-validator';
 import { GiveMethod } from '../enums/give-method.enum';
+import { PRICE_MIN, SanitizeHtml } from '@common';
 
 export class ProductInput {
   @IsDefined()
@@ -8,10 +9,12 @@ export class ProductInput {
 
   @IsOptional()
   @IsString()
+  @SanitizeHtml()
   description?: string;
 
   @IsDefined()
   @IsNumber()
+  @Min(PRICE_MIN)
   price: number;
 
   @IsOptional()

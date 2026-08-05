@@ -1,5 +1,14 @@
-import { IpAddress, ThrottlerCoreGuard, UserAgent } from '@common';
+import {
+  IpAddress,
+  THROTTLE_PASSWORD_RESET,
+  THROTTLE_REGISTER,
+  THROTTLE_RESEND,
+  THROTTLE_VERIFY,
+  ThrottlerCoreGuard,
+  UserAgent,
+} from '@common';
 import { Body, Controller, Delete, Get, Header, Headers, Param, Post, UseGuards } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { Recaptcha } from '@nestlab/google-recaptcha';
 import { EmailService } from 'src/admin/email/email.service';
 import { UserDto } from 'src/admin/users/dto/user.dto';
@@ -11,7 +20,9 @@ import { AuthenticatedDto } from './dto/authenticated.dto';
 import { LoginInput } from './dto/login.input';
 import { PasswordLinkInput } from './dto/password-link.input';
 import { PasswordResetInput } from './dto/password-reset.input';
+import { RefreshTokenInput } from './dto/refresh-token.input';
 import { RegisterInput } from './dto/register.input';
+import { TokenInput } from './dto/token.input';
 import { VerifyInput } from './dto/verify.input';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { TokensService } from './tokens.service';
@@ -19,11 +30,7 @@ import { TokensService } from './tokens.service';
 @UseGuards(ThrottlerCoreGuard)
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private tokensService: TokensService,
-    private authService: AuthService,
-    private emailService: EmailService,
-  ) {}
+  constructor(private tokensService: TokensService, private authService: AuthService, private emailService: EmailService) {}
 
   @Public()
   @Recaptcha({ action: 'login' })
@@ -34,6 +41,7 @@ export class AuthController {
 
   @Public()
   @Recaptcha({ action: 'register' })
+  @Throttle({ default: THROTTLE_REGISTER })
   @Post('register')
   register(@Body() input: RegisterInput, @UserAgent() agent: string, @IpAddress() ip: string): Promise<AuthenticatedDto> {
     return this.authService.register(input, agent, ip);
@@ -41,15 +49,12 @@ export class AuthController {
 
   @Public()
   @Post('refresh')
-  refresh(
-    @Body('refresh_token') token: string,
-    @UserAgent() agent: string,
-    @IpAddress() ip: string,
-  ): Promise<Omit<AuthenticatedDto, 'user'>> {
-    return this.tokensService.createTokensFromRefreshToken(token, { agent, ip });
+  refresh(@Body() input: RefreshTokenInput, @UserAgent() agent: string, @IpAddress() ip: string): Promise<Omit<AuthenticatedDto, 'user'>> {
+    return this.tokensService.createTokensFromRefreshToken(input.refresh_token, { agent, ip });
   }
 
   @Recaptcha({ action: 'verify' })
+  @Throttle({ default: THROTTLE_VERIFY })
   @Post('verify')
   verify(@CurrentUser() user: User, @Body() input: VerifyInput): Promise<UserDto> {
     return this.emailService.checkCode(user, input);
@@ -57,6 +62,7 @@ export class AuthController {
 
   @Public()
   @Recaptcha({ action: 'reset' })
+  @Throttle({ default: THROTTLE_PASSWORD_RESET })
   @Post('reset')
   resetReq(@IpAddress() ip: string, @Body() input: PasswordLinkInput) {
     return this.emailService.sendPasswordLink(ip, input);
@@ -64,17 +70,19 @@ export class AuthController {
 
   @Public()
   @Recaptcha({ action: 'reset' })
+  @Throttle({ default: THROTTLE_PASSWORD_RESET })
   @Post('password')
   reset(@Body() input: PasswordResetInput): Promise<UserDto> {
     return this.emailService.checkHash(input);
   }
 
   @Post('logout')
-  logout(@Body('refresh_token') token: string): Promise<void> {
-    return this.tokensService.revokeRefreshToken(token);
+  logout(@Body() input: RefreshTokenInput): Promise<void> {
+    return this.tokensService.revokeRefreshToken(input.refresh_token);
   }
 
   @UseGuards(JwtAuthGuard)
+  @Throttle({ default: THROTTLE_RESEND })
   @Get('resend')
   resend(@CurrentUser() user: User) {
     return this.emailService.sendActivation(user);
@@ -88,8 +96,8 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Post('sessions/me')
-  sessionsMe(@CurrentUser() user: User, @Body('token') token: string) {
-    return this.tokensService.sessions(user, token);
+  sessionsMe(@CurrentUser() user: User, @Body() input: TokenInput) {
+    return this.tokensService.sessions(user, input.token);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -100,8 +108,8 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Delete('sessions_other')
-  closeMeOtherSessions(@CurrentUser() user: User, @Body('token') token: string) {
-    return this.tokensService.revokeRefreshTokensByUserOther(user, token);
+  closeMeOtherSessions(@CurrentUser() user: User, @Body() input: TokenInput) {
+    return this.tokensService.revokeRefreshTokensByUserOther(user, input.token);
   }
 
   @UseGuards(JwtAuthGuard)

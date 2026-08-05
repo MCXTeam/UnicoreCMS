@@ -14,7 +14,7 @@ import { Vote } from 'src/game/cabinet/votes/entities/vote.entity';
 import { UserPublicDto } from './dto/user-public.dto';
 import { ReferalsService } from 'src/game/cabinet/referals/referals.service';
 import { Cache } from 'cache-manager';
-import { CacheKey, DeleteManyInput } from '@common';
+import { CacheKey, DeleteManyUuidInput } from '@common';
 import { UserUpdateInput } from './dto/user-update.input';
 import { matchPermission, transformPermissions } from '../roles/guards/permisson.guard';
 import { Permission } from 'unicore-common';
@@ -274,7 +274,7 @@ export class UsersService {
   }
 
   @Transactional()
-  async deleteMany(input: DeleteManyInput, actor: User = null) {
+  async deleteMany(input: DeleteManyUuidInput, actor: User = null) {
     const users = await this.usersRepository.findBy({ uuid: In(input.items) });
 
     if (actor) {

@@ -1,7 +1,7 @@
 import envVar from "env-var";
 import { config } from "dotenv";
 import { envFilePath, ports } from "./ports";
-import { DEFAULT_TIMEZONE } from "./constants";
+import { DEFAULT_TIMEZONE, PUBLIC_ENV_KEY } from "./constants";
 import { isValidTimezone } from "./timezone";
 
 const env = envVar.from(process.env);
@@ -94,7 +94,7 @@ export interface EnvConfig {
   colorModeFallback: string;
 }
 
-const baseurl = env.get("BASEURL").required().asString();
+const baseurl = env.get(PUBLIC_ENV_KEY.baseurl).required().asString();
 
 const originWithPort = (url: string, port: number): string => {
   try {
@@ -107,7 +107,7 @@ const originWithPort = (url: string, port: number): string => {
 };
 
 const adminBaseurl =
-  env.get("ADMIN_BASEURL").asString() ||
+  env.get(PUBLIC_ENV_KEY.adminBaseurl).asString() ||
   originWithPort(baseurl, ports.adminPort);
 
 const explicitCorsOrigins = env
@@ -119,7 +119,7 @@ const explicitCorsOrigins = env
   .filter(Boolean);
 
 const timezone = env
-  .get("TIMEZONE")
+  .get(PUBLIC_ENV_KEY.timezone)
   .default(DEFAULT_TIMEZONE)
   .asString()
   .trim();
@@ -134,9 +134,9 @@ export const envConfig: EnvConfig = {
   baseurl,
   adminBaseurl,
   timezone,
-  devseed: env.get("DEV_SEED").default(0).asBool(),
+  devseed: env.get(PUBLIC_ENV_KEY.devseed).default(0).asBool(),
 
-  sitename: env.get("SITENAME").default("UnicoreCMS").asString(),
+  sitename: env.get(PUBLIC_ENV_KEY.sitename).default("UnicoreCMS").asString(),
 
   // Порты
   frontendPort: ports.frontendPort,
@@ -144,7 +144,7 @@ export const envConfig: EnvConfig = {
   backendPort: ports.backendPort,
 
   // URL REWRITES
-  apiBaseurl: env.get("API_BASEURL").required().asString(),
+  apiBaseurl: env.get(PUBLIC_ENV_KEY.apiBaseurl).required().asString(),
 
   // Настройки подключения к БД
   databaseType: env.get("DATABASE_TYPE").default("mysql").asString(),
@@ -158,8 +158,11 @@ export const envConfig: EnvConfig = {
 
   // JWT
   jwtKey: env.get("JWT_KEY").required().asString(),
-  jwtExpires: env.get("JWT_EXPIRES").default("5m").asString(),
-  jwtRefreshExpires: env.get("JWT_REFRESH_EXPIRES").default("30d").asString(),
+  jwtExpires: env.get(PUBLIC_ENV_KEY.jwtExpires).default("5m").asString(),
+  jwtRefreshExpires: env
+    .get(PUBLIC_ENV_KEY.jwtRefreshExpires)
+    .default("30d")
+    .asString(),
 
   trustProxy: (() => {
     const raw = env.get("TRUST_PROXY").asString();
@@ -175,7 +178,10 @@ export const envConfig: EnvConfig = {
 
   // RECAPTHA
   recaptchaSecret: env.get("RECAPTCHA_SECRET").default("").asString(),
-  recaptchaPublic: env.get("RECAPTCHA_PUBLIC").default("").asString(),
+  recaptchaPublic: env
+    .get(PUBLIC_ENV_KEY.recaptchaPublic)
+    .default("")
+    .asString(),
 
   // OAUTH
   discordClientID: env.get("DISCORD_CLIENT_ID").asString(),
@@ -242,18 +248,21 @@ export const envConfig: EnvConfig = {
     .get("MONITORINGMINECRAFT_SECRET_KEY")
     .asString(),
 
-  googleAnalyticsId: env.get("GOOGLE_ANALYTICS_ID").asString(),
-  yandexMetrikaId: env.get("YANDEX_METRIKA_ID").asString(),
+  googleAnalyticsId: env.get(PUBLIC_ENV_KEY.googleAnalyticsId).asString(),
+  yandexMetrikaId: env.get(PUBLIC_ENV_KEY.yandexMetrikaId).asString(),
 
-  realDecimals: env.get("REAL_DECIMALS").default(2).asInt(),
-  virtualDecimals: env.get("VIRTUAL_DECIMALS").default(2).asInt(),
-  ingameDecimals: env.get("INGAME_DECIMALS").default(2).asInt(),
+  realDecimals: env.get(PUBLIC_ENV_KEY.realDecimals).default(2).asInt(),
+  virtualDecimals: env.get(PUBLIC_ENV_KEY.virtualDecimals).default(2).asInt(),
+  ingameDecimals: env.get(PUBLIC_ENV_KEY.ingameDecimals).default(2).asInt(),
 
   colorModePreference: env
-    .get("COLOR_MODE_PREFERENCE")
+    .get(PUBLIC_ENV_KEY.colorModePreference)
     .default("dark")
     .asString(),
-  colorModeFallback: env.get("COLOR_MODE_FALLBACK").default("dark").asString(),
+  colorModeFallback: env
+    .get(PUBLIC_ENV_KEY.colorModeFallback)
+    .default("dark")
+    .asString(),
 };
 
 const weakSecrets = [

@@ -1,4 +1,3 @@
-import { config } from 'dotenv'
-import { envFilePath } from 'unicore-common/ports'
+import { loadPublicEnvFile } from 'unicore-common/ports'
 
-config({ path: envFilePath })
+loadPublicEnvFile()

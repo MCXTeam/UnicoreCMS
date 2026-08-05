@@ -1,4 +1,5 @@
-import { IsDefined, IsOptional, IsString, IsNumber } from 'class-validator';
+import { IsDefined, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { PRICE_MIN } from '@common';
 
 export class ProductFromGameInput {
   @IsDefined()
@@ -15,6 +16,7 @@ export class ProductFromGameInput {
 
   @IsDefined()
   @IsNumber()
+  @Min(PRICE_MIN)
   price: number;
 
   @IsDefined()

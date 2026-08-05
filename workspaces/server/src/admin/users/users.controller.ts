@@ -10,7 +10,7 @@ import { UserBasicDto, UserDto } from './dto/user.dto';
 import { UserUpdateInput } from './dto/user-update.input';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { User } from './entities/user.entity';
-import { DeleteManyInput } from '@common';
+import { DeleteManyUuidInput } from '@common';
 import { PasswordUpdateInput } from 'src/game/cabinet/settings/dto/password-update.input';
 import { Permissions } from '../roles/decorators/permission.decorator';
 import { Permission } from 'unicore-common';
@@ -67,7 +67,7 @@ export class UsersController {
   @Permissions([Permission.AdminDashboard, Permission.AdminUsersDeleteMany])
   @ApiOperation({ summary: 'Удалить несколько пользователей' })
   @Delete('bulk/:ids')
-  removeMany(@CurrentUser() actor: User, @Body() body: DeleteManyInput) {
+  removeMany(@CurrentUser() actor: User, @Body() body: DeleteManyUuidInput) {
     return this.usersService.deleteMany(body, actor);
   }
 

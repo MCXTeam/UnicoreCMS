@@ -1,4 +1,5 @@
 import { IsDefined, IsString } from 'class-validator';
+import { SanitizeHtml } from '@common';
 
 export class NewsInput {
   @IsDefined()
@@ -7,5 +8,6 @@ export class NewsInput {
 
   @IsDefined()
   @IsString()
+  @SanitizeHtml()
   description: string;
 }

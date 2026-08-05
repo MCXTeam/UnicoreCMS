@@ -3,6 +3,7 @@ import { Public } from 'src/auth/decorators/public.decorator';
 import { Permission } from 'unicore-common';
 import { Permissions } from '../roles/decorators/permission.decorator';
 import { PageInput } from './dto/page.input';
+import { PagePathInput } from './dto/page-path.input';
 import { PagesService } from './pages.service';
 
 @Controller('pages')
@@ -41,8 +42,8 @@ export class PagesController {
 
   @Public()
   @Post('path')
-  async findByPath(@Body('path') path: string) {
-    const page = await this.pagesService.findByPath(path);
+  async findByPath(@Body() input: PagePathInput) {
+    const page = await this.pagesService.findByPath(input.path);
 
     if (!page) {
       throw new NotFoundException();

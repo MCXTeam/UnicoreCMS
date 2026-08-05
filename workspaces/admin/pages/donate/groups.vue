@@ -314,6 +314,8 @@
 
 <script>
 import { Form, Field } from 'vee-validate'
+import { filterDonateWebPerms } from 'unicore-common/validation'
+import { donateWebPermSuggestions } from '~/helpers'
 
 export default {
   components: {
@@ -371,7 +373,7 @@ export default {
       this.kits = await this.$api.get('/donates/group-kits').then((res) => res.data)
       this.periods = await this.$api.get('/donates/periods').then((res) => res.data)
       this.servers = await this.$api.get('/servers').then((res) => res.data)
-      this.autocompleate = await this.$api.get('/admin/roles/autocompleate').then((res) => res.data)
+      this.autocompleate = await this.$api.get('/admin/roles/autocompleate').then((res) => filterDonateWebPerms(res.data))
       this.loading = false
     },
     async onGroupReorder(event) {
@@ -402,20 +404,7 @@ export default {
       this.features = []
     },
     searchAutocompleate(event) {
-      if (!event.query.trim().length) {
-        this.autocompleateFilterd = this.autocompleate
-      } else {
-        this.autocompleateFilterd = [
-          event.query.toLowerCase(),
-          ...this.autocompleate.filter((perm) => {
-            return perm.toLowerCase().includes(event.query.toLowerCase())
-          }),
-        ]
-
-        if (this.autocompleateFilterd.length === 0) {
-          this.autocompleateFilterd = [event.query.toLowerCase()]
-        }
-      }
+      this.autocompleateFilterd = donateWebPermSuggestions(this.autocompleate, event.query)
     },
     hideDialog() {
       this.groupDialog = false

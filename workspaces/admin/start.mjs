@@ -1,6 +1,6 @@
-import { configuredPorts, loadEnvFile, ports } from 'unicore-common/ports'
+import { configuredPorts, loadPublicEnvFile, ports } from 'unicore-common/ports'
 
-loadEnvFile()
+loadPublicEnvFile()
 
 const port = configuredPorts.admin
 

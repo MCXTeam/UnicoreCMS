@@ -1,4 +1,5 @@
 import { IsDefined, IsOptional, IsString } from 'class-validator';
+import { SanitizeHtml } from '@common';
 
 export class GroupKitInput {
   @IsDefined()
@@ -7,5 +8,6 @@ export class GroupKitInput {
 
   @IsOptional()
   @IsString()
+  @SanitizeHtml()
   description: string;
 }

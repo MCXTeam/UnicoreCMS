@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsBoolean, IsDefined, IsInt, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsArray, IsBoolean, IsDefined, IsInt, IsNumber, IsOptional, IsString, Max, Min, ValidateNested } from 'class-validator';
+import { PRICE_MIN, SanitizeHtml } from '@common';
 
 export class KitItemInput {
   @IsDefined()
@@ -19,10 +20,12 @@ export class KitInput {
 
   @IsOptional()
   @IsString()
+  @SanitizeHtml()
   description: string;
 
   @IsDefined()
   @IsNumber()
+  @Min(PRICE_MIN)
   price: number;
 
   @IsOptional()
@@ -43,6 +46,7 @@ export class KitInput {
 
   @IsDefined()
   @IsArray()
+  @ValidateNested({ each: true })
   @Type(() => KitItemInput)
   items: KitItemInput[];
 

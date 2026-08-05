@@ -9,6 +9,9 @@ export class EmailActivation {
   @Column({ name: 'code' })
   code: string;
 
+  @Column({ name: 'attempts', default: 0 })
+  attempts: number;
+
   @ManyToOne(() => User, {
     cascade: true,
     onDelete: 'CASCADE',

@@ -1,5 +1,6 @@
 import { IsArray, IsBoolean, IsDefined, IsEnum, IsInt, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 import { PermissionType } from '../enums/permission-type.enum';
+import { IsDonateWebPerm, PRICE_MIN, SanitizeHtml } from '@common';
 
 export class PermissionInput {
   @IsDefined()
@@ -12,10 +13,12 @@ export class PermissionInput {
 
   @IsOptional()
   @IsString()
+  @SanitizeHtml()
   description?: string;
 
   @IsDefined()
   @IsNumber()
+  @Min(PRICE_MIN)
   price: number;
 
   @IsOptional()
@@ -47,6 +50,7 @@ export class PermissionInput {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
+  @IsDonateWebPerm({ each: true })
   web_perms?: string[];
 
   @IsOptional()

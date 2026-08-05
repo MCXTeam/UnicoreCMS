@@ -5,6 +5,7 @@ import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { Permission } from 'unicore-common';
+import { GiftActivateInput } from './dto/gift-activate.input';
 import { GiftInput } from './dto/gift.input';
 import { GiftsService } from './gifts.service';
 
@@ -15,8 +16,8 @@ export class GiftsController {
   @UseGuards(ThrottlerCoreGuard)
   @Recaptcha({ action: 'gift' })
   @Post('activate')
-  giftActivate(@CurrentUser() user: User, @Body('gift_code') code: string) {
-    return this.giftsService.activate(user, code);
+  giftActivate(@CurrentUser() user: User, @Body() input: GiftActivateInput) {
+    return this.giftsService.activate(user, input.gift_code);
   }
 
   @Permissions([Permission.AdminDashboard, Permission.EditorCabinetGiftsCreate])

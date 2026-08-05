@@ -4,6 +4,7 @@ import { DeliveryMode } from 'unicore-common';
 import { ServerTable } from '../entities/server-table.entity';
 import { Query } from '../online/entities/query.entity';
 import { RconInput } from './rcon.input';
+import { SanitizeHtml } from '@common';
 
 export class ServerUpdateInput {
   @IsDefined()
@@ -20,10 +21,12 @@ export class ServerUpdateInput {
 
   @IsOptional()
   @IsString()
+  @SanitizeHtml()
   description: string;
 
   @IsOptional()
   @IsString()
+  @SanitizeHtml()
   content: string;
 
   @IsDefined()

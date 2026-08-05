@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsAlphanumeric, IsArray, IsDefined, IsInt } from 'class-validator';
+import { IsAlphanumeric, IsArray, IsDefined, IsInt, ValidateNested } from 'class-validator';
 
 class ServerSortInput {
   @IsDefined()
@@ -13,6 +13,7 @@ class ServerSortInput {
 
 export class ServersSortInput {
   @IsArray()
+  @ValidateNested({ each: true })
   @Type(() => ServerSortInput)
   items: ServerSortInput[];
 }

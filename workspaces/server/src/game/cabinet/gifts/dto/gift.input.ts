@@ -1,5 +1,6 @@
 import { IsDate, IsDefined, IsEnum, IsInt, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { GiftType } from '../enums/gift-type.enum';
+import { PRICE_MIN } from '@common';
 
 export class GiftInput {
   @IsDefined()
@@ -44,5 +45,6 @@ export class GiftInput {
 
   @IsOptional()
   @IsNumber()
+  @Min(PRICE_MIN)
   amount?: number;
 }

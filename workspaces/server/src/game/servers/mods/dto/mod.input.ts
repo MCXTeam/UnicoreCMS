@@ -1,4 +1,5 @@
 import { IsDefined, IsOptional, IsString } from 'class-validator';
+import { SanitizeHtml } from '@common';
 
 export class ModInput {
   @IsDefined()
@@ -11,5 +12,6 @@ export class ModInput {
 
   @IsOptional()
   @IsString()
+  @SanitizeHtml()
   description: string;
 }

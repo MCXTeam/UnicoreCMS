@@ -11,7 +11,19 @@ import { EmailMessage } from './entities/email-message.entity';
 import { EmailMessageType } from './enums/email-message-type.enum';
 import { nanoid, customAlphabet } from 'nanoid';
 import { ThrottlerException } from '@nestjs/throttler';
-import { MomentWrapper } from '@common';
+import {
+  EMAIL_ACTIVATION_MAX_ATTEMPTS,
+  EMAIL_ACTIVATION_RESEND_MAX,
+  EMAIL_ACTIVATION_RESEND_WINDOW_MINUTES,
+  EMAIL_ACTIVATION_TTL_MINUTES,
+  EMAIL_CODE_ALPHABET,
+  EMAIL_CODE_LENGTH,
+  MomentWrapper,
+  PASSWORD_RESET_HASH_LENGTH,
+  PASSWORD_RESET_MAX,
+  PASSWORD_RESET_TTL_MINUTES,
+  PASSWORD_RESET_WINDOW_MINUTES,
+} from '@common';
 import { UserDto } from '../users/dto/user.dto';
 import { VerifyInput } from 'src/auth/dto/verify.input';
 import { PasswordReset } from './entities/password-reset.entity';
@@ -78,9 +90,9 @@ export class EmailService {
   async sendActivation(user: User) {
     if (
       (await this.emailActivationsRepository.countBy({
-        created: MoreThan(this.moment().utc().subtract(5, 'minutes').toDate()),
+        created: MoreThan(this.moment().utc().subtract(EMAIL_ACTIVATION_RESEND_WINDOW_MINUTES, 'minutes').toDate()),
         user: { uuid: user.uuid },
-      })) > 2
+      })) >= EMAIL_ACTIVATION_RESEND_MAX
     ) {
       throw new ThrottlerException();
     }
@@ -88,7 +100,7 @@ export class EmailService {
     const { content, title } = await this.emailMessagesRepository.findOneBy({ id: EmailMessageType.Activation });
 
     const activation = new EmailActivation();
-    const code = customAlphabet('1234567890', 6)();
+    const code = customAlphabet(EMAIL_CODE_ALPHABET, EMAIL_CODE_LENGTH)();
 
     const html = content.replace('{USERNAME}', user.username).replace('{SITENAME}', envConfig.sitename).replace('{CODE}', code);
 
@@ -103,18 +115,36 @@ export class EmailService {
   }
 
   async checkCode(user: User, input: VerifyInput): Promise<UserDto> {
-    const exist = await this.emailActivationsRepository.findOneBy({ user: { uuid: user.uuid }, code: input.code });
+    const activation = await this.emailActivationsRepository.findOne({
+      where: {
+        user: { uuid: user.uuid },
+        created: MoreThan(this.moment().utc().subtract(EMAIL_ACTIVATION_TTL_MINUTES, 'minutes').toDate()),
+      },
+      order: { created: 'DESC' },
+    });
 
-    if (exist) {
-      await this.emailActivationsRepository.delete({ user });
-
-      user.activated = true;
-      await this.usersRepository.save(user);
-
-      return new UserDto(user);
-    } else {
+    if (!activation) {
       throw new NotFoundException();
     }
+
+    if (activation.code !== input.code) {
+      activation.attempts += 1;
+
+      if (activation.attempts >= EMAIL_ACTIVATION_MAX_ATTEMPTS) {
+        await this.emailActivationsRepository.delete({ user: { uuid: user.uuid } });
+      } else {
+        await this.emailActivationsRepository.save(activation);
+      }
+
+      throw new NotFoundException();
+    }
+
+    await this.emailActivationsRepository.delete({ user: { uuid: user.uuid } });
+
+    user.activated = true;
+    await this.usersRepository.save(user);
+
+    return new UserDto(user);
   }
 
   async sendPasswordLink(ip: string, input: PasswordLinkInput) {
@@ -125,15 +155,15 @@ export class EmailService {
       (await this.passwordResetRepository.count({
         where: [
           {
-            created: MoreThan(this.moment().utc().subtract(5, 'minutes').toDate()),
+            created: MoreThan(this.moment().utc().subtract(PASSWORD_RESET_WINDOW_MINUTES, 'minutes').toDate()),
             user: { uuid: user.uuid },
           },
           {
-            created: MoreThan(this.moment().utc().subtract(5, 'minutes').toDate()),
+            created: MoreThan(this.moment().utc().subtract(PASSWORD_RESET_WINDOW_MINUTES, 'minutes').toDate()),
             ip,
           },
         ],
-      })) > 2
+      })) >= PASSWORD_RESET_MAX
     ) {
       throw new ThrottlerException();
     }
@@ -141,7 +171,7 @@ export class EmailService {
     const { content, title } = await this.emailMessagesRepository.findOneBy({ id: EmailMessageType.Reset });
 
     const activation = new PasswordReset();
-    const hash = nanoid(32);
+    const hash = nanoid(PASSWORD_RESET_HASH_LENGTH);
 
     const link = new URL(envConfig.baseurl);
     link.pathname = '/auth/password';
@@ -165,7 +195,13 @@ export class EmailService {
   }
 
   async checkHash(input: PasswordResetInput): Promise<UserDto> {
-    const exist = await this.passwordResetRepository.findOne({ where: { hash: input.hash }, relations: ['user'] });
+    const exist = await this.passwordResetRepository.findOne({
+      where: {
+        hash: input.hash,
+        created: MoreThan(this.moment().utc().subtract(PASSWORD_RESET_TTL_MINUTES, 'minutes').toDate()),
+      },
+      relations: ['user'],
+    });
 
     if (exist) {
       if (input.password) {

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseArrayPipe, Patch } from '@nestjs/common';
 import { instanceToPlain } from 'class-transformer';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { User } from 'src/admin/users/entities/user.entity';
@@ -19,7 +19,7 @@ export class PlaytimeController {
 
   @Permissions([Permission.KernelUnicoreConnect])
   @Patch()
-  update(@Body() body: PlaytimeInput[]) {
+  update(@Body(new ParseArrayPipe({ items: PlaytimeInput, whitelist: true })) body: PlaytimeInput[]) {
     return this.playtimeService.update(body);
   }
 
