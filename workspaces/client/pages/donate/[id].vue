@@ -29,21 +29,28 @@
       </div>
       <hr />
       <div class="p-4">
-        <h4 class="mt-0">Наведите для просмотра набора:</h4>
+        <h4 class="mt-0">Наведите для просмотра набора, нажмите чтобы закрепить:</h4>
         <div class="d-flex flex-wrap">
           <Button
-            :outlined="!(kit_active.donate_id == donate.id && kit_active.payload && kit_active.payload.id == kit.id)"
+            :outlined="!isKitActive(donate.id, kit.id)"
             @mouseover="viewKit(donate.id, kit.id)"
             @mouseleave="viewKitDestroy()"
+            @click="toggleKit(donate.id, kit.id)"
             size="large"
             v-for="kit in donate.kits"
             :key="kit.id"
             class="me-2"
           >
             Кит "{{ kit.name }}"
+            <i v-if="kit_pinned && isKitActive(donate.id, kit.id)" class="bx bx-pin ms-1"></i>
           </Button>
         </div>
-        <div v-if="kit_active.payload && kit_active.donate_id == donate.id" class="row mt-3">
+        <div
+          v-if="kit_active.payload && kit_active.donate_id == donate.id"
+          class="row mt-3"
+          @mouseover="cancelKitHide()"
+          @mouseleave="viewKitDestroy()"
+        >
           <div class="col-12">
             <p v-if="kit_active.payload.description" class="description-html" v-text="kit_active.payload.description" />
           </div>
@@ -81,14 +88,53 @@ const donates = computed<any[]>(() => data.value.donates)
 useUiStore().setName(`Платные услуги ${server.value.name}`)
 useHead({ title: `Донат ${server.value.name}` })
 
+const KIT_HIDE_DELAY = 250
+
 const kit_active = ref<{ payload: any; donate_id: any }>({ payload: null, donate_id: null })
+const kit_pinned = ref(false)
+let kitHideTimer: ReturnType<typeof setTimeout> | null = null
+
+function findKit(donate_id: any, kit_id: any) {
+  return donates.value.find((d: any) => d.id == donate_id)?.kits.find((k: any) => k.id == kit_id)
+}
+
+function isKitActive(donate_id: any, kit_id: any) {
+  return kit_active.value.donate_id == donate_id && kit_active.value.payload?.id == kit_id
+}
+
+function cancelKitHide() {
+  if (!kitHideTimer) return
+  clearTimeout(kitHideTimer)
+  kitHideTimer = null
+}
 
 function viewKit(donate_id: any, kit_id: any) {
-  const kit = donates.value.find((d: any) => d.id == donate_id).kits.find((k: any) => k.id == kit_id)
-  kit_active.value = { payload: kit, donate_id }
+  cancelKitHide()
+  if (kit_pinned.value) return
+  kit_active.value = { payload: findKit(donate_id, kit_id), donate_id }
 }
 
 function viewKitDestroy() {
-  kit_active.value = { payload: null, donate_id: null }
+  cancelKitHide()
+  if (kit_pinned.value) return
+  kitHideTimer = setTimeout(() => {
+    kit_active.value = { payload: null, donate_id: null }
+    kitHideTimer = null
+  }, KIT_HIDE_DELAY)
 }
+
+function toggleKit(donate_id: any, kit_id: any) {
+  cancelKitHide()
+
+  if (kit_pinned.value && isKitActive(donate_id, kit_id)) {
+    kit_pinned.value = false
+    kit_active.value = { payload: null, donate_id: null }
+    return
+  }
+
+  kit_active.value = { payload: findKit(donate_id, kit_id), donate_id }
+  kit_pinned.value = true
+}
+
+onBeforeUnmount(cancelKitHide)
 </script>

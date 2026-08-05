@@ -1,4 +1,6 @@
-import { configuredPorts, ports } from 'unicore-common/ports'
+import { configuredPorts, loadEnvFile, ports } from 'unicore-common/ports'
+
+loadEnvFile()
 
 const port = configuredPorts.admin
 
@@ -10,6 +12,12 @@ if (port) {
 }
 
 if (!process.env.HOST && !process.env.NITRO_HOST) process.env.HOST = '0.0.0.0'
+
+const { publicRuntimeEnv } = await import('unicore-common/public-config')
+
+for (const [key, value] of Object.entries(publicRuntimeEnv())) {
+  if (process.env[key] === undefined) process.env[key] = value
+}
 
 const entry = './.output/server/index.mjs'
 

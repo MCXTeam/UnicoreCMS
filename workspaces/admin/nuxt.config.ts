@@ -23,7 +23,7 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      titleTemplate: '%s - UnicoreCMS',
+      titleTemplate: `%s - ${publicConfig.sitename}`,
       title: 'Панель управления',
       htmlAttrs: { lang: 'ru' },
       meta: [

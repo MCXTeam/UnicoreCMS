@@ -1,8 +1,8 @@
-import { from } from "env-var";
+import envVar from "env-var";
 import { ports } from "./ports";
 import { DEFAULT_TIMEZONE } from "./timezone";
 
-const env = from(
+const env = envVar.from(
   typeof process !== "undefined" && process.env ? process.env : {},
 );
 
@@ -53,3 +53,14 @@ export const publicConfig: PublicConfig = {
   colorModeFallback: env.get("COLOR_MODE_FALLBACK").default("dark").asString(),
   devseed: env.get("DEV_SEED").default(0).asBool(),
 };
+
+const toRuntimeEnvKey = (key: string): string =>
+  `NUXT_PUBLIC_${key.replace(/([a-z0-9])([A-Z])/g, "$1_$2").toUpperCase()}`;
+
+export const publicRuntimeEnv = (): Record<string, string> =>
+  Object.fromEntries(
+    Object.entries(publicConfig).map(([key, value]) => [
+      toRuntimeEnvKey(key),
+      String(value),
+    ]),
+  );

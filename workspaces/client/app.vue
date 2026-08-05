@@ -14,6 +14,9 @@
 import { useUiStore } from '~/stores/ui'
 
 const ui = useUiStore()
+const { sitename } = useRuntimeConfig().public
+
+useHead({ titleTemplate: `%s - ${sitename}` })
 </script>
 
 <style>

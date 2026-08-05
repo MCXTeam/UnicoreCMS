@@ -1,9 +1,9 @@
-import { from } from "env-var";
+import envVar from "env-var";
 import { config } from "dotenv";
 import { envFilePath, ports } from "./ports";
 import { DEFAULT_TIMEZONE, isValidTimezone } from "./timezone";
 
-const env = from(process.env);
+const env = envVar.from(process.env);
 config({ path: envFilePath });
 
 export interface EnvConfig {

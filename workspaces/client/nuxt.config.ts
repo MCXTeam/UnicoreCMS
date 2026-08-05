@@ -42,7 +42,6 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      titleTemplate: `%s - ${publicConfig.sitename}`,
       title: 'Игровые серверы Minecraft',
       htmlAttrs: { lang: 'ru' },
       meta: [

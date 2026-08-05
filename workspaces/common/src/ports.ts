@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "fs";
 import { dirname, resolve } from "path";
-import { parse } from "dotenv";
+import { config, parse } from "dotenv";
 
 export const DEFAULT_CLIENT_PORT = 3000;
 export const DEFAULT_ADMIN_PORT = 4000;
@@ -31,6 +31,10 @@ const locateEnvFile = (): string => {
 };
 
 export const envFilePath = locateEnvFile();
+
+export const loadEnvFile = (): void => {
+  config({ path: envFilePath });
+};
 
 const readEnvFile = (): Record<string, string> => {
   if (!isNodeRuntime) return {};
