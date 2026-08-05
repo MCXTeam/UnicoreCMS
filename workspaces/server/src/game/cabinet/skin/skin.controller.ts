@@ -17,7 +17,7 @@ export class SkinController {
   @Get('public/skin/username/:username')
   async streamSkinByUsername(@Response({ passthrough: true }) res, @Param('username') username: string) {
     const file = await this.skinsService.streamSkinByUsername(username);
-    res.headers({ 'Content-Type': 'image/png' });
+    res.set({ 'Content-Type': 'image/png' });
     return file;
   }
 
@@ -25,7 +25,7 @@ export class SkinController {
   @Get('public/skin/uuid/:uuid')
   async streamSkinByUUID(@Response({ passthrough: true }) res, @Param('uuid') uuid: string) {
     const file = await this.skinsService.streamSkinByUUID(uuid);
-    res.headers({ 'Content-Type': 'image/png' });
+    res.set({ 'Content-Type': 'image/png' });
     return file;
   }
 
@@ -33,7 +33,7 @@ export class SkinController {
   @Get('public/cloak/username/:username')
   async streamCloakByUsername(@Response({ passthrough: true }) res, @Param('username') username: string) {
     const file = await this.skinsService.streamCloakByUsername(username);
-    res.headers({ 'Content-Type': 'image/png' });
+    res.set({ 'Content-Type': 'image/png' });
     return file;
   }
 
@@ -41,7 +41,7 @@ export class SkinController {
   @Get('public/cloak/uuid/:uuid')
   async streamCloakByUUID(@Response({ passthrough: true }) res, @Param('uuid') uuid: string) {
     const file = await this.skinsService.streamCloakByUUID(uuid);
-    res.headers({ 'Content-Type': 'image/png' });
+    res.set({ 'Content-Type': 'image/png' });
     return file;
   }
 

@@ -65,9 +65,12 @@ export const useAuthStore = defineStore('auth', {
     },
     async logout() {
       const { $api } = useNuxtApp()
-      await $api.post('/auth/logout', { refresh_token: this.refreshToken }).catch(() => {})
+      const token = this.refreshToken
+
       this.setUser(null)
       this.setTokens(null, null)
+
+      if (token) await $api.post('/auth/logout', { refresh_token: token }).catch(() => {})
     },
   },
 })

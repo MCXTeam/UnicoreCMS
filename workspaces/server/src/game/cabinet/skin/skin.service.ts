@@ -140,7 +140,7 @@ export class SkinService {
 
   async streamSkinByUsername(username: string): Promise<StreamableFile> {
     const user = await this.usersService.getByUsername(username);
-    if (!user || !user?.skin) var file = StorageManager.readStream(user?.skin?.file);
+    if (user?.skin) var file = StorageManager.readStream(user.skin.file);
 
     if (!file) var default_file = StorageManager.readStream('default_skin.png');
 
@@ -151,7 +151,7 @@ export class SkinService {
 
   async streamSkinByUUID(uuid: string): Promise<StreamableFile> {
     const user = await this.usersService.getById(uuid);
-    if (!user || !user?.skin) var file = StorageManager.readStream(user?.skin?.file);
+    if (user?.skin) var file = StorageManager.readStream(user.skin.file);
 
     if (!file) var default_file = StorageManager.readStream('default_skin.png');
 
@@ -162,7 +162,7 @@ export class SkinService {
 
   async streamCloakByUsername(username: string): Promise<StreamableFile> {
     const user = await this.usersService.getByUsername(username);
-    if (!user || !user?.cloak) var file = StorageManager.readStream(user?.cloak?.file);
+    if (user?.cloak) var file = StorageManager.readStream(user.cloak.file);
 
     if (!file) var default_file = StorageManager.readStream('default_cloak.png');
 
@@ -173,7 +173,7 @@ export class SkinService {
 
   async streamCloakByUUID(uuid: string): Promise<StreamableFile> {
     const user = await this.usersService.getById(uuid);
-    if (!user || !user?.cloak) var file = StorageManager.readStream(user?.cloak?.file);
+    if (user?.cloak) var file = StorageManager.readStream(user.cloak.file);
 
     if (!file) var default_file = StorageManager.readStream('default_cloak.png');
 

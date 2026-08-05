@@ -7,10 +7,7 @@ import { RconService } from './rcon.service';
 
 @Controller('rcon')
 export class RconController {
-  constructor(
-    private rconService: RconService,
-    private rconQueueService: RconQueueService,
-  ) {}
+  constructor(private rconService: RconService, private rconQueueService: RconQueueService) {}
 
   @Permissions([Permission.AdminDashboard, Permission.AdminServersUpdate])
   @Post(':server/test')
