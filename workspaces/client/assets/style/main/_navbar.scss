@@ -7,8 +7,8 @@
   color: rgba(var(--vs-text), 0.75) !important;
 
   &::before {
-    left: 15px;
-    width: calc(100% - 30px);
+    left: 0;
+    width: 100%;
   }
 }
 
@@ -69,8 +69,8 @@
     &:hover,
     &.nuxt-link-exact-active {
       &::before {
-        left: 15px;
-        width: calc(100% - 30px);
+        left: 0;
+        width: 100%;
       }
     }
   }

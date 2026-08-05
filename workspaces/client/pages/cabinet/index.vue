@@ -4,7 +4,7 @@
       <div class="col-xl-6 pe-xl-2">
         <div class="skin-view p-4">
           <div class="row">
-            <div class="col-xxl-6 d-flex flex-column align-items-center">
+            <div class="col-auto d-flex flex-column align-items-center">
               <SkinView3D class="rounded" :width="140" :height="200" :skin="$auth.user.skin" :cloak="$auth.user.cloak" ref="Skin3D" />
               <div class="skin-animation">
                 <i @click="Skin3D.setAnimation(null)" class="bx bx-male"></i>

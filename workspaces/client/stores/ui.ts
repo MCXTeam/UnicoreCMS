@@ -1,7 +1,9 @@
 import { defineStore } from 'pinia'
 
+export type StoreSidebarName = 'CartSidebar' | 'StoreProductsSidebar' | 'WarehouseSidebar'
+
 export interface StoreSidebar {
-  component: string
+  component: StoreSidebarName
   payload?: Record<string, any>
 }
 

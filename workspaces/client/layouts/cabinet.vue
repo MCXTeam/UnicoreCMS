@@ -16,12 +16,12 @@
       </div>
       <div class="d-flex align-items-center p-2">
         <Avatar class="rounded shadow">
-          <SkinView2D class="rounded" :width="32" :height="32" :skin="$auth.user.skin" />
+          <SkinView2D class="rounded" :width="32" :height="32" :skin="$auth.user?.skin" />
         </Avatar>
         <div class="ms-3">
-          <h4 class="d-block d-lg-none m-0">{{ $auth.user.username }}</h4>
-          <h4 class="d-none d-lg-block m-0">Привет, {{ $auth.user.username }}</h4>
-          <h5 class="m-0">Баланс: {{ $utils.formatCurrency('real', $auth.user.real) }}</h5>
+          <h4 class="d-block d-lg-none m-0">{{ $auth.user?.username }}</h4>
+          <h4 class="d-none d-lg-block m-0">Привет, {{ $auth.user?.username }}</h4>
+          <h5 class="m-0">Баланс: {{ $utils.formatCurrency('real', $auth.user?.real) }}</h5>
         </div>
         <Button @click="$unicore.logout()" text severity="danger" size="large" class="ms-2 d-none d-lg-block">
           <i class="bx bx-exit"></i>
@@ -56,11 +56,11 @@
         >
         <div class="mt-auto d-flex align-items-center justify-content-between">
           <Avatar>
-            <SkinView2D class="rounded" :width="48" :height="48" :skin="$auth.user.skin" />
+            <SkinView2D class="rounded" :width="48" :height="48" :skin="$auth.user?.skin" />
           </Avatar>
           <div class="d-flex flex-column justify-content-center">
-            <h4 class="m-0">{{ $auth.user.username }}</h4>
-            <h5 class="m-0">Баланс: {{ $utils.formatCurrency('real', $auth.user.real) }}</h5>
+            <h4 class="m-0">{{ $auth.user?.username }}</h4>
+            <h5 class="m-0">Баланс: {{ $utils.formatCurrency('real', $auth.user?.real) }}</h5>
           </div>
           <Avatar style="cursor: pointer" @click="$unicore.logout()">
             <i class="bx bx-power-off"></i>
@@ -98,7 +98,7 @@
               <NuxtLink class="no-exact" to="/players/banlist"> <i class="bx bxs-shield-alt-2"></i> Банлист </NuxtLink>
             </div>
           </div>
-          <component v-if="storeSidebar" :is="storeSidebar.component" v-bind="storeSidebar.payload" />
+          <component v-if="storeSidebarComponent" :is="storeSidebarComponent" v-bind="storeSidebar?.payload" />
         </div>
         <div class="col-xl-9 pe-xl-5">
           <div class="panel px-0 py-4">
@@ -111,8 +111,18 @@
   </div>
 </template>
 
-<script setup>
-import { useUiStore } from '~/stores/ui'
+<script setup lang="ts">
+import type { Component } from 'vue'
+import CartSidebar from '~/components/CartSidebar.vue'
+import StoreProductsSidebar from '~/components/StoreProductsSidebar.vue'
+import WarehouseSidebar from '~/components/WarehouseSidebar.vue'
+import { useUiStore, type StoreSidebarName } from '~/stores/ui'
+
+const storeSidebars: Record<StoreSidebarName, Component> = {
+  CartSidebar,
+  StoreProductsSidebar,
+  WarehouseSidebar,
+}
 
 const route = useRoute()
 const ui = useUiStore()
@@ -120,6 +130,7 @@ const ui = useUiStore()
 const activeSidebar = ref(false)
 const name = computed(() => String(route.meta.title || ''))
 const storeSidebar = computed(() => ui.storeSidebar)
+const storeSidebarComponent = computed(() => (storeSidebar.value ? storeSidebars[storeSidebar.value.component] : null))
 
 useHead({ title: 'Личный кабинет' })
 
