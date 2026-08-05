@@ -1,4 +1,4 @@
-import { IsDefined, IsInt, IsString, Max, Min } from 'class-validator';
+import { IsDefined, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 
 export class RconInput {
   @IsDefined()
@@ -11,7 +11,7 @@ export class RconInput {
   @Max(65535)
   port: number;
 
-  @IsDefined()
+  @IsOptional()
   @IsString()
-  password: string;
+  password?: string;
 }

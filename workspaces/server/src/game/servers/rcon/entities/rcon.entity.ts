@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
 import { Server } from '../../entities/server.entity';
 
@@ -9,6 +10,7 @@ export class RCON {
   @Column({ name: 'port' })
   port: number;
 
+  @Exclude()
   @Column({ name: 'password' })
   password: string;
 

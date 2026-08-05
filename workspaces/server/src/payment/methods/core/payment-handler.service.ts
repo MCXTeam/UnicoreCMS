@@ -47,7 +47,7 @@ export class PaymentHandlerService {
 
     let credit = payment.amount;
 
-    if (bonus && bonus.bonus > 0) credit += (payment.amount * 100) / bonus.bonus;
+    if (bonus && bonus.bonus > 0) credit += (payment.amount * bonus.bonus) / 100;
 
     await this.usersRepo.increment({ uuid: payment.user.uuid }, 'real', credit);
     await this.historyService.create(HistoryType.Payment, payment.ip, payment.user, payment);

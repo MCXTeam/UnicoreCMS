@@ -337,6 +337,7 @@
                       :feedback="false"
                       toggleMask
                       inputClass="w-full"
+                      placeholder="Оставьте пустым, чтобы не менять"
                       @update:modelValue="rconTest.ok = null"
                     />
                   </div>
@@ -655,19 +656,13 @@ export default {
       }
     },
     async testRcon() {
-      if (!this.server.rcon || !this.server.rcon.host || !this.server.rcon.password) {
-        this.rconTest = { loading: false, ok: false, message: 'Заполните хост и пароль' }
+      if (!this.server.id) {
+        this.rconTest = { loading: false, ok: false, message: 'Сначала сохраните сервер' }
         return
       }
       this.rconTest = { loading: true, ok: null, message: null }
       try {
-        const res = await this.$api
-          .post('/rcon/test', {
-            host: this.server.rcon.host,
-            port: this.server.rcon.port || 25575,
-            password: this.server.rcon.password,
-          })
-          .then((r) => r.data)
+        const res = await this.$api.post(`/rcon/${this.server.id}/test`).then((r) => r.data)
         this.rconTest = { loading: false, ok: res.ok, message: res.ok ? 'Соединение успешно' : res.error || 'Ошибка соединения' }
       } catch {
         this.rconTest = { loading: false, ok: false, message: 'Ошибка соединения' }

@@ -70,7 +70,7 @@ export class ServersService {
       server.rcon = new RCON();
       server.rcon.host = input.rcon.host;
       server.rcon.port = input.rcon.port;
-      server.rcon.password = input.rcon.password;
+      server.rcon.password = input.rcon.password ?? '';
     }
 
     server.mods = await this.modsRepository.findBy({
@@ -107,7 +107,7 @@ export class ServersService {
       }
       server.rcon.host = input.rcon.host;
       server.rcon.port = input.rcon.port;
-      server.rcon.password = input.rcon.password;
+      if (input.rcon.password) server.rcon.password = input.rcon.password;
     }
 
     server.mods = await this.modsRepository.findBy({

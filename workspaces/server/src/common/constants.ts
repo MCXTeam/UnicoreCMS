@@ -19,5 +19,9 @@ export const RCON_MAX_ATTEMPTS = 8;
 export const RCON_BACKOFF_BASE_MS = 30_000;
 export const RCON_BACKOFF_MAX_MS = 30 * 60_000;
 export const RCON_BATCH_LIMIT = 200;
+export const RCON_TEST_TIMEOUT_MS = 5000;
 
 export const VK_LINK_PREFIX = 'https://vk.com/';
+
+export const PRICE_MIN = 0;
+export const BONUS_MAX_PERCENT = 100;

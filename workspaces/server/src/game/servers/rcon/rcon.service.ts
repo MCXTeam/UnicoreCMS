@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Rcon } from 'rcon-client';
 import { RCON } from './entities/rcon.entity';
+import { RCON_TEST_TIMEOUT_MS } from 'src/common/constants';
 
 export interface RconTestResult {
   ok: boolean;
@@ -80,12 +81,15 @@ export class RconService implements OnModuleDestroy {
     return responses;
   }
 
-  async test(host: string, port: number, password: string): Promise<RconTestResult> {
+  async test(serverId: string): Promise<RconTestResult> {
+    const creds = await this.getCreds(serverId);
+    if (!creds) return { ok: false, error: `RCON credentials are not configured for server "${serverId}"` };
+
     const started = Date.now();
     let client: Rcon | undefined;
 
     try {
-      client = await Rcon.connect({ host, port, password, timeout: 5000 });
+      client = await Rcon.connect({ host: creds.host, port: creds.port, password: creds.password, timeout: RCON_TEST_TIMEOUT_MS });
       return { ok: true, latency: Date.now() - started };
     } catch (error: any) {
       return { ok: false, error: error?.message || String(error) };
