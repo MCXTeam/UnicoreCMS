@@ -19,7 +19,7 @@
           <Column sortable field="secret" header="Ключ" :styles="{ width: '8rem' }"></Column>
           <Column sortable field="created" header="Создан" :styles="{ width: '8rem' }">
             <template #body="slotProps">
-              {{ $moment(slotProps.data.created).local().format('MM/DD/YYYY HH:mm:ss') }}
+              {{ $moment(slotProps.data.created).format('MM/DD/YYYY HH:mm:ss') }}
             </template>
           </Column>
           <Column :styles="{ width: '12rem' }">

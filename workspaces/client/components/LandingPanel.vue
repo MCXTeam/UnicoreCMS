@@ -12,18 +12,18 @@
           </div>
         </div>
         <div class="tab-panel w-100">
-          <Button as="NuxtLink" to="/cabinet" text class="m-0 w-full" size="large" label="Личный кабинет" />
-          <Button as="NuxtLink" to="/store" text class="m-0 w-full" size="large" label="Магазин" />
-          <Button as="NuxtLink" to="/players" text class="m-0 w-full" size="large" label="Игроки" />
+          <Button :as="NuxtLink" to="/cabinet" text class="m-0 w-full" size="large" label="Личный кабинет" />
+          <Button :as="NuxtLink" to="/store" text class="m-0 w-full" size="large" label="Магазин" />
+          <Button :as="NuxtLink" to="/players" text class="m-0 w-full" size="large" label="Игроки" />
           <Button @click="$unicore.logout()" text severity="danger" class="m-0 w-full" size="large" label="Выйти из системы" />
         </div>
       </div>
       <div v-else class="panel d-flex flex-column align-items-center py-4 mb-5">
         <h2 class="mb-4 mt-0"><i class="bx bx-key"></i> Авторизация</h2>
-        <Button as="NuxtLink" to="/auth" size="large" class="px-4" label="Войти" />
+        <Button :as="NuxtLink" to="/auth" size="large" class="px-4" label="Войти" />
         <div class="d-flex mt-3 justify-content-center gap-2">
-          <Button as="NuxtLink" to="/auth/register" text size="small" class="m-0" label="Регистрация" />
-          <Button as="NuxtLink" to="/auth/reset" text size="small" class="m-0" label="Сбросить пароль" />
+          <Button :as="NuxtLink" to="/auth/register" text size="small" class="m-0" label="Регистрация" />
+          <Button :as="NuxtLink" to="/auth/reset" text size="small" class="m-0" label="Сбросить пароль" />
         </div>
       </div>
     </ClientOnly>
@@ -32,7 +32,7 @@
       <img src="/images/chest-minecraft.gif" height="180px" />
       <p class="mb-3">Голосуй за нас и получай приятные бонусы: игровую валюту, кейсы, предметы!</p>
       <div class="d-flex">
-        <Button as="NuxtLink" to="/cabinet/gifts" text class="m-0" size="large" label="Голосовать" />
+        <Button :as="NuxtLink" to="/cabinet/gifts" text class="m-0" size="large" label="Голосовать" />
       </div>
     </div>
     <h2 class="mt-0">Серверы</h2>
@@ -63,10 +63,10 @@
         <p class="m-0">
           Общий онлайн: <b><CountTo :startVal="0" :endVal="onlines.total.online" :duration="1000" /></b>
         </p>
-        <p class="m-0" v-tooltip.top="$moment(onlines.total.records.today.created).local().format('D MMMM YYYY, HH:mm')">
+        <p class="m-0" v-tooltip.top="$moment(onlines.total.records.today.created).format('D MMMM YYYY, HH:mm')">
           Рекорд за сегодня: <b><CountTo :startVal="0" :endVal="onlines.total.records.today.online" :duration="1000" /></b>
         </p>
-        <p class="m-0" v-tooltip.top="$moment(onlines.total.records.absolute.created).local().format('D MMMM YYYY, HH:mm')">
+        <p class="m-0" v-tooltip.top="$moment(onlines.total.records.absolute.created).format('D MMMM YYYY, HH:mm')">
           Рекорд за всё время: <b><CountTo :startVal="0" :endVal="onlines.total.records.absolute.online" :duration="1000" /></b>
         </p>
       </div>
@@ -103,6 +103,8 @@
 </template>
 
 <script setup lang="ts">
+import { NuxtLink } from '#components'
+
 defineProps({
   config: {
     type: Object,

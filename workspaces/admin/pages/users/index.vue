@@ -53,7 +53,7 @@
           <Column field="email" header="Email" sortable></Column>
           <Column field="created" header="Дата регистрации" sortable>
             <template #body="slotProps">
-              {{ $moment(slotProps.data.created).local().format('MM/DD/YYYY HH:mm:ss') }}
+              {{ $moment(slotProps.data.created).format('MM/DD/YYYY HH:mm:ss') }}
             </template>
           </Column>
           <Column field="roles" header="Роли">

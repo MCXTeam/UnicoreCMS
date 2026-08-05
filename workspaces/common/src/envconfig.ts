@@ -1,12 +1,15 @@
 import { from } from "env-var";
 import { config } from "dotenv";
 import { envFilePath, ports } from "./ports";
+import { DEFAULT_TIMEZONE, isValidTimezone } from "./timezone";
 
 const env = from(process.env);
 config({ path: envFilePath });
 
 export interface EnvConfig {
   baseurl: string;
+  adminBaseurl: string;
+  timezone: string;
   devseed: boolean;
   sitename: string;
   frontendPort: number;
@@ -90,9 +93,46 @@ export interface EnvConfig {
   colorModeFallback: string;
 }
 
+const baseurl = env.get("BASEURL").required().asString();
+
+const originWithPort = (url: string, port: number): string => {
+  try {
+    const parsed = new URL(url);
+    parsed.port = String(port);
+    return parsed.origin;
+  } catch {
+    return "";
+  }
+};
+
+const adminBaseurl =
+  env.get("ADMIN_BASEURL").asString() ||
+  originWithPort(baseurl, ports.adminPort);
+
+const explicitCorsOrigins = env
+  .get("CORS_ORIGINS")
+  .default("")
+  .asString()
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+const timezone = env
+  .get("TIMEZONE")
+  .default(DEFAULT_TIMEZONE)
+  .asString()
+  .trim();
+
+if (!isValidTimezone(timezone))
+  throw new Error(
+    `TIMEZONE="${timezone}" is not a valid IANA timezone (e.g. UTC, Europe/Moscow).`,
+  );
+
 export const envConfig: EnvConfig = {
   // Хост приложения
-  baseurl: env.get("BASEURL").required().asString(),
+  baseurl,
+  adminBaseurl,
+  timezone,
   devseed: env.get("DEV_SEED").default(0).asBool(),
 
   sitename: env.get("SITENAME").default("UnicoreCMS").asString(),
@@ -128,13 +168,9 @@ export const envConfig: EnvConfig = {
     if (/^\d+$/.test(raw)) return Number(raw);
     return raw;
   })(),
-  corsOrigins: env
-    .get("CORS_ORIGINS")
-    .default("")
-    .asString()
-    .split(",")
-    .map((o) => o.trim())
-    .filter(Boolean),
+  corsOrigins: explicitCorsOrigins.length
+    ? explicitCorsOrigins
+    : [...new Set([baseurl, adminBaseurl].filter(Boolean))],
 
   // RECAPTHA
   recaptchaSecret: env.get("RECAPTCHA_SECRET").default("").asString(),

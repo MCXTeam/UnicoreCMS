@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { addTransactionalDataSource } from 'typeorm-transactional';
 import { envConfig } from 'unicore-common';
+import { enforceSessionTimezone } from './common/database';
 import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
 import { GameModule } from './game/game.module';
@@ -44,7 +45,9 @@ export class AppLoggerMiddleware implements NestMiddleware {
       useFactory: () => ormconfig,
       dataSourceFactory: async (options) => {
         if (!options) throw new Error('Invalid TypeORM data source options');
-        return addTransactionalDataSource(new DataSource(options));
+        const dataSource = addTransactionalDataSource(new DataSource(options));
+        await dataSource.initialize();
+        return enforceSessionTimezone(dataSource);
       },
     }),
     CacheModule.register({

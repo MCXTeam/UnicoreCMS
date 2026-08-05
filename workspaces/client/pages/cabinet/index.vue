@@ -54,11 +54,11 @@
           </tr>
           <tr>
             <td>Регистрация</td>
-            <td v-text="$moment($auth.user.created).local().format('D MMMM YYYY, HH:mm')" />
+            <td v-text="$moment($auth.user.created).format('D MMMM YYYY, HH:mm')" />
           </tr>
           <tr>
             <td>Стаж аккаунта</td>
-            <td v-text="$moment.duration($moment().local() - $moment($auth.user.created).local()).format()" />
+            <td v-text="$moment.duration($moment() - $moment($auth.user.created)).format()" />
           </tr>
           <tr v-if="inviter">
             <td>Вас пригласил</td>
@@ -74,7 +74,7 @@
         <p>Информация об активных блокировках аккаунта, при блокировке вам недоступны некоторые разделы сайта и доступ к серверам.</p>
         <p v-if="!$auth.user.ban" class="text-success">Все круто, твой аккаунт не в бане!</p>
         <p v-if="$auth.user.ban && $auth.user.ban.expires" class="text-danger">
-          Вы заблокированы до {{ $moment($auth.user.expires).local().format('DD.MM.YYYY, HH:mm:ss') }}!
+          Вы заблокированы до {{ $moment($auth.user.expires).format('DD.MM.YYYY, HH:mm:ss') }}!
         </p>
         <p v-if="$auth.user.ban && !$auth.user.ban.expires" class="text-danger">Вы заблокированы навсегда!</p>
       </div>

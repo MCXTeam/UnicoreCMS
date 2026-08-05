@@ -26,10 +26,10 @@
         <template #body="{ data }"> {{ data.ip }} </template>
       </Column>
       <Column headerStyle="width: 20%" header="Последняя активность">
-        <template #body="{ data }"> {{ $moment(data.updated).local().format('D MMMM YYYY, HH:mm:ss') }} </template>
+        <template #body="{ data }"> {{ $moment(data.updated).format('D MMMM YYYY, HH:mm:ss') }} </template>
       </Column>
       <Column headerStyle="width: 20%" header="Создан">
-        <template #body="{ data }"> {{ $moment(data.created).local().format('D MMMM YYYY, HH:mm:ss') }} </template>
+        <template #body="{ data }"> {{ $moment(data.created).format('D MMMM YYYY, HH:mm:ss') }} </template>
       </Column>
       <Column headerStyle="width: 10%">
         <template #body="{ data }">

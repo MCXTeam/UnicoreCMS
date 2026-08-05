@@ -46,7 +46,7 @@
           <Column field="title" header="Название" sortable />
           <Column field="created" header="Дата создания" sortable>
             <template #body="slotProps">
-              {{ $moment(slotProps.data.created).local().format('D MMMM YYYY, HH:mm') }}
+              {{ $moment(slotProps.data.created).format('D MMMM YYYY, HH:mm') }}
             </template>
           </Column>
           <Column :styles="{ width: '12rem' }">

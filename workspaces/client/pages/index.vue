@@ -16,7 +16,7 @@
           <div class="d-flex justify-content-between">
             <a v-if="news_.link" :href="news_.link" target="_blank">Читать в VK</a>
             <NuxtLink v-else :to="`/news/${news_.id}`">Подробнее</NuxtLink>
-            <span class="text-break" v-text="$moment(news_.created).local().format('D MMMM YYYY, HH:mm')" />
+            <span class="text-break" v-text="$moment(news_.created).format('D MMMM YYYY, HH:mm')" />
           </div>
         </div>
       </div>

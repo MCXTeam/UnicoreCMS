@@ -11,7 +11,7 @@ import { ASCII_NAME } from '@common';
 import * as clc from 'cli-color';
 import { initializeTransactionalContext } from 'typeorm-transactional';
 
-process.env.TZ = 'UTC';
+process.env.TZ = envConfig.timezone;
 
 async function bootstrap() {
   console.log(
@@ -46,7 +46,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.useGlobalFilters(new EntityNotFoundFilter());
   app.enableCors({
-    origin: envConfig.corsOrigins.length ? envConfig.corsOrigins : [envConfig.baseurl],
+    origin: envConfig.corsOrigins,
     credentials: true,
   });
 

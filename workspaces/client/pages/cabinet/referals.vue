@@ -44,7 +44,7 @@
       <h3 class="mb-3 mt-4">Приглашённые вами игроки</h3>
       <DataTable class="no-overflow-table large-table" :value="referals">
         <Column header="Дата">
-          <template #body="{ data }"> {{ $moment(data.user.created).local().format('DD.MM.YYYY, HH:mm:ss') }} </template>
+          <template #body="{ data }"> {{ $moment(data.user.created).format('DD.MM.YYYY, HH:mm:ss') }} </template>
         </Column>
         <Column headerStyle="width: 35%" header="Логин">
           <template #body="{ data }">

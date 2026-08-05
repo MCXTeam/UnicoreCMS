@@ -28,7 +28,7 @@
         @page="onPage($event)"
       >
         <Column style="max-width: 200px" header="Дата">
-          <template #body="{ data }"> {{ $moment(data.created).local().format('D MMMM YYYY, HH:mm:ss') }} </template>
+          <template #body="{ data }"> {{ $moment(data.created).format('D MMMM YYYY, HH:mm:ss') }} </template>
         </Column>
         <Column v-if="history_type != 'payment'" header="IP">
           <template #body="{ data }"

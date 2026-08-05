@@ -48,7 +48,7 @@
           <template #body="{ data }">{{ data.total }}</template>
         </Column>
         <Column header="Последний голос">
-          <template #body="{ data }">{{ $moment(data.updated).local().format('DD.MM.YYYY, HH:mm:ss') }}</template>
+          <template #body="{ data }">{{ $moment(data.updated).format('DD.MM.YYYY, HH:mm:ss') }}</template>
         </Column>
         <template #empty>
           <span>Нет результатов</span>

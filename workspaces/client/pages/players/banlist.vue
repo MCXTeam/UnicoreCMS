@@ -28,11 +28,11 @@
           </template>
         </Column>
         <Column header="Дата бана" headerStyle="width: 20%">
-          <template #body="{ data }">{{ $moment(data.created).local().format('DD.MM.YYYY, HH:mm:ss') }}</template>
+          <template #body="{ data }">{{ $moment(data.created).format('DD.MM.YYYY, HH:mm:ss') }}</template>
         </Column>
         <Column header="Дата разбана" headerStyle="width: 20%">
           <template #body="{ data }">{{
-            data.expires ? $moment(data.expires).local().format('DD.MM.YYYY, HH:mm:ss') : 'Никогда'
+            data.expires ? $moment(data.expires).format('DD.MM.YYYY, HH:mm:ss') : 'Никогда'
           }}</template>
         </Column>
         <Column header="Модератор" headerStyle="width: 25%">

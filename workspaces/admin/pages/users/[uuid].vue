@@ -549,7 +549,7 @@
               </Column>
               <Column field="expired" header="Истекает" sortable>
                 <template #body="slotProps">
-                  {{ slotProps.data.expired ? $moment(slotProps.data.expired).local().format('D MMMM YYYY, HH:mm') : 'Никогда' }}
+                  {{ slotProps.data.expired ? $moment(slotProps.data.expired).format('D MMMM YYYY, HH:mm') : 'Никогда' }}
                 </template>
               </Column>
               <Column :styles="{ width: '4rem' }">
@@ -584,7 +584,7 @@
               <Column field="permission.name" header="Право" sortable />
               <Column field="expired" header="Истекает" sortable>
                 <template #body="slotProps">
-                  {{ slotProps.data.expired ? $moment(slotProps.data.expired).local().format('D MMMM YYYY, HH:mm') : 'Никогда' }}
+                  {{ slotProps.data.expired ? $moment(slotProps.data.expired).format('D MMMM YYYY, HH:mm') : 'Никогда' }}
                 </template>
               </Column>
               <Column :styles="{ width: '4rem' }">
@@ -761,7 +761,7 @@ export default {
       this.rolesUser = this.roles.filter((role) => this.user.roles.find((ur) => ur.id == role.id)).map((r) => r.id)
 
       if (this.user.ban) {
-        if (this.user.ban.expires) this.ban_model.expires = this.$moment(this.user.ban.expires).local().toDate()
+        if (this.user.ban.expires) this.ban_model.expires = this.$moment(this.user.ban.expires).toDate()
         else this.ban_model.expires = null
         this.ban_model.reason = this.user.ban.reason
       } else {

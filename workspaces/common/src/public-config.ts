@@ -1,5 +1,6 @@
 import { from } from "env-var";
 import { ports } from "./ports";
+import { DEFAULT_TIMEZONE } from "./timezone";
 
 const env = from(
   typeof process !== "undefined" && process.env ? process.env : {},
@@ -7,6 +8,7 @@ const env = from(
 
 export interface PublicConfig {
   baseurl: string;
+  timezone: string;
   apiBaseurl: string;
   sitename: string;
   frontendPort: number;
@@ -27,6 +29,7 @@ export interface PublicConfig {
 
 export const publicConfig: PublicConfig = {
   baseurl: env.get("BASEURL").default("http://127.0.0.1:3000").asString(),
+  timezone: env.get("TIMEZONE").default(DEFAULT_TIMEZONE).asString().trim(),
   apiBaseurl: env
     .get("API_BASEURL")
     .default("http://127.0.0.1:5000")

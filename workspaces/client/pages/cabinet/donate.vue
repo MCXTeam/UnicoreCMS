@@ -156,7 +156,7 @@
             </Column>
             <Column header="Истекает">
               <template #body="{ data }">{{
-                data.expired ? $moment(data.expired).local().format('D MMMM YYYY, HH:mm') : 'Никогда'
+                data.expired ? $moment(data.expired).format('D MMMM YYYY, HH:mm') : 'Никогда'
               }}</template>
             </Column>
           </DataTable>
@@ -238,7 +238,7 @@
             </Column>
             <Column header="Истекает">
               <template #body="{ data }">{{
-                data.expired ? $moment(data.expired).local().format('D MMMM YYYY, HH:mm') : 'Никогда'
+                data.expired ? $moment(data.expired).format('D MMMM YYYY, HH:mm') : 'Никогда'
               }}</template>
             </Column>
           </DataTable>

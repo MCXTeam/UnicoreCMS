@@ -59,6 +59,7 @@ export default defineNuxtConfig({
       apiBaseurl: publicConfig.apiBaseurl,
       baseurl: publicConfig.baseurl,
       sitename: publicConfig.sitename,
+      timezone: publicConfig.timezone,
       recaptchaPublic: publicConfig.recaptchaPublic,
       realDecimals: publicConfig.realDecimals,
       virtualDecimals: publicConfig.virtualDecimals,
@@ -101,6 +102,14 @@ export default defineNuxtConfig({
     shim: false,
     tsConfig: {
       exclude: ['./dist'],
+    },
+  },
+
+  vite: {
+    resolve: {
+      alias: {
+        'moment-timezone': 'moment-timezone/builds/moment-timezone-with-data-10-year-range',
+      },
     },
   },
 

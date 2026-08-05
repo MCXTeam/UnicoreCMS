@@ -22,11 +22,11 @@
           </tr>
           <tr>
             <td>Регистрация</td>
-            <td v-text="$moment(user.created).local().format('D MMMM YYYY, HH:mm')" />
+            <td v-text="$moment(user.created).format('D MMMM YYYY, HH:mm')" />
           </tr>
           <tr>
             <td>Стаж аккаунта</td>
-            <td v-text="$moment.duration($moment().local().diff($moment(user.created).local())).format()" />
+            <td v-text="$moment.duration($moment().diff($moment(user.created))).format()" />
           </tr>
           <tr>
             <td>Голосов за этот месяц</td>
@@ -63,7 +63,7 @@
         <h2 class="mb-3 mt-4">Приглашённые игроки</h2>
         <DataTable :value="user.referals" class="no-overflow-table">
           <Column header="Дата">
-            <template #body="{ data }">{{ $moment(data.user.created).local().format('DD.MM.YYYY, HH:mm:ss') }}</template>
+            <template #body="{ data }">{{ $moment(data.user.created).format('DD.MM.YYYY, HH:mm:ss') }}</template>
           </Column>
           <Column header="Логин" :style="{ width: '35%' }">
             <template #body="{ data }">

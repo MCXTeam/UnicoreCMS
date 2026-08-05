@@ -6,6 +6,7 @@ export default defineConfig({
     "src/public-config.ts",
     "src/envconfig.ts",
     "src/ports.ts",
+    "src/timezone.ts",
     "src/enums/index.ts",
     "src/issuance/index.ts",
     "src/validation/index.ts",

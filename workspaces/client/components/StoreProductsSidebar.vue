@@ -1,6 +1,6 @@
 <template>
   <div class="mb-4">
-    <Button as="NuxtLink" to="/store/products" size="large" class="mx-0 mb-5 server-changer w-full"
+    <Button :as="NuxtLink" to="/store/products" size="large" class="mx-0 mb-5 server-changer w-full"
       >Сменить сервер <i class="bx bx-server"></i
     ></Button>
 
@@ -25,6 +25,7 @@
 </template>
 
 <script setup lang="ts">
+import { NuxtLink } from '#components'
 import { useUiStore } from '~/stores/ui'
 
 const props = defineProps({

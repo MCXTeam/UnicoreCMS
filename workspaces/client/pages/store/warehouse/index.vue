@@ -27,7 +27,7 @@
             </div>
           </td>
           <td align="right">
-            <small v-text="$moment(whItem.updated).local().format('DD.MM.YYYY, HH.mm')" />
+            <small v-text="$moment(whItem.updated).format('DD.MM.YYYY, HH.mm')" />
             <h4 class="m-0">{{ whItem.amount }} шт.</h4>
           </td>
         </tr>

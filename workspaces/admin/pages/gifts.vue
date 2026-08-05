@@ -57,7 +57,7 @@
           </Column>
           <Column field="type" header="Активен до" sortable>
             <template #body="slotProps">
-              {{ slotProps.data.expires ? $moment(slotProps.data.expires).local().format('MM/DD/YYYY HH:mm:ss') : '∞' }}
+              {{ slotProps.data.expires ? $moment(slotProps.data.expires).format('MM/DD/YYYY HH:mm:ss') : '∞' }}
             </template>
           </Column>
           <Column :styles="{ width: '12rem' }">
@@ -358,7 +358,7 @@ export default {
         this.gift.type = this.types.find((type) => type.value == this.gift.type)
         this.gift.donate_group = this.donate_groups.find((group) => group.id == this.gift.donate_group?.id)
         this.gift.donate_permission = this.donate_permissions.find((perm) => perm.id == this.gift.donate_permission?.id)
-        if (this.gift.expires) this.gift.expires = this.$moment(this.gift.expires).local().toDate()
+        if (this.gift.expires) this.gift.expires = this.$moment(this.gift.expires).toDate()
       } else {
         this.gift = {
           id: null,

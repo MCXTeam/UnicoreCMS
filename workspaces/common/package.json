@@ -21,6 +21,11 @@
       "import": "./dist/ports.mjs",
       "require": "./dist/ports.js"
     },
+    "./timezone": {
+      "types": "./dist/timezone.d.ts",
+      "import": "./dist/timezone.mjs",
+      "require": "./dist/timezone.js"
+    },
     "./enums": {
       "types": "./dist/enums/index.d.ts",
       "import": "./dist/enums/index.mjs",

@@ -3,7 +3,7 @@
     <div v-if="news.image" class="news-image-full" :style="`background-image: url(${$pub.apiBaseurl}/${news.image})`"></div>
     <div v-else class="news-image-full" style="background-image: url(/images/news.jpg)"></div>
     <div class="mt-4" v-html="$sanitize(news.description)" />
-    <div class="d-flex justify-content-end mt-4" v-text="$moment(news.created).local().format('D MMMM YYYY, HH:mm')" />
+    <div class="d-flex justify-content-end mt-4" v-text="$moment(news.created).format('D MMMM YYYY, HH:mm')" />
   </div>
 </template>
 

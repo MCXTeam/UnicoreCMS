@@ -95,7 +95,7 @@
         >
           <Column field="date" header="Дата" style="width: 35%">
             <template #body="slotProps">
-              {{ $moment(slotProps.data.date).local().format('DD.MM.YYYY (dddd)') }}
+              {{ $moment(slotProps.data.date).format('DD.MM.YYYY (dddd)') }}
             </template>
           </Column>
           <Column field="amount" header="Доход" style="width: 35%">
@@ -212,7 +212,7 @@ export default {
   methods: {
     daysCharts() {
       const range = Array.from(
-        this.$moment.range(this.$moment().subtract(6, 'day').startOf('day').local(), this.$moment().local()).by('day'),
+        this.$moment.range(this.$moment().subtract(6, 'day').startOf('day'), this.$moment()).by('day'),
       )
       this.barData.labels = range.map((r) => r.format('dddd'))
       this.barData.datasets = []
@@ -247,7 +247,7 @@ export default {
     },
     monthsCharts() {
       const range = Array.from(
-        this.$moment.range(this.$moment().subtract(11, 'month').startOf('month').local(), this.$moment().local()).by('month'),
+        this.$moment.range(this.$moment().subtract(11, 'month').startOf('month'), this.$moment()).by('month'),
       )
       this.barData.labels = range.map((r) => r.format('MMMM'))
       this.barData.datasets = []
