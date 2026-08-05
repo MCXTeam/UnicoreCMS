@@ -10,6 +10,7 @@ export default defineConfig({
     "src/enums/index.ts",
     "src/issuance/index.ts",
     "src/validation/index.ts",
+    "src/sanitize.ts",
     "src/console/index.ts",
   ],
   format: ["cjs", "esm"],

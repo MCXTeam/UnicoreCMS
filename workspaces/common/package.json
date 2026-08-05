@@ -41,6 +41,11 @@
       "import": "./dist/validation/index.mjs",
       "require": "./dist/validation/index.js"
     },
+    "./sanitize": {
+      "types": "./dist/sanitize.d.ts",
+      "import": "./dist/sanitize.mjs",
+      "require": "./dist/sanitize.js"
+    },
     "./console": {
       "types": "./dist/console/index.d.ts",
       "import": "./dist/console/index.mjs",
@@ -55,17 +60,17 @@
   },
   "dependencies": {
     "cli-color": "^2.0.4",
-    "dotenv": "^17.2.1",
+    "dotenv": "^17.4.2",
     "env-var": "^7.5.0",
     "fast-safe-stringify": "^2.1.1",
     "logform": "^2.7.0",
     "nest-winston": "^1.10.2",
-    "validator": "^13.15.15",
+    "validator": "^13.15.35",
     "winston": "^3.19.0"
   },
   "devDependencies": {
     "@types/cli-color": "^2.0.6",
-    "@types/node": "^22.10.2",
-    "tsup": "^8.5.0"
+    "@types/node": "^22.20.1",
+    "tsup": "^8.5.1"
   }
 }
