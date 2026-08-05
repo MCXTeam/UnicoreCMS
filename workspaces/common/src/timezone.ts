@@ -1,5 +1,3 @@
-export const DEFAULT_TIMEZONE = "UTC";
-
 export const isValidTimezone = (timezone: string): boolean => {
   try {
     new Intl.DateTimeFormat("en-US", { timeZone: timezone });

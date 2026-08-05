@@ -9,7 +9,7 @@ import { IResolvedOwnerResource, IResolvedTargetResource, ISharedAttachmentPaylo
 import { getById, getPostLink } from './utils';
 import { replaceAsync, StorageManager } from '@common';
 import { WebhookType } from 'src/admin/webhook/enums/webhook-type.enum';
-import { VK_LINK_PREFIX } from './constants/vk-link-prefix';
+import { VK_LINK_PREFIX } from 'src/common/constants';
 import { EmbedBuilder, WebhookClient } from 'discord.js';
 
 @Injectable()

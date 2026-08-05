@@ -1,14 +1,16 @@
 import { existsSync, readFileSync } from "fs";
 import { dirname, resolve } from "path";
 import { config, parse } from "dotenv";
-
-export const DEFAULT_CLIENT_PORT = 3000;
-export const DEFAULT_ADMIN_PORT = 4000;
-export const DEFAULT_BACKEND_PORT = 5000;
-
-export const CLIENT_PORT_KEYS = ["CLIENT_PORT"];
-export const ADMIN_PORT_KEYS = ["ADMIN_PORT"];
-export const BACKEND_PORT_KEYS = ["BACKEND_PORT", "SERVER_PORT"];
+import {
+  ADMIN_PORT_KEYS,
+  BACKEND_PORT_KEYS,
+  CLIENT_PORT_KEYS,
+  DEFAULT_ADMIN_PORT,
+  DEFAULT_BACKEND_PORT,
+  DEFAULT_CLIENT_PORT,
+  MAX_PORT,
+  MIN_PORT,
+} from "./constants";
 
 const processEnv: NodeJS.ProcessEnv =
   typeof process !== "undefined" && process.env ? process.env : {};
@@ -50,7 +52,9 @@ const envFile = readEnvFile();
 const toPort = (value: string | undefined): number | undefined => {
   if (!value) return undefined;
   const port = Number(value.trim());
-  return Number.isInteger(port) && port > 0 && port <= 65535 ? port : undefined;
+  return Number.isInteger(port) && port >= MIN_PORT && port <= MAX_PORT
+    ? port
+    : undefined;
 };
 
 const readPort = (keys: string[]): number | undefined => {

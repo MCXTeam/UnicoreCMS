@@ -1,10 +1,10 @@
+import { VK_LINK_PREFIX } from 'src/common/constants';
+
 export interface IGetPostLinkOptions {
   owner_id: number;
   id: number;
 }
 
-export const LINK_PREFIX = 'https://vk.com/';
-
 export function getPostLink({ owner_id, id }: IGetPostLinkOptions): string {
-  return `${LINK_PREFIX}wall${owner_id}_${id}`;
+  return `${VK_LINK_PREFIX}wall${owner_id}_${id}`;
 }

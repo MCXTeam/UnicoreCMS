@@ -1,4 +1,4 @@
-export const IS_USERNAME = "isUsername";
+export { IS_USERNAME } from "../constants";
 
 /**
  * Проверяет, является ли строка логином.

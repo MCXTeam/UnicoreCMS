@@ -67,6 +67,7 @@
 </template>
 
 <script setup lang="ts">
+import { KIT_HIDE_DELAY_MS } from '~/constants'
 import { useUiStore } from '~/stores/ui'
 
 definePageMeta({ layout: 'landing' })
@@ -87,8 +88,6 @@ const donates = computed<any[]>(() => data.value.donates)
 
 useUiStore().setName(`Платные услуги ${server.value.name}`)
 useHead({ title: `Донат ${server.value.name}` })
-
-const KIT_HIDE_DELAY = 250
 
 const kit_active = ref<{ payload: any; donate_id: any }>({ payload: null, donate_id: null })
 const kit_pinned = ref(false)
@@ -120,7 +119,7 @@ function viewKitDestroy() {
   kitHideTimer = setTimeout(() => {
     kit_active.value = { payload: null, donate_id: null }
     kitHideTimer = null
-  }, KIT_HIDE_DELAY)
+  }, KIT_HIDE_DELAY_MS)
 }
 
 function toggleKit(donate_id: any, kit_id: any) {

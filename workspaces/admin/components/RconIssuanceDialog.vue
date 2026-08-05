@@ -73,16 +73,7 @@
 
 <script>
 import { RCON_PLACEHOLDERS, RCON_PRESETS, renderTemplate, secondsToDuration } from 'unicore-common/issuance'
-
-const FIELD_MAP = {
-  give_item: { cfg: 'rcon_tpl_give_item', op: 'giveItem' },
-  group_add: { cfg: 'rcon_tpl_group_add', op: 'groupAdd' },
-  group_add_temp: { cfg: 'rcon_tpl_group_add_temp', op: 'groupAddTemp' },
-  group_remove: { cfg: 'rcon_tpl_group_remove', op: 'groupRemove' },
-  perm_set: { cfg: 'rcon_tpl_perm_set', op: 'permSet' },
-  perm_set_temp: { cfg: 'rcon_tpl_perm_set_temp', op: 'permSetTemp' },
-  perm_unset: { cfg: 'rcon_tpl_perm_unset', op: 'permUnset' },
-}
+import { RCON_FIELD_MAP } from '~/constants'
 
 export default {
   props: {
@@ -155,7 +146,7 @@ export default {
       const config = await this.$api.get('/config').then((res) => res.data)
       const map = this.$_.keyBy(config, 'key')
       this.preset = map['rcon_preset']?.value || 'luckperms'
-      for (const [key, meta] of Object.entries(FIELD_MAP)) {
+      for (const [key, meta] of Object.entries(RCON_FIELD_MAP)) {
         this.templates[key] = map[meta.cfg]?.value || ''
       }
     },
@@ -163,7 +154,7 @@ export default {
       const found = RCON_PRESETS.find((p) => p.id === this.preset)
       if (!found) return
       const vanilla = RCON_PRESETS.find((p) => p.id === 'vanilla')
-      for (const [key, meta] of Object.entries(FIELD_MAP)) {
+      for (const [key, meta] of Object.entries(RCON_FIELD_MAP)) {
         let value = found.ops[meta.op]
         if (meta.op === 'giveItem' && !value) value = vanilla?.ops.giveItem
         this.templates[key] = value || ''
@@ -182,7 +173,7 @@ export default {
       try {
         await this.$api.patch('/config', { key: 'rcon_preset', value: this.preset, type: 1 })
         await Promise.all(
-          Object.entries(FIELD_MAP).map(([key, meta]) =>
+          Object.entries(RCON_FIELD_MAP).map(([key, meta]) =>
             this.$api.patch('/config', { key: meta.cfg, value: this.templates[key] || '', type: 1 }),
           ),
         )

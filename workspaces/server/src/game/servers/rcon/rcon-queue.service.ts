@@ -4,11 +4,7 @@ import { IsNull, LessThanOrEqual, Repository } from 'typeorm';
 import { RconCommandStatus } from 'unicore-common';
 import { RconCommand } from './entities/rcon-command.entity';
 import { RconService } from './rcon.service';
-
-const MAX_ATTEMPTS = 8;
-const BACKOFF_BASE_MS = 30_000;
-const BACKOFF_MAX_MS = 30 * 60_000;
-const BATCH_LIMIT = 200;
+import { RCON_BACKOFF_BASE_MS, RCON_BACKOFF_MAX_MS, RCON_BATCH_LIMIT, RCON_MAX_ATTEMPTS } from 'src/common/constants';
 
 export interface EnqueueMeta {
   label?: string;
@@ -58,7 +54,7 @@ export class RconQueueService {
           { status: RconCommandStatus.Pending, nextAttempt: LessThanOrEqual(now) },
         ],
         order: { id: 'ASC' },
-        take: BATCH_LIMIT,
+        take: RCON_BATCH_LIMIT,
       });
 
       if (!pending.length) return;
@@ -87,11 +83,11 @@ export class RconQueueService {
             item.attempts += 1;
             item.error = error?.message || String(error);
 
-            if (item.attempts >= MAX_ATTEMPTS) {
+            if (item.attempts >= RCON_MAX_ATTEMPTS) {
               item.status = RconCommandStatus.Failed;
               this.logger.warn(`RCON command #${item.id} for server ${serverId} failed permanently: ${item.error}`);
             } else {
-              const delay = Math.min(BACKOFF_BASE_MS * 2 ** (item.attempts - 1), BACKOFF_MAX_MS);
+              const delay = Math.min(RCON_BACKOFF_BASE_MS * 2 ** (item.attempts - 1), RCON_BACKOFF_MAX_MS);
               item.nextAttempt = new Date(Date.now() + delay);
             }
 

@@ -105,10 +105,10 @@ importers:
         version: 0.7.39
       '@vueuse/nuxt':
         specifier: ^14.3.0
-        version: 14.3.0(magicast@0.5.3)(nuxt@3.21.8(@parcel/watcher@2.5.6)(@types/node@22.20.0)(@vue/compiler-sfc@3.5.39)(cac@6.7.14)(db0@0.3.4(mysql2@3.22.5(@types/node@22.20.0)))(esbuild@0.28.1)(ioredis@5.11.1)(magicast@0.5.3)(mysql2@3.22.5(@types/node@22.20.0))(rollup-plugin-visualizer@7.0.1(rollup@4.62.2))(rollup@4.62.2)(sass@1.101.0)(srvx@0.11.18)(terser@5.48.0)(typescript@5.9.3)(vite@7.3.3(@types/node@22.20.0)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(yaml@2.9.0))(vue-tsc@3.3.9(typescript@5.9.3))(webpack@5.108.3(esbuild@0.28.1)(postcss@8.5.16))(yaml@2.9.0))(vue@3.5.39(typescript@5.9.3))
+        version: 14.3.0(magicast@0.5.3)(nuxt@3.21.8(@parcel/watcher@2.5.6)(@types/node@22.20.0)(@vue/compiler-sfc@3.5.39)(cac@6.7.14)(db0@0.3.4(mysql2@3.22.5(@types/node@22.20.0)))(esbuild@0.28.1)(ioredis@5.11.1)(magicast@0.5.3)(mysql2@3.22.5(@types/node@22.20.0))(rollup-plugin-visualizer@7.0.1(rollup@4.62.2))(rollup@4.62.2)(sass@1.101.0)(terser@5.48.0)(typescript@5.9.3)(vite@7.3.3(@types/node@22.20.0)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(yaml@2.9.0))(vue-tsc@3.3.9(typescript@5.9.3))(webpack@5.108.3(esbuild@0.28.1))(yaml@2.9.0))(vue@3.5.39(typescript@5.9.3))
       nuxt:
         specifier: ^3.21.8
-        version: 3.21.8(@parcel/watcher@2.5.6)(@types/node@22.20.0)(@vue/compiler-sfc@3.5.39)(cac@6.7.14)(db0@0.3.4(mysql2@3.22.5(@types/node@22.20.0)))(esbuild@0.28.1)(ioredis@5.11.1)(magicast@0.5.3)(mysql2@3.22.5(@types/node@22.20.0))(rollup-plugin-visualizer@7.0.1(rollup@4.62.2))(rollup@4.62.2)(sass@1.101.0)(srvx@0.11.18)(terser@5.48.0)(typescript@5.9.3)(vite@7.3.3(@types/node@22.20.0)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(yaml@2.9.0))(vue-tsc@3.3.9(typescript@5.9.3))(webpack@5.108.3(esbuild@0.28.1)(postcss@8.5.16))(yaml@2.9.0)
+        version: 3.21.8(@parcel/watcher@2.5.6)(@types/node@22.20.0)(@vue/compiler-sfc@3.5.39)(cac@6.7.14)(db0@0.3.4(mysql2@3.22.5(@types/node@22.20.0)))(esbuild@0.28.1)(ioredis@5.11.1)(magicast@0.5.3)(mysql2@3.22.5(@types/node@22.20.0))(rollup-plugin-visualizer@7.0.1(rollup@4.62.2))(rollup@4.62.2)(sass@1.101.0)(terser@5.48.0)(typescript@5.9.3)(vite@7.3.3(@types/node@22.20.0)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(yaml@2.9.0))(vue-tsc@3.3.9(typescript@5.9.3))(webpack@5.108.3(esbuild@0.28.1))(yaml@2.9.0)
       prettier:
         specifier: ^3.4.2
         version: 3.9.4
@@ -129,7 +129,7 @@ importers:
         version: 4.0.1(magicast@0.5.3)
       '@nuxtjs/sitemap':
         specifier: ^8.2.2
-        version: 8.2.2(@nuxt/schema@3.21.8)(magicast@0.5.3)(nuxt@3.21.8(@parcel/watcher@2.5.6)(@types/node@22.20.0)(@vue/compiler-sfc@3.5.39)(cac@6.7.14)(db0@0.3.4(mysql2@3.22.5(@types/node@22.20.0)))(esbuild@0.28.1)(ioredis@5.11.1)(magicast@0.5.3)(mysql2@3.22.5(@types/node@22.20.0))(rollup-plugin-visualizer@7.0.1(rollup@4.62.2))(rollup@4.62.2)(sass@1.101.0)(terser@5.48.0)(typescript@5.9.3)(vite@7.3.3(@types/node@22.20.0)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(yaml@2.9.0))(vue-tsc@3.3.9(typescript@5.9.3))(webpack@5.108.3(esbuild@0.28.1))(yaml@2.9.0))(vite@7.3.3(@types/node@22.20.0)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(yaml@2.9.0))(vue@3.5.39(typescript@5.9.3))
+        version: 8.2.2(@nuxt/schema@3.21.8)(magicast@0.5.3)(nuxt@3.21.8(@parcel/watcher@2.5.6)(@types/node@22.20.0)(@vue/compiler-sfc@3.5.39)(cac@6.7.14)(db0@0.3.4(mysql2@3.22.5(@types/node@22.20.0)))(esbuild@0.28.1)(ioredis@5.11.1)(magicast@0.5.3)(mysql2@3.22.5(@types/node@22.20.0))(rollup-plugin-visualizer@7.0.1(rollup@4.62.2))(rollup@4.62.2)(sass@1.101.0)(srvx@0.11.18)(terser@5.48.0)(typescript@5.9.3)(vite@7.3.3(@types/node@22.20.0)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(yaml@2.9.0))(vue-tsc@3.3.9(typescript@5.9.3))(webpack@5.108.3(esbuild@0.28.1)(postcss@8.5.16))(yaml@2.9.0))(vite@7.3.3(@types/node@22.20.0)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(yaml@2.9.0))(vue@3.5.39(typescript@5.9.3))
       '@primevue/themes':
         specifier: ^4.5.4
         version: 4.5.4
@@ -229,9 +229,6 @@ importers:
       vue3-count-to:
         specifier: ^1.1.2
         version: 1.1.2(vue@3.5.39(typescript@5.9.3))
-      yandex-metrika-module-nuxt3:
-        specifier: ^1.5.3
-        version: 1.5.3(magicast@0.5.3)
     devDependencies:
       '@pinia/nuxt':
         specifier: ^0.11.3
@@ -256,10 +253,10 @@ importers:
         version: 0.7.39
       '@vueuse/nuxt':
         specifier: ^14.3.0
-        version: 14.3.0(magicast@0.5.3)(nuxt@3.21.8(@parcel/watcher@2.5.6)(@types/node@22.20.0)(@vue/compiler-sfc@3.5.39)(cac@6.7.14)(db0@0.3.4(mysql2@3.22.5(@types/node@22.20.0)))(esbuild@0.28.1)(ioredis@5.11.1)(magicast@0.5.3)(mysql2@3.22.5(@types/node@22.20.0))(rollup-plugin-visualizer@7.0.1(rollup@4.62.2))(rollup@4.62.2)(sass@1.101.0)(terser@5.48.0)(typescript@5.9.3)(vite@7.3.3(@types/node@22.20.0)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(yaml@2.9.0))(vue-tsc@3.3.9(typescript@5.9.3))(webpack@5.108.3(esbuild@0.28.1))(yaml@2.9.0))(vue@3.5.39(typescript@5.9.3))
+        version: 14.3.0(magicast@0.5.3)(nuxt@3.21.8(@parcel/watcher@2.5.6)(@types/node@22.20.0)(@vue/compiler-sfc@3.5.39)(cac@6.7.14)(db0@0.3.4(mysql2@3.22.5(@types/node@22.20.0)))(esbuild@0.28.1)(ioredis@5.11.1)(magicast@0.5.3)(mysql2@3.22.5(@types/node@22.20.0))(rollup-plugin-visualizer@7.0.1(rollup@4.62.2))(rollup@4.62.2)(sass@1.101.0)(srvx@0.11.18)(terser@5.48.0)(typescript@5.9.3)(vite@7.3.3(@types/node@22.20.0)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(yaml@2.9.0))(vue-tsc@3.3.9(typescript@5.9.3))(webpack@5.108.3(esbuild@0.28.1)(postcss@8.5.16))(yaml@2.9.0))(vue@3.5.39(typescript@5.9.3))
       nuxt:
         specifier: ^3.21.8
-        version: 3.21.8(@parcel/watcher@2.5.6)(@types/node@22.20.0)(@vue/compiler-sfc@3.5.39)(cac@6.7.14)(db0@0.3.4(mysql2@3.22.5(@types/node@22.20.0)))(esbuild@0.28.1)(ioredis@5.11.1)(magicast@0.5.3)(mysql2@3.22.5(@types/node@22.20.0))(rollup-plugin-visualizer@7.0.1(rollup@4.62.2))(rollup@4.62.2)(sass@1.101.0)(terser@5.48.0)(typescript@5.9.3)(vite@7.3.3(@types/node@22.20.0)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(yaml@2.9.0))(vue-tsc@3.3.9(typescript@5.9.3))(webpack@5.108.3(esbuild@0.28.1))(yaml@2.9.0)
+        version: 3.21.8(@parcel/watcher@2.5.6)(@types/node@22.20.0)(@vue/compiler-sfc@3.5.39)(cac@6.7.14)(db0@0.3.4(mysql2@3.22.5(@types/node@22.20.0)))(esbuild@0.28.1)(ioredis@5.11.1)(magicast@0.5.3)(mysql2@3.22.5(@types/node@22.20.0))(rollup-plugin-visualizer@7.0.1(rollup@4.62.2))(rollup@4.62.2)(sass@1.101.0)(srvx@0.11.18)(terser@5.48.0)(typescript@5.9.3)(vite@7.3.3(@types/node@22.20.0)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(yaml@2.9.0))(vue-tsc@3.3.9(typescript@5.9.3))(webpack@5.108.3(esbuild@0.28.1)(postcss@8.5.16))(yaml@2.9.0)
       prettier:
         specifier: ^3.4.2
         version: 3.9.4
@@ -8137,9 +8134,6 @@ packages:
     engines: {node: '>= 14.6'}
     hasBin: true
 
-  yandex-metrika-module-nuxt3@1.5.3:
-    resolution: {integrity: sha512-1JIQb5CF1dh/ZGce5wt5Q2jNCqJLxKWisWo0h8Ee2UzndJIiRAdrADliIDXMD6u2JyJvGPyu3qozkTxPFOzxcw==}
-
   yargs-parser@18.1.3:
     resolution: {integrity: sha512-o50j0JeToy/4K6OZcaQmW6lyXXKhq7csREXcDwk2omFPJEwUNOVtJKvmDr9EI1fAJZUyZcRF7kxGBWmRXudrCQ==}
     engines: {node: '>=6'}
@@ -9748,14 +9742,14 @@ snapshots:
     transitivePeerDependencies:
       - magicast
 
-  '@nuxtjs/sitemap@8.2.2(@nuxt/schema@3.21.8)(magicast@0.5.3)(nuxt@3.21.8(@parcel/watcher@2.5.6)(@types/node@22.20.0)(@vue/compiler-sfc@3.5.39)(cac@6.7.14)(db0@0.3.4(mysql2@3.22.5(@types/node@22.20.0)))(esbuild@0.28.1)(ioredis@5.11.1)(magicast@0.5.3)(mysql2@3.22.5(@types/node@22.20.0))(rollup-plugin-visualizer@7.0.1(rollup@4.62.2))(rollup@4.62.2)(sass@1.101.0)(terser@5.48.0)(typescript@5.9.3)(vite@7.3.3(@types/node@22.20.0)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(yaml@2.9.0))(vue-tsc@3.3.9(typescript@5.9.3))(webpack@5.108.3(esbuild@0.28.1))(yaml@2.9.0))(vite@7.3.3(@types/node@22.20.0)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(yaml@2.9.0))(vue@3.5.39(typescript@5.9.3))':
+  '@nuxtjs/sitemap@8.2.2(@nuxt/schema@3.21.8)(magicast@0.5.3)(nuxt@3.21.8(@parcel/watcher@2.5.6)(@types/node@22.20.0)(@vue/compiler-sfc@3.5.39)(cac@6.7.14)(db0@0.3.4(mysql2@3.22.5(@types/node@22.20.0)))(esbuild@0.28.1)(ioredis@5.11.1)(magicast@0.5.3)(mysql2@3.22.5(@types/node@22.20.0))(rollup-plugin-visualizer@7.0.1(rollup@4.62.2))(rollup@4.62.2)(sass@1.101.0)(srvx@0.11.18)(terser@5.48.0)(typescript@5.9.3)(vite@7.3.3(@types/node@22.20.0)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(yaml@2.9.0))(vue-tsc@3.3.9(typescript@5.9.3))(webpack@5.108.3(esbuild@0.28.1)(postcss@8.5.16))(yaml@2.9.0))(vite@7.3.3(@types/node@22.20.0)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(yaml@2.9.0))(vue@3.5.39(typescript@5.9.3))':
     dependencies:
       '@nuxt/kit': 4.4.8(magicast@0.5.3)
       consola: 3.4.2
       defu: 6.1.7
       fast-xml-parser: 5.9.3
-      nuxt-site-config: 4.1.1(@nuxt/schema@3.21.8)(magicast@0.5.3)(nuxt@3.21.8(@parcel/watcher@2.5.6)(@types/node@22.20.0)(@vue/compiler-sfc@3.5.39)(cac@6.7.14)(db0@0.3.4(mysql2@3.22.5(@types/node@22.20.0)))(esbuild@0.28.1)(ioredis@5.11.1)(magicast@0.5.3)(mysql2@3.22.5(@types/node@22.20.0))(rollup-plugin-visualizer@7.0.1(rollup@4.62.2))(rollup@4.62.2)(sass@1.101.0)(terser@5.48.0)(typescript@5.9.3)(vite@7.3.3(@types/node@22.20.0)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(yaml@2.9.0))(vue-tsc@3.3.9(typescript@5.9.3))(webpack@5.108.3(esbuild@0.28.1))(yaml@2.9.0))(vite@7.3.3(@types/node@22.20.0)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(yaml@2.9.0))(vue@3.5.39(typescript@5.9.3))
-      nuxtseo-shared: 5.3.2(vemwuzd2yleth4o65kgdjisowi)
+      nuxt-site-config: 4.1.1(@nuxt/schema@3.21.8)(magicast@0.5.3)(nuxt@3.21.8(@parcel/watcher@2.5.6)(@types/node@22.20.0)(@vue/compiler-sfc@3.5.39)(cac@6.7.14)(db0@0.3.4(mysql2@3.22.5(@types/node@22.20.0)))(esbuild@0.28.1)(ioredis@5.11.1)(magicast@0.5.3)(mysql2@3.22.5(@types/node@22.20.0))(rollup-plugin-visualizer@7.0.1(rollup@4.62.2))(rollup@4.62.2)(sass@1.101.0)(srvx@0.11.18)(terser@5.48.0)(typescript@5.9.3)(vite@7.3.3(@types/node@22.20.0)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(yaml@2.9.0))(vue-tsc@3.3.9(typescript@5.9.3))(webpack@5.108.3(esbuild@0.28.1)(postcss@8.5.16))(yaml@2.9.0))(vite@7.3.3(@types/node@22.20.0)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(yaml@2.9.0))(vue@3.5.39(typescript@5.9.3))
+      nuxtseo-shared: 5.3.2(xrhwd6vojcoy2zkv5btyxsb2hi)
       ofetch: 1.5.1
       pathe: 2.0.3
       pkg-types: 2.3.1
@@ -14633,13 +14627,13 @@ snapshots:
       - magicast
       - vue
 
-  nuxt-site-config@4.1.1(@nuxt/schema@3.21.8)(magicast@0.5.3)(nuxt@3.21.8(@parcel/watcher@2.5.6)(@types/node@22.20.0)(@vue/compiler-sfc@3.5.39)(cac@6.7.14)(db0@0.3.4(mysql2@3.22.5(@types/node@22.20.0)))(esbuild@0.28.1)(ioredis@5.11.1)(magicast@0.5.3)(mysql2@3.22.5(@types/node@22.20.0))(rollup-plugin-visualizer@7.0.1(rollup@4.62.2))(rollup@4.62.2)(sass@1.101.0)(terser@5.48.0)(typescript@5.9.3)(vite@7.3.3(@types/node@22.20.0)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(yaml@2.9.0))(vue-tsc@3.3.9(typescript@5.9.3))(webpack@5.108.3(esbuild@0.28.1))(yaml@2.9.0))(vite@7.3.3(@types/node@22.20.0)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(yaml@2.9.0))(vue@3.5.39(typescript@5.9.3)):
+  nuxt-site-config@4.1.1(@nuxt/schema@3.21.8)(magicast@0.5.3)(nuxt@3.21.8(@parcel/watcher@2.5.6)(@types/node@22.20.0)(@vue/compiler-sfc@3.5.39)(cac@6.7.14)(db0@0.3.4(mysql2@3.22.5(@types/node@22.20.0)))(esbuild@0.28.1)(ioredis@5.11.1)(magicast@0.5.3)(mysql2@3.22.5(@types/node@22.20.0))(rollup-plugin-visualizer@7.0.1(rollup@4.62.2))(rollup@4.62.2)(sass@1.101.0)(srvx@0.11.18)(terser@5.48.0)(typescript@5.9.3)(vite@7.3.3(@types/node@22.20.0)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(yaml@2.9.0))(vue-tsc@3.3.9(typescript@5.9.3))(webpack@5.108.3(esbuild@0.28.1)(postcss@8.5.16))(yaml@2.9.0))(vite@7.3.3(@types/node@22.20.0)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(yaml@2.9.0))(vue@3.5.39(typescript@5.9.3)):
     dependencies:
       '@nuxt/devalue': 2.0.2
       '@nuxt/kit': 4.4.8(magicast@0.5.3)
       h3: 1.15.11
       nuxt-site-config-kit: 4.1.1(magicast@0.5.3)(vue@3.5.39(typescript@5.9.3))
-      nuxtseo-shared: 5.3.2(vemwuzd2yleth4o65kgdjisowi)
+      nuxtseo-shared: 5.3.2(xrhwd6vojcoy2zkv5btyxsb2hi)
       pathe: 2.0.3
       pkg-types: 2.3.1
       site-config-stack: 4.1.1(vue@3.5.39(typescript@5.9.3))
@@ -14916,7 +14910,7 @@ snapshots:
       - xml2js
       - yaml
 
-  nuxtseo-shared@5.3.2(vemwuzd2yleth4o65kgdjisowi):
+  nuxtseo-shared@5.3.2(xrhwd6vojcoy2zkv5btyxsb2hi):
     dependencies:
       '@clack/prompts': 1.6.0
       '@nuxt/devtools-kit': 4.0.0-alpha.3(magicast@0.5.3)(vite@7.3.3(@types/node@22.20.0)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(yaml@2.9.0))
@@ -14925,7 +14919,7 @@ snapshots:
       birpc: 4.0.0
       consola: 3.4.2
       defu: 6.1.7
-      nuxt: 3.21.8(@parcel/watcher@2.5.6)(@types/node@22.20.0)(@vue/compiler-sfc@3.5.39)(cac@6.7.14)(db0@0.3.4(mysql2@3.22.5(@types/node@22.20.0)))(esbuild@0.28.1)(ioredis@5.11.1)(magicast@0.5.3)(mysql2@3.22.5(@types/node@22.20.0))(rollup-plugin-visualizer@7.0.1(rollup@4.62.2))(rollup@4.62.2)(sass@1.101.0)(terser@5.48.0)(typescript@5.9.3)(vite@7.3.3(@types/node@22.20.0)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(yaml@2.9.0))(vue-tsc@3.3.9(typescript@5.9.3))(webpack@5.108.3(esbuild@0.28.1))(yaml@2.9.0)
+      nuxt: 3.21.8(@parcel/watcher@2.5.6)(@types/node@22.20.0)(@vue/compiler-sfc@3.5.39)(cac@6.7.14)(db0@0.3.4(mysql2@3.22.5(@types/node@22.20.0)))(esbuild@0.28.1)(ioredis@5.11.1)(magicast@0.5.3)(mysql2@3.22.5(@types/node@22.20.0))(rollup-plugin-visualizer@7.0.1(rollup@4.62.2))(rollup@4.62.2)(sass@1.101.0)(srvx@0.11.18)(terser@5.48.0)(typescript@5.9.3)(vite@7.3.3(@types/node@22.20.0)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(yaml@2.9.0))(vue-tsc@3.3.9(typescript@5.9.3))(webpack@5.108.3(esbuild@0.28.1)(postcss@8.5.16))(yaml@2.9.0)
       nypm: 0.6.8
       ofetch: 1.5.1
       pathe: 2.0.3
@@ -14936,7 +14930,7 @@ snapshots:
       ufo: 1.6.4
       vue: 3.5.39(typescript@5.9.3)
     optionalDependencies:
-      nuxt-site-config: 4.1.1(@nuxt/schema@3.21.8)(magicast@0.5.3)(nuxt@3.21.8(@parcel/watcher@2.5.6)(@types/node@22.20.0)(@vue/compiler-sfc@3.5.39)(cac@6.7.14)(db0@0.3.4(mysql2@3.22.5(@types/node@22.20.0)))(esbuild@0.28.1)(ioredis@5.11.1)(magicast@0.5.3)(mysql2@3.22.5(@types/node@22.20.0))(rollup-plugin-visualizer@7.0.1(rollup@4.62.2))(rollup@4.62.2)(sass@1.101.0)(terser@5.48.0)(typescript@5.9.3)(vite@7.3.3(@types/node@22.20.0)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(yaml@2.9.0))(vue-tsc@3.3.9(typescript@5.9.3))(webpack@5.108.3(esbuild@0.28.1))(yaml@2.9.0))(vite@7.3.3(@types/node@22.20.0)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(yaml@2.9.0))(vue@3.5.39(typescript@5.9.3))
+      nuxt-site-config: 4.1.1(@nuxt/schema@3.21.8)(magicast@0.5.3)(nuxt@3.21.8(@parcel/watcher@2.5.6)(@types/node@22.20.0)(@vue/compiler-sfc@3.5.39)(cac@6.7.14)(db0@0.3.4(mysql2@3.22.5(@types/node@22.20.0)))(esbuild@0.28.1)(ioredis@5.11.1)(magicast@0.5.3)(mysql2@3.22.5(@types/node@22.20.0))(rollup-plugin-visualizer@7.0.1(rollup@4.62.2))(rollup@4.62.2)(sass@1.101.0)(srvx@0.11.18)(terser@5.48.0)(typescript@5.9.3)(vite@7.3.3(@types/node@22.20.0)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(yaml@2.9.0))(vue-tsc@3.3.9(typescript@5.9.3))(webpack@5.108.3(esbuild@0.28.1)(postcss@8.5.16))(yaml@2.9.0))(vite@7.3.3(@types/node@22.20.0)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(yaml@2.9.0))(vue@3.5.39(typescript@5.9.3))
     transitivePeerDependencies:
       - magicast
       - vite
@@ -17503,14 +17497,6 @@ snapshots:
   yallist@5.0.0: {}
 
   yaml@2.9.0: {}
-
-  yandex-metrika-module-nuxt3@1.5.3(magicast@0.5.3):
-    dependencies:
-      '@nuxt/kit': 3.21.8(magicast@0.5.3)
-      defu: 6.1.7
-      pathe: 1.1.2
-    transitivePeerDependencies:
-      - magicast
 
   yargs-parser@18.1.3:
     dependencies:

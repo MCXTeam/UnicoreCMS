@@ -5,8 +5,7 @@ import { User } from 'src/admin/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { envConfig } from 'unicore-common';
 import { TwoFactorInput } from '../dto/two_factor.input';
-
-const TOTP_WINDOW = 1;
+import { TOTP_WINDOW } from '@common';
 
 @Injectable()
 export class TwoFactorService {

@@ -20,11 +20,9 @@ import { promises as dns } from 'dns';
 import { isIP } from 'net';
 import { Logger } from '@nestjs/common';
 import { envConfig } from 'unicore-common';
+import { STORAGE_MAX_REMOTE_DOWNLOAD } from '../constants';
 
 const destination = '../../storage';
-
-export const STORAGE_MAX_IMAGE_UPLOAD = 2 * 1024 * 1024;
-export const STORAGE_MAX_REMOTE_DOWNLOAD = 10 * 1024 * 1024;
 
 export class StorageManager {
   /**

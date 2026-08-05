@@ -1,6 +1,6 @@
 import envVar from "env-var";
 import { ports } from "./ports";
-import { DEFAULT_TIMEZONE } from "./timezone";
+import { DEFAULT_TIMEZONE, RUNTIME_ENV_PREFIX } from "./constants";
 
 const env = envVar.from(
   typeof process !== "undefined" && process.env ? process.env : {},
@@ -55,12 +55,15 @@ export const publicConfig: PublicConfig = {
 };
 
 const toRuntimeEnvKey = (key: string): string =>
-  `NUXT_PUBLIC_${key.replace(/([a-z0-9])([A-Z])/g, "$1_$2").toUpperCase()}`;
+  `${RUNTIME_ENV_PREFIX}${key.replace(/([a-z0-9])([A-Z])/g, "$1_$2").toUpperCase()}`;
 
-export const publicRuntimeEnv = (): Record<string, string> =>
-  Object.fromEntries(
+export const publicRuntimeEnv = (): Record<string, string> => ({
+  ...Object.fromEntries(
     Object.entries(publicConfig).map(([key, value]) => [
       toRuntimeEnvKey(key),
       String(value),
     ]),
-  );
+  ),
+  NUXT_PUBLIC_GTAG_ID: publicConfig.googleAnalyticsId,
+  NUXT_PUBLIC_GTAG_ENABLED: String(Boolean(publicConfig.googleAnalyticsId)),
+});

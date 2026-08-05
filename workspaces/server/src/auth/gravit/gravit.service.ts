@@ -110,7 +110,11 @@ export class GravitService {
     try {
       const { user } = await this.tokensService.resolveRefreshToken(input.refreshToken);
       // const refreshTokenPayload = await this.tokensService.decodeToken(input.refreshToken) as JWTRefreshPayload;
-      const { accessToken } = await this.tokensService.createTokensFromRefreshToken(input.refreshToken, 'launcher', input?.context?.ip);
+      const { accessToken } = await this.tokensService.createTokensFromRefreshToken(input.refreshToken, {
+        agent: 'launcher',
+        ip: input?.context?.ip,
+        rotate: false,
+      });
 
       // user.accessToken = await this.tokensService.generateMinecraftAccessToken(user, refreshTokenPayload)
       // await this.usersRepository.save(user)

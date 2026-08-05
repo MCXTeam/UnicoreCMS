@@ -8,6 +8,7 @@ import { userRoom } from '../helpers';
 import { ApiKeyRoom } from '../helpers/api-key-room';
 import { AuthSocket } from '../interfaces/auth-socket.interface';
 import { TokensService } from '../tokens.service';
+import { WS_API_KEY_PREFIX, WS_BEARER_PREFIX, WS_PUBLIC_ROOM } from '@common';
 
 export class AuthAdapter extends IoAdapter {
   private tokensService: TokensService;
@@ -27,40 +28,61 @@ export class AuthAdapter extends IoAdapter {
     });
   }
 
+  private apiKeyFromHandshake(handshake: AuthSocket['handshake']): string | null {
+    const authorization = handshake.headers?.authorization;
+
+    return authorization?.startsWith(WS_API_KEY_PREFIX) ? authorization.slice(WS_API_KEY_PREFIX.length) : null;
+  }
+
+  private refreshTokenFromHandshake(handshake: AuthSocket['handshake']): string | null {
+    const fromAuth = (handshake.auth as Record<string, unknown> | undefined)?.token;
+    if (typeof fromAuth === 'string' && fromAuth) return fromAuth;
+
+    const authorization = handshake.headers?.authorization;
+
+    return authorization?.startsWith(WS_BEARER_PREFIX) ? authorization.slice(WS_BEARER_PREFIX.length) : null;
+  }
+
+  private async authorizeApiKey(socket: AuthSocket, apiKey: string): Promise<void> {
+    const apiToken = await this.apiService.findOne(apiKey);
+    const ip = socket.handshake.address || socket.conn?.remoteAddress;
+
+    if (!apiToken?.allow?.length || !apiToken.allow.some((ipPattern) => minimatch.match([ip], ipPattern).length)) {
+      throw new UnauthorizedException();
+    }
+
+    const user = await this.usersService.getKernel();
+    user.perms = apiToken.perms;
+
+    socket.join([...new UserDto(user).perms, userRoom(user), ApiKeyRoom(apiToken)]);
+    socket.user = user;
+  }
+
+  private async authorizeUser(socket: AuthSocket, refreshToken: string): Promise<void> {
+    const { user } = await this.tokensService.resolveRefreshToken(refreshToken);
+
+    socket.join([...user.perms, userRoom(user)]);
+    socket.user = user;
+  }
+
   createIOServer(port: number, options?: any): any {
     const server = super.createIOServer(port, options);
-    server.use(async (socket: AuthSocket, next) => {
-      if (socket.handshake.headers?.authorization) {
-        try {
-          if (socket.handshake.headers?.authorization?.startsWith('Api-Key ')) {
-            const apiToken = await this.apiService.findOne(socket.handshake.headers?.authorization.slice(8));
-            const ip = socket.handshake.address || socket.conn?.remoteAddress;
 
-            if (
-              !apiToken ||
-              !apiToken.allow ||
-              !apiToken.allow.length ||
-              !apiToken.allow.filter((ipPattern) => minimatch.match([ip], ipPattern).length).flat().length
-            ) {
-              throw new UnauthorizedException();
-            }
-            const user = await this.usersService.getKernel();
-            user.perms = apiToken.perms;
-            socket.join([...new UserDto(user).perms, userRoom(user), ApiKeyRoom(apiToken)]);
-            socket.user = user;
-          } else {
-            const { user } = await this.tokensService.resolveRefreshToken(socket.handshake.query.token as string);
-            socket.join([...user.perms, userRoom(user)]);
-            socket.user = user;
-          }
-        } catch {
-          socket.join('public');
-        }
-      } else {
-        socket.join('public');
+    server.use(async (socket: AuthSocket, next) => {
+      const apiKey = this.apiKeyFromHandshake(socket.handshake);
+      const refreshToken = apiKey ? null : this.refreshTokenFromHandshake(socket.handshake);
+
+      try {
+        if (apiKey) await this.authorizeApiKey(socket, apiKey);
+        else if (refreshToken) await this.authorizeUser(socket, refreshToken);
+        else socket.join(WS_PUBLIC_ROOM);
+      } catch {
+        socket.join(WS_PUBLIC_ROOM);
       }
+
       next();
     });
+
     return server;
   }
 }

@@ -2,18 +2,6 @@ import './load-env'
 import { publicConfig } from 'unicore-common/public-config'
 import Aura from '@primevue/themes/aura'
 
-const modules: (string | [string, Record<string, unknown>])[] = [
-  '@primevue/nuxt-module',
-  '@pinia/nuxt',
-  '@vueuse/nuxt',
-  '@vueuse/motion/nuxt',
-  '@nuxtjs/color-mode',
-  '@nuxtjs/sitemap',
-]
-
-if (publicConfig.googleAnalyticsId) modules.push(['nuxt-gtag', { id: publicConfig.googleAnalyticsId }])
-if (publicConfig.yandexMetrikaId) modules.push(['yandex-metrika-module-nuxt3', { id: publicConfig.yandexMetrikaId }])
-
 export default defineNuxtConfig({
   ssr: true,
 
@@ -22,7 +10,20 @@ export default defineNuxtConfig({
     host: '0.0.0.0',
   },
 
-  modules,
+  modules: [
+    '@primevue/nuxt-module',
+    '@pinia/nuxt',
+    '@vueuse/nuxt',
+    '@vueuse/motion/nuxt',
+    '@nuxtjs/color-mode',
+    '@nuxtjs/sitemap',
+    'nuxt-gtag',
+  ],
+
+  gtag: {
+    id: publicConfig.googleAnalyticsId,
+    enabled: Boolean(publicConfig.googleAnalyticsId),
+  },
 
   css: [
     'primeicons/primeicons.css',
@@ -59,6 +60,7 @@ export default defineNuxtConfig({
       baseurl: publicConfig.baseurl,
       sitename: publicConfig.sitename,
       timezone: publicConfig.timezone,
+      yandexMetrikaId: publicConfig.yandexMetrikaId,
       recaptchaPublic: publicConfig.recaptchaPublic,
       realDecimals: publicConfig.realDecimals,
       virtualDecimals: publicConfig.virtualDecimals,

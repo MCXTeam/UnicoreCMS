@@ -4,7 +4,7 @@ import { User } from 'src/admin/users/entities/user.entity';
 import { Permission } from 'unicore-common';
 import * as minimath from 'minimatch';
 import * as _ from 'lodash';
-import { PERMISSIONS_KEY } from '../decorators/permission.decorator';
+import { PERMISSIONS_KEY } from 'src/common/constants';
 import { Role } from '../entities/role.entity';
 import { Repository } from 'typeorm';
 import { getDataSourceByName } from 'typeorm-transactional';

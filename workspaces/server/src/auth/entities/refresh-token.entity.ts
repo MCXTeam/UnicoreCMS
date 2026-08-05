@@ -1,5 +1,15 @@
 import { User } from 'src/admin/users/entities/user.entity';
-import { Column, CreateDateColumn, Entity, Generated, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Generated,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity({ name: 'unicore_refresh_tokens' })
 export class RefreshToken {
@@ -12,6 +22,20 @@ export class RefreshToken {
     unique: true,
   })
   uuid: string;
+
+  @Column({
+    name: 'previous_uuid',
+    nullable: true,
+  })
+  @Index()
+  previousUuid?: string;
+
+  @Column({
+    name: 'rotated',
+    type: 'datetime',
+    nullable: true,
+  })
+  rotated?: Date;
 
   @Column({
     name: 'ip',

@@ -273,7 +273,7 @@ export const RCON_PRESETS: IssuancePreset[] = [
   },
 ];
 
-export const DEFAULT_ISSUANCE_PRESET = "luckperms";
+export { DEFAULT_ISSUANCE_PRESET } from "../constants";
 
 export interface RenderContext {
   user?: {

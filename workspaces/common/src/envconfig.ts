@@ -1,7 +1,8 @@
 import envVar from "env-var";
 import { config } from "dotenv";
 import { envFilePath, ports } from "./ports";
-import { DEFAULT_TIMEZONE, isValidTimezone } from "./timezone";
+import { DEFAULT_TIMEZONE } from "./constants";
+import { isValidTimezone } from "./timezone";
 
 const env = envVar.from(process.env);
 config({ path: envFilePath });
