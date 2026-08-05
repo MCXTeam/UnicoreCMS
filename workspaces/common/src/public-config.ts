@@ -1,4 +1,5 @@
 import { from } from "env-var";
+import { ports } from "./ports";
 
 const env = from(
   typeof process !== "undefined" && process.env ? process.env : {},
@@ -31,9 +32,9 @@ export const publicConfig: PublicConfig = {
     .default("http://127.0.0.1:5000")
     .asString(),
   sitename: env.get("SITENAME").default("UnicoreCMS").asString(),
-  frontendPort: env.get("CLIENT_PORT").default(3000).asPortNumber(),
-  adminPort: env.get("ADMIN_PORT").default(4000).asPortNumber(),
-  backendPort: env.get("SERVER_PORT").default(5000).asPortNumber(),
+  frontendPort: ports.frontendPort,
+  adminPort: ports.adminPort,
+  backendPort: ports.backendPort,
   recaptchaPublic: env.get("RECAPTCHA_PUBLIC").default("").asString(),
   googleAnalyticsId: env.get("GOOGLE_ANALYTICS_ID").default("").asString(),
   yandexMetrikaId: env.get("YANDEX_METRIKA_ID").default("").asString(),

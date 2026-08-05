@@ -1,8 +1,8 @@
-<img src="https://github.com/UnicoreProject/UnicoreCMS/blob/main/unicorecms.png?raw=true?v=2" />
+<img src="https://github.com/MCXTeam/UnicoreCMS/blob/main/unicorecms.png?raw=true?v=2" />
 
 # UnicoreCMS
 
-[![Build Status](https://github.com/UnicoreProject/UnicoreCMS/actions/workflows/build.yml/badge.svg)](https://github.com/UnicoreProject/UnicoreCMS/actions)
+[![Build Status](https://github.com/MCXTeam/UnicoreCMS/actions/workflows/build.yml/badge.svg)](https://github.com/MCXTeam/UnicoreCMS/actions)
 <p>
   <img alt="TypeScript" src="https://img.shields.io/badge/-TypeScript-05122A?style=flat&logo=TypeScript"/>&nbsp;
   <img alt="Nuxt.js" src="https://img.shields.io/badge/-Nuxt.js-05122A?style=flat&logo=Nuxt.js"/>&nbsp;
@@ -10,7 +10,7 @@
 
 <p>
   <a href="https://unicorecms.ru/docs/" target="_blank">Документация</a> |
-  <a href="https://github.com/UnicoreProject/UnicoreCMS/archive/refs/heads/main.zip">Скачать</a> |
+  <a href="https://github.com/MCXTeam/UnicoreCMS/archive/refs/heads/main.zip">Скачать</a> |
   <a href="https://discord.gg/wn8fPjpvDn">Discord-сервер</a> |
   <a href="https://unicorecms.ru/screens" target="_blank">Картинки</a>
 </p>

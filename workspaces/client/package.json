@@ -7,7 +7,7 @@
     "dev": "nuxt dev",
     "build": "nuxt build",
     "generate": "nuxt generate",
-    "start": "PORT=${CLIENT_PORT:-3000} HOST=${HOST:-0.0.0.0} node .output/server/index.mjs",
+    "start": "node ./start.mjs",
     "preview": "nuxt preview",
     "typecheck": "nuxt typecheck",
     "format": "prettier --write --list-different ."

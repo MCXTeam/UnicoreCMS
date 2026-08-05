@@ -8,20 +8,14 @@ module.exports = {
     {
       name: 'unicore-client',
       cwd: './workspaces/client',
-      script: '.output/server/index.mjs',
-      env: {
-        HOST: '0.0.0.0',
-        PORT: process.env.CLIENT_PORT || 3000,
-      },
+      script: 'start.mjs',
+      interpreter: 'node',
     },
     {
       name: 'unicore-admin',
       cwd: './workspaces/admin',
-      script: '.output/server/index.mjs',
-      env: {
-        HOST: '0.0.0.0',
-        PORT: process.env.ADMIN_PORT || 4000,
-      },
+      script: 'start.mjs',
+      interpreter: 'node',
     },
   ],
 };

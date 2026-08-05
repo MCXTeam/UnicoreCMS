@@ -16,6 +16,11 @@
       "import": "./dist/public-config.mjs",
       "require": "./dist/public-config.js"
     },
+    "./ports": {
+      "types": "./dist/ports.d.ts",
+      "import": "./dist/ports.mjs",
+      "require": "./dist/ports.js"
+    },
     "./enums": {
       "types": "./dist/enums/index.d.ts",
       "import": "./dist/enums/index.mjs",

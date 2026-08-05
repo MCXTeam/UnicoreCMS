@@ -1,9 +1,9 @@
 import { from } from "env-var";
 import { config } from "dotenv";
-import { resolve } from "path";
+import { envFilePath, ports } from "./ports";
 
 const env = from(process.env);
-config({ path: resolve(__dirname, "../../../.env") });
+config({ path: envFilePath });
 
 export interface EnvConfig {
   baseurl: string;
@@ -98,9 +98,9 @@ export const envConfig: EnvConfig = {
   sitename: env.get("SITENAME").default("UnicoreCMS").asString(),
 
   // Порты
-  frontendPort: env.get("CLIENT_PORT").default(3000).asPortNumber(),
-  adminPort: env.get("ADMIN_PORT").default(4000).asPortNumber(),
-  backendPort: env.get("SERVER_PORT").default(5000).asPortNumber(),
+  frontendPort: ports.frontendPort,
+  adminPort: ports.adminPort,
+  backendPort: ports.backendPort,
 
   // URL REWRITES
   apiBaseurl: env.get("API_BASEURL").required().asString(),

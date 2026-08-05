@@ -1,5 +1,4 @@
 import { config } from 'dotenv'
-import { resolve, dirname } from 'path'
-import { fileURLToPath } from 'url'
+import { envFilePath } from 'unicore-common/ports'
 
-config({ path: resolve(dirname(fileURLToPath(import.meta.url)), '../../.env') })
+config({ path: envFilePath })
