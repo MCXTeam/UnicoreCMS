@@ -6,6 +6,8 @@ import { Repository } from 'typeorm';
 import { envConfig } from 'unicore-common';
 import { TwoFactorInput } from '../dto/two_factor.input';
 
+const TOTP_WINDOW = 1;
+
 @Injectable()
 export class TwoFactorService {
   constructor(@InjectRepository(User) private usersService: Repository<User>) {}
@@ -17,6 +19,7 @@ export class TwoFactorService {
       secret: user.two_factor_secret,
       encoding: 'base32',
       token: totp,
+      window: TOTP_WINDOW,
     });
   }
 
@@ -24,7 +27,7 @@ export class TwoFactorService {
     if (user.two_factor_enabled && user.two_factor_secret) throw new BadRequestException();
 
     const secret = speakeasy.generateSecret({ length: 12 });
-    const otpauth_url = speakeasy.otpauthURL({ secret: secret.ascii, label: envConfig.sitename, algorithm: 'sha512' });
+    const otpauth_url = speakeasy.otpauthURL({ secret: secret.ascii, label: user.username, issuer: envConfig.sitename });
     user.two_factor_secret_temp = secret.base32;
 
     await this.usersService.save(user);
@@ -39,6 +42,7 @@ export class TwoFactorService {
       secret: user.two_factor_secret_temp,
       encoding: 'base32',
       token: input.code,
+      window: TOTP_WINDOW,
     });
 
     if (!tokenValidates) throw new BadRequestException();
