@@ -9,6 +9,7 @@
     "generate": "nuxt generate",
     "start": "node ./start.mjs",
     "preview": "nuxt preview",
+    "typecheck": "nuxt typecheck",
     "format": "prettier --write --list-different ."
   },
   "dependencies": {
@@ -46,6 +47,6 @@
     "prettier": "^3.4.2",
     "sass": "^1.101.0",
     "typescript": "~5.9.2",
-    "vue-tsc": "^2.2.12"
+    "vue-tsc": "^3.3.9"
   }
 }

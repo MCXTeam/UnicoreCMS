@@ -65,6 +65,9 @@ export default defineNuxtConfig({
 
   typescript: {
     shim: false,
+    tsConfig: {
+      exclude: ['./dist'],
+    },
   },
 
   compatibilityDate: '2025-01-01',

@@ -11,4 +11,6 @@ if (port) {
 
 if (!process.env.HOST && !process.env.NITRO_HOST) process.env.HOST = '0.0.0.0'
 
-await import('./.output/server/index.mjs')
+const entry = './.output/server/index.mjs'
+
+await import(entry)

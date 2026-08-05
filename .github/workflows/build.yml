@@ -10,18 +10,21 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+
     steps:
     - uses: actions/checkout@v4
 
     - name: Setup pnpm
       uses: pnpm/action-setup@v4
-      with:
-        version: 9
 
-    - name: Use Node.js 22
+    - name: Use Node.js ${{ matrix.node }}
       uses: actions/setup-node@v4
       with:
-        node-version: 22
+        node-version: ${{ matrix.node }}
         cache: pnpm
 
     - name: Build
@@ -30,7 +33,13 @@ jobs:
         pnpm install --frozen-lockfile
         pnpm run build
 
+    - name: Typecheck
+      run: |
+        pnpm --filter unicore-client run typecheck
+        pnpm --filter unicore-admin run typecheck
+
     - name: Prepare artifact
+      if: matrix.node == 22
       run: |
         rm -rf .git
         rm -rf .github
@@ -41,8 +50,9 @@ jobs:
         rm -rf ./workspaces/admin/.nuxt
         rm -rf ./workspaces/admin/dist
         rm -rf ./workspaces/server/src
-        rm -rf /logs
+        rm -rf ./logs
     - uses: actions/upload-artifact@v4
+      if: matrix.node == 22
       with:
         name: UnicoreCMS
         path: ./
