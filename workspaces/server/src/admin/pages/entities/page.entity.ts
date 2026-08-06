@@ -20,6 +20,12 @@ export class Page {
   @Column('longtext', { nullable: true, name: 'content' })
   content: string;
 
+  @Column('longtext', { nullable: true, name: 'custom_css' })
+  custom_css: string;
+
+  @Column('longtext', { nullable: true, name: 'custom_js' })
+  custom_js: string;
+
   @CreateDateColumn({ name: 'created' })
   created: Date;
 

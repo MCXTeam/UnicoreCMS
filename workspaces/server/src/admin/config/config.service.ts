@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DEFAULT_ISSUANCE_PRESET, RCON_PRESETS } from 'unicore-common';
+import { KEEP_HISTORY_DAYS, KEEP_PAID_PAYMENTS_DAYS, KEEP_PENDING_PAYMENTS_DAYS } from '@common';
 import { IsNull, Not, Repository } from 'typeorm';
 import { ConfigField, ConfigType } from './config.enum';
 import { ConfigInput } from './dto/config.input';
@@ -63,6 +64,14 @@ export class ConfigService {
         { key: ConfigField.DonatePermsVirtualUse, important: true, type: ConfigType.boolean, value: 'true' },
         { key: ConfigField.EmailActivationRequired, important: true, type: ConfigType.boolean, value: 'true' },
         { key: ConfigField.OrdinaryRegister, important: true, type: ConfigType.boolean, value: 'false' },
+        { key: ConfigField.KeepPaidPaymentsDays, important: true, type: ConfigType.number, value: String(KEEP_PAID_PAYMENTS_DAYS) },
+        {
+          key: ConfigField.KeepPendingPaymentsDays,
+          important: true,
+          type: ConfigType.number,
+          value: String(KEEP_PENDING_PAYMENTS_DAYS),
+        },
+        { key: ConfigField.KeepHistoryDays, important: true, type: ConfigType.number, value: String(KEEP_HISTORY_DAYS) },
         { key: ConfigField.RconPreset, important: true, type: ConfigType.string, value: DEFAULT_ISSUANCE_PRESET },
         { key: ConfigField.RconTplGiveItem, important: true, type: ConfigType.string, value: presetOps.giveItem ?? vanillaOps.giveItem ?? '' },
         { key: ConfigField.RconTplGroupAdd, important: true, type: ConfigType.string, value: presetOps.groupAdd ?? '' },

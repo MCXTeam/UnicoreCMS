@@ -51,7 +51,14 @@ export class PagesService {
     });
   }
 
-  async create(input: PageInput): Promise<Page> {
+  private applyCustomCode(page: Page, input: PageInput, allowCustomCode: boolean) {
+    if (!allowCustomCode) return;
+
+    page.custom_css = input.custom_css;
+    page.custom_js = input.custom_js;
+  }
+
+  async create(input: PageInput, allowCustomCode = false): Promise<Page> {
     if (await this.pagesRepository.findOneBy({ path: input.path })) {
       throw new ConflictException();
     }
@@ -63,10 +70,12 @@ export class PagesService {
     page.content = input.content;
     page.description = input.description;
 
+    this.applyCustomCode(page, input, allowCustomCode);
+
     return this.pagesRepository.save(page);
   }
 
-  async update(id: number, input: PageInput): Promise<Page> {
+  async update(id: number, input: PageInput, allowCustomCode = false): Promise<Page> {
     const page = await this.findOne(id);
 
     if (!page) {
@@ -81,6 +90,8 @@ export class PagesService {
     page.title = input.title;
     page.content = input.content;
     page.description = input.description;
+
+    this.applyCustomCode(page, input, allowCustomCode);
 
     return this.pagesRepository.save(page);
   }

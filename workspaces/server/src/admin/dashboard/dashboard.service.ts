@@ -5,7 +5,7 @@ import * as _ from 'lodash';
 import { User } from '../users/entities/user.entity';
 import { StatGroup } from './interfaces/stat.interface';
 import { StatType } from './enums/stat-type.enum';
-import { MomentWrapper } from '@common';
+import { DASHBOARD_MONTH_DAYS, DASHBOARD_WEEK_DAYS, MomentWrapper } from '@common';
 import { OnlinesRecord } from 'src/game/servers/online/entities/onlines-record.entity';
 import { History } from 'src/game/cabinet/history/entities/history.entity';
 import { HistoryGroupType } from 'src/game/cabinet/history/enums/history-type.enum';
@@ -30,9 +30,9 @@ export class DashboardService {
     private onlineService: OnlineService,
   ) {}
 
-  private async daysStatBuilder(type: StatType): Promise<StatGroup[]> {
+  private async daysStatBuilder(type: StatType, days: number = DASHBOARD_WEEK_DAYS): Promise<StatGroup[]> {
     var result: StatGroup[] = new Array();
-    const range = Array.from(this.moment.range(this.moment().subtract(6, 'day').startOf('day'), this.moment()).by('day'));
+    const range = Array.from(this.moment.range(this.moment().subtract(days - 1, 'day').startOf('day'), this.moment()).by('day'));
 
     switch (type) {
       case StatType.User:
@@ -212,6 +212,7 @@ export class DashboardService {
     return {
       payments: {
         days: await this.daysStatBuilder(StatType.Payment),
+        month: await this.daysStatBuilder(StatType.Payment, DASHBOARD_MONTH_DAYS),
         months: await this.monthsStatBuilder(StatType.Payment),
         count: await this.paymentsRepository.countBy({
           status: PaymentStatuses.PAID,
@@ -228,6 +229,7 @@ export class DashboardService {
       },
       purchases: {
         days: await this.daysStatBuilder(StatType.Purchase),
+        month: await this.daysStatBuilder(StatType.Purchase, DASHBOARD_MONTH_DAYS),
         months: await this.monthsStatBuilder(StatType.Purchase),
         count: await this.historyRepository.countBy({
           type: In(HistoryGroupType.Purchase),
@@ -244,12 +246,14 @@ export class DashboardService {
       },
       online_records: {
         days: await this.daysStatBuilder(StatType.Online),
+        month: await this.daysStatBuilder(StatType.Online, DASHBOARD_MONTH_DAYS),
         months: await this.monthsStatBuilder(StatType.Online),
         amount: online.total.records.absolute.online,
         date: online.total.records.absolute.created,
       },
       users: {
         days: await this.daysStatBuilder(StatType.User),
+        month: await this.daysStatBuilder(StatType.User, DASHBOARD_MONTH_DAYS),
         months: await this.monthsStatBuilder(StatType.User),
         count: await this.usersRepository.count(),
       },

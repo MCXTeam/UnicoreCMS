@@ -18,4 +18,12 @@ export class PageInput {
   @IsString()
   @SanitizeHtml()
   content: string;
+
+  @IsOptional()
+  @IsString()
+  custom_css?: string;
+
+  @IsOptional()
+  @IsString()
+  custom_js?: string;
 }

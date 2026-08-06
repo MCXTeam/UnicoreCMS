@@ -20,5 +20,7 @@ useUiStore().setName(page.value.title)
 useHead({
   title: page.value.title,
   meta: [{ name: 'description', content: page.value.description }],
+  style: page.value.custom_css ? [{ innerHTML: String(page.value.custom_css) }] : [],
+  script: page.value.custom_js ? [{ innerHTML: String(page.value.custom_js) }] : [],
 })
 </script>

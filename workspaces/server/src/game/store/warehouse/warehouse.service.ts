@@ -27,6 +27,12 @@ export class WarehouseService {
     return this.warehouseItemsRepository.findBy({ user: { uuid: user.uuid }, server: { id: server.id } });
   }
 
+  async findFilledServers(user: User): Promise<string[]> {
+    const items = await this.warehouseItemsRepository.find({ where: { user: { uuid: user.uuid } }, relations: ['server'] });
+
+    return _.uniq(items.map((item) => item.server?.id).filter(Boolean));
+  }
+
   async findOwn(user: User, server_id: string) {
     const server = await this.serversService.findOne(server_id);
 

@@ -15,6 +15,11 @@ import { GiveProductInput } from './dto/give-product.input';
 export class CartController {
   constructor(private cartService: CartService) {}
 
+  @Get('servers')
+  findFilledServers(@CurrentUser() user: User) {
+    return this.cartService.findFilledServers(user);
+  }
+
   @Get(':server')
   findByServer(@CurrentUser() user: User, @Param('server') id: string) {
     return this.cartService.findByServer(user, id);

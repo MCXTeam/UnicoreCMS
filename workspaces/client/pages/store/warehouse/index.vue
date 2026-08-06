@@ -72,7 +72,15 @@ watch(server_id, async () => {
 onMounted(async () => {
   ui.setStoreSidebar({ component: 'WarehouseSidebar' })
   servers.value = await $api.get('/store/products/protected/servers').then((res) => res.data)
-  if (servers.value.length) warehouseFind()
+
+  if (!servers.value.length) return
+
+  const filled = await $api.get('/store/warehouse/servers').then((res) => res.data)
+  const index = servers.value.findIndex((server) => filled.includes(server.id))
+  const target = String(index === -1 ? 0 : index)
+
+  if (target === server_id.value) warehouseFind()
+  else server_id.value = target
 })
 
 onBeforeUnmount(() => {

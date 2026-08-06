@@ -9,7 +9,9 @@
         <div class="row">
           <div class="col-12 col-xl-3">
             <div class="d-flex align-items-center mb-2">
-              <h1 class="m-0">{{ donate.name }}</h1>
+              <Avatar v-if="donate.icon" size="xlarge" class="flex-shrink-0" :image="`${$pub.apiBaseurl}/${donate.icon}`" />
+              <Avatar v-else size="xlarge" class="flex-shrink-0"><i class="bx bx-crown"></i></Avatar>
+              <h1 class="m-0 ms-3">{{ donate.name }}</h1>
               <h5 class="sale-wrapper ms-2 my-0" v-if="donate.sale">-{{ donate.sale }}%</h5>
             </div>
             <h4 v-if="donate.sale" class="mt-0">

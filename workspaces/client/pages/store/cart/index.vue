@@ -142,7 +142,15 @@ export default {
   methods: {
     async load() {
       this.servers = await this.$api.get('/store/products/protected/servers').then((res) => res.data)
-      if (this.servers.length) await this.cartFind()
+
+      if (!this.servers.length) return
+
+      const filled = await this.$api.get('/store/cart/servers').then((res) => res.data)
+      const index = this.servers.findIndex((server) => filled.includes(server.id))
+      const target = String(index === -1 ? 0 : index)
+
+      if (target === this.server_id) await this.cartFind()
+      else this.server_id = target
     },
 
     async cartFind() {

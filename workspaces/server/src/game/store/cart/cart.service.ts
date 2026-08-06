@@ -111,6 +111,15 @@ export class CartService {
     return this.cartItemsRepository.findBy({ user: { uuid: user.uuid } });
   }
 
+  async findFilledServers(user: User): Promise<string[]> {
+    const [products, kits] = await Promise.all([
+      this.cartItemsRepository.find({ where: { user: { uuid: user.uuid } }, relations: ['server'] }),
+      this.cartItemKitsRepository.find({ where: { user: { uuid: user.uuid } }, relations: ['server'] }),
+    ]);
+
+    return _.uniq([...products, ...kits].map((item) => item.server?.id).filter(Boolean));
+  }
+
   async findByServer(user: User, server_id: string) {
     const server = await this.serversService.findOne(server_id);
 

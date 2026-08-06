@@ -6,6 +6,7 @@ export interface StatGroup {
 
 export interface StatInterface {
   days: StatGroup[];
+  month: StatGroup[];
   months: StatGroup[];
   count?: number;
   amount?: number;

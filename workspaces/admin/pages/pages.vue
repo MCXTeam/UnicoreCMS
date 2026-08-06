@@ -29,10 +29,10 @@
               </span>
             </div>
           </template>
-          <Column sortable field="id" header="ID" :styles="{ width: '8rem' }"></Column>
+          <Column sortable field="id" header="ID" :style="{ width: '8rem' }"></Column>
           <Column sortable field="title" header="Заголовок"></Column>
           <Column sortable field="path" header="Путь"></Column>
-          <Column :styles="{ width: '12rem' }">
+          <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
               <Button
@@ -75,8 +75,27 @@
               </div>
             </VeeField>
             <div class="field">
-              <label>Содержимое</label>
-              <Editor v-model="page.content" editorStyle="height: 400px"></Editor>
+              <div class="flex justify-content-between align-items-center mb-2">
+                <label class="m-0">Содержимое</label>
+                <SelectButton v-model="contentMode" :options="contentModes" optionLabel="label" optionValue="value" :allowEmpty="false" />
+              </div>
+              <Editor v-if="contentMode === 'visual'" v-model="page.content" editorStyle="height: 400px"></Editor>
+              <Textarea v-else v-model="page.content" class="font-mono" rows="18" spellcheck="false" />
+              <small v-if="contentMode === 'html'">
+                Небезопасные теги и атрибуты (script, style, iframe, обработчики событий) вырезаются при сохранении.
+              </small>
+            </div>
+            <div class="field" v-if="isSuperuser">
+              <label>Кастомный CSS</label>
+              <Textarea v-model="page.custom_css" class="font-mono" rows="6" spellcheck="false" placeholder=".my-block { color: red }" />
+              <small>Подключается только на этой странице. Доступно суперпользователю.</small>
+            </div>
+            <div class="field" v-if="isSuperuser">
+              <label>Кастомный JS</label>
+              <Textarea v-model="page.custom_js" class="font-mono" rows="6" spellcheck="false" placeholder="console.log('hello')" />
+              <small class="p-error">
+                Выполняется у каждого посетителя страницы без проверок — вставляйте только собственный код.
+              </small>
             </div>
             <div class="field">
               <label>Описание (meta-description)</label>
@@ -110,6 +129,14 @@ export default {
   },
   setup() {
     useHead({ title: 'Страницы' })
+    const auth = useAuthStore()
+    return { auth }
+  },
+
+  computed: {
+    isSuperuser() {
+      return !!this.auth.user?.superuser
+    },
   },
   data() {
     return {
@@ -123,7 +150,14 @@ export default {
         description: null,
         path: null,
         content: null,
+        custom_css: null,
+        custom_js: null,
       },
+      contentMode: 'visual',
+      contentModes: [
+        { label: 'Визуально', value: 'visual' },
+        { label: 'HTML', value: 'html' },
+      ],
       pageDialog: false,
       filters: {
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -154,6 +188,8 @@ export default {
           description: null,
           path: null,
           content: null,
+          custom_css: null,
+          custom_js: null,
         }
       }
       this.pageDialog = true

@@ -115,14 +115,7 @@
       <div class="card h-full">
         <div class="flex justify-content-between align-items-center mb-5">
           <h5>Статистика</h5>
-          <div>
-            <Button
-              icon="pi pi-ellipsis-v"
-              class="p-button-text p-button-plain p-button-rounded"
-              @click="$refs.menu2.toggle($event)"
-            ></Button>
-            <Menu ref="menu2" :popup="true" :model="charts"></Menu>
-          </div>
+          <SelectButton v-model="chartPeriod" :options="chartPeriods" optionLabel="label" optionValue="value" :allowEmpty="false" />
         </div>
         <Chart type="bar" :data="barData" :options="barOptions" />
       </div>
@@ -166,19 +159,11 @@ export default {
     return {
       products: null,
       stats: null,
-      charts: [
-        {
-          label: 'Недельня',
-          command: () => {
-            this.daysCharts()
-          },
-        },
-        {
-          label: 'Годовая',
-          command: () => {
-            this.monthsCharts()
-          },
-        },
+      chartPeriod: 'week',
+      chartPeriods: [
+        { label: 'Неделя', value: 'week' },
+        { label: 'Месяц', value: 'month' },
+        { label: 'Год', value: 'year' },
       ],
       barData: {
         labels: [],
@@ -196,6 +181,12 @@ export default {
       },
     }
   },
+  watch: {
+    chartPeriod() {
+      if (this.stats) this.buildChart()
+    },
+  },
+
   computed: {
     onlines() {
       return this.ioStore.serversOnline
@@ -203,82 +194,30 @@ export default {
   },
   async mounted() {
     this.stats = await this.$api.get('/admin/dashboard/stats').then((res) => res.data)
-    this.daysCharts()
+    this.buildChart()
 
     this.$socket.emit('servers/online', {}, (res) => {
       this.ioStore.setServersOnline(res)
     })
   },
   methods: {
-    daysCharts() {
-      const range = Array.from(
-        this.$moment.range(this.$moment().subtract(6, 'day').startOf('day'), this.$moment()).by('day'),
-      )
-      this.barData.labels = range.map((r) => r.format('dddd'))
-      this.barData.datasets = []
-      this.barData.datasets.push({
-        label: 'Онлайн',
-        data: this.stats.online_records.days.map((online) => online.amount),
-        fill: false,
-        backgroundColor: '#e91e63',
-        tension: 1,
-      })
-      this.barData.datasets.push({
-        label: 'Покупки',
-        data: this.stats.purchases.days.map((online) => online.count),
-        fill: false,
-        backgroundColor: '#3f51b5',
-        tension: 1,
-      })
-      this.barData.datasets.push({
-        label: 'Пополнения',
-        data: this.stats.payments.days.map((online) => online.count),
-        fill: false,
-        backgroundColor: '#f57c00',
-        tension: 1,
-      })
-      this.barData.datasets.push({
-        label: 'Регистрации',
-        data: this.stats.users.days.map((online) => online.count),
-        fill: false,
-        backgroundColor: '#9c27b0',
-        tension: 1,
-      })
-    },
-    monthsCharts() {
-      const range = Array.from(
-        this.$moment.range(this.$moment().subtract(11, 'month').startOf('month'), this.$moment()).by('month'),
-      )
-      this.barData.labels = range.map((r) => r.format('MMMM'))
-      this.barData.datasets = []
-      this.barData.datasets.push({
-        label: 'Онлайн',
-        data: this.stats.online_records.months.map((online) => online.amount),
-        fill: false,
-        backgroundColor: '#e91e63',
-        tension: 1,
-      })
-      this.barData.datasets.push({
-        label: 'Покупки',
-        data: this.stats.purchases.months.map((online) => online.count),
-        fill: false,
-        backgroundColor: '#3f51b5',
-        tension: 1,
-      })
-      this.barData.datasets.push({
-        label: 'Пополнения',
-        data: this.stats.payments.months.map((online) => online.count),
-        fill: false,
-        backgroundColor: '#f57c00',
-        tension: 1,
-      })
-      this.barData.datasets.push({
-        label: 'Регистрации',
-        data: this.stats.users.months.map((online) => online.count),
-        fill: false,
-        backgroundColor: '#9c27b0',
-        tension: 1,
-      })
+    buildChart() {
+      const periods = {
+        week: { unit: 'day', back: 6, format: 'dddd', key: 'days' },
+        month: { unit: 'day', back: 29, format: 'D MMMM', key: 'month' },
+        year: { unit: 'month', back: 11, format: 'MMMM', key: 'months' },
+      }
+      const { unit, back, format, key } = periods[this.chartPeriod]
+      const start = this.$moment().subtract(back, unit).startOf(unit)
+      const range = Array.from(this.$moment.range(start, this.$moment()).by(unit))
+
+      this.barData.labels = range.map((r) => r.format(format))
+      this.barData.datasets = [
+        { label: 'Онлайн', data: this.stats.online_records[key].map((stat) => stat.amount), backgroundColor: '#e91e63' },
+        { label: 'Покупки', data: this.stats.purchases[key].map((stat) => stat.count), backgroundColor: '#3f51b5' },
+        { label: 'Пополнения', data: this.stats.payments[key].map((stat) => stat.count), backgroundColor: '#f57c00' },
+        { label: 'Регистрации', data: this.stats.users[key].map((stat) => stat.count), backgroundColor: '#9c27b0' },
+      ]
     },
   },
 }

@@ -10,6 +10,11 @@ import { WarehouseService } from './warehouse.service';
 export class WarehouseController {
   constructor(private warehouseService: WarehouseService) {}
 
+  @Get('servers')
+  findFilledServers(@CurrentUser() user: User) {
+    return this.warehouseService.findFilledServers(user);
+  }
+
   @Get(':server')
   async findOwn(@CurrentUser() user: User, @Param('server') server_id: string) {
     return this.warehouseService.findOwn(user, server_id);
