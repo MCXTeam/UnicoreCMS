@@ -11,7 +11,10 @@ export class GravitPermissions {
   perms: string[];
   roles: string[];
 }
-
+export class GravitAssets {
+  SKIN: SkinDto;
+  CAPE: CloakDto;
+}
 @Exclude()
 export class GravitUserDto {
   perms: string[];
@@ -33,16 +36,21 @@ export class GravitUserDto {
       roles: this.roles.map((role) => role.id),
     };
   }
-
   @Expose()
+  assets: GravitAssets;
+  /*@Expose()
   @Transform(({ value }) => (value ? instanceToPlain(new SkinDto(value)) : null))
   skin?: SkinDto;
 
   @Expose()
   @Transform(({ value }) => (value ? instanceToPlain(new CloakDto(value)) : null))
-  cloak?: CloakDto;
+  cloak?: CloakDto;*/
 
   constructor(partial: Partial<User>) {
     Object.assign(this, transformPermissions(partial));
+    this.assets = {
+      SKIN: partial.skin ? instanceToPlain(new SkinDto(partial.skin)) as SkinDto : undefined,
+      CAPE:  partial.cloak ? instanceToPlain(new CloakDto(partial.cloak)) as CloakDto : undefined
+    };
   }
 }

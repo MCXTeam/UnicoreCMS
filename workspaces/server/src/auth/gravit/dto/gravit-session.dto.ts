@@ -8,11 +8,13 @@ import * as ms from 'ms';
 export class GravitSessionDto {
   id: string;
   user: GravitUserDto;
+  accessToken: string;
   expireIn: number;
 
   constructor(user: User) {
     this.id = nanoid();
     this.expireIn = 0;
     this.user = instanceToPlain(new GravitUserDto(user)) as GravitUserDto;
+    this.accessToken=this.user.accessToken;
   }
 }
