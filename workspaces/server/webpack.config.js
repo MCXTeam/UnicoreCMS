@@ -1,28 +1,16 @@
 const path = require('path');
-const webpack = require("webpack");
+const webpack = require('webpack');
 const nodeExternals = require('webpack-node-externals');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
-const WebpackObfuscator = require('webpack-obfuscator');
 
-const main = module.exports = {
-  entry: "./src/main.ts",
+const base = {
   target: 'node',
-  mode: "production",
-  output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: '[name].js',
-  },
-  plugins: [
-    new WebpackObfuscator({
-      optionsPreset: "high-obfuscation",
-      target: "node"
-    })
-  ],
+  mode: 'production',
   externals: [
     nodeExternals(),
     nodeExternals({
       modulesDir: path.resolve(__dirname, '../../node_modules'),
-    })
+    }),
   ],
   node: {
     __dirname: false,
@@ -37,55 +25,36 @@ const main = module.exports = {
   },
   module: {
     rules: [{ test: /\.ts$/, loader: 'ts-loader' }],
-  }
+  },
 };
 
-const orm = module.exports = {
+const orm = {
+  ...base,
   entry: './src/ormconfig-schema.ts',
-  target: 'node',
-  mode: "production",
   output: {
     path: path.resolve(__dirname, 'dist'),
     libraryTarget: 'commonjs2',
     filename: 'ormconfig-schema.js',
   },
-  externals: [
-    nodeExternals(),
-    nodeExternals({
-      modulesDir: path.resolve(__dirname, '../../node_modules'),
-    })
-  ],
-  node: {
-    __dirname: false,
-    __filename: false,
+};
+
+const main = {
+  ...base,
+  entry: './src/main.ts',
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].js',
   },
-  optimization: {
-    minimize: false,
-  },
-  resolve: {
-    extensions: ['.ts', '.js'],
-    plugins: [new TsconfigPathsPlugin({ configFile: './tsconfig.build.json' })],
-  },
-  module: {
-    rules: [{ test: /\.ts$/, loader: 'ts-loader' }],
-  }
 };
 
 const cli = {
-  ...main,
-  entry: "./src/cli/main.ts",
+  ...base,
+  entry: './src/cli/main.ts',
   output: {
     path: path.resolve(__dirname, 'dist/cli'),
     filename: 'main.js',
   },
-  plugins: [
-    new WebpackObfuscator({
-      optionsPreset: "high-obfuscation",
-      target: "node"
-    }),
-    new webpack.BannerPlugin({ banner: "#!/usr/bin/env node", raw: true }),
-  ]
-}
+  plugins: [new webpack.BannerPlugin({ banner: '#!/usr/bin/env node', raw: true })],
+};
 
-
-module.exports = [orm, main, cli]
+module.exports = [orm, main, cli];

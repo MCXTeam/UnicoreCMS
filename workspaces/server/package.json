@@ -10,9 +10,8 @@
     "unicore": "dist/cli/main.js"
   },
   "scripts": {
-    "prebuild": "rimraf dist",
-    "build": "rimraf dist && webpack && node ./postbuild.js",
-    "postbuild": "node ./postbuild.js",
+    "build": "node ./build.js",
+    "typecheck": "tsc --noEmit --incremental false -p tsconfig.build.json",
     "format": "prettier --write \"src/**/*.ts\"",
     "start": "node .",
     "dev": "nest start --watch --preserveWatchOutput",
@@ -85,7 +84,6 @@
     "@types/sanitize-html": "^2.16.1",
     "javascript-obfuscator": "^4.2.2",
     "prettier": "^2.8.8",
-    "rimraf": "^6.1.3",
     "source-map-support": "^0.5.21",
     "ts-loader": "^9.6.2",
     "ts-node": "^10.9.2",
@@ -93,7 +91,6 @@
     "tsconfig-paths-webpack-plugin": "^4.2.0",
     "webpack": "^5.109.2",
     "webpack-cli": "^5.1.4",
-    "webpack-node-externals": "^3.0.0",
-    "webpack-obfuscator": "^3.6.1"
+    "webpack-node-externals": "^3.0.0"
   }
 }

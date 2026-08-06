@@ -35,6 +35,7 @@ jobs:
 
     - name: Typecheck
       run: |
+        pnpm --filter unicore-server run typecheck
         pnpm --filter unicore-client run typecheck
         pnpm --filter unicore-admin run typecheck
 
