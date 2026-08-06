@@ -12,6 +12,7 @@ export default defineConfig({
     "src/validation/index.ts",
     "src/sanitize.ts",
     "src/console/index.ts",
+    "src/build.ts",
   ],
   format: ["cjs", "esm"],
   dts: true,

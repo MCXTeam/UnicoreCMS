@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "pnpm --filter unicore-common run build && pnpm -r --parallel run dev",
-    "build": "pnpm -r run build",
+    "build": "pnpm -r --workspace-concurrency=1 run build",
     "build:server": "pnpm --filter unicore-common run build && pnpm --filter unicore-server run build",
     "build:client": "pnpm --filter unicore-client run build",
     "build:admin": "pnpm --filter unicore-admin run build",

@@ -54,6 +54,12 @@ export const DEFAULT_ARGON2_TIME = 3;
 export const DEFAULT_ARGON2_PARALLELISM = 4;
 export const DEFAULT_BCRYPT_COST = 12;
 
+export const CGROUP_LIMIT_FILES = ["/sys/fs/cgroup/memory.max", "/sys/fs/cgroup/memory/memory.limit_in_bytes"];
+export const CGROUP_LIMIT_MAX = 64 * 1024 * 1024 * 1024;
+export const BUILD_HEAP_SHARE = 0.75;
+export const BUILD_HEAP_MIN_MB = 512;
+export const BUILD_KILL_SIGNALS: string[] = ["SIGKILL", "SIGABRT"];
+
 export const LOG_DIR_NAME = "logs";
 export const LOG_ERROR_FILE_NAME = "error.log";
 export const LOG_DIR_MODE = 0o750;

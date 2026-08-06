@@ -46,6 +46,11 @@
       "import": "./dist/sanitize.mjs",
       "require": "./dist/sanitize.js"
     },
+    "./build": {
+      "types": "./dist/build.d.ts",
+      "import": "./dist/build.mjs",
+      "require": "./dist/build.js"
+    },
     "./console": {
       "types": "./dist/console/index.d.ts",
       "import": "./dist/console/index.mjs",
