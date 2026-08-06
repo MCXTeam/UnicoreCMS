@@ -29,6 +29,12 @@ export class KitsController {
     return this.kitsService.find(query);
   }
 
+  @Permissions([Permission.AdminDashboard, Permission.EditorStoreKitsDeleteMany])
+  @Delete('bulk')
+  removeMany(@Body() body: DeleteManyInput) {
+    return this.kitsService.removeMany(body.items);
+  }
+
   @Permissions([Permission.AdminDashboard, Permission.EditorStoreRead])
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
@@ -55,12 +61,6 @@ export class KitsController {
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.kitsService.remove(id);
-  }
-
-  @Permissions([Permission.AdminDashboard, Permission.EditorStoreKitsDeleteMany])
-  @Delete('bulk/:any')
-  removeMany(@Body() body: DeleteManyInput) {
-    return this.kitsService.removeMany(body.items);
   }
 
   @Permissions([Permission.AdminDashboard, Permission.EditorStoreKitsUpdate])

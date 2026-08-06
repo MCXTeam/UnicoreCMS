@@ -41,15 +41,15 @@
               </span>
             </div>
           </template>
-          <Column selectionMode="multiple" :styles="{ width: '3rem' }"></Column>
-          <Column field="id" header="ID" :styles="{ width: '8rem' }" sortable></Column>
+          <Column selectionMode="multiple" :style="{ width: '3rem' }"></Column>
+          <Column field="id" header="ID" :style="{ width: '8rem' }" sortable></Column>
           <Column field="title" header="Название" sortable />
           <Column field="created" header="Дата создания" sortable>
             <template #body="slotProps">
               {{ $moment(slotProps.data.created).format('D MMMM YYYY, HH:mm') }}
             </template>
           </Column>
-          <Column :styles="{ width: '12rem' }">
+          <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
               <Button @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary mr-2" />
@@ -75,7 +75,7 @@
                   <Button label="Удалить" icon="pi pi-trash" class="p-button-secondary mt-2" @click="removeImage()" />
                   <FileUpload
                     ref="fileInput"
-                    style="display: none"
+                    :pt="{ root: { class: 'hidden' } }"
                     mode="basic"
                     name="file"
                     accept="image/*"
@@ -97,7 +97,13 @@
             header="Создание/редактирование новости"
             class="p-fluid"
           >
-            <VeeField v-model="newsSingle.title" name="title" label="Название" rules="required" v-slot="{ value, errorMessage, handleChange }">
+            <VeeField
+              v-model="newsSingle.title"
+              name="title"
+              label="Название"
+              rules="required"
+              v-slot="{ value, errorMessage, handleChange }"
+            >
               <div class="field">
                 <label>Название</label>
                 <InputText :modelValue="value" @update:modelValue="handleChange" autofocus />
@@ -292,7 +298,7 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$api.delete('/news/bulk/', {
+            await this.$api.delete('/news/bulk', {
               data: {
                 items: this.selected.map((newsSingle) => newsSingle.id),
               },

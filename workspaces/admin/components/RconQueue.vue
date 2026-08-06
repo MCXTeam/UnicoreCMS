@@ -22,14 +22,14 @@
           <small class="command">{{ s.data.command }}</small>
         </template>
       </Column>
-      <Column header="Статус" :styles="{ width: '9rem' }">
+      <Column header="Статус" :style="{ width: '9rem' }">
         <template #body="s">
           <Tag :severity="statusSeverity(s.data.status)" :value="statusLabel(s.data.status)" />
           <div v-if="s.data.error" class="text-red-500 text-xs mt-1">{{ s.data.error }}</div>
         </template>
       </Column>
-      <Column field="attempts" header="Попытки" :styles="{ width: '6rem' }" />
-      <Column header="Создано" :styles="{ width: '11rem' }">
+      <Column field="attempts" header="Попытки" :style="{ width: '6rem' }" />
+      <Column header="Создано" :style="{ width: '11rem' }">
         <template #body="s">{{ $moment(s.data.created).format('DD.MM.YYYY HH:mm') }}</template>
       </Column>
       <template #empty>

@@ -41,16 +41,31 @@ body {
 .p-fluid {
   .p-inputtext,
   .p-inputnumber,
-  .p-dropdown,
   .p-select,
   .p-multiselect,
+  .p-autocomplete,
+  .p-inputchips,
   .p-textarea,
   .p-password,
-  .p-calendar,
   .p-datepicker,
   .p-editor,
-  textarea,
-  .p-component {
+  textarea {
     width: 100%;
+  }
+}
+
+.p-input-icon-left {
+  position: relative;
+
+  > i:first-of-type {
+    position: absolute;
+    top: 50%;
+    left: 0.75rem;
+    margin-top: -0.5rem;
+    color: var(--p-text-muted-color);
+  }
+
+  > .p-inputtext {
+    padding-left: 2.5rem;
   }
 }

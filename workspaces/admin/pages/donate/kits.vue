@@ -31,11 +31,11 @@
               <h5 class="m-0">Управление донат-китами</h5>
             </div>
           </template>
-          <Column :styles="{ width: '3rem' }" :rowReorder="true" headerStyle="width: 3rem" />
-          <Column selectionMode="multiple" :styles="{ width: '3rem' }"></Column>
-          <Column field="id" header="ID" :styles="{ width: '8rem' }"></Column>
+          <Column :style="{ width: '3rem' }" :rowReorder="true" headerStyle="width: 3rem" />
+          <Column selectionMode="multiple" :style="{ width: '3rem' }"></Column>
+          <Column field="id" header="ID" :style="{ width: '8rem' }"></Column>
           <Column field="name" header="Название"></Column>
-          <Column :styles="{ width: '12rem' }">
+          <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
               <Button @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary mr-2" />
@@ -57,7 +57,7 @@
                 <Button label="Удалить" icon="pi pi-trash" class="p-button-secondary mt-2" @click="removeImage(server.id)" />
                 <FileUpload
                   :ref="'imageInput-' + server.id"
-                  style="display: none"
+                  :pt="{ root: { class: 'hidden' } }"
                   mode="basic"
                   name="file"
                   accept="image/*"
@@ -283,7 +283,7 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$api.delete('/donates/group-kits/bulk/', {
+            await this.$api.delete('/donates/group-kits/bulk', {
               data: {
                 items: this.selected.map((kit) => kit.id),
               },

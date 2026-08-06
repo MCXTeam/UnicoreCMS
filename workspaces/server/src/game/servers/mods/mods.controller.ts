@@ -16,6 +16,12 @@ export class ModsController {
     return this.modsService.find(query);
   }
 
+  @Permissions([Permission.AdminDashboard, Permission.EditorModsDeleteMany])
+  @Delete('bulk')
+  removeMany(@Body() body: DeleteManyInput) {
+    return this.modsService.removeMany(body.items);
+  }
+
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.modsService.findOne(id);
@@ -37,12 +43,6 @@ export class ModsController {
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.modsService.remove(id);
-  }
-
-  @Permissions([Permission.AdminDashboard, Permission.EditorModsDeleteMany])
-  @Delete('bulk/:any')
-  removeMany(@Body() body: DeleteManyInput) {
-    return this.modsService.removeMany(body.items);
   }
 
   @Permissions([Permission.AdminDashboard, Permission.EditorModsUpdate])

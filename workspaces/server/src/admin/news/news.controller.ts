@@ -24,6 +24,12 @@ export class NewsController {
     return this.newsService.findForMap();
   }
 
+  @Delete('bulk')
+  @Permissions([Permission.AdminDashboard, Permission.EditorNewsDeleteMany])
+  removeMany(@Body() body: DeleteManyInput) {
+    return this.newsService.removeMany(body.items);
+  }
+
   @Public()
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
@@ -52,12 +58,6 @@ export class NewsController {
   @Permissions([Permission.AdminDashboard, Permission.EditorNewsDelete])
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.newsService.remove(id);
-  }
-
-  @Delete('bulk/:any')
-  @Permissions([Permission.AdminDashboard, Permission.EditorNewsDeleteMany])
-  removeMany(@Body() body: DeleteManyInput) {
-    return this.newsService.removeMany(body.items);
   }
 
   @Permissions([Permission.AdminDashboard, Permission.EditorNewsUpdate])

@@ -12,7 +12,7 @@
             </div>
           </template>
           <Column sortable field="title" header="Заголовок"></Column>
-          <Column :styles="{ width: '12rem' }">
+          <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
             </template>

@@ -40,6 +40,12 @@ export class GroupKitsController {
     return this.groupKitsService.find();
   }
 
+  @Permissions([Permission.AdminDashboard, Permission.EditorDonateKitsDeleteMany])
+  @Delete('bulk')
+  removeMany(@Body() body: DeleteManyInput) {
+    return this.groupKitsService.removeMany(body.items);
+  }
+
   @Permissions([Permission.AdminDashboard, Permission.EditorDonateRead])
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
@@ -62,12 +68,6 @@ export class GroupKitsController {
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.groupKitsService.remove(id);
-  }
-
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateKitsDeleteMany])
-  @Delete('bulk/:ids')
-  removeMany(@Body() body: DeleteManyInput) {
-    return this.groupKitsService.removeMany(body.items);
   }
 
   @Permissions([Permission.AdminDashboard, Permission.EditorDonateKitsUpdate])

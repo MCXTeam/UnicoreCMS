@@ -48,7 +48,7 @@ export default {
         skinUrl:
           this.skin && this.$_.get(this.skin, 'file')
             ? `${this.rc.apiBaseurl}/${this.$_.get(this.skin, 'file')}`
-            : `${this.rc.baseurl}/default.png`,
+            : '/default.png',
         width: this.width,
         height: this.height,
       })

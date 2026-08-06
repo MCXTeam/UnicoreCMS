@@ -32,9 +32,9 @@
               <h5 class="m-0">Управление донат-группами</h5>
             </div>
           </template>
-          <Column :styles="{ width: '3rem' }" :rowReorder="true" headerStyle="width: 3rem" />
-          <Column selectionMode="multiple" :styles="{ width: '3rem' }"></Column>
-          <Column field="id" header="ID" :styles="{ width: '8rem' }"></Column>
+          <Column :style="{ width: '3rem' }" :rowReorder="true" headerStyle="width: 3rem" />
+          <Column selectionMode="multiple" :style="{ width: '3rem' }"></Column>
+          <Column field="id" header="ID" :style="{ width: '8rem' }"></Column>
           <Column field="name" header="Название">
             <template #body="slotProps">
               <div class="flex align-items-center">
@@ -55,7 +55,7 @@
               <Tag class="mr-2 mb-2" v-for="server in slotProps.data.servers" :key="server.id" :value="server.name"></Tag>
             </template>
           </Column>
-          <Column :styles="{ width: '12rem' }">
+          <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
               <Button @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary mr-2" />
@@ -73,7 +73,7 @@
               <Button label="Удалить" icon="pi pi-trash" class="p-button-secondary mt-2" @click="removeIcon()" />
               <FileUpload
                 ref="fileInput"
-                style="display: none"
+                :pt="{ root: { class: 'hidden' } }"
                 mode="basic"
                 name="file"
                 accept="image/*"
@@ -162,6 +162,7 @@
                 :filter="true"
                 :options="kits"
                 optionLabel="name"
+                dataKey="id"
                 placeholder="Выберите киты"
                 class="p-column-filter"
                 appendTo="body"
@@ -204,19 +205,19 @@
                 @row-edit-save="onFeatureEditSave"
                 responsiveLayout="scroll"
               >
-                <Column :styles="{ width: '3rem' }" :rowReorder="true" headerStyle="width: 3rem" />
-                <Column field="title" header="Заголовок" :styles="{ width: '40%' }">
+                <Column :style="{ width: '3rem' }" :rowReorder="true" headerStyle="width: 3rem" />
+                <Column field="title" header="Заголовок" :style="{ width: '40%' }">
                   <template #editor="slotProps">
-                    <InputText v-model="slotProps.data[slotProps.column.field]" />
+                    <InputText v-model="slotProps.data[slotProps.field]" />
                   </template>
                 </Column>
-                <Column field="description" header="Описание" :styles="{ width: '50%' }">
+                <Column field="description" header="Описание" :style="{ width: '50%' }">
                   <template #editor="slotProps">
-                    <Textarea v-model="slotProps.data[slotProps.column.field]" :autoResize="true" />
+                    <Textarea v-model="slotProps.data[slotProps.field]" :autoResize="true" />
                   </template>
                 </Column>
-                <Column :rowEditor="true" :styles="{ width: '10%', 'min-width': '8rem' }" :bodyStyle="{ 'text-align': 'right' }"></Column>
-                <Column v-if="!features || !features.length" :styles="{ width: '3rem' }" :bodyStyle="{ 'text-align': 'center' }">
+                <Column :rowEditor="true" :style="{ width: '10%', 'min-width': '8rem' }" :bodyStyle="{ 'text-align': 'right' }"></Column>
+                <Column v-if="!features || !features.length" :style="{ width: '3rem' }" :bodyStyle="{ 'text-align': 'center' }">
                   <template #body="slotProps">
                     <Button
                       @click="removeFeature(slotProps.index)"
@@ -241,6 +242,7 @@
                     <InputNumber
                       :modelValue="value"
                       @update:modelValue="handleChange"
+                      @input="handleChange($event.value)"
                       @blur="handleBlur"
                       mode="decimal"
                       :minFractionDigits="realDecimals"
@@ -266,6 +268,7 @@
                       :useGrouping="false"
                       :modelValue="value"
                       @update:modelValue="handleChange"
+                      @input="handleChange($event.value)"
                       @blur="handleBlur"
                       :class="errorMessage && 'p-invalid'"
                     />
@@ -288,6 +291,7 @@
                   :useGrouping="false"
                   :modelValue="value"
                   @update:modelValue="handleChange"
+                  @input="handleChange($event.value)"
                   @blur="handleBlur"
                   :class="errorMessage && 'p-invalid'"
                 />
@@ -350,7 +354,7 @@ export default {
         web_perms: [],
         kits: [],
         periods: [],
-        virtual_percent: false,
+        virtual_percent: null,
       },
       groupDialog: false,
       autocompleate: null,
@@ -469,7 +473,7 @@ export default {
           web_perms: [],
           kits: [],
           periods: [],
-          virtual_percent: false,
+          virtual_percent: null,
         }
       }
       this.groupDialog = true
@@ -534,7 +538,7 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$api.delete('/donates/groups/bulk/', {
+            await this.$api.delete('/donates/groups/bulk', {
               data: {
                 items: this.selected.map((group) => group.id),
               },

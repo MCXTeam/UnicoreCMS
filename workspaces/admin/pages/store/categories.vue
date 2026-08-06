@@ -41,8 +41,8 @@
               </span>
             </div>
           </template>
-          <Column selectionMode="multiple" :styles="{ width: '3rem' }"></Column>
-          <Column sortable field="id" header="ID" :styles="{ width: '8rem' }"></Column>
+          <Column selectionMode="multiple" :style="{ width: '3rem' }"></Column>
+          <Column sortable field="id" header="ID" :style="{ width: '8rem' }"></Column>
           <Column sortable field="name" header="Название">
             <template #body="slotProps">
               <div class="flex align-items-center">
@@ -52,7 +52,7 @@
               </div>
             </template>
           </Column>
-          <Column :styles="{ width: '12rem' }">
+          <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
               <Button @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary mr-2" />
@@ -75,7 +75,7 @@
               <Button label="Удалить" icon="pi pi-trash" class="p-button-secondary mt-2" @click="removeIcon()" />
               <FileUpload
                 ref="fileInput"
-                style="display: none"
+                :pt="{ root: { class: 'hidden' } }"
                 mode="basic"
                 name="file"
                 accept="image/*"
@@ -344,7 +344,7 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$api.delete('/store/categories/bulk/', {
+            await this.$api.delete('/store/categories/bulk', {
               data: {
                 items: this.selected.map((category) => category.id),
               },

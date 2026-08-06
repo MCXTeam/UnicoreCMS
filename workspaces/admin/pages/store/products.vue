@@ -54,8 +54,8 @@
               </span>
             </div>
           </template>
-          <Column selectionMode="multiple" :styles="{ width: '3rem' }"></Column>
-          <Column field="id" header="ID" :styles="{ width: '8rem' }" sortable></Column>
+          <Column selectionMode="multiple" :style="{ width: '3rem' }"></Column>
+          <Column field="id" header="ID" :style="{ width: '8rem' }" sortable></Column>
           <Column field="name" header="Название" sortable>
             <template #body="slotProps">
               <div class="flex align-items-center">
@@ -121,7 +121,7 @@
               </AutoComplete>
             </template>
           </Column>
-          <Column :styles="{ width: '12rem' }">
+          <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
               <Button @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary mr-2" />
@@ -144,7 +144,7 @@
               <Button label="Удалить" icon="pi pi-trash" class="p-button-secondary mt-2" @click="removeIcon()" />
               <FileUpload
                 ref="fileInput"
-                style="display: none"
+                :pt="{ root: { class: 'hidden' } }"
                 mode="basic"
                 name="file"
                 accept="image/*"
@@ -219,6 +219,7 @@
                     <InputNumber
                       :modelValue="value"
                       @update:modelValue="handleChange"
+                      @input="handleChange($event.value)"
                       @blur="handleBlur"
                       mode="decimal"
                       :minFractionDigits="realDecimals"
@@ -244,6 +245,7 @@
                       :useGrouping="false"
                       :modelValue="value"
                       @update:modelValue="handleChange"
+                      @input="handleChange($event.value)"
                       @blur="handleBlur"
                     />
                     <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
@@ -428,7 +430,7 @@
             >
               <div class="field">
                 <label>Количество (кратно)</label>
-                <InputNumber :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" />
+                <InputNumber :modelValue="value" @update:modelValue="handleChange" @input="handleChange($event.value)" @blur="handleBlur" />
                 <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
                 <small>Количество данного товара для покупки должно быть кратно указанному числу</small>
               </div>
@@ -501,6 +503,7 @@
                     <InputNumber
                       :modelValue="value"
                       @update:modelValue="handleChange"
+                      @input="handleChange($event.value)"
                       @blur="handleBlur"
                       mode="decimal"
                       :minFractionDigits="realDecimals"
@@ -525,6 +528,7 @@
                       :useGrouping="false"
                       :modelValue="value"
                       @update:modelValue="handleChange"
+                      @input="handleChange($event.value)"
                       @blur="handleBlur"
                     />
                     <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
@@ -541,7 +545,14 @@
                 v-slot="{ value, errorMessage, handleChange, handleBlur }"
               >
                 <label>Индивидуальный процент оплаты бонусами</label>
-                <InputNumber suffix=" %" :useGrouping="false" :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" />
+                <InputNumber
+                  suffix=" %"
+                  :useGrouping="false"
+                  :modelValue="value"
+                  @update:modelValue="handleChange"
+                  @input="handleChange($event.value)"
+                  @blur="handleBlur"
+                />
                 <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
                 <small>0 - отключить оплату бонусами на данный товар</small>
               </VeeField>
@@ -862,7 +873,7 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$api.patch('/store/products/bulk/', {
+            await this.$api.patch('/store/products/bulk', {
               products: this.selected.map((select) => {
                 select = this.$_.pick(select, 'id')
 
@@ -904,7 +915,7 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$api.delete('/store/products/bulk/', {
+            await this.$api.delete('/store/products/bulk', {
               data: {
                 items: this.selected.map((product) => product.id),
               },

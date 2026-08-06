@@ -34,9 +34,9 @@
               <h5 class="m-0">Управление донат-правами</h5>
             </div>
           </template>
-          <Column :styles="{ width: '3rem' }" :rowReorder="true" headerStyle="width: 3rem" />
-          <Column selectionMode="multiple" :styles="{ width: '3rem' }"></Column>
-          <Column field="id" header="ID" :styles="{ width: '8rem' }"></Column>
+          <Column :style="{ width: '3rem' }" :rowReorder="true" headerStyle="width: 3rem" />
+          <Column selectionMode="multiple" :style="{ width: '3rem' }"></Column>
+          <Column field="id" header="ID" :style="{ width: '8rem' }"></Column>
           <Column field="name" header="Название"></Column>
           <Column field="price" header="Цена">
             <template #body="slotProps">
@@ -54,7 +54,7 @@
               <Tag class="mr-2 mb-2" v-for="server in slotProps.data.servers" :key="server.id" :value="server.name"></Tag>
             </template>
           </Column>
-          <Column :styles="{ width: '12rem' }">
+          <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
               <Button @click="removePermission(slotProps.data.id)" icon="pi pi-trash" class="p-button-rounded p-button-warning mt-2" />
@@ -146,6 +146,7 @@
                     <InputNumber
                       :modelValue="value"
                       @update:modelValue="handleChange"
+                      @input="handleChange($event.value)"
                       @blur="handleBlur"
                       mode="decimal"
                       :minFractionDigits="realDecimals"
@@ -171,6 +172,7 @@
                       :useGrouping="false"
                       :modelValue="value"
                       @update:modelValue="handleChange"
+                      @input="handleChange($event.value)"
                       @blur="handleBlur"
                       :class="errorMessage && 'p-invalid'"
                     />
@@ -193,6 +195,7 @@
                   :useGrouping="false"
                   :modelValue="value"
                   @update:modelValue="handleChange"
+                  @input="handleChange($event.value)"
                   @blur="handleBlur"
                   :class="errorMessage && 'p-invalid'"
                 />
@@ -303,7 +306,7 @@ export default {
         periods: [],
         perms: [],
         web_perms: [],
-        virtual_percent: false,
+        virtual_percent: null,
       },
       permissionDialog: false,
       types: [
@@ -370,7 +373,7 @@ export default {
           periods: [],
           perms: [],
           web_perms: [],
-          virtual_percent: false,
+          virtual_percent: null,
         }
       }
       this.permissionDialog = true
@@ -433,7 +436,7 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$api.delete('/donates/permissions/bulk/', {
+            await this.$api.delete('/donates/permissions/bulk', {
               data: {
                 items: this.selected.map((permission) => permission.id),
               },

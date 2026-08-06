@@ -42,12 +42,18 @@ export class DonateGroupsController {
   @Permissions([Permission.AdminDashboard, Permission.EditorDonateRead])
   @Get()
   find() {
-    return this.donateGroupsService.find(['servers']);
+    return this.donateGroupsService.find(['servers', 'kits', 'periods', 'features']);
   }
 
   @Get('me')
   me(@CurrentUser() user: User) {
     return this.donateGroupsService.me(user);
+  }
+
+  @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsDeleteMany])
+  @Delete('bulk')
+  removeMany(@Body() body: DeleteManyInput) {
+    return this.donateGroupsService.removeMany(body.items);
   }
 
   @Public()
@@ -90,12 +96,6 @@ export class DonateGroupsController {
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.donateGroupsService.remove(id);
-  }
-
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsDeleteMany])
-  @Delete('bulk/:ids')
-  removeMany(@Body() body: DeleteManyInput) {
-    return this.donateGroupsService.removeMany(body.items);
   }
 
   @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsUpdate])

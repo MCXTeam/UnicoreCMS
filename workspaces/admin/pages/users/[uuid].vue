@@ -55,7 +55,7 @@
         >
           <div class="field">
             <label>Количество</label>
-            <InputNumber :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" />
+            <InputNumber :modelValue="value" @update:modelValue="handleChange" @input="handleChange($event.value)" @blur="handleBlur" />
             <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
           </div>
         </VeeField>
@@ -187,7 +187,13 @@
         header="Выдача донат-права игроку"
         class="p-fluid"
       >
-        <VeeField v-model="udpForm.permission" name="permission" label="Право" rules="required" v-slot="{ value, errorMessage, handleChange }">
+        <VeeField
+          v-model="udpForm.permission"
+          name="permission"
+          label="Право"
+          rules="required"
+          v-slot="{ value, errorMessage, handleChange }"
+        >
           <div class="field">
             <label>Право</label>
             <Select :modelValue="value" @update:modelValue="handleChange" :options="donatePermissions" optionLabel="name" appendTo="body">
@@ -259,7 +265,7 @@
                     </div>
                     <FileUpload
                       ref="skinInput"
-                      style="display: none"
+                      :pt="{ root: { class: 'hidden' } }"
                       mode="basic"
                       name="file"
                       accept="image/png"
@@ -275,7 +281,7 @@
                     </div>
                     <FileUpload
                       ref="cloakInput"
-                      style="display: none"
+                      :pt="{ root: { class: 'hidden' } }"
                       mode="basic"
                       name="file"
                       accept="image/png"
@@ -395,7 +401,7 @@
                     v-model="passwordForm.password"
                     name="password"
                     label="Пароль"
-                    rules="required|min:6|max:32"
+                    rules="required|min:8|max:128"
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
@@ -511,7 +517,7 @@
                     />
                   </template>
                 </Column>
-                <Column :styles="{ width: '4rem' }">
+                <Column :style="{ width: '4rem' }" :bodyStyle="{ 'text-align': 'right' }">
                   <template #body="slotProps">
                     <Button @click="updateMoney(slotProps.data.server.id)" icon="pi pi-check" class="p-button-rounded mt-2" />
                   </template>
@@ -552,7 +558,7 @@
                   {{ slotProps.data.expired ? $moment(slotProps.data.expired).format('D MMMM YYYY, HH:mm') : 'Никогда' }}
                 </template>
               </Column>
-              <Column :styles="{ width: '4rem' }">
+              <Column :style="{ width: '4rem' }" :bodyStyle="{ 'text-align': 'right' }">
                 <template #body="slotProps">
                   <Button @click="takeDonateGroup(slotProps.data.id)" icon="pi pi-trash" class="p-button-rounded p-button-danger mt-2" />
                 </template>
@@ -587,7 +593,7 @@
                   {{ slotProps.data.expired ? $moment(slotProps.data.expired).format('D MMMM YYYY, HH:mm') : 'Никогда' }}
                 </template>
               </Column>
-              <Column :styles="{ width: '4rem' }">
+              <Column :style="{ width: '4rem' }" :bodyStyle="{ 'text-align': 'right' }">
                 <template #body="slotProps">
                   <Button
                     @click="takeDonatePermission(slotProps.data.id)"
@@ -621,7 +627,7 @@
             <Button label="Выдать товар" class="p-button mr-2 mb-2" @click="showProductDialog()" />
             <Button label="Выдать кит" class="p-button mr-2 mb-2" @click="showKitDialog()" />
             <DataTable :value="warehouse" :loading="wh_loading" responsiveLayout="scroll" dataKey="id">
-              <Column field="id" header="ID" :styles="{ width: '8rem' }" sortable></Column>
+              <Column field="id" header="ID" :style="{ width: '8rem' }" sortable></Column>
               <Column field="name" header="Название" sortable>
                 <template #body="slotProps">
                   <div class="flex align-items-center">
@@ -648,7 +654,7 @@
                   ></Tag>
                 </template>
               </Column>
-              <Column :styles="{ width: '4rem' }">
+              <Column :style="{ width: '4rem' }" :bodyStyle="{ 'text-align': 'right' }">
                 <template #body="slotProps">
                   <Button @click="removeWHItem(slotProps.data.id)" icon="pi pi-trash" class="p-button-rounded p-button-warning mt-2" />
                 </template>

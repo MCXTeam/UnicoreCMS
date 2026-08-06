@@ -18,7 +18,7 @@
           </template>
           <Column sortable field="key" header="Ключ"></Column>
           <Column sortable field="value" header="Значение"></Column>
-          <Column :styles="{ width: '12rem' }">
+          <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
               <Button

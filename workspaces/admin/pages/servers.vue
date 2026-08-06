@@ -29,8 +29,8 @@
               <h5 class="m-0">Управление серверами</h5>
             </div>
           </template>
-          <Column :styles="{ width: '3rem' }" :rowReorder="true" headerStyle="width: 3rem" />
-          <Column field="id" header="ID" :styles="{ width: '8rem' }"></Column>
+          <Column :style="{ width: '3rem' }" :rowReorder="true" headerStyle="width: 3rem" />
+          <Column field="id" header="ID" :style="{ width: '8rem' }"></Column>
           <Column field="name" header="Название">
             <template #body="slotProps">
               <div class="flex align-items-center">
@@ -40,7 +40,7 @@
               </div>
             </template>
           </Column>
-          <Column :styles="{ width: '12rem' }">
+          <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
               <Button @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary mr-2" />
@@ -67,7 +67,7 @@
                 <Button label="Удалить" icon="pi pi-trash" class="p-button-secondary mt-2" @click="removeMedia('icon')" />
                 <FileUpload
                   ref="iconInput"
-                  style="display: none"
+                  :pt="{ root: { class: 'hidden' } }"
                   mode="basic"
                   name="file"
                   accept="image/*"
@@ -90,7 +90,7 @@
                 <Button label="Удалить" icon="pi pi-trash" class="p-button-secondary mt-2" @click="removeMedia('image')" />
                 <FileUpload
                   ref="imageInput"
-                  style="display: none"
+                  :pt="{ root: { class: 'hidden' } }"
                   mode="basic"
                   name="file"
                   accept="image/*"
@@ -232,23 +232,23 @@
                     @row-edit-save="onRowEditSave"
                     responsiveLayout="scroll"
                   >
-                    <Column :styles="{ width: '3rem' }" :rowReorder="true" headerStyle="width: 3rem" />
-                    <Column field="title" header="Заголовок" :styles="{ width: '40%' }">
+                    <Column :style="{ width: '3rem' }" :rowReorder="true" headerStyle="width: 3rem" />
+                    <Column field="title" header="Заголовок" :style="{ width: '40%' }">
                       <template #editor="slotProps">
-                        <InputText v-model="slotProps.data[slotProps.column.field]" />
+                        <InputText v-model="slotProps.data[slotProps.field]" />
                       </template>
                     </Column>
-                    <Column field="description" header="Описание" :styles="{ width: '50%' }">
+                    <Column field="description" header="Описание" :style="{ width: '50%' }">
                       <template #editor="slotProps">
-                        <Textarea v-model="slotProps.data[slotProps.column.field]" :autoResize="true" />
+                        <Textarea v-model="slotProps.data[slotProps.field]" :autoResize="true" />
                       </template>
                     </Column>
                     <Column
                       :rowEditor="true"
-                      :styles="{ width: '10%', 'min-width': '8rem' }"
+                      :style="{ width: '10%', 'min-width': '8rem' }"
                       :bodyStyle="{ 'text-align': 'right' }"
                     ></Column>
-                    <Column v-if="!table || !table.length" :styles="{ width: '3rem' }" :bodyStyle="{ 'text-align': 'center' }">
+                    <Column v-if="!table || !table.length" :style="{ width: '3rem' }" :bodyStyle="{ 'text-align': 'center' }">
                       <template #body="slotProps">
                         <Button
                           @click="removeRow(slotProps.index)"
@@ -294,6 +294,7 @@
                       :useGrouping="false"
                       :modelValue="value"
                       @update:modelValue="handleChange"
+                      @input="handleChange($event.value)"
                       @blur="handleBlur"
                       :class="errorMessage && 'p-invalid'"
                     />

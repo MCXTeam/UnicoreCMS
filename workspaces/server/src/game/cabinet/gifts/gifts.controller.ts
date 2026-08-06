@@ -32,6 +32,12 @@ export class GiftsController {
     return this.giftsService.find();
   }
 
+  @Permissions([Permission.AdminDashboard, Permission.EditorCabinetGiftsDeleteMany])
+  @Delete('bulk')
+  removeMany(@Body() body: DeleteManyInput) {
+    return this.giftsService.removeMany(body.items);
+  }
+
   @Permissions([Permission.AdminDashboard, Permission.EditorCabinetGiftsRead])
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
@@ -56,9 +62,4 @@ export class GiftsController {
     return this.giftsService.remove(id);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorCabinetGiftsDeleteMany])
-  @Delete('bulk/:ids')
-  removeMany(@Body() body: DeleteManyInput) {
-    return this.giftsService.removeMany(body.items);
-  }
 }

@@ -37,7 +37,7 @@
         v-model="login.password"
         name="password"
         label="Пароль"
-        rules="required|min:6|max:32"
+        rules="required"
         v-slot="{ value, errorMessage, handleChange, handleBlur }"
       >
         <div class="field p-fluid mb-3">

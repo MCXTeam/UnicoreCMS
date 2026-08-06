@@ -23,6 +23,12 @@ export class WebhooksController {
     return this.webhooksService.find();
   }
 
+  @Permissions([Permission.AdminWebhooksDeleteMany])
+  @Delete('webhooks/bulk')
+  removeMany(@Body() body: DeleteManyInput) {
+    return this.webhooksService.removeMany(body.items);
+  }
+
   @Permissions([Permission.AdminWebhooksRead])
   @Get('webhooks/:id')
   findOne(@Param('id', ParseIntPipe) id: number) {
@@ -47,9 +53,4 @@ export class WebhooksController {
     return this.webhooksService.remove(id);
   }
 
-  @Permissions([Permission.AdminWebhooksDeleteMany])
-  @Delete('webhooks/bulk/:any')
-  removeMany(@Body() body: DeleteManyInput) {
-    return this.webhooksService.removeMany(body.items);
-  }
 }

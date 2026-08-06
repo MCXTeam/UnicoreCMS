@@ -74,7 +74,11 @@ export class DonateGroupsService {
             group.kits.map((kit) => ({
               ...kit,
               priority: kit.priority ? kit.priority : 0,
-              images: _(kit.images.map((image) => ({ ...image, priority: image.server.priority ? image.server.priority : 0 })))
+              images: _(
+                kit.images
+                  .filter((image) => image.server.id == id)
+                  .map((image) => ({ ...image, priority: image.server.priority ? image.server.priority : 0 })),
+              )
                 .orderBy(['server.priority', 'id'], ['asc', 'asc'])
                 .value(),
             })),

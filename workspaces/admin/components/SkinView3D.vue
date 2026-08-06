@@ -74,7 +74,7 @@ export default {
       this.viewer.loadSkin(
         this.skin && this.$_.get(this.skin, 'file')
           ? `${this.rc.apiBaseurl}/${this.$_.get(this.skin, 'file')}`
-          : `${this.rc.baseurl}/default.png`,
+          : '/default.png',
       )
     },
 

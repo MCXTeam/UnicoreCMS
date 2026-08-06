@@ -38,8 +38,8 @@
               </span>
             </div>
           </template>
-          <Column selectionMode="multiple" :styles="{ width: '3rem' }"></Column>
-          <Column sortable field="id" header="ID" :styles="{ width: '8rem' }"></Column>
+          <Column selectionMode="multiple" :style="{ width: '3rem' }"></Column>
+          <Column sortable field="id" header="ID" :style="{ width: '8rem' }"></Column>
           <Column field="promocode" header="Промо-код" sortable></Column>
           <Column field="type" header="Тип" sortable>
             <template #body="slotProps">
@@ -60,7 +60,7 @@
               {{ slotProps.data.expires ? $moment(slotProps.data.expires).format('MM/DD/YYYY HH:mm:ss') : '∞' }}
             </template>
           </Column>
-          <Column :styles="{ width: '12rem' }">
+          <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
               <Button @click="removeGift(slotProps.data.id)" icon="pi pi-trash" class="p-button-rounded p-button-warning mt-2" />
@@ -103,7 +103,7 @@
             >
               <div class="field">
                 <label>Количество использований</label>
-                <InputNumber :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" />
+                <InputNumber :modelValue="value" @update:modelValue="handleChange" @input="handleChange($event.value)" @blur="handleBlur" />
                 <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
             </VeeField>
@@ -239,7 +239,12 @@
               >
                 <div class="field">
                   <label>Количество</label>
-                  <InputNumber :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" />
+                  <InputNumber
+                    :modelValue="value"
+                    @update:modelValue="handleChange"
+                    @input="handleChange($event.value)"
+                    @blur="handleBlur"
+                  />
                   <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
                 </div>
               </VeeField>
@@ -442,7 +447,7 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$api.delete('/cabinet/gifts/bulk/', {
+            await this.$api.delete('/cabinet/gifts/bulk', {
               data: {
                 items: this.selected.map((gift) => gift.id),
               },

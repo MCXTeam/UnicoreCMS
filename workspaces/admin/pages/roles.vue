@@ -36,7 +36,7 @@
             </template>
           </Column>
           <Column field="priority" header="Приоритет"></Column>
-          <Column :styles="{ width: '8rem' }">
+          <Column :style="{ width: '8rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
               <Button
@@ -114,7 +114,7 @@
             >
               <div class="field">
                 <label>Приоритет</label>
-                <InputNumber :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" />
+                <InputNumber :modelValue="value" @update:modelValue="handleChange" @input="handleChange($event.value)" @blur="handleBlur" />
                 <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
             </VeeField>

@@ -72,9 +72,10 @@ export default defineNuxtConfig({
 
   vite: {
     resolve: {
-      alias: {
-        'moment-timezone': 'moment-timezone/builds/moment-timezone-with-data-10-year-range',
-      },
+      alias: [
+        { find: /^moment-timezone$/, replacement: 'moment-timezone/builds/moment-timezone-with-data-10-year-range' },
+        { find: /^moment$/, replacement: 'moment/moment.js' },
+      ],
     },
   },
 

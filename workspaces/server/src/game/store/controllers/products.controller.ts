@@ -20,6 +20,18 @@ export class ProductsController {
     return this.productsService.find(query);
   }
 
+  @Permissions([Permission.AdminDashboard, Permission.EditorStoreProductsDeleteMany])
+  @Delete('bulk')
+  removeMany(@Body() body: DeleteManyInput) {
+    return this.productsService.removeMany(body.items);
+  }
+
+  @Permissions([Permission.AdminDashboard, Permission.EditorStoreProductsUpdateMany])
+  @Patch('bulk')
+  updateMany(@Body() body: ProductsManyInput) {
+    return this.productsService.updateMany(body);
+  }
+
   @Permissions([Permission.AdminDashboard, Permission.EditorStoreRead])
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
@@ -88,18 +100,6 @@ export class ProductsController {
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.productsService.remove(id);
-  }
-
-  @Permissions([Permission.AdminDashboard, Permission.EditorStoreProductsDeleteMany])
-  @Delete('bulk/:ids')
-  removeMany(@Body() body: DeleteManyInput) {
-    return this.productsService.removeMany(body.items);
-  }
-
-  @Permissions([Permission.AdminDashboard, Permission.EditorStoreProductsUpdateMany])
-  @Patch('bulk/:ids')
-  updateMany(@Body() body: ProductsManyInput) {
-    return this.productsService.updateMany(body);
   }
 
   @Permissions([Permission.AdminDashboard, Permission.EditorStoreProductsUpdate])

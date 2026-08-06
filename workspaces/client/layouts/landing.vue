@@ -1,40 +1,42 @@
 <template>
   <div>
     <ClientOnly>
-      <nav class="vs-navbar d-flex align-items-center justify-content-between py-2">
-        <div class="d-flex align-items-center">
-          <Button @click="activeSidebar = true" class="d-lg-none d-md-block me-4" text>
-            <i class="bx bx-menu"></i>
-          </Button>
-          <NuxtLink to="/" class="d-flex align-items-center without-underline">
-            <img class="my-1" src="/icon.png" height="64px" />
-            <h2 class="ms-3 my-0 d-none d-md-block">{{ $pub.sitename }}</h2>
-          </NuxtLink>
-          <NuxtLink to="/servers" class="vs-navbar__item d-none d-lg-block"> <i class="bx bx-server"></i> Серверы </NuxtLink>
-          <a :href="config.public_link_forum" target="_blank" class="vs-navbar__item d-none d-lg-block">
-            <i class="bx bx-chat"></i> Форум
-          </a>
-          <NuxtLink to="/page/rules" class="vs-navbar__item d-none d-lg-block"> <i class="bx bx-paperclip"></i> Правила </NuxtLink>
-          <NuxtLink to="/donate" class="vs-navbar__item d-none d-lg-block"> <i class="bx bx-donate-heart"></i> Донат </NuxtLink>
-        </div>
-        <div class="d-flex align-items-center">
-          <div class="d-flex align-items-center" v-if="$auth.loggedIn">
-            <NuxtLink to="/start"
-              ><Button size="large">Скачать лаунчер <i class="bx bxl-windows"></i></Button
-            ></NuxtLink>
+      <div class="vs-navbar-content paddingScroll" :class="{ paddingScrollActive: scrolled }">
+        <nav class="vs-navbar d-flex align-items-center justify-content-between py-2">
+          <div class="d-flex align-items-center">
+            <Button @click="activeSidebar = true" class="d-lg-none d-md-block me-4" text>
+              <i class="bx bx-menu"></i>
+            </Button>
+            <NuxtLink to="/" class="d-flex align-items-center without-underline">
+              <img class="my-1" src="/icon.png" height="64px" />
+              <h2 class="ms-3 my-0 d-none d-md-block">{{ $pub.sitename }}</h2>
+            </NuxtLink>
+            <NuxtLink to="/servers" class="vs-navbar__item d-none d-lg-block"> <i class="bx bx-server"></i> Серверы </NuxtLink>
+            <a :href="config.public_link_forum" target="_blank" class="vs-navbar__item d-none d-lg-block">
+              <i class="bx bx-chat"></i> Форум
+            </a>
+            <NuxtLink to="/page/rules" class="vs-navbar__item d-none d-lg-block"> <i class="bx bx-paperclip"></i> Правила </NuxtLink>
+            <NuxtLink to="/donate" class="vs-navbar__item d-none d-lg-block"> <i class="bx bx-donate-heart"></i> Донат </NuxtLink>
           </div>
-          <div class="d-flex" v-else>
-            <NuxtLink to="/auth" class="d-none d-md-block"><Button size="large" text>Войти</Button></NuxtLink>
-            <NuxtLink to="/start"
-              ><Button size="large">Начать игру <i class="bx bx-play"></i></Button
-            ></NuxtLink>
+          <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center" v-if="$auth.loggedIn">
+              <NuxtLink to="/start"
+                ><Button size="large">Скачать лаунчер <i class="bx bxl-windows"></i></Button
+              ></NuxtLink>
+            </div>
+            <div class="d-flex" v-else>
+              <NuxtLink to="/auth" class="d-none d-md-block"><Button size="large" text>Войти</Button></NuxtLink>
+              <NuxtLink to="/start"
+                ><Button size="large">Начать игру <i class="bx bx-play"></i></Button
+              ></NuxtLink>
+            </div>
+            <div class="ms-2 d-none d-lg-block" style="font-size: 1.5rem">
+              <i v-if="$colorMode.preference == 'light'" @click="$unicore.switchTheme()" class="bx bxs-sun" style="cursor: pointer"></i>
+              <i v-else @click="$unicore.switchTheme()" class="bx bxs-moon" style="cursor: pointer"></i>
+            </div>
           </div>
-          <div class="ms-2 d-none d-lg-block" style="font-size: 1.5rem">
-            <i v-if="$colorMode.preference == 'light'" @click="$unicore.switchTheme()" class="bx bxs-sun" style="cursor: pointer"></i>
-            <i v-else @click="$unicore.switchTheme()" class="bx bxs-moon" style="cursor: pointer"></i>
-          </div>
-        </div>
-      </nav>
+        </nav>
+      </div>
       <Drawer v-model:visible="activeSidebar" class="vs-sidebar">
         <template #header>
           <img src="/icon.png" height="48px" />
@@ -120,9 +122,20 @@ const onlines = computed(() => ioStore.serversOnline)
 const config = computed(() => configStore.config)
 
 const activeSidebar = ref(false)
+const scrolled = ref(false)
+
+function onScroll() {
+  scrolled.value = window.scrollY > 0
+}
 
 onMounted(() => {
   $socket?.emit('servers/online', {}, (res) => ioStore.setServersOnline(res))
+  onScroll()
+  window.addEventListener('scroll', onScroll, { passive: true })
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', onScroll)
 })
 
 watch(

@@ -10,12 +10,12 @@
     max-height: 300px;
 
     .header-render {
-      transform: translateX(1000px);
+      transform: translateX(100vw);
     }
 
     .header-content {
       position: absolute;
-      transform: translateX(-1300px);
+      transform: translateX(-100vw);
     }
 
     .header-waves {

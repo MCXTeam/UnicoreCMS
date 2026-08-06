@@ -32,7 +32,7 @@
           <Column field="bonus" header="Бонуск пополнению">
             <template #body="slotProps"> {{ slotProps.data.bonus }}% </template>
           </Column>
-          <Column :styles="{ width: '12rem' }">
+          <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
               <Button @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary mr-2" />
@@ -50,7 +50,7 @@
               <Button label="Удалить" icon="pi pi-trash" class="p-button-secondary mt-2" @click="removeIcon()" />
               <FileUpload
                 ref="fileInput"
-                style="display: none"
+                :pt="{ root: { class: 'hidden' } }"
                 mode="basic"
                 name="file"
                 accept="image/*"
@@ -71,12 +71,19 @@
             header="Создание/редактирование бонуса"
             class="p-fluid"
           >
-            <VeeField v-model="bonus.amount" name="amount" label="Сумма" rules="required|min:0" v-slot="{ value, errorMessage, handleChange }">
+            <VeeField
+              v-model="bonus.amount"
+              name="amount"
+              label="Сумма"
+              rules="required|min:0"
+              v-slot="{ value, errorMessage, handleChange }"
+            >
               <div class="field">
                 <label>Сумма (условие >=)</label>
                 <InputNumber
                   :modelValue="value"
                   @update:modelValue="handleChange"
+                  @input="handleChange($event.value)"
                   mode="decimal"
                   :minFractionDigits="runtimeConfig.realDecimals"
                   :maxFractionDigits="runtimeConfig.realDecimals"
@@ -93,7 +100,7 @@
             >
               <div class="field">
                 <label>Бонус к пополнению</label>
-                <InputNumber :modelValue="value" @update:modelValue="handleChange" suffix="%" />
+                <InputNumber :modelValue="value" @update:modelValue="handleChange" @input="handleChange($event.value)" suffix="%" />
                 <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
             </VeeField>

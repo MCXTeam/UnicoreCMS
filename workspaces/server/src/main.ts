@@ -40,15 +40,15 @@ async function bootstrap() {
     SwaggerModule.setup('docs', app, document);
   }
 
+  app.enableCors({
+    origin: envConfig.corsOrigins,
+    credentials: true,
+  });
   app.useStaticAssets(join(__dirname, '../../../storage'));
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
   app.useWebSocketAdapter(new AuthAdapter(app));
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.useGlobalFilters(new EntityNotFoundFilter());
-  app.enableCors({
-    origin: envConfig.corsOrigins,
-    credentials: true,
-  });
 
   await app.listen(envConfig.backendPort, '0.0.0.0');
 }

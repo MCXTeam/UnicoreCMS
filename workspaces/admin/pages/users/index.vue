@@ -41,7 +41,7 @@
               </span>
             </div>
           </template>
-          <Column selectionMode="multiple" :styles="{ width: '3rem' }"></Column>
+          <Column selectionMode="multiple" :style="{ width: '3rem' }"></Column>
           <Column field="username" header="Имя пользователя" sortable>
             <template #body="slotProps">
               <div class="flex align-items-center">
@@ -62,7 +62,7 @@
               <Tag class="mr-2 mb-2" v-for="role in slotProps.data.roles" :key="role.id" :value="role.name"></Tag>
             </template>
           </Column>
-          <Column :styles="{ width: '12rem' }">
+          <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <NuxtLink :to="`/users/` + slotProps.data.uuid">
                 <Button icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
@@ -151,7 +151,7 @@
             v-model="user.password"
             name="password"
             label="Пароль"
-            rules="required|min:6|max:32"
+            rules="required|min:8|max:128"
             v-slot="{ value, errorMessage, handleChange, handleBlur }"
           >
             <div class="field">
@@ -341,7 +341,7 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$api.delete('/users/bulk/', {
+            await this.$api.delete('/users/bulk', {
               data: {
                 items: this.selected.map((user) => user.uuid),
               },

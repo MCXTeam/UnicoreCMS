@@ -34,6 +34,13 @@ export class UsersController {
     return new PaginatedUsersDto(await this.usersService.findAll(query));
   }
 
+  @Permissions([Permission.AdminDashboard, Permission.AdminUsersDeleteMany])
+  @ApiOperation({ summary: 'Удалить несколько пользователей' })
+  @Delete('bulk')
+  removeMany(@CurrentUser() actor: User, @Body() body: DeleteManyUuidInput) {
+    return this.usersService.deleteMany(body, actor);
+  }
+
   @Permissions([Permission.AdminDashboard, Permission.AdminUsersRead])
   @ApiOperation({ summary: 'Найти одного пользователя' })
   @Get(':uuid')
@@ -62,13 +69,6 @@ export class UsersController {
   @Delete(':uuid')
   async remove(@CurrentUser() actor: User, @Param('uuid') uuid: string) {
     return new UserDto(await this.usersService.delete(uuid, actor));
-  }
-
-  @Permissions([Permission.AdminDashboard, Permission.AdminUsersDeleteMany])
-  @ApiOperation({ summary: 'Удалить несколько пользователей' })
-  @Delete('bulk/:ids')
-  removeMany(@CurrentUser() actor: User, @Body() body: DeleteManyUuidInput) {
-    return this.usersService.deleteMany(body, actor);
   }
 
   @Public()

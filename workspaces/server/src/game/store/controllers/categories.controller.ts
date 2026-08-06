@@ -4,7 +4,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { Permission } from 'unicore-common';
-import { Category } from '../entities/category.entity';
+import { CategoryInput } from '../dto/category.input';
 import { CategoriesService } from '../providers/categories.service';
 
 @Controller('store/categories')
@@ -19,13 +19,19 @@ export class CategoriesController {
 
   @Permissions([Permission.AdminDashboard, Permission.EditorStoreCategoryCreate])
   @Post()
-  create(@Body() body: Category) {
+  create(@Body() body: CategoryInput) {
     return this.categoriesService.create(body);
+  }
+
+  @Permissions([Permission.AdminDashboard, Permission.EditorStoreCategoryDeleteMany])
+  @Delete('bulk')
+  removeMany(@Body() body: DeleteManyInput) {
+    return this.categoriesService.removeMany(body.items);
   }
 
   @Permissions([Permission.AdminDashboard, Permission.EditorStoreCategoryUpdate])
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() body: Category) {
+  update(@Param('id', ParseIntPipe) id: number, @Body() body: CategoryInput) {
     return this.categoriesService.update(id, body);
   }
 
@@ -33,12 +39,6 @@ export class CategoriesController {
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.categoriesService.remove(id);
-  }
-
-  @Permissions([Permission.AdminDashboard, Permission.EditorStoreCategoryDeleteMany])
-  @Delete('bulk/:any')
-  removeMany(@Body() body: DeleteManyInput) {
-    return this.categoriesService.removeMany(body.items);
   }
 
   @Permissions([Permission.AdminDashboard, Permission.EditorStoreCategoryUpdate])

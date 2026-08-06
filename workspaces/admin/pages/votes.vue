@@ -24,7 +24,7 @@
           <Column field="bonus" header="Бонус">
             <template #body="slotProps"> {{ $utils.formatCurrency('real', slotProps.data.bonus) }} </template>
           </Column>
-          <Column :styles="{ width: '12rem' }">
+          <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
               <Button @click="removeBonus(slotProps.data.id)" icon="pi pi-trash" class="p-button-rounded p-button-warning mt-2" />
@@ -41,10 +41,16 @@
             header="Создание/редактирование бонуса"
             class="p-fluid"
           >
-            <VeeField v-model="bonus.place" name="place" label="Место" rules="required|min:0" v-slot="{ value, errorMessage, handleChange }">
+            <VeeField
+              v-model="bonus.place"
+              name="place"
+              label="Место"
+              rules="required|min:0"
+              v-slot="{ value, errorMessage, handleChange }"
+            >
               <div class="field">
                 <label>Место</label>
-                <InputNumber :modelValue="value" @update:modelValue="handleChange" />
+                <InputNumber :modelValue="value" @update:modelValue="handleChange" @input="handleChange($event.value)" />
                 <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
             </VeeField>
@@ -60,6 +66,7 @@
                 <InputNumber
                   :modelValue="value"
                   @update:modelValue="handleChange"
+                  @input="handleChange($event.value)"
                   mode="decimal"
                   :minFractionDigits="runtimeConfig.realDecimals"
                   :maxFractionDigits="runtimeConfig.realDecimals"

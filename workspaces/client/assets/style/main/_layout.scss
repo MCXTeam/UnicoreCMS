@@ -96,9 +96,10 @@ a:visited {
     text-underline-offset: 5px;
   }
 
-  &.without-underline {
+  &.without-underline,
+  &.p-button {
     &:hover {
-      text-decoration: none !important;
+      text-decoration: none;
     }
   }
 }
@@ -231,6 +232,15 @@ hr {
     td {
       position: relative;
       padding: 7px 0;
+    }
+
+    td:not(:first-child) {
+      width: 1%;
+      white-space: nowrap;
+    }
+
+    td:nth-child(2):not(:last-child) {
+      min-width: 160px;
     }
   }
 

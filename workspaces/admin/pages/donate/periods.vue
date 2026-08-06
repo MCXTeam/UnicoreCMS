@@ -38,7 +38,7 @@
           <Column field="multiplier" header="Множитель">
             <template #body="slotProps"> x{{ slotProps.data.multiplier }} </template>
           </Column>
-          <Column :styles="{ width: '8rem' }">
+          <Column :style="{ width: '8rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
               <Button @click="removePeriod(slotProps.data.id)" icon="pi pi-trash" class="p-button-rounded p-button-warning mt-2" />
@@ -80,6 +80,7 @@
                 <InputNumber
                   :modelValue="value"
                   @update:modelValue="handleChange"
+                  @input="handleChange($event.value)"
                   @blur="handleBlur"
                   suffix=" сек."
                   :class="errorMessage && 'p-invalid'"
@@ -99,6 +100,7 @@
                 <InputNumber
                   :modelValue="value"
                   @update:modelValue="handleChange"
+                  @input="handleChange($event.value)"
                   @blur="handleBlur"
                   mode="decimal"
                   :min-fraction-digits="2"

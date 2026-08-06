@@ -43,8 +43,8 @@
               </span>
             </div>
           </template>
-          <Column selectionMode="multiple" :styles="{ width: '3rem' }"></Column>
-          <Column field="id" header="ID" :styles="{ width: '8rem' }" sortable></Column>
+          <Column selectionMode="multiple" :style="{ width: '3rem' }"></Column>
+          <Column field="id" header="ID" :style="{ width: '8rem' }" sortable></Column>
           <Column field="name" header="Название" sortable>
             <template #body="slotProps">
               <div class="flex align-items-center">
@@ -110,7 +110,7 @@
               </AutoComplete>
             </template>
           </Column>
-          <Column :styles="{ width: '12rem' }">
+          <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
               <Button @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary mr-2" />
@@ -133,7 +133,7 @@
               <Button label="Удалить" icon="pi pi-trash" class="p-button-secondary mt-2" @click="removeIcon()" />
               <FileUpload
                 ref="fileInput"
-                style="display: none"
+                :pt="{ root: { class: 'hidden' } }"
                 mode="basic"
                 name="file"
                 accept="image/*"
@@ -197,7 +197,7 @@
                 @row-edit-save="onKitItemEditSave"
                 responsiveLayout="scroll"
               >
-                <Column field="product" header="Товар из магазина" :styles="{ width: '40%' }">
+                <Column field="product" header="Товар из магазина" :style="{ width: '40%' }">
                   <template #body="slotProps">
                     <div class="flex align-items-center">
                       <Avatar
@@ -227,13 +227,13 @@
                     </AutoComplete>
                   </template>
                 </Column>
-                <Column field="amount" header="Количество" :styles="{ width: '50%' }">
+                <Column field="amount" header="Количество" :style="{ width: '50%' }">
                   <template #editor="slotProps">
                     <InputNumber v-model="slotProps.data[slotProps.field]" />
                   </template>
                 </Column>
-                <Column :rowEditor="true" :styles="{ width: '10%', 'min-width': '8rem' }" :bodyStyle="{ 'text-align': 'right' }"></Column>
-                <Column v-if="!kitItems || !kitItems.length" :styles="{ width: '3rem' }" :bodyStyle="{ 'text-align': 'center' }">
+                <Column :rowEditor="true" :style="{ width: '10%', 'min-width': '8rem' }" :bodyStyle="{ 'text-align': 'right' }"></Column>
+                <Column v-if="!kitItems || !kitItems.length" :style="{ width: '3rem' }" :bodyStyle="{ 'text-align': 'center' }">
                   <template #body="slotProps">
                     <Button
                       @click="removeKitItem(slotProps.index)"
@@ -298,6 +298,7 @@
                     <InputNumber
                       :modelValue="value"
                       @update:modelValue="handleChange"
+                      @input="handleChange($event.value)"
                       @blur="handleBlur"
                       mode="decimal"
                       :minFractionDigits="realDecimals"
@@ -322,6 +323,7 @@
                       :useGrouping="false"
                       :modelValue="value"
                       @update:modelValue="handleChange"
+                      @input="handleChange($event.value)"
                       @blur="handleBlur"
                     />
                     <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
@@ -338,7 +340,14 @@
                 v-slot="{ value, errorMessage, handleChange, handleBlur }"
               >
                 <label>Индивидуальный процент оплаты бонусами</label>
-                <InputNumber suffix=" %" :useGrouping="false" :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" />
+                <InputNumber
+                  suffix=" %"
+                  :useGrouping="false"
+                  :modelValue="value"
+                  @update:modelValue="handleChange"
+                  @input="handleChange($event.value)"
+                  @blur="handleBlur"
+                />
                 <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
                 <small>0 - отключить оплату бонусами на данный товар</small>
               </VeeField>
@@ -638,7 +647,7 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$api.delete('/store/kits/bulk/', {
+            await this.$api.delete('/store/kits/bulk', {
               data: {
                 items: this.selected.map((category) => category.id),
               },

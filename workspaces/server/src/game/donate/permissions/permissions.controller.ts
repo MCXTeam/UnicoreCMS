@@ -28,12 +28,18 @@ export class PermissionsController {
   @Permissions([Permission.AdminDashboard, Permission.EditorDonateRead])
   @Get()
   find() {
-    return this.donatePermissionsService.find(['servers']);
+    return this.donatePermissionsService.find(['servers', 'kits', 'periods']);
   }
 
   @Get('me')
   me(@CurrentUser() user: User) {
     return this.donatePermissionsService.me(user);
+  }
+
+  @Permissions([Permission.AdminDashboard, Permission.EditorDonatePermsDeleteMany])
+  @Delete('bulk')
+  removeMany(@Body() body: DeleteManyInput) {
+    return this.donatePermissionsService.removeMany(body.items);
   }
 
   @Permissions([Permission.KernelUnicoreConnect])
@@ -80,12 +86,6 @@ export class PermissionsController {
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.donatePermissionsService.remove(id);
-  }
-
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonatePermsDeleteMany])
-  @Delete('bulk/:ids')
-  removeMany(@Body() body: DeleteManyInput) {
-    return this.donatePermissionsService.removeMany(body.items);
   }
 
   @Permissions([Permission.AdminDashboard, Permission.AdminUsersRead])

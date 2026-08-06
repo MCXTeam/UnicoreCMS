@@ -37,12 +37,12 @@
               </span>
             </div>
           </template>
-          <Column selectionMode="multiple" :styles="{ width: '3rem' }"></Column>
-          <Column sortable field="id" header="ID" :styles="{ width: '8rem' }"></Column>
+          <Column selectionMode="multiple" :style="{ width: '3rem' }"></Column>
+          <Column sortable field="id" header="ID" :style="{ width: '8rem' }"></Column>
           <Column field="name" header="Название" sortable></Column>
           <Column field="type" header="Событие" sortable></Column>
           <Column field="request" header="Формат" sortable></Column>
-          <Column :styles="{ width: '12rem' }">
+          <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
               <Button @click="removeWebhook(slotProps.data.id)" icon="pi pi-trash" class="p-button-rounded p-button-warning mt-2" />
@@ -257,7 +257,7 @@ export default {
         accept: async () => {
           this.loading = true
           try {
-            await this.$api.delete('/admin/webhooks/bulk/', {
+            await this.$api.delete('/admin/webhooks/bulk', {
               data: {
                 items: this.selected.map((webhook) => webhook.id),
               },
