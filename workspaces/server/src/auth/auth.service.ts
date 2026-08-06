@@ -1,7 +1,6 @@
 import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { User } from 'src/admin/users/entities/user.entity';
 import { UsersService } from 'src/admin/users/users.service';
-import * as bcrypt from 'bcrypt';
 import { TokensService } from './tokens.service';
 import { LoginInput } from './dto/login.input';
 import { AuthenticatedDto } from './dto/authenticated.dto';
@@ -11,11 +10,16 @@ import { TwoFactorService } from 'src/game/cabinet/settings/providers/two_factor
 import { InjectRepository } from '@nestjs/typeorm';
 import { Referal } from 'src/game/cabinet/referals/entities/referal.entity';
 import { Repository } from 'typeorm';
+import { PasswordService } from './password/password.service';
+import { passwordAad } from './password/password-aad';
 
 @Injectable()
 export class AuthService {
   constructor(
     private tokensService: TokensService,
+    private passwordService: PasswordService,
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
     private usersService: UsersService,
     private emailService: EmailService,
     private twoFactorService: TwoFactorService,
@@ -23,8 +27,15 @@ export class AuthService {
     private referalsRepository: Repository<Referal>,
   ) {}
 
-  async validateCredentials(user: User, password: string) {
-    return bcrypt.compare(password, user.password);
+  async validateCredentials(user: User, password: string): Promise<boolean> {
+    const { valid, rehashed } = await this.passwordService.verify(password, user.password, passwordAad(user.uuid));
+
+    if (valid && rehashed) {
+      user.password = rehashed;
+      await this.usersRepository.update({ uuid: user.uuid }, { password: rehashed });
+    }
+
+    return valid;
   }
 
   async login(body: LoginInput, agent?: string, ip?: string): Promise<AuthenticatedDto> {

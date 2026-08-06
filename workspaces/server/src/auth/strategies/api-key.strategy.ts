@@ -27,7 +27,7 @@ export class ApiKeyStrategy extends PassportStrategy(HeaderAPIKeyStrategy) {
   }
 
   async validate(apiKey: string, done: (error: Error, data) => {}, req: Request) {
-    const api = await this.apiService.findOne(apiKey);
+    const api = await this.apiService.findByKey(apiKey);
     const kernel = await this.usersService.getKernel();
     const ip = req.ip || requestIp.getClientIp(req);
 

@@ -6,6 +6,8 @@ import { ApiToken } from './entities/api-token.entity';
 import { nanoid } from 'nanoid';
 import { EventsService } from 'src/events/events.service';
 import { ApiKeyRoom } from 'src/auth/helpers';
+import { API_KEY_HASH, API_KEY_LENGTH } from '@common';
+import { createHash } from 'crypto';
 
 @Injectable()
 export class ApiService {
@@ -23,14 +25,25 @@ export class ApiService {
     return this.apiTokensRepository.findOneBy({ secret });
   }
 
-  create(input: ApiInput) {
+  findByKey(key: string): Promise<ApiToken> {
+    return this.findOne(ApiService.digest(key));
+  }
+
+  static digest(key: string): string {
+    return createHash(API_KEY_HASH).update(key).digest('hex');
+  }
+
+  async create(input: ApiInput) {
+    const key = nanoid(API_KEY_LENGTH);
     const apikey = new ApiToken();
 
-    apikey.secret = nanoid(64);
+    apikey.secret = ApiService.digest(key);
+    apikey.hint = key.slice(0, 6);
+    apikey.comment = input.comment;
     apikey.allow = input.allow;
     apikey.perms = input.perms;
 
-    return this.apiTokensRepository.save(apikey);
+    return { ...(await this.apiTokensRepository.save(apikey)), key };
   }
 
   async update(secret: string, input: ApiInput) {
@@ -40,6 +53,7 @@ export class ApiService {
       throw new NotFoundException();
     }
 
+    apikey.comment = input.comment;
     apikey.allow = input.allow;
     apikey.perms = input.perms;
 

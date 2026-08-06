@@ -4,6 +4,7 @@ import { Ban } from 'src/game/cabinet/bans/entities/ban.entity';
 import { Cloak } from 'src/game/cabinet/skin/entities/cloak.entity';
 import { Skin } from 'src/game/cabinet/skin/entities/skin.entity';
 import { Column, CreateDateColumn, Entity, Generated, JoinTable, ManyToMany, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import { encryptedColumn, ENCRYPTED_TWO_FACTOR_SECRET, ENCRYPTED_TWO_FACTOR_SECRET_TEMP } from '@common';
 
 @Entity({ name: 'unicore_users' })
 export class User {
@@ -44,10 +45,15 @@ export class User {
   @Column({ name: 'two_factor_enabled', nullable: true })
   two_factor_enabled?: boolean;
 
-  @Column({ name: 'two_factor_secret', nullable: true })
+  @Column({ name: 'two_factor_secret', type: 'text', nullable: true, transformer: encryptedColumn(ENCRYPTED_TWO_FACTOR_SECRET) })
   two_factor_secret?: string;
 
-  @Column({ name: 'two_factor_secret_temp', nullable: true })
+  @Column({
+    name: 'two_factor_secret_temp',
+    type: 'text',
+    nullable: true,
+    transformer: encryptedColumn(ENCRYPTED_TWO_FACTOR_SECRET_TEMP),
+  })
   two_factor_secret_temp?: string;
 
   @Column('float', { name: 'real', default: 0 })

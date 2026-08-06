@@ -5,6 +5,12 @@ export class ApiToken {
   @PrimaryColumn({ name: 'secret' })
   secret: string;
 
+  @Column({ name: 'hint', nullable: true })
+  hint?: string;
+
+  @Column({ name: 'comment', nullable: true })
+  comment?: string;
+
   // Allowed Ip List
   @Column('simple-array', {
     nullable: true,

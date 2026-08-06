@@ -40,7 +40,7 @@
       </IconField>
       <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
     </Field>
-    <Field v-model="form.password" name="password" rules="required|min:6|max:24" v-slot="{ value, errorMessage, handleChange, handleBlur }">
+    <Field v-model="form.password" name="password" rules="required|min:8|max:128" v-slot="{ value, errorMessage, handleChange, handleBlur }">
       <div data-aos="zoom-in-right" data-aos-delay="600" class="w-100 mb-3">
         <Password
           :modelValue="value"

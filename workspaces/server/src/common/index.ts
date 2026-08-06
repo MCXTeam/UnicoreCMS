@@ -1,4 +1,5 @@
 export * from './constants';
+export * from './crypto';
 export * from './database';
 export * from './validation';
 export * from './storage';

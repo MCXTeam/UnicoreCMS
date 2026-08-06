@@ -47,7 +47,7 @@
         <Field
           v-model="form.password"
           name="Пароль"
-          rules="required|min:6|max:24"
+          rules="required"
           v-slot="{ value, errorMessage, handleChange, handleBlur }"
         >
           <div data-aos="zoom-in-right" data-aos-delay="450" class="w-100">

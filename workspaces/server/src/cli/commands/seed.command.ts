@@ -8,6 +8,7 @@ import CreateBonuses from '../../seeds/bonuses.seed';
 import CreateVoteGifts from '../../seeds/votes-gifts.seed';
 import CreateNews from '../../seeds/news.seed';
 import CreateUsers from '../../seeds/users.seed';
+import { stdout } from '../stdout';
 
 @Command({ name: 'seed', description: 'Run database seeders' })
 export class SeedCommand extends CommandRunner {
@@ -19,10 +20,10 @@ export class SeedCommand extends CommandRunner {
     const seeders = [CreateRoles, CreateServers, CreateBonuses, CreateVoteGifts, CreateNews, CreateUsers];
 
     for (const S of seeders) {
-      console.log(clc.magenta('Seeding: ' + S.name));
+      stdout(clc.magenta('Seeding: ' + S.name));
       await new S().run(this.dataSource);
     }
 
-    console.log(clc.green('Seeding done'));
+    stdout(clc.green('Seeding done'));
   }
 }

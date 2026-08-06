@@ -18,9 +18,11 @@ import { ApiKeyStrategy } from './strategies/api-key.strategy';
 import { EmailModule } from 'src/admin/email/email.module';
 import { SettingsModule } from 'src/game/cabinet/settings/settings.module';
 import { Referal } from 'src/game/cabinet/referals/entities/referal.entity';
+import { PasswordModule } from './password/password.module';
 
 @Module({
   imports: [
+    PasswordModule,
     UsersModule,
     ApiModule,
     EmailModule,

@@ -9,9 +9,13 @@ import { EmailActivation } from './entities/email-activation.entity';
 import { EmailMessage } from './entities/email-message.entity';
 import { PasswordReset } from './entities/password-reset.entity';
 import { EmailMessageType } from './enums/email-message-type.enum';
+import { PasswordModule } from 'src/auth/password/password.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([EmailMessage, EmailActivation, User, PasswordReset, RefreshToken])],
+  imports: [
+    PasswordModule,
+    TypeOrmModule.forFeature([EmailMessage, EmailActivation, User, PasswordReset, RefreshToken]),
+  ],
   providers: [EmailService],
   controllers: [EmailController],
   exports: [EmailService],

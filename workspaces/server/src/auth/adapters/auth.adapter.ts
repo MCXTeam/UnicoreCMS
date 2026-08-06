@@ -44,7 +44,7 @@ export class AuthAdapter extends IoAdapter {
   }
 
   private async authorizeApiKey(socket: AuthSocket, apiKey: string): Promise<void> {
-    const apiToken = await this.apiService.findOne(apiKey);
+    const apiToken = await this.apiService.findByKey(apiKey);
     const ip = socket.handshake.address || socket.conn?.remoteAddress;
 
     if (!apiToken?.allow?.length || !apiToken.allow.some((ipPattern) => minimatch.match([ip], ipPattern).length)) {

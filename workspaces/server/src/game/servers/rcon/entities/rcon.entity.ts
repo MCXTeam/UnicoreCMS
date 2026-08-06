@@ -1,5 +1,6 @@
 import { Exclude } from 'class-transformer';
 import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
+import { encryptedColumn, ENCRYPTED_RCON_PASSWORD } from '@common';
 import { Server } from '../../entities/server.entity';
 
 @Entity({ name: 'unicore_rcons' })
@@ -11,7 +12,7 @@ export class RCON {
   port: number;
 
   @Exclude()
-  @Column({ name: 'password' })
+  @Column({ name: 'password', type: 'text', transformer: encryptedColumn(ENCRYPTED_RCON_PASSWORD) })
   password: string;
 
   @PrimaryColumn({ name: 'server_id' })

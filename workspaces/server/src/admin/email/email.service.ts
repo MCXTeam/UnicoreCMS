@@ -28,9 +28,10 @@ import { UserDto } from '../users/dto/user.dto';
 import { VerifyInput } from 'src/auth/dto/verify.input';
 import { PasswordReset } from './entities/password-reset.entity';
 import { PasswordResetInput } from 'src/auth/dto/password-reset.input';
-import * as bcrypt from 'bcrypt';
 import { PasswordLinkInput } from 'src/auth/dto/password-link.input';
 import { RefreshToken } from 'src/auth/entities/refresh-token.entity';
+import { PasswordService } from 'src/auth/password/password.service';
+import { passwordAad } from 'src/auth/password/password-aad';
 
 @Injectable()
 export class EmailService {
@@ -50,6 +51,7 @@ export class EmailService {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
     private mailerService: MailerService,
+    private passwordService: PasswordService,
   ) {}
 
   find(): Promise<EmailMessage[]> {
@@ -206,7 +208,7 @@ export class EmailService {
     if (exist) {
       if (input.password) {
         await this.passwordResetRepository.delete({ user: exist.user });
-        exist.user.password = bcrypt.hashSync(input.password, 10);
+        exist.user.password = await this.passwordService.hash(input.password, passwordAad(exist.user.uuid));
         await this.usersRepository.save(exist.user);
 
         if (input.close) await this.tokensRepo.delete({ user: exist.user });

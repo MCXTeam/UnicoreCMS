@@ -1,7 +1,16 @@
 import envVar from "env-var";
 import { config } from "dotenv";
 import { envFilePath, ports } from "./ports";
-import { DEFAULT_TIMEZONE, PUBLIC_ENV_KEY } from "./constants";
+import {
+  DEFAULT_ARGON2_MEMORY,
+  DEFAULT_ARGON2_PARALLELISM,
+  DEFAULT_ARGON2_TIME,
+  DEFAULT_BCRYPT_COST,
+  DEFAULT_PASSWORD_ALGORITHM,
+  DEFAULT_TIMEZONE,
+  PASSWORD_ALGORITHMS,
+  PUBLIC_ENV_KEY,
+} from "./constants";
 import { isValidTimezone } from "./timezone";
 
 const env = envVar.from(process.env);
@@ -85,6 +94,13 @@ export interface EnvConfig {
   yandexMetrikaId: string;
 
   encryptionKey: string;
+  encryptionKeyPrevious: string;
+
+  passwordAlgorithm: string;
+  passwordArgon2Memory: number;
+  passwordArgon2Time: number;
+  passwordArgon2Parallelism: number;
+  passwordBcryptCost: number;
 
   realDecimals: number;
   virtualDecimals: number;
@@ -109,6 +125,10 @@ const originWithPort = (url: string, port: number): string => {
 const adminBaseurl =
   env.get(PUBLIC_ENV_KEY.adminBaseurl).asString() ||
   originWithPort(baseurl, ports.adminPort);
+
+const encryptionKey =
+  env.get("ENCRYPTION_KEY").asString() ||
+  env.get("JWT_KEY").required().asString();
 
 const explicitCorsOrigins = env
   .get("CORS_ORIGINS")
@@ -154,7 +174,32 @@ export const envConfig: EnvConfig = {
   databasePassword: env.get("DATABASE_PASSWORD").asString(),
   databaseName: env.get("DATABASE_NAME").required().asString(),
 
-  encryptionKey: env.get("JWT_KEY").required().asString(),
+  encryptionKey,
+  encryptionKeyPrevious: env
+    .get("ENCRYPTION_KEY_PREVIOUS")
+    .default("")
+    .asString(),
+
+  passwordAlgorithm: env
+    .get("PASSWORD_ALGORITHM")
+    .default(DEFAULT_PASSWORD_ALGORITHM)
+    .asEnum(PASSWORD_ALGORITHMS),
+  passwordArgon2Memory: env
+    .get("PASSWORD_ARGON2_MEMORY")
+    .default(DEFAULT_ARGON2_MEMORY)
+    .asIntPositive(),
+  passwordArgon2Time: env
+    .get("PASSWORD_ARGON2_TIME")
+    .default(DEFAULT_ARGON2_TIME)
+    .asIntPositive(),
+  passwordArgon2Parallelism: env
+    .get("PASSWORD_ARGON2_PARALLELISM")
+    .default(DEFAULT_ARGON2_PARALLELISM)
+    .asIntPositive(),
+  passwordBcryptCost: env
+    .get("PASSWORD_BCRYPT_COST")
+    .default(DEFAULT_BCRYPT_COST)
+    .asIntPositive(),
 
   // JWT
   jwtKey: env.get("JWT_KEY").required().asString(),

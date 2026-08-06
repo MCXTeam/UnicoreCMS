@@ -10,7 +10,7 @@
         <Field
           v-model="password_form.password_old"
           name="Текущий пароль"
-          rules="required|min:6|max:24"
+          rules="required"
           v-slot="{ value, errorMessage, handleChange, handleBlur }"
         >
           <Password
@@ -30,7 +30,7 @@
         <Field
           v-model="password_form.password"
           name="password"
-          rules="required|min:6|max:24"
+          rules="required|min:8|max:128"
           v-slot="{ value, errorMessage, handleChange, handleBlur }"
         >
           <Password

@@ -3,7 +3,6 @@ import { In, Not, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { PaginateQuery, Paginated, paginate, FilterOperator } from 'nestjs-paginate';
 import { UserInput } from './dto/user.input';
-import * as bcrypt from 'bcrypt';
 import * as _ from 'lodash';
 import { Role } from '../roles/entities/role.entity';
 import { BadRequestException, ConflictException, ForbiddenException, forwardRef, Inject, NotFoundException } from '@nestjs/common';
@@ -13,6 +12,9 @@ import { PlaytimeService } from 'src/game/cabinet/playtime/playtime.service';
 import { Vote } from 'src/game/cabinet/votes/entities/vote.entity';
 import { UserPublicDto } from './dto/user-public.dto';
 import { ReferalsService } from 'src/game/cabinet/referals/referals.service';
+import { randomUUID } from 'crypto';
+import { PasswordService } from 'src/auth/password/password.service';
+import { passwordAad } from 'src/auth/password/password-aad';
 import { Cache } from 'cache-manager';
 import { CacheKey, DeleteManyUuidInput } from '@common';
 import { UserUpdateInput } from './dto/user-update.input';
@@ -46,6 +48,7 @@ export class UsersService {
     @Inject(forwardRef(() => PlaytimeService))
     private playtimeService: PlaytimeService,
     private referalsService: ReferalsService,
+    private passwordService: PasswordService,
     private settingsService: SettingsService,
   ) {}
 
@@ -190,10 +193,11 @@ export class UsersService {
 
     const user = new User();
 
+    user.uuid = randomUUID();
     user.email = input.email;
     user.username = input.username;
     user.superuser = input.superuser;
-    user.password = bcrypt.hashSync(input.password, 10);
+    user.password = await this.passwordService.hash(input.password, passwordAad(user.uuid));
     user.activated = input.activated;
 
     user.perms = input.perms;

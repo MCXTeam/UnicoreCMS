@@ -38,6 +38,42 @@ export const THROTTLE_VERIFY = { ttl: 10 * 60_000, limit: 10 };
 export const THROTTLE_RESEND = { ttl: 10 * 60_000, limit: 3 };
 export const THROTTLE_PASSWORD_RESET = { ttl: 60 * 60_000, limit: 5 };
 
+export const CRYPTO_PREFIX = 'enc';
+export const CRYPTO_VERSION = 1;
+export const CRYPTO_CIPHER = 'aes-256-gcm';
+export const CRYPTO_KEY_BYTES = 32;
+export const CRYPTO_IV_BYTES = 12;
+export const CRYPTO_TAG_BYTES = 16;
+export const CRYPTO_HKDF_HASH = 'sha256';
+export const CRYPTO_HKDF_SALT = 'unicore-cms';
+
+export const CRYPTO_PURPOSE_PASSWORD = 'password-wrap';
+export const CRYPTO_PURPOSE_FIELD = 'field';
+
+export const ENCRYPTED_RCON_PASSWORD = 'rcon.password';
+export const ENCRYPTED_TWO_FACTOR_SECRET = 'user.two_factor_secret';
+export const ENCRYPTED_TWO_FACTOR_SECRET_TEMP = 'user.two_factor_secret_temp';
+
+export const PASSWORD_ALGORITHM_ARGON2ID = 'argon2id';
+export const PASSWORD_ALGORITHM_BCRYPT = 'bcrypt';
+export const PASSWORD_ARGON2_PREFIXES = ['$argon2id$', '$argon2i$', '$argon2d$'];
+export const PASSWORD_BCRYPT_PREFIXES = ['$2a$', '$2b$', '$2y$'];
+
+export const PASSWORD_MIN_LENGTH = 8;
+export const PASSWORD_MAX_LENGTH = 128;
+
+export const API_KEY_LENGTH = 64;
+export const API_KEY_COMMENT_MAX_LENGTH = 120;
+export const API_KEY_HASH = 'sha256';
+
+export const DASHBOARD_WEEK_DAYS = 7;
+export const DASHBOARD_MONTH_DAYS = 30;
+
+export const KEEP_PAID_PAYMENTS_DAYS = 365;
+export const KEEP_PENDING_PAYMENTS_DAYS = 7;
+export const KEEP_HISTORY_DAYS = 365;
+export const KEEP_FOREVER = 0;
+
 export const VK_LINK_PREFIX = 'https://vk.com/';
 
 export const PRICE_MIN = 0;

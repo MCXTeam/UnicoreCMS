@@ -8,9 +8,11 @@ import { PlaytimeModule } from 'src/game/cabinet/playtime/playtime.module';
 import { Vote } from 'src/game/cabinet/votes/entities/vote.entity';
 import { ReferalsModule } from 'src/game/cabinet/referals/referals.module';
 import { SettingsModule } from 'src/game/cabinet/settings/settings.module';
+import { PasswordModule } from 'src/auth/password/password.module';
 
 @Module({
   imports: [
+    PasswordModule,
     TypeOrmModule.forFeature([User, Role, Vote]),
     forwardRef(() => PlaytimeModule),
     forwardRef(() => ReferalsModule),

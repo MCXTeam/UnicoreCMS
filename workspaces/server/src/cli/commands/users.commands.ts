@@ -3,6 +3,7 @@ import * as clc from 'cli-color';
 import { UserInput } from 'src/admin/users/dto/user.input';
 import { UsersService } from 'src/admin/users/users.service';
 import { validateOrReject } from 'class-validator';
+import { stdout } from '../stdout';
 
 @Command({
   name: 'user-create',
@@ -36,9 +37,8 @@ export class UsersCommandCreate extends CommandRunner {
 
     const user = await this.usersService.create(input);
 
-    console.log(clc.magenta('Account has been created'));
-    console.log(`UUID: ${clc.magenta(user.uuid)}`);
-    console.log(`Username: ${clc.magenta(user.username)}`);
-    console.log(`Password: ${clc.magenta(user.password)}`);
+    stdout(clc.magenta('Account has been created'));
+    stdout(`UUID: ${clc.magenta(user.uuid)}`);
+    stdout(`Username: ${clc.magenta(user.username)}`);
   }
 }

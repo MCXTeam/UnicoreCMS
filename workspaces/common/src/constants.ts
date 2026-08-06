@@ -47,6 +47,13 @@ export const DONATE_WEB_PERM_PREFIXES = ["user."];
 
 export const DEFAULT_ISSUANCE_PRESET = "luckperms";
 
+export const PASSWORD_ALGORITHMS = ["argon2id", "bcrypt"] as const;
+export const DEFAULT_PASSWORD_ALGORITHM = "argon2id";
+export const DEFAULT_ARGON2_MEMORY = 65536;
+export const DEFAULT_ARGON2_TIME = 3;
+export const DEFAULT_ARGON2_PARALLELISM = 4;
+export const DEFAULT_BCRYPT_COST = 12;
+
 export const LOG_DIR_NAME = "logs";
 export const LOG_ERROR_FILE_NAME = "error.log";
 export const LOG_DIR_MODE = 0o750;
@@ -111,9 +118,25 @@ export const SANITIZE_ALLOWED_TAGS = [
   "tr",
   "th",
   "td",
+  "details",
+  "summary",
+  "section",
+  "article",
+  "figure",
+  "figcaption",
+  "caption",
+  "colgroup",
+  "col",
+  "dl",
+  "dt",
+  "dd",
 ];
 
 export const SANITIZE_ALLOWED_ATTR = [
+  "id",
+  "open",
+  "colspan",
+  "rowspan",
   "href",
   "target",
   "rel",
@@ -125,8 +148,6 @@ export const SANITIZE_ALLOWED_ATTR = [
   "height",
   "class",
   "style",
-  "colspan",
-  "rowspan",
 ];
 
 export const SANITIZE_FORBID_TAGS = [

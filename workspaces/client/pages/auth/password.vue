@@ -1,7 +1,7 @@
 <template>
   <Form v-slot="{ meta }" class="d-flex flex-column align-items-center w-100" @submit="reset">
     <h3 data-aos="zoom-in-right" data-aos-delay="150" class="text-uppercase text-center mb-4">Восстановление пароля</h3>
-    <Field v-model="form.password" name="password" rules="required|min:6|max:24" v-slot="{ value, errorMessage, handleChange, handleBlur }">
+    <Field v-model="form.password" name="password" rules="required|min:8|max:128" v-slot="{ value, errorMessage, handleChange, handleBlur }">
       <div data-aos="zoom-in-right" data-aos-delay="300" class="w-100 mb-3">
         <Password
           :modelValue="value"

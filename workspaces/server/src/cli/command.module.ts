@@ -8,6 +8,9 @@ import UsersModule from 'src/admin/users/users.module';
 import { ormconfig } from 'src/ormconfig';
 import { UsersCommandCreate } from './commands/users.commands';
 import { SeedCommand } from './commands/seed.command';
+import { CryptoRewrapCommand } from './commands/crypto.commands';
+import { User } from 'src/admin/users/entities/user.entity';
+import { RCON } from 'src/game/servers/rcon/entities/rcon.entity';
 
 @Module({
   imports: [
@@ -24,7 +27,8 @@ import { SeedCommand } from './commands/seed.command';
       isGlobal: true,
     }),
     UsersModule,
+    TypeOrmModule.forFeature([User, RCON]),
   ],
-  providers: [UsersCommandCreate, SeedCommand],
+  providers: [UsersCommandCreate, SeedCommand, CryptoRewrapCommand],
 })
 export class CommandsModule {}
