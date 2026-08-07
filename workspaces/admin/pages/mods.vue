@@ -5,9 +5,9 @@
         <Toolbar class="mb-4">
           <template v-slot:start>
             <div class="my-2">
-              <Button label="Создать" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
+              <Button :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
               <Button
-                label="Удалить"
+                :label="$t('admin.delete')"
                 icon="pi pi-trash"
                 class="p-button-danger"
                 :disabled="!selected || !selected.length"
@@ -34,16 +34,16 @@
         >
           <template #header>
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-              <h5 class="m-0">Управление модами</h5>
+              <h5 class="m-0">{{ $t('admin.mods_title') }}</h5>
               <span class="block mt-2 md:mt-0 p-input-icon-left">
                 <i class="pi pi-search" />
-                <InputText @keydown.enter="onFilter()" v-model="filters['global'].value" placeholder="Поиск..." />
+                <InputText @keydown.enter="onFilter()" v-model="filters['global'].value" :placeholder="$t('admin.search')" />
               </span>
             </div>
           </template>
           <Column selectionMode="multiple" :style="{ width: '3rem' }"></Column>
           <Column field="id" header="ID" :style="{ width: '8rem' }" sortable></Column>
-          <Column field="name" header="Название" sortable>
+          <Column field="name" :header="$t('admin.name')" sortable>
             <template #body="slotProps">
               <div class="flex align-items-center">
                 <Avatar v-if="slotProps.data.icon" :image="`${apiUrl + '/' + slotProps.data.icon}`" shape="circle" />
@@ -65,13 +65,13 @@
             </template>
           </Column>
         </DataTable>
-        <Dialog v-model:visible="fileDialog" :style="{ width: '400px' }" :modal="true" header="Иконка мода" class="p-fluid">
+        <Dialog v-model:visible="fileDialog" :style="{ width: '400px' }" :modal="true" :header="$t('admin.mod_icon')" class="p-fluid">
           <div class="flex align-items-center justify-content-center flex-wrap w-full">
             <Avatar v-if="mod.icon" :image="`${apiUrl + '/' + mod.icon}`" size="xlarge" shape="circle" />
             <Avatar v-else icon="pi pi-image" size="xlarge" shape="circle" />
             <div class="field ml-6 mb-0">
-              <Button label="Загрузить" icon="pi pi-upload" @click="$refs.fileInput.choose()" />
-              <Button label="Удалить" icon="pi pi-trash" class="p-button-secondary mt-2" @click="removeIcon()" />
+              <Button :label="$t('admin.upload')" icon="pi pi-upload" @click="$refs.fileInput.choose()" />
+              <Button :label="$t('admin.delete')" icon="pi pi-trash" class="p-button-secondary mt-2" @click="removeIcon()" />
               <FileUpload
                 ref="fileInput"
                 :pt="{ root: { class: 'hidden' } }"
@@ -92,53 +92,68 @@
             :closable="false"
             :style="{ width: '600px' }"
             :modal="true"
-            header="Создание/редактирование мода"
+            :header="$t('admin.mod_dialog')"
             class="p-fluid"
           >
-            <VeeField
-              v-model="mod.name"
-              name="name"
-              label="Название"
-              rules="required"
-              v-slot="{ value, errorMessage, handleChange, handleBlur }"
-            >
+            <LocaleEditorBar
+              v-model="translations.locale"
+              :locales="translations.locales"
+              :status="translations.status"
+              :isDefault="translations.isDefault"
+              @copy="translations.copyFromDefault()"
+            />
+            <template v-if="translations.isDefault">
+              <VeeField
+                v-model="mod.name"
+                name="name"
+                :label="$t('admin.name')"
+                rules="required"
+                v-slot="{ value, errorMessage, handleChange, handleBlur }"
+              >
+                <div class="field">
+                  <label>{{ $t('admin.name') }}</label>
+                  <InputText
+                    :modelValue="value"
+                    @update:modelValue="handleChange"
+                    @blur="handleBlur"
+                    autofocus
+                    :class="errorMessage && 'p-invalid'"
+                  />
+                  <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+                </div>
+              </VeeField>
               <div class="field">
-                <label>Название</label>
-                <InputText
-                  :modelValue="value"
-                  @update:modelValue="handleChange"
-                  @blur="handleBlur"
-                  autofocus
-                  :class="errorMessage && 'p-invalid'"
-                />
-                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+                <label>{{ $t('admin.description') }}</label>
+                <Editor v-model="mod.description" editorStyle="height: 220px">
+                  <template #toolbar>
+                    <span class="ql-formats">
+                      <button class="ql-bold"></button>
+                      <button class="ql-italic"></button>
+                      <button class="ql-underline"></button>
+                      <button class="ql-link"></button>
+                    </span>
+                  </template>
+                </Editor>
               </div>
-            </VeeField>
-            <div class="field">
-              <label>Описание</label>
-              <Editor v-model="mod.description" editorStyle="height: 220px">
-                <template #toolbar>
-                  <span class="ql-formats">
-                    <button class="ql-bold"></button>
-                    <button class="ql-italic"></button>
-                    <button class="ql-underline"></button>
-                    <button class="ql-link"></button>
-                  </span>
-                </template>
-              </Editor>
-            </div>
-            <VeeField v-model="mod.link" name="link" label="URL" rules="url" v-slot="{ value, errorMessage, handleChange, handleBlur }">
-              <div class="field">
-                <label>Ссылка</label>
-                <InputText :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" :class="errorMessage && 'p-invalid'" />
-                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
-              </div>
-            </VeeField>
+              <VeeField v-model="mod.link" name="link" label="URL" rules="url" v-slot="{ value, errorMessage, handleChange, handleBlur }">
+                <div class="field">
+                  <label>{{ $t('admin.link') }}</label>
+                  <InputText
+                    :modelValue="value"
+                    @update:modelValue="handleChange"
+                    @blur="handleBlur"
+                    :class="errorMessage && 'p-invalid'"
+                  />
+                  <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+                </div>
+              </VeeField>
+            </template>
+            <ContentTranslationFields v-else :translations="translations" />
             <template #footer>
-              <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
+              <Button :disabled="loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
                 :disabled="loading || !meta.valid"
-                label="Сохранить"
+                :label="$t('common.save')"
                 icon="pi pi-check"
                 class="p-button-text"
                 @click="updateMode ? updateMod() : createMod()"
@@ -162,9 +177,13 @@ export default {
     VeeField: Field,
   },
   setup() {
+    const translations = useContentTranslations('mod')
+
     const rc = useRuntimeConfig()
-    useHead({ title: 'Моды' })
-    return { apiUrl: rc.public.apiBaseurl }
+    const { $t } = useNuxtApp()
+
+    useHead({ title: computed(() => $t('admin.menu_mods')) })
+    return { translations, apiUrl: rc.public.apiBaseurl }
   },
   data() {
     return {
@@ -228,7 +247,7 @@ export default {
         })
         this.$toast.add({
           severity: 'success',
-          detail: 'Иконка успешно обновлена',
+          detail: this.$t('admin.icon_updated'),
           life: 3000,
         })
         await this.load()
@@ -236,7 +255,7 @@ export default {
         this.fileDialog = false
         this.$toast.add({
           severity: 'error',
-          detail: 'Поддерживаются только изображения',
+          detail: this.$t('admin.images_only'),
           life: 3000,
         })
       }
@@ -246,7 +265,7 @@ export default {
         await this.$api.delete(`/servers/mods/icon/` + this.mod.id)
         this.$toast.add({
           severity: 'success',
-          detail: 'Иконка успешно удалена',
+          detail: this.$t('admin.icon_deleted'),
           life: 3000,
         })
         await this.load()
@@ -255,7 +274,7 @@ export default {
     hideDialog() {
       this.modDialog = false
     },
-    openDialog(mod = null) {
+    async openDialog(mod = null) {
       this.updateMode = !!mod
       if (mod) {
         this.mod = this.$_.pick(mod, this.$_.deepKeys(this.mod))
@@ -268,6 +287,8 @@ export default {
           icon: null,
         }
       }
+      this.translations.attach(this.mod)
+      await this.translations.load(mod ? mod.id : null)
       this.modDialog = true
     },
     openFileDialog(mod) {
@@ -289,8 +310,8 @@ export default {
     },
     async removeMany() {
       this.$confirm.require({
-        message: `Данный процесс будет необратим!`,
-        header: `Удаления ${this.selected.length} объектов`,
+        message: this.$t('admin.irreversible'),
+        header: this.$t('admin.delete_many', { count: this.selected.length }),
         icon: 'pi pi-exclamation-triangle',
         accept: async () => {
           this.loading = true
@@ -302,7 +323,7 @@ export default {
             })
             this.$toast.add({
               severity: 'success',
-              detail: 'Моды успешно удалены',
+              detail: this.$t('admin.mods_deleted'),
               life: 3000,
             })
             this.selected = []
@@ -314,10 +335,12 @@ export default {
     async createMod() {
       this.loading = true
       try {
-        await this.$api.post('/servers/mods', this.mod)
+        const { data } = await this.$api.post('/servers/mods', this.mod)
+
+        await this.translations.save(data.id)
         this.$toast.add({
           severity: 'success',
-          detail: 'Мод успешно добавлен',
+          detail: this.$t('admin.mod_created'),
           life: 3000,
         })
         await this.load()
@@ -325,7 +348,7 @@ export default {
         this.loading = false
         this.$toast.add({
           severity: 'error',
-          detail: 'Введены некоректные данные',
+          detail: this.$t('admin.invalid_data'),
           life: 3000,
         })
       }
@@ -334,9 +357,11 @@ export default {
       this.loading = true
       try {
         await this.$api.patch('/servers/mods/' + this.mod.id, this.$_.omit(this.mod, 'id'))
+
+        await this.translations.save(this.mod.id)
         this.$toast.add({
           severity: 'success',
-          detail: 'Мод успешно редактирован',
+          detail: this.$t('admin.mod_updated'),
           life: 3000,
         })
         await this.load()
@@ -344,15 +369,15 @@ export default {
         this.loading = false
         this.$toast.add({
           severity: 'error',
-          detail: 'Введены некоректные данные',
+          detail: this.$t('admin.invalid_data'),
           life: 3000,
         })
       }
     },
     async removeMod(id) {
       this.$confirm.require({
-        message: `Данный процесс будет необратим!`,
-        header: 'Подтверждение удаления',
+        message: this.$t('admin.irreversible'),
+        header: this.$t('admin.confirm_delete'),
         icon: 'pi pi-exclamation-triangle',
         accept: async () => {
           this.loading = true
@@ -360,7 +385,7 @@ export default {
             await this.$api.delete('/servers/mods/' + id)
             this.$toast.add({
               severity: 'success',
-              detail: 'Мод успешно удален',
+              detail: this.$t('admin.mod_deleted'),
               life: 3000,
             })
           } catch {}

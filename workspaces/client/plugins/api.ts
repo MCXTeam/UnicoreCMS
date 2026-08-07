@@ -1,14 +1,18 @@
 import axios, { type AxiosInstance } from 'axios'
+import { LOCALE_HEADER } from 'unicore-common/locales'
 import { useAuthStore } from '~/stores/auth'
+import { useLocale } from '~/composables/useLocale'
 
 export default defineNuxtPlugin((nuxtApp) => {
   const config = useRuntimeConfig()
+  const locale = useLocale()
   const api: AxiosInstance = axios.create({ baseURL: config.public.apiBaseurl })
 
   api.interceptors.request.use((cfg) => {
     const auth = useAuthStore()
     if (auth.accessToken) cfg.headers.Authorization = `Bearer ${auth.accessToken}`
     cfg.headers['Timezone'] = Intl.DateTimeFormat().resolvedOptions().timeZone
+    cfg.headers[LOCALE_HEADER] = locale.value
     return cfg
   })
 
@@ -42,7 +46,9 @@ export default defineNuxtPlugin((nuxtApp) => {
 
       if (status === 403 && import.meta.client) {
         const toast = nuxtApp.vueApp.config.globalProperties.$toast
-        toast?.add({ severity: 'error', summary: 'Ошибка!', detail: 'Недостаточно прав для выполнения данного действия', life: 4000 })
+        const t = (key: string) => String((nuxtApp as any).$t?.(key) ?? key)
+
+        toast?.add({ severity: 'error', summary: t('error.title'), detail: t('error.no_permission'), life: 4000 })
       }
 
       return Promise.reject(error)

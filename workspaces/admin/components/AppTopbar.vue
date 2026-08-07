@@ -22,22 +22,32 @@
       <i class="pi pi-ellipsis-v"></i>
     </button>
     <ul class="layout-topbar-menu hidden lg:flex origin-top">
+      <li v-if="locales.length > 1" class="flex align-items-center">
+        <Select
+          class="topbar-locale"
+          :modelValue="locale"
+          @update:modelValue="$setLocale"
+          :options="locales"
+          optionLabel="name"
+          optionValue="code"
+        />
+      </li>
       <li>
         <button class="p-link layout-topbar-button" @click="toggleTheme">
           <i :class="colorMode.value === 'dark' ? 'pi pi-sun' : 'pi pi-moon'"></i>
-          <span>Тема</span>
+          <span>{{ $t('admin.theme') }}</span>
         </button>
       </li>
       <li>
         <NuxtLink class="p-link layout-topbar-button" :to="'/users/' + authStore.user?.uuid">
           <i class="pi pi-user"></i>
-          <span>Профиль</span>
+          <span>{{ $t('admin.profile') }}</span>
         </NuxtLink>
       </li>
       <li>
         <button class="p-link layout-topbar-button" @click="logout">
           <i class="pi pi-sign-out"></i>
-          <span>Выйти</span>
+          <span>{{ $t('admin.logout') }}</span>
         </button>
       </li>
     </ul>
@@ -46,13 +56,15 @@
 
 <script>
 import { useAuthStore } from '~/stores/auth'
+import { useLocale, useLocales } from '~/composables/useLocale'
 
 export default {
   emits: ['menu-toggle', 'topbar-menu-toggle'],
   setup() {
     const authStore = useAuthStore()
     const colorMode = useColorMode()
-    return { authStore, colorMode }
+
+    return { authStore, colorMode, locales: useLocales(), locale: useLocale() }
   },
   methods: {
     toggleTheme() {

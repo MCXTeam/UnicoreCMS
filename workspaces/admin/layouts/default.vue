@@ -35,57 +35,62 @@ export default {
       menuClick: false,
       menu: [
         {
-          label: 'Основное',
+          label: 'admin.menu_main',
           items: [
             {
-              label: 'Панель управления',
+              label: 'admin.menu_dashboard',
               icon: 'pi pi-fw pi-chart-bar',
               to: '/',
             },
             {
-              label: 'Пользователи',
+              label: 'admin.menu_users',
               icon: 'pi pi-fw pi-users',
               to: '/users',
             },
             {
-              label: 'Роли',
+              label: 'admin.menu_roles',
               icon: 'pi pi-fw pi-lock',
               to: '/roles',
             },
             {
-              label: 'Настройки',
+              label: 'admin.menu_settings',
               icon: 'pi pi-fw pi-bars',
               to: '/config',
             },
           ],
         },
         {
-          label: 'Управление контентом',
+          label: 'admin.menu_content',
           items: [
             {
-              label: 'Новости',
+              label: 'admin.menu_news',
               icon: 'pi pi-paperclip',
               to: '/news',
             },
             {
-              label: 'Статические страницы',
+              label: 'admin.menu_pages',
               icon: 'pi pi-sitemap',
               to: '/pages',
             },
             {
-              label: 'Email-сообщения',
+              label: 'admin.menu_email',
               icon: 'pi pi-send',
               to: '/email',
             },
             {
-              label: 'Серверы',
+              label: 'admin.menu_servers',
               icon: 'pi pi-play',
               to: '/servers',
             },
             {
-              label: 'Моды',
+              label: 'admin.menu_mods',
               icon: 'pi pi-map-marker',
               to: '/mods',
+            },
+            {
+              label: 'admin.menu_locales',
+              icon: 'pi pi-globe',
+              to: '/locales',
             },
           ],
         },
@@ -93,79 +98,79 @@ export default {
           label: 'E-Commerce',
           items: [
             {
-              label: 'Донат',
+              label: 'admin.menu_donate',
               icon: 'pi pi-fw pi-money-bill',
               items: [
                 {
-                  label: 'Донат-группы',
+                  label: 'admin.menu_donate_groups',
                   icon: 'pi pi-fw pi-users',
                   to: '/donate/groups',
                 },
                 {
-                  label: 'Донат-права',
+                  label: 'admin.menu_donate_permissions',
                   icon: 'pi pi-fw pi-money-bill',
                   to: '/donate/permissions',
                 },
                 {
-                  label: 'Донат-киты',
+                  label: 'admin.menu_donate_kits',
                   icon: 'pi pi-fw pi-briefcase',
                   to: '/donate/kits',
                 },
                 {
-                  label: 'Периоды',
+                  label: 'admin.menu_periods',
                   icon: 'pi pi-fw pi-calendar',
                   to: '/donate/periods',
                 },
               ],
             },
             {
-              label: 'Магазин',
+              label: 'admin.menu_store',
               icon: 'pi pi-fw pi-shopping-cart',
               items: [
                 {
-                  label: 'Каталог',
+                  label: 'admin.menu_catalog',
                   icon: 'pi pi-fw pi-shopping-cart',
                   to: '/store/products',
                 },
                 {
-                  label: 'Категории',
+                  label: 'admin.menu_categories',
                   icon: 'pi pi-fw pi-list',
                   to: '/store/categories',
                 },
                 {
-                  label: 'Киты',
+                  label: 'admin.menu_kits',
                   icon: 'pi pi-fw pi-briefcase',
                   to: '/store/kits',
                 },
               ],
             },
             {
-              label: 'Пополнение',
+              label: 'admin.menu_payment',
               icon: 'pi pi-fw pi-wallet',
               to: '/payment',
             },
             {
-              label: 'Промо-коды',
+              label: 'admin.menu_gifts',
               icon: 'pi pi-fw pi-dollar',
               to: '/gifts',
             },
             {
-              label: 'Голосование',
+              label: 'admin.menu_votes',
               icon: 'pi pi-fw pi-volume-off',
               to: '/votes',
             },
           ],
         },
         {
-          label: 'Утилиты',
+          label: 'admin.menu_utils',
           items: [
             {
-              label: 'API-Ключи',
+              label: 'admin.menu_api',
               icon: 'pi pi-fw pi-reply',
               to: '/api',
             },
             {
-              label: 'Вебхуки',
+              label: 'admin.menu_webhooks',
               icon: 'pi pi-fw pi-link',
               to: '/webhooks',
             },

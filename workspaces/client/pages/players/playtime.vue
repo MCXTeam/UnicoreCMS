@@ -1,6 +1,6 @@
 <template>
   <div class="px-4">
-    <h2 class="m-0">Топ онлайна</h2>
+    <h2 class="m-0">{{ $t('players.tab_playtime') }}</h2>
     <div>
       <DataTable
         class="no-overflow-table mt-4 large-table"
@@ -13,28 +13,28 @@
         dataKey="user.uuid"
         @page="onPage($event)"
       >
-        <Column header="Место" headerStyle="width: 4rem; max-width: 4rem">
+        <Column :header="$t('players.place')" headerStyle="width: 4rem; max-width: 4rem">
           <template #body="{ index }">
             <h3 class="m-0">#{{ (playtimes.meta.page - 1) * 25 + index + 1 }}</h3>
           </template>
         </Column>
-        <Column header="Игрок" headerStyle="width: 60%">
+        <Column :header="$t('players.player')" headerStyle="width: 60%">
           <template #body="{ data }">
             <div class="d-flex align-items-center">
               <Avatar class="rounded shadow me-3">
                 <SkinView2D class="rounded" :width="32" :height="32" :skin="data.user.skin" />
               </Avatar>
-              <NuxtLink :to="`/user/` + data.user.username">{{ data.user.username }}</NuxtLink>
+              <NuxtLink :to="`/user/${data.user.username}`">{{ data.user.username }}</NuxtLink>
             </div>
           </template>
         </Column>
-        <Column header="Время в игре">
+        <Column :header="$t('players.playtime')">
           <template #body="{ data }">
-            {{ $moment.duration(data.time, 'minutes').format('y [years], w [weeks], d [days], h [hours], m [minutes]') }}
+            {{ $utils.formatDuration(data.time) }}
           </template>
         </Column>
         <template #empty>
-          <span>Нет результатов</span>
+          <span>{{ $t('common.no_results') }}</span>
         </template>
       </DataTable>
     </div>
@@ -44,11 +44,12 @@
 <script setup lang="ts">
 import { useUiStore } from '~/stores/ui'
 
-definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'] })
-useHead({ title: 'Топ-онлайн' })
-useUiStore().setName('Игроки')
+definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'header.players' })
 
-const { $api } = useNuxtApp()
+const { $api, $t } = useNuxtApp()
+
+useHead({ title: computed(() => $t('players.tab_playtime')) })
+useUiStore().setName($t('header.players'))
 
 const loading = ref(false)
 const playtimes = ref<any>({

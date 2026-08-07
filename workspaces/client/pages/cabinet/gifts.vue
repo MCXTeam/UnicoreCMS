@@ -3,44 +3,51 @@
     <Dialog class="buy-dialog" v-model:visible="giftDialog" modal v-if="gift">
       <template #header>
         <div class="d-flex flex-column align-items-center">
-          <h4 class="mt-2 mb-0">Гифт-код активирован!</h4>
-          <h3 class="mt-2 mb-0">Вы получили:</h3>
+          <h4 class="mt-2 mb-0">{{ $t('cabinet.gift_activated') }}</h4>
+          <h3 class="mt-2 mb-0">{{ $t('cabinet.gift_you_got') }}</h3>
         </div>
       </template>
       <div class="text-center">
         <img height="100px" src="/images/chest-minecraft.gif" />
-        <h4 v-if="gift.type == 'real'" class="m-0">{{ $utils.formatCurrency('real', gift.amount) }} на баланс</h4>
+        <h4 v-if="gift.type == 'real'" class="m-0">
+          {{ $t('cabinet.referal_to_balance', { amount: $utils.formatCurrency('real', gift.amount) }) }}
+        </h4>
         <h4 v-if="gift.type == 'money'" class="m-0">
-          {{ $utils.formatCurrency('ingame', gift.amount) }} монет на сервере {{ gift.server.name }}
+          {{ $t('cabinet.gift_money', { amount: $utils.formatCurrency('ingame', gift.amount), server: gift.server.name }) }}
         </h4>
         <h4 v-if="gift.type == 'donate'" class="m-0">
-          Донат-группу "{{ gift.donate_group.name }}" ({{ gift.period.name }}) на сервере {{ gift.server.name }}
+          {{ $t('cabinet.gift_donate', { name: gift.donate_group.name, period: gift.period.name, server: gift.server.name }) }}
         </h4>
         <h4 v-if="gift.type == 'permission' && gift.donate_permission.type == 'web'" class="m-0">
-          Донат-право "{{ gift.donate_permission.name }}" ({{ gift.period.name }})
+          {{ $t('cabinet.gift_permission_web', { name: gift.donate_permission.name, period: gift.period.name }) }}
         </h4>
         <h4 v-if="gift.type == 'permission' && gift.donate_permission.type != 'web'" class="m-0">
-          Донат-право "{{ gift.donate_permission.name }}" ({{ gift.period.name }}) на сервере {{ gift.server.name }}
+          {{ $t('cabinet.gift_permission', { name: gift.donate_permission.name, period: gift.period.name, server: gift.server.name }) }}
         </h4>
         <h4 v-if="gift.type == 'product' && gift.donate_permission != 'web'" class="m-0">
-          Товар из магазина "{{ gift.product.name }}" ({{ gift.amount }} шт.) на сервере {{ gift.server.name }}
+          {{ $t('cabinet.gift_product', { name: gift.product.name, amount: gift.amount, server: gift.server.name }) }}
         </h4>
         <h4 v-if="gift.type == 'kit' && gift.donate_permission != 'web'" class="m-0">
-          Кит из магазина "{{ gift.kit.name }}" на сервере {{ gift.server.name }}
+          {{ $t('cabinet.gift_kit', { name: gift.kit.name, server: gift.server.name }) }}
         </h4>
       </div>
     </Dialog>
     <section class="px-4 pb-3">
-      <h2 class="mt-0 mb-3">Гифт-коды</h2>
+      <h2 class="mt-0 mb-3">{{ $t('cabinet.gift_codes') }}</h2>
       <div class="row settings-split">
         <div class="col-xl-6 input-fw pe-xl-4 mb-4">
           <Form v-slot="{ meta }">
-            <Field v-model="gift_code" name="гифт-код" rules="required" v-slot="{ value, errorMessage, handleChange, handleBlur }">
+            <Field
+              v-model="gift_code"
+              :name="$t('cabinet.gift_code')"
+              rules="required"
+              v-slot="{ value, errorMessage, handleChange, handleBlur }"
+            >
               <InputText
                 :modelValue="value"
                 @update:modelValue="handleChange"
                 @blur="handleBlur"
-                placeholder="Введите гифт-код"
+                :placeholder="$t('cabinet.gift_code_placeholder')"
                 class="w-100"
               />
               <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
@@ -51,24 +58,21 @@
               :disabled="!meta.valid"
               class="mt-3 w-full"
               size="large"
-              label="Активировать"
+              :label="$t('cabinet.activate')"
             />
           </Form>
         </div>
         <div class="col ps-xl-5">
-          <h3 class="m-0">Где найти код?</h3>
-          <p class="mt-1">Переодически мы публикуем коды в наших социальных сетях, чтобы не пропускать их, советуем подписаться.</p>
-          <h3 class="m-0">Что содержат гифт-коды?</h3>
-          <p class="mt-1">
-            Активировав гифт-код вы можете получить деньги на баланс, монеты, игровые предметы или киты, а также донат-группы или
-            донат-права
-          </p>
+          <h3 class="m-0">{{ $t('cabinet.gift_where_title') }}</h3>
+          <p class="mt-1">{{ $t('cabinet.gift_where_text') }}</p>
+          <h3 class="m-0">{{ $t('cabinet.gift_what_title') }}</h3>
+          <p class="mt-1">{{ $t('cabinet.gift_what_text') }}</p>
         </div>
       </div>
     </section>
     <hr />
     <section class="px-4 mt-5">
-      <h2 class="mt-0 mb-3">Голосование</h2>
+      <h2 class="mt-0 mb-3">{{ $t('panel.vote') }}</h2>
       <div class="row settings-split">
         <div class="col-xl-6 input-fw pe-xl-4 mb-4">
           <table class="player-info-table w-100">
@@ -78,28 +82,27 @@
                 <h4 class="m-0 ms-3" v-text="monitorings_map[mon].name" />
               </td>
               <td>
-                <Button as="a" :href="config['public_link_' + mon]" class="w-full">Голосовать на {{ monitorings_map[mon].name }}</Button>
+                <Button as="a" :href="config['public_link_' + mon]" class="w-full">
+                  {{ $t('cabinet.vote_on', { monitoring: monitorings_map[mon].name }) }}
+                </Button>
               </td>
             </tr>
           </table>
         </div>
         <div class="col ps-xl-5">
-          <h3 class="mt-0 mb-3">Что вы получите, проголосовав в {{ monitorings.length }} рейтингах?</h3>
-          <p class="mt-1">
-            <b>Бонусы</b> - валюта за которую вы можете частично или полностью оплачивать товары из магазина, наборы ресурсов, донат-группы
-            и донат-киты.
-          </p>
+          <h3 class="mt-0 mb-3">{{ $t('cabinet.vote_reward_title', { count: monitorings.length }) }}</h3>
+          <p class="mt-1">{{ $t('cabinet.vote_reward_text') }}</p>
           <div class="row">
             <div class="col-xl-6">
               <div class="mini-profile p-4 my-3 h-75">
                 <h2 class="mt-0 mb-2">{{ $utils.formatCurrency('virtual', config.public_monitoring_reward * monitorings.length) }}</h2>
-                <span>Бонусов</span>
+                <span>{{ $t('cabinet.bonuses') }}</span>
               </div>
             </div>
             <div class="col-xl-6">
               <div class="mini-profile p-4 my-3 h-75">
                 <h2 class="mt-0 mb-2">{{ monitorings.length }}</h2>
-                <span>Очка в топе</span>
+                <span>{{ $t('cabinet.top_points') }}</span>
               </div>
             </div>
           </div>
@@ -115,10 +118,11 @@ import { useReCaptcha } from 'vue-recaptcha-v3'
 import monitoringsMap from '~/json/monitorings.json'
 import { useConfigStore } from '~/stores/config'
 
-definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'] })
-useHead({ title: 'Личный кабинет' })
+definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'cabinet.tab_gifts' })
 
-const { $api, $auth, $unicore } = useNuxtApp()
+const { $api, $auth, $unicore, $t } = useNuxtApp()
+
+useHead({ title: computed(() => $t('header.cabinet')) })
 const recaptcha = useReCaptcha()
 const config = computed(() => useConfigStore().config)
 
@@ -152,7 +156,7 @@ async function activateGift() {
 
     giftDialog.value = true
   } catch {
-    $unicore.errorNotification('Указанный вами промокод не найден, либо вы уже активировали его')
+    $unicore.errorNotification($t('cabinet.gift_not_found'))
   }
   loading.value = false
 }

@@ -1,7 +1,9 @@
 import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { DonateGroup } from '../groups/entities/donate-group.entity';
 import { DonatePermission } from '../permissions/entities/donate-permission.entity';
+import { Translatable } from 'src/admin/locales/translatable.decorator';
 
+@Translatable('period', ['name'])
 @Entity({
   name: 'unicore_periods',
   orderBy: {

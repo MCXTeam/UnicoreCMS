@@ -21,10 +21,40 @@
       "import": "./dist/ports.mjs",
       "require": "./dist/ports.js"
     },
+    "./duration": {
+      "types": "./dist/duration.d.ts",
+      "import": "./dist/duration.mjs",
+      "require": "./dist/duration.js"
+    },
     "./timezone": {
       "types": "./dist/timezone.d.ts",
       "import": "./dist/timezone.mjs",
       "require": "./dist/timezone.js"
+    },
+    "./permissions": {
+      "types": "./dist/permissions.d.ts",
+      "import": "./dist/permissions.mjs",
+      "require": "./dist/permissions.js"
+    },
+    "./dashboard": {
+      "types": "./dist/dashboard.d.ts",
+      "import": "./dist/dashboard.mjs",
+      "require": "./dist/dashboard.js"
+    },
+    "./users": {
+      "types": "./dist/users.d.ts",
+      "import": "./dist/users.mjs",
+      "require": "./dist/users.js"
+    },
+    "./locales": {
+      "types": "./dist/locales.d.ts",
+      "import": "./dist/locales.mjs",
+      "require": "./dist/locales.js"
+    },
+    "./envconfig": {
+      "types": "./dist/envconfig.d.ts",
+      "import": "./dist/envconfig.mjs",
+      "require": "./dist/envconfig.js"
     },
     "./enums": {
       "types": "./dist/enums/index.d.ts",

@@ -5,7 +5,7 @@
         <Toolbar class="mb-4">
           <template v-slot:start>
             <div class="my-2">
-              <Button label="Создать" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
+              <Button :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
             </div>
           </template>
         </Toolbar>
@@ -21,21 +21,21 @@
         >
           <template #header>
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-              <h5 class="m-0">Управление ролями</h5>
+              <h5 class="m-0">{{ $t('admin.roles_title') }}</h5>
               <span class="block mt-2 md:mt-0 p-input-icon-left">
                 <i class="pi pi-search" />
-                <InputText v-model="filters['global'].value" placeholder="Поиск..." />
+                <InputText v-model="filters['global'].value" :placeholder="$t('admin.search')" />
               </span>
             </div>
           </template>
           <Column field="id" header="ID" sortable></Column>
-          <Column field="name" header="Название" sortable>
+          <Column field="name" :header="$t('admin.name')" sortable>
             <template #body="slotProps">
               <span class="mr-2">{{ slotProps.data.name }}</span>
-              <Tag v-if="slotProps.data.important" value="Только редактирование"></Tag>
+              <Tag v-if="slotProps.data.important" :value="$t('admin.role_edit_only')"></Tag>
             </template>
           </Column>
-          <Column field="priority" header="Приоритет"></Column>
+          <Column field="priority" :header="$t('admin.priority')"></Column>
           <Column :style="{ width: '8rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
@@ -55,7 +55,7 @@
             :closable="false"
             :style="{ width: '450px' }"
             :modal="true"
-            header="Создание/редактирование роли"
+            :header="$t('admin.role_dialog')"
             class="p-fluid"
           >
             <VeeField
@@ -77,19 +77,25 @@
             <VeeField
               v-model="role.name"
               name="name"
-              label="Название"
+              :label="$t('admin.name')"
               rules="required|alpha_dash"
               v-slot="{ value, errorMessage, handleChange, handleBlur }"
             >
               <div class="field">
-                <label>Название</label>
+                <label>{{ $t('admin.name') }}</label>
                 <InputText :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" />
                 <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
             </VeeField>
-            <VeeField v-model="role.perms" name="perms" label="Разрешения" rules="required" v-slot="{ value, errorMessage, handleChange }">
+            <VeeField
+              v-model="role.perms"
+              name="perms"
+              :label="$t('admin.permissions')"
+              rules="required"
+              v-slot="{ value, errorMessage, handleChange }"
+            >
               <div class="field">
-                <label>Разрешения</label>
+                <label>{{ $t('admin.permissions') }}</label>
                 <span class="p-fluid">
                   <AutoComplete
                     :modelValue="value"
@@ -99,7 +105,7 @@
                     @complete="searchAutocompleate($event)"
                     appendTo="body"
                     :completeOnFocus="true"
-                    placeholder="Выберите разрешения"
+                    :placeholder="$t('admin.choose_permissions')"
                   />
                 </span>
                 <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
@@ -108,21 +114,21 @@
             <VeeField
               v-model="role.priority"
               name="priority"
-              label="Приоритет"
+              :label="$t('admin.priority')"
               rules="required"
               v-slot="{ value, errorMessage, handleChange, handleBlur }"
             >
               <div class="field">
-                <label>Приоритет</label>
+                <label>{{ $t('admin.priority') }}</label>
                 <InputNumber :modelValue="value" @update:modelValue="handleChange" @input="handleChange($event.value)" @blur="handleBlur" />
                 <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
             </VeeField>
             <template #footer>
-              <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
+              <Button :disabled="loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
                 :disabled="loading || !meta.valid"
-                label="Сохранить"
+                :label="$t('common.save')"
                 icon="pi pi-check"
                 class="p-button-text"
                 @click="updateMode ? updateRole() : createRole()"
@@ -147,7 +153,9 @@ export default {
     VeeField: Field,
   },
   setup() {
-    useHead({ title: 'Роли' })
+    const { $t } = useNuxtApp()
+
+    useHead({ title: computed(() => $t('admin.menu_roles')) })
     const toast = useToast()
     const confirm = useConfirm()
     return { toast, confirm }
@@ -222,7 +230,7 @@ export default {
         await this.$api.post('/admin/roles', this.role)
         this.toast.add({
           severity: 'success',
-          detail: 'Роль успешно добавлена',
+          detail: this.$t('admin.role_created'),
           life: 3000,
         })
         await this.load()
@@ -231,13 +239,13 @@ export default {
         if (err.response.status === 409) {
           this.toast.add({
             severity: 'error',
-            detail: 'Роль с данным ID уже присутствует',
+            detail: this.$t('admin.role_exists'),
             life: 3000,
           })
         } else {
           this.toast.add({
             severity: 'error',
-            detail: 'Введены некоректные данные',
+            detail: this.$t('admin.invalid_data'),
             life: 3000,
           })
         }
@@ -249,7 +257,7 @@ export default {
         await this.$api.patch('/admin/roles/' + this.role.id, this.$_.omit(this.role, 'id'))
         this.toast.add({
           severity: 'success',
-          detail: 'Роль успешно редактирована',
+          detail: this.$t('admin.role_updated'),
           life: 3000,
         })
         await this.load()
@@ -257,15 +265,15 @@ export default {
         this.loading = false
         this.toast.add({
           severity: 'error',
-          detail: 'Введены некоректные данные',
+          detail: this.$t('admin.invalid_data'),
           life: 3000,
         })
       }
     },
     async removeRole(id) {
       this.confirm.require({
-        message: `Данный процесс будет необратим!`,
-        header: 'Подтверждение удаления',
+        message: this.$t('admin.irreversible'),
+        header: this.$t('admin.confirm_delete'),
         icon: 'pi pi-exclamation-triangle',
         accept: async () => {
           this.loading = true
@@ -273,7 +281,7 @@ export default {
             await this.$api.delete('/admin/roles/' + id)
             this.toast.add({
               severity: 'success',
-              detail: 'Роль успешно удалена',
+              detail: this.$t('admin.role_deleted'),
               life: 3000,
             })
           } catch {}

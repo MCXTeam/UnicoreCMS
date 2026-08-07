@@ -5,9 +5,9 @@
         <Toolbar class="mb-4">
           <template v-slot:start>
             <div class="my-2">
-              <Button label="Создать" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
+              <Button :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
               <Button
-                label="Удалить"
+                :label="$t('admin.delete')"
                 icon="pi pi-trash"
                 class="p-button-danger"
                 :disabled="!selected || !selected.length"
@@ -34,15 +34,15 @@
         >
           <template #header>
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-              <h5 class="m-0">Управление пользователями</h5>
+              <h5 class="m-0">{{ $t('admin.users_title') }}</h5>
               <span class="block mt-2 md:mt-0 p-input-icon-left">
                 <i class="pi pi-search" />
-                <InputText @keydown.enter="onFilter()" v-model="filters['global'].value" placeholder="Поиск..." />
+                <InputText @keydown.enter="onFilter()" v-model="filters['global'].value" :placeholder="$t('admin.search')" />
               </span>
             </div>
           </template>
           <Column selectionMode="multiple" :style="{ width: '3rem' }"></Column>
-          <Column field="username" header="Имя пользователя" sortable>
+          <Column field="username" :header="$t('admin.username')" sortable>
             <template #body="slotProps">
               <div class="flex align-items-center">
                 <SkinView2D class="rounded" :width="16" :height="16" :skin="slotProps.data.skin" />
@@ -51,12 +51,12 @@
             </template>
           </Column>
           <Column field="email" header="Email" sortable></Column>
-          <Column field="created" header="Дата регистрации" sortable>
+          <Column field="created" :header="$t('admin.registered_date')" sortable>
             <template #body="slotProps">
               {{ $moment(slotProps.data.created).format('MM/DD/YYYY HH:mm:ss') }}
             </template>
           </Column>
-          <Column field="roles" header="Роли">
+          <Column field="roles" :header="$t('admin.roles')">
             <template #body="slotProps">
               <Tag class="mr-2 mb-2" v-if="slotProps.data.superuser" value="SuperUser"></Tag>
               <Tag class="mr-2 mb-2" v-for="role in slotProps.data.roles" :key="role.id" :value="role.name"></Tag>
@@ -80,19 +80,19 @@
         :closable="false"
         :style="{ width: '450px' }"
         :modal="true"
-        header="Создание пользователя"
+        :header="$t('admin.user_create_dialog')"
         class="p-fluid"
       >
         <div class="p-fluid">
           <VeeField
             v-model="user.username"
             name="username"
-            label="Имя пользователя"
+            :label="$t('admin.username')"
             rules="required|isUsername"
             v-slot="{ value, errorMessage, handleChange, handleBlur }"
           >
             <div class="field">
-              <label>Имя пользователя</label>
+              <label>{{ $t('admin.username') }}</label>
               <InputText :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" type="text" />
               <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
             </div>
@@ -112,11 +112,11 @@
           </VeeField>
           <div class="field-checkbox">
             <Checkbox :binary="true" v-model="user.activated" />
-            <label>Активирован (Email)</label>
+            <label>{{ $t('admin.activated_email') }}</label>
           </div>
-          <h4>Роли и права</h4>
+          <h4>{{ $t('admin.roles_and_rights') }}</h4>
           <div class="field">
-            <label>Роли</label>
+            <label>{{ $t('admin.roles') }}</label>
             <MultiSelect
               display="chip"
               :filter="true"
@@ -125,12 +125,12 @@
               :options="roles"
               optionLabel="name"
               optionValue="id"
-              placeholder="Выберите роли"
+              :placeholder="$t('admin.choose_roles')"
               class="p-column-filter"
             />
           </div>
           <div class="field">
-            <label>Права</label>
+            <label>{{ $t('admin.rights') }}</label>
             <span class="p-fluid">
               <AutoComplete
                 v-model="user.perms"
@@ -139,29 +139,29 @@
                 @complete="searchAutocompleate($event)"
                 appendTo="body"
                 :completeOnFocus="true"
-                placeholder="Выберите разрешения"
+                :placeholder="$t('admin.choose_permissions')"
               />
             </span>
           </div>
           <div class="field-checkbox">
             <Checkbox :binary="true" v-model="user.superuser" />
-            <label>Суперпользователь</label>
+            <label>{{ $t('admin.superuser') }}</label>
           </div>
           <VeeField
             v-model="user.password"
             name="password"
-            label="Пароль"
+            :label="$t('auth.password')"
             rules="required|min:8|max:128"
             v-slot="{ value, errorMessage, handleChange, handleBlur }"
           >
             <div class="field">
-              <label>Пароль</label>
+              <label>{{ $t('auth.password') }}</label>
               <InputText
                 autocomplete="false"
                 :modelValue="value"
                 @update:modelValue="handleChange"
                 @blur="handleBlur"
-                placeholder="Без изменений"
+                :placeholder="$t('admin.unchanged')"
                 type="password"
               />
               <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
@@ -170,18 +170,18 @@
           <VeeField
             v-model="passwordConfirm"
             name="password_confirm"
-            label="Подтверждение пароля"
+            :label="$t('auth.password_confirm')"
             rules="required|confirmed:@password"
             v-slot="{ value, errorMessage, handleChange, handleBlur }"
           >
             <div class="field">
-              <label>Подтверждение пароля</label>
+              <label>{{ $t('auth.password_confirm') }}</label>
               <InputText
                 autocomplete="false"
                 :modelValue="value"
                 @update:modelValue="handleChange"
                 @blur="handleBlur"
-                placeholder="Без изменений"
+                :placeholder="$t('admin.unchanged')"
                 type="password"
               />
               <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
@@ -189,8 +189,14 @@
           </VeeField>
         </div>
         <template #footer>
-          <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
-          <Button :disabled="loading || !meta.valid" label="Сохранить" icon="pi pi-check" class="p-button-text" @click="createUser()" />
+          <Button :disabled="loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
+          <Button
+            :disabled="loading || !meta.valid"
+            :label="$t('common.save')"
+            icon="pi pi-check"
+            class="p-button-text"
+            @click="createUser()"
+          />
         </template>
       </Dialog>
     </VeeForm>
@@ -210,7 +216,9 @@ export default {
     VeeField: Field,
   },
   setup() {
-    useHead({ title: 'Пользователи' })
+    const { $t } = useNuxtApp()
+
+    useHead({ title: computed(() => $t('admin.menu_users')) })
     const toast = useToast()
     const confirm = useConfirm()
     return { toast, confirm }
@@ -316,8 +324,8 @@ export default {
     },
     async removeUser(id) {
       this.confirm.require({
-        message: `Данный процесс будет необратим!`,
-        header: 'Подтверждение удаления',
+        message: this.$t('admin.irreversible'),
+        header: this.$t('admin.confirm_delete'),
         icon: 'pi pi-exclamation-triangle',
         accept: async () => {
           this.loading = true
@@ -325,7 +333,7 @@ export default {
             await this.$api.delete('/users/' + id)
             this.toast.add({
               severity: 'success',
-              detail: 'Пользователь успешно удален',
+              detail: this.$t('admin.user_deleted'),
               life: 3000,
             })
           } catch {}
@@ -335,8 +343,8 @@ export default {
     },
     async removeMany() {
       this.confirm.require({
-        message: `Данный процесс будет необратим!`,
-        header: `Удаления ${this.selected.length} объектов`,
+        message: this.$t('admin.irreversible'),
+        header: this.$t('admin.delete_many', { count: this.selected.length }),
         icon: 'pi pi-exclamation-triangle',
         accept: async () => {
           this.loading = true
@@ -348,7 +356,7 @@ export default {
             })
             this.toast.add({
               severity: 'success',
-              detail: 'Пользователи успешно удалены',
+              detail: this.$t('admin.users_deleted'),
               life: 3000,
             })
             this.selected = []
@@ -363,7 +371,7 @@ export default {
         await this.$api.post('/users', this.user)
         this.toast.add({
           severity: 'success',
-          detail: 'Пользователь успешно добавлен',
+          detail: this.$t('admin.user_created'),
           life: 3000,
         })
         this.userDialog = false
@@ -371,7 +379,7 @@ export default {
       } catch (err) {
         this.toast.add({
           severity: 'error',
-          detail: 'Введены некоректные данные, либо у вас недостаточно прав',
+          detail: this.$t('admin.invalid_data_or_rights'),
           life: 3000,
         })
       }

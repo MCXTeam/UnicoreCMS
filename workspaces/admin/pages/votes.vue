@@ -5,23 +5,23 @@
         <Toolbar class="mb-4">
           <template v-slot:start>
             <div class="my-2">
-              <Button label="Создать" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
+              <Button :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
             </div>
           </template>
         </Toolbar>
         <DataTable :value="bonuses" :loading="loading" v-model:filters="filters" rowHover responsiveLayout="scroll" dataKey="id">
           <template #header>
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-              <h5 class="m-0">Управление бонусами голосования</h5>
+              <h5 class="m-0">{{ $t('admin.votes_title') }}</h5>
               <span class="block mt-2 md:mt-0 p-input-icon-left">
                 <i class="pi pi-search" />
-                <InputText v-model="filters['global'].value" placeholder="Поиск..." />
+                <InputText v-model="filters['global'].value" :placeholder="$t('admin.search')" />
               </span>
             </div>
           </template>
           <Column field="id" header="ID" sortable></Column>
-          <Column field="place" header="Место" sortable />
-          <Column field="bonus" header="Бонус">
+          <Column field="place" :header="$t('admin.place')" sortable />
+          <Column field="bonus" :header="$t('admin.bonus')">
             <template #body="slotProps"> {{ $utils.formatCurrency('real', slotProps.data.bonus) }} </template>
           </Column>
           <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
@@ -38,18 +38,18 @@
             :closable="false"
             :style="{ width: '450px' }"
             :modal="true"
-            header="Создание/редактирование бонуса"
+            :header="$t('admin.vote_dialog')"
             class="p-fluid"
           >
             <VeeField
               v-model="bonus.place"
               name="place"
-              label="Место"
+              :label="$t('admin.place')"
               rules="required|min:0"
               v-slot="{ value, errorMessage, handleChange }"
             >
               <div class="field">
-                <label>Место</label>
+                <label>{{ $t('admin.place') }}</label>
                 <InputNumber :modelValue="value" @update:modelValue="handleChange" @input="handleChange($event.value)" />
                 <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
@@ -57,12 +57,12 @@
             <VeeField
               v-model="bonus.bonus"
               name="bonus"
-              label="Бонус рублей на баланс"
+              :label="$t('admin.vote_bonus_amount')"
               rules="required|min:0"
               v-slot="{ value, errorMessage, handleChange }"
             >
               <div class="field">
-                <label>Бонус рублей на баланс</label>
+                <label>{{ $t('admin.vote_bonus_amount') }}</label>
                 <InputNumber
                   :modelValue="value"
                   @update:modelValue="handleChange"
@@ -75,10 +75,10 @@
               </div>
             </VeeField>
             <template #footer>
-              <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
+              <Button :disabled="loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
                 :disabled="loading || !meta.valid"
-                label="Сохранить"
+                :label="$t('common.save')"
                 icon="pi pi-check"
                 class="p-button-text"
                 @click="updateMode ? updateBonus() : createBonus()"
@@ -100,7 +100,9 @@ export default {
     VeeField: Field,
   },
   setup() {
-    useHead({ title: 'Бонусы голосования' })
+    const { $t } = useNuxtApp()
+
+    useHead({ title: computed(() => $t('admin.votes_title')) })
     return { runtimeConfig: useRuntimeConfig().public }
   },
   data() {
@@ -150,14 +152,14 @@ export default {
         await this.$api.post('/cabinet/votes/gifts', this.bonus)
         this.$toast.add({
           severity: 'success',
-          detail: 'Бонус успешно добавлен',
+          detail: this.$t('admin.vote_created'),
           life: 3000,
         })
         await this.load()
       } catch (err) {
         this.$toast.add({
           severity: 'error',
-          detail: 'Введены некоректные данные',
+          detail: this.$t('admin.invalid_data'),
           life: 3000,
         })
       }
@@ -169,7 +171,7 @@ export default {
         await this.$api.patch('/cabinet/votes/gifts/' + this.bonus.id, this.$_.omit(this.bonus, 'id'))
         this.$toast.add({
           severity: 'success',
-          detail: 'Бонус успешно редактирован',
+          detail: this.$t('admin.vote_updated'),
           life: 3000,
         })
         await this.load()
@@ -177,7 +179,7 @@ export default {
         this.loading = false
         this.$toast.add({
           severity: 'error',
-          detail: 'Введены некоректные данные',
+          detail: this.$t('admin.invalid_data'),
           life: 3000,
         })
       }
@@ -185,8 +187,8 @@ export default {
     },
     async removeBonus(id) {
       this.$confirm.require({
-        message: `Данный процесс будет необратим!`,
-        header: 'Подтверждение удаления',
+        message: this.$t('admin.irreversible'),
+        header: this.$t('admin.confirm_delete'),
         icon: 'pi pi-exclamation-triangle',
         accept: async () => {
           this.loading = true
@@ -194,7 +196,7 @@ export default {
             await this.$api.delete('/cabinet/votes/gifts/' + id)
             this.$toast.add({
               severity: 'success',
-              detail: 'Бонус успешно удален',
+              detail: this.$t('admin.vote_deleted'),
               life: 3000,
             })
           } catch {}

@@ -1,5 +1,7 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Translatable } from 'src/admin/locales/translatable.decorator';
 
+@Translatable('page', ['title', 'description', 'content'])
 @Entity({ name: 'unicore_pages' })
 export class Page {
   @PrimaryGeneratedColumn({ name: 'id' })
@@ -19,6 +21,9 @@ export class Page {
 
   @Column('longtext', { nullable: true, name: 'content' })
   content: string;
+
+  @Column({ default: false, name: 'full_size' })
+  full_size: boolean;
 
   @Column('longtext', { nullable: true, name: 'custom_css' })
   custom_css: string;

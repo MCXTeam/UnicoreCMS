@@ -5,9 +5,9 @@
         <Toolbar class="mb-4">
           <template v-slot:start>
             <div class="my-2">
-              <Button label="Создать" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
+              <Button :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
               <Button
-                label="Удалить"
+                :label="$t('admin.delete')"
                 icon="pi pi-trash"
                 class="p-button-danger"
                 :disabled="!selected || !selected.length"
@@ -28,13 +28,13 @@
         >
           <template #header>
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-              <h5 class="m-0">Управление донат-китами</h5>
+              <h5 class="m-0">{{ $t('admin.donate_kits_title') }}</h5>
             </div>
           </template>
           <Column :style="{ width: '3rem' }" :rowReorder="true" headerStyle="width: 3rem" />
           <Column selectionMode="multiple" :style="{ width: '3rem' }"></Column>
           <Column field="id" header="ID" :style="{ width: '8rem' }"></Column>
-          <Column field="name" header="Название"></Column>
+          <Column field="name" :header="$t('admin.name')"></Column>
           <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
@@ -44,7 +44,7 @@
           </Column>
         </DataTable>
 
-        <Dialog v-model:visible="fileDialog" :style="{ width: '600px' }" :modal="true" header="Редактирование картинкок" class="p-fluid">
+        <Dialog v-model:visible="fileDialog" :style="{ width: '600px' }" :modal="true" :header="$t('admin.kit_images')" class="p-fluid">
           <div v-for="server in servers" :key="server.id" class="grid mb-4 pt-2">
             <div class="col-12 md:col-6">
               <h4 v-text="server.name" />
@@ -53,8 +53,8 @@
             </div>
             <div class="col-12 md:col-6">
               <div class="field mb-0 mt-2">
-                <Button label="Загрузить" icon="pi pi-upload" @click="preUpdateImage(server.id)" />
-                <Button label="Удалить" icon="pi pi-trash" class="p-button-secondary mt-2" @click="removeImage(server.id)" />
+                <Button :label="$t('admin.upload')" icon="pi pi-upload" @click="preUpdateImage(server.id)" />
+                <Button :label="$t('admin.delete')" icon="pi pi-trash" class="p-button-secondary mt-2" @click="removeImage(server.id)" />
                 <FileUpload
                   :ref="'imageInput-' + server.id"
                   :pt="{ root: { class: 'hidden' } }"
@@ -76,40 +76,55 @@
             :closable="false"
             :style="{ width: '600px' }"
             :modal="true"
-            header="Создание/редактирование кита"
+            :header="$t('admin.kit_dialog')"
             class="p-fluid"
           >
-            <VeeField
-              v-model="kit.name"
-              name="name"
-              label="Название"
-              rules="required"
-              v-slot="{ value, errorMessage, handleChange, handleBlur }"
-            >
+            <LocaleEditorBar
+              v-model="translations.locale"
+              :locales="translations.locales"
+              :status="translations.status"
+              :isDefault="translations.isDefault"
+              @copy="translations.copyFromDefault()"
+            />
+            <template v-if="translations.isDefault">
+              <VeeField
+                v-model="kit.name"
+                name="name"
+                :label="$t('admin.name')"
+                rules="required"
+                v-slot="{ value, errorMessage, handleChange, handleBlur }"
+              >
+                <div class="field">
+                  <label>{{ $t('admin.name') }}</label>
+                  <InputText
+                    :modelValue="value"
+                    @update:modelValue="handleChange"
+                    @blur="handleBlur"
+                    :class="errorMessage && 'p-invalid'"
+                  />
+                  <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+                </div>
+              </VeeField>
               <div class="field">
-                <label>Название</label>
-                <InputText :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" :class="errorMessage && 'p-invalid'" />
-                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+                <label>{{ $t('admin.description') }}</label>
+                <Editor v-model="kit.description" editorStyle="height: 220px">
+                  <template #toolbar>
+                    <span class="ql-formats">
+                      <button class="ql-bold"></button>
+                      <button class="ql-italic"></button>
+                      <button class="ql-underline"></button>
+                      <button class="ql-link"></button>
+                    </span>
+                  </template>
+                </Editor>
               </div>
-            </VeeField>
-            <div class="field">
-              <label>Описание</label>
-              <Editor v-model="kit.description" editorStyle="height: 220px">
-                <template #toolbar>
-                  <span class="ql-formats">
-                    <button class="ql-bold"></button>
-                    <button class="ql-italic"></button>
-                    <button class="ql-underline"></button>
-                    <button class="ql-link"></button>
-                  </span>
-                </template>
-              </Editor>
-            </div>
+            </template>
+            <ContentTranslationFields v-else :translations="translations" />
             <template #footer>
-              <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
+              <Button :disabled="loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
                 :disabled="loading || !meta.valid"
-                label="Сохранить"
+                :label="$t('common.save')"
                 icon="pi pi-check"
                 class="p-button-text"
                 @click="updateMode ? updateKit() : createKit()"
@@ -131,9 +146,13 @@ export default {
     VeeField: Field,
   },
   setup() {
-    useHead({ title: 'Донат-киты' })
+    const translations = useContentTranslations('group_kit')
+
+    const { $t } = useNuxtApp()
+
+    useHead({ title: computed(() => $t('admin.menu_donate_kits')) })
     const config = useRuntimeConfig()
-    return { apiUrl: config.public.apiBaseurl }
+    return { translations, apiUrl: config.public.apiBaseurl }
   },
   data() {
     return {
@@ -195,7 +214,7 @@ export default {
         })
         this.$toast.add({
           severity: 'success',
-          detail: 'Картинка успешно обновлена',
+          detail: this.$t('admin.image_updated'),
           life: 3000,
         })
         await this.load()
@@ -203,7 +222,7 @@ export default {
         this.fileDialog = false
         this.$toast.add({
           severity: 'error',
-          detail: 'Поддерживаются только изображения',
+          detail: this.$t('admin.images_only'),
           life: 3000,
         })
       }
@@ -213,7 +232,7 @@ export default {
         await this.$api.delete(`/donates/group-kits/image/${id}/${this.kit.id}`)
         this.$toast.add({
           severity: 'success',
-          detail: 'Картинка успешно удалена',
+          detail: this.$t('admin.image_deleted'),
           life: 3000,
         })
         await this.load()
@@ -235,15 +254,19 @@ export default {
           images: [],
         }
       }
+      this.translations.attach(this.kit)
+      await this.translations.load(kit ? kit.id : null)
       this.kitDialog = true
     },
     async createKit() {
       this.loading = true
       try {
-        await this.$api.post('/donates/group-kits', this.kit)
+        const { data } = await this.$api.post('/donates/group-kits', this.kit)
+
+        await this.translations.save(data.id)
         this.$toast.add({
           severity: 'success',
-          detail: 'Кит успешно добавлен',
+          detail: this.$t('admin.kit_created'),
           life: 3000,
         })
         await this.load()
@@ -251,7 +274,7 @@ export default {
         this.loading = false
         this.$toast.add({
           severity: 'error',
-          detail: 'Введены некоректные данные',
+          detail: this.$t('admin.invalid_data'),
           life: 3000,
         })
       }
@@ -260,9 +283,11 @@ export default {
       this.loading = true
       try {
         await this.$api.patch('/donates/group-kits/' + this.kit.id, this.$_.omit(this.kit, 'id'))
+
+        await this.translations.save(this.kit.id)
         this.$toast.add({
           severity: 'success',
-          detail: 'Кит успешно редактирован',
+          detail: this.$t('admin.kit_updated'),
           life: 3000,
         })
         await this.load()
@@ -270,15 +295,15 @@ export default {
         this.loading = false
         this.$toast.add({
           severity: 'error',
-          detail: 'Введены некоректные данные',
+          detail: this.$t('admin.invalid_data'),
           life: 3000,
         })
       }
     },
     async removeMany() {
       this.$confirm.require({
-        message: `Данный процесс будет необратим!`,
-        header: `Удаления ${this.selected.length} объектов`,
+        message: this.$t('admin.irreversible'),
+        header: this.$t('admin.delete_many', { count: this.selected.length }),
         icon: 'pi pi-exclamation-triangle',
         accept: async () => {
           this.loading = true
@@ -290,7 +315,7 @@ export default {
             })
             this.$toast.add({
               severity: 'success',
-              detail: 'Киты успешно удалены',
+              detail: this.$t('admin.kits_deleted'),
               life: 3000,
             })
             this.selected = []
@@ -301,8 +326,8 @@ export default {
     },
     async removeKit(id) {
       this.$confirm.require({
-        message: `Данный процесс будет необратим!`,
-        header: 'Подтверждение удаления',
+        message: this.$t('admin.irreversible'),
+        header: this.$t('admin.confirm_delete'),
         icon: 'pi pi-exclamation-triangle',
         accept: async () => {
           this.loading = true
@@ -310,7 +335,7 @@ export default {
             await this.$api.delete('/donates/group-kits/' + id)
             this.$toast.add({
               severity: 'success',
-              detail: 'Кит успешно удален',
+              detail: this.$t('admin.kit_deleted'),
               life: 3000,
             })
           } catch {}

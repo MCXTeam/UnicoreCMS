@@ -2,21 +2,18 @@
   <section>
     <Form v-slot="{ meta }" class="d-flex flex-column align-items-center w-100" @submit="login">
       <h3 data-aos="zoom-in-right" data-aos-delay="150" class="text-uppercase text-center mb-4">
-        Войдите в учётную запись {{ $pub.sitename }}
+        {{ $t('auth.login_title', { sitename: $pub.sitename }) }}
       </h3>
       <div class="w-100" v-if="totpRequired">
-        <p class="text-center mb-4 w-100">
-          Так как для данного аккаунта включена двухфакторная авторизация, для входа в него необходимо ввести код из
-          приложения-аутификатора.
-        </p>
-        <Field v-model="form.totp" name="Код из приложения" rules="required" v-slot="{ value, errorMessage, handleChange, handleBlur }">
+        <p class="text-center mb-4 w-100">{{ $t('auth.totp_hint') }}</p>
+        <Field v-model="form.totp" :name="$t('auth.totp_code')" rules="required" v-slot="{ value, errorMessage, handleChange, handleBlur }">
           <IconField class="w-100 mb-3">
             <InputIcon class="bx bx-lock-open-alt" />
             <InputText
               :modelValue="value"
               @update:modelValue="handleChange"
               @blur="handleBlur"
-              placeholder="Код из приложения"
+              :placeholder="$t('auth.totp_code')"
               class="w-100"
               :class="errorMessage && 'p-invalid'"
             />
@@ -27,7 +24,7 @@
       <div class="w-100" v-else>
         <Field
           v-model="form.username_or_email"
-          name="Email"
+          :name="$t('auth.username_or_email')"
           rules="required|isUsernameOrEmail"
           v-slot="{ value, errorMessage, handleChange, handleBlur }"
         >
@@ -37,7 +34,7 @@
               :modelValue="value"
               @update:modelValue="handleChange"
               @blur="handleBlur"
-              placeholder="Имя пользователя или Email"
+              :placeholder="$t('auth.username_or_email')"
               class="w-100"
               :class="errorMessage && 'p-invalid'"
             />
@@ -46,7 +43,7 @@
         </Field>
         <Field
           v-model="form.password"
-          name="Пароль"
+          :name="$t('auth.password')"
           rules="required"
           v-slot="{ value, errorMessage, handleChange, handleBlur }"
         >
@@ -57,7 +54,7 @@
               @blur="handleBlur"
               :feedback="false"
               :toggleMask="true"
-              placeholder="Пароль"
+              :placeholder="$t('auth.password')"
               class="w-100"
               inputClass="w-100"
               :class="errorMessage && 'p-invalid'"
@@ -73,16 +70,18 @@
         >
           <div class="d-flex align-items-center gap-2">
             <Checkbox v-model="form.save_me" :binary="true" inputId="save_me" />
-            <label for="save_me">Запомнить меня</label>
+            <label for="save_me">{{ $t('auth.remember_me') }}</label>
           </div>
-          <NuxtLink to="/auth/reset">Забыли пароль?</NuxtLink>
+          <NuxtLink to="/auth/reset">{{ $t('auth.forgot_password') }}</NuxtLink>
         </div>
       </div>
       <div class="w-100" data-aos="zoom-in-right" data-aos-delay="750">
-        <Button :disabled="!meta.valid" type="submit" size="large" label="Войти" class="w-100" />
+        <Button :disabled="!meta.valid" type="submit" size="large" :label="$t('header.login')" class="w-100" />
       </div>
-      <p data-aos="zoom-in-right" data-aos-delay="900" class="mb-0 mt-4">У вас нет учётной записи UnicoreCMS?</p>
-      <NuxtLink data-aos="zoom-in-right" data-aos-delay="1050" class="mb-4" to="/auth/register">Зарегистрироваться</NuxtLink>
+      <p data-aos="zoom-in-right" data-aos-delay="900" class="mb-0 mt-4">{{ $t('auth.no_account', { sitename: $pub.sitename }) }}</p>
+      <NuxtLink data-aos="zoom-in-right" data-aos-delay="1050" class="mb-4" to="/auth/register">
+        {{ $t('auth.sign_up') }}
+      </NuxtLink>
     </Form>
   </section>
 </template>
@@ -93,7 +92,7 @@ import { useReCaptcha } from 'vue-recaptcha-v3'
 
 definePageMeta({ layout: 'auth', middleware: 'guest' })
 
-const { $unicore, $auth } = useNuxtApp()
+const { $unicore, $auth, $t } = useNuxtApp()
 const recaptcha = useReCaptcha()
 
 const totpRequired = ref(false)
@@ -115,9 +114,9 @@ async function login() {
     if (err?.response?.data?.message == 'require2fa') {
       totpRequired.value = true
     } else if (totpRequired.value) {
-      $unicore.authErrorNotification(err, 'Код из приложения не подходит, попробуйте еще раз')
+      $unicore.authErrorNotification(err, $t('auth.totp_wrong'))
     } else {
-      $unicore.authErrorNotification(err, 'Неправильный логин или пароль')
+      $unicore.authErrorNotification(err, $t('auth.wrong_credentials'))
     }
   } finally {
     loading.close()

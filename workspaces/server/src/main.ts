@@ -10,6 +10,9 @@ import { EntityNotFoundFilter } from './common/filters/entity-not-found.filter';
 import { ASCII_NAME } from '@common';
 import * as clc from 'cli-color';
 import { initializeTransactionalContext } from 'typeorm-transactional';
+import { ContentLocaleInterceptor } from './admin/locales/content-locale.interceptor';
+import { ContentTranslationsService } from './admin/locales/content-translations.service';
+import { LocalesService } from './admin/locales/locales.service';
 
 process.env.TZ = envConfig.timezone;
 
@@ -47,7 +50,10 @@ async function bootstrap() {
   app.useStaticAssets(join(__dirname, '../../../storage'));
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
   app.useWebSocketAdapter(new AuthAdapter(app));
-  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+  app.useGlobalInterceptors(
+    new ClassSerializerInterceptor(app.get(Reflector)),
+    new ContentLocaleInterceptor(app.get(ContentTranslationsService), app.get(LocalesService)),
+  );
   app.useGlobalFilters(new EntityNotFoundFilter());
 
   await app.listen(envConfig.backendPort, '0.0.0.0');

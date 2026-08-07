@@ -11,14 +11,14 @@
       </div>
       <div class="row">
         <div class="col-xl-7 pe-xl-5" v-if="server.content">
-          <h2 class="mt-4 mb-2">Описание сервера</h2>
+          <h2 class="mt-4 mb-2">{{ $t('servers.description') }}</h2>
           <div class="description-html" v-html="$sanitize(server.content)" />
         </div>
         <div class="col-xl-5">
-          <h3 class="mt-4 mb-2">Информация о сервере</h3>
+          <h3 class="mt-4 mb-2">{{ $t('servers.info') }}</h3>
           <table class="server-table w-100">
             <tr>
-              <td>Игровая версия</td>
+              <td>{{ $t('servers.game_version') }}</td>
               <td v-text="server.version" />
             </tr>
             <tr v-for="(row, i) in server.table" :key="i">
@@ -30,7 +30,7 @@
       </div>
     </div>
     <div v-if="server.mods && server.mods.length">
-      <h2 class="mt-5 mb-4">Моды сервера</h2>
+      <h2 class="mt-5 mb-4">{{ $t('servers.mods') }}</h2>
       <div v-for="mod in server.mods" :key="mod.id" class="mb-4 panel" v-show="mod.description">
         <div class="row">
           <div class="col-xl-10">
@@ -44,7 +44,7 @@
       </div>
     </div>
     <div class="mb-4 panel" v-if="othermods">
-      <h2 class="mt-0 mb-2">Остальные моды</h2>
+      <h2 class="mt-0 mb-2">{{ $t('servers.other_mods') }}</h2>
       <div v-text="othermods"></div>
     </div>
   </div>
@@ -56,7 +56,7 @@ import { useUiStore } from '~/stores/ui'
 definePageMeta({ layout: 'landing' })
 
 const route = useRoute()
-const { $api } = useNuxtApp()
+const { $api, $t } = useNuxtApp()
 const ui = useUiStore()
 
 const { data: server, error } = await useAsyncData<any>(`server-${route.params.id}`, () =>
@@ -72,7 +72,7 @@ const othermods = server.value?.mods
   ?.map((m: any) => m.name)
   ?.join(', ')
 
-ui.setName(`Информация о сервере ${server.value.name}`)
+ui.setName($t('servers.about', { server: server.value.name }))
 
 useHead({
   title: server.value?.name,

@@ -2,7 +2,9 @@ import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColum
 import { DonatePermission } from '../../permissions/entities/donate-permission.entity';
 import { DonateGroup } from './donate-group.entity';
 import { GroupKitImage } from './group-kit-image.entity';
+import { Translatable } from 'src/admin/locales/translatable.decorator';
 
+@Translatable('group_kit', ['name', 'description'])
 @Entity({
   name: 'unicore_group_kits',
   orderBy: {

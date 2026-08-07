@@ -1,7 +1,9 @@
 import { StorageManager } from '@common';
 import { AfterRemove, Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Server } from '../../entities/server.entity';
+import { Translatable } from 'src/admin/locales/translatable.decorator';
 
+@Translatable('mod', ['name', 'description'])
 @Entity({
   name: 'unicore_mods',
   orderBy: {

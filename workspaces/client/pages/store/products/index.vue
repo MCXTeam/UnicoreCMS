@@ -1,16 +1,18 @@
 <template>
   <div class="px-4">
-    <h2 class="mt-0 mb-4">Выберите сервер</h2>
+    <h2 class="mt-0 mb-4">{{ $t('store.choose_server') }}</h2>
     <div v-if="servers.length">
       <div class="row">
-        <div class="col-xl-6" v-for="server in servers" :key="server.id">
+        <div class="col-xl-6 mb-4" v-for="server in servers" :key="server.id">
           <NuxtLink
             :to="`/store/products/${server.id}`"
-            class="mb-4 panel server-block p-5 d-flex align-items-center justify-content-between without-underline"
+            class="h-100 panel server-block p-5 d-flex align-items-center justify-content-between without-underline"
           >
             <div>
               <h2 class="m-0">{{ server.name }}</h2>
-              <h5 class="m-0">{{ server.products_count }} товаров из {{ server.categories_count }} категорий</h5>
+              <h5 class="m-0">
+                {{ $t('store.server_counts', { products: server.products_count, categories: server.categories_count }) }}
+              </h5>
             </div>
             <img v-if="server.icon" :src="`${apiUrl}/${server.icon}`" width="96px" />
             <div
@@ -32,10 +34,11 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'Магазин' })
-useHead({ title: 'Магазин' })
+definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'header.store' })
 
-const { $api } = useNuxtApp()
+const { $api, $t } = useNuxtApp()
+
+useHead({ title: computed(() => $t('header.store')) })
 const apiUrl = useRuntimeConfig().public.apiBaseurl
 
 const servers = ref<any[]>([])

@@ -1,17 +1,17 @@
 <template>
   <div class="mb-4">
     <Button :as="NuxtLink" to="/store/products" size="large" class="mx-0 mb-5 server-changer w-full"
-      >Сменить сервер <i class="bx bx-server"></i
+      >{{ $t('store.change_server') }} <i class="bx bx-server"></i
     ></Button>
 
-    <h3 class="text-uppercase">Поиск и фильтры</h3>
+    <h3 class="text-uppercase">{{ $t('store.filters') }}</h3>
     <div class="store-filters">
-      <InputText :disabled="loading" class="mw-100 mt-3" placeholder="Поиск" v-model="searchLocal" />
-      <h5 class="text-uppercase mt-3 mb-0">Категория</h5>
+      <InputText :disabled="loading" class="mw-100 mt-3" :placeholder="$t('store.search')" v-model="searchLocal" />
+      <h5 class="text-uppercase mt-3 mb-0">{{ $t('store.category') }}</h5>
       <Select :disabled="loading" v-model="categoryLocal" :options="categoryOptions" optionLabel="label" optionValue="value" class="mt-1" />
-      <h5 class="text-uppercase mt-3 mb-0">Сортировка</h5>
+      <h5 class="text-uppercase mt-3 mb-0">{{ $t('store.sorting') }}</h5>
       <Select :disabled="loading" v-model="sortLocal" :options="sortOptions" optionLabel="label" optionValue="value" class="mt-1" />
-      <h5 class="text-uppercase mt-3 mb-0">Цена</h5>
+      <h5 class="text-uppercase mt-3 mb-0">{{ $t('store.price') }}</h5>
       <div class="px-2">
         <Slider :disabled="loading" v-model="priceLocal" :range="true" :min="range.min" :max="range.max" :step="0.01" class="mt-3" />
       </div>
@@ -19,7 +19,7 @@
         <span>{{ $utils.formatCurrency('real', priceLocal[0]) }}</span>
         <span>{{ $utils.formatCurrency('real', priceLocal[1]) }}</span>
       </div>
-      <Button :loading="loading" @click="update()" size="large" class="mx-0 mt-3 text-uppercase w-full" label="Применить" />
+      <Button :loading="loading" @click="update()" size="large" class="mx-0 mt-3 text-uppercase w-full" :label="$t('store.apply')" />
     </div>
   </div>
 </template>
@@ -64,17 +64,19 @@ const sortLocal = ref(props.sort)
 const categoryLocal = ref(props.category)
 const searchLocal = ref(props.search)
 
-const sortOptions = [
-  { label: 'Сначало новые', value: 'id:DESC' },
-  { label: 'Сначало старые', value: 'id:ASC' },
-  { label: 'Сначало дорогие', value: 'price:DESC' },
-  { label: 'Сначало дешёвые', value: 'price:ASC' },
-  { label: 'Название (Я-а)', value: 'name:DESC' },
-  { label: 'Название (А-я)', value: 'name:ASC' },
-]
+const { $t } = useNuxtApp()
+
+const sortOptions = computed(() => [
+  { label: $t('store.sort_new'), value: 'id:DESC' },
+  { label: $t('store.sort_old'), value: 'id:ASC' },
+  { label: $t('store.sort_expensive'), value: 'price:DESC' },
+  { label: $t('store.sort_cheap'), value: 'price:ASC' },
+  { label: $t('store.sort_name_desc'), value: 'name:DESC' },
+  { label: $t('store.sort_name_asc'), value: 'name:ASC' },
+])
 
 const categoryOptions = computed(() => [
-  { label: 'Все категории', value: '0' },
+  { label: $t('store.all_categories'), value: '0' },
   ...(props.categories as Array<{ id: number; name: string }>).map((cat) => ({ label: cat.name, value: String(cat.id) })),
 ])
 

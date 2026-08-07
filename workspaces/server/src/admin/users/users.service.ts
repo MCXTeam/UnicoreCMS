@@ -16,10 +16,10 @@ import { randomUUID } from 'crypto';
 import { PasswordService } from 'src/auth/password/password.service';
 import { passwordAad } from 'src/auth/password/password-aad';
 import { Cache } from 'cache-manager';
-import { CacheKey, DeleteManyUuidInput } from '@common';
+import { CacheKey, DeleteManyUuidInput, KERNEL_USERNAME } from '@common';
 import { UserUpdateInput } from './dto/user-update.input';
 import { matchPermission, transformPermissions } from '../roles/guards/permisson.guard';
-import { Permission } from 'unicore-common';
+import { Permission, UserField, USER_FIELDS } from 'unicore-common';
 import { SettingsService } from 'src/game/cabinet/settings/providers/settings.service';
 import { PasswordChangeInput } from 'src/game/cabinet/settings/dto/password-change.input';
 import { PasswordUpdateInput } from 'src/game/cabinet/settings/dto/password-update.input';
@@ -78,7 +78,7 @@ export class UsersService {
       .leftJoinAndSelect('user.roles', 'roles')
       .leftJoinAndSelect('user.skin', 'skin')
       .where({
-        username: Not('Kernel'),
+        username: Not(KERNEL_USERNAME),
       });
 
     const paginate_ = await paginate(query, queryBuilder, {
@@ -143,7 +143,7 @@ export class UsersService {
   @Transactional()
   async getPublicUser(username: string): Promise<UserPublicDto> {
     const user = await this.getByUsername(username);
-    if (!user || user.username == 'Kernel') throw new NotFoundException();
+    if (!user || user.username == KERNEL_USERNAME) throw new NotFoundException();
 
     const playtimes = await this.playtimeService.findOneByUser(user);
     const referals = await this.referalsService.getReferals(user);
@@ -155,7 +155,7 @@ export class UsersService {
   @Transactional()
   async getKernel(): Promise<User> {
     return this.usersRepository.findOneBy({
-      username: 'Kernel',
+      username: KERNEL_USERNAME,
     });
   }
 
@@ -166,7 +166,7 @@ export class UsersService {
       .insert()
       .into(User)
       .values({
-        username: 'Kernel',
+        username: KERNEL_USERNAME,
         password: '',
         activated: true,
       })
@@ -177,12 +177,12 @@ export class UsersService {
   @Transactional()
   async count(): Promise<number> {
     return this.usersRepository.countBy({
-      username: Not('Kernel'),
+      username: Not(KERNEL_USERNAME),
     });
   }
 
   @Transactional()
-  async create(input: UserInput, actor: User = null): Promise<User> {
+  async create(input: UserInput, actor: User = null, allowedFields: UserField[] = USER_FIELDS): Promise<User> {
     const userExist = await this.usersRepository.findOne({
       where: [{ email: input.username }, { username: input.username }],
     });
@@ -193,16 +193,19 @@ export class UsersService {
 
     const user = new User();
 
+    const allowed = new Set(allowedFields);
+
     user.uuid = randomUUID();
-    user.email = input.email;
     user.username = input.username;
     user.superuser = input.superuser;
+    user.locale = input.locale;
     user.password = await this.passwordService.hash(input.password, passwordAad(user.uuid));
-    user.activated = input.activated;
 
-    user.perms = input.perms;
+    if (allowed.has('email')) user.email = input.email;
+    if (allowed.has('activated')) user.activated = input.activated;
+    if (allowed.has('perms')) user.perms = input.perms;
 
-    if (!input.roles) input.roles = [];
+    if (!input.roles || !allowed.has('roles')) input.roles = [];
 
     user.roles = await this.rolesRepository.findBy({
       id: In(input.roles),
@@ -219,25 +222,30 @@ export class UsersService {
   }
 
   @Transactional()
-  async update(uuid: string, input: UserUpdateInput, actor: User = null): Promise<User> {
+  async update(uuid: string, input: UserUpdateInput, actor: User = null, allowedFields: UserField[] = USER_FIELDS): Promise<User> {
     const user = await this.getById(uuid);
 
     if (!user) throw new NotFoundException();
 
-    user.email = input.email;
+    const allowed = new Set(allowedFields);
+
     user.username = input.username;
     user.superuser = input.superuser;
-    user.activated = input.activated;
-    user.perms = input.perms;
 
-    if (!input.roles) input.roles = [];
+    if (allowed.has('email')) user.email = input.email;
+    if (allowed.has('activated')) user.activated = input.activated;
+    if (allowed.has('perms')) user.perms = input.perms;
 
-    user.roles = await this.rolesRepository.findBy({
-      id: In(input.roles),
-    });
+    if (allowed.has('roles')) {
+      if (!input.roles) input.roles = [];
 
-    if (!user.roles.find((role) => role.id === ImportantRoles.Default))
-      user.roles.push(await this.rolesRepository.findOneBy({ id: ImportantRoles.Default }));
+      user.roles = await this.rolesRepository.findBy({
+        id: In(input.roles),
+      });
+
+      if (!user.roles.find((role) => role.id === ImportantRoles.Default))
+        user.roles.push(await this.rolesRepository.findOneBy({ id: ImportantRoles.Default }));
+    }
 
     if (actor) {
       if (!(await userPermissionCheck(user, actor))) throw new ForbiddenException();

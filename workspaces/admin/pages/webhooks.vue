@@ -5,9 +5,9 @@
         <Toolbar class="mb-4">
           <template v-slot:start>
             <div class="my-2">
-              <Button label="Создать" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
+              <Button :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
               <Button
-                label="Удалить"
+                :label="$t('admin.delete')"
                 icon="pi pi-trash"
                 class="p-button-danger"
                 :disabled="!selected || !selected.length"
@@ -30,18 +30,18 @@
         >
           <template #header>
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-              <h5 class="m-0">Управление вебхуками</h5>
+              <h5 class="m-0">{{ $t('admin.webhooks_title') }}</h5>
               <span class="block mt-2 md:mt-0 p-input-icon-left">
                 <i class="pi pi-search" />
-                <InputText v-model="filters['global'].value" placeholder="Поиск..." />
+                <InputText v-model="filters['global'].value" :placeholder="$t('admin.search')" />
               </span>
             </div>
           </template>
           <Column selectionMode="multiple" :style="{ width: '3rem' }"></Column>
           <Column sortable field="id" header="ID" :style="{ width: '8rem' }"></Column>
-          <Column field="name" header="Название" sortable></Column>
-          <Column field="type" header="Событие" sortable></Column>
-          <Column field="request" header="Формат" sortable></Column>
+          <Column field="name" :header="$t('admin.name')" sortable></Column>
+          <Column field="type" :header="$t('admin.event')" sortable></Column>
+          <Column field="request" :header="$t('admin.format')" sortable></Column>
           <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
@@ -56,18 +56,18 @@
             :closable="false"
             :style="{ width: '600px' }"
             :modal="true"
-            header="Создание/редактирование вебхука"
+            :header="$t('admin.webhook_dialog')"
             class="p-fluid"
           >
             <VeeField
               v-model="webhook.name"
               name="name"
-              label="Название"
+              :label="$t('admin.name')"
               rules="required"
               v-slot="{ value, errorMessage, handleChange, handleBlur }"
             >
               <div class="field">
-                <label>Название</label>
+                <label>{{ $t('admin.name') }}</label>
                 <InputText :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" />
                 <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
@@ -85,9 +85,15 @@
                 <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
             </VeeField>
-            <VeeField v-model="webhook.type" name="type" label="Событие" rules="required" v-slot="{ value, errorMessage, handleChange }">
+            <VeeField
+              v-model="webhook.type"
+              name="type"
+              :label="$t('admin.event')"
+              rules="required"
+              v-slot="{ value, errorMessage, handleChange }"
+            >
               <div class="field">
-                <label>Событие</label>
+                <label>{{ $t('admin.event') }}</label>
                 <Select :modelValue="value" @update:modelValue="handleChange" :options="list" optionLabel="id" appendTo="body">
                   <template #option="slotProps">
                     <p class="mb-1">{{ slotProps.option.id }}</p>
@@ -101,12 +107,12 @@
               v-if="webhook.type"
               v-model="webhook.request"
               name="request"
-              label="Формат"
+              :label="$t('admin.format')"
               rules="required"
               v-slot="{ value, errorMessage, handleChange }"
             >
               <div class="field">
-                <label>Формат</label>
+                <label>{{ $t('admin.format') }}</label>
                 <Select
                   :modelValue="value"
                   @update:modelValue="handleChange"
@@ -122,10 +128,10 @@
               </div>
             </VeeField>
             <template #footer>
-              <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
+              <Button :disabled="loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
                 :disabled="loading || !meta.valid"
-                label="Сохранить"
+                :label="$t('common.save')"
                 icon="pi pi-check"
                 class="p-button-text"
                 @click="updateMode ? updateWebhook() : createWebhook()"
@@ -150,7 +156,9 @@ export default {
     VeeField: Field,
   },
   setup() {
-    useHead({ title: 'Вебхуки' })
+    const { $t } = useNuxtApp()
+
+    useHead({ title: computed(() => $t('admin.menu_webhooks')) })
     const toast = useToast()
     const confirm = useConfirm()
     return { toast, confirm }
@@ -214,7 +222,7 @@ export default {
         })
         this.toast.add({
           severity: 'success',
-          detail: 'Гифт-код успешно добавлен',
+          detail: this.$t('admin.webhook_created'),
           life: 3000,
         })
         await this.load()
@@ -222,7 +230,7 @@ export default {
         this.loading = false
         this.toast.add({
           severity: 'error',
-          detail: 'Введены некоректные данные',
+          detail: this.$t('admin.invalid_data'),
           life: 3000,
         })
       }
@@ -236,7 +244,7 @@ export default {
         })
         this.toast.add({
           severity: 'success',
-          detail: 'Вебхук успешно редактирован',
+          detail: this.$t('admin.webhook_updated'),
           life: 3000,
         })
         await this.load()
@@ -244,15 +252,15 @@ export default {
         this.loading = false
         this.toast.add({
           severity: 'error',
-          detail: 'Введены некоректные данные',
+          detail: this.$t('admin.invalid_data'),
           life: 3000,
         })
       }
     },
     async removeMany() {
       this.confirm.require({
-        message: `Данный процесс будет необратим!`,
-        header: `Удаления ${this.selected.length} объектов`,
+        message: this.$t('admin.irreversible'),
+        header: this.$t('admin.delete_many', { count: this.selected.length }),
         icon: 'pi pi-exclamation-triangle',
         accept: async () => {
           this.loading = true
@@ -264,7 +272,7 @@ export default {
             })
             this.toast.add({
               severity: 'success',
-              detail: 'Права успешно удалены',
+              detail: this.$t('admin.webhooks_deleted'),
               life: 3000,
             })
             this.selected = []
@@ -275,8 +283,8 @@ export default {
     },
     async removeWebhook(id) {
       this.confirm.require({
-        message: `Данный процесс будет необратим!`,
-        header: 'Подтверждение удаления',
+        message: this.$t('admin.irreversible'),
+        header: this.$t('admin.confirm_delete'),
         icon: 'pi pi-exclamation-triangle',
         accept: async () => {
           this.loading = true
@@ -284,7 +292,7 @@ export default {
             await this.$api.delete('/admin/webhooks/' + id)
             this.toast.add({
               severity: 'success',
-              detail: 'Вебхук успешно удален',
+              detail: this.$t('admin.webhook_deleted'),
               life: 3000,
             })
           } catch {}

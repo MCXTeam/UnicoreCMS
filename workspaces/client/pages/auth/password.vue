@@ -1,7 +1,12 @@
 <template>
   <Form v-slot="{ meta }" class="d-flex flex-column align-items-center w-100" @submit="reset">
-    <h3 data-aos="zoom-in-right" data-aos-delay="150" class="text-uppercase text-center mb-4">Восстановление пароля</h3>
-    <Field v-model="form.password" name="password" rules="required|min:8|max:128" v-slot="{ value, errorMessage, handleChange, handleBlur }">
+    <h3 data-aos="zoom-in-right" data-aos-delay="150" class="text-uppercase text-center mb-4">{{ $t('auth.new_password_title') }}</h3>
+    <Field
+      v-model="form.password"
+      name="password"
+      rules="required|min:8|max:128"
+      v-slot="{ value, errorMessage, handleChange, handleBlur }"
+    >
       <div data-aos="zoom-in-right" data-aos-delay="300" class="w-100 mb-3">
         <Password
           :modelValue="value"
@@ -9,7 +14,7 @@
           @blur="handleBlur"
           :feedback="false"
           :toggleMask="true"
-          placeholder="Новый пароль"
+          :placeholder="$t('auth.new_password')"
           class="w-100"
           inputClass="w-100"
           :class="errorMessage && 'p-invalid'"
@@ -19,7 +24,7 @@
     </Field>
     <Field
       v-model="form.password_confirm"
-      name="Подтверждение пароля"
+      :name="$t('auth.password_confirm')"
       rules="required|confirmed:@password"
       v-slot="{ value, errorMessage, handleChange, handleBlur }"
     >
@@ -30,7 +35,7 @@
           @blur="handleBlur"
           :feedback="false"
           :toggleMask="true"
-          placeholder="Подтверждение пароля"
+          :placeholder="$t('auth.password_confirm')"
           class="w-100"
           inputClass="w-100"
           :class="errorMessage && 'p-invalid'"
@@ -38,19 +43,19 @@
       </div>
       <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
     </Field>
-    <Field v-model="form.close" name="Сеансы" :rules="sessionsRequired" v-slot="{ value, handleChange }">
+    <Field v-model="form.close" :name="$t('auth.sessions')" :rules="sessionsRequired" v-slot="{ value, handleChange }">
       <div data-aos="zoom-in-right" data-aos-delay="600" class="my-3 w-100">
         <div class="d-flex align-items-center gap-2">
           <Checkbox :modelValue="value" @update:modelValue="handleChange" :binary="true" inputId="close_sessions" />
-          <label for="close_sessions">Завершить все сеансы?</label>
+          <label for="close_sessions">{{ $t('auth.close_sessions') }}</label>
         </div>
       </div>
     </Field>
     <div class="w-100" data-aos="zoom-in-right" data-aos-delay="750">
-      <Button :disabled="!meta.valid" type="submit" size="large" label="Сменить пароль" class="w-100" />
+      <Button :disabled="!meta.valid" type="submit" size="large" :label="$t('auth.change_password')" class="w-100" />
     </div>
     <p data-aos="zoom-in-right" data-aos-delay="900" class="mb-0 mt-4 d-flex align-items-center mb-4">
-      Помните свой пароль? <NuxtLink class="ms-2" to="/auth">Войти</NuxtLink>
+      {{ $t('auth.remember_password') }} <NuxtLink class="ms-2" to="/auth">{{ $t('header.login') }}</NuxtLink>
     </p>
   </Form>
 </template>
@@ -60,7 +65,7 @@ import { Form, Field } from 'vee-validate'
 
 definePageMeta({ layout: 'auth', middleware: 'guest' })
 
-const { $unicore, $api } = useNuxtApp()
+const { $unicore, $api, $t } = useNuxtApp()
 const route = useRoute()
 
 const form = reactive({
@@ -69,13 +74,13 @@ const form = reactive({
   close: true,
 })
 
-const sessionsRequired = (value: unknown) => value === true || 'Необходимо подтвердить'
+const sessionsRequired = (value: unknown) => value === true || $t('auth.confirm_required')
 
 onMounted(async () => {
   try {
     await $api.post('/auth/password', { hash: route.query.hash })
   } catch {
-    $unicore.errorNotification('Невалидная ссылка, либо время на сброс пароля по данной ссылке истекло')
+    $unicore.errorNotification($t('auth.reset_link_invalid'))
     await navigateTo('/auth')
   }
 })
@@ -84,10 +89,10 @@ async function reset() {
   const loading = $unicore.loading()
   try {
     await $api.post('/auth/password', { ...form, hash: route.query.hash })
-    $unicore.successNotification('Пароль успешно изменён, войдите в ваш аккаунт')
+    $unicore.successNotification($t('auth.password_changed'))
     await navigateTo('/auth')
   } catch {
-    $unicore.errorNotification('Невалидная ссылка, либо время на сброс пароля по данной ссылке истекло')
+    $unicore.errorNotification($t('auth.reset_link_invalid'))
     await navigateTo('/auth')
   } finally {
     loading.close()

@@ -5,7 +5,7 @@
         <Toolbar class="mb-4">
           <template v-slot:start>
             <div class="my-2">
-              <Button label="Создать" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
+              <Button :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
             </div>
           </template>
         </Toolbar>
@@ -22,16 +22,16 @@
         >
           <template #header>
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-              <h5 class="m-0">Управление страницами</h5>
+              <h5 class="m-0">{{ $t('admin.pages_title') }}</h5>
               <span class="block mt-2 md:mt-0 p-input-icon-left">
                 <i class="pi pi-search" />
-                <InputText v-model="filters['global'].value" placeholder="Поиск..." />
+                <InputText v-model="filters['global'].value" :placeholder="$t('admin.search')" />
               </span>
             </div>
           </template>
           <Column sortable field="id" header="ID" :style="{ width: '8rem' }"></Column>
-          <Column sortable field="title" header="Заголовок"></Column>
-          <Column sortable field="path" header="Путь"></Column>
+          <Column sortable field="title" :header="$t('admin.heading')"></Column>
+          <Column sortable field="path" :header="$t('admin.path')"></Column>
           <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
@@ -51,61 +51,77 @@
             v-model:visible="pageDialog"
             :closable="false"
             :modal="true"
-            header="Создание/редактирование страницы"
+            :header="$t('admin.page_dialog')"
             class="p-fluid"
           >
-            <VeeField
-              v-model="page.path"
-              name="path"
-              label="Путь"
-              :rules="{ required: true, regex: /^(?!\/)[a-z\/\-_]+$/ }"
-              v-slot="{ value, errorMessage, handleChange }"
-            >
+            <LocaleEditorBar
+              v-model="translations.locale"
+              :locales="translations.locales"
+              :status="translations.status"
+              :isDefault="translations.isDefault"
+              @copy="translations.copyFromDefault()"
+            />
+            <template v-if="translations.isDefault">
+              <VeeField
+                v-model="page.path"
+                name="path"
+                :label="$t('admin.path')"
+                :rules="{ required: true, regex: /^(?!\/)[a-z\/\-_]+$/ }"
+                v-slot="{ value, errorMessage, handleChange }"
+              >
+                <div class="field">
+                  <label>{{ $t('admin.path') }}</label>
+                  <InputText :modelValue="value" @update:modelValue="handleChange" autofocus />
+                  <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+                </div>
+              </VeeField>
+              <VeeField
+                v-model="page.title"
+                name="title"
+                :label="$t('admin.heading')"
+                rules="required"
+                v-slot="{ value, errorMessage, handleChange }"
+              >
+                <div class="field">
+                  <label>{{ $t('admin.heading') }}</label>
+                  <InputText :modelValue="value" @update:modelValue="handleChange" />
+                  <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+                </div>
+              </VeeField>
               <div class="field">
-                <label>Путь</label>
-                <InputText :modelValue="value" @update:modelValue="handleChange" autofocus />
-                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+                <div class="flex justify-content-between align-items-center mb-2">
+                  <label class="m-0">{{ $t('admin.content') }}</label>
+                  <SelectButton v-model="contentMode" :options="contentModes" optionLabel="label" optionValue="value" :allowEmpty="false" />
+                </div>
+                <Editor v-if="contentMode === 'visual'" v-model="page.content" editorStyle="height: 400px"></Editor>
+                <Textarea v-else v-model="page.content" class="font-mono" rows="18" spellcheck="false" />
+                <small v-if="contentMode === 'html'">{{ $t('admin.html_sanitize_hint') }}</small>
               </div>
-            </VeeField>
-            <VeeField v-model="page.title" name="title" label="Заголовок" rules="required" v-slot="{ value, errorMessage, handleChange }">
+              <div class="field flex align-items-center gap-2">
+                <Checkbox v-model="page.full_size" :binary="true" inputId="page-full-size" />
+                <label for="page-full-size" class="m-0">{{ $t('admin.page_full_size') }}</label>
+              </div>
+              <div class="field" v-if="isSuperuser">
+                <label>{{ $t('admin.custom_css') }}</label>
+                <Textarea v-model="page.custom_css" class="font-mono" rows="6" spellcheck="false" placeholder=".my-block { color: red }" />
+                <small>{{ $t('admin.custom_css_hint') }}</small>
+              </div>
+              <div class="field" v-if="isSuperuser">
+                <label>{{ $t('admin.custom_js') }}</label>
+                <Textarea v-model="page.custom_js" class="font-mono" rows="6" spellcheck="false" placeholder="console.log('hello')" />
+                <small class="p-error"> {{ $t('admin.custom_js_hint') }} </small>
+              </div>
               <div class="field">
-                <label>Заголовок</label>
-                <InputText :modelValue="value" @update:modelValue="handleChange" />
-                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+                <label>{{ $t('admin.meta_description') }}</label>
+                <Textarea v-model="page.description" :autoResize="true" />
               </div>
-            </VeeField>
-            <div class="field">
-              <div class="flex justify-content-between align-items-center mb-2">
-                <label class="m-0">Содержимое</label>
-                <SelectButton v-model="contentMode" :options="contentModes" optionLabel="label" optionValue="value" :allowEmpty="false" />
-              </div>
-              <Editor v-if="contentMode === 'visual'" v-model="page.content" editorStyle="height: 400px"></Editor>
-              <Textarea v-else v-model="page.content" class="font-mono" rows="18" spellcheck="false" />
-              <small v-if="contentMode === 'html'">
-                Небезопасные теги и атрибуты (script, style, iframe, обработчики событий) вырезаются при сохранении.
-              </small>
-            </div>
-            <div class="field" v-if="isSuperuser">
-              <label>Кастомный CSS</label>
-              <Textarea v-model="page.custom_css" class="font-mono" rows="6" spellcheck="false" placeholder=".my-block { color: red }" />
-              <small>Подключается только на этой странице. Доступно суперпользователю.</small>
-            </div>
-            <div class="field" v-if="isSuperuser">
-              <label>Кастомный JS</label>
-              <Textarea v-model="page.custom_js" class="font-mono" rows="6" spellcheck="false" placeholder="console.log('hello')" />
-              <small class="p-error">
-                Выполняется у каждого посетителя страницы без проверок — вставляйте только собственный код.
-              </small>
-            </div>
-            <div class="field">
-              <label>Описание (meta-description)</label>
-              <Textarea v-model="page.description" :autoResize="true" />
-            </div>
+            </template>
+            <ContentTranslationFields v-else :translations="translations" />
             <template #footer>
-              <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
+              <Button :disabled="loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
                 :disabled="loading || !meta.valid"
-                label="Сохранить"
+                :label="$t('common.save')"
                 icon="pi pi-check"
                 class="p-button-text"
                 @click="updateMode ? updatePage() : createPage()"
@@ -128,12 +144,22 @@ export default {
     VeeField: Field,
   },
   setup() {
-    useHead({ title: 'Страницы' })
+    const translations = useContentTranslations('page')
+
+    const { $t } = useNuxtApp()
+
+    useHead({ title: computed(() => $t('admin.menu_pages')) })
     const auth = useAuthStore()
-    return { auth }
+    return { translations, auth }
   },
 
   computed: {
+    contentModes() {
+      return [
+        { label: this.$t('admin.visual'), value: 'visual' },
+        { label: 'HTML', value: 'html' },
+      ]
+    },
     isSuperuser() {
       return !!this.auth.user?.superuser
     },
@@ -150,14 +176,11 @@ export default {
         description: null,
         path: null,
         content: null,
+        full_size: false,
         custom_css: null,
         custom_js: null,
       },
       contentMode: 'visual',
-      contentModes: [
-        { label: 'Визуально', value: 'visual' },
-        { label: 'HTML', value: 'html' },
-      ],
       pageDialog: false,
       filters: {
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -188,19 +211,24 @@ export default {
           description: null,
           path: null,
           content: null,
+          full_size: false,
           custom_css: null,
           custom_js: null,
         }
       }
+      this.translations.attach(this.page)
+      await this.translations.load(page ? page.id : null)
       this.pageDialog = true
     },
     async createPage() {
       this.loading = true
       try {
-        await this.$api.post('/pages', this.page)
+        const { data } = await this.$api.post('/pages', this.page)
+
+        await this.translations.save(data.id)
         this.$toast.add({
           severity: 'success',
-          detail: 'Страница успешно добавлена',
+          detail: this.$t('admin.page_created'),
           life: 3000,
         })
         await this.load()
@@ -209,13 +237,13 @@ export default {
         if (err.response.status === 409) {
           this.$toast.add({
             severity: 'error',
-            detail: 'Страница с идентичным путем уже присутствует',
+            detail: this.$t('admin.page_path_exists'),
             life: 3000,
           })
         } else {
           this.$toast.add({
             severity: 'error',
-            detail: 'Введены некоректные данные',
+            detail: this.$t('admin.invalid_data'),
             life: 3000,
           })
         }
@@ -225,9 +253,11 @@ export default {
       this.loading = true
       try {
         await this.$api.patch('/pages/' + this.page.id, this.$_.omit(this.page, 'id'))
+
+        await this.translations.save(this.page.id)
         this.$toast.add({
           severity: 'success',
-          detail: 'Страница успешно редактирована',
+          detail: this.$t('admin.page_updated'),
           life: 3000,
         })
         await this.load()
@@ -236,13 +266,13 @@ export default {
         if (err.response.status === 409) {
           this.$toast.add({
             severity: 'error',
-            detail: 'Страница с идентичным путем уже присутствует',
+            detail: this.$t('admin.page_path_exists'),
             life: 3000,
           })
         } else {
           this.$toast.add({
             severity: 'error',
-            detail: 'Введены некоректные данные',
+            detail: this.$t('admin.invalid_data'),
             life: 3000,
           })
         }
@@ -250,8 +280,8 @@ export default {
     },
     async removePage(id) {
       this.$confirm.require({
-        message: `Данный процесс будет необратим!`,
-        header: 'Подтверждение удаления',
+        message: this.$t('admin.irreversible'),
+        header: this.$t('admin.confirm_delete'),
         icon: 'pi pi-exclamation-triangle',
         accept: async () => {
           this.loading = true
@@ -259,7 +289,7 @@ export default {
             await this.$api.delete('/pages/' + id)
             this.$toast.add({
               severity: 'success',
-              detail: 'Страница успешно удалена',
+              detail: this.$t('admin.page_deleted'),
               life: 3000,
             })
           } catch {}

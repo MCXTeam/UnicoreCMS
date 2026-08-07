@@ -19,12 +19,12 @@
               </div>
               <div class="d-flex gap-2 mt-3">
                 <input type="file" ref="skin" class="d-none" accept="image/png" @change="updateSkin()" />
-                <Button @click="skin.click()" class="w-full" :loading="skinLoading" label="Загрузить скин" />
+                <Button @click="skin.click()" class="w-full" :loading="skinLoading" :label="$t('cabinet.upload_skin')" />
                 <Button @click="deleteSkin()" severity="danger" class="w-25" :loading="skinLoading"><i class="bx bx-trash"></i></Button>
               </div>
               <div class="d-flex gap-2 mt-2">
                 <input type="file" ref="cloak" class="d-none" accept="image/png" @change="updateCloak()" />
-                <Button @click="cloak.click()" class="w-full" :loading="cloakLoading" label="Загрузить плащ" />
+                <Button @click="cloak.click()" class="w-full" :loading="cloakLoading" :label="$t('cabinet.upload_cloak')" />
                 <Button @click="deleteCloak()" severity="danger" class="w-25" :loading="cloakLoading"><i class="bx bx-trash"></i></Button>
               </div>
             </div>
@@ -34,18 +34,18 @@
       <div class="col-xl-6 px-4 mt-4 mt-xl-0 player-info">
         <h5 class="text-uppercase mt-0 d-none d-xl-block"><b>UUID:</b> {{ $auth.user.uuid }}</h5>
         <div class="d-flex justify-content-between align-items-center mb-3">
-          <h3 class="m-0">Сведения об аккаунте</h3>
+          <h3 class="m-0">{{ $t('profile.account_info') }}</h3>
           <NuxtLink :to="`/user/${$auth.user.username}`" class="d-none d-xl-block">
-            <Button size="small"><i class="bx bx-link me-1"></i> Публичный профиль</Button>
+            <Button size="small"><i class="bx bx-link me-1"></i> {{ $t('cabinet.public_profile') }}</Button>
           </NuxtLink>
         </div>
         <table class="player-info-table w-100">
           <tr>
-            <td>Логин</td>
+            <td>{{ $t('profile.login') }}</td>
             <td v-text="$auth.user.username" />
           </tr>
           <tr>
-            <td>Баланс бонусов</td>
+            <td>{{ $t('cabinet.bonus_balance') }}</td>
             <td>{{ $utils.formatCurrency('virtual', $auth.user.virtual) }} <i class="bx bx-gift"></i></td>
           </tr>
           <tr>
@@ -53,15 +53,15 @@
             <td v-text="$auth.user.email || '-'" />
           </tr>
           <tr>
-            <td>Регистрация</td>
+            <td>{{ $t('profile.registered') }}</td>
             <td v-text="$moment($auth.user.created).format('D MMMM YYYY, HH:mm')" />
           </tr>
           <tr>
-            <td>Стаж аккаунта</td>
-            <td v-text="$moment.duration($moment() - $moment($auth.user.created)).format()" />
+            <td>{{ $t('profile.account_age') }}</td>
+            <td v-text="$utils.formatDuration($moment() - $moment($auth.user.created), 'milliseconds')" />
           </tr>
           <tr v-if="inviter">
-            <td>Вас пригласил</td>
+            <td>{{ $t('cabinet.invited_by') }}</td>
             <td v-text="inviter.inviter.username" />
           </tr>
         </table>
@@ -70,26 +70,26 @@
     <hr class="my-3" />
     <div class="row px-4">
       <div class="col-xl-8">
-        <h2 class="m-0">Блокировки аккаунта</h2>
-        <p>Информация об активных блокировках аккаунта, при блокировке вам недоступны некоторые разделы сайта и доступ к серверам.</p>
-        <p v-if="!$auth.user.ban" class="text-success">Все круто, твой аккаунт не в бане!</p>
+        <h2 class="m-0">{{ $t('cabinet.bans_title') }}</h2>
+        <p>{{ $t('cabinet.bans_hint') }}</p>
+        <p v-if="!$auth.user.ban" class="text-success">{{ $t('cabinet.ban_none') }}</p>
         <p v-if="$auth.user.ban && $auth.user.ban.expires" class="text-danger">
-          Вы заблокированы до {{ $moment($auth.user.expires).format('DD.MM.YYYY, HH:mm:ss') }}!
+          {{ $t('cabinet.ban_until', { date: $moment($auth.user.expires).format('DD.MM.YYYY, HH:mm:ss') }) }}
         </p>
-        <p v-if="$auth.user.ban && !$auth.user.ban.expires" class="text-danger">Вы заблокированы навсегда!</p>
+        <p v-if="$auth.user.ban && !$auth.user.ban.expires" class="text-danger">{{ $t('cabinet.ban_forever') }}</p>
       </div>
       <div class="col-xl-4 d-flex align-items-center">
         <Button class="w-full" size="large" :disabled="!$auth.user.ban" :loading="banLoading" @click="unabn()">
-          Купить разбан за {{ $utils.formatCurrency('real', config.public_unban_price) }}
+          {{ $t('cabinet.buy_unban', { price: $utils.formatCurrency('real', config.public_unban_price) }) }}
         </Button>
       </div>
     </div>
     <hr class="my-3" />
     <div class="px-4">
-      <h2 class="m-0">Балансы валюты на серверах</h2>
+      <h2 class="m-0">{{ $t('cabinet.ingame_balances') }}</h2>
       <p>
-        Информация о балансе внутриигровой валюты на серверах. Обмен, перевод и пополненение осуществляется во вкладке
-        <NuxtLink to="/cabinet/payment">“ПОПОЛНЕНИЕ И ПЕРЕВОД”</NuxtLink>
+        {{ $t('cabinet.ingame_balances_hint') }}
+        <NuxtLink to="/cabinet/payment">{{ $t('cabinet.tab_payment') }}</NuxtLink>
       </p>
       <div class="row mt-2" v-if="money">
         <div class="col-xl-4 d-flex align-items-center mb-3" v-for="m in money" :key="m.server.id">
@@ -97,7 +97,7 @@
           <Avatar v-else size="xlarge"> <i class="bx bxs-server"></i> </Avatar>
           <div class="ms-3">
             <h3 class="m-0" v-text="m.server.name" />
-            <span>{{ $utils.formatCurrency('ingame', m.money) }} монет</span>
+            <span>{{ $t('cabinet.coins', { amount: $utils.formatCurrency('ingame', m.money) }) }}</span>
           </div>
         </div>
       </div>
@@ -117,10 +117,11 @@
 <script setup>
 import { useConfigStore } from '~/stores/config'
 
-definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'] })
-useHead({ title: 'Личный кабинет' })
+definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'cabinet.tab_general' })
 
-const { $api, $auth, $unicore } = useNuxtApp()
+const { $api, $auth, $unicore, $t } = useNuxtApp()
+
+useHead({ title: computed(() => $t('header.cabinet')) })
 const config = computed(() => useConfigStore().config)
 
 const Skin3D = ref(null)
@@ -161,9 +162,9 @@ async function updateSkin() {
       },
     })
     await $auth.fetchUser()
-    $unicore.successNotification('Ваш скин был обновлён!')
+    $unicore.successNotification($t('cabinet.skin_updated'))
   } catch (e) {
-    if (e.response?.status == 415) $unicore.errorNotification('Файл не является скином Minecraft')
+    if (e.response?.status == 415) $unicore.errorNotification($t('cabinet.skin_invalid'))
   }
 
   skin.value.value = null
@@ -182,9 +183,9 @@ async function updateCloak() {
       },
     })
     await $auth.fetchUser()
-    $unicore.successNotification('Ваш плащ был обновлён!')
+    $unicore.successNotification($t('cabinet.cloak_updated'))
   } catch (e) {
-    if (e.response?.status == 415) $unicore.errorNotification('Файл не является плащом Minecraft')
+    if (e.response?.status == 415) $unicore.errorNotification($t('cabinet.cloak_invalid'))
   }
 
   cloak.value.value = null
@@ -196,7 +197,7 @@ async function deleteSkin() {
   try {
     await $api.delete('/cabinet/skin/skin')
     await $auth.fetchUser()
-    $unicore.successNotification('Ваш скин был удалён!')
+    $unicore.successNotification($t('cabinet.skin_deleted'))
   } catch {}
   skinLoading.value = false
 }
@@ -206,7 +207,7 @@ async function deleteCloak() {
   try {
     await $api.delete('/cabinet/skin/cloak')
     await $auth.fetchUser()
-    $unicore.successNotification('Ваш плащ был удалён!')
+    $unicore.successNotification($t('cabinet.cloak_deleted'))
   } catch {}
   cloakLoading.value = false
 }
@@ -216,9 +217,9 @@ async function unabn() {
   try {
     await $api.post('/bans/unban')
     await $auth.fetchUser()
-    $unicore.successNotification('Ваш аккаунт был разблокирован!')
+    $unicore.successNotification($t('cabinet.unbanned'))
   } catch {
-    $unicore.errorNotification('На балансе недостаточно денег для покупки разбана!')
+    $unicore.errorNotification($t('cabinet.unban_not_enough'))
   }
   banLoading.value = false
 }

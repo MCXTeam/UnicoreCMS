@@ -5,7 +5,9 @@ import { Category } from './category.entity';
 import { Enchantment } from './enchantment.entity';
 import { KitItem } from './kit-item.entity';
 import { GiveMethod } from '../enums/give-method.enum';
+import { Translatable } from 'src/admin/locales/translatable.decorator';
 
+@Translatable('product', ['name', 'description'])
 @Entity({ name: 'unicore_products' })
 export class Product {
   @PrimaryGeneratedColumn({ name: 'id' })

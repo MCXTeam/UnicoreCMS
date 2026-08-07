@@ -10,18 +10,13 @@
     <div class="container">
       <div class="h-100 d-flex flex-column justify-content-center">
         <div class="header-content">
-          <h1 class="mb-3">
-            <b>{{ $pub.sitename }}</b> - Ваш сайт готов к работе
-          </h1>
-          <p class="mt-0 mb-2">
-            Next-gen Headless система управления контентом и электронная коммерция для Minecraft <br />
-            написанная на NestJS и NuxtJS
-          </p>
+          <h1 class="mb-3" v-html="$sanitize($t('header.tagline', { sitename: `<b>${$pub.sitename}</b>` }))" />
+          <p class="mt-0 mb-2">{{ $t('header.description') }}</p>
           <div class="d-flex justify-content-between mt-4" style="max-width: 250px">
             <div>
               <div class="d-flex align-items-center">
                 <div class="circle me-2" />
-                <span class="text-uppercase">В игре</span>
+                <span class="text-uppercase">{{ $t('header.online') }}</span>
               </div>
               <h1 class="mt-2">
                 <ClientOnly>
@@ -33,7 +28,7 @@
             <div>
               <div class="d-flex align-items-center">
                 <div class="circle me-2" />
-                <span class="text-uppercase">Всего</span>
+                <span class="text-uppercase">{{ $t('header.total') }}</span>
               </div>
               <h1 class="mt-2">
                 <ClientOnly>
@@ -45,10 +40,10 @@
           </div>
           <div class="mt-4 download-content" style="max-width: 400px">
             <Button as="a" :href="config.public_launcher_exe" target="download" class="w-full mb-2" size="large"
-              >Скачать лаунчер <i class="bx bxl-windows ms-2"></i
+              >{{ $t('header.download') }} <i class="bx bxl-windows ms-2"></i
             ></Button>
             <div class="d-flex justify-content-between">
-              <span>Клиент также доступен на</span>
+              <span>{{ $t('header.other_platforms') }}</span>
               <div class="d-flex">
                 <Button as="a" :href="config.public_launcher_jar" target="download" text class="m-0" label="Linux" />
                 <Button as="a" :href="config.public_launcher_jar" target="download" text class="m-0" label="MacOS" />

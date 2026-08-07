@@ -5,9 +5,9 @@
         <Toolbar class="mb-4">
           <template #start>
             <div class="my-2">
-              <Button label="Создать" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
+              <Button :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
               <Button
-                label="Удалить"
+                :label="$t('admin.delete')"
                 icon="pi pi-trash"
                 class="p-button-danger"
                 :disabled="!selected || !selected.length"
@@ -34,16 +34,16 @@
         >
           <template #header>
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-              <h5 class="m-0">Управление категориями</h5>
+              <h5 class="m-0">{{ $t('admin.categories_title') }}</h5>
               <span class="block mt-2 md:mt-0 p-input-icon-left">
                 <i class="pi pi-search" />
-                <InputText @keydown.enter="onFilter()" v-model="filters['global'].value" placeholder="Поиск..." />
+                <InputText @keydown.enter="onFilter()" v-model="filters['global'].value" :placeholder="$t('admin.search')" />
               </span>
             </div>
           </template>
           <Column selectionMode="multiple" :style="{ width: '3rem' }"></Column>
           <Column sortable field="id" header="ID" :style="{ width: '8rem' }"></Column>
-          <Column sortable field="name" header="Название">
+          <Column sortable field="name" :header="$t('admin.name')">
             <template #body="slotProps">
               <div class="flex align-items-center">
                 <Avatar v-if="slotProps.data.icon" :image="`${apiUrl + '/' + slotProps.data.icon}`" shape="circle" />
@@ -66,13 +66,13 @@
           </Column>
         </DataTable>
 
-        <Dialog v-model:visible="fileDialog" :style="{ width: '400px' }" :modal="true" header="Иконка категории" class="p-fluid">
+        <Dialog v-model:visible="fileDialog" :style="{ width: '400px' }" :modal="true" :header="$t('admin.category_icon')" class="p-fluid">
           <div class="flex align-items-center justify-content-center flex-wrap w-full">
             <Avatar v-if="category.icon" :image="`${apiUrl + '/' + category.icon}`" size="xlarge" shape="circle" />
             <Avatar v-else icon="pi pi-image" size="xlarge" shape="circle" />
             <div class="field ml-6 mb-0">
-              <Button label="Загрузить" icon="pi pi-upload" @click="$refs.fileInput.choose()" />
-              <Button label="Удалить" icon="pi pi-trash" class="p-button-secondary mt-2" @click="removeIcon()" />
+              <Button :label="$t('admin.upload')" icon="pi pi-upload" @click="$refs.fileInput.choose()" />
+              <Button :label="$t('admin.delete')" icon="pi pi-trash" class="p-button-secondary mt-2" @click="removeIcon()" />
               <FileUpload
                 ref="fileInput"
                 :pt="{ root: { class: 'hidden' } }"
@@ -93,41 +93,51 @@
             :closable="false"
             :style="{ width: '450px' }"
             :modal="true"
-            header="Создание/редактирование Категории"
+            :header="$t('admin.category_dialog')"
             class="p-fluid"
           >
-            <VeeField
-              v-model="category.name"
-              name="name"
-              label="Название"
-              rules="required"
-              v-slot="{ value, errorMessage, handleChange, handleBlur }"
-            >
+            <LocaleEditorBar
+              v-model="translations.locale"
+              :locales="translations.locales"
+              :status="translations.status"
+              :isDefault="translations.isDefault"
+              @copy="translations.copyFromDefault()"
+            />
+            <template v-if="translations.isDefault">
+              <VeeField
+                v-model="category.name"
+                name="name"
+                :label="$t('admin.name')"
+                rules="required"
+                v-slot="{ value, errorMessage, handleChange, handleBlur }"
+              >
+                <div class="field">
+                  <label>{{ $t('admin.name') }}</label>
+                  <InputText
+                    :modelValue="value"
+                    @update:modelValue="handleChange"
+                    @blur="handleBlur"
+                    autofocus
+                    :class="errorMessage && 'p-invalid'"
+                  />
+                  <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+                </div>
+              </VeeField>
               <div class="field">
-                <label>Название</label>
-                <InputText
-                  :modelValue="value"
-                  @update:modelValue="handleChange"
-                  @blur="handleBlur"
-                  autofocus
-                  :class="errorMessage && 'p-invalid'"
-                />
-                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+                <label>{{ $t('admin.description') }}</label>
+                <Textarea v-model="category.description" :autoResize="true" rows="5" cols="30" />
               </div>
-            </VeeField>
-            <div class="field">
-              <label>Описание</label>
-              <Textarea v-model="category.description" :autoResize="true" rows="5" cols="30" />
-            </div>
-            <div class="field">
-              <label>Приоритет (сортировка)</label>
-              <InputNumber v-model="category.priority" />
-            </div>
+              <div class="field">
+                <label>{{ $t('admin.priority_sort') }}</label>
+                <InputNumber v-model="category.priority" />
+              </div>
+            </template>
+            <ContentTranslationFields v-else :translations="translations" />
             <template #footer>
-              <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
+              <Button :disabled="loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
                 :disabled="loading || !meta.valid"
-                label="Сохранить"
+                :label="$t('common.save')"
                 icon="pi pi-check"
                 class="p-button-text"
                 @click="updateMode ? updateCategory() : createCategory()"
@@ -151,9 +161,13 @@ export default {
     VeeField: Field,
   },
   setup() {
+    const translations = useContentTranslations('category')
+
     const rc = useRuntimeConfig()
-    useHead({ title: 'Категории' })
-    return { apiUrl: rc.public.apiBaseurl }
+    const { $t } = useNuxtApp()
+
+    useHead({ title: computed(() => $t('admin.menu_categories')) })
+    return { translations, apiUrl: rc.public.apiBaseurl }
   },
   data() {
     return {
@@ -233,7 +247,7 @@ export default {
         })
         this.$toast.add({
           severity: 'success',
-          detail: 'Иконка успешно обновлена',
+          detail: this.$t('admin.icon_updated'),
           life: 3000,
         })
         await this.load()
@@ -241,7 +255,7 @@ export default {
         this.fileDialog = false
         this.$toast.add({
           severity: 'error',
-          detail: 'Поддерживаются только изображения',
+          detail: this.$t('admin.images_only'),
           life: 3000,
         })
       }
@@ -251,7 +265,7 @@ export default {
         await this.$api.delete(`/store/categories/icon/` + this.category.id)
         this.$toast.add({
           severity: 'success',
-          detail: 'Иконка успешно удалена',
+          detail: this.$t('admin.icon_deleted'),
           life: 3000,
         })
         await this.load()
@@ -260,7 +274,7 @@ export default {
     hideDialog() {
       this.categoryDialog = false
     },
-    openDialog(category = null) {
+    async openDialog(category = null) {
       this.updateMode = !!category
       if (category) {
         this.category = this.$_.pick(category, this.$_.deepKeys(this.category))
@@ -273,6 +287,8 @@ export default {
           icon: null,
         }
       }
+      this.translations.attach(this.category)
+      await this.translations.load(category ? category.id : null)
       this.categoryDialog = true
     },
     openFileDialog(category) {
@@ -282,10 +298,12 @@ export default {
     async createCategory() {
       this.loading = true
       try {
-        await this.$api.post('/store/categories', this.category)
+        const { data } = await this.$api.post('/store/categories', this.category)
+
+        await this.translations.save(data.id)
         this.$toast.add({
           severity: 'success',
-          detail: 'Категория успешно добавлена',
+          detail: this.$t('admin.category_created'),
           life: 3000,
         })
         await this.load()
@@ -293,7 +311,7 @@ export default {
         this.loading = false
         this.$toast.add({
           severity: 'error',
-          detail: 'Введены некоректные данные',
+          detail: this.$t('admin.invalid_data'),
           life: 3000,
         })
       }
@@ -302,9 +320,11 @@ export default {
       this.loading = true
       try {
         await this.$api.patch('/store/categories/' + this.category.id, this.$_.omit(this.category, 'id'))
+
+        await this.translations.save(this.category.id)
         this.$toast.add({
           severity: 'success',
-          detail: 'Категория успешно редактирована',
+          detail: this.$t('admin.category_updated'),
           life: 3000,
         })
         await this.load()
@@ -312,15 +332,15 @@ export default {
         this.loading = false
         this.$toast.add({
           severity: 'error',
-          detail: 'Введены некоректные данные',
+          detail: this.$t('admin.invalid_data'),
           life: 3000,
         })
       }
     },
     async removeCategory(id) {
       this.$confirm.require({
-        message: `Данный процесс будет необратим!`,
-        header: 'Подтверждение удаления',
+        message: this.$t('admin.irreversible'),
+        header: this.$t('admin.confirm_delete'),
         icon: 'pi pi-exclamation-triangle',
         accept: async () => {
           this.loading = true
@@ -328,7 +348,7 @@ export default {
             await this.$api.delete('/store/categories/' + id)
             this.$toast.add({
               severity: 'success',
-              detail: 'Категория успешно удалена',
+              detail: this.$t('admin.category_deleted'),
               life: 3000,
             })
           } catch {}
@@ -338,8 +358,8 @@ export default {
     },
     async removeMany() {
       this.$confirm.require({
-        message: `Данный процесс будет необратим!`,
-        header: `Удаления ${this.selected.length} объектов`,
+        message: this.$t('admin.irreversible'),
+        header: this.$t('admin.delete_many', { count: this.selected.length }),
         icon: 'pi pi-exclamation-triangle',
         accept: async () => {
           this.loading = true
@@ -351,7 +371,7 @@ export default {
             })
             this.$toast.add({
               severity: 'success',
-              detail: 'Категории успешно удалены',
+              detail: this.$t('admin.categories_deleted'),
               life: 3000,
             })
             this.selected = []

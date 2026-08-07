@@ -3,7 +3,9 @@ import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 't
 import { Period } from '../../entities/period.entity';
 import { GroupKit } from '../../groups/entities/group-kit.entity';
 import { PermissionType } from '../enums/permission-type.enum';
+import { Translatable } from 'src/admin/locales/translatable.decorator';
 
+@Translatable('donate_permission', ['name', 'description'])
 @Entity({
   name: 'unicore_donate_permissions',
   orderBy: {

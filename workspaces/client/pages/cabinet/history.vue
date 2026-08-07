@@ -2,12 +2,12 @@
   <div class="px-4">
     <div class="row justify-content-between">
       <div class="col-12 col-xl-7">
-        <h2 class="mt-0 mb-4">Транзакции и покупки</h2>
+        <h2 class="mt-0 mb-4">{{ $t('cabinet.tab_history') }}</h2>
       </div>
       <div class="col input-fw">
         <Select
           class="mb-4 w-100"
-          placeholder="Тип операции"
+          :placeholder="$t('cabinet.operation_type')"
           v-model="history_type"
           :options="typeOptions"
           optionLabel="label"
@@ -27,7 +27,7 @@
         :loading="loading"
         @page="onPage($event)"
       >
-        <Column style="max-width: 200px" header="Дата">
+        <Column style="max-width: 200px" :header="$t('common.date')">
           <template #body="{ data }"> {{ $moment(data.created).format('D MMMM YYYY, HH:mm:ss') }} </template>
         </Column>
         <Column v-if="history_type != 'payment'" header="IP">
@@ -36,126 +36,126 @@
           >
         </Column>
 
-        <Column v-if="history_type == 'payment'" style="max-width: 6rem" header="ID платежа">
+        <Column v-if="history_type == 'payment'" style="max-width: 6rem" :header="$t('cabinet.payment_id')">
           <template #body="{ data }"
             ><span v-if="data.payment"> #{{ data.payment.id }} </span></template
           >
         </Column>
-        <Column v-if="history_type == 'payment'" header="Платёжная система">
+        <Column v-if="history_type == 'payment'" :header="$t('cabinet.payment_method')">
           <template #body="{ data }"
             ><span v-if="data.payment"> {{ data.payment.method }} </span></template
           >
         </Column>
-        <Column v-if="history_type == 'payment'" header="Сумма">
+        <Column v-if="history_type == 'payment'" :header="$t('cabinet.amount')">
           <template #body="{ data }"
             ><span v-if="data.payment"> {{ $utils.formatCurrency('real', data.payment.amount) }} </span></template
           >
         </Column>
-        <Column v-if="history_type == 'payment'" header="Статус">
+        <Column v-if="history_type == 'payment'" :header="$t('cabinet.status')">
           <template #body="{ data }"
             ><span v-if="data.payment"> {{ data.payment.status }} </span></template
           >
         </Column>
 
-        <Column v-if="history_type == 'product_purchase'" header="Товар">
+        <Column v-if="history_type == 'product_purchase'" :header="$t('cabinet.product')">
           <template #body="{ data }"
             ><span v-if="data.product"> {{ data.product.name }} </span></template
           >
         </Column>
-        <Column v-if="history_type == 'product_purchase'" header="Сервер">
+        <Column v-if="history_type == 'product_purchase'" :header="$t('cabinet.server')">
           <template #body="{ data }">
-            <NuxtLink v-if="data.server" :to="'/servers/' + data.server.id">{{ data.server.name }}</NuxtLink>
+            <NuxtLink v-if="data.server" :to="`/servers/${data.server.id}`">{{ data.server.name }}</NuxtLink>
           </template>
         </Column>
-        <Column v-if="history_type == 'product_purchase'" style="max-width: 6rem" header="Количество">
+        <Column v-if="history_type == 'product_purchase'" style="max-width: 6rem" :header="$t('cabinet.quantity')">
           <template #body="{ data }"
-            ><span v-if="data.amount"> {{ data.amount }} шт. </span></template
+            ><span v-if="data.amount"> {{ $t('store.pieces', { amount: data.amount }) }} </span></template
           >
         </Column>
 
-        <Column v-if="history_type == 'kit_purchase'" header="Кит">
+        <Column v-if="history_type == 'kit_purchase'" :header="$t('store.kit')">
           <template #body="{ data }"
             ><span v-if="data.kit"> {{ data.kit.name }} </span></template
           >
         </Column>
-        <Column v-if="history_type == 'kit_purchase'" header="Сервер">
+        <Column v-if="history_type == 'kit_purchase'" :header="$t('cabinet.server')">
           <template #body="{ data }">
-            <NuxtLink v-if="data.server" :to="'/servers/' + data.server.id">{{ data.server.name }}</NuxtLink>
+            <NuxtLink v-if="data.server" :to="`/servers/${data.server.id}`">{{ data.server.name }}</NuxtLink>
           </template>
         </Column>
 
-        <Column v-if="history_type == 'donate_group_purchase'" header="Донат-группа">
+        <Column v-if="history_type == 'donate_group_purchase'" :header="$t('cabinet.donate_group')">
           <template #body="{ data }"
             ><span v-if="data.donate_group"> {{ data.donate_group.name }} </span></template
           >
         </Column>
-        <Column v-if="history_type == 'donate_group_purchase'" header="Период">
+        <Column v-if="history_type == 'donate_group_purchase'" :header="$t('cabinet.period')">
           <template #body="{ data }"
             ><span v-if="data.period"> {{ data.period.name }} </span></template
           >
         </Column>
-        <Column v-if="history_type == 'donate_group_purchase'" header="Сервер">
+        <Column v-if="history_type == 'donate_group_purchase'" :header="$t('cabinet.server')">
           <template #body="{ data }">
-            <NuxtLink v-if="data.server" :to="'/servers/' + data.server.id">{{ data.server.name }}</NuxtLink>
+            <NuxtLink v-if="data.server" :to="`/servers/${data.server.id}`">{{ data.server.name }}</NuxtLink>
           </template>
         </Column>
 
-        <Column v-if="history_type == 'donate_permission_purchase'" header="Донат-право">
+        <Column v-if="history_type == 'donate_permission_purchase'" :header="$t('cabinet.donate_permission')">
           <template #body="{ data }"
             ><span v-if="data.donate_permission"> {{ data.donate_permission.name }} </span></template
           >
         </Column>
-        <Column v-if="history_type == 'donate_permission_purchase'" header="Период">
+        <Column v-if="history_type == 'donate_permission_purchase'" :header="$t('cabinet.period')">
           <template #body="{ data }"
             ><span v-if="data.period"> {{ data.period.name }} </span></template
           >
         </Column>
-        <Column v-if="history_type == 'donate_permission_purchase'" header="Сервер">
+        <Column v-if="history_type == 'donate_permission_purchase'" :header="$t('cabinet.server')">
           <template #body="{ data }">
-            <NuxtLink v-if="data.server" :to="'/servers/' + data.server.id">{{ data.server.name }}</NuxtLink>
+            <NuxtLink v-if="data.server" :to="`/servers/${data.server.id}`">{{ data.server.name }}</NuxtLink>
           </template>
         </Column>
 
-        <Column v-if="history_type == 'money_exchange'" header="Сервер">
+        <Column v-if="history_type == 'money_exchange'" :header="$t('cabinet.server')">
           <template #body="{ data }">
-            <NuxtLink v-if="data.server" :to="'/servers/' + data.server.id">{{ data.server.name }}</NuxtLink>
+            <NuxtLink v-if="data.server" :to="`/servers/${data.server.id}`">{{ data.server.name }}</NuxtLink>
           </template>
         </Column>
-        <Column v-if="history_type == 'money_exchange'" header="Количество">
+        <Column v-if="history_type == 'money_exchange'" :header="$t('cabinet.quantity')">
           <template #body="{ data }"
             ><span v-if="data.amount"> {{ $utils.formatCurrency('ingame', data.amount) }} </span></template
           >
         </Column>
 
-        <Column v-if="history_type == 'money_transfer'" header="Игрок">
+        <Column v-if="history_type == 'money_transfer'" :header="$t('players.player')">
           <template #body="{ data }">
-            <NuxtLink v-if="data.target" :to="`/user/` + data.target.username">{{ data.target.username }}</NuxtLink>
+            <NuxtLink v-if="data.target" :to="`/user/${data.target.username}`">{{ data.target.username }}</NuxtLink>
           </template>
         </Column>
-        <Column v-if="history_type == 'money_transfer'" header="Сервер">
+        <Column v-if="history_type == 'money_transfer'" :header="$t('cabinet.server')">
           <template #body="{ data }">
-            <NuxtLink v-if="data.server" :to="'/servers/' + data.server.id">{{ data.server.name }}</NuxtLink>
+            <NuxtLink v-if="data.server" :to="`/servers/${data.server.id}`">{{ data.server.name }}</NuxtLink>
           </template>
         </Column>
-        <Column v-if="history_type == 'money_transfer'" header="Количество">
+        <Column v-if="history_type == 'money_transfer'" :header="$t('cabinet.quantity')">
           <template #body="{ data }"
             ><span v-if="data.amount"> {{ $utils.formatCurrency('ingame', data.amount) }} </span></template
           >
         </Column>
 
-        <Column v-if="history_type == 'real_transfer'" header="Игрок">
+        <Column v-if="history_type == 'real_transfer'" :header="$t('players.player')">
           <template #body="{ data }">
-            <NuxtLink v-if="data.target" :to="`/user/` + data.target.username">{{ data.target.username }}</NuxtLink>
+            <NuxtLink v-if="data.target" :to="`/user/${data.target.username}`">{{ data.target.username }}</NuxtLink>
           </template>
         </Column>
-        <Column v-if="history_type == 'real_transfer'" header="Количество">
+        <Column v-if="history_type == 'real_transfer'" :header="$t('cabinet.quantity')">
           <template #body="{ data }"
             ><span v-if="data.amount"> {{ $utils.formatCurrency('ingame', data.amount) }} </span></template
           >
         </Column>
 
         <template #empty>
-          <span>История пуста...</span>
+          <span>{{ $t('cabinet.history_empty') }}</span>
         </template>
       </DataTable>
     </div>
@@ -166,24 +166,20 @@
 definePageMeta({
   layout: 'cabinet',
   middleware: ['auth', 'verify'],
-  title: 'Личный кабинет',
+  title: 'cabinet.tab_history',
 })
 
 export default {
+  setup() {
+    const { $t } = useNuxtApp()
+
+    useHead({ title: computed(() => $t('header.cabinet')) })
+  },
+
   data() {
     return {
       loading: false,
       history_type: 'payment',
-      typeOptions: [
-        { label: 'Пополнение баланса', value: 'payment' },
-        { label: 'Покупки в магазиине (товары)', value: 'product_purchase' },
-        { label: 'Покупки в магазиине (киты)', value: 'kit_purchase' },
-        { label: 'Покупки донат-групп', value: 'donate_group_purchase' },
-        { label: 'Покупки донат-прав', value: 'donate_permission_purchase' },
-        { label: 'Покупка монет', value: 'money_exchange' },
-        { label: 'Перевод монет', value: 'money_transfer' },
-        { label: 'Перевод реальной валюты', value: 'real_transfer' },
-      ],
       history: {
         data: [],
         meta: {
@@ -194,6 +190,21 @@ export default {
         },
       },
     }
+  },
+
+  computed: {
+    typeOptions() {
+      return [
+        { label: this.$t('cabinet.type_payment'), value: 'payment' },
+        { label: this.$t('cabinet.type_product'), value: 'product_purchase' },
+        { label: this.$t('cabinet.type_kit'), value: 'kit_purchase' },
+        { label: this.$t('cabinet.type_donate_group'), value: 'donate_group_purchase' },
+        { label: this.$t('cabinet.type_donate_permission'), value: 'donate_permission_purchase' },
+        { label: this.$t('cabinet.type_money_exchange'), value: 'money_exchange' },
+        { label: this.$t('cabinet.type_money_transfer'), value: 'money_transfer' },
+        { label: this.$t('cabinet.type_real_transfer'), value: 'real_transfer' },
+      ]
+    },
   },
 
   mounted() {

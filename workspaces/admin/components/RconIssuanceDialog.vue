@@ -4,13 +4,13 @@
     @update:visible="$emit('update:visible', $event)"
     :style="{ width: '980px' }"
     :modal="true"
-    header="Выдача через RCON — шаблоны команд"
+    :header="$t('admin.rcon_templates_title')"
     class="p-fluid"
   >
     <div class="grid">
       <div class="col-12 md:col-7">
         <div class="field">
-          <label>Пресет плагина</label>
+          <label>{{ $t('admin.rcon_preset') }}</label>
           <div class="flex gap-2">
             <Select
               v-model="preset"
@@ -18,55 +18,56 @@
               optionLabel="name"
               optionValue="id"
               appendTo="body"
-              placeholder="Выберите пресет"
+              :placeholder="$t('admin.rcon_choose_preset')"
               class="flex-1"
             />
-            <Button label="Заполнить" icon="pi pi-bolt" class="p-button-secondary" @click="applyPreset" />
+            <Button :label="$t('admin.rcon_fill')" icon="pi pi-bolt" class="p-button-secondary" @click="applyPreset" />
           </div>
           <small class="text-color-secondary">{{ presetNote }}</small>
         </div>
 
         <template v-for="section in sections" :key="section.title">
           <Divider align="left"
-            ><span class="font-medium">{{ section.title }}</span></Divider
+            ><span class="font-medium">{{ $t(section.title) }}</span></Divider
           >
           <div class="field" v-for="field in section.fields" :key="field.key">
-            <label>{{ field.label }}</label>
-            <InputText v-model="templates[field.key]" @focus="activeField = field.key" placeholder="Команда без слэша" />
+            <label>{{ $t(field.label) }}</label>
+            <InputText
+              v-model="templates[field.key]"
+              @focus="activeField = field.key"
+              :placeholder="$t('admin.rcon_command_placeholder')"
+            />
             <small class="preview" v-if="templates[field.key]">→ {{ renderPreview(templates[field.key]) }}</small>
           </div>
         </template>
       </div>
 
       <div class="col-12 md:col-5">
-        <Panel header="Плейсхолдеры (клик — вставить)">
-          <p class="text-color-secondary mb-3 text-sm">
-            Кликните по полю команды слева, затем по плейсхолдеру — он подставится в это поле.
-          </p>
+        <Panel :header="$t('admin.rcon_placeholders')">
+          <p class="text-color-secondary mb-3 text-sm">{{ $t('admin.rcon_placeholders_hint') }}</p>
           <div v-for="(items, group) in placeholderGroups" :key="group" class="mb-3">
-            <div class="font-medium mb-2">{{ group }}</div>
+            <div class="font-medium mb-2">{{ $t(group) }}</div>
             <div class="flex flex-wrap gap-2">
               <Chip
                 v-for="ph in items"
                 :key="ph.token"
                 :label="ph.token"
                 class="placeholder-chip"
-                v-tooltip.top="ph.description + ' (напр. ' + ph.example + ')'"
+                v-tooltip.top="`${$t(ph.description)} (${ph.example})`"
                 @click="insert(ph.token)"
               />
             </div>
           </div>
           <Message severity="info" :closable="false" class="mt-2">
-            Длительность: <b>{{ period.duration }}</b> строкой или <b>{{ period.seconds }}</b> секунд — зависит от плагина. UUID принимают
-            LuckPerms/PowerRanks, остальные — по нику.
+            {{ $t('admin.rcon_duration_hint', { duration: period.duration, seconds: period.seconds }) }}
           </Message>
         </Panel>
       </div>
     </div>
 
     <template #footer>
-      <Button label="Отмена" icon="pi pi-times" class="p-button-text" @click="$emit('update:visible', false)" />
-      <Button :disabled="saving" label="Сохранить" icon="pi pi-check" class="p-button-text" @click="save" />
+      <Button :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="$emit('update:visible', false)" />
+      <Button :disabled="saving" :label="$t('common.save')" icon="pi pi-check" class="p-button-text" @click="save" />
     </template>
   </Dialog>
 </template>
@@ -95,29 +96,10 @@ export default {
         perm_set_temp: '',
         perm_unset: '',
       },
-      sections: [
-        { title: 'Предметы', fields: [{ key: 'give_item', label: 'Выдать предмет' }] },
-        {
-          title: 'Группы / ранги',
-          fields: [
-            { key: 'group_add', label: 'Выдать группу (навсегда)' },
-            { key: 'group_add_temp', label: 'Выдать группу (временно)' },
-            { key: 'group_remove', label: 'Снять группу' },
-          ],
-        },
-        {
-          title: 'Права (пермишены)',
-          fields: [
-            { key: 'perm_set', label: 'Выдать право (навсегда)' },
-            { key: 'perm_set_temp', label: 'Выдать право (временно)' },
-            { key: 'perm_unset', label: 'Снять право' },
-          ],
-        },
-      ],
       sample: {
         user: { username: 'Notch', uuid: '069a79f4-44e9-4726-a5be-fca90e38aaf5' },
         server: { id: 'hitech', name: 'HiTech', version: '1.12.2' },
-        product: { id: 42, name: 'Алмаз', item_id: 'minecraft:diamond', nbt: '', amount: 64, price: 99 },
+        product: { id: 42, name: 'Diamond', item_id: 'minecraft:diamond', nbt: '', amount: 64, price: 99 },
         group: { ingame_id: 'vip' },
         permission: { node: 'essentials.fly' },
         period: { seconds: 2592000 },
@@ -125,12 +107,33 @@ export default {
     }
   },
   computed: {
+    sections() {
+      return [
+        { title: 'admin.rcon_section_items', fields: [{ key: 'give_item', label: 'admin.rcon_give_item' }] },
+        {
+          title: 'admin.rcon_section_groups',
+          fields: [
+            { key: 'group_add', label: 'admin.rcon_group_add' },
+            { key: 'group_add_temp', label: 'admin.rcon_group_add_temp' },
+            { key: 'group_remove', label: 'admin.rcon_group_remove' },
+          ],
+        },
+        {
+          title: 'admin.rcon_section_perms',
+          fields: [
+            { key: 'perm_set', label: 'admin.rcon_perm_set' },
+            { key: 'perm_set_temp', label: 'admin.rcon_perm_set_temp' },
+            { key: 'perm_unset', label: 'admin.rcon_perm_unset' },
+          ],
+        },
+      ]
+    },
     placeholderGroups() {
       return this.$_.groupBy(RCON_PLACEHOLDERS, 'group')
     },
     presetNote() {
       const found = RCON_PRESETS.find((p) => p.id === this.preset)
-      return found ? found.note : ''
+      return found ? this.$t(found.note) : ''
     },
     period() {
       return { seconds: this.sample.period.seconds, duration: secondsToDuration(this.sample.period.seconds) }
@@ -177,10 +180,10 @@ export default {
             this.$api.patch('/config', { key: meta.cfg, value: this.templates[key] || '', type: 1 }),
           ),
         )
-        this.$toast.add({ severity: 'success', detail: 'Шаблоны выдачи сохранены', life: 3000 })
+        this.$toast.add({ severity: 'success', detail: this.$t('admin.rcon_templates_saved'), life: 3000 })
         this.$emit('update:visible', false)
       } catch {
-        this.$toast.add({ severity: 'error', detail: 'Не удалось сохранить шаблоны', life: 3000 })
+        this.$toast.add({ severity: 'error', detail: this.$t('admin.rcon_templates_failed'), life: 3000 })
       }
       this.saving = false
     },

@@ -5,23 +5,20 @@
         <div class="col-12 md:col-6 p-6 text-center md:text-left flex align-items-center">
           <section>
             <span class="block text-6xl font-bold mb-1">UnicoreCMS</span>
-            <div class="text-6xl text-primary font-bold mb-3">Headless CMS для Minecraft</div>
-            <p class="mt-0 mb-4 text-700 line-height-3">
-              CMS для модовых проектов Minecraft. Современные технологии и профессиональный подход, невероятная производительность и
-              скорость.
-            </p>
+            <div class="text-6xl text-primary font-bold mb-3">{{ $t('admin.home_title') }}</div>
+            <p class="mt-0 mb-4 text-700 line-height-3">{{ $t('admin.home_text') }}</p>
             <a href="https://unicorecms.ru/docs" target="_blank">
-              <Button label="Документация" type="button" class="mr-3 p-button-raised"></Button>
+              <Button :label="$t('admin.docs')" type="button" class="mr-3 p-button-raised"></Button>
             </a>
           </section>
         </div>
       </div>
     </div>
-    <div class="col-12 lg:col-6 xl:col-3">
+    <div v-if="hasSection('purchases')" class="col-12 lg:col-6 xl:col-3">
       <div class="card mb-0">
         <div class="flex justify-content-between mb-3">
           <div>
-            <span class="block text-500 font-medium mb-3">Покупки</span>
+            <span class="block text-500 font-medium mb-3">{{ $t('admin.stat_purchases') }}</span>
             <div class="text-900 font-medium text-xl">
               {{ $_.get(stats, 'purchases.count', '...') }}
             </div>
@@ -31,14 +28,14 @@
           </div>
         </div>
         <span class="text-green-500 font-medium">+{{ $_.get(stats, 'purchases.days[6].count', '...') }}</span>
-        <span class="text-500">сегодня</span>
+        <span class="text-500">{{ $t('admin.today') }}</span>
       </div>
     </div>
-    <div class="col-12 lg:col-6 xl:col-3">
+    <div v-if="hasSection('payments')" class="col-12 lg:col-6 xl:col-3">
       <div class="card mb-0">
         <div class="flex justify-content-between mb-3">
           <div>
-            <span class="block text-500 font-medium mb-3">Доход</span>
+            <span class="block text-500 font-medium mb-3">{{ $t('admin.stat_income') }}</span>
             <div class="text-900 font-medium text-xl">
               {{ $utils.formatCurrency('real', $_.get(stats, 'payments.amount', 0)) }}
             </div>
@@ -48,14 +45,14 @@
           </div>
         </div>
         <span class="text-green-500 font-medium">+{{ $utils.formatCurrency('real', $_.get(stats, 'payments.months[11].amount', 0)) }}</span>
-        <span class="text-500">в этом месяце</span>
+        <span class="text-500">{{ $t('admin.this_month') }}</span>
       </div>
     </div>
-    <div class="col-12 lg:col-6 xl:col-3">
+    <div v-if="hasSection('users')" class="col-12 lg:col-6 xl:col-3">
       <div class="card mb-0">
         <div class="flex justify-content-between mb-3">
           <div>
-            <span class="block text-500 font-medium mb-3">Пользователи</span>
+            <span class="block text-500 font-medium mb-3">{{ $t('admin.menu_users') }}</span>
             <div class="text-900 font-medium text-xl">
               {{ $_.get(stats, 'users.count', '...') }}
             </div>
@@ -65,14 +62,14 @@
           </div>
         </div>
         <span class="text-green-500 font-medium">+{{ $_.get(stats, 'users.days[6].count', '...') }}</span>
-        <span class="text-500">сегодня</span>
+        <span class="text-500">{{ $t('admin.today') }}</span>
       </div>
     </div>
-    <div class="col-12 lg:col-6 xl:col-3">
+    <div v-if="hasSection('online_records')" class="col-12 lg:col-6 xl:col-3">
       <div class="card mb-0">
         <div class="flex justify-content-between mb-3">
           <div>
-            <span class="block text-500 font-medium mb-3">Рекордный онлайн</span>
+            <span class="block text-500 font-medium mb-3">{{ $t('admin.stat_record_online') }}</span>
             <div class="text-900 font-medium text-xl">
               {{ $_.get(stats, 'online_records.amount', '...') }}
             </div>
@@ -82,23 +79,23 @@
           </div>
         </div>
         <span class="text-green-500 font-medium">{{ $_.get(stats, 'online_records.days[6].amount', '...') }} </span>
-        <span class="text-500">сегодня</span>
+        <span class="text-500">{{ $t('admin.today') }}</span>
       </div>
     </div>
-    <div class="col-12 xl:col-6 mt-2">
+    <div v-if="hasSection('payments')" class="col-12 xl:col-6 mt-2">
       <div class="card h-full">
-        <h5>Доход за последние 7 дней</h5>
+        <h5>{{ $t('admin.income_7_days') }}</h5>
         <DataTable
           :value="$_.orderBy($_.get(stats, 'payments.days', []), ['date'], ['desc'])"
           :loading="!$_.get(stats, 'payments.days')"
           responsiveLayout="scroll"
         >
-          <Column field="date" header="Дата" style="width: 35%">
+          <Column field="date" :header="$t('common.date')" style="width: 35%">
             <template #body="slotProps">
               {{ $moment(slotProps.data.date).format('DD.MM.YYYY (dddd)') }}
             </template>
           </Column>
-          <Column field="amount" header="Доход" style="width: 35%">
+          <Column field="amount" :header="$t('admin.stat_income')" style="width: 35%">
             <template #body="slotProps">
               <span v-if="slotProps.data.amount > 0" class="text-green-500">
                 +{{ $utils.formatCurrency('real', slotProps.data.amount) }}
@@ -111,10 +108,10 @@
         </DataTable>
       </div>
     </div>
-    <div class="col-12 xl:col-6 mt-2">
+    <div v-if="chartSections.length" class="col-12 xl:col-6 mt-2">
       <div class="card h-full">
         <div class="flex justify-content-between align-items-center mb-5">
-          <h5>Статистика</h5>
+          <h5>{{ $t('admin.statistics') }}</h5>
           <SelectButton v-model="chartPeriod" :options="chartPeriods" optionLabel="label" optionValue="value" :allowEmpty="false" />
         </div>
         <Chart type="bar" :data="barData" :options="barOptions" />
@@ -123,7 +120,7 @@
     <div class="col-12 mt-2">
       <div class="card h-full">
         <div class="flex justify-content-between align-items-center mb-4">
-          <h5>Текущий статус серверов</h5>
+          <h5>{{ $t('admin.servers_status') }}</h5>
         </div>
         <ul class="list-none p-0 m-0">
           <li
@@ -134,9 +131,12 @@
             <div>
               <span class="text-900 font-medium mr-2 mb-1 md:mb-0" v-text="online.server.name" />
               <div v-if="online.online" class="mt-1 text-600">
-                {{ online.players }}/{{ online.maxplayers }}, рекорд: {{ online.record }}, cегодня {{ online.record_today }}
+                {{ online.players }}/{{ online.maxplayers }},
+                {{ $t('admin.record_line', { record: online.record, today: online.record_today }) }}
               </div>
-              <div v-else class="mt-1 text-600">Оффлайн, рекорд: {{ online.record }}, cегодня {{ online.record_today }}</div>
+              <div v-else class="mt-1 text-600">
+                {{ $t('panel.offline') }}, {{ $t('admin.record_line', { record: online.record, today: online.record_today }) }}
+              </div>
             </div>
           </li>
         </ul>
@@ -147,24 +147,22 @@
 
 <script>
 import Chart from 'primevue/chart'
+import { DASHBOARD_CHART_SECTIONS } from '~/constants'
 import { useIoStore } from '~/stores/io'
+import { useLocale } from '~/composables/useLocale'
 
 export default {
   components: { Chart },
   setup() {
     const ioStore = useIoStore()
-    return { ioStore }
+
+    return { ioStore, locale: useLocale() }
   },
   data() {
     return {
       products: null,
       stats: null,
       chartPeriod: 'week',
-      chartPeriods: [
-        { label: 'Неделя', value: 'week' },
-        { label: 'Месяц', value: 'month' },
-        { label: 'Год', value: 'year' },
-      ],
       barData: {
         labels: [],
         datasets: [],
@@ -185,11 +183,24 @@ export default {
     chartPeriod() {
       if (this.stats) this.buildChart()
     },
+    locale() {
+      if (this.stats) this.buildChart()
+    },
   },
 
   computed: {
     onlines() {
       return this.ioStore.serversOnline
+    },
+    chartSections() {
+      return DASHBOARD_CHART_SECTIONS.filter((section) => this.hasSection(section.key))
+    },
+    chartPeriods() {
+      return [
+        { label: this.$t('admin.period_week'), value: 'week' },
+        { label: this.$t('admin.period_month'), value: 'month' },
+        { label: this.$t('admin.period_year'), value: 'year' },
+      ]
     },
   },
   async mounted() {
@@ -201,6 +212,9 @@ export default {
     })
   },
   methods: {
+    hasSection(section) {
+      return !!this.$_.get(this.stats, section)
+    },
     buildChart() {
       const periods = {
         week: { unit: 'day', back: 6, format: 'dddd', key: 'days' },
@@ -212,12 +226,11 @@ export default {
       const range = Array.from(this.$moment.range(start, this.$moment()).by(unit))
 
       this.barData.labels = range.map((r) => r.format(format))
-      this.barData.datasets = [
-        { label: 'Онлайн', data: this.stats.online_records[key].map((stat) => stat.amount), backgroundColor: '#e91e63' },
-        { label: 'Покупки', data: this.stats.purchases[key].map((stat) => stat.count), backgroundColor: '#3f51b5' },
-        { label: 'Пополнения', data: this.stats.payments[key].map((stat) => stat.count), backgroundColor: '#f57c00' },
-        { label: 'Регистрации', data: this.stats.users[key].map((stat) => stat.count), backgroundColor: '#9c27b0' },
-      ]
+      this.barData.datasets = this.chartSections.map((section) => ({
+        label: this.$t(section.label),
+        data: this.stats[section.key][key].map((stat) => stat[section.field]),
+        backgroundColor: section.color,
+      }))
     },
   },
 }

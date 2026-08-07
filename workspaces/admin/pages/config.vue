@@ -5,7 +5,7 @@
         <Toolbar class="mb-4">
           <template v-slot:start>
             <div class="my-2">
-              <Button @click="openDialog()" label="Создать" icon="pi pi-plus" class="p-button-success mr-2" />
+              <Button @click="openDialog()" :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" />
             </div>
           </template>
         </Toolbar>
@@ -13,11 +13,21 @@
         <DataTable :value="config" :loading="loading" v-model:filters="filters" rowHover responsiveLayout="scroll" dataKey="key">
           <template #header>
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-              <h5 class="m-0">Управление переменными</h5>
+              <h5 class="m-0">{{ $t('admin.config_title') }}</h5>
             </div>
           </template>
-          <Column sortable field="key" header="Ключ"></Column>
-          <Column sortable field="value" header="Значение"></Column>
+          <Column sortable field="key" :header="$t('admin.key')">
+            <template #body="slotProps">
+              <div>{{ slotProps.data.key }}</div>
+              <small class="text-500">{{ $t(hint(slotProps.data.key).title) }}</small>
+            </template>
+          </Column>
+          <Column :header="$t('admin.description')">
+            <template #body="slotProps">
+              <small class="text-500">{{ $t(hint(slotProps.data.key).hint) }}</small>
+            </template>
+          </Column>
+          <Column sortable field="value" :header="$t('admin.value')"></Column>
           <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
@@ -37,25 +47,31 @@
             :closable="false"
             :style="{ width: '600px' }"
             :modal="true"
-            header="Создание/редактирование переменной"
+            :header="$t('admin.config_dialog')"
             class="p-fluid"
           >
             <VeeField
               v-model="cfgField.key"
               name="key"
-              label="Ключ (a-z)"
+              :label="$t('admin.config_key_hint')"
               :rules="{ required: true, regex: /^[a-z_]+$/ }"
               v-slot="{ value, errorMessage, handleChange }"
             >
               <div class="field">
-                <label>Ключ</label>
+                <label>{{ $t('admin.key') }}</label>
                 <InputText :disabled="updateMode" :modelValue="value" @update:modelValue="handleChange" />
                 <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
             </VeeField>
-            <VeeField v-model="cfgField.type" name="type" label="Тип" rules="required" v-slot="{ value, errorMessage, handleChange }">
+            <VeeField
+              v-model="cfgField.type"
+              name="type"
+              :label="$t('admin.type')"
+              rules="required"
+              v-slot="{ value, errorMessage, handleChange }"
+            >
               <div class="field">
-                <label>Тип</label>
+                <label>{{ $t('admin.type') }}</label>
                 <Select
                   :disabled="cfgField.important"
                   :modelValue="value"
@@ -69,14 +85,15 @@
               </div>
             </VeeField>
             <div class="field">
-              <label>Значение</label>
+              <label>{{ $t('admin.value') }}</label>
               <InputText v-model="cfgField.value" />
+              <small v-if="hint(cfgField.key).hint" class="text-500">{{ $t(hint(cfgField.key).hint) }}</small>
             </div>
             <template #footer>
-              <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
+              <Button :disabled="loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
                 :disabled="loading || !meta.valid"
-                label="Сохранить"
+                :label="$t('common.save')"
                 icon="pi pi-check"
                 class="p-button-text"
                 @click="updateMode ? updateCfg() : createCfg()"
@@ -91,6 +108,7 @@
 
 <script>
 import { FilterMatchMode } from '@primevue/core/api'
+import { CONFIG_HINTS } from '~/constants'
 import { Form, Field } from 'vee-validate'
 
 export default {
@@ -100,7 +118,9 @@ export default {
   },
 
   setup() {
-    useHead({ title: 'Конфигурация' })
+    const { $t } = useNuxtApp()
+
+    useHead({ title: computed(() => $t('admin.menu_settings')) })
   },
 
   data() {
@@ -131,6 +151,9 @@ export default {
   },
 
   methods: {
+    hint(key) {
+      return CONFIG_HINTS[key] || { title: '', hint: '' }
+    },
     async load() {
       this.loading = true
       this.cfgDialog = false
@@ -160,7 +183,7 @@ export default {
         await this.$api.post('/config', this.cfgField)
         this.$toast.add({
           severity: 'success',
-          detail: 'Переменная успешно добавлен',
+          detail: this.$t('admin.config_created'),
           life: 3000,
         })
         await this.load()
@@ -168,7 +191,7 @@ export default {
         this.loading = false
         this.$toast.add({
           severity: 'error',
-          detail: 'Введены некоректные данные',
+          detail: this.$t('admin.invalid_data'),
           life: 3000,
         })
       }
@@ -179,7 +202,7 @@ export default {
         await this.$api.patch('/config', this.cfgField)
         this.$toast.add({
           severity: 'success',
-          detail: 'Переменная успешно редактирована',
+          detail: this.$t('admin.config_updated'),
           life: 3000,
         })
         await this.load()
@@ -187,15 +210,15 @@ export default {
         this.loading = false
         this.$toast.add({
           severity: 'error',
-          detail: 'Введены некоректные данные',
+          detail: this.$t('admin.invalid_data'),
           life: 3000,
         })
       }
     },
     async removeCfg(key) {
       this.$confirm.require({
-        message: `Данный процесс будет необратим!`,
-        header: 'Подтверждение удаления',
+        message: this.$t('admin.irreversible'),
+        header: this.$t('admin.confirm_delete'),
         icon: 'pi pi-exclamation-triangle',
         accept: async () => {
           this.loading = true
@@ -203,7 +226,7 @@ export default {
             await this.$api.delete('/config/' + key)
             this.$toast.add({
               severity: 'success',
-              detail: 'Переменная успешно удалена',
+              detail: this.$t('admin.config_deleted'),
               life: 3000,
             })
           } catch {}

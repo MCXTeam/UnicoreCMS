@@ -1,10 +1,13 @@
 import { UAParser } from 'ua-parser-js'
+import { formatDuration, type DurationUnit } from 'unicore-common/duration'
 import { useConfigStore } from '~/stores/config'
+import { useLocale } from '~/composables/useLocale'
 
 export default defineNuxtPlugin(async () => {
   const parser = new UAParser()
   const rc = useRuntimeConfig()
   const configStore = useConfigStore()
+  const locale = useLocale()
 
   await configStore.fetch().catch(() => {})
 
@@ -17,13 +20,17 @@ export default defineNuxtPlugin(async () => {
       if (!decimals || decimals <= 0) value = Math.round(value)
       else value = Math.round(value * Math.pow(10, decimals)) / Math.pow(10, decimals)
 
-      return (
-        value.toLocaleString('ru-RU', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) + (type == 'real' ? ' ₽' : '')
-      )
+      const tag = locale.value === 'ru' ? 'ru-RU' : 'en-US'
+
+      return value.toLocaleString(tag, { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) + (type == 'real' ? ' ₽' : '')
+    },
+    formatDuration(value: number, unit: DurationUnit = 'minutes') {
+      return formatDuration(value, unit, locale.value)
     },
     uaParse(value: string) {
       const res = parser.setUA(value).getResult()
-      const join = (...parts: (string | undefined)[]) => parts.filter(Boolean).join(' ') || 'Неизвестно'
+      const join = (...parts: (string | undefined)[]) =>
+        parts.filter(Boolean).join(' ') || String((useNuxtApp() as any).$t?.('common.unknown') ?? 'common.unknown')
       const browser = join(res.browser.name, res.browser.version)
       const os = join(res.os.name, res.os.version)
 

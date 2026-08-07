@@ -1,17 +1,14 @@
 <template>
   <section class="px-4">
-    <h2 class="mt-0 mb-4">Статистика на серверах</h2>
+    <h2 class="mt-0 mb-4">{{ $t('profile.server_stats') }}</h2>
     <div v-if="playtime">
       <div v-for="pt in playtime" :key="pt.server.id" class="d-flex align-items-center mb-4">
         <Avatar v-if="pt.server.icon" size="xlarge" :image="`${$pub.apiBaseurl}/${pt.server.icon}`"> </Avatar>
         <Avatar v-else size="xlarge"> <i class="bx bxs-server"></i> </Avatar>
         <div class="ms-4">
           <h2 class="text-uppercase m-0" v-text="pt.server.name" />
-          <span
-            v-if="pt.time"
-            v-text="$moment.duration(pt.time, 'minutes').format('y [years], w [weeks], d [days], h [hours], m [minutes]')"
-          />
-          <span v-else>Вы еще не играли на этом сервере</span>
+          <span v-if="pt.time" v-text="$utils.formatDuration(pt.time)" />
+          <span v-else>{{ $t('cabinet.never_played') }}</span>
         </div>
       </div>
     </div>
@@ -28,10 +25,11 @@
 </template>
 
 <script setup>
-definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'] })
-useHead({ title: 'Личный кабинет' })
+definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'cabinet.tab_stats' })
 
-const { $api } = useNuxtApp()
+const { $api, $t } = useNuxtApp()
+
+useHead({ title: computed(() => $t('header.cabinet')) })
 const playtime = ref(null)
 
 onMounted(async () => {

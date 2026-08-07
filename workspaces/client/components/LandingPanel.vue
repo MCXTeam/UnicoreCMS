@@ -2,40 +2,40 @@
   <div>
     <ClientOnly>
       <div v-if="$auth.user" class="panel d-none d-xl-flex flex-column align-items-center py-4 mb-5">
-        <h3 class="mb-4 mt-0"><i class="bx bx-user"></i> Привет, {{ $auth.user.username }}</h3>
+        <h3 class="mb-4 mt-0"><i class="bx bx-user"></i> {{ $t('panel.hello', { username: $auth.user.username }) }}</h3>
         <div class="d-flex align-items-center w-100 mb-2 mini-profile p-2">
           <Avatar class="rounded shadow me-3" size="large">
             <SkinView2D class="rounded" :width="48" :height="48" :skin="$auth.user.skin" />
           </Avatar>
           <div>
-            <h4 class="m-0">Баланс: {{ $utils.formatCurrency('real', $auth.user.real) }}</h4>
+            <h4 class="m-0">{{ $t('panel.balance', { amount: $utils.formatCurrency('real', $auth.user.real) }) }}</h4>
           </div>
         </div>
         <div class="tab-panel w-100">
-          <Button :as="NuxtLink" to="/cabinet" text class="m-0 w-full" size="large" label="Личный кабинет" />
-          <Button :as="NuxtLink" to="/store" text class="m-0 w-full" size="large" label="Магазин" />
-          <Button :as="NuxtLink" to="/players" text class="m-0 w-full" size="large" label="Игроки" />
-          <Button @click="$unicore.logout()" text severity="danger" class="m-0 w-full" size="large" label="Выйти из системы" />
+          <Button :as="NuxtLink" to="/cabinet" text class="m-0 w-full" size="large" :label="$t('header.cabinet')" />
+          <Button :as="NuxtLink" to="/store" text class="m-0 w-full" size="large" :label="$t('header.store')" />
+          <Button :as="NuxtLink" to="/players" text class="m-0 w-full" size="large" :label="$t('header.players')" />
+          <Button @click="$unicore.logout()" text severity="danger" class="m-0 w-full" size="large" :label="$t('header.logout')" />
         </div>
       </div>
       <div v-else class="panel d-flex flex-column align-items-center py-4 mb-5">
-        <h2 class="mb-4 mt-0"><i class="bx bx-key"></i> Авторизация</h2>
-        <Button :as="NuxtLink" to="/auth" size="large" class="px-4" label="Войти" />
+        <h2 class="mb-4 mt-0"><i class="bx bx-key"></i> {{ $t('panel.auth') }}</h2>
+        <Button :as="NuxtLink" to="/auth" size="large" class="px-4" :label="$t('header.login')" />
         <div class="d-flex mt-3 justify-content-center gap-2">
-          <Button :as="NuxtLink" to="/auth/register" text size="small" class="m-0" label="Регистрация" />
-          <Button :as="NuxtLink" to="/auth/reset" text size="small" class="m-0" label="Сбросить пароль" />
+          <Button :as="NuxtLink" to="/auth/register" text size="small" class="m-0" :label="$t('panel.register')" />
+          <Button :as="NuxtLink" to="/auth/reset" text size="small" class="m-0" :label="$t('panel.reset_password')" />
         </div>
       </div>
     </ClientOnly>
     <div class="panel d-flex flex-column align-items-center text-center py-4 mb-5">
-      <h2 class="mb-4 mt-0"><i class="bx bx-gift"></i> Голосование</h2>
+      <h2 class="mb-4 mt-0"><i class="bx bx-gift"></i> {{ $t('panel.vote') }}</h2>
       <img src="/images/chest-minecraft.gif" height="180px" />
-      <p class="mb-3">Голосуй за нас и получай приятные бонусы: игровую валюту, кейсы, предметы!</p>
+      <p class="mb-3">{{ $t('panel.vote_text') }}</p>
       <div class="d-flex">
-        <Button :as="NuxtLink" to="/cabinet/gifts" text class="m-0" size="large" label="Голосовать" />
+        <Button :as="NuxtLink" to="/cabinet/gifts" text class="m-0" size="large" :label="$t('panel.vote_button')" />
       </div>
     </div>
-    <h2 class="mt-0">Серверы</h2>
+    <h2 class="mt-0">{{ $t('panel.servers') }}</h2>
     <div v-if="onlines.servers" class="">
       <div v-for="online in onlines.servers" :key="online.server.id" class="mb-4">
         <div class="onlines d-flex justify-content-between align-items-end mb-3">
@@ -43,31 +43,39 @@
             <Avatar v-if="online.server.icon" size="xlarge" :image="`${$pub.apiBaseurl}/${online.server.icon}`" />
             <Avatar v-else size="xlarge"> <i class="bx bxs-server"></i> </Avatar>
             <div class="ms-3">
-              <span>Версия: {{ online.server.version }}</span>
+              <span>{{ $t('panel.version') }}: {{ online.server.version }}</span>
               <NuxtLink :to="`/servers/${online.server.id}`">
                 <h3 class="mb-1 mt-0">{{ online.server.name }}</h3>
               </NuxtLink>
             </div>
           </div>
           <div class="d-flex flex-column align-items-end">
-            <div v-tooltip.top="`Рекорд: ${online.record} / Сегодня: ${online.record_today}`">
+            <div v-tooltip.top="$t('panel.record_tooltip', { record: online.record, today: online.record_today })">
               <h2 v-if="online.online" class="mb-1 mt-0"><CountTo :startVal="0" :endVal="online.players" :duration="1000" /></h2>
-              <h2 v-else class="mb-1 mt-0 text-uppercase">Off</h2>
+              <h2 v-else class="mb-1 mt-0 text-uppercase">{{ $t('panel.offline') }}</h2>
             </div>
-            <span v-if="online.online">из {{ online.maxplayers }}</span>
+            <span v-if="online.online">{{ $t('panel.of') }} {{ online.maxplayers }}</span>
           </div>
         </div>
         <ProgressBar style="height: 0.5em" :showValue="false" :value="(online.players / online.maxplayers) * 100" />
+        <div v-if="online.server.instances?.length" class="server-instances mt-2">
+          <div v-for="instance in online.server.instances" :key="instance.name" class="d-flex justify-content-between align-items-center">
+            <span>{{ instance.name }}</span>
+            <span v-if="instance.online">{{ instance.players }} {{ $t('panel.of') }} {{ instance.maxplayers }}</span>
+            <span v-else class="text-uppercase">{{ $t('panel.offline') }}</span>
+          </div>
+        </div>
       </div>
       <div class="text-center">
         <p class="m-0">
-          Общий онлайн: <b><CountTo :startVal="0" :endVal="onlines.total.online" :duration="1000" /></b>
+          {{ $t('panel.total_online') }}: <b><CountTo :startVal="0" :endVal="onlines.total.online" :duration="1000" /></b>
         </p>
         <p class="m-0" v-tooltip.top="$moment(onlines.total.records.today.created).format('D MMMM YYYY, HH:mm')">
-          Рекорд за сегодня: <b><CountTo :startVal="0" :endVal="onlines.total.records.today.online" :duration="1000" /></b>
+          {{ $t('panel.record_today') }}: <b><CountTo :startVal="0" :endVal="onlines.total.records.today.online" :duration="1000" /></b>
         </p>
         <p class="m-0" v-tooltip.top="$moment(onlines.total.records.absolute.created).format('D MMMM YYYY, HH:mm')">
-          Рекорд за всё время: <b><CountTo :startVal="0" :endVal="onlines.total.records.absolute.online" :duration="1000" /></b>
+          {{ $t('panel.record_absolute') }}:
+          <b><CountTo :startVal="0" :endVal="onlines.total.records.absolute.online" :duration="1000" /></b>
         </p>
       </div>
     </div>

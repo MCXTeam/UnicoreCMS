@@ -8,26 +8,26 @@
         <div class="col-xl-6">
           <h3 class="mt-0 mb-1">© {{ $moment().format('YYYY') }} {{ $pub.sitename }}</h3>
           <p class="footer-desc">
-            Все права защищены. Копирование материалов сайта запрещено. Мы предоставляем ознакомительный и бесплатный вариант игры
+            {{ $t('footer.rights') }}
             <a href="https://www.minecraft.net" target="_blank">Minecraft</a>.
           </p>
           <small class="d-flex align-items-center">
             <img class="me-1" height="16px" :src="systemLogo" />
-            Powered by <a class="ms-1" href="https://unicorecms.ru/" target="_blank">UnicoreCMS</a>
+            {{ $t('footer.powered') }} <a class="ms-1" href="https://unicorecms.ru/" target="_blank">UnicoreCMS</a>
           </small>
         </div>
         <div class="col ms-xl-4">
-          <h3 class="mt-0 mb-2">Навигация</h3>
+          <h3 class="mt-0 mb-2">{{ $t('footer.navigation') }}</h3>
           <div class="row">
             <div class="col links">
-              <NuxtLink to="/">Главная</NuxtLink>
-              <NuxtLink to="/servers">Серверы</NuxtLink>
-              <a href="#" target="_blank">Форум</a>
+              <NuxtLink to="/">{{ $t('header.home') }}</NuxtLink>
+              <NuxtLink to="/servers">{{ $t('header.servers') }}</NuxtLink>
+              <a :href="forumLink" target="_blank">{{ $t('header.forum') }}</a>
             </div>
             <div class="col links">
-              <NuxtLink to="/start">Начать игру</NuxtLink>
-              <NuxtLink to="/start">Скачать лаунчер</NuxtLink>
-              <NuxtLink to="/donate">Донат</NuxtLink>
+              <NuxtLink to="/start">{{ $t('header.start') }}</NuxtLink>
+              <NuxtLink to="/start">{{ $t('header.download') }}</NuxtLink>
+              <NuxtLink to="/donate">{{ $t('header.donate') }}</NuxtLink>
             </div>
           </div>
         </div>
@@ -38,4 +38,9 @@
 
 <script setup lang="ts">
 import systemLogo from '~/assets/images/system-logo.png'
+import { useConfigStore } from '~/stores/config'
+
+const configStore = useConfigStore()
+
+const forumLink = computed(() => String(configStore.config.public_link_forum ?? ''))
 </script>

@@ -10,6 +10,7 @@ import { ApiModule } from './api/api.module';
 import { StorageModule } from './storage/storage.module';
 import { PagesModule } from './pages/pages.module';
 import { EmailModule } from './email/email.module';
+import { LocalesModule } from './locales/locales.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { EmailModule } from './email/email.module';
     StorageModule,
     PagesModule,
     EmailModule,
+    LocalesModule,
   ],
 })
 export class AdminModule {}

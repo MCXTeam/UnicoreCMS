@@ -1,11 +1,11 @@
 <template>
   <div class="px-4">
     <div class="d-flex justify-content-between">
-      <h2 class="mt-0 mb-4">Корзина покупок</h2>
+      <h2 class="mt-0 mb-4">{{ $t('store.cart_title') }}</h2>
       <Select
         :loading="!servers.length"
         :key="servers.length"
-        placeholder="Выберите сервер"
+        :placeholder="$t('store.choose_server')"
         v-model="server_id"
         :options="serverOptions"
         optionLabel="label"
@@ -22,7 +22,7 @@
             <Avatar v-else size="large"> <i class="bx bxs-image"></i> </Avatar>
             <div class="ms-3">
               <h4 class="m-0">
-                {{ cartItem.payload.kit.name }} <small class="sale-wrapper ms-2">Набор</small>
+                {{ cartItem.payload.kit.name }} <small class="sale-wrapper ms-2">{{ $t('store.kit') }}</small>
                 <small class="sale-wrapper ms-2" v-if="cartItem.payload.kit.sale">-{{ cartItem.payload.kit.sale }}%</small>
               </h4>
               <span v-text="cartItem.payload.kit.categories.map((c) => c.name).join(', ')" />
@@ -35,7 +35,7 @@
               class="me-1"
             ></strike>
             <span v-text="$utils.formatCurrency('real', cartItem.payload.kit.price, cartItem.payload.kit.sale)"></span>
-            <h5 class="m-0">1 шт.</h5>
+            <h5 class="m-0">{{ $t('store.pieces', { amount: 1 }) }}</h5>
           </td>
           <td align="right">
             <Button :loading="deletingKey == `${cartItem.type}-${cartItem.payload.id}`" @click="cartDelete(cartItem)" severity="danger"
@@ -67,7 +67,7 @@
                 $utils.formatCurrency('real', cartItem.payload.product.price * cartItem.payload.amount, cartItem.payload.product.sale)
               "
             ></span>
-            <h5 class="m-0">{{ cartItem.payload.amount }} шт.</h5>
+            <h5 class="m-0">{{ $t('store.pieces', { amount: cartItem.payload.amount }) }}</h5>
           </td>
           <td align="right">
             <Button :loading="deletingKey == `${cartItem.type}-${cartItem.payload.id}`" @click="cartDelete(cartItem)" severity="danger"
@@ -76,7 +76,7 @@
           </td>
         </tr>
       </table>
-      <h4 class="text-center m-0" v-else>Ваша корзина пуста...</h4>
+      <h4 class="text-center m-0" v-else>{{ $t('store.cart_empty') }}</h4>
     </div>
   </div>
 </template>
@@ -87,12 +87,15 @@ import { useEventBus } from '@vueuse/core'
 definePageMeta({
   layout: 'cabinet',
   middleware: ['auth', 'verify'],
-  title: 'Корзина',
+  title: 'store.tab_cart',
 })
 
 export default {
   setup() {
-    useHead({ title: 'Корзина' })
+    const { $t } = useNuxtApp()
+
+    useHead({ title: computed(() => $t('store.tab_cart')) })
+
     return {
       ui: useUiStore(),
       cartUpdateBus: useEventBus('storeCartUpdate'),
@@ -192,9 +195,9 @@ export default {
         })
         await Promise.all([this.$auth.fetchUser(), this.cartFind()])
         this.cartUpdateBus.emit(this.cart)
-        this.$unicore.successNotification('Покупка была совершенна')
+        this.$unicore.successNotification(this.$t('store.purchase_done'))
       } catch {
-        this.$unicore.errorNotification('На балансе недостаточно средств для совершения данной покупки')
+        this.$unicore.errorNotification(this.$t('store.not_enough_money'))
       }
       loading.close()
       this.ui.setStoreSidebarLoading(false)

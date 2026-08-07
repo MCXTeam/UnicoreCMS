@@ -22,8 +22,11 @@ import { Online } from '../online/entities/online.entity';
 import { Query } from '../online/entities/query.entity';
 import { RCON } from '../rcon/entities/rcon.entity';
 import { ServerGroup } from './server-group.entity';
+import { ServerInstance } from './server-instance.entity';
 import { ServerTable } from './server-table.entity';
+import { Translatable } from 'src/admin/locales/translatable.decorator';
 
+@Translatable('server', ['name', 'slogan', 'description', 'content', 'table.*.title', 'table.*.description'])
 @Entity({
   name: 'unicore_servers',
   orderBy: {
@@ -153,6 +156,11 @@ export class Server {
     cascade: ['insert', 'update'],
   })
   table: ServerTable[];
+
+  @OneToMany(() => ServerInstance, (instance) => instance.server, {
+    cascade: ['insert', 'update'],
+  })
+  instances: ServerInstance[];
 
   @CreateDateColumn({ name: 'created' })
   created: Date;

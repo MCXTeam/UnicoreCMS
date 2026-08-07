@@ -14,8 +14,8 @@
             <span class="text-break" v-html="$sanitize(news_.description)"></span>
           </div>
           <div class="d-flex justify-content-between">
-            <a v-if="news_.link" :href="news_.link" target="_blank">Читать в VK</a>
-            <NuxtLink v-else :to="`/news/${news_.id}`">Подробнее</NuxtLink>
+            <a v-if="news_.link" :href="news_.link" target="_blank">{{ $t('news.read_vk') }}</a>
+            <NuxtLink v-else :to="`/news/${news_.id}`">{{ $t('common.more') }}</NuxtLink>
             <span class="text-break" v-text="$moment(news_.created).format('D MMMM YYYY, HH:mm')" />
           </div>
         </div>

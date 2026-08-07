@@ -2,7 +2,9 @@ import { StorageManager } from '@common';
 import { AfterRemove, Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Kit } from './kit.entity';
 import { Product } from './product.entity';
+import { Translatable } from 'src/admin/locales/translatable.decorator';
 
+@Translatable('category', ['name', 'description'])
 @Entity({
   name: 'unicore_categories',
   orderBy: {

@@ -5,7 +5,7 @@
         <Toolbar class="mb-4">
           <template #start>
             <div class="my-2">
-              <Button label="Создать" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
+              <Button :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
               <Button
                 icon="pi pi-pencil"
                 class="p-button-second mr-2"
@@ -17,10 +17,10 @@
           </template>
 
           <template #end>
-            <Button :disabled="loading" label="Импорт" icon="pi pi-plus" class="mr-2" @click="openImportDialog()" />
+            <Button :disabled="loading" :label="$t('admin.import')" icon="pi pi-plus" class="mr-2" @click="openImportDialog()" />
             <Button
               :disabled="!selected || !selected.length || loading"
-              label="Экспорт"
+              :label="$t('admin.export')"
               icon="pi pi-upload"
               class="p-button-help"
               @click="exportItems()"
@@ -47,16 +47,16 @@
         >
           <template #header>
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-              <h5 class="m-0">Управление товарами</h5>
+              <h5 class="m-0">{{ $t('admin.products_title') }}</h5>
               <span class="block mt-2 md:mt-0 p-input-icon-left">
                 <i class="pi pi-search" />
-                <InputText @keydown.enter="onFilter()" v-model="filters['global'].value" placeholder="Поиск..." />
+                <InputText @keydown.enter="onFilter()" v-model="filters['global'].value" :placeholder="$t('admin.search')" />
               </span>
             </div>
           </template>
           <Column selectionMode="multiple" :style="{ width: '3rem' }"></Column>
           <Column field="id" header="ID" :style="{ width: '8rem' }" sortable></Column>
-          <Column field="name" header="Название" sortable>
+          <Column field="name" :header="$t('admin.name')" sortable>
             <template #body="slotProps">
               <div class="flex align-items-center">
                 <Avatar v-if="slotProps.data.icon" :image="`${apiUrl + '/' + slotProps.data.icon}`" shape="circle" />
@@ -65,25 +65,25 @@
               </div>
             </template>
           </Column>
-          <Column field="price" header="Цена" sortable>
+          <Column field="price" :header="$t('admin.price')" sortable>
             <template #body="slotProps">
               {{ $utils.formatCurrency('real', slotProps.data.price) }}
             </template>
           </Column>
-          <Column field="sale" header="Скидка" sortable></Column>
-          <Column field="servers" header="Серверы" filterField="servers" :showFilterMatchModes="false">
+          <Column field="sale" :header="$t('admin.sale')" sortable></Column>
+          <Column field="servers" :header="$t('admin.servers')" filterField="servers" :showFilterMatchModes="false">
             <template #body="slotProps">
               <Tag class="mr-2 mb-2" v-for="server in slotProps.data.servers" :key="server.id" :value="server.name"></Tag>
             </template>
             <template #filter="{ filterModel }">
-              <div class="mb-3 font-bold">Серверы</div>
+              <div class="mb-3 font-bold">{{ $t('admin.servers') }}</div>
               <MultiSelect
                 display="chip"
                 :filter="true"
                 v-model="filterModel.value"
                 :options="servers"
                 optionLabel="name"
-                placeholder="Выберите серверы"
+                :placeholder="$t('admin.choose_servers')"
                 class="p-column-filter"
               >
                 <template #option="slotProps">
@@ -96,19 +96,19 @@
               </MultiSelect>
             </template>
           </Column>
-          <Column field="categories" header="Категории" filterField="categories" :showFilterMatchModes="false">
+          <Column field="categories" :header="$t('admin.categories')" filterField="categories" :showFilterMatchModes="false">
             <template #body="slotProps">
               <Tag class="mr-2 mb-2" v-for="category in slotProps.data.categories" :key="category.id" :value="category.name"></Tag>
             </template>
             <template #filter="{ filterModel }">
-              <div class="mb-3 font-bold">Категории</div>
+              <div class="mb-3 font-bold">{{ $t('admin.categories') }}</div>
               <AutoComplete
                 v-model="filterModel.value"
                 multiple
                 :suggestions="categories"
                 @complete="searchCategory($event)"
                 optionLabel="name"
-                placeholder="Выберите категории"
+                :placeholder="$t('admin.choose_categories')"
                 style="max-width: 200px"
               >
                 <template #option="slotProps">
@@ -135,13 +135,13 @@
           </Column>
         </DataTable>
 
-        <Dialog v-model:visible="fileDialog" :style="{ width: '400px' }" :modal="true" header="Иконка товара" class="p-fluid">
+        <Dialog v-model:visible="fileDialog" :style="{ width: '400px' }" :modal="true" :header="$t('admin.product_icon')" class="p-fluid">
           <div class="flex align-items-center justify-content-center flex-wrap w-full">
             <Avatar v-if="product.icon" :image="`${apiUrl + '/' + product.icon}`" size="xlarge" shape="circle" />
             <Avatar v-else icon="pi pi-image" size="xlarge" shape="circle" />
             <div class="field ml-6 mb-0">
-              <Button label="Загрузить" icon="pi pi-upload" @click="$refs.fileInput.choose()" />
-              <Button label="Удалить" icon="pi pi-trash" class="p-button-secondary mt-2" @click="removeIcon()" />
+              <Button :label="$t('admin.upload')" icon="pi pi-upload" @click="$refs.fileInput.choose()" />
+              <Button :label="$t('admin.delete')" icon="pi pi-trash" class="p-button-secondary mt-2" @click="removeIcon()" />
               <FileUpload
                 ref="fileInput"
                 :pt="{ root: { class: 'hidden' } }"
@@ -162,18 +162,18 @@
             :closable="false"
             :style="{ width: '600px' }"
             :modal="true"
-            header="Массовое редактирование товаров"
+            :header="$t('admin.products_bulk_dialog')"
             class="p-fluid"
           >
             <div class="field">
-              <label>Серверы</label>
+              <label>{{ $t('admin.servers') }}</label>
               <MultiSelect
                 display="chip"
                 :filter="true"
                 v-model="productMany.servers"
                 :options="servers"
                 optionLabel="name"
-                :placeholder="productMany.servers.length ? 'Выберите серверы' : 'Без изменений'"
+                :placeholder="productMany.servers.length ? $t('admin.choose_servers') : $t('admin.unchanged')"
                 class="p-column-filter"
               >
                 <template #option="slotProps">
@@ -186,7 +186,7 @@
               </MultiSelect>
             </div>
             <div class="field">
-              <label>Категории</label>
+              <label>{{ $t('admin.categories') }}</label>
               <AutoComplete
                 v-model="productMany.categories"
                 multiple
@@ -194,7 +194,7 @@
                 @complete="searchCategory($event)"
                 optionLabel="name"
                 appendTo="body"
-                :placeholder="productMany.categories.length ? 'Выберите катагории' : 'Без изменений'"
+                :placeholder="productMany.categories.length ? $t('admin.choose_categories') : $t('admin.unchanged')"
               >
                 <template #option="slotProps">
                   <div class="flex align-items-center">
@@ -210,12 +210,12 @@
                 <VeeField
                   v-model="productMany.price"
                   name="price"
-                  label="Цена"
+                  :label="$t('admin.price')"
                   rules="min:0.01"
                   v-slot="{ value, errorMessage, handleChange, handleBlur }"
                 >
                   <div class="field">
-                    <label>Цена</label>
+                    <label>{{ $t('admin.price') }}</label>
                     <InputNumber
                       :modelValue="value"
                       @update:modelValue="handleChange"
@@ -233,15 +233,15 @@
                 <VeeField
                   v-model="productMany.sale"
                   name="sale"
-                  label="Скидка"
+                  :label="$t('admin.sale')"
                   rules="min_value:0|max_value:99"
                   v-slot="{ value, errorMessage, handleChange, handleBlur }"
                 >
                   <div class="field">
-                    <label>Скидка</label>
+                    <label>{{ $t('admin.sale') }}</label>
                     <InputNumber
                       suffix=" %"
-                      placeholder="Без изменений"
+                      :placeholder="$t('admin.unchanged')"
                       :useGrouping="false"
                       :modelValue="value"
                       @update:modelValue="handleChange"
@@ -254,8 +254,14 @@
               </div>
             </div>
             <template #footer>
-              <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideManyDialog" />
-              <Button :disabled="loading || !meta.valid" label="Сохранить" icon="pi pi-check" class="p-button-text" @click="updateMany" />
+              <Button :disabled="loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideManyDialog" />
+              <Button
+                :disabled="loading || !meta.valid"
+                :label="$t('common.save')"
+                icon="pi pi-check"
+                class="p-button-text"
+                @click="updateMany"
+              />
             </template>
           </Dialog>
         </VeeForm>
@@ -266,18 +272,18 @@
             :closable="false"
             :style="{ width: '600px' }"
             :modal="true"
-            header="Импортирование товаров"
+            :header="$t('admin.products_import_dialog')"
             class="p-fluid"
           >
             <div class="field">
-              <label>Серверы</label>
+              <label>{{ $t('admin.servers') }}</label>
               <MultiSelect
                 display="chip"
                 :filter="true"
                 v-model="productMany.servers"
                 :options="servers"
                 optionLabel="name"
-                :placeholder="productMany.servers.length ? 'Выберите серверы' : 'Не выбраны'"
+                :placeholder="productMany.servers.length ? $t('admin.choose_servers') : $t('admin.not_chosen')"
                 class="p-column-filter"
               >
                 <template #option="slotProps">
@@ -290,7 +296,7 @@
               </MultiSelect>
             </div>
             <div class="field">
-              <label>Категории</label>
+              <label>{{ $t('admin.categories') }}</label>
               <AutoComplete
                 v-model="productMany.categories"
                 multiple
@@ -298,7 +304,7 @@
                 @complete="searchCategory($event)"
                 optionLabel="name"
                 appendTo="body"
-                :placeholder="productMany.categories.length ? 'Выберите катагории' : 'Не выбраны'"
+                :placeholder="productMany.categories.length ? $t('admin.choose_categories') : $t('admin.not_chosen')"
               >
                 <template #option="slotProps">
                   <div class="flex align-items-center">
@@ -318,14 +324,14 @@
                 accept="zip,application/octet-stream,application/zip,application/x-zip,application/x-zip-compressed"
                 :maxFileSize="1000000"
                 label="Import"
-                chooseLabel="Выберите файл"
+                :chooseLabel="$t('admin.choose_file')"
               />
             </div>
             <template #footer>
-              <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideImportDialog" />
+              <Button :disabled="loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideImportDialog" />
               <Button
                 :disabled="loading || !meta.valid || !$_.get($refs, 'importer.files', []).length"
-                label="Импортировать"
+                :label="$t('admin.import_button')"
                 icon="pi pi-check"
                 class="p-button-text"
                 @click="importItems"
@@ -340,228 +346,252 @@
             :closable="false"
             :style="{ width: '600px' }"
             :modal="true"
-            header="Создание/редактирование товара"
+            :header="$t('admin.product_dialog')"
             class="p-fluid"
           >
-            <VeeField
-              v-model="product.name"
-              name="name"
-              label="Название"
-              rules="required"
-              v-slot="{ value, errorMessage, handleChange, handleBlur }"
-            >
-              <div class="field">
-                <label>Название</label>
-                <InputText
-                  :modelValue="value"
-                  @update:modelValue="handleChange"
-                  @blur="handleBlur"
-                  autofocus
-                  :class="errorMessage && 'p-invalid'"
-                />
-                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
-              </div>
-            </VeeField>
-            <VeeField
-              v-model="product.give_method"
-              name="give_method"
-              label="Тип"
-              rules="required"
-              v-slot="{ value, errorMessage, handleChange }"
-            >
-              <div class="field">
-                <label>Тип</label>
-                <Select :modelValue="value" @update:modelValue="handleChange" :options="giveMethods" :optionLabel="null" appendTo="body" />
-                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
-              </div>
-            </VeeField>
-            <VeeField
-              v-if="giveMethods.findIndex((gm) => gm == product.give_method) == 0"
-              v-model="product.item_id"
-              name="item_id"
-              label="ID предмета"
-              rules="required"
-              v-slot="{ value, errorMessage, handleChange, handleBlur }"
-            >
-              <div class="field">
-                <label>ID предмета</label>
-                <InputText :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" :class="errorMessage && 'p-invalid'" />
-                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
-              </div>
-            </VeeField>
-            <div class="field" v-if="giveMethods.findIndex((gm) => gm == product.give_method) == 0">
-              <label>NBT-теги</label>
-              <InputText v-model="product.nbt" />
-            </div>
-            <VeeField
-              v-if="
-                giveMethods.findIndex((gm) => gm == product.give_method) == 1 ||
-                giveMethods.findIndex((gm) => gm == product.give_method) == 2
-              "
-              v-model="product.commands"
-              name="commands"
-              label="Команда"
-              rules="required"
-              v-slot="{ value, errorMessage, handleChange }"
-            >
-              <div class="field">
-                <label>Команды</label>
-                <InputChips :modelValue="value" @update:modelValue="handleChange" />
-                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
-                <Divider align="left" type="dashed">
-                  <b>Переменные</b>
-                </Divider>
-                <ul>
-                  <li><code>{user.username}</code> - имя пользователя</li>
-                  <li><code>{product.name}</code> - название товара</li>
-                  <li><code>{product.amount}</code> - выбранное пользователем количество товара</li>
-                  <li><code>{server.id}</code> - ID сервера на котором была совершенна покупка</li>
-                  <li><code>{server.name}</code> - название сервера на котором была совершенна покупка</li>
-                </ul>
-                <Divider type="dashed" />
-              </div>
-            </VeeField>
-            <VeeField
-              v-model="product.multiple_of"
-              name="multiple_of"
-              label="Количество"
-              rules="min_value:1"
-              v-slot="{ value, errorMessage, handleChange, handleBlur }"
-            >
-              <div class="field">
-                <label>Количество (кратно)</label>
-                <InputNumber :modelValue="value" @update:modelValue="handleChange" @input="handleChange($event.value)" @blur="handleBlur" />
-                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
-                <small>Количество данного товара для покупки должно быть кратно указанному числу</small>
-              </div>
-            </VeeField>
-            <div class="field">
-              <label>Описание</label>
-              <Editor v-model="product.description" editorStyle="height: 160px">
-                <template #toolbar>
-                  <span class="ql-formats">
-                    <button class="ql-bold"></button>
-                    <button class="ql-italic"></button>
-                    <button class="ql-underline"></button>
-                    <button class="ql-link"></button>
-                    <button class="ql-image"></button>
-                  </span>
-                </template>
-              </Editor>
-            </div>
-            <div class="field">
-              <label>Серверы</label>
-              <MultiSelect
-                display="chip"
-                :filter="true"
-                v-model="product.servers"
-                :options="servers"
-                optionLabel="name"
-                placeholder="Выберите серверы"
-                class="p-column-filter"
-              >
-                <template #option="slotProps">
-                  <div class="p-multiselect-representative-option">
-                    <Avatar v-if="slotProps.option.icon" :image="`${apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
-                    <Avatar v-else icon="pi pi-image" shape="circle" />
-                    <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
-                  </div>
-                </template>
-              </MultiSelect>
-            </div>
-            <div class="field">
-              <label>Категории</label>
-              <AutoComplete
-                v-model="product.categories"
-                multiple
-                :suggestions="categories"
-                @complete="searchCategory($event)"
-                optionLabel="name"
-                appendTo="body"
-                placeholder="Выберите катагории"
-              >
-                <template #option="slotProps">
-                  <div class="flex align-items-center">
-                    <Avatar v-if="slotProps.option.icon" :image="`${apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
-                    <Avatar v-else icon="pi pi-image" shape="circle" />
-                    <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
-                  </div>
-                </template>
-              </AutoComplete>
-            </div>
-            <div class="grid">
-              <div class="col-6">
-                <VeeField
-                  v-model="product.price"
-                  name="price"
-                  label="Цена"
-                  rules="required|min:0.01"
-                  v-slot="{ value, errorMessage, handleChange, handleBlur }"
-                >
-                  <div class="field">
-                    <label>Цена</label>
-                    <InputNumber
-                      :modelValue="value"
-                      @update:modelValue="handleChange"
-                      @input="handleChange($event.value)"
-                      @blur="handleBlur"
-                      mode="decimal"
-                      :minFractionDigits="realDecimals"
-                      :maxFractionDigits="realDecimals"
-                    />
-                    <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
-                  </div>
-                </VeeField>
-              </div>
-              <div class="col-6">
-                <VeeField
-                  v-model="product.sale"
-                  name="sale"
-                  label="Скидка"
-                  rules="min_value:0|max_value:99"
-                  v-slot="{ value, errorMessage, handleChange, handleBlur }"
-                >
-                  <div class="field">
-                    <label>Скидка</label>
-                    <InputNumber
-                      suffix=" %"
-                      :useGrouping="false"
-                      :modelValue="value"
-                      @update:modelValue="handleChange"
-                      @input="handleChange($event.value)"
-                      @blur="handleBlur"
-                    />
-                    <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
-                  </div>
-                </VeeField>
-              </div>
-            </div>
-            <div class="field">
+            <LocaleEditorBar
+              v-model="translations.locale"
+              :locales="translations.locales"
+              :status="translations.status"
+              :isDefault="translations.isDefault"
+              @copy="translations.copyFromDefault()"
+            />
+            <template v-if="translations.isDefault">
               <VeeField
-                v-model="product.virtual_percent"
-                name="virtual_percent"
-                label="Процент"
-                rules="min_value:0|max_value:100"
+                v-model="product.name"
+                name="name"
+                :label="$t('admin.name')"
+                rules="required"
                 v-slot="{ value, errorMessage, handleChange, handleBlur }"
               >
-                <label>Индивидуальный процент оплаты бонусами</label>
-                <InputNumber
-                  suffix=" %"
-                  :useGrouping="false"
-                  :modelValue="value"
-                  @update:modelValue="handleChange"
-                  @input="handleChange($event.value)"
-                  @blur="handleBlur"
-                />
-                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
-                <small>0 - отключить оплату бонусами на данный товар</small>
+                <div class="field">
+                  <label>{{ $t('admin.name') }}</label>
+                  <InputText
+                    :modelValue="value"
+                    @update:modelValue="handleChange"
+                    @blur="handleBlur"
+                    autofocus
+                    :class="errorMessage && 'p-invalid'"
+                  />
+                  <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+                </div>
               </VeeField>
-            </div>
+              <VeeField
+                v-model="product.give_method"
+                name="give_method"
+                :label="$t('admin.type')"
+                rules="required"
+                v-slot="{ value, errorMessage, handleChange }"
+              >
+                <div class="field">
+                  <label>{{ $t('admin.type') }}</label>
+                  <Select
+                    :modelValue="value"
+                    @update:modelValue="handleChange"
+                    :options="giveMethods"
+                    optionLabel="label"
+                    optionValue="value"
+                    appendTo="body"
+                  />
+                  <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+                </div>
+              </VeeField>
+              <VeeField
+                v-if="product.give_method === 0"
+                v-model="product.item_id"
+                name="item_id"
+                :label="$t('admin.item_id')"
+                rules="required"
+                v-slot="{ value, errorMessage, handleChange, handleBlur }"
+              >
+                <div class="field">
+                  <label>{{ $t('admin.item_id') }}</label>
+                  <InputText
+                    :modelValue="value"
+                    @update:modelValue="handleChange"
+                    @blur="handleBlur"
+                    :class="errorMessage && 'p-invalid'"
+                  />
+                  <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+                </div>
+              </VeeField>
+              <div class="field" v-if="product.give_method === 0">
+                <label>{{ $t('admin.nbt_tags') }}</label>
+                <InputText v-model="product.nbt" />
+              </div>
+              <VeeField
+                v-if="product.give_method === 1 || product.give_method === 2"
+                v-model="product.commands"
+                name="commands"
+                :label="$t('admin.command')"
+                rules="required"
+                v-slot="{ value, errorMessage, handleChange }"
+              >
+                <div class="field">
+                  <label>{{ $t('admin.commands') }}</label>
+                  <InputChips :modelValue="value" @update:modelValue="handleChange" />
+                  <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+                  <Divider align="left" type="dashed">
+                    <b>{{ $t('admin.variables') }}</b>
+                  </Divider>
+                  <ul>
+                    <li><code>{user.username}</code> — {{ $t('admin.var_username') }}</li>
+                    <li><code>{product.name}</code> — {{ $t('admin.var_product_name') }}</li>
+                    <li><code>{product.amount}</code> — {{ $t('admin.var_product_amount') }}</li>
+                    <li><code>{server.id}</code> — {{ $t('admin.var_server_id') }}</li>
+                    <li><code>{server.name}</code> — {{ $t('admin.var_server_name') }}</li>
+                  </ul>
+                  <Divider type="dashed" />
+                </div>
+              </VeeField>
+              <VeeField
+                v-model="product.multiple_of"
+                name="multiple_of"
+                :label="$t('admin.quantity')"
+                rules="min_value:1"
+                v-slot="{ value, errorMessage, handleChange, handleBlur }"
+              >
+                <div class="field">
+                  <label>{{ $t('admin.quantity_multiple') }}</label>
+                  <InputNumber
+                    :modelValue="value"
+                    @update:modelValue="handleChange"
+                    @input="handleChange($event.value)"
+                    @blur="handleBlur"
+                  />
+                  <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+                  <small>{{ $t('admin.quantity_multiple_hint') }}</small>
+                </div>
+              </VeeField>
+              <div class="field">
+                <label>{{ $t('admin.description') }}</label>
+                <Editor v-model="product.description" editorStyle="height: 160px">
+                  <template #toolbar>
+                    <span class="ql-formats">
+                      <button class="ql-bold"></button>
+                      <button class="ql-italic"></button>
+                      <button class="ql-underline"></button>
+                      <button class="ql-link"></button>
+                      <button class="ql-image"></button>
+                    </span>
+                  </template>
+                </Editor>
+              </div>
+              <div class="field">
+                <label>{{ $t('admin.servers') }}</label>
+                <MultiSelect
+                  display="chip"
+                  :filter="true"
+                  v-model="product.servers"
+                  :options="servers"
+                  optionLabel="name"
+                  :placeholder="$t('admin.choose_servers')"
+                  class="p-column-filter"
+                >
+                  <template #option="slotProps">
+                    <div class="p-multiselect-representative-option">
+                      <Avatar v-if="slotProps.option.icon" :image="`${apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
+                      <Avatar v-else icon="pi pi-image" shape="circle" />
+                      <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
+                    </div>
+                  </template>
+                </MultiSelect>
+              </div>
+              <div class="field">
+                <label>{{ $t('admin.categories') }}</label>
+                <AutoComplete
+                  v-model="product.categories"
+                  multiple
+                  :suggestions="categories"
+                  @complete="searchCategory($event)"
+                  optionLabel="name"
+                  appendTo="body"
+                  :placeholder="$t('admin.choose_categories')"
+                >
+                  <template #option="slotProps">
+                    <div class="flex align-items-center">
+                      <Avatar v-if="slotProps.option.icon" :image="`${apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
+                      <Avatar v-else icon="pi pi-image" shape="circle" />
+                      <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
+                    </div>
+                  </template>
+                </AutoComplete>
+              </div>
+              <div class="grid">
+                <div class="col-6">
+                  <VeeField
+                    v-model="product.price"
+                    name="price"
+                    :label="$t('admin.price')"
+                    rules="required|min:0.01"
+                    v-slot="{ value, errorMessage, handleChange, handleBlur }"
+                  >
+                    <div class="field">
+                      <label>{{ $t('admin.price') }}</label>
+                      <InputNumber
+                        :modelValue="value"
+                        @update:modelValue="handleChange"
+                        @input="handleChange($event.value)"
+                        @blur="handleBlur"
+                        mode="decimal"
+                        :minFractionDigits="realDecimals"
+                        :maxFractionDigits="realDecimals"
+                      />
+                      <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+                    </div>
+                  </VeeField>
+                </div>
+                <div class="col-6">
+                  <VeeField
+                    v-model="product.sale"
+                    name="sale"
+                    :label="$t('admin.sale')"
+                    rules="min_value:0|max_value:99"
+                    v-slot="{ value, errorMessage, handleChange, handleBlur }"
+                  >
+                    <div class="field">
+                      <label>{{ $t('admin.sale') }}</label>
+                      <InputNumber
+                        suffix=" %"
+                        :useGrouping="false"
+                        :modelValue="value"
+                        @update:modelValue="handleChange"
+                        @input="handleChange($event.value)"
+                        @blur="handleBlur"
+                      />
+                      <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+                    </div>
+                  </VeeField>
+                </div>
+              </div>
+              <div class="field">
+                <VeeField
+                  v-model="product.virtual_percent"
+                  name="virtual_percent"
+                  :label="$t('admin.percent')"
+                  rules="min_value:0|max_value:100"
+                  v-slot="{ value, errorMessage, handleChange, handleBlur }"
+                >
+                  <label>{{ $t('admin.virtual_percent') }}</label>
+                  <InputNumber
+                    suffix=" %"
+                    :useGrouping="false"
+                    :modelValue="value"
+                    @update:modelValue="handleChange"
+                    @input="handleChange($event.value)"
+                    @blur="handleBlur"
+                  />
+                  <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+                  <small>{{ $t('admin.virtual_percent_hint') }}</small>
+                </VeeField>
+              </div>
+            </template>
+            <ContentTranslationFields v-else :translations="translations" />
             <template #footer>
-              <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
+              <Button :disabled="loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
                 :disabled="loading || !meta.valid"
-                label="Сохранить"
+                :label="$t('common.save')"
                 icon="pi pi-check"
                 class="p-button-text"
                 @click="updateMode ? updateProduct() : createProduct()"
@@ -585,13 +615,16 @@ export default {
     VeeField: Field,
   },
   setup() {
+    const translations = useContentTranslations('product')
+
     const rc = useRuntimeConfig()
-    useHead({ title: 'Товары' })
-    return { apiUrl: rc.public.apiBaseurl, realDecimals: rc.public.realDecimals }
+    const { $t } = useNuxtApp()
+
+    useHead({ title: computed(() => $t('admin.products')) })
+    return { translations, apiUrl: rc.public.apiBaseurl, realDecimals: rc.public.realDecimals }
   },
   data() {
     return {
-      giveMethods: ['UnicoreConnect (Предмет)', 'UnicoreConnect (Команды)', 'RCON (Команды)'],
       selected: null,
       categories: null,
       servers: null,
@@ -641,6 +674,16 @@ export default {
       },
     }
   },
+  computed: {
+    giveMethods() {
+      return [
+        { label: this.$t('admin.give_method_item'), value: 0 },
+        { label: this.$t('admin.give_method_commands'), value: 1 },
+        { label: this.$t('admin.give_method_rcon'), value: 2 },
+      ]
+    },
+  },
+
   mounted() {
     this.load()
   },
@@ -711,7 +754,7 @@ export default {
         })
         this.$toast.add({
           severity: 'success',
-          detail: 'Иконка успешно обновлена',
+          detail: this.$t('admin.icon_updated'),
           life: 3000,
         })
         await this.load()
@@ -719,7 +762,7 @@ export default {
         this.fileDialog = false
         this.$toast.add({
           severity: 'error',
-          detail: 'Поддерживаются только изображения',
+          detail: this.$t('admin.images_only'),
           life: 3000,
         })
       }
@@ -729,7 +772,7 @@ export default {
         await this.$api.delete(`/store/products/icon/` + this.product.id)
         this.$toast.add({
           severity: 'success',
-          detail: 'Иконка успешно удалена',
+          detail: this.$t('admin.icon_deleted'),
           life: 3000,
         })
         await this.load()
@@ -748,7 +791,6 @@ export default {
       this.updateMode = !!product
       if (product) {
         this.product = this.$_.pick(product, this.$_.deepKeys(this.product))
-        this.product.give_method = this.giveMethods[product.give_method]
         this.product.servers = this.servers.filter((srv) => this.product.servers.find((sv) => srv.id == sv.id))
       } else {
         this.product = {
@@ -758,7 +800,7 @@ export default {
           price: null,
           sale: null,
           item_id: null,
-          give_method: this.giveMethods[0],
+          give_method: 0,
           commands: null,
           servers: this.filters?.servers?.value || [],
           categories: this.filters?.categories?.value || [],
@@ -768,6 +810,8 @@ export default {
           multiple_of: null,
         }
       }
+      this.translations.attach(this.product)
+      await this.translations.load(product ? product.id : null)
       this.productDialog = true
     },
     async openManyDialog() {
@@ -795,15 +839,16 @@ export default {
     async createProduct() {
       this.loading = true
       try {
-        await this.$api.post('/store/products', {
+        const { data } = await this.$api.post('/store/products', {
           ...this.product,
-          give_method: this.giveMethods.findIndex((gm) => gm == this.product.give_method),
           servers: this.product.servers.map((server) => server.id),
           categories: this.product.categories.map((category) => category.id),
         })
+
+        await this.translations.save(data.id)
         this.$toast.add({
           severity: 'success',
-          detail: 'Товар успешно добавлен',
+          detail: this.$t('admin.product_created'),
           life: 3000,
         })
         await this.load()
@@ -811,7 +856,7 @@ export default {
         this.loading = false
         this.$toast.add({
           severity: 'error',
-          detail: 'Введены некоректные данные',
+          detail: this.$t('admin.invalid_data'),
           life: 3000,
         })
       }
@@ -824,16 +869,17 @@ export default {
           this.$_.omit(
             {
               ...this.product,
-              give_method: this.giveMethods.findIndex((gm) => gm == this.product.give_method),
               servers: this.product.servers.map((server) => server.id),
               categories: this.product.categories.map((category) => category.id),
             },
             'id',
           ),
         )
+
+        await this.translations.save(this.product.id)
         this.$toast.add({
           severity: 'success',
-          detail: 'Товар успешно редактирован',
+          detail: this.$t('admin.product_updated'),
           life: 3000,
         })
         await this.load()
@@ -841,15 +887,15 @@ export default {
         this.loading = false
         this.$toast.add({
           severity: 'error',
-          detail: 'Введены некоректные данные',
+          detail: this.$t('admin.invalid_data'),
           life: 3000,
         })
       }
     },
     async removeProduct(id) {
       this.$confirm.require({
-        message: `Данный процесс будет необратим!`,
-        header: 'Подтверждение удаления',
+        message: this.$t('admin.irreversible'),
+        header: this.$t('admin.confirm_delete'),
         icon: 'pi pi-exclamation-triangle',
         accept: async () => {
           this.loading = true
@@ -857,7 +903,7 @@ export default {
             await this.$api.delete('/store/products/' + id)
             this.$toast.add({
               severity: 'success',
-              detail: 'Товар успешно удален',
+              detail: this.$t('admin.product_deleted'),
               life: 3000,
             })
           } catch {}
@@ -867,8 +913,8 @@ export default {
     },
     async updateMany() {
       this.$confirm.require({
-        message: `Данный процесс будет необратим!`,
-        header: `Редактирование ${this.selected.length} объектов`,
+        message: this.$t('admin.irreversible'),
+        header: this.$t('admin.edit_many', { count: this.selected.length }),
         icon: 'pi pi-exclamation-triangle',
         accept: async () => {
           this.loading = true
@@ -892,7 +938,7 @@ export default {
             })
             this.$toast.add({
               severity: 'success',
-              detail: 'Товары успешно редактированы',
+              detail: this.$t('admin.products_updated'),
               life: 3000,
             })
             await this.load()
@@ -900,7 +946,7 @@ export default {
             this.loading = false
             this.$toast.add({
               severity: 'error',
-              detail: 'Введены некоректные данные',
+              detail: this.$t('admin.invalid_data'),
               life: 3000,
             })
           }
@@ -909,8 +955,8 @@ export default {
     },
     async removeMany() {
       this.$confirm.require({
-        message: `Данный процесс будет необратим!`,
-        header: `Удаления ${this.selected.length} объектов`,
+        message: this.$t('admin.irreversible'),
+        header: this.$t('admin.delete_many', { count: this.selected.length }),
         icon: 'pi pi-exclamation-triangle',
         accept: async () => {
           this.loading = true
@@ -922,7 +968,7 @@ export default {
             })
             this.$toast.add({
               severity: 'success',
-              detail: 'Товары успешно удалены',
+              detail: this.$t('admin.products_deleted'),
               life: 3000,
             })
             this.selected = []
@@ -956,7 +1002,7 @@ export default {
         })
         this.$toast.add({
           severity: 'success',
-          detail: `Импортировано ${resp.data.length} продуктов`,
+          detail: this.$t('admin.import_done', { count: resp.data.length }),
           life: 3000,
         })
         await this.load()
@@ -964,7 +1010,7 @@ export default {
         this.fileDialog = false
         this.$toast.add({
           severity: 'error',
-          detail: 'Файл не поддерживается UnicoreCMS',
+          detail: this.$t('admin.import_unsupported'),
           life: 3000,
         })
       }

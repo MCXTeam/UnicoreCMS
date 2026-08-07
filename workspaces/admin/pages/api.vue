@@ -5,7 +5,7 @@
         <Toolbar class="mb-4">
           <template v-slot:start>
             <div class="my-2">
-              <Button label="Создать" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
+              <Button :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
             </div>
           </template>
         </Toolbar>
@@ -13,16 +13,16 @@
         <DataTable :value="api" :loading="loading" v-model:filters="filters" rowHover responsiveLayout="scroll" dataKey="id">
           <template #header>
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-              <h5 class="m-0">Управление API-ключами</h5>
+              <h5 class="m-0">{{ $t('admin.api_title') }}</h5>
             </div>
           </template>
-          <Column sortable field="hint" header="Ключ" :style="{ width: '8rem' }">
+          <Column sortable field="hint" :header="$t('admin.api_key')" :style="{ width: '8rem' }">
             <template #body="slotProps">{{ slotProps.data.hint ? slotProps.data.hint + '…' : '—' }}</template>
           </Column>
-          <Column sortable field="comment" header="Комментарий">
+          <Column sortable field="comment" :header="$t('admin.comment')">
             <template #body="slotProps">{{ slotProps.data.comment || '—' }}</template>
           </Column>
-          <Column sortable field="created" header="Создан" :style="{ width: '8rem' }">
+          <Column sortable field="created" :header="$t('admin.created')" :style="{ width: '8rem' }">
             <template #body="slotProps">
               {{ $moment(slotProps.data.created).format('MM/DD/YYYY HH:mm:ss') }}
             </template>
@@ -35,13 +35,19 @@
           </Column>
         </DataTable>
 
-        <Dialog v-model:visible="createdKeyDialog" :style="{ width: '600px' }" :modal="true" header="Новый API-ключ" class="p-fluid">
+        <Dialog
+          v-model:visible="createdKeyDialog"
+          :style="{ width: '600px' }"
+          :modal="true"
+          :header="$t('admin.api_new_key')"
+          class="p-fluid"
+        >
           <div class="field">
-            <label>Скопируйте ключ — он больше не будет показан</label>
+            <label>{{ $t('admin.api_copy_hint') }}</label>
             <InputText :modelValue="createdKey" readonly />
           </div>
           <template #footer>
-            <Button label="Готово" icon="pi pi-check" class="p-button-text" @click="createdKeyDialog = false" />
+            <Button :label="$t('admin.done')" icon="pi pi-check" class="p-button-text" @click="createdKeyDialog = false" />
           </template>
         </Dialog>
 
@@ -51,21 +57,27 @@
             :closable="false"
             :style="{ width: '600px' }"
             :modal="true"
-            header="Создание/редактирование API-ключ"
+            :header="$t('admin.api_dialog')"
             class="p-fluid"
           >
             <div class="field" v-if="updateMode">
-              <label>API-ключ</label>
+              <label>{{ $t('admin.api_key_field') }}</label>
               <InputText :modelValue="token.hint ? token.hint + '…' : ''" readonly />
-              <small>Ключ показывается один раз при создании и в базе не хранится.</small>
+              <small>{{ $t('admin.api_key_hint') }}</small>
             </div>
             <div class="field">
-              <label>Комментарий</label>
-              <InputText v-model="token.comment" placeholder="Для какого сервиса этот ключ" />
+              <label>{{ $t('admin.comment') }}</label>
+              <InputText v-model="token.comment" :placeholder="$t('admin.api_comment_placeholder')" />
             </div>
-            <VeeField v-model="token.perms" name="perms" label="Разрешения" rules="required" v-slot="{ value, errorMessage, handleChange }">
+            <VeeField
+              v-model="token.perms"
+              name="perms"
+              :label="$t('admin.permissions')"
+              rules="required"
+              v-slot="{ value, errorMessage, handleChange }"
+            >
               <div class="field">
-                <label>Разрешения</label>
+                <label>{{ $t('admin.permissions') }}</label>
                 <span class="p-fluid">
                   <AutoComplete
                     :modelValue="value"
@@ -75,24 +87,30 @@
                     @complete="searchAutocompleate($event)"
                     appendTo="body"
                     :completeOnFocus="true"
-                    placeholder="Выберите разрешения"
+                    :placeholder="$t('admin.choose_permissions')"
                   />
                 </span>
                 <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
             </VeeField>
-            <VeeField v-model="token.allow" name="allow" label="IP-адреса" rules="required" v-slot="{ value, errorMessage, handleChange }">
+            <VeeField
+              v-model="token.allow"
+              name="allow"
+              :label="$t('admin.api_ips')"
+              rules="required"
+              v-slot="{ value, errorMessage, handleChange }"
+            >
               <div class="field">
-                <label>Доверенные IP-адреса</label>
+                <label>{{ $t('admin.api_trusted_ips') }}</label>
                 <InputChips :modelValue="value" @update:modelValue="handleChange" />
                 <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
             </VeeField>
             <template #footer>
-              <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
+              <Button :disabled="loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
                 :disabled="loading || !meta.valid"
-                label="Сохранить"
+                :label="$t('common.save')"
                 icon="pi pi-check"
                 class="p-button-text"
                 @click="updateMode ? updateToken() : createToken()"
@@ -117,7 +135,9 @@ export default {
     VeeField: Field,
   },
   setup() {
-    useHead({ title: 'API-ключи' })
+    const { $t } = useNuxtApp()
+
+    useHead({ title: computed(() => $t('admin.menu_api')) })
     const toast = useToast()
     const confirm = useConfirm()
     return { toast, confirm }
@@ -195,7 +215,7 @@ export default {
         this.createdKeyDialog = true
         this.toast.add({
           severity: 'success',
-          detail: 'API-ключ успешно добавлен',
+          detail: this.$t('admin.api_created'),
           life: 3000,
         })
         await this.load()
@@ -203,7 +223,7 @@ export default {
         this.loading = false
         this.toast.add({
           severity: 'error',
-          detail: 'Введены некоректные данные',
+          detail: this.$t('admin.invalid_data'),
           life: 3000,
         })
       }
@@ -214,7 +234,7 @@ export default {
         await this.$api.patch('/admin/api/' + this.token.secret, this.$_.omit(this.token, ['secret', 'hint']))
         this.toast.add({
           severity: 'success',
-          detail: 'API-ключ успешно редактирован',
+          detail: this.$t('admin.api_updated'),
           life: 3000,
         })
         await this.load()
@@ -222,15 +242,15 @@ export default {
         this.loading = false
         this.toast.add({
           severity: 'error',
-          detail: 'Введены некоректные данные',
+          detail: this.$t('admin.invalid_data'),
           life: 3000,
         })
       }
     },
     async removeToken(id) {
       this.confirm.require({
-        message: `Данный процесс будет необратим!`,
-        header: 'Подтверждение удаления',
+        message: this.$t('admin.irreversible'),
+        header: this.$t('admin.confirm_delete'),
         icon: 'pi pi-exclamation-triangle',
         accept: async () => {
           this.loading = true
@@ -238,7 +258,7 @@ export default {
             await this.$api.delete('/admin/api/' + id)
             this.toast.add({
               severity: 'success',
-              detail: 'API-ключ успешно удален',
+              detail: this.$t('admin.api_deleted'),
               life: 3000,
             })
           } catch {}

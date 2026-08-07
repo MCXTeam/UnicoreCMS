@@ -29,6 +29,9 @@ export class User {
   @Column({ name: 'password' })
   password: string;
 
+  @Column({ name: 'locale', nullable: true, length: 5 })
+  locale: string;
+
   @Column({ name: 'superuser', nullable: true })
   superuser: boolean;
 

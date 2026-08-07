@@ -5,9 +5,9 @@
         <Toolbar class="mb-4">
           <template v-slot:start>
             <div class="my-2">
-              <Button label="Создать" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
+              <Button :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
               <Button
-                label="Удалить"
+                :label="$t('admin.delete')"
                 icon="pi pi-trash"
                 class="p-button-danger"
                 :disabled="!selected || !selected.length"
@@ -31,22 +31,22 @@
         >
           <template #header>
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-              <h5 class="m-0">Управление промо-кодами</h5>
+              <h5 class="m-0">{{ $t('admin.gifts_title') }}</h5>
               <span class="block mt-2 md:mt-0 p-input-icon-left">
                 <i class="pi pi-search" />
-                <InputText v-model="filters['global'].value" placeholder="Поиск..." />
+                <InputText v-model="filters['global'].value" :placeholder="$t('admin.search')" />
               </span>
             </div>
           </template>
           <Column selectionMode="multiple" :style="{ width: '3rem' }"></Column>
           <Column sortable field="id" header="ID" :style="{ width: '8rem' }"></Column>
-          <Column field="promocode" header="Промо-код" sortable></Column>
-          <Column field="type" header="Тип" sortable>
+          <Column field="promocode" :header="$t('admin.promocode')" sortable></Column>
+          <Column field="type" :header="$t('admin.type')" sortable>
             <template #body="slotProps">
               {{ types.find((type) => type.value == slotProps.data.type).name }}
             </template>
           </Column>
-          <Column field="type" header="Использований" sortable>
+          <Column field="type" :header="$t('admin.uses')" sortable>
             <template #body="slotProps">
               {{
                 slotProps.data.max_activations
@@ -55,7 +55,7 @@
               }}
             </template>
           </Column>
-          <Column field="type" header="Активен до" sortable>
+          <Column field="type" :header="$t('admin.active_until')" sortable>
             <template #body="slotProps">
               {{ slotProps.data.expires ? $moment(slotProps.data.expires).format('MM/DD/YYYY HH:mm:ss') : '∞' }}
             </template>
@@ -74,49 +74,61 @@
             :closable="false"
             :style="{ width: '600px' }"
             :modal="true"
-            header="Создание/редактирование промо-кода"
+            :header="$t('admin.gift_dialog')"
             class="p-fluid"
           >
             <VeeField
               v-model="gift.promocode"
               name="promocode"
-              label="Промо-код"
+              :label="$t('admin.promocode')"
               rules="required"
               v-slot="{ value, errorMessage, handleChange, handleBlur }"
             >
               <div class="field">
-                <label>Промо-код</label>
+                <label>{{ $t('admin.promocode') }}</label>
                 <InputText :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" :class="errorMessage && 'p-invalid'" />
                 <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
             </VeeField>
             <div class="field">
-              <label>Истекает</label>
+              <label>{{ $t('admin.expires') }}</label>
               <DatePicker id="time24" v-model="gift.expires" showTime showSeconds appendTo="body" />
             </div>
             <VeeField
               v-model="gift.max_activations"
               name="max_activations"
-              label="Тип"
+              :label="$t('admin.type')"
               rules="min:1"
               v-slot="{ value, errorMessage, handleChange, handleBlur }"
             >
               <div class="field">
-                <label>Количество использований</label>
+                <label>{{ $t('admin.uses_count') }}</label>
                 <InputNumber :modelValue="value" @update:modelValue="handleChange" @input="handleChange($event.value)" @blur="handleBlur" />
                 <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
             </VeeField>
-            <VeeField v-model="gift.type" name="type" label="Тип" rules="required" v-slot="{ value, errorMessage, handleChange }">
+            <VeeField
+              v-model="gift.type"
+              name="type"
+              :label="$t('admin.type')"
+              rules="required"
+              v-slot="{ value, errorMessage, handleChange }"
+            >
               <div class="field">
-                <label>Тип</label>
+                <label>{{ $t('admin.type') }}</label>
                 <Select :modelValue="value" @update:modelValue="handleChange" :options="types" optionLabel="name" appendTo="body" />
                 <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
             </VeeField>
             <div class="field" v-if="['donate', 'permission'].find((v) => v == $_.get(gift.type, 'value'))">
-              <label>Период</label>
-              <VeeField v-model="gift.period" name="period" label="Период" rules="required" v-slot="{ value, errorMessage, handleChange }">
+              <label>{{ $t('cabinet.period') }}</label>
+              <VeeField
+                v-model="gift.period"
+                name="period"
+                :label="$t('cabinet.period')"
+                rules="required"
+                v-slot="{ value, errorMessage, handleChange }"
+              >
                 <Select :modelValue="value" @update:modelValue="handleChange" :options="periods" optionLabel="name" appendTo="body" />
                 <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </VeeField>
@@ -129,8 +141,14 @@
                   (gift.donate_permission && gift.donate_permission.type != 'web'))
               "
             >
-              <label>Сервер</label>
-              <VeeField v-model="gift.server" name="server" label="Сервер" rules="required" v-slot="{ value, errorMessage, handleChange }">
+              <label>{{ $t('cabinet.server') }}</label>
+              <VeeField
+                v-model="gift.server"
+                name="server"
+                :label="$t('cabinet.server')"
+                rules="required"
+                v-slot="{ value, errorMessage, handleChange }"
+              >
                 <Select :modelValue="value" @update:modelValue="handleChange" :options="servers" optionLabel="name" appendTo="body">
                   <template #option="slotProps">
                     <div class="flex align-items-center">
@@ -144,11 +162,11 @@
               </VeeField>
             </div>
             <div class="field" v-if="$_.get(gift.type, 'value') == 'donate'">
-              <label>Донат-группа</label>
+              <label>{{ $t('cabinet.donate_group') }}</label>
               <VeeField
                 v-model="gift.donate_group"
                 name="donate_group"
-                label="Донат-группа"
+                :label="$t('cabinet.donate_group')"
                 rules="required"
                 v-slot="{ value, errorMessage, handleChange }"
               >
@@ -165,11 +183,11 @@
               </VeeField>
             </div>
             <div class="field" v-if="$_.get(gift.type, 'value') == 'permission'">
-              <label>Донат-право</label>
+              <label>{{ $t('cabinet.donate_permission') }}</label>
               <VeeField
                 v-model="gift.donate_permission"
                 name="donate_permission"
-                label="Донат-право"
+                :label="$t('cabinet.donate_permission')"
                 rules="required"
                 v-slot="{ value, errorMessage, handleChange }"
               >
@@ -186,8 +204,14 @@
               </VeeField>
             </div>
             <div class="field" v-if="$_.get(gift.type, 'value') == 'product'">
-              <label>Товар</label>
-              <VeeField v-model="gift.product" name="product" label="Товар" rules="required" v-slot="{ value, errorMessage, handleChange }">
+              <label>{{ $t('cabinet.product') }}</label>
+              <VeeField
+                v-model="gift.product"
+                name="product"
+                :label="$t('cabinet.product')"
+                rules="required"
+                v-slot="{ value, errorMessage, handleChange }"
+              >
                 <AutoComplete
                   :modelValue="value"
                   @update:modelValue="handleChange"
@@ -208,8 +232,14 @@
               </VeeField>
             </div>
             <div class="field" v-if="$_.get(gift.type, 'value') == 'kit'">
-              <label>Кит</label>
-              <VeeField v-model="gift.kit" name="kit" label="Товар" rules="required" v-slot="{ value, errorMessage, handleChange }">
+              <label>{{ $t('store.kit') }}</label>
+              <VeeField
+                v-model="gift.kit"
+                name="kit"
+                :label="$t('cabinet.product')"
+                rules="required"
+                v-slot="{ value, errorMessage, handleChange }"
+              >
                 <AutoComplete
                   :modelValue="value"
                   @update:modelValue="handleChange"
@@ -233,12 +263,12 @@
               <VeeField
                 v-model="gift.amount"
                 name="amount"
-                label="Количество"
+                :label="$t('admin.quantity')"
                 rules="required|min:1"
                 v-slot="{ value, errorMessage, handleChange, handleBlur }"
               >
                 <div class="field">
-                  <label>Количество</label>
+                  <label>{{ $t('admin.quantity') }}</label>
                   <InputNumber
                     :modelValue="value"
                     @update:modelValue="handleChange"
@@ -250,10 +280,10 @@
               </VeeField>
             </div>
             <template #footer>
-              <Button :disabled="loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
+              <Button :disabled="loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
                 :disabled="loading || !meta.valid"
-                label="Сохранить"
+                :label="$t('common.save')"
                 icon="pi pi-check"
                 class="p-button-text"
                 @click="updateMode ? updateGift() : createGift()"
@@ -277,7 +307,9 @@ export default {
   },
   setup() {
     const rc = useRuntimeConfig()
-    useHead({ title: 'Гифт-коды' })
+    const { $t } = useNuxtApp()
+
+    useHead({ title: computed(() => $t('admin.menu_gifts')) })
     return { apiUrl: rc.public.apiBaseurl }
   },
   data() {
@@ -305,14 +337,6 @@ export default {
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
         servers: { value: null, matchMode: FilterMatchMode.CONTAINS },
       },
-      types: [
-        { name: 'Реальные деньги', value: 'real' },
-        { name: 'Игровые деньги', value: 'money' },
-        { name: 'Донат-группа', value: 'donate' },
-        { name: 'Донат-право', value: 'permission' },
-        { name: 'Товар', value: 'product' },
-        { name: 'Кит', value: 'kit' },
-      ],
       servers: null,
       periods: null,
       products: null,
@@ -321,6 +345,19 @@ export default {
       kits: null,
     }
   },
+  computed: {
+    types() {
+      return [
+        { name: this.$t('admin.gift_type_real'), value: 'real' },
+        { name: this.$t('admin.gift_type_money'), value: 'money' },
+        { name: this.$t('cabinet.donate_group'), value: 'donate' },
+        { name: this.$t('cabinet.donate_permission'), value: 'permission' },
+        { name: this.$t('cabinet.product'), value: 'product' },
+        { name: this.$t('store.kit'), value: 'kit' },
+      ]
+    },
+  },
+
   mounted() {
     this.load()
   },
@@ -397,7 +434,7 @@ export default {
         })
         this.$toast.add({
           severity: 'success',
-          detail: 'Гифт-код успешно добавлен',
+          detail: this.$t('admin.gift_created'),
           life: 3000,
         })
         await this.load()
@@ -405,7 +442,7 @@ export default {
         this.loading = false
         this.$toast.add({
           severity: 'error',
-          detail: 'Введены некоректные данные',
+          detail: this.$t('admin.invalid_data'),
           life: 3000,
         })
       }
@@ -426,7 +463,7 @@ export default {
         })
         this.$toast.add({
           severity: 'success',
-          detail: 'Промо-код успешно редактирован',
+          detail: this.$t('admin.gift_updated'),
           life: 3000,
         })
         await this.load()
@@ -434,15 +471,15 @@ export default {
         this.loading = false
         this.$toast.add({
           severity: 'error',
-          detail: 'Введены некоректные данные',
+          detail: this.$t('admin.invalid_data'),
           life: 3000,
         })
       }
     },
     async removeMany() {
       this.$confirm.require({
-        message: `Данный процесс будет необратим!`,
-        header: `Удаления ${this.selected.length} объектов`,
+        message: this.$t('admin.irreversible'),
+        header: this.$t('admin.delete_many', { count: this.selected.length }),
         icon: 'pi pi-exclamation-triangle',
         accept: async () => {
           this.loading = true
@@ -454,7 +491,7 @@ export default {
             })
             this.$toast.add({
               severity: 'success',
-              detail: 'Права успешно удалены',
+              detail: this.$t('admin.gifts_deleted'),
               life: 3000,
             })
             this.selected = []
@@ -465,8 +502,8 @@ export default {
     },
     async removeGift(id) {
       this.$confirm.require({
-        message: `Данный процесс будет необратим!`,
-        header: 'Подтверждение удаления',
+        message: this.$t('admin.irreversible'),
+        header: this.$t('admin.confirm_delete'),
         icon: 'pi pi-exclamation-triangle',
         accept: async () => {
           this.loading = true
@@ -474,7 +511,7 @@ export default {
             await this.$api.delete('/cabinet/gifts/' + id)
             this.$toast.add({
               severity: 'success',
-              detail: 'Промо-код успешно удален',
+              detail: this.$t('admin.gift_deleted'),
               life: 3000,
             })
           } catch {}

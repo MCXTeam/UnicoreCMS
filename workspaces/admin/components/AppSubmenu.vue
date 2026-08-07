@@ -13,8 +13,8 @@
         role="none"
       >
         <template v-if="root">
-          <div class="layout-menuitem-root-text" :aria-label="item.label">
-            {{ item.label }}
+          <div class="layout-menuitem-root-text" :aria-label="$t(item.label)">
+            {{ $t(item.label) }}
           </div>
           <AppSubmenu :items="visible(item) && item.items" @menuitem-click="$emit('menuitem-click', $event)"></AppSubmenu>
         </template>
@@ -26,12 +26,12 @@
             :style="item.style"
             @click="onMenuItemClick($event, item, i)"
             :target="item.target"
-            :aria-label="item.label"
+            :aria-label="$t(item.label)"
             role="menuitem"
             v-ripple
           >
             <i :class="item.icon"></i>
-            <span>{{ item.label }}</span>
+            <span>{{ $t(item.label) }}</span>
             <i v-if="item.items" class="pi pi-fw pi-angle-down menuitem-toggle-icon"></i>
             <Badge v-if="item.badge" :value="item.badge"></Badge>
           </NuxtLink>
@@ -42,12 +42,12 @@
             :class="[item.class, 'p-ripple', { 'p-disabled': item.disabled }]"
             @click="onMenuItemClick($event, item, i)"
             :target="item.target"
-            :aria-label="item.label"
+            :aria-label="$t(item.label)"
             role="menuitem"
             v-ripple
           >
             <i :class="item.icon"></i>
-            <span>{{ item.label }}</span>
+            <span>{{ $t(item.label) }}</span>
             <i v-if="item.items" class="pi pi-fw pi-angle-down menuitem-toggle-icon"></i>
             <Badge v-if="item.badge" :value="item.badge"></Badge>
           </a>

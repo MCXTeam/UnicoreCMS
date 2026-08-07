@@ -1,14 +1,14 @@
 <template>
   <div class="px-4">
     <div class="d-flex justify-content-between">
-      <h2 class="mt-0 mb-4">Склад покупок</h2>
+      <h2 class="mt-0 mb-4">{{ $t('store.warehouse_title') }}</h2>
       <Select
         v-model="server_id"
         :options="serverOptions"
         optionLabel="label"
         optionValue="value"
         :loading="!servers.length"
-        placeholder="Выберите сервер"
+        :placeholder="$t('store.choose_server')"
         style="max-width: 150px"
       />
     </div>
@@ -28,11 +28,11 @@
           </td>
           <td align="right">
             <small v-text="$moment(whItem.updated).format('DD.MM.YYYY, HH.mm')" />
-            <h4 class="m-0">{{ whItem.amount }} шт.</h4>
+            <h4 class="m-0">{{ $t('store.pieces', { amount: whItem.amount }) }}</h4>
           </td>
         </tr>
       </table>
-      <h4 class="text-center m-0" v-else>Ваш склад пуст...</h4>
+      <h4 class="text-center m-0" v-else>{{ $t('store.warehouse_empty') }}</h4>
     </div>
   </div>
 </template>
@@ -40,10 +40,11 @@
 <script setup lang="ts">
 import { useUiStore } from '~/stores/ui'
 
-definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'Склад' })
-useHead({ title: 'Склад' })
+definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'store.tab_warehouse' })
 
-const { $api, $unicore } = useNuxtApp()
+const { $api, $unicore, $t } = useNuxtApp()
+
+useHead({ title: computed(() => $t('store.tab_warehouse')) })
 const apiUrl = useRuntimeConfig().public.apiBaseurl
 const ui = useUiStore()
 

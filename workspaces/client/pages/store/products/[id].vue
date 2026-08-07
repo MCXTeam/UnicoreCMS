@@ -11,16 +11,16 @@
     >
       <template #header>
         <div class="d-flex flex-column align-items-center">
-          <h4 class="mt-2 mb-0">Сервер: {{ server.name }}</h4>
+          <h4 class="mt-2 mb-0">{{ $t('store.server', { server: server.name }) }}</h4>
           <h3 class="mt-0" v-if="product.type == 'product'" v-text="product.payload.name" />
-          <h3 class="mt-0" v-else>Набор: {{ product.payload.name }}</h3>
+          <h3 class="mt-0" v-else>{{ $t('store.kit_name', { name: product.payload.name }) }}</h3>
           <Avatar v-if="product.payload.icon" size="xlarge" :image="`${apiUrl}/${product.payload.icon}`"> </Avatar>
           <Avatar v-else size="xlarge"> <i class="bx bxs-image"></i> </Avatar>
         </div>
       </template>
       <div class="description-html mb-3" v-if="product.payload.description" v-html="$sanitize(product.payload.description)" />
       <div v-if="product.type == 'product'" class="mb-4">
-        <h5 class="text-uppercase my-2">Количество ({{ amount }} шт.)</h5>
+        <h5 class="text-uppercase my-2">{{ $t('store.amount', { amount }) }}</h5>
         <Slider
           v-model="amount"
           @change="multiple_of_fix"
@@ -30,7 +30,7 @@
         />
       </div>
       <div v-else>
-        <h3 class="mt-0 text-center">Содержимое набора</h3>
+        <h3 class="mt-0 text-center">{{ $t('store.kit_contents') }}</h3>
         <div v-if="product.payload.items">
           <div class="d-flex mb-1" v-for="item in product.payload.items" :key="item.product.id">
             <Avatar v-if="item.product.icon" :image="`${apiUrl}/${item.product.icon}`"> </Avatar>
@@ -50,21 +50,23 @@
         class="mt-3"
       >
         <i class="bx bxs-gift me-2"></i>
-        Вы можете оплатить <b>{{ product.payload.virtual_percent || config.public_virtual_percent }}%</b> от стоимости товара бонусами
+        {{ $t('store.virtual_hint', { percent: product.payload.virtual_percent || config.public_virtual_percent }) }}
       </Message>
       <template #footer>
         <div class="d-flex justify-content-center">
           <Button v-if="product.type == 'product'" size="large" text @click="addToCart()">
-            Добавить в корзину ({{ $utils.formatCurrency('real', product.payload.price * amount, product.payload.sale) }})
+            {{
+              $t('store.add_to_cart_price', { price: $utils.formatCurrency('real', product.payload.price * amount, product.payload.sale) })
+            }}
           </Button>
           <Button v-else size="large" text @click="addToCart()">
-            Добавить в корзину ({{ $utils.formatCurrency('real', product.payload.price, product.payload.sale) }})
+            {{ $t('store.add_to_cart_price', { price: $utils.formatCurrency('real', product.payload.price, product.payload.sale) }) }}
           </Button>
         </div>
       </template>
     </Dialog>
 
-    <h2 class="mt-0 mb-4 text-center" v-if="server">Каталог {{ server.name }}</h2>
+    <h2 class="mt-0 mb-4 text-center" v-if="server">{{ $t('store.catalog', { server: server.name }) }}</h2>
     <div class="store-table-overflow position-relative">
       <table class="store-table" v-if="products.data.length">
         <tr :key="product.payload.id" v-for="product in products.data">
@@ -73,7 +75,7 @@
             <Avatar v-else size="large"> <i class="bx bxs-image"></i> </Avatar>
             <div class="ms-3">
               <h4 class="m-0">
-                {{ product.payload.name }} <small class="sale-wrapper ms-2" v-if="product.type == 'kit'">Набор</small>
+                {{ product.payload.name }} <small class="sale-wrapper ms-2" v-if="product.type == 'kit'">{{ $t('store.kit') }}</small>
                 <small class="sale-wrapper ms-2" v-if="product.payload.sale">-{{ product.payload.sale }}%</small>
               </h4>
               <span v-text="joinCategoryNames(product.payload.categories)" />
@@ -84,14 +86,16 @@
             <span
               v-text="$utils.formatCurrency('real', product.payload.price * (product.payload.multiple_of || 1), product.payload.sale)"
             ></span>
-            <h5 class="m-0" v-if="product.type == 'product'">за {{ product.payload.multiple_of || 1 }} шт.</h5>
+            <h5 class="m-0" v-if="product.type == 'product'">
+              {{ $t('store.price_per', { amount: product.payload.multiple_of || 1 }) }}
+            </h5>
           </td>
           <td align="right">
-            <Button @click="openDialog(product)">В корзину <i class="bx bxs-cart-add ms-1"></i></Button>
+            <Button @click="openDialog(product)">{{ $t('store.add_to_cart') }} <i class="bx bxs-cart-add ms-1"></i></Button>
           </td>
         </tr>
       </table>
-      <h4 class="text-center m-0" v-else>Нет результатов</h4>
+      <h4 class="text-center m-0" v-else>{{ $t('common.no_results') }}</h4>
     </div>
     <Paginator
       v-if="products.data.length"
@@ -108,10 +112,11 @@
 import { useUiStore, type StoreFilters } from '~/stores/ui'
 import { useConfigStore } from '~/stores/config'
 
-definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'Магазин' })
-useHead({ title: 'Магазин' })
+definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'header.store' })
 
-const { $api, $unicore } = useNuxtApp()
+const { $api, $unicore, $t } = useNuxtApp()
+
+useHead({ title: computed(() => $t('header.store')) })
 const apiUrl = useRuntimeConfig().public.apiBaseurl
 const route = useRoute()
 const ui = useUiStore()
@@ -175,9 +180,9 @@ async function addToCart() {
       server_id: server.value.id,
       amount: amount.value,
     })
-    $unicore.successNotification('Товар добавлен в корзину')
+    $unicore.successNotification($t('store.added_to_cart'))
   } catch (e) {
-    $unicore.errorNotification('Произошла неизвестная ошибка')
+    $unicore.errorNotification($t('common.unknown_error'))
   }
   productDialog.value = false
   loading.value = false

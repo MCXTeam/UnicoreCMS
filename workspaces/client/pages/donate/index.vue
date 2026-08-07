@@ -25,11 +25,11 @@
 import { useUiStore } from '~/stores/ui'
 
 definePageMeta({ layout: 'landing' })
-useHead({ title: 'Донат' })
 
-const { $api, $pub } = useNuxtApp()
+const { $api, $pub, $t } = useNuxtApp()
 
-useUiStore().setName(`Платные услуги ${$pub.sitename}`)
+useHead({ title: computed(() => $t('header.donate')) })
+useUiStore().setName($t('donate.page_name', { sitename: $pub.sitename }))
 
 const { data: servers } = await useAsyncData<any>('donate-servers', () => $api.get('/servers').then((res) => res.data))
 </script>

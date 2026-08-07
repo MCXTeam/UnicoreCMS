@@ -1,23 +1,22 @@
 <template>
   <div>
-    <p class="mt-0">
-      Хотите открыть новые возможности и получить максимум удовольствия от любимой игры? Для Вас мы готовые предложить нечто особенное!
-      Выберите свой сервер, кликнув ниже по нужному варианту.
-    </p>
+    <p class="mt-0">{{ $t('donate.intro') }}</p>
     <div v-for="donate in donates" :key="donate.id" class="donate-block my-4">
       <div class="p-4">
         <div class="row">
           <div class="col-12 col-xl-3">
             <div class="d-flex align-items-center mb-2">
-              <Avatar v-if="donate.icon" size="xlarge" class="flex-shrink-0" :image="`${$pub.apiBaseurl}/${donate.icon}`" />
-              <Avatar v-else size="xlarge" class="flex-shrink-0"><i class="bx bx-crown"></i></Avatar>
-              <h1 class="m-0 ms-3">{{ donate.name }}</h1>
+              <h1 class="m-0">{{ donate.name }}</h1>
               <h5 class="sale-wrapper ms-2 my-0" v-if="donate.sale">-{{ donate.sale }}%</h5>
             </div>
-            <h4 v-if="donate.sale" class="mt-0">
-              {{ donate.periods[0].name }} за <strike v-text="$utils.formatCurrency('real', donate.price * donate.periods[0].multiplier)" />
+            <h4 v-if="donate.periods?.length" class="mt-0">
+              {{ $t('donate.period_price', { period: donate.periods[0].name }) }}
+              <strike v-if="donate.sale" v-text="$utils.formatCurrency('real', donate.price * donate.periods[0].multiplier)" />
               {{ $utils.formatCurrency('real', donate.price * donate.periods[0].multiplier, donate.sale) }}
             </h4>
+            <div v-if="donate.icon" class="donate-icon mb-3">
+              <img :src="`${$pub.apiBaseurl}/${donate.icon}`" :alt="donate.name" />
+            </div>
           </div>
           <div class="col">
             <div class="row">
@@ -31,7 +30,7 @@
       </div>
       <hr />
       <div class="p-4">
-        <h4 class="mt-0">Наведите для просмотра набора, нажмите чтобы закрепить:</h4>
+        <h4 class="mt-0">{{ $t('donate.kit_hint') }}</h4>
         <div class="d-flex flex-wrap">
           <Button
             :outlined="!isKitActive(donate.id, kit.id)"
@@ -43,7 +42,7 @@
             :key="kit.id"
             class="me-2"
           >
-            Кит "{{ kit.name }}"
+            {{ $t('donate.kit_name', { name: kit.name }) }}
             <i v-if="kit_pinned && isKitActive(donate.id, kit.id)" class="bx bx-pin ms-1"></i>
           </Button>
         </div>
@@ -74,7 +73,7 @@ import { useUiStore } from '~/stores/ui'
 
 definePageMeta({ layout: 'landing' })
 
-const { $api } = useNuxtApp()
+const { $api, $t } = useNuxtApp()
 const route = useRoute()
 
 const { data, error } = await useAsyncData<any>(`donate-${route.params.id}`, async () => {
@@ -88,8 +87,8 @@ if (error.value || !data.value) throw createError({ statusCode: 404, fatal: true
 const server = computed<any>(() => data.value.server)
 const donates = computed<any[]>(() => data.value.donates)
 
-useUiStore().setName(`Платные услуги ${server.value.name}`)
-useHead({ title: `Донат ${server.value.name}` })
+useUiStore().setName($t('donate.page_name', { sitename: server.value.name }))
+useHead({ title: computed(() => `${$t('header.donate')} ${server.value.name}`) })
 
 const kit_active = ref<{ payload: any; donate_id: any }>({ payload: null, donate_id: null })
 const kit_pinned = ref(false)

@@ -32,6 +32,7 @@ import { PasswordLinkInput } from 'src/auth/dto/password-link.input';
 import { RefreshToken } from 'src/auth/entities/refresh-token.entity';
 import { PasswordService } from 'src/auth/password/password.service';
 import { passwordAad } from 'src/auth/password/password-aad';
+import { ContentTranslationsService } from '../locales/content-translations.service';
 
 @Injectable()
 export class EmailService {
@@ -52,6 +53,7 @@ export class EmailService {
     private usersRepository: Repository<User>,
     private mailerService: MailerService,
     private passwordService: PasswordService,
+    private contentTranslations: ContentTranslationsService,
   ) {}
 
   find(): Promise<EmailMessage[]> {
@@ -99,7 +101,12 @@ export class EmailService {
       throw new ThrottlerException();
     }
 
-    const { content, title } = await this.emailMessagesRepository.findOneBy({ id: EmailMessageType.Activation });
+    const { content, title } = await this.contentTranslations.localize(
+      'email_message',
+      EmailMessageType.Activation,
+      user.locale,
+      await this.emailMessagesRepository.findOneBy({ id: EmailMessageType.Activation }),
+    );
 
     const activation = new EmailActivation();
     const code = customAlphabet(EMAIL_CODE_ALPHABET, EMAIL_CODE_LENGTH)();
@@ -170,7 +177,12 @@ export class EmailService {
       throw new ThrottlerException();
     }
 
-    const { content, title } = await this.emailMessagesRepository.findOneBy({ id: EmailMessageType.Reset });
+    const { content, title } = await this.contentTranslations.localize(
+      'email_message',
+      EmailMessageType.Reset,
+      user.locale,
+      await this.emailMessagesRepository.findOneBy({ id: EmailMessageType.Reset }),
+    );
 
     const activation = new PasswordReset();
     const hash = nanoid(PASSWORD_RESET_HASH_LENGTH);

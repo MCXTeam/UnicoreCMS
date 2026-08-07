@@ -1,15 +1,13 @@
 <template>
   <div class="row settings-split px-4">
     <div class="col-xl-6">
-      <h2 class="mt-0 mb-2">Сменить пароль</h2>
-      <p class="mt-0 mb-3">
-        В целях безопасности мы рекомендуем выбрать пароль, который ещё не использовался вами в других учётных записях.
-      </p>
+      <h2 class="mt-0 mb-2">{{ $t('auth.change_password') }}</h2>
+      <p class="mt-0 mb-3">{{ $t('cabinet.password_hint') }}</p>
       <Form v-slot="{ meta }">
-        <h3 class="mb-1 mt-0">Текущий пароль</h3>
+        <h3 class="mb-1 mt-0">{{ $t('cabinet.current_password') }}</h3>
         <Field
           v-model="password_form.password_old"
-          name="Текущий пароль"
+          :name="$t('cabinet.current_password')"
           rules="required"
           v-slot="{ value, errorMessage, handleChange, handleBlur }"
         >
@@ -19,14 +17,14 @@
             :modelValue="value"
             @update:modelValue="handleChange"
             @blur="handleBlur"
-            placeholder="Текущий пароль"
+            :placeholder="$t('cabinet.current_password')"
             class="w-100"
             inputClass="w-100"
             :class="errorMessage && 'p-invalid'"
           />
           <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
         </Field>
-        <h3 class="mb-1 mt-3">Новый пароль</h3>
+        <h3 class="mb-1 mt-3">{{ $t('auth.new_password') }}</h3>
         <Field
           v-model="password_form.password"
           name="password"
@@ -39,17 +37,17 @@
             :modelValue="value"
             @update:modelValue="handleChange"
             @blur="handleBlur"
-            placeholder="Новый пароль"
+            :placeholder="$t('auth.new_password')"
             class="w-100"
             inputClass="w-100"
             :class="errorMessage && 'p-invalid'"
           />
           <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
         </Field>
-        <h3 class="mb-1 mt-3">Введите новый пароль ещё раз</h3>
+        <h3 class="mb-1 mt-3">{{ $t('cabinet.repeat_password') }}</h3>
         <Field
           v-model="password_form.password_confirm"
-          name="Подтверждение нового пароля"
+          :name="$t('cabinet.repeat_password')"
           rules="required|confirmed:@password"
           v-slot="{ value, errorMessage, handleChange, handleBlur }"
         >
@@ -59,7 +57,7 @@
             :modelValue="value"
             @update:modelValue="handleChange"
             @blur="handleBlur"
-            placeholder="Введите новый пароль ещё раз"
+            :placeholder="$t('cabinet.repeat_password')"
             class="w-100"
             inputClass="w-100"
             :class="errorMessage && 'p-invalid'"
@@ -68,27 +66,24 @@
         </Field>
         <div class="flex align-items-center gap-2 mb-1 mt-3">
           <Checkbox v-model="password_form.close" :binary="true" inputId="sessionsClose" />
-          <label for="sessionsClose">Завершить все сеансы</label>
+          <label for="sessionsClose">{{ $t('auth.close_sessions') }}</label>
         </div>
-        <Button @click="changePassword()" :disabled="!meta.valid" class="mt-3 w-full" size="large" label="Сменить пароль" />
+        <Button @click="changePassword()" :disabled="!meta.valid" class="mt-3 w-full" size="large" :label="$t('auth.change_password')" />
       </Form>
     </div>
     <div class="col ps-xl-5 mt-5 mt-xl-0">
-      <h2 class="mb-2 mt-0">Двухфакторная авторизация</h2>
+      <h2 class="mb-2 mt-0">{{ $t('cabinet.two_factor') }}</h2>
       <div v-if="!$auth.user.two_factor_enabled" v-show="two_factor && !$auth.user.two_factor_enabled">
         <div class="text-sm mini-profile p-2 my-3">
-          <p class="m-0">
-            Двухфакторная аутентификация не позволит злоумышленникам войти под вашим аккаунтом, даже если они узнают ваш пароль.
-          </p>
-          <p class="mt-1 mb-0">Эта степень защиты даст вам возможность спокойно играть не беспокоясь о безопасности вашего аккаунта.</p>
-          <p class="m-0">
-            Наша система поддерживает популярные приложения: <b>Google Authentificator</b>, <b>Authy</b>, <b>Яндекс.Ключ</b>. Для
-            подключения загрузите приложение на свой смартфон, отсканируйте QR-код, введите код из приложения в специальное поле ниже.
-          </p>
+          <p class="m-0">{{ $t('cabinet.two_factor_text1') }}</p>
+          <p class="mt-1 mb-0">{{ $t('cabinet.two_factor_text2') }}</p>
+          <p class="m-0">{{ $t('cabinet.two_factor_text3') }}</p>
         </div>
-        <p v-if="two_factor" class="m-0 text-sm">Секретный ключ: <b v-text="two_factor.base32" /></p>
-        <p class="m-0 text-sm">Аккаунт: <b v-text="$auth.user.username" /></p>
-        <p class="m-0 text-sm">На основе времени: <b>Да (30 секунд)</b></p>
+        <p v-if="two_factor" class="m-0 text-sm">{{ $t('cabinet.secret_key') }} <b v-text="two_factor.base32" /></p>
+        <p class="m-0 text-sm">{{ $t('cabinet.account') }} <b v-text="$auth.user.username" /></p>
+        <p class="m-0 text-sm">
+          {{ $t('cabinet.time_based') }} <b>{{ $t('cabinet.time_based_value') }}</b>
+        </p>
         <div class="row mt-3">
           <div class="col-xl-5 d-flex justify-content-center mb-3 mb-xl-0">
             <canvas ref="qrcode" />
@@ -97,7 +92,7 @@
             <Form v-slot="{ meta }">
               <Field
                 v-model="two_factor_form.code"
-                name="Код из приложения"
+                :name="$t('auth.totp_code')"
                 rules="required"
                 v-slot="{ value, errorMessage, handleChange, handleBlur }"
               >
@@ -105,24 +100,34 @@
                   :modelValue="value"
                   @update:modelValue="handleChange"
                   @blur="handleBlur"
-                  placeholder="Код из приложения"
+                  :placeholder="$t('auth.totp_code')"
                   class="w-100"
                 />
                 <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </Field>
-              <Button :disabled="!meta.valid" @click="TwoFactorEnable()" class="mt-3 w-full" size="large" label="Подключить" />
+              <Button
+                :disabled="!meta.valid"
+                @click="TwoFactorEnable()"
+                class="mt-3 w-full"
+                size="large"
+                :label="$t('cabinet.two_factor_enable')"
+              />
             </Form>
           </div>
         </div>
       </div>
       <div v-else-if="$auth.user.two_factor_enabled && !two_factor">
-        <p class="m-0">Статус: <b class="text-success">Подключена</b></p>
-        <p class="m-0">Аккаунт: <b v-text="$auth.user.username" /></p>
-        <p class="mt-0 mb-3">На основе времени: <b>Да (30 секунд)</b></p>
+        <p class="m-0">
+          {{ $t('cabinet.status') }} <b class="text-success">{{ $t('cabinet.two_factor_on') }}</b>
+        </p>
+        <p class="m-0">{{ $t('cabinet.account') }} <b v-text="$auth.user.username" /></p>
+        <p class="mt-0 mb-3">
+          {{ $t('cabinet.time_based') }} <b>{{ $t('cabinet.time_based_value') }}</b>
+        </p>
         <Form v-slot="{ meta }">
           <Field
             v-model="two_factor_form.code"
-            name="Код из приложения"
+            :name="$t('auth.totp_code')"
             rules="required"
             v-slot="{ value, errorMessage, handleChange, handleBlur }"
           >
@@ -130,12 +135,18 @@
               :modelValue="value"
               @update:modelValue="handleChange"
               @blur="handleBlur"
-              placeholder="Код из приложения"
+              :placeholder="$t('auth.totp_code')"
               class="w-100"
             />
             <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
           </Field>
-          <Button :disabled="!meta.valid" @click="TwoFactorDisable()" class="mt-3 w-full" size="large" label="Отключить" />
+          <Button
+            :disabled="!meta.valid"
+            @click="TwoFactorDisable()"
+            class="mt-3 w-full"
+            size="large"
+            :label="$t('cabinet.two_factor_disable')"
+          />
         </Form>
       </div>
       <div v-if="!two_factor && !$auth.user.two_factor_enabled">
@@ -161,10 +172,11 @@
 import QRCode from 'qrcode-with-logos'
 import { Form, Field } from 'vee-validate'
 
-definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'] })
-useHead({ title: 'Личный кабинет' })
+definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'cabinet.tab_settings' })
 
-const { $api, $auth, $unicore } = useNuxtApp()
+const { $api, $auth, $unicore, $t } = useNuxtApp()
+
+useHead({ title: computed(() => $t('header.cabinet')) })
 
 const qrcode = ref(null)
 const password_form = reactive({
@@ -183,15 +195,15 @@ onMounted(async () => {
 })
 
 async function changePassword() {
-  if (password_form.password_old == password_form.password) return $unicore.errorNotification('Новый пароль не может совпадать со старым')
+  if (password_form.password_old == password_form.password) return $unicore.errorNotification($t('cabinet.password_same'))
 
   const loading = $unicore.loading()
   try {
     await $api.post('/cabinet/settings/password', password_form).then((res) => res.data)
-    $unicore.successNotification('Ваш пароль был изменён')
+    $unicore.successNotification($t('cabinet.password_changed'))
     if (password_form.close) $unicore.logout()
   } catch {
-    $unicore.errorNotification('Указан неверный текущий пароль')
+    $unicore.errorNotification($t('cabinet.password_wrong'))
   }
   loading.close()
 }
@@ -218,9 +230,9 @@ async function TwoFactorEnable() {
     await $auth.fetchUser()
     two_factor_form.code = ''
     two_factor.value = null
-    $unicore.successNotification('Двухфакторная авторизация успешно подключена к вашему аккаунту')
+    $unicore.successNotification($t('cabinet.two_factor_enabled'))
   } catch {
-    $unicore.errorNotification('Код из приложения не подходит, попробуйте еще раз')
+    $unicore.errorNotification($t('auth.totp_wrong'))
   }
   loading.close()
 }
@@ -231,9 +243,9 @@ async function TwoFactorDisable() {
     await $api.post('/cabinet/2fa/disable', two_factor_form).then((res) => res.data)
     await Promise.all([$auth.fetchUser(), GenerateQR()])
     two_factor_form.code = ''
-    $unicore.successNotification('Двухфакторная авторизация успешно отключена от вашего аккаунта')
+    $unicore.successNotification($t('cabinet.two_factor_disabled'))
   } catch {
-    $unicore.errorNotification('Код из приложения не подходит, попробуйте еще раз')
+    $unicore.errorNotification($t('auth.totp_wrong'))
   }
   loading.close()
 }

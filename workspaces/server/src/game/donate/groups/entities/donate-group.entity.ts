@@ -4,7 +4,9 @@ import { AfterRemove, Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryG
 import { Period } from '../../entities/period.entity';
 import { GroupFeature } from './group-feature.entity';
 import { GroupKit } from './group-kit.entity';
+import { Translatable } from 'src/admin/locales/translatable.decorator';
 
+@Translatable('donate_group', ['name', 'description', 'features.*.title', 'features.*.description'])
 @Entity({
   name: 'unicore_donate_groups',
   orderBy: {

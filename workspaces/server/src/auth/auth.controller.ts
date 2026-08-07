@@ -1,5 +1,6 @@
 import {
   IpAddress,
+  Locale,
   THROTTLE_PASSWORD_RESET,
   THROTTLE_REGISTER,
   THROTTLE_RESEND,
@@ -16,6 +17,7 @@ import { User } from 'src/admin/users/entities/user.entity';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { Public } from './decorators/public.decorator';
+import { AllowInactive } from './decorators/allow-inactive.decorator';
 import { AuthenticatedDto } from './dto/authenticated.dto';
 import { LoginInput } from './dto/login.input';
 import { PasswordLinkInput } from './dto/password-link.input';
@@ -43,8 +45,13 @@ export class AuthController {
   @Recaptcha({ action: 'register' })
   @Throttle({ default: THROTTLE_REGISTER })
   @Post('register')
-  register(@Body() input: RegisterInput, @UserAgent() agent: string, @IpAddress() ip: string): Promise<AuthenticatedDto> {
-    return this.authService.register(input, agent, ip);
+  register(
+    @Body() input: RegisterInput,
+    @UserAgent() agent: string,
+    @IpAddress() ip: string,
+    @Locale() locale: string,
+  ): Promise<AuthenticatedDto> {
+    return this.authService.register(input, agent, ip, locale);
   }
 
   @Public()
@@ -53,6 +60,7 @@ export class AuthController {
     return this.tokensService.createTokensFromRefreshToken(input.refresh_token, { agent, ip });
   }
 
+  @AllowInactive()
   @Recaptcha({ action: 'verify' })
   @Throttle({ default: THROTTLE_VERIFY })
   @Post('verify')
@@ -76,11 +84,13 @@ export class AuthController {
     return this.emailService.checkHash(input);
   }
 
+  @AllowInactive()
   @Post('logout')
   logout(@Body() input: RefreshTokenInput): Promise<void> {
     return this.tokensService.revokeRefreshToken(input.refresh_token);
   }
 
+  @AllowInactive()
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: THROTTLE_RESEND })
   @Get('resend')
@@ -88,6 +98,7 @@ export class AuthController {
     return this.emailService.sendActivation(user);
   }
 
+  @AllowInactive()
   @UseGuards(JwtAuthGuard)
   @Get('me')
   me(@CurrentUser() user: User): { user: UserDto } {

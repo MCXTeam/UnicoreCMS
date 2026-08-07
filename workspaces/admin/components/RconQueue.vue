@@ -4,41 +4,41 @@
     @update:visible="$emit('update:visible', $event)"
     :style="{ width: '900px' }"
     :modal="true"
-    :header="'Очередь RCON — ' + serverId"
+    :header="`${$t('admin.rcon_queue')} — ${serverId}`"
     class="p-fluid"
   >
     <div class="flex justify-content-between align-items-center mb-3">
-      <span class="text-color-secondary">Команды, поставленные в очередь на выполнение через RCON.</span>
+      <span class="text-color-secondary">{{ $t('admin.rcon_queue_hint') }}</span>
       <div class="flex gap-2">
-        <Button label="Обновить" icon="pi pi-refresh" class="p-button-secondary" @click="load" />
-        <Button label="Повторить неудачные" icon="pi pi-replay" class="p-button-warning" @click="retry" />
+        <Button :label="$t('admin.refresh')" icon="pi pi-refresh" class="p-button-secondary" @click="load" />
+        <Button :label="$t('admin.rcon_retry_failed')" icon="pi pi-replay" class="p-button-warning" @click="retry" />
       </div>
     </div>
 
     <DataTable :value="items" :loading="loading" responsiveLayout="scroll" :rows="10" :paginator="items && items.length > 10">
-      <Column field="label" header="Операция">
+      <Column field="label" :header="$t('admin.operation')">
         <template #body="s">
           <div>{{ s.data.label || '—' }}</div>
           <small class="command">{{ s.data.command }}</small>
         </template>
       </Column>
-      <Column header="Статус" :style="{ width: '9rem' }">
+      <Column :header="$t('admin.status')" :style="{ width: '9rem' }">
         <template #body="s">
           <Tag :severity="statusSeverity(s.data.status)" :value="statusLabel(s.data.status)" />
           <div v-if="s.data.error" class="text-red-500 text-xs mt-1">{{ s.data.error }}</div>
         </template>
       </Column>
-      <Column field="attempts" header="Попытки" :style="{ width: '6rem' }" />
-      <Column header="Создано" :style="{ width: '11rem' }">
+      <Column field="attempts" :header="$t('admin.attempts')" :style="{ width: '6rem' }" />
+      <Column :header="$t('admin.created')" :style="{ width: '11rem' }">
         <template #body="s">{{ $moment(s.data.created).format('DD.MM.YYYY HH:mm') }}</template>
       </Column>
       <template #empty>
-        <div class="text-center p-4 text-color-secondary">Очередь пуста</div>
+        <div class="text-center p-4 text-color-secondary">{{ $t('admin.rcon_queue_empty') }}</div>
       </template>
     </DataTable>
 
     <template #footer>
-      <Button label="Закрыть" icon="pi pi-times" class="p-button-text" @click="$emit('update:visible', false)" />
+      <Button :label="$t('admin.close')" icon="pi pi-times" class="p-button-text" @click="$emit('update:visible', false)" />
     </template>
   </Dialog>
 </template>
@@ -77,16 +77,16 @@ export default {
     async retry() {
       try {
         await this.$api.post(`/rcon/${this.serverId}/retry`)
-        this.$toast.add({ severity: 'success', detail: 'Неудачные команды поставлены в очередь заново', life: 3000 })
+        this.$toast.add({ severity: 'success', detail: this.$t('admin.rcon_requeued'), life: 3000 })
         await this.load()
       } catch {
-        this.$toast.add({ severity: 'error', detail: 'Не удалось перезапустить', life: 3000 })
+        this.$toast.add({ severity: 'error', detail: this.$t('admin.rcon_requeue_failed'), life: 3000 })
       }
     },
     statusLabel(status) {
-      if (status === RconCommandStatus.Sent) return 'Выполнено'
-      if (status === RconCommandStatus.Failed) return 'Ошибка'
-      return 'В очереди'
+      if (status === RconCommandStatus.Sent) return this.$t('admin.rcon_status_sent')
+      if (status === RconCommandStatus.Failed) return this.$t('admin.rcon_status_failed')
+      return this.$t('admin.rcon_status_queued')
     },
     statusSeverity(status) {
       if (status === RconCommandStatus.Sent) return 'success'

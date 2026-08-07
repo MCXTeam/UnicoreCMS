@@ -6,12 +6,18 @@
         :closable="false"
         :style="{ width: '450px' }"
         :modal="true"
-        header="Выдача товара игроку"
+        :header="$t('admin.give_product_dialog')"
         class="p-fluid"
       >
-        <VeeField v-model="whItem.server" name="server" label="Сервер" rules="required" v-slot="{ value, errorMessage, handleChange }">
+        <VeeField
+          v-model="whItem.server"
+          name="server"
+          :label="$t('cabinet.server')"
+          rules="required"
+          v-slot="{ value, errorMessage, handleChange }"
+        >
           <div class="field">
-            <label>Сервер</label>
+            <label>{{ $t('cabinet.server') }}</label>
             <Select :modelValue="value" @update:modelValue="handleChange" :options="servers" optionLabel="name" appendTo="body">
               <template #option="slotProps">
                 <div class="flex align-items-center">
@@ -24,9 +30,15 @@
             <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
           </div>
         </VeeField>
-        <VeeField v-model="whItem.product" name="product" label="Товар" rules="required" v-slot="{ value, errorMessage, handleChange }">
+        <VeeField
+          v-model="whItem.product"
+          name="product"
+          :label="$t('cabinet.product')"
+          rules="required"
+          v-slot="{ value, errorMessage, handleChange }"
+        >
           <div class="field">
-            <label>Товар</label>
+            <label>{{ $t('cabinet.product') }}</label>
             <AutoComplete
               :modelValue="value"
               @update:modelValue="handleChange"
@@ -49,19 +61,25 @@
         <VeeField
           v-model="whItem.amount"
           name="amount"
-          label="Количество"
+          :label="$t('admin.quantity')"
           rules="required|min:1"
           v-slot="{ value, errorMessage, handleChange, handleBlur }"
         >
           <div class="field">
-            <label>Количество</label>
+            <label>{{ $t('admin.quantity') }}</label>
             <InputNumber :modelValue="value" @update:modelValue="handleChange" @input="handleChange($event.value)" @blur="handleBlur" />
             <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
           </div>
         </VeeField>
         <template #footer>
-          <Button :disabled="wh_loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideProductDialog" />
-          <Button :disabled="wh_loading || !meta.valid" label="Сохранить" icon="pi pi-check" class="p-button-text" @click="giveProduct()" />
+          <Button :disabled="wh_loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideProductDialog" />
+          <Button
+            :disabled="wh_loading || !meta.valid"
+            :label="$t('common.save')"
+            icon="pi pi-check"
+            class="p-button-text"
+            @click="giveProduct()"
+          />
         </template>
       </Dialog>
     </VeeForm>
@@ -72,12 +90,18 @@
         :closable="false"
         :style="{ width: '450px' }"
         :modal="true"
-        header="Выдача кита игроку"
+        :header="$t('admin.give_kit_dialog')"
         class="p-fluid"
       >
-        <VeeField v-model="whItem.server" name="server" label="Сервер" rules="required" v-slot="{ value, errorMessage, handleChange }">
+        <VeeField
+          v-model="whItem.server"
+          name="server"
+          :label="$t('cabinet.server')"
+          rules="required"
+          v-slot="{ value, errorMessage, handleChange }"
+        >
           <div class="field">
-            <label>Сервер</label>
+            <label>{{ $t('cabinet.server') }}</label>
             <Select :modelValue="value" @update:modelValue="handleChange" :options="servers" optionLabel="name" appendTo="body">
               <template #option="slotProps">
                 <div class="flex align-items-center">
@@ -90,9 +114,9 @@
             <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
           </div>
         </VeeField>
-        <VeeField v-model="whItem.kit" name="kit" label="Кит" rules="required" v-slot="{ value, errorMessage, handleChange }">
+        <VeeField v-model="whItem.kit" name="kit" :label="$t('store.kit')" rules="required" v-slot="{ value, errorMessage, handleChange }">
           <div class="field">
-            <label>Кит</label>
+            <label>{{ $t('store.kit') }}</label>
             <AutoComplete
               :modelValue="value"
               @update:modelValue="handleChange"
@@ -113,8 +137,14 @@
           </div>
         </VeeField>
         <template #footer>
-          <Button :disabled="wh_loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideKitDialog" />
-          <Button :disabled="wh_loading || !meta.valid" label="Сохранить" icon="pi pi-check" class="p-button-text" @click="giveKit()" />
+          <Button :disabled="wh_loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideKitDialog" />
+          <Button
+            :disabled="wh_loading || !meta.valid"
+            :label="$t('common.save')"
+            icon="pi pi-check"
+            class="p-button-text"
+            @click="giveKit()"
+          />
         </template>
       </Dialog>
     </VeeForm>
@@ -125,12 +155,18 @@
         :closable="false"
         :style="{ width: '450px' }"
         :modal="true"
-        header="Выдача донат-группы игроку"
+        :header="$t('admin.give_group_dialog')"
         class="p-fluid"
       >
-        <VeeField v-model="udgForm.server" name="server" label="Сервер" rules="required" v-slot="{ value, errorMessage, handleChange }">
+        <VeeField
+          v-model="udgForm.server"
+          name="server"
+          :label="$t('cabinet.server')"
+          rules="required"
+          v-slot="{ value, errorMessage, handleChange }"
+        >
           <div class="field">
-            <label>Сервер</label>
+            <label>{{ $t('cabinet.server') }}</label>
             <Select :modelValue="value" @update:modelValue="handleChange" :options="servers" optionLabel="name" appendTo="body">
               <template #option="slotProps">
                 <div class="flex align-items-center">
@@ -143,9 +179,15 @@
             <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
           </div>
         </VeeField>
-        <VeeField v-model="udgForm.group" name="group" label="Группа" rules="required" v-slot="{ value, errorMessage, handleChange }">
+        <VeeField
+          v-model="udgForm.group"
+          name="group"
+          :label="$t('admin.group')"
+          rules="required"
+          v-slot="{ value, errorMessage, handleChange }"
+        >
           <div class="field">
-            <label>Группа</label>
+            <label>{{ $t('admin.group') }}</label>
             <Select :modelValue="value" @update:modelValue="handleChange" :options="donateGroups" optionLabel="name" appendTo="body">
               <template #option="slotProps">
                 <div class="flex align-items-center">
@@ -158,18 +200,24 @@
             <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
           </div>
         </VeeField>
-        <VeeField v-model="udgForm.period" name="period" label="Период" rules="required" v-slot="{ value, errorMessage, handleChange }">
+        <VeeField
+          v-model="udgForm.period"
+          name="period"
+          :label="$t('cabinet.period')"
+          rules="required"
+          v-slot="{ value, errorMessage, handleChange }"
+        >
           <div class="field">
-            <label>Период</label>
+            <label>{{ $t('cabinet.period') }}</label>
             <Select :modelValue="value" @update:modelValue="handleChange" :options="periods" optionLabel="name" appendTo="body" />
             <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
           </div>
         </VeeField>
         <template #footer>
-          <Button :disabled="udg_loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideUDGDialog" />
+          <Button :disabled="udg_loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideUDGDialog" />
           <Button
             :disabled="udg_loading || !meta.valid"
-            label="Сохранить"
+            :label="$t('common.save')"
             icon="pi pi-check"
             class="p-button-text"
             @click="giveDonateGroup()"
@@ -184,18 +232,18 @@
         :closable="false"
         :style="{ width: '450px' }"
         :modal="true"
-        header="Выдача донат-права игроку"
+        :header="$t('admin.give_permission_dialog')"
         class="p-fluid"
       >
         <VeeField
           v-model="udpForm.permission"
           name="permission"
-          label="Право"
+          :label="$t('admin.right')"
           rules="required"
           v-slot="{ value, errorMessage, handleChange }"
         >
           <div class="field">
-            <label>Право</label>
+            <label>{{ $t('admin.right') }}</label>
             <Select :modelValue="value" @update:modelValue="handleChange" :options="donatePermissions" optionLabel="name" appendTo="body">
               <template #option="slotProps">
                 <div class="flex align-items-center">
@@ -210,12 +258,12 @@
           v-if="udpForm.permission && udpForm.permission.type != 'web'"
           v-model="udpForm.server"
           name="server"
-          label="Сервер"
+          :label="$t('cabinet.server')"
           rules="required"
           v-slot="{ value, errorMessage, handleChange }"
         >
           <div class="field">
-            <label>Сервер</label>
+            <label>{{ $t('cabinet.server') }}</label>
             <Select :modelValue="value" @update:modelValue="handleChange" :options="servers" optionLabel="name" appendTo="body">
               <template #option="slotProps">
                 <div class="flex align-items-center">
@@ -228,18 +276,24 @@
             <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
           </div>
         </VeeField>
-        <VeeField v-model="udpForm.period" name="period" label="Период" rules="required" v-slot="{ value, errorMessage, handleChange }">
+        <VeeField
+          v-model="udpForm.period"
+          name="period"
+          :label="$t('cabinet.period')"
+          rules="required"
+          v-slot="{ value, errorMessage, handleChange }"
+        >
           <div class="field">
-            <label>Период</label>
+            <label>{{ $t('cabinet.period') }}</label>
             <Select :modelValue="value" @update:modelValue="handleChange" :options="periods" optionLabel="name" appendTo="body" />
             <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
           </div>
         </VeeField>
         <template #footer>
-          <Button :disabled="udp_loading" label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideUDPDialog" />
+          <Button :disabled="udp_loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideUDPDialog" />
           <Button
             :disabled="udp_loading || !meta.valid"
-            label="Сохранить"
+            :label="$t('common.save')"
             icon="pi pi-check"
             class="p-button-text"
             @click="giveDonatePermission()"
@@ -249,11 +303,11 @@
     </VeeForm>
 
     <TabView v-if="user">
-      <TabPanel header="Основное">
+      <TabPanel :header="$t('admin.tab_main')">
         <div class="grid" v-if="user">
           <div class="col-12 md:col-6">
             <div class="p-fluid p-4">
-              <h4>Внешний вид</h4>
+              <h4>{{ $t('admin.appearance') }}</h4>
               <div class="grid">
                 <div class="col-12 flex justify-content-center">
                   <SkinView3D class="rounded" :width="210" :height="300" :skin="user.skin" :cloak="user.cloak" ref="skin" />
@@ -261,7 +315,7 @@
                 <div class="col-12 flex justify-content-center">
                   <div class="grid">
                     <div @click="$refs.skinInput.choose()" class="col-12 md:col-6">
-                      <Button label="Загрузить скин" class="p-button mr-2 mb-2" />
+                      <Button :label="$t('admin.upload_skin')" class="p-button mr-2 mb-2" />
                     </div>
                     <FileUpload
                       ref="skinInput"
@@ -274,10 +328,10 @@
                       @uploader="uploadSkin($event, 'skin')"
                     />
                     <div class="col-12 md:col-6">
-                      <Button @click="deleteSkin('skin')" label="Удалить скин" class="p-button-danger p-button mr-2 mb-2" />
+                      <Button @click="deleteSkin('skin')" :label="$t('admin.delete_skin')" class="p-button-danger p-button mr-2 mb-2" />
                     </div>
                     <div @click="$refs.cloakInput.choose()" class="col-12 md:col-6">
-                      <Button label="Загрузить плащ" class="p-button mr-2 mb-2" />
+                      <Button :label="$t('admin.upload_cloak')" class="p-button mr-2 mb-2" />
                     </div>
                     <FileUpload
                       ref="cloakInput"
@@ -290,7 +344,7 @@
                       @uploader="uploadSkin($event, 'cloak')"
                     />
                     <div class="col-12 md:col-6">
-                      <Button @click="deleteSkin('cloak')" label="Удалить плащ" class="p-button-danger p-button mr-2 mb-2" />
+                      <Button @click="deleteSkin('cloak')" :label="$t('admin.delete_cloak')" class="p-button-danger p-button mr-2 mb-2" />
                     </div>
                   </div>
                 </div>
@@ -298,28 +352,33 @@
             </div>
             <div class="p-4">
               <VeeForm as="div" v-slot="{ meta }">
-                <h4>Блокировка ({{ user.ban ? 'Да' : 'Нет' }})</h4>
+                <h4>{{ $t('admin.ban_block') }} ({{ user.ban ? $t('admin.yes') : $t('admin.no') }})</h4>
                 <div class="p-fluid">
                   <VeeField
                     v-model="ban_model.reason"
                     name="reason"
-                    label="Причина"
+                    :label="$t('admin.reason')"
                     rules="required"
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>Причина</label>
+                      <label>{{ $t('admin.reason') }}</label>
                       <InputText :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" type="text" />
                       <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
                     </div>
                   </VeeField>
                   <div class="field">
-                    <label>Истекает (пусто - нет)</label>
+                    <label>{{ $t('admin.expires_empty') }}</label>
                     <DatePicker v-model="ban_model.expires" showTime showSeconds appendTo="body" />
                   </div>
                 </div>
-                <Button :disabled="!meta.valid" @click="banCreate()" label="Заблокировать/редактировать" class="p-button mr-2 mb-2" />
-                <Button @click="deleteBan()" :disabled="!user.ban" label="Разблокировать" class="p-button-danger p-button mr-2 mb-2" />
+                <Button :disabled="!meta.valid" @click="banCreate()" :label="$t('admin.ban_button')" class="p-button mr-2 mb-2" />
+                <Button
+                  @click="deleteBan()"
+                  :disabled="!user.ban"
+                  :label="$t('admin.unban_button')"
+                  class="p-button-danger p-button mr-2 mb-2"
+                />
               </VeeForm>
             </div>
           </div>
@@ -327,16 +386,16 @@
             <div class="p-4">
               <VeeForm as="div" v-slot="{ meta }">
                 <div class="p-fluid">
-                  <h4>Профиль {{ user.username }}</h4>
+                  <h4>{{ $t('admin.profile_of', { username: user.username }) }}</h4>
                   <VeeField
                     v-model="user.username"
                     name="username"
-                    label="Имя пользователя"
+                    :label="$t('admin.username')"
                     rules="required|isUsername"
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>Имя пользователя</label>
+                      <label>{{ $t('admin.username') }}</label>
                       <InputText :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" type="text" />
                       <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
                     </div>
@@ -356,11 +415,11 @@
                   </VeeField>
                   <div class="field-checkbox">
                     <Checkbox :binary="true" v-model="user.activated" />
-                    <label>Активирован (Email)</label>
+                    <label>{{ $t('admin.activated_email') }}</label>
                   </div>
-                  <h4>Роли и права</h4>
+                  <h4>{{ $t('admin.roles_and_rights') }}</h4>
                   <div class="field">
-                    <label>Роли</label>
+                    <label>{{ $t('admin.roles') }}</label>
                     <MultiSelect
                       display="chip"
                       :filter="true"
@@ -369,12 +428,12 @@
                       optionLabel="name"
                       optionValue="id"
                       optionDisabled="important"
-                      placeholder="Выберите роли"
+                      :placeholder="$t('admin.choose_roles')"
                       class="p-column-filter"
                     />
                   </div>
                   <div class="field">
-                    <label>Права</label>
+                    <label>{{ $t('admin.rights') }}</label>
                     <span class="p-fluid">
                       <AutoComplete
                         v-model="user.perms"
@@ -383,35 +442,35 @@
                         @complete="searchAutocompleate($event)"
                         appendTo="body"
                         :completeOnFocus="true"
-                        placeholder="Выберите разрешения"
+                        :placeholder="$t('admin.choose_permissions')"
                       />
                     </span>
                   </div>
                   <div class="field-checkbox">
                     <Checkbox :binary="true" v-model="user.superuser" />
-                    <label>Суперпользователь</label>
+                    <label>{{ $t('admin.superuser') }}</label>
                   </div>
                 </div>
-                <Button :disabled="!meta.valid" @click="updateProfile()" label="Сохранить" class="p-button mr-2 mb-4" />
+                <Button :disabled="!meta.valid" @click="updateProfile()" :label="$t('common.save')" class="p-button mr-2 mb-4" />
               </VeeForm>
               <VeeForm as="div" v-slot="{ meta }">
                 <div class="p-fluid">
-                  <h4>Сменить пароль</h4>
+                  <h4>{{ $t('admin.change_password') }}</h4>
                   <VeeField
                     v-model="passwordForm.password"
                     name="password"
-                    label="Пароль"
+                    :label="$t('auth.password')"
                     rules="required|min:8|max:128"
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>Пароль</label>
+                      <label>{{ $t('auth.password') }}</label>
                       <InputText
                         autocomplete="false"
                         :modelValue="value"
                         @update:modelValue="handleChange"
                         @blur="handleBlur"
-                        placeholder="Без изменений"
+                        :placeholder="$t('admin.unchanged')"
                         type="password"
                       />
                       <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
@@ -420,18 +479,18 @@
                   <VeeField
                     v-model="passwordForm.password_confirm"
                     name="password_confirm"
-                    label="Подтверждение пароля"
+                    :label="$t('auth.password_confirm')"
                     rules="required|confirmed:@password"
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>Подтверждение пароля</label>
+                      <label>{{ $t('auth.password_confirm') }}</label>
                       <InputText
                         autocomplete="false"
                         :modelValue="value"
                         @update:modelValue="handleChange"
                         @blur="handleBlur"
-                        placeholder="Без изменений"
+                        :placeholder="$t('admin.unchanged')"
                         type="password"
                       />
                       <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
@@ -439,11 +498,11 @@
                   </VeeField>
                   <div class="field-checkbox">
                     <Checkbox :binary="true" v-model="passwordForm.close" />
-                    <label>Закрыть все сеансы</label>
+                    <label>{{ $t('admin.close_sessions') }}</label>
                   </div>
                 </div>
-                <Button :disabled="!meta.valid" @click="updatePassword()" label="Сохранить" class="p-button mr-2 mb-2" />
-                <Button label="Сбросить 2FA" class="p-button-danger p-button mr-2 mb-2" />
+                <Button :disabled="!meta.valid" @click="updatePassword()" :label="$t('common.save')" class="p-button mr-2 mb-2" />
+                <Button :label="$t('admin.reset_2fa')" class="p-button-danger p-button mr-2 mb-2" />
               </VeeForm>
             </div>
           </div>
@@ -453,11 +512,11 @@
         <div class="grid">
           <div class="col-12">
             <div class="p-4">
-              <h4>Экономика</h4>
+              <h4>{{ $t('admin.economy') }}</h4>
               <div class="p-fluid grid">
                 <div class="col-12 md:col-6">
                   <div class="field">
-                    <label>Баланс на сайте (реальная валюта)</label>
+                    <label>{{ $t('admin.balance_real') }}</label>
                     <div class="grid">
                       <div class="col-12 md:col-7">
                         <InputNumber
@@ -468,14 +527,14 @@
                         />
                       </div>
                       <div class="col-12 md:col-5">
-                        <Button @click="updateReal()" label="Сохранить" class="p-button mr-2 mb-2" />
+                        <Button @click="updateReal()" :label="$t('common.save')" class="p-button mr-2 mb-2" />
                       </div>
                     </div>
                   </div>
                 </div>
                 <div class="col-12 md:col-6">
                   <div class="field">
-                    <label>Баланс на сайте (бонусная валюта)</label>
+                    <label>{{ $t('admin.balance_virtual') }}</label>
                     <div class="grid">
                       <div class="col-12 md:col-7">
                         <InputNumber
@@ -486,14 +545,14 @@
                         />
                       </div>
                       <div class="col-12 md:col-5">
-                        <Button @click="updateVirtual()" label="Сохранить" class="p-button mr-2 mb-2" />
+                        <Button @click="updateVirtual()" :label="$t('common.save')" class="p-button mr-2 mb-2" />
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
               <DataTable :value="money" :loading="money_loading" responsiveLayout="scroll" dataKey="m.id">
-                <Column field="m.server.name" header="Сервер" sortable>
+                <Column field="m.server.name" :header="$t('cabinet.server')" sortable>
                   <template #body="slotProps">
                     <div class="flex align-items-center">
                       <Avatar
@@ -506,7 +565,7 @@
                     </div>
                   </template>
                 </Column>
-                <Column field="money" header="Количество" sortable>
+                <Column field="money" :header="$t('admin.quantity')" sortable>
                   <template #body="slotProps">
                     <InputNumber
                       type="text"
@@ -527,11 +586,11 @@
           </div>
           <div class="col-12 md:col-6 p-4">
             <div class="flex justify-content-between align-items-center">
-              <h4>Донат-группы</h4>
-              <Button label="Выдать" class="p-button mr-2 mb-2" @click="showUDGDialog()" />
+              <h4>{{ $t('admin.menu_donate_groups') }}</h4>
+              <Button :label="$t('admin.give')" class="p-button mr-2 mb-2" @click="showUDGDialog()" />
             </div>
             <DataTable :value="udg" :loading="udg_loading" responsiveLayout="scroll" dataKey="m.id">
-              <Column field="server" header="Сервер">
+              <Column field="server" :header="$t('cabinet.server')">
                 <template #body="slotProps">
                   <div class="flex align-items-center">
                     <Avatar
@@ -544,7 +603,7 @@
                   </div>
                 </template>
               </Column>
-              <Column field="group.name" header="Группа" sortable>
+              <Column field="group.name" :header="$t('admin.group')" sortable>
                 <template #body="slotProps">
                   <div class="flex align-items-center">
                     <Avatar v-if="slotProps.data.group.icon" :image="`${rc.apiBaseurl + '/' + slotProps.data.group.icon}`" shape="circle" />
@@ -553,9 +612,9 @@
                   </div>
                 </template>
               </Column>
-              <Column field="expired" header="Истекает" sortable>
+              <Column field="expired" :header="$t('admin.expires')" sortable>
                 <template #body="slotProps">
-                  {{ slotProps.data.expired ? $moment(slotProps.data.expired).format('D MMMM YYYY, HH:mm') : 'Никогда' }}
+                  {{ slotProps.data.expired ? $moment(slotProps.data.expired).format('D MMMM YYYY, HH:mm') : $t('players.never') }}
                 </template>
               </Column>
               <Column :style="{ width: '4rem' }" :bodyStyle="{ 'text-align': 'right' }">
@@ -567,11 +626,11 @@
           </div>
           <div class="col-12 md:col-6 p-4">
             <div class="flex justify-content-between align-items-center">
-              <h4>Донат-права</h4>
-              <Button label="Выдать" class="p-button mr-2 mb-2" @click="showUDPDialog()" />
+              <h4>{{ $t('admin.menu_donate_permissions') }}</h4>
+              <Button :label="$t('admin.give')" class="p-button mr-2 mb-2" @click="showUDPDialog()" />
             </div>
             <DataTable :value="udp" :loading="udp_loading" responsiveLayout="scroll" dataKey="m.id">
-              <Column field="server" header="Сервер">
+              <Column field="server" :header="$t('cabinet.server')">
                 <template #body="slotProps">
                   <div v-if="slotProps.data.server">
                     <div class="flex align-items-center">
@@ -584,13 +643,13 @@
                       <span class="ml-2">{{ slotProps.data.server.name }}</span>
                     </div>
                   </div>
-                  <div v-else>Web-сайт</div>
+                  <div v-else>{{ $t('admin.web_site') }}</div>
                 </template>
               </Column>
-              <Column field="permission.name" header="Право" sortable />
-              <Column field="expired" header="Истекает" sortable>
+              <Column field="permission.name" :header="$t('admin.right')" sortable />
+              <Column field="expired" :header="$t('admin.expires')" sortable>
                 <template #body="slotProps">
-                  {{ slotProps.data.expired ? $moment(slotProps.data.expired).format('D MMMM YYYY, HH:mm') : 'Никогда' }}
+                  {{ slotProps.data.expired ? $moment(slotProps.data.expired).format('D MMMM YYYY, HH:mm') : $t('players.never') }}
                 </template>
               </Column>
               <Column :style="{ width: '4rem' }" :bodyStyle="{ 'text-align': 'right' }">
@@ -606,7 +665,7 @@
           </div>
           <div class="col-12 p-4">
             <div class="flex align-items-center justify-content-between">
-              <h4>Склад</h4>
+              <h4>{{ $t('admin.warehouse') }}</h4>
               <Select
                 @change="warehouseFetch()"
                 v-model="warehouse_server"
@@ -624,11 +683,11 @@
                 </template>
               </Select>
             </div>
-            <Button label="Выдать товар" class="p-button mr-2 mb-2" @click="showProductDialog()" />
-            <Button label="Выдать кит" class="p-button mr-2 mb-2" @click="showKitDialog()" />
+            <Button :label="$t('admin.give_product')" class="p-button mr-2 mb-2" @click="showProductDialog()" />
+            <Button :label="$t('admin.give_kit')" class="p-button mr-2 mb-2" @click="showKitDialog()" />
             <DataTable :value="warehouse" :loading="wh_loading" responsiveLayout="scroll" dataKey="id">
               <Column field="id" header="ID" :style="{ width: '8rem' }" sortable></Column>
-              <Column field="name" header="Название" sortable>
+              <Column field="name" :header="$t('admin.name')" sortable>
                 <template #body="slotProps">
                   <div class="flex align-items-center">
                     <Avatar
@@ -641,10 +700,10 @@
                   </div>
                 </template>
               </Column>
-              <Column field="price" header="Количество" sortable>
-                <template #body="slotProps"> {{ slotProps.data.amount }} шт. </template>
+              <Column field="price" :header="$t('admin.quantity')" sortable>
+                <template #body="slotProps"> {{ $t('store.pieces', { amount: slotProps.data.amount }) }} </template>
               </Column>
-              <Column field="categories" header="Категории" filterField="categories" :showFilterMatchModes="false">
+              <Column field="categories" :header="$t('admin.categories')" filterField="categories" :showFilterMatchModes="false">
                 <template #body="slotProps">
                   <Tag
                     class="mr-2 mb-2"
@@ -822,7 +881,7 @@ export default {
       await this.fetchUser()
       this.toast.add({
         severity: 'success',
-        detail: 'Баланс обновлён',
+        detail: this.$t('admin.balance_updated'),
         life: 3000,
       })
     },
@@ -835,7 +894,7 @@ export default {
       await this.fetchUser()
       this.toast.add({
         severity: 'success',
-        detail: 'Баланс обновлён',
+        detail: this.$t('admin.balance_updated'),
         life: 3000,
       })
     },
@@ -870,13 +929,13 @@ export default {
         await this.fetchUser()
         this.toast.add({
           severity: 'success',
-          detail: 'Профиль обновлён',
+          detail: this.$t('admin.profile_updated'),
           life: 3000,
         })
       } catch {
         this.toast.add({
           severity: 'error',
-          detail: 'Некоректные данные, либо изменения могут справоцировать ошибку!',
+          detail: this.$t('admin.profile_update_error'),
           life: 3000,
         })
       }
@@ -888,13 +947,13 @@ export default {
         await this.fetchUser()
         this.toast.add({
           severity: 'success',
-          detail: 'Пароль пользователя обновлён',
+          detail: this.$t('admin.user_password_updated'),
           life: 3000,
         })
       } catch {
         this.toast.add({
           severity: 'error',
-          detail: 'Некоректные данные!',
+          detail: this.$t('admin.invalid_data_short'),
           life: 3000,
         })
       }
@@ -911,14 +970,14 @@ export default {
         })
         this.toast.add({
           severity: 'success',
-          detail: 'Скин/плащ успешно обновлен',
+          detail: this.$t('admin.skin_updated'),
           life: 3000,
         })
         await this.fetchUser()
       } catch {
         this.toast.add({
           severity: 'error',
-          detail: 'Файл не является скином/плащом',
+          detail: this.$t('admin.skin_invalid'),
           life: 3000,
         })
       }
@@ -932,15 +991,15 @@ export default {
       await this.fetchUser()
       this.toast.add({
         severity: 'success',
-        detail: 'Скин/плащ успешно удалён',
+        detail: this.$t('admin.skin_deleted'),
         life: 3000,
       })
     },
 
     async takeDonateGroup(id) {
       this.confirm.require({
-        message: `Данный процесс будет необратим!`,
-        header: `Снятие донат-группы`,
+        message: this.$t('admin.irreversible'),
+        header: this.$t('admin.group_revoke'),
         icon: 'pi pi-exclamation-triangle',
         accept: async () => {
           this.udg_loading = true
@@ -948,7 +1007,7 @@ export default {
             await this.$api.delete(`/donates/groups/admin/` + id)
             this.toast.add({
               severity: 'success',
-              detail: 'Донат-группа успешно снята',
+              detail: this.$t('admin.group_revoked'),
               life: 3000,
             })
           } catch {}
@@ -968,7 +1027,7 @@ export default {
         })
         this.toast.add({
           severity: 'success',
-          detail: 'Донат-группа успешно выдана',
+          detail: this.$t('admin.group_given'),
           life: 3000,
         })
       } catch {}
@@ -990,7 +1049,7 @@ export default {
         await this.$api.post(`/donates/permissions/admin/give`, form)
         this.toast.add({
           severity: 'success',
-          detail: 'Донат-право успешно выдано',
+          detail: this.$t('admin.permission_given'),
           life: 3000,
         })
       } catch {}
@@ -1000,8 +1059,8 @@ export default {
 
     async takeDonatePermission(id) {
       this.confirm.require({
-        message: `Данный процесс будет необратим!`,
-        header: `Снятие донат-права`,
+        message: this.$t('admin.irreversible'),
+        header: this.$t('admin.permission_revoke'),
         icon: 'pi pi-exclamation-triangle',
         accept: async () => {
           this.udp_loading = true
@@ -1009,7 +1068,7 @@ export default {
             await this.$api.delete(`/donates/permissions/admin/` + id)
             this.toast.add({
               severity: 'success',
-              detail: 'Донат-право успешно снято',
+              detail: this.$t('admin.permission_revoked'),
               life: 3000,
             })
           } catch {}
@@ -1027,7 +1086,7 @@ export default {
       await this.fetchUser()
       this.toast.add({
         severity: 'success',
-        detail: 'Блокировка для пользователя обновлена',
+        detail: this.$t('admin.ban_updated'),
         life: 3000,
       })
     },
@@ -1037,15 +1096,15 @@ export default {
       await this.fetchUser()
       this.toast.add({
         severity: 'success',
-        detail: 'Блокировка для пользователя снята',
+        detail: this.$t('admin.ban_removed'),
         life: 3000,
       })
     },
 
     async removeWHItem(id) {
       this.confirm.require({
-        message: `Данный процесс будет необратим!`,
-        header: `Удаления товара со склада`,
+        message: this.$t('admin.irreversible'),
+        header: this.$t('admin.warehouse_item_delete'),
         icon: 'pi pi-exclamation-triangle',
         accept: async () => {
           this.wh_loading = true

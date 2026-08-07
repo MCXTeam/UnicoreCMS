@@ -18,8 +18,10 @@
 </template>
 
 <script setup>
+const { $t } = useNuxtApp()
+
 useHead({
-  title: 'Авторизация',
+  title: computed(() => $t('panel.auth')),
   bodyAttrs: { class: 'auth-body' },
 })
 </script>

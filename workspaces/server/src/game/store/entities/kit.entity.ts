@@ -3,7 +3,9 @@ import { Server } from 'src/game/servers/entities/server.entity';
 import { AfterRemove, Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Category } from './category.entity';
 import { KitItem } from './kit-item.entity';
+import { Translatable } from 'src/admin/locales/translatable.decorator';
 
+@Translatable('kit', ['name', 'description'])
 @Entity({ name: 'unicore_kits' })
 export class Kit {
   @PrimaryGeneratedColumn({ name: 'id' })

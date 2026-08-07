@@ -12,6 +12,8 @@ import { Referal } from 'src/game/cabinet/referals/entities/referal.entity';
 import { Repository } from 'typeorm';
 import { PasswordService } from './password/password.service';
 import { passwordAad } from './password/password-aad';
+import { ConfigField } from 'src/admin/config/config.enum';
+import { ConfigService } from 'src/admin/config/config.service';
 
 @Injectable()
 export class AuthService {
@@ -21,6 +23,7 @@ export class AuthService {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
     private usersService: UsersService,
+    private configService: ConfigService,
     private emailService: EmailService,
     private twoFactorService: TwoFactorService,
     @InjectRepository(Referal)
@@ -63,12 +66,14 @@ export class AuthService {
     return new AuthenticatedDto({ accessToken, refreshToken, user });
   }
 
-  async register(input: RegisterInput, agent?: string, ip?: string) {
+  async register(input: RegisterInput, agent?: string, ip?: string, locale?: string) {
     try {
       const { username, email, password } = input;
-      const user = await this.usersService.create({ username, email, password });
+      const cfg = await this.configService.load();
+      const activationRequired = Boolean(cfg[ConfigField.EmailActivationRequired]) && !cfg[ConfigField.OrdinaryRegister];
+      const user = await this.usersService.create({ username, email, password, activated: !activationRequired, locale });
 
-      this.emailService.sendActivation(user);
+      if (activationRequired) this.emailService.sendActivation(user);
       const accessToken = await this.tokensService.generateAccessToken(user);
       const refreshToken = await this.tokensService.generateRefreshToken(user, agent, ip);
 

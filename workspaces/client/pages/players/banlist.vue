@@ -1,9 +1,10 @@
 <template>
   <div class="px-4">
-    <h2 class="m-0">Банлист</h2>
+    <h2 class="m-0">{{ $t('players.tab_banlist') }}</h2>
     <p class="mt-1 mb-2">
-      В банлист попадают только плохие игроки, которые нарушили правила наших серверов. Избегайте бана! Следуйте
-      <NuxtLink to="/page/rules">правилам проекта</NuxtLink> и никогда не будете забанены.
+      {{ $t('players.banlist_hint_before') }}
+      <NuxtLink to="/page/rules">{{ $t('players.banlist_hint_link') }}</NuxtLink>
+      {{ $t('players.banlist_hint_after') }}
     </p>
     <div>
       <DataTable
@@ -17,37 +18,37 @@
         dataKey="id"
         @page="onPage($event)"
       >
-        <Column header="Игрок" headerStyle="width: 25%">
+        <Column :header="$t('players.player')" headerStyle="width: 25%">
           <template #body="{ data }">
             <div class="d-flex align-items-center">
               <Avatar class="rounded shadow me-3">
                 <SkinView2D class="rounded" :width="32" :height="32" :skin="data.user.skin" />
               </Avatar>
-              <NuxtLink :to="`/user/` + data.user.username">{{ data.user.username }}</NuxtLink>
+              <NuxtLink :to="`/user/${data.user.username}`">{{ data.user.username }}</NuxtLink>
             </div>
           </template>
         </Column>
-        <Column header="Дата бана" headerStyle="width: 20%">
+        <Column :header="$t('players.ban_date')" headerStyle="width: 20%">
           <template #body="{ data }">{{ $moment(data.created).format('DD.MM.YYYY, HH:mm:ss') }}</template>
         </Column>
-        <Column header="Дата разбана" headerStyle="width: 20%">
+        <Column :header="$t('players.unban_date')" headerStyle="width: 20%">
           <template #body="{ data }">{{
-            data.expires ? $moment(data.expires).format('DD.MM.YYYY, HH:mm:ss') : 'Никогда'
+            data.expires ? $moment(data.expires).format('DD.MM.YYYY, HH:mm:ss') : $t('players.never')
           }}</template>
         </Column>
-        <Column header="Модератор" headerStyle="width: 25%">
+        <Column :header="$t('players.moderator')" headerStyle="width: 25%">
           <template #body="{ data }">
-            <NuxtLink v-if="data.actor && data.actor.username != 'Kernel'" :to="`/user/` + data.actor.username">
+            <NuxtLink v-if="data.actor && data.actor.username != 'Kernel'" :to="`/user/${data.actor.username}`">
               {{ data.actor.username }}
             </NuxtLink>
-            <span v-else>Консоль</span>
+            <span v-else>{{ $t('players.console') }}</span>
           </template>
         </Column>
-        <Column header="Причина">
+        <Column :header="$t('players.reason')">
           <template #body="{ data }">{{ data.reason }}</template>
         </Column>
         <template #empty>
-          <span>Нет результатов</span>
+          <span>{{ $t('common.no_results') }}</span>
         </template>
       </DataTable>
     </div>
@@ -57,11 +58,12 @@
 <script setup lang="ts">
 import { useUiStore } from '~/stores/ui'
 
-definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'] })
-useHead({ title: 'Банлист' })
-useUiStore().setName('Игроки')
+definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'header.players' })
 
-const { $api } = useNuxtApp()
+const { $api, $t } = useNuxtApp()
+
+useHead({ title: computed(() => $t('players.tab_banlist')) })
+useUiStore().setName($t('header.players'))
 
 const loading = ref(false)
 const banlist = ref<any>({

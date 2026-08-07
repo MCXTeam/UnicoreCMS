@@ -3,9 +3,11 @@
     <Dialog class="buy-dialog" v-model:visible="groupDialog" modal :closable="!loading" :closeOnEscape="!loading" v-if="donate.group">
       <template #header>
         <div class="d-flex flex-column align-items-center">
-          <h4 class="mt-2 mb-0">Покупка <b v-text="donate.group.name" /> на сервере <b v-text="donate.server.name" /></h4>
+          <h4 class="mt-2 mb-0">
+            {{ $t('cabinet.buy_group_title', { group: donate.group.name, server: donate.server.name }) }}
+          </h4>
           <h3 v-if="donate.group.periods.find((p) => p.id == donate.period).expire" class="m-0">
-            До:
+            {{ $t('cabinet.until') }}
             {{
               $moment()
                 .add(donate.group.periods.find((p) => p.id == donate.period).expire, 'seconds')
@@ -20,7 +22,7 @@
         :options="donate.group.periods"
         optionLabel="name"
         optionValue="id"
-        placeholder="Выберите период"
+        :placeholder="$t('cabinet.choose_period')"
         v-model="donate.period"
       />
       <Message
@@ -29,25 +31,27 @@
         :closable="false"
         class="mt-3"
       >
-        <i class="bx bxs-gift"></i> Вы можете оплатить <b>{{ donate.group.virtual_percent || config.public_virtual_percent }}%</b> от
-        стоимости донат-группы бонусами
+        <i class="bx bxs-gift"></i>
+        {{ $t('store.virtual_hint', { percent: donate.group.virtual_percent || config.public_virtual_percent }) }}
       </Message>
       <div v-if="calcGroupVirtSale() > 0" class="d-flex justify-content-between align-items-center mt-2">
         <div class="flex align-items-center gap-2">
           <Checkbox v-model="donate.use_virtual" :binary="true" inputId="groupUseVirtual" />
-          <label for="groupUseVirtual">Использовать бонусы</label>
+          <label for="groupUseVirtual">{{ $t('store.use_bonuses') }}</label>
         </div>
         <b>-{{ $utils.formatCurrency('virtual', calcGroupVirtSale()) }}</b>
       </div>
       <template #footer>
         <div class="d-flex justify-content-center" v-if="donate.period">
           <Button v-if="donate.use_virtual" size="large" @click="buyGroup()" text>
-            Купить за &nbsp;<small
+            {{ $t('cabinet.buy_for') }} &nbsp;<small
               ><strike>{{ $utils.formatCurrency('real', calcGroupPrice()) }}</strike></small
             >
             &nbsp;{{ $utils.formatCurrency('real', calcGroupPrice() - calcGroupVirtSale()) }}
           </Button>
-          <Button v-else size="large" @click="buyGroup()" text> Купить за {{ $utils.formatCurrency('real', calcGroupPrice()) }} </Button>
+          <Button v-else size="large" @click="buyGroup()" text>
+            {{ $t('cabinet.buy_for') }} {{ $utils.formatCurrency('real', calcGroupPrice()) }}
+          </Button>
         </div>
       </template>
     </Dialog>
@@ -63,14 +67,14 @@
       <template #header>
         <div class="d-flex flex-column align-items-center">
           <h4 v-if="permission.permission.type == 'game'" class="mt-2 mb-0">
-            Покупка права на сервере <b v-text="permission.server.name" />
+            {{ $t('cabinet.buy_permission_game', { server: permission.server.name }) }}
           </h4>
           <h4 v-if="permission.permission.type == 'kit'" class="mt-2 mb-0">
-            Покупка кита на сервере <b v-text="permission.server.name" />
+            {{ $t('cabinet.buy_permission_kit', { server: permission.server.name }) }}
           </h4>
-          <h4 v-if="permission.permission.type == 'web'" class="mt-2 mb-0">Покупка права на сайте</h4>
+          <h4 v-if="permission.permission.type == 'web'" class="mt-2 mb-0">{{ $t('cabinet.buy_permission_web') }}</h4>
           <h4 v-if="permission.permission.periods.find((p) => p.id == permission.period).expire" class="m-0">
-            До:
+            {{ $t('cabinet.until') }}
             {{
               $moment()
                 .add(permission.permission.periods.find((p) => p.id == permission.period).expire, 'seconds')
@@ -99,7 +103,7 @@
         :options="permission.permission.periods"
         optionLabel="name"
         optionValue="id"
-        placeholder="Выберите период"
+        :placeholder="$t('cabinet.choose_period')"
         v-model="permission.period"
       />
       <Message
@@ -108,26 +112,26 @@
         :closable="false"
         class="mt-3"
       >
-        <i class="bx bxs-gift"></i> Вы можете оплатить
-        <b>{{ permission.permission.virtual_percent || config.public_virtual_percent }}%</b> от стоимости донат-права бонусами
+        <i class="bx bxs-gift"></i>
+        {{ $t('store.virtual_hint', { percent: permission.permission.virtual_percent || config.public_virtual_percent }) }}
       </Message>
       <div v-if="calcPermissionVirtSale() > 0" class="d-flex justify-content-between align-items-center mt-2">
         <div class="flex align-items-center gap-2">
           <Checkbox v-model="permission.use_virtual" :binary="true" inputId="permissionUseVirtual" />
-          <label for="permissionUseVirtual">Использовать бонусы</label>
+          <label for="permissionUseVirtual">{{ $t('store.use_bonuses') }}</label>
         </div>
         <b>-{{ $utils.formatCurrency('virtual', calcPermissionVirtSale()) }}</b>
       </div>
       <template #footer>
         <div class="d-flex justify-content-center" v-if="permission.period">
           <Button v-if="permission.use_virtual" size="large" @click="buyPermission()" text>
-            Купить за &nbsp;<small
+            {{ $t('cabinet.buy_for') }} &nbsp;<small
               ><strike>{{ $utils.formatCurrency('real', calcPermissionPrice()) }}</strike></small
             >
             &nbsp;{{ $utils.formatCurrency('real', calcPermissionPrice() - calcPermissionVirtSale()) }}
           </Button>
           <Button v-else size="large" @click="buyPermission()" text>
-            Купить за {{ $utils.formatCurrency('real', calcPermissionPrice()) }}
+            {{ $t('cabinet.buy_for') }} {{ $utils.formatCurrency('real', calcPermissionPrice()) }}
           </Button>
         </div>
       </template>
@@ -136,35 +140,37 @@
     <div class="row px-3">
       <div class="col-xl-6 px-4">
         <div class="d-flex justify-content-between align-items-center">
-          <h2 class="m-0">Донат-группы</h2>
+          <h2 class="m-0">{{ $t('cabinet.donate_groups') }}</h2>
           <Select
             :options="serverOptions"
             optionLabel="label"
             optionValue="value"
             :loading="!servers.length"
-            placeholder="Выберите сервер"
+            :placeholder="$t('store.choose_server')"
             v-model="donate.server_id"
             style="max-width: 150px"
           />
         </div>
         <div v-if="donateGroupsMe && donate.server">
-          <h4 class="mt-4 mb-2">Активные группы на сервере {{ donate.server.name }}</h4>
+          <h4 class="mt-4 mb-2">{{ $t('cabinet.active_groups', { server: donate.server.name }) }}</h4>
           <DataTable class="no-overflow-table" :value="donateGroupsMe.filter((dgm) => dgm.server.id == donate.server.id)">
-            <template #empty><span>Нет покупок</span></template>
-            <Column header="Донат-группа">
+            <template #empty
+              ><span>{{ $t('cabinet.no_purchases') }}</span></template
+            >
+            <Column :header="$t('cabinet.donate_group')">
               <template #body="{ data }">{{ data.group.name }}</template>
             </Column>
-            <Column header="Истекает">
+            <Column :header="$t('cabinet.expires')">
               <template #body="{ data }">{{
-                data.expired ? $moment(data.expired).format('D MMMM YYYY, HH:mm') : 'Никогда'
+                data.expired ? $moment(data.expired).format('D MMMM YYYY, HH:mm') : $t('players.never')
               }}</template>
             </Column>
           </DataTable>
         </div>
         <div class="d-flex justify-content-between align-items-center mt-4">
-          <h4 class="text-uppercase m-0">Покупка</h4>
+          <h4 class="text-uppercase m-0">{{ $t('cabinet.purchase') }}</h4>
           <NuxtLink v-if="donate.server" :to="`/donate/${donate.server.id}`" class="d-none d-xl-block m-0">
-            <Button size="small"><i class="bx bx-link me-1"></i> Подробнее</Button>
+            <Button size="small"><i class="bx bx-link me-1"></i> {{ $t('common.more') }}</Button>
           </NuxtLink>
         </div>
         <div v-if="donateGroups">
@@ -183,22 +189,30 @@
                   <h2 class="text-uppercase m-0" v-text="group.name" />
                   <h5 class="sale-wrapper ms-3 my-0" v-if="group.sale">-{{ group.sale }}%</h5>
                 </div>
-                <span v-if="!group.sale">От {{ $utils.formatCurrency('real', group.price * group.periods[0].multiplier) }}</span>
+                <span v-if="!group.sale">
+                  {{ $t('cabinet.from_price', { price: $utils.formatCurrency('real', group.price * group.periods[0].multiplier) }) }}
+                </span>
                 <div v-else class="d-flex">
                   <strike v-text="$utils.formatCurrency('real', group.price * group.periods[0].multiplier)"></strike>
-                  <h4 class="ms-2 my-0">От {{ $utils.formatCurrency('real', group.price * group.periods[0].multiplier, group.sale) }}</h4>
+                  <h4 class="ms-2 my-0">
+                    {{
+                      $t('cabinet.from_price', {
+                        price: $utils.formatCurrency('real', group.price * group.periods[0].multiplier, group.sale),
+                      })
+                    }}
+                  </h4>
                 </div>
               </div>
             </div>
             <Button
               v-if="donateGroupsMe.find((dgm) => dgm.server.id == donate.server.id && dgm.group.id == group.id && dgm.expired)"
               @click="openGroupDialog(group.id)"
-              ><i class="bx bx-cart me-1"></i> Продлить</Button
+              ><i class="bx bx-cart me-1"></i> {{ $t('cabinet.renew') }}</Button
             >
             <Button
               v-else-if="!donateGroupsMe.find((dgm) => dgm.server.id == donate.server.id && dgm.group.id == group.id)"
               @click="openGroupDialog(group.id)"
-              ><i class="bx bx-cart me-1"></i> Купить</Button
+              ><i class="bx bx-cart me-1"></i> {{ $t('cabinet.buy') }}</Button
             >
           </div>
         </div>
@@ -215,30 +229,32 @@
       </div>
       <div class="col px-4 pt-4 pt-xl-0">
         <div class="d-flex justify-content-between align-items-center">
-          <h2 class="m-0">Донат-права</h2>
+          <h2 class="m-0">{{ $t('cabinet.donate_permissions') }}</h2>
           <Select
             :options="serverOptions"
             optionLabel="label"
             optionValue="value"
             :loading="!servers.length"
-            placeholder="Выберите сервер"
+            :placeholder="$t('store.choose_server')"
             v-model="permission.server_id"
             style="max-width: 150px"
           />
         </div>
         <div v-if="donatePermissionsMe && permission.server">
-          <h4 class="mt-4 mb-2">Активные донат-права на сервере {{ permission.server.name }}</h4>
+          <h4 class="mt-4 mb-2">{{ $t('cabinet.active_permissions', { server: permission.server.name }) }}</h4>
           <DataTable
             class="no-overflow-table"
             :value="donatePermissionsMe.filter((dpm) => dpm.permission.type == 'web' || dpm.server.id == permission.server.id)"
           >
-            <template #empty><span>Нет покупок</span></template>
-            <Column header="Донат-право">
+            <template #empty
+              ><span>{{ $t('cabinet.no_purchases') }}</span></template
+            >
+            <Column :header="$t('cabinet.donate_permission')">
               <template #body="{ data }">{{ data.permission.name }}</template>
             </Column>
-            <Column header="Истекает">
+            <Column :header="$t('cabinet.expires')">
               <template #body="{ data }">{{
-                data.expired ? $moment(data.expired).format('D MMMM YYYY, HH:mm') : 'Никогда'
+                data.expired ? $moment(data.expired).format('D MMMM YYYY, HH:mm') : $t('players.never')
               }}</template>
             </Column>
           </DataTable>
@@ -261,10 +277,18 @@
                   <h4 class="text-uppercase m-0" v-text="perm.name" />
                   <h5 class="sale-wrapper ms-3 my-0" v-if="perm.sale">-{{ perm.sale }}%</h5>
                 </div>
-                <span v-if="!perm.sale">От {{ $utils.formatCurrency('real', perm.price * perm.periods[0].multiplier) }}</span>
+                <span v-if="!perm.sale">
+                  {{ $t('cabinet.from_price', { price: $utils.formatCurrency('real', perm.price * perm.periods[0].multiplier) }) }}
+                </span>
                 <div v-else class="d-flex">
                   <strike v-text="$utils.formatCurrency('real', perm.price * perm.periods[0].multiplier)"></strike>
-                  <h4 class="ms-2 my-0">От {{ $utils.formatCurrency('real', perm.price * perm.periods[0].multiplier, perm.sale) }}</h4>
+                  <h4 class="ms-2 my-0">
+                    {{
+                      $t('cabinet.from_price', {
+                        price: $utils.formatCurrency('real', perm.price * perm.periods[0].multiplier, perm.sale),
+                      })
+                    }}
+                  </h4>
                 </div>
               </div>
             </div>
@@ -276,7 +300,7 @@
                 )
               "
               @click="openPermissionDialog(perm.id)"
-              ><i class="bx bx-cart me-1"></i> Продлить</Button
+              ><i class="bx bx-cart me-1"></i> {{ $t('cabinet.renew') }}</Button
             >
             <Button
               v-else-if="
@@ -285,7 +309,7 @@
                 )
               "
               @click="openPermissionDialog(perm.id)"
-              ><i class="bx bx-cart me-1"></i> Купить</Button
+              ><i class="bx bx-cart me-1"></i> {{ $t('cabinet.buy') }}</Button
             >
           </div>
         </div>
@@ -306,10 +330,11 @@
 <script setup>
 import { useConfigStore } from '~/stores/config'
 
-definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'] })
-useHead({ title: 'Личный кабинет' })
+definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'cabinet.tab_donate' })
 
-const { $api, $auth, $unicore } = useNuxtApp()
+const { $api, $auth, $unicore, $t } = useNuxtApp()
+
+useHead({ title: computed(() => $t('header.cabinet')) })
 const config = computed(() => useConfigStore().config)
 
 const donate = reactive({
@@ -388,10 +413,9 @@ async function buyGroup() {
     })
     await Promise.all([$auth.fetchUser(), fetchDonatesMe()])
     groupDialog.value = false
-    $unicore.successNotification('Покупка была совершенна')
+    $unicore.successNotification($t('store.purchase_done'))
   } catch (e) {
-    if (e.response?.status == 400)
-      $unicore.errorNotification('На балансе недостаточно средств для совершения данной покупки, либо данную донат-группу нельзя продлить')
+    if (e.response?.status == 400) $unicore.errorNotification($t('cabinet.buy_group_error'))
   }
   loading.value = false
 }
@@ -406,10 +430,9 @@ async function buyPermission() {
     })
     await Promise.all([$auth.fetchUser(), fetchPermissionsMe()])
     permissionDialog.value = false
-    $unicore.successNotification('Покупка была совершенна')
+    $unicore.successNotification($t('store.purchase_done'))
   } catch (e) {
-    if (e.response?.status == 400)
-      $unicore.errorNotification('На балансе недостаточно средств для совершения данной покупки, либо данное донат-право нельзя продлить')
+    if (e.response?.status == 400) $unicore.errorNotification($t('cabinet.buy_permission_error'))
   }
   loading.value = false
 }

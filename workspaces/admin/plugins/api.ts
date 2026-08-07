@@ -1,4 +1,5 @@
 import axios, { type AxiosInstance } from 'axios'
+import { RAW_CONTENT_HEADER } from 'unicore-common/locales'
 import { useAuthStore } from '~/stores/auth'
 
 export default defineNuxtPlugin(() => {
@@ -9,6 +10,7 @@ export default defineNuxtPlugin(() => {
     const auth = useAuthStore()
     if (auth.accessToken) cfg.headers.Authorization = `Bearer ${auth.accessToken}`
     cfg.headers['Timezone'] = Intl.DateTimeFormat().resolvedOptions().timeZone
+    cfg.headers[RAW_CONTENT_HEADER] = '1'
     return cfg
   })
 
