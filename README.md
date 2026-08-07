@@ -11,7 +11,7 @@
 <p>
   <a href="https://unicorecms.ru/docs/" target="_blank">Документация</a> |
   <a href="https://github.com/MCXTeam/UnicoreCMS/archive/refs/heads/main.zip">Скачать</a> |
-  <a href="https://discord.gg/wn8fPjpvDn">Discord-сервер</a> |
+  <a href="https://discord.gg/hsCvepqRMD">Discord-сервер</a> |
   <a href="https://unicorecms.ru/screens" target="_blank">Картинки</a>
 </p>
 
