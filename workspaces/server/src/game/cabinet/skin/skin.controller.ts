@@ -58,7 +58,7 @@ export class SkinController {
     return this.skinsService.updateSkinMe(req, file);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsUpdate])
+  @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
   @Patch('skin/:uuid')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -84,7 +84,7 @@ export class SkinController {
     return this.skinsService.updateCloakMe(req, file);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsUpdate])
+  @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
   @Patch('cloak/:uuid')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -103,7 +103,7 @@ export class SkinController {
     return this.skinsService.removeSkin(user);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsUpdate])
+  @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
   @Delete('skin/:uuid')
   removeSkin(@Param('uuid') uuid: string) {
     return this.skinsService.removeSkinByUUID(uuid);
@@ -115,7 +115,7 @@ export class SkinController {
     return this.skinsService.removeCloak(user);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsUpdate])
+  @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
   @Delete('cloak/:uuid')
   removeCloak(@Param('uuid') uuid: string) {
     return this.skinsService.removeCloakByUUID(uuid);

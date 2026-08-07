@@ -1,14 +1,5 @@
 import { RconCommandStatus } from 'unicore-common';
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  Index,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Server } from '../../entities/server.entity';
 
 @Entity({ name: 'unicore_rcon_commands' })

@@ -41,7 +41,7 @@ export class ServersController {
   @Public()
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    const server = await this.serversService.findOne(id, ['mods', 'query', 'table']);
+    const server = await this.serversService.findOne(id, ['mods', 'query', 'table', 'instances']);
 
     if (!server) {
       throw new NotFoundException();
@@ -53,7 +53,7 @@ export class ServersController {
   @Permissions([Permission.AdminDashboard, Permission.AdminServersUpdate])
   @Get(':id/admin')
   async findOneAdmin(@Param('id') id: string) {
-    const server = await this.serversService.findOne(id, ['mods', 'query', 'table', 'rcon']);
+    const server = await this.serversService.findOne(id, ['mods', 'query', 'table', 'rcon', 'instances']);
 
     if (!server) {
       throw new NotFoundException();

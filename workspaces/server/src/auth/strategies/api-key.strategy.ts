@@ -9,10 +9,7 @@ import { Request } from 'express';
 
 @Injectable()
 export class ApiKeyStrategy extends PassportStrategy(HeaderAPIKeyStrategy) {
-  constructor(
-    private usersService: UsersService,
-    private apiService: ApiService,
-  ) {
+  constructor(private usersService: UsersService, private apiService: ApiService) {
     super(
       {
         header: 'Authorization',

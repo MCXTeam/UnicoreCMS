@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { VoteGift } from 'src/game/cabinet/votes/entities/vote-gift.entity';
@@ -6,12 +6,14 @@ import { Vote } from 'src/game/cabinet/votes/entities/vote.entity';
 import { VotesGroupped } from 'src/game/players/votes-list/votes-groupped.interface';
 import { Repository } from 'typeorm';
 import * as _ from 'lodash';
-import * as moment from 'moment';
+import { MomentWrapper } from '@common';
 import { User } from 'src/admin/users/entities/user.entity';
 
 @Injectable()
 export class VotesTasks {
   constructor(
+    @Inject('moment')
+    private moment: MomentWrapper,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
     @InjectRepository(Vote)
@@ -35,7 +37,7 @@ export class VotesTasks {
         total: value.length,
         updated: _(value).maxBy((pt) => pt.created).created,
       }))
-      .filter((vt) => !moment().utc().isSame(moment(vt.updated).utc(), 'months'))
+      .filter((vt) => !this.moment().isSame(this.moment(vt.updated), 'months'))
       .orderBy(['total'], ['desc'])
       .value();
 

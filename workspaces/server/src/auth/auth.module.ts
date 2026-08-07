@@ -19,9 +19,12 @@ import { EmailModule } from 'src/admin/email/email.module';
 import { SettingsModule } from 'src/game/cabinet/settings/settings.module';
 import { Referal } from 'src/game/cabinet/referals/entities/referal.entity';
 import { PasswordModule } from './password/password.module';
+import { ConfigModule } from 'src/admin/config/config.module';
+import { ActivatedGuard } from './guards/activated.guard';
 
 @Module({
   imports: [
+    ConfigModule,
     PasswordModule,
     UsersModule,
     ApiModule,
@@ -42,6 +45,10 @@ import { PasswordModule } from './password/password.module';
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ActivatedGuard,
     },
   ],
   exports: [AuthService, TokensService],

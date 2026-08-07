@@ -6,4 +6,4 @@ const require = createRequire(import.meta.url)
 
 const nuxt = path.join(path.dirname(require.resolve('nuxt/package.json')), 'bin', 'nuxt.mjs')
 
-runNode([nuxt, 'build'])
+await runNode([nuxt, 'build'])

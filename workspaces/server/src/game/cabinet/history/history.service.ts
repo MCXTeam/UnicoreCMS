@@ -18,10 +18,7 @@ import { HistoryType } from './enums/history-type.enum';
 
 @Injectable()
 export class HistoryService {
-  constructor(
-    @InjectRepository(History) private historyRepository: Repository<History>,
-    private usersService: UsersService,
-  ) {}
+  constructor(@InjectRepository(History) private historyRepository: Repository<History>, private usersService: UsersService) {}
 
   async findByUUID(query: PaginateQuery, uuid: string) {
     const user = await this.usersService.getById(uuid);

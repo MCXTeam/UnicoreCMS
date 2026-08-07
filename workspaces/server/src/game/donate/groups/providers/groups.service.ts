@@ -67,25 +67,27 @@ export class DonateGroupsService {
     return _(
       groups
         .filter((group) => group.periods.length)
-        .map((group) => ({
-          ...group,
-          periods: _.orderBy(group.periods, ['multiplier'], ['asc']),
-          kits: _(
-            group.kits.map((kit) => ({
-              ...kit,
-              priority: kit.priority ? kit.priority : 0,
-              images: _(
-                kit.images
-                  .filter((image) => image.server.id == id)
-                  .map((image) => ({ ...image, priority: image.server.priority ? image.server.priority : 0 })),
-              )
-                .orderBy(['server.priority', 'id'], ['asc', 'asc'])
-                .value(),
-            })),
-          )
-            .orderBy(['priority', 'id'], ['asc', 'asc'])
-            .value(),
-        })),
+        .map((group) =>
+          Object.assign(group, {
+            periods: _.orderBy(group.periods, ['multiplier'], ['asc']),
+            kits: _(
+              group.kits.map((kit) =>
+                Object.assign(kit, {
+                  priority: kit.priority ? kit.priority : 0,
+                  images: _(
+                    kit.images
+                      .filter((image) => image.server.id == id)
+                      .map((image) => Object.assign(image, { priority: image.server.priority ? image.server.priority : 0 })),
+                  )
+                    .orderBy(['server.priority', 'id'], ['asc', 'asc'])
+                    .value(),
+                }),
+              ),
+            )
+              .orderBy(['priority', 'id'], ['asc', 'asc'])
+              .value(),
+          }),
+        ),
     )
       .orderBy(['priority', 'id'], ['asc', 'asc'])
       .value();

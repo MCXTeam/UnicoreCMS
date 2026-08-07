@@ -52,5 +52,4 @@ export class WebhooksController {
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.webhooksService.remove(id);
   }
-
 }

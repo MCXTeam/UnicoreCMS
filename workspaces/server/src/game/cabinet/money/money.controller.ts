@@ -68,7 +68,7 @@ export class MoneyController {
     return this.moneyService.findOneByUser(uuid);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
+  @Permissions([Permission.AdminDashboard, Permission.AdminUsersMoney])
   @Patch('admin')
   async update(@Body() body: MoneyUpdateInput) {
     return this.moneyService.update(body);

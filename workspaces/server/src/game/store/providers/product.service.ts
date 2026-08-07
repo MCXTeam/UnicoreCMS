@@ -186,7 +186,9 @@ export class ProductsService {
 
   async servers(): Promise<StoreServer[]> {
     const servers = await Promise.all(
-      (await this.serversRepository.find()).map(async (serv: StoreServer) => {
+      (
+        await this.serversRepository.find()
+      ).map(async (serv: StoreServer) => {
         serv.products_count =
           (await this.productsRepository
             .createQueryBuilder('product')
@@ -251,7 +253,7 @@ export class ProductsService {
           ({
             ...cat,
             priority: cat.priority ? cat.priority : 0,
-          }) as Category,
+          } as Category),
       )
       .orderBy(['priority', 'name'], ['desc', 'asc'])
       .value();

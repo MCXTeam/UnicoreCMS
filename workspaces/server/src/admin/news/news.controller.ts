@@ -3,6 +3,8 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Upload
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { Public } from 'src/auth/decorators/public.decorator';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import { User } from '../users/entities/user.entity';
 import { Permission } from 'unicore-common';
 import { Permissions } from '../roles/decorators/permission.decorator';
 import { NewsInput } from './dto/news.input';
@@ -44,14 +46,14 @@ export class NewsController {
       fileFilter: imageFileFilter,
     }),
   )
-  create(@Body() body: NewsInput, @UploadedFile() file?: Express.Multer.File) {
-    return this.newsService.create(body, file);
+  create(@CurrentUser() user: User, @Body() body: NewsInput, @UploadedFile() file?: Express.Multer.File) {
+    return this.newsService.create(body, file, Boolean(user.superuser));
   }
 
   @Patch(':id')
   @Permissions([Permission.AdminDashboard, Permission.EditorNewsUpdate])
-  update(@Param('id', ParseIntPipe) id: number, @Body() body: NewsInput) {
-    return this.newsService.update(id, body);
+  update(@CurrentUser() user: User, @Param('id', ParseIntPipe) id: number, @Body() body: NewsInput) {
+    return this.newsService.update(id, body, Boolean(user.superuser));
   }
 
   @Delete(':id')

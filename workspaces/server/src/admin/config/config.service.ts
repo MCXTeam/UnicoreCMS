@@ -73,7 +73,12 @@ export class ConfigService {
         },
         { key: ConfigField.KeepHistoryDays, important: true, type: ConfigType.number, value: String(KEEP_HISTORY_DAYS) },
         { key: ConfigField.RconPreset, important: true, type: ConfigType.string, value: DEFAULT_ISSUANCE_PRESET },
-        { key: ConfigField.RconTplGiveItem, important: true, type: ConfigType.string, value: presetOps.giveItem ?? vanillaOps.giveItem ?? '' },
+        {
+          key: ConfigField.RconTplGiveItem,
+          important: true,
+          type: ConfigType.string,
+          value: presetOps.giveItem ?? vanillaOps.giveItem ?? '',
+        },
         { key: ConfigField.RconTplGroupAdd, important: true, type: ConfigType.string, value: presetOps.groupAdd ?? '' },
         { key: ConfigField.RconTplGroupAddTemp, important: true, type: ConfigType.string, value: presetOps.groupAddTemp ?? '' },
         { key: ConfigField.RconTplGroupRemove, important: true, type: ConfigType.string, value: presetOps.groupRemove ?? '' },

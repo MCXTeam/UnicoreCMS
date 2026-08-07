@@ -61,5 +61,4 @@ export class GiftsController {
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.giftsService.remove(id);
   }
-
 }

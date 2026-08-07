@@ -83,8 +83,8 @@ b {
   font-weight: 800;
 }
 
-a,
-a:visited {
+a:not(.p-button),
+a:not(.p-button):visited {
   color: rgb(var(--vs-primary));
   text-decoration: none;
   cursor: pointer;
@@ -96,11 +96,20 @@ a:visited {
     text-underline-offset: 5px;
   }
 
-  &.without-underline,
-  &.p-button {
+  &.without-underline {
     &:hover {
       text-decoration: none;
     }
+  }
+}
+
+a.p-button,
+a.p-button:visited {
+  cursor: pointer;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: none;
   }
 }
 
@@ -274,4 +283,17 @@ hr {
 
 .p-button-label {
   white-space: nowrap;
+}
+
+.full-width-page {
+  .landing-main {
+    width: 100%;
+    max-width: 100%;
+    flex: 0 0 auto;
+    padding-right: calc(var(--bs-gutter-x) * 0.5) !important;
+  }
+
+  .landing-aside {
+    display: none;
+  }
 }

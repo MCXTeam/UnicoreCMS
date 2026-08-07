@@ -1,11 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, In, Repository } from 'typeorm';
+import { Between, In, Not, Repository } from 'typeorm';
 import * as _ from 'lodash';
 import { User } from '../users/entities/user.entity';
 import { StatGroup } from './interfaces/stat.interface';
 import { StatType } from './enums/stat-type.enum';
-import { DASHBOARD_MONTH_DAYS, DASHBOARD_WEEK_DAYS, MomentWrapper } from '@common';
+import { DASHBOARD_MONTH_DAYS, DASHBOARD_WEEK_DAYS, KERNEL_USERNAME, MomentWrapper } from '@common';
+import { DashboardStatSection, DASHBOARD_STAT_SECTIONS } from 'unicore-common';
 import { OnlinesRecord } from 'src/game/servers/online/entities/onlines-record.entity';
 import { History } from 'src/game/cabinet/history/entities/history.entity';
 import { HistoryGroupType } from 'src/game/cabinet/history/enums/history-type.enum';
@@ -32,7 +33,16 @@ export class DashboardService {
 
   private async daysStatBuilder(type: StatType, days: number = DASHBOARD_WEEK_DAYS): Promise<StatGroup[]> {
     var result: StatGroup[] = new Array();
-    const range = Array.from(this.moment.range(this.moment().subtract(days - 1, 'day').startOf('day'), this.moment()).by('day'));
+    const range = Array.from(
+      this.moment
+        .range(
+          this.moment()
+            .subtract(days - 1, 'day')
+            .startOf('day'),
+          this.moment(),
+        )
+        .by('day'),
+    );
 
     switch (type) {
       case StatType.User:
@@ -40,6 +50,7 @@ export class DashboardService {
           range.map(async (date) => ({
             date: this.moment(date).utc().toDate(),
             count: await this.usersRepository.countBy({
+              username: Not(KERNEL_USERNAME),
               created: Between(this.moment(date).toDate(), this.moment(date).endOf('day').toDate()),
             }),
           })),
@@ -128,6 +139,7 @@ export class DashboardService {
           range.map(async (date) => ({
             date: this.moment(date).toDate(),
             count: await this.usersRepository.countBy({
+              username: Not(KERNEL_USERNAME),
               created: Between(this.moment(date).toDate(), this.moment(date).endOf('month').toDate()),
             }),
           })),
@@ -206,11 +218,14 @@ export class DashboardService {
     return result;
   }
 
-  async stats(): Promise<StatsInterface> {
+  async stats(sections: DashboardStatSection[] = DASHBOARD_STAT_SECTIONS): Promise<StatsInterface> {
     const online = await this.onlineService.find();
+    const allowed = new Set(sections);
 
-    return {
-      payments: {
+    const stats: StatsInterface = {};
+
+    if (allowed.has('payments'))
+      stats.payments = {
         days: await this.daysStatBuilder(StatType.Payment),
         month: await this.daysStatBuilder(StatType.Payment, DASHBOARD_MONTH_DAYS),
         months: await this.monthsStatBuilder(StatType.Payment),
@@ -226,8 +241,10 @@ export class DashboardService {
               .getRawOne()
           )?.amount || 0,
         ),
-      },
-      purchases: {
+      };
+
+    if (allowed.has('purchases'))
+      stats.purchases = {
         days: await this.daysStatBuilder(StatType.Purchase),
         month: await this.daysStatBuilder(StatType.Purchase, DASHBOARD_MONTH_DAYS),
         months: await this.monthsStatBuilder(StatType.Purchase),
@@ -243,20 +260,25 @@ export class DashboardService {
               .getRawOne()
           )?.amount || 0,
         ),
-      },
-      online_records: {
+      };
+
+    if (allowed.has('online_records'))
+      stats.online_records = {
         days: await this.daysStatBuilder(StatType.Online),
         month: await this.daysStatBuilder(StatType.Online, DASHBOARD_MONTH_DAYS),
         months: await this.monthsStatBuilder(StatType.Online),
         amount: online.total.records.absolute.online,
         date: online.total.records.absolute.created,
-      },
-      users: {
+      };
+
+    if (allowed.has('users'))
+      stats.users = {
         days: await this.daysStatBuilder(StatType.User),
         month: await this.daysStatBuilder(StatType.User, DASHBOARD_MONTH_DAYS),
         months: await this.monthsStatBuilder(StatType.User),
-        count: await this.usersRepository.count(),
-      },
-    };
+        count: await this.usersRepository.countBy({ username: Not(KERNEL_USERNAME) }),
+      };
+
+    return stats;
   }
 }

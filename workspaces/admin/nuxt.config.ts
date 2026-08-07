@@ -77,6 +77,9 @@ export default defineNuxtConfig({
         { find: /^moment$/, replacement: 'moment/moment.js' },
       ],
     },
+    optimizeDeps: {
+      include: ['quill', 'quill-delta'],
+    },
   },
 
   compatibilityDate: '2025-01-01',

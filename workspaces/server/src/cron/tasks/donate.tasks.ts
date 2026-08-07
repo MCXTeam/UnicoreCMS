@@ -47,11 +47,10 @@ export class DonateTasks {
       this.eventsService.server.to(Permission.KernelUnicoreConnect).emit('take_group', udg);
 
       if (this.issuanceService.isRcon(udg.server)) {
-        await this.issuanceService.removeGroup(
-          { username: udg.user?.username, uuid: udg.user?.uuid },
-          udg.server,
-          { ingame_id: udg.group?.ingame_id, name: udg.group?.name },
-        );
+        await this.issuanceService.removeGroup({ username: udg.user?.username, uuid: udg.user?.uuid }, udg.server, {
+          ingame_id: udg.group?.ingame_id,
+          name: udg.group?.name,
+        });
       }
     }
 
@@ -60,11 +59,10 @@ export class DonateTasks {
         this.eventsService.server.to(Permission.KernelUnicoreConnect).emit('take_permission', udp);
 
         if (this.issuanceService.isRcon(udp.server)) {
-          await this.issuanceService.removePermission(
-            { username: udp.user?.username, uuid: udp.user?.uuid },
-            udp.server,
-            { name: udp.permission?.name, perms: udp.permission?.perms },
-          );
+          await this.issuanceService.removePermission({ username: udp.user?.username, uuid: udp.user?.uuid }, udp.server, {
+            name: udp.permission?.name,
+            perms: udp.permission?.perms,
+          });
         }
       }
     }

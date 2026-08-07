@@ -5,6 +5,7 @@ import { Online } from './entities/online.entity';
 import * as _ from 'lodash';
 import { pingMinecraft } from './minecraft-ping';
 import { Server } from '../entities/server.entity';
+import { ServerInstance } from '../entities/server-instance.entity';
 import * as moment from 'moment';
 import { UpdateOnline } from './interfaces/update-online.interface';
 import { Onlines } from './dto/onlines.dto';
@@ -12,12 +13,15 @@ import { OnlinesRecord } from './entities/onlines-record.entity';
 import { OnlinesAbsoluteRecord } from './entities/onlines-absolute-record.entity';
 import { RecordOnlineInterface } from './interfaces/record-online.interface';
 import { classToPlain } from 'class-transformer';
+import { DEFAULT_MINECRAFT_PORT, PING_TIMEOUT_MS } from '@common';
 
 @Injectable()
 export class OnlineService {
   constructor(
     @InjectRepository(Online)
     private onlineRepository: Repository<Online>,
+    @InjectRepository(ServerInstance)
+    private instancesRepository: Repository<ServerInstance>,
     @InjectRepository(OnlinesRecord)
     private onlinesRecordsRepository: Repository<OnlinesRecord>,
     @InjectRepository(OnlinesAbsoluteRecord)
@@ -27,7 +31,7 @@ export class OnlineService {
   async find(): Promise<Onlines> {
     const servers = _.orderBy(
       await this.onlineRepository.find({
-        relations: ['server'],
+        relations: ['server', 'server.instances'],
       }),
       ['server.priority'],
       ['asc'],
@@ -117,30 +121,54 @@ export class OnlineService {
     return onlines;
   }
 
+  private async ping(host: string, port?: number): Promise<Pick<Online, 'maxplayers' | 'online' | 'players'>> {
+    const status = await pingMinecraft(host, port || DEFAULT_MINECRAFT_PORT, PING_TIMEOUT_MS).catch(() => null);
+
+    if (!status) return { maxplayers: 0, players: 0, online: false };
+
+    return { maxplayers: status.max, players: status.online, online: true };
+  }
+
+  private async updateInstances(server: Server): Promise<Pick<Online, 'maxplayers' | 'online' | 'players'>> {
+    const reachable = server.instances.filter((instance) => instance.host);
+
+    const states = await Promise.all(
+      reachable.map(async (instance) => {
+        const state = await this.ping(instance.host, instance.port);
+
+        if (instance.online !== state.online || instance.players !== state.players || instance.maxplayers !== state.maxplayers) {
+          await this.instancesRepository
+            .createQueryBuilder()
+            .update(ServerInstance)
+            .set(state)
+            .where('server_id = :id AND priority = :priority', { id: server.id, priority: instance.priority })
+            .execute();
+
+          Object.assign(instance, state);
+        }
+
+        return state;
+      }),
+    );
+
+    return {
+      players: _.sumBy(states, 'players'),
+      maxplayers: _.sumBy(states, 'maxplayers'),
+      online: states.some((state) => state.online),
+    };
+  }
+
   async updateOnline(server: Server): Promise<UpdateOnline> {
-    if (!server.query || !server.query.host || !server.online) {
+    const hasInstances = Boolean(server.instances?.length);
+
+    if (!server.online || (!hasInstances && !server.query?.host)) {
       return {
         instance: server,
         updated: false,
       };
     }
 
-    let online: Pick<Online, 'maxplayers' | 'online' | 'players'>;
-    const status = await pingMinecraft(server.query.host, server.query.port || 25565, 3000).catch(() => null);
-
-    if (status) {
-      online = {
-        maxplayers: status.max,
-        players: status.online,
-        online: true,
-      };
-    } else {
-      online = {
-        maxplayers: 0,
-        players: 0,
-        online: false,
-      };
-    }
+    const online = hasInstances ? await this.updateInstances(server) : await this.ping(server.query.host, server.query.port);
 
     if (!_.isEqual(classToPlain(server.online), { ...server.online, ...online })) {
       var record: number = server.online.record;

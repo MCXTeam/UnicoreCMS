@@ -10,11 +10,7 @@ export class OnlineTasks {
   private readonly logger = new Logger('OnlineTasks');
   private running = false;
 
-  constructor(
-    private eventsService: EventsService,
-    private onlineService: OnlineService,
-    private serversService: ServersService,
-  ) {}
+  constructor(private eventsService: EventsService, private onlineService: OnlineService, private serversService: ServersService) {}
 
   @Cron(CronExpression.EVERY_5_SECONDS)
   async updateOnline() {
@@ -22,7 +18,7 @@ export class OnlineTasks {
     this.running = true;
 
     try {
-      const servers = await this.serversService.find(['online', 'query']);
+      const servers = await this.serversService.find(['online', 'query', 'instances']);
       const serversUpdated: UpdateOnline[] = await Promise.all(servers.map((server) => this.onlineService.updateOnline(server)));
 
       if (serversUpdated.find((upd) => upd.updated)) {

@@ -15,7 +15,7 @@ export class HistoryController {
     return this.histiryService.find(query, user);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsUpdate])
+  @Permissions([Permission.AdminDashboard, Permission.AdminUsersRead])
   @Get('user/:uuid')
   find(@Paginate() query: PaginateQuery, @Param('uuid') uuid: string) {
     return this.histiryService.findByUUID(query, uuid);

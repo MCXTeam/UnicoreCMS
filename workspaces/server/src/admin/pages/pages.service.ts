@@ -1,6 +1,7 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { applyCustomCode } from '@common';
 import { PageInput } from './dto/page.input';
 import { Page } from './entities/page.entity';
 
@@ -51,13 +52,6 @@ export class PagesService {
     });
   }
 
-  private applyCustomCode(page: Page, input: PageInput, allowCustomCode: boolean) {
-    if (!allowCustomCode) return;
-
-    page.custom_css = input.custom_css;
-    page.custom_js = input.custom_js;
-  }
-
   async create(input: PageInput, allowCustomCode = false): Promise<Page> {
     if (await this.pagesRepository.findOneBy({ path: input.path })) {
       throw new ConflictException();
@@ -69,8 +63,9 @@ export class PagesService {
     page.title = input.title;
     page.content = input.content;
     page.description = input.description;
+    page.full_size = Boolean(input.full_size);
 
-    this.applyCustomCode(page, input, allowCustomCode);
+    applyCustomCode(page, input, allowCustomCode);
 
     return this.pagesRepository.save(page);
   }
@@ -90,8 +85,9 @@ export class PagesService {
     page.title = input.title;
     page.content = input.content;
     page.description = input.description;
+    page.full_size = Boolean(input.full_size);
 
-    this.applyCustomCode(page, input, allowCustomCode);
+    applyCustomCode(page, input, allowCustomCode);
 
     return this.pagesRepository.save(page);
   }

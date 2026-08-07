@@ -3,6 +3,7 @@
 </template>
 
 <script setup lang="ts">
+import { FULL_WIDTH_PAGE_CLASS } from '~/constants'
 import { useUiStore } from '~/stores/ui'
 
 definePageMeta({ layout: 'landing' })
@@ -19,6 +20,7 @@ if (error.value || !page.value) throw createError({ statusCode: 404, fatal: true
 useUiStore().setName(page.value.title)
 useHead({
   title: page.value.title,
+  htmlAttrs: { class: page.value.full_size ? FULL_WIDTH_PAGE_CLASS : '' },
   meta: [{ name: 'description', content: page.value.description }],
   style: page.value.custom_css ? [{ innerHTML: String(page.value.custom_css) }] : [],
   script: page.value.custom_js ? [{ innerHTML: String(page.value.custom_js) }] : [],

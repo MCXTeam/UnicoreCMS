@@ -5,6 +5,7 @@ import { DeliveryMode } from 'unicore-common';
 import { In, Repository } from 'typeorm';
 import { ServerCreateInput } from './dto/server-create.input';
 import { ServerUpdateInput } from './dto/server-update.input';
+import { ServerInstance } from './entities/server-instance.entity';
 import { ServersSortInput } from './dto/servers-sort.input';
 import { Server } from './entities/server.entity';
 import { ServerMedia } from './enums/server-media.enum';
@@ -58,6 +59,7 @@ export class ServersService {
     server.description = input.description;
     server.content = input.content;
     server.table = input.table;
+    server.instances = (input.instances ?? []).map((instance, index) => ({ ...instance, priority: index } as ServerInstance));
 
     server.online = new Online();
     server.query = new Query();
@@ -81,7 +83,7 @@ export class ServersService {
   }
 
   async update(id: string, input: ServerUpdateInput): Promise<Server> {
-    const server = await this.findOne(id, ['query', 'table', 'rcon']);
+    const server = await this.findOne(id, ['query', 'table', 'rcon', 'instances']);
 
     if (!server) {
       throw new NotFoundException();
@@ -93,6 +95,7 @@ export class ServersService {
     server.description = input.description;
     server.content = input.content;
     server.table = input.table;
+    server.instances = (input.instances ?? []).map((instance, index) => ({ ...instance, priority: index } as ServerInstance));
 
     server.query.host = input.query.host;
     server.query.port = input.query.port;

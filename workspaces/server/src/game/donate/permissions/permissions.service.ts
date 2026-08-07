@@ -135,11 +135,10 @@ export class DonatePermissionsService {
       this.eventsService.server.to(Permission.KernelUnicoreConnect).emit('take_permission', udp);
 
       if (this.issuanceService.isRcon(udp.server)) {
-        await this.issuanceService.removePermission(
-          { username: udp.user.username, uuid: udp.user.uuid },
-          udp.server,
-          { name: udp.permission.name, perms: udp.permission.perms },
-        );
+        await this.issuanceService.removePermission({ username: udp.user.username, uuid: udp.user.uuid }, udp.server, {
+          name: udp.permission.name,
+          perms: udp.permission.perms,
+        });
       }
     }
   }
@@ -210,21 +209,25 @@ export class DonatePermissionsService {
     return _(
       perms
         .filter((group) => group.periods.length)
-        .map((perms) => ({
-          ...perms,
-          periods: _.orderBy(perms.periods, ['multiplier'], ['asc']),
-          kits: _(
-            perms.kits.map((kit) => ({
-              ...kit,
-              priority: kit.priority ? kit.priority : 0,
-              images: _(kit.images.map((image) => ({ ...image, priority: image.server.priority ? image.server.priority : 0 })))
-                .orderBy(['server.priority', 'id'], ['asc', 'asc'])
-                .value(),
-            })),
-          )
-            .orderBy(['priority', 'id'], ['asc', 'asc'])
-            .value(),
-        })),
+        .map((perms) =>
+          Object.assign(perms, {
+            periods: _.orderBy(perms.periods, ['multiplier'], ['asc']),
+            kits: _(
+              perms.kits.map((kit) =>
+                Object.assign(kit, {
+                  priority: kit.priority ? kit.priority : 0,
+                  images: _(
+                    kit.images.map((image) => Object.assign(image, { priority: image.server.priority ? image.server.priority : 0 })),
+                  )
+                    .orderBy(['server.priority', 'id'], ['asc', 'asc'])
+                    .value(),
+                }),
+              ),
+            )
+              .orderBy(['priority', 'id'], ['asc', 'asc'])
+              .value(),
+          }),
+        ),
     )
       .orderBy(['priority', 'id'], ['asc', 'asc'])
       .value();

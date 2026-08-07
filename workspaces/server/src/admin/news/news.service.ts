@@ -7,7 +7,7 @@ import { WebhooksService } from '../webhook/webhooks.service';
 import { NewsInput } from './dto/news.input';
 import { News } from './entities/news.entity';
 import { HtmlSlice } from 'htmlslice';
-import { StorageManager } from '@common';
+import { applyCustomCode, NEWS_PREVIEW_LENGTH, StorageManager } from '@common';
 
 @Injectable()
 export class NewsService {
@@ -17,12 +17,16 @@ export class NewsService {
     private webhooksService: WebhooksService,
   ) {}
 
-  create(input: NewsInput, file?: Express.Multer.File): Promise<News> {
+  create(input: NewsInput, file?: Express.Multer.File, allowCustomCode = false): Promise<News> {
     const news = new News();
 
     news.title = input.title;
     news.description = input.description;
+    news.short_description = input.short_description;
+    news.full_size = Boolean(input.full_size);
     news.image = file?.filename;
+
+    applyCustomCode(news, input, allowCustomCode);
 
     this.webhooksService.send(WebhookType.NewsCreated, news);
     return this.newsRepository.save(news);
@@ -37,16 +41,29 @@ export class NewsService {
 
     return {
       ...paginated,
-      data: paginated.data.map((news) => {
-        var sliced = new HtmlSlice(news.description);
-        const description = sliced.length > 300 ? sliced.slice(0, 300) + '...' : news.description;
-
-        return {
-          ...news,
-          description,
-        };
-      }),
+      data: paginated.data.map((news) => this.withPreview(news)),
     };
+  }
+
+  private withPreview(news: News): News {
+    let content = news.description;
+
+    Object.defineProperty(news, 'description', {
+      get: () => (news.short_description ? news.short_description : this.slice(content)),
+      set: (value: string) => {
+        content = value;
+      },
+      enumerable: true,
+      configurable: true,
+    });
+
+    return news;
+  }
+
+  private slice(content: string): string {
+    const sliced = new HtmlSlice(content);
+
+    return sliced.length > NEWS_PREVIEW_LENGTH ? sliced.slice(0, NEWS_PREVIEW_LENGTH) + '...' : content;
   }
 
   async findForMap(): Promise<number[]> {
@@ -68,13 +85,17 @@ export class NewsService {
     return news;
   }
 
-  async update(id: number, input: NewsInput): Promise<News> {
+  async update(id: number, input: NewsInput, allowCustomCode = false): Promise<News> {
     const news = await this.newsRepository.findOneBy({ id });
 
     if (!news) throw new NotFoundException();
 
     news.title = input.title;
     news.description = input.description;
+    news.short_description = input.short_description;
+    news.full_size = Boolean(input.full_size);
+
+    applyCustomCode(news, input, allowCustomCode);
 
     return this.newsRepository.save(news);
   }

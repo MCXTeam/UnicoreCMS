@@ -12,10 +12,7 @@ import { paginate, PaginateQuery } from 'nestjs-paginate';
 
 @Injectable()
 export class VotesListService {
-  constructor(
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
-    @InjectRepository(Vote) private votesRepo: Repository<Vote>,
-  ) {}
+  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache, @InjectRepository(Vote) private votesRepo: Repository<Vote>) {}
 
   async refresh() {
     const votes: VotesGroupped[] = _(await this.votesRepo.find({ relations: ['user'] }))

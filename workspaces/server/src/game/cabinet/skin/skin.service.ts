@@ -2,7 +2,7 @@ import { ForbiddenException, Injectable, NotFoundException, StreamableFile, Unsu
 import { matchPermission } from 'src/admin/roles/guards/permisson.guard';
 import { Permission } from 'unicore-common';
 import { imageSize } from 'image-size';
-import { StorageManager, STORAGE_MAX_IMAGE_UPLOAD } from '@common';
+import { DEFAULT_CLOAK_FILE, DEFAULT_SKIN_FILE, StorageManager, STORAGE_MAX_IMAGE_UPLOAD } from '@common';
 import { Repository } from 'typeorm';
 import { Skin } from './entities/skin.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -142,7 +142,7 @@ export class SkinService {
     const user = await this.usersService.getByUsername(username);
     if (user?.skin) var file = StorageManager.readStream(user.skin.file);
 
-    if (!file) var default_file = StorageManager.readStream('default_skin.png');
+    if (!file) var default_file = StorageManager.readStream(DEFAULT_SKIN_FILE);
 
     if (!file && !default_file) throw new NotFoundException();
 
@@ -153,7 +153,7 @@ export class SkinService {
     const user = await this.usersService.getById(uuid);
     if (user?.skin) var file = StorageManager.readStream(user.skin.file);
 
-    if (!file) var default_file = StorageManager.readStream('default_skin.png');
+    if (!file) var default_file = StorageManager.readStream(DEFAULT_SKIN_FILE);
 
     if (!file && !default_file) throw new NotFoundException();
 
@@ -164,7 +164,7 @@ export class SkinService {
     const user = await this.usersService.getByUsername(username);
     if (user?.cloak) var file = StorageManager.readStream(user.cloak.file);
 
-    if (!file) var default_file = StorageManager.readStream('default_cloak.png');
+    if (!file) var default_file = StorageManager.readStream(DEFAULT_CLOAK_FILE);
 
     if (!file && !default_file) throw new NotFoundException();
 
@@ -175,7 +175,7 @@ export class SkinService {
     const user = await this.usersService.getById(uuid);
     if (user?.cloak) var file = StorageManager.readStream(user.cloak.file);
 
-    if (!file) var default_file = StorageManager.readStream('default_cloak.png');
+    if (!file) var default_file = StorageManager.readStream(DEFAULT_CLOAK_FILE);
 
     if (!file && !default_file) throw new NotFoundException();
 

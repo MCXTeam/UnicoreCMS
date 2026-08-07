@@ -40,13 +40,13 @@ export class BansController {
     return this.bansService.remove(uuid);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsUpdate])
+  @Permissions([Permission.AdminDashboard, Permission.AdminUsersBan])
   @Post('admin')
   createFromAdmin(@CurrentUser() user: User, @Body() body: BanFromAdminInput) {
     return this.bansService.createFromAdmin(user, body);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsUpdate])
+  @Permissions([Permission.AdminDashboard, Permission.AdminUsersBan])
   @Delete('admin/:uuid')
   deleteFromAdmin(@Param('uuid') uuid: string) {
     return this.bansService.remove(uuid);

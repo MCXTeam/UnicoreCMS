@@ -1,7 +1,7 @@
 import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { User } from 'src/admin/users/entities/user.entity';
-import { filterDonateWebPerms, Permission } from 'unicore-common';
+import { expandPermissionPattern, filterDonateWebPerms, Permission } from 'unicore-common';
 import * as minimath from 'minimatch';
 import * as _ from 'lodash';
 import { PERMISSIONS_KEY } from 'src/common/constants';
@@ -11,6 +11,12 @@ import { getDataSourceByName } from 'typeorm-transactional';
 import { UsersDonateGroup } from 'src/game/donate/groups/entities/user-donate.entity';
 import { UsersDonatePermission } from 'src/game/donate/permissions/entities/user-permission.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+
+function matchPerms(list: string[], pattern: string): string[] {
+  return expandPermissionPattern(pattern)
+    .map((expanded) => minimath.match(list, expanded))
+    .flat();
+}
 
 export type PermissionOptions = {
   handle?: (req: any) => Record<string, string | number | boolean> | Promise<Record<string, string | number | boolean>>;
@@ -28,13 +34,13 @@ export function transformPermissions(userPart: Partial<User>) {
     // Проходимся по правам пользователя
     const exclude = user.perms
       .filter((perm) => perm.charAt(0) === '!')
-      .map((perm) => minimath.match(Object.values(Permission), perm.slice(1)))
+      .map((perm) => matchPerms(Object.values(Permission), perm.slice(1)))
       .flat();
     user.perms = _.union(
       _.pull(
         user.perms
           .filter((perm) => perm.charAt(0) !== '!')
-          .map((perm) => minimath.match(Object.values(Permission), perm))
+          .map((perm) => matchPerms(Object.values(Permission), perm))
           .flat(),
         ...exclude,
       ),
@@ -105,12 +111,12 @@ export async function matchPermission(args: PermissionArgs, request: any): Promi
         for (const perm of role.perms) {
           // Проверям наличие права по паттерну
           if (perm.charAt(0) !== '!') {
-            matched = _.union(matched, minimath.match(permissions, perm));
+            matched = _.union(matched, matchPerms(permissions, perm));
           } else {
             // !Исключения (exclude) всегда в приоритете...
             // Они же права (патерны) начинающиеся на "!"
             // Фильтруем их, а потом удаляем "мусор"
-            matched = _.pull(matched, ...minimath.match(permissions, perm.slice(1)));
+            matched = _.pull(matched, ...matchPerms(permissions, perm.slice(1)));
           }
         }
       }
@@ -122,9 +128,9 @@ export async function matchPermission(args: PermissionArgs, request: any): Promi
     // Проходимся по правам пользователя
     for (const perm of user.perms) {
       if (perm.charAt(0) !== '!') {
-        matched = _.union(matched, minimath.match(permissions, perm));
+        matched = _.union(matched, matchPerms(permissions, perm));
       } else {
-        matched = _.pull(matched, ...minimath.match(permissions, perm.slice(1)));
+        matched = _.pull(matched, ...matchPerms(permissions, perm.slice(1)));
       }
     }
   }
@@ -134,9 +140,9 @@ export async function matchPermission(args: PermissionArgs, request: any): Promi
     // Проходимся по правам пользователя
     for (const perm of add_perms) {
       if (perm.charAt(0) !== '!') {
-        matched = _.union(matched, minimath.match(permissions, perm));
+        matched = _.union(matched, matchPerms(permissions, perm));
       } else {
-        matched = _.pull(matched, ...minimath.match(permissions, perm.slice(1)));
+        matched = _.pull(matched, ...matchPerms(permissions, perm.slice(1)));
       }
     }
   }

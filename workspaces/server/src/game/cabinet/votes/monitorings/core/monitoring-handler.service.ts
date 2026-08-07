@@ -24,15 +24,15 @@ export class MonitoringHandlerService {
 
       if (!user) return false;
 
-      const recentVote = await manager.findOne(Vote, {
+      const votedToday = await manager.findOne(Vote, {
         where: {
           monitoring: monitoring_id,
           user: { uuid: user.uuid },
-          created: MoreThanOrEqual(this.moment().subtract(1, 'day').toDate()),
+          created: MoreThanOrEqual(this.moment().startOf('day').toDate()),
         },
       });
 
-      if (recentVote) return false;
+      if (votedToday && cfg[ConfigField.VotesTwinkProtect]) return false;
 
       user.virtual += Number(cfg[ConfigField.MonitoringReward]);
 

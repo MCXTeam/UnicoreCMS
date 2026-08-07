@@ -11,6 +11,7 @@ export const WS_PUBLIC_ROOM = 'public';
 
 export const IS_PUBLIC_KEY = 'isPublic';
 export const PERMISSIONS_KEY = 'permissions';
+export const ALLOW_INACTIVE_KEY = 'allowInactive';
 
 export const STORAGE_MAX_IMAGE_UPLOAD = 2 * 1024 * 1024;
 export const STORAGE_MAX_REMOTE_DOWNLOAD = 10 * 1024 * 1024;
@@ -65,6 +66,16 @@ export const PASSWORD_MAX_LENGTH = 128;
 export const API_KEY_LENGTH = 64;
 export const API_KEY_COMMENT_MAX_LENGTH = 120;
 export const API_KEY_HASH = 'sha256';
+
+export const DEFAULT_SKIN_FILE = 'default/skin.png';
+export const DEFAULT_CLOAK_FILE = 'default/cloak.png';
+
+export const KERNEL_USERNAME = 'Kernel';
+
+export const DEFAULT_MINECRAFT_PORT = 25565;
+export const PING_TIMEOUT_MS = 3000;
+
+export const NEWS_PREVIEW_LENGTH = 300;
 
 export const DASHBOARD_WEEK_DAYS = 7;
 export const DASHBOARD_MONTH_DAYS = 30;

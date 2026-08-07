@@ -15,7 +15,12 @@ import { ConfigModule } from 'src/admin/config/config.module';
 import { RconModule } from 'src/game/servers/rcon/rcon.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([GroupKit, DonateGroup, Period, Server, User, UsersDonateGroup]), HistoryModule, ConfigModule, RconModule],
+  imports: [
+    TypeOrmModule.forFeature([GroupKit, DonateGroup, Period, Server, User, UsersDonateGroup]),
+    HistoryModule,
+    ConfigModule,
+    RconModule,
+  ],
   providers: [DonateGroupsService, GroupKitsService],
   exports: [DonateGroupsService],
   controllers: [GroupKitsController, DonateGroupsController],

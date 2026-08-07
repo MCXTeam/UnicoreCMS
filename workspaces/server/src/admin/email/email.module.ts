@@ -12,10 +12,7 @@ import { EmailMessageType } from './enums/email-message-type.enum';
 import { PasswordModule } from 'src/auth/password/password.module';
 
 @Module({
-  imports: [
-    PasswordModule,
-    TypeOrmModule.forFeature([EmailMessage, EmailActivation, User, PasswordReset, RefreshToken]),
-  ],
+  imports: [PasswordModule, TypeOrmModule.forFeature([EmailMessage, EmailActivation, User, PasswordReset, RefreshToken])],
   providers: [EmailService],
   controllers: [EmailController],
   exports: [EmailService],

@@ -72,9 +72,7 @@ export default {
   methods: {
     loadSkin() {
       this.viewer.loadSkin(
-        this.skin && this.$_.get(this.skin, 'file')
-          ? `${this.rc.apiBaseurl}/${this.$_.get(this.skin, 'file')}`
-          : '/default.png',
+        this.skin && this.$_.get(this.skin, 'file') ? `${this.rc.apiBaseurl}/${this.$_.get(this.skin, 'file')}` : '/default.png',
       )
     },
 

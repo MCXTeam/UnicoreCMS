@@ -1,13 +1,26 @@
-import { spawnSync } from "child_process";
-import { readFileSync } from "fs";
+import { spawn } from "child_process";
+import {
+  appendFileSync,
+  mkdirSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+} from "fs";
+import { dirname, resolve } from "path";
 
 import {
   BUILD_HEAP_MIN_MB,
   BUILD_HEAP_SHARE,
   BUILD_KILL_SIGNALS,
+  BUILD_LOG_FILE_NAME,
+  BUILD_LOG_MAX_BYTES,
   CGROUP_LIMIT_FILES,
   CGROUP_LIMIT_MAX,
+  LOG_DIR_MODE,
+  LOG_DIR_NAME,
+  LOG_FILE_MODE,
 } from "./constants";
+import { envFilePath } from "./ports";
 
 export function heapOptions(): string[] {
   for (const file of CGROUP_LIMIT_FILES) {
@@ -19,28 +32,79 @@ export function heapOptions(): string[] {
       continue;
     }
 
-    if (!Number.isFinite(limit) || limit <= 0 || limit > CGROUP_LIMIT_MAX) continue;
+    if (!Number.isFinite(limit) || limit <= 0 || limit > CGROUP_LIMIT_MAX)
+      continue;
 
     const megabytes = Math.floor((limit / 1024 / 1024) * BUILD_HEAP_SHARE);
 
-    if (megabytes >= BUILD_HEAP_MIN_MB) return [`--max-old-space-size=${megabytes}`];
+    if (megabytes >= BUILD_HEAP_MIN_MB)
+      return [`--max-old-space-size=${megabytes}`];
   }
 
   return [];
 }
 
-export function runNode(args: string[], cwd?: string): void {
-  const result = spawnSync(process.execPath, [...heapOptions(), ...args], { stdio: "inherit", cwd });
+export function buildLogPath(): string {
+  const directory = resolve(dirname(envFilePath), LOG_DIR_NAME);
 
-  if (result.error) throw result.error;
+  mkdirSync(directory, { recursive: true, mode: LOG_DIR_MODE });
 
-  if (result.signal && BUILD_KILL_SIGNALS.includes(result.signal)) {
-    process.stderr.write(
-      `\nBuild step killed by ${result.signal}: not enough memory. Raise the container memory limit or build with OBFUSCATE=0.\n`,
-    );
+  const path = resolve(directory, BUILD_LOG_FILE_NAME);
 
-    process.exit(1);
-  }
+  try {
+    if (statSync(path).size > BUILD_LOG_MAX_BYTES)
+      writeFileSync(path, "", { mode: LOG_FILE_MODE });
+  } catch {}
 
-  if (result.status !== 0) process.exit(result.status === null ? 1 : result.status);
+  return path;
+}
+
+export function runNode(args: string[], cwd?: string): Promise<void> {
+  const logPath = buildLogPath();
+  const write = (chunk: string | Uint8Array) => {
+    try {
+      appendFileSync(logPath, chunk, { mode: LOG_FILE_MODE });
+    } catch {}
+  };
+
+  write(`\n=== ${new Date().toISOString()} ${args.join(" ")} ===\n`);
+
+  return new Promise((done, fail) => {
+    const child = spawn(process.execPath, [...heapOptions(), ...args], {
+      cwd,
+      stdio: ["inherit", "pipe", "pipe"],
+    });
+
+    child.stdout.on("data", (chunk) => {
+      process.stdout.write(chunk);
+      write(chunk);
+    });
+
+    child.stderr.on("data", (chunk) => {
+      process.stderr.write(chunk);
+      write(chunk);
+    });
+
+    child.on("error", fail);
+
+    child.on("close", (status, signal) => {
+      if (signal && BUILD_KILL_SIGNALS.includes(signal)) {
+        const message = `\nBuild step killed by ${signal}: not enough memory. Raise the container memory limit or build with OBFUSCATE=0.\nFull log: ${logPath}\n`;
+
+        process.stderr.write(message);
+        write(message);
+        process.exit(1);
+      }
+
+      if (status !== 0) {
+        const message = `\nBuild step failed with exit code ${status}.\nFull log: ${logPath}\n`;
+
+        process.stderr.write(message);
+        write(message);
+        process.exit(status === null ? 1 : status);
+      }
+
+      done();
+    });
+  });
 }

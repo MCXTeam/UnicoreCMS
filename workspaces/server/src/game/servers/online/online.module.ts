@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { OnlineService } from './online.service';
-import { OnlineController } from './online.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Online } from './entities/online.entity';
 import { ServersService } from '../servers.service';
@@ -9,11 +8,11 @@ import { OnlinesRecord } from './entities/onlines-record.entity';
 import { OnlinesAbsoluteRecord } from './entities/onlines-absolute-record.entity';
 import { Query } from './entities/query.entity';
 import { Mod } from '../mods/entities/mod.entity';
+import { ServerInstance } from '../entities/server-instance.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Online, Server, OnlinesRecord, OnlinesAbsoluteRecord, Query, Mod])],
+  imports: [TypeOrmModule.forFeature([Online, Server, OnlinesRecord, OnlinesAbsoluteRecord, Query, Mod, ServerInstance])],
   providers: [OnlineService, ServersService],
-  controllers: [OnlineController],
   exports: [OnlineService],
 })
 export class OnlineModule {}

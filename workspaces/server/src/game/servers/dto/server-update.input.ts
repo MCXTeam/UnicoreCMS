@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer';
 import { IsArray, IsDefined, IsEnum, IsInt, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { DeliveryMode } from 'unicore-common';
+import { ServerInstance } from '../entities/server-instance.entity';
 import { ServerTable } from '../entities/server-table.entity';
 import { Query } from '../online/entities/query.entity';
 import { RconInput } from './rcon.input';
@@ -46,6 +47,11 @@ export class ServerUpdateInput {
   @IsArray()
   @Type(() => ServerTable)
   table: ServerTable[];
+
+  @IsOptional()
+  @IsArray()
+  @Type(() => ServerInstance)
+  instances?: ServerInstance[];
 
   @IsOptional()
   @IsArray()

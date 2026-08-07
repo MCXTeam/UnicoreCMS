@@ -57,13 +57,13 @@ export class CartController {
     return this.cartService.remove(id);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
+  @Permissions([Permission.AdminDashboard, Permission.AdminUsersGive])
   @Post('admin/give/product')
   giveProduct(@Body() body: GiveProductInput) {
     return this.cartService.giveProductByDTO(body);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
+  @Permissions([Permission.AdminDashboard, Permission.AdminUsersGive])
   @Post('admin/give/kit')
   giveKit(@Body() body: GiveKitInput) {
     return this.cartService.giveKitByDTO(body);

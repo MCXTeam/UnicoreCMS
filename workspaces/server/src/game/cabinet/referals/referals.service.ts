@@ -11,10 +11,7 @@ import * as _ from 'lodash';
 
 @Injectable()
 export class ReferalsService {
-  constructor(
-    @InjectRepository(Referal) private referalsRepo: Repository<Referal>,
-    private playtimeService: PlaytimeService,
-  ) {}
+  constructor(@InjectRepository(Referal) private referalsRepo: Repository<Referal>, private playtimeService: PlaytimeService) {}
 
   async getInviter(user: User) {
     const inviter = await this.referalsRepo.findOne({ where: { user: { uuid: user.uuid } }, relations: ['user', 'inviter'] });

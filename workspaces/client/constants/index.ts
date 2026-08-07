@@ -1,3 +1,10 @@
+export const PAYMENT_POLL_ATTEMPTS = 10
+export const PAYMENT_POLL_INTERVAL_MS = 3000
+
+export const FULL_WIDTH_PAGE_CLASS = 'full-width-page'
+
+export const IMAGE_FALLBACK = '/images/placeholder.svg'
+
 export const KIT_HIDE_DELAY_MS = 250
 
 export const YANDEX_METRIKA_SCRIPT = 'https://mc.yandex.ru/metrika/tag.js'

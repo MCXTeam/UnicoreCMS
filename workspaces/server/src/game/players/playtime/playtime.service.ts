@@ -6,19 +6,16 @@ import { Playtime } from 'src/game/cabinet/playtime/entities/playtime.entity';
 import { Not, Repository } from 'typeorm';
 import * as _ from 'lodash';
 import { PlaytimeGroupped } from './playtime-groupped.interface';
-import { CacheKey } from '@common';
+import { CacheKey, KERNEL_USERNAME } from '@common';
 import { GrouppedPaginate } from '../groupped.dto';
 
 @Injectable()
 export class PlaytimeListService {
-  constructor(
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
-    @InjectRepository(Playtime) private playtimeRepo: Repository<Playtime>,
-  ) {}
+  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache, @InjectRepository(Playtime) private playtimeRepo: Repository<Playtime>) {}
 
   async refresh() {
     const platimes: PlaytimeGroupped[] = _(
-      await this.playtimeRepo.find({ where: { user: { username: Not('Kernel') } }, relations: ['user'] }),
+      await this.playtimeRepo.find({ where: { user: { username: Not(KERNEL_USERNAME) } }, relations: ['user'] }),
     )
       .groupBy((v) => v.user.uuid)
       .map((value) => ({

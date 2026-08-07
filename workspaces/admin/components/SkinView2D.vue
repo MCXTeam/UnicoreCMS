@@ -45,10 +45,7 @@ export default {
     render() {
       new SkinViewer2D({
         domElement: this.$refs.skinHead,
-        skinUrl:
-          this.skin && this.$_.get(this.skin, 'file')
-            ? `${this.rc.apiBaseurl}/${this.$_.get(this.skin, 'file')}`
-            : '/default.png',
+        skinUrl: this.skin && this.$_.get(this.skin, 'file') ? `${this.rc.apiBaseurl}/${this.$_.get(this.skin, 'file')}` : '/default.png',
         width: this.width,
         height: this.height,
       })

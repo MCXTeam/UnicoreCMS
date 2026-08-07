@@ -1,4 +1,5 @@
-import { IsDefined, IsOptional, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsBoolean, IsDefined, IsOptional, IsString } from 'class-validator';
 import { SanitizeHtml } from '@common';
 
 export class PageInput {
@@ -18,6 +19,11 @@ export class PageInput {
   @IsString()
   @SanitizeHtml()
   content: string;
+
+  @IsOptional()
+  @Transform(({ value }) => value === true || value === 'true')
+  @IsBoolean()
+  full_size?: boolean;
 
   @IsOptional()
   @IsString()
