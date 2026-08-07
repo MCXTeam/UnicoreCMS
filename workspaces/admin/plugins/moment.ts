@@ -1,8 +1,10 @@
 import moment from 'moment-timezone'
 import 'moment/locale/ru'
 import momentDurationFormatSetup from 'moment-duration-format'
-import { extendMoment } from 'moment-range'
+import * as momentRange from 'moment-range'
 import { useLocale } from '~/composables/useLocale'
+
+const { extendMoment } = (momentRange as any).default ?? momentRange
 
 export default defineNuxtPlugin(() => {
   const { timezone } = useRuntimeConfig().public
