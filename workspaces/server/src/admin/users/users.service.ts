@@ -197,7 +197,7 @@ export class UsersService {
 
     user.uuid = randomUUID();
     user.username = input.username;
-    user.superuser = input.superuser;
+    user.superuser = actor && !actor.superuser ? null : input.superuser;
     user.locale = input.locale;
     user.password = await this.passwordService.hash(input.password, passwordAad(user.uuid));
 
@@ -229,8 +229,12 @@ export class UsersService {
 
     const allowed = new Set(allowedFields);
 
+    if (actor && !(await userPermissionCheck(user, actor))) throw new ForbiddenException();
+
+    const superuser = actor && !actor.superuser ? user.superuser : input.superuser;
+
     user.username = input.username;
-    user.superuser = input.superuser;
+    user.superuser = superuser;
 
     if (allowed.has('email')) user.email = input.email;
     if (allowed.has('activated')) user.activated = input.activated;
@@ -247,14 +251,10 @@ export class UsersService {
         user.roles.push(await this.rolesRepository.findOneBy({ id: ImportantRoles.Default }));
     }
 
-    if (actor) {
-      if (!(await userPermissionCheck(user, actor))) throw new ForbiddenException();
+    if (actor && user.uuid == actor.uuid) {
+      if (actor.superuser != user.superuser) throw new BadRequestException();
 
-      if (user.uuid == actor.uuid) {
-        if (actor.superuser != user.superuser) throw new BadRequestException();
-
-        if (!(await matchPermission([Permission.AdminDashboard, Permission.AdminUsersUpdate], { user }))) throw new BadRequestException();
-      }
+      if (!(await matchPermission([Permission.AdminDashboard, Permission.AdminUsersUpdate], { user }))) throw new BadRequestException();
     }
 
     return this.usersRepository.save(user);

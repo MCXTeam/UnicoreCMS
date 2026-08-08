@@ -2,13 +2,13 @@ import { uniq } from 'lodash';
 import { EventPermission, Permission } from 'unicore-common';
 
 export const PermissionMapper = uniq(
-  Object.values({ ...Permission, ...EventPermission })
+  [...Object.values(Permission), ...Object.values(EventPermission)]
     .map((perm) => {
-      const perm_map = perm.split('.').map((part, index, perm_split) => {
-        return [perm_split.map((v, i, o) => perm_split.slice(0, -i).join('.') + '.*'), perm_split.join('.')];
-      });
-      return perm_map;
+      const parts = perm.split('.');
+      const wildcards = parts.slice(0, -1).map((_part, index) => parts.slice(0, index + 1).join('.') + '.*');
+
+      return [...wildcards, perm];
     })
-    .flat(3)
+    .flat()
     .sort(),
-).filter((perm) => perm !== '.*');
+);

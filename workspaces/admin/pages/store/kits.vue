@@ -48,8 +48,7 @@
           <Column field="name" :header="$t('admin.name')" sortable>
             <template #body="slotProps">
               <div class="flex align-items-center">
-                <Avatar v-if="slotProps.data.icon" :image="`${apiUrl + '/' + slotProps.data.icon}`" shape="circle" />
-                <Avatar v-else icon="pi pi-image" shape="circle" />
+                <IconAvatar :path="slotProps.data.icon" />
                 <span class="ml-2">{{ slotProps.data.name }}</span>
               </div>
             </template>
@@ -77,8 +76,7 @@
               >
                 <template #option="slotProps">
                   <div class="p-multiselect-representative-option">
-                    <Avatar v-if="slotProps.option.icon" :image="`${apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
-                    <Avatar v-else icon="pi pi-image" shape="circle" />
+                    <IconAvatar :path="slotProps.option.icon" />
                     <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                   </div>
                 </template>
@@ -102,8 +100,7 @@
               >
                 <template #option="slotProps">
                   <div class="flex align-items-center">
-                    <Avatar v-if="slotProps.option.icon" :image="`${apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
-                    <Avatar v-else icon="pi pi-image" shape="circle" />
+                    <IconAvatar :path="slotProps.option.icon" />
                     <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                   </div>
                 </template>
@@ -126,8 +123,7 @@
 
         <Dialog v-model:visible="fileDialog" :style="{ width: '400px' }" :modal="true" :header="$t('admin.kit_icon')" class="p-fluid">
           <div class="flex align-items-center justify-content-center flex-wrap w-full">
-            <Avatar v-if="kit.icon" :image="`${apiUrl + '/' + kit.icon}`" size="xlarge" shape="circle" />
-            <Avatar v-else icon="pi pi-image" size="xlarge" shape="circle" />
+            <IconAvatar :path="kit.icon" size="xlarge" />
             <div class="field ml-6 mb-0">
               <Button :label="$t('admin.upload')" icon="pi pi-upload" @click="$refs.fileInput.choose()" />
               <Button :label="$t('admin.delete')" icon="pi pi-trash" class="p-button-secondary mt-2" @click="removeIcon()" />
@@ -208,12 +204,7 @@
                   <Column field="product" :header="$t('admin.store_product')" :style="{ width: '40%' }">
                     <template #body="slotProps">
                       <div class="flex align-items-center">
-                        <Avatar
-                          v-if="$_.get(slotProps.data, 'product.icon')"
-                          :image="`${apiUrl + '/' + $_.get(slotProps.data, 'product.icon')}`"
-                          shape="circle"
-                        />
-                        <Avatar v-else icon="pi pi-image" shape="circle" />
+                        <IconAvatar :path="$_.get(slotProps.data, 'product.icon')" />
                         <span class="ml-2">{{ $_.get(slotProps.data, 'product.name', $t('admin.not_selected')) }}</span>
                       </div>
                     </template>
@@ -227,8 +218,7 @@
                       >
                         <template #option="slotProps">
                           <div class="flex align-items-center">
-                            <Avatar v-if="slotProps.option.icon" :image="`${apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
-                            <Avatar v-else icon="pi pi-image" shape="circle" />
+                            <IconAvatar :path="slotProps.option.icon" />
                             <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                           </div>
                         </template>
@@ -265,8 +255,7 @@
                 >
                   <template #option="slotProps">
                     <div class="p-multiselect-representative-option">
-                      <Avatar v-if="slotProps.option.icon" :image="`${apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
-                      <Avatar v-else icon="pi pi-image" shape="circle" />
+                      <IconAvatar :path="slotProps.option.icon" />
                       <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                     </div>
                   </template>
@@ -285,8 +274,7 @@
                 >
                   <template #option="slotProps">
                     <div class="flex align-items-center">
-                      <Avatar v-if="slotProps.option.icon" :image="`${apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
-                      <Avatar v-else icon="pi pi-image" shape="circle" />
+                      <IconAvatar :path="slotProps.option.icon" />
                       <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                     </div>
                   </template>
@@ -396,7 +384,7 @@ export default {
     const { $t } = useNuxtApp()
 
     useHead({ title: computed(() => $t('admin.menu_kits')) })
-    return { translations, apiUrl: rc.public.apiBaseurl, realDecimals: rc.public.realDecimals }
+    return { translations, realDecimals: rc.public.realDecimals }
   },
   data() {
     return {

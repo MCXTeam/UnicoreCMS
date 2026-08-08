@@ -40,8 +40,7 @@
       <div v-for="online in onlines.servers" :key="online.server.id" class="mb-4">
         <div class="onlines d-flex justify-content-between align-items-end mb-3">
           <div class="d-flex">
-            <Avatar v-if="online.server.icon" size="xlarge" :image="`${$pub.apiBaseurl}/${online.server.icon}`" />
-            <Avatar v-else size="xlarge"> <i class="bx bxs-server"></i> </Avatar>
+            <IconAvatar :path="online.server.icon" size="xlarge" icon="bx bxs-server" />
             <div class="ms-3">
               <span>{{ $t('panel.version') }}: {{ online.server.version }}</span>
               <NuxtLink :to="`/servers/${online.server.id}`">

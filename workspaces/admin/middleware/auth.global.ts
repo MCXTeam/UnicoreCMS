@@ -1,4 +1,5 @@
 import { useAuthStore } from '~/stores/auth'
+import { routeAccess } from '~/constants/access'
 
 const publicPages = ['/login']
 
@@ -12,5 +13,9 @@ export default defineNuxtRouteMiddleware((to) => {
 
   if (!auth.loggedIn || !auth.isAdmin) {
     return navigateTo('/login')
+  }
+
+  if (to.path !== '/' && !auth.can(routeAccess(to.path))) {
+    return navigateTo('/')
   }
 })

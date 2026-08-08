@@ -93,8 +93,7 @@
       </p>
       <div class="row mt-2" v-if="money">
         <div class="col-xl-4 d-flex align-items-center mb-3" v-for="m in money" :key="m.server.id">
-          <Avatar v-if="m.server.icon" size="xlarge" :image="`${$pub.apiBaseurl}/${m.server.icon}`"> </Avatar>
-          <Avatar v-else size="xlarge"> <i class="bx bxs-server"></i> </Avatar>
+          <IconAvatar :path="m.server.icon" size="xlarge" icon="bx bxs-server" />
           <div class="ms-3">
             <h3 class="m-0" v-text="m.server.name" />
             <span>{{ $t('cabinet.coins', { amount: $utils.formatCurrency('ingame', m.money) }) }}</span>

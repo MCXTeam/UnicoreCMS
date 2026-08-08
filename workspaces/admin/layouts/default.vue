@@ -18,6 +18,8 @@
 
 <script>
 import { useToast } from 'primevue/usetoast'
+import { useAuthStore } from '~/stores/auth'
+import { routeAccess } from '~/constants/access'
 import { usePrimeVue } from 'primevue/config'
 
 export default {
@@ -33,7 +35,7 @@ export default {
       overlayMenuActive: false,
       mobileMenuActive: false,
       menuClick: false,
-      menu: [
+      menuSource: [
         {
           label: 'admin.menu_main',
           items: [
@@ -241,6 +243,21 @@ export default {
     },
   },
   computed: {
+    menu() {
+      const auth = useAuthStore()
+
+      const allowed = (item) => {
+        if (item.items) {
+          const items = item.items.map(allowed).filter(Boolean)
+          return items.length ? { ...item, items } : null
+        }
+
+        return auth.can(routeAccess(item.to)) ? item : null
+      }
+
+      return this.menuSource.map(allowed).filter(Boolean)
+    },
+
     containerClass() {
       return [
         'layout-wrapper',

@@ -196,7 +196,7 @@ a.server-block:hover {
       }
     }
 
-    &:hover,
+    &:not(.p-button):hover,
     &.nuxt-link-exact-active,
     &.nuxt-link-active.no-exact {
       color: rgba(var(--vs-text), 1) !important;

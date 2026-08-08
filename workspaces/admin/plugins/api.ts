@@ -2,7 +2,7 @@ import axios, { type AxiosInstance } from 'axios'
 import { RAW_CONTENT_HEADER } from 'unicore-common/locales'
 import { useAuthStore } from '~/stores/auth'
 
-export default defineNuxtPlugin(() => {
+export default defineNuxtPlugin((nuxtApp) => {
   const config = useRuntimeConfig()
   const api: AxiosInstance = axios.create({ baseURL: config.public.apiBaseurl })
 
@@ -39,7 +39,12 @@ export default defineNuxtPlugin(() => {
         }
       }
 
-      if (status === 403) await navigateTo('/')
+      if (status === 403 && import.meta.client) {
+        const toast = nuxtApp.vueApp.config.globalProperties.$toast
+        const t = (key: string) => String((nuxtApp as any).$t?.(key) ?? key)
+
+        toast?.add({ severity: 'error', summary: t('error.title'), detail: t('error.no_permission'), life: 4000 })
+      }
 
       return Promise.reject(error)
     },

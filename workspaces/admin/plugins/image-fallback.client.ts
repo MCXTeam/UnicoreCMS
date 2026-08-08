@@ -6,7 +6,7 @@ export default defineNuxtPlugin(() => {
     (event) => {
       const image = event.target as HTMLImageElement
 
-      if (!(image instanceof HTMLImageElement) || image.dataset.fallback) return
+      if (!(image instanceof HTMLImageElement) || image.dataset.fallback || image.closest('.p-avatar')) return
 
       image.dataset.fallback = '1'
       image.src = IMAGE_FALLBACK

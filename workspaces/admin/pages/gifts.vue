@@ -152,8 +152,7 @@
                 <Select :modelValue="value" @update:modelValue="handleChange" :options="servers" optionLabel="name" appendTo="body">
                   <template #option="slotProps">
                     <div class="flex align-items-center">
-                      <Avatar v-if="slotProps.option.icon" :image="`${apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
-                      <Avatar v-else icon="pi pi-image" shape="circle" />
+                      <IconAvatar :path="slotProps.option.icon" />
                       <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                     </div>
                   </template>
@@ -173,8 +172,7 @@
                 <Select :modelValue="value" @update:modelValue="handleChange" :options="donate_groups" optionLabel="name" appendTo="body">
                   <template #option="slotProps">
                     <div class="flex align-items-center">
-                      <Avatar v-if="slotProps.option.icon" :image="`${apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
-                      <Avatar v-else icon="pi pi-image" shape="circle" />
+                      <IconAvatar :path="slotProps.option.icon" />
                       <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                     </div>
                   </template>
@@ -222,8 +220,7 @@
                 >
                   <template #option="slotProps">
                     <div class="flex align-items-center">
-                      <Avatar v-if="slotProps.option.icon" :image="`${apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
-                      <Avatar v-else icon="pi pi-image" shape="circle" />
+                      <IconAvatar :path="slotProps.option.icon" />
                       <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                     </div>
                   </template>
@@ -250,8 +247,7 @@
                 >
                   <template #option="slotProps">
                     <div class="flex align-items-center">
-                      <Avatar v-if="slotProps.option.icon" :image="`${apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
-                      <Avatar v-else icon="pi pi-image" shape="circle" />
+                      <IconAvatar :path="slotProps.option.icon" />
                       <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                     </div>
                   </template>
@@ -306,11 +302,9 @@ export default {
     VeeField: Field,
   },
   setup() {
-    const rc = useRuntimeConfig()
     const { $t } = useNuxtApp()
 
     useHead({ title: computed(() => $t('admin.menu_gifts')) })
-    return { apiUrl: rc.public.apiBaseurl }
   },
   data() {
     return {

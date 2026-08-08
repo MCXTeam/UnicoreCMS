@@ -21,8 +21,7 @@
             <Select :modelValue="value" @update:modelValue="handleChange" :options="servers" optionLabel="name" appendTo="body">
               <template #option="slotProps">
                 <div class="flex align-items-center">
-                  <Avatar v-if="slotProps.option.icon" :image="`${rc.apiBaseurl + '/' + slotProps.option.icon}`" shape="circle" />
-                  <Avatar v-else icon="pi pi-image" shape="circle" />
+                  <IconAvatar :path="slotProps.option.icon" />
                   <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                 </div>
               </template>
@@ -49,8 +48,7 @@
             >
               <template #option="slotProps">
                 <div class="flex align-items-center">
-                  <Avatar v-if="slotProps.option.icon" :image="`${rc.apiBaseurl + '/' + slotProps.option.icon}`" shape="circle" />
-                  <Avatar v-else icon="pi pi-image" shape="circle" />
+                  <IconAvatar :path="slotProps.option.icon" />
                   <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                 </div>
               </template>
@@ -105,8 +103,7 @@
             <Select :modelValue="value" @update:modelValue="handleChange" :options="servers" optionLabel="name" appendTo="body">
               <template #option="slotProps">
                 <div class="flex align-items-center">
-                  <Avatar v-if="slotProps.option.icon" :image="`${rc.apiBaseurl + '/' + slotProps.option.icon}`" shape="circle" />
-                  <Avatar v-else icon="pi pi-image" shape="circle" />
+                  <IconAvatar :path="slotProps.option.icon" />
                   <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                 </div>
               </template>
@@ -127,8 +124,7 @@
             >
               <template #option="slotProps">
                 <div class="flex align-items-center">
-                  <Avatar v-if="slotProps.option.icon" :image="`${rc.apiBaseurl + '/' + slotProps.option.icon}`" shape="circle" />
-                  <Avatar v-else icon="pi pi-image" shape="circle" />
+                  <IconAvatar :path="slotProps.option.icon" />
                   <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                 </div>
               </template>
@@ -170,8 +166,7 @@
             <Select :modelValue="value" @update:modelValue="handleChange" :options="servers" optionLabel="name" appendTo="body">
               <template #option="slotProps">
                 <div class="flex align-items-center">
-                  <Avatar v-if="slotProps.option.icon" :image="`${rc.apiBaseurl + '/' + slotProps.option.icon}`" shape="circle" />
-                  <Avatar v-else icon="pi pi-image" shape="circle" />
+                  <IconAvatar :path="slotProps.option.icon" />
                   <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                 </div>
               </template>
@@ -191,8 +186,7 @@
             <Select :modelValue="value" @update:modelValue="handleChange" :options="donateGroups" optionLabel="name" appendTo="body">
               <template #option="slotProps">
                 <div class="flex align-items-center">
-                  <Avatar v-if="slotProps.option.icon" :image="`${rc.apiBaseurl + '/' + slotProps.option.icon}`" shape="circle" />
-                  <Avatar v-else icon="pi pi-image" shape="circle" />
+                  <IconAvatar :path="slotProps.option.icon" />
                   <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                 </div>
               </template>
@@ -267,8 +261,7 @@
             <Select :modelValue="value" @update:modelValue="handleChange" :options="servers" optionLabel="name" appendTo="body">
               <template #option="slotProps">
                 <div class="flex align-items-center">
-                  <Avatar v-if="slotProps.option.icon" :image="`${rc.apiBaseurl + '/' + slotProps.option.icon}`" shape="circle" />
-                  <Avatar v-else icon="pi pi-image" shape="circle" />
+                  <IconAvatar :path="slotProps.option.icon" />
                   <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                 </div>
               </template>
@@ -555,12 +548,7 @@
                 <Column field="m.server.name" :header="$t('cabinet.server')" sortable>
                   <template #body="slotProps">
                     <div class="flex align-items-center">
-                      <Avatar
-                        v-if="slotProps.data.server.icon"
-                        :image="`${rc.apiBaseurl + '/' + slotProps.data.server.icon}`"
-                        shape="circle"
-                      />
-                      <Avatar v-else icon="pi pi-image" shape="circle" />
+                      <IconAvatar :path="slotProps.data.server.icon" />
                       <span class="ml-2">{{ slotProps.data.server.name }}</span>
                     </div>
                   </template>
@@ -593,12 +581,7 @@
               <Column field="server" :header="$t('cabinet.server')">
                 <template #body="slotProps">
                   <div class="flex align-items-center">
-                    <Avatar
-                      v-if="slotProps.data.server.icon"
-                      :image="`${rc.apiBaseurl + '/' + slotProps.data.server.icon}`"
-                      shape="circle"
-                    />
-                    <Avatar v-else icon="pi pi-image" shape="circle" />
+                    <IconAvatar :path="slotProps.data.server.icon" />
                     <span class="ml-2">{{ slotProps.data.server.name }}</span>
                   </div>
                 </template>
@@ -606,8 +589,7 @@
               <Column field="group.name" :header="$t('admin.group')" sortable>
                 <template #body="slotProps">
                   <div class="flex align-items-center">
-                    <Avatar v-if="slotProps.data.group.icon" :image="`${rc.apiBaseurl + '/' + slotProps.data.group.icon}`" shape="circle" />
-                    <Avatar v-else icon="pi pi-image" shape="circle" />
+                    <IconAvatar :path="slotProps.data.group.icon" />
                     <span class="ml-2">{{ slotProps.data.group.name }}</span>
                   </div>
                 </template>
@@ -634,12 +616,7 @@
                 <template #body="slotProps">
                   <div v-if="slotProps.data.server">
                     <div class="flex align-items-center">
-                      <Avatar
-                        v-if="slotProps.data.server.icon"
-                        :image="`${rc.apiBaseurl + '/' + slotProps.data.server.icon}`"
-                        shape="circle"
-                      />
-                      <Avatar v-else icon="pi pi-image" shape="circle" />
+                      <IconAvatar :path="slotProps.data.server.icon" />
                       <span class="ml-2">{{ slotProps.data.server.name }}</span>
                     </div>
                   </div>
@@ -676,8 +653,7 @@
               >
                 <template #option="slotProps">
                   <div class="flex align-items-center">
-                    <Avatar v-if="slotProps.option.icon" :image="`${rc.apiBaseurl + '/' + slotProps.option.icon}`" shape="circle" />
-                    <Avatar v-else icon="pi pi-image" shape="circle" />
+                    <IconAvatar :path="slotProps.option.icon" />
                     <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                   </div>
                 </template>
@@ -690,12 +666,7 @@
               <Column field="name" :header="$t('admin.name')" sortable>
                 <template #body="slotProps">
                   <div class="flex align-items-center">
-                    <Avatar
-                      v-if="slotProps.data.product.icon"
-                      :image="`${rc.apiBaseurl + '/' + slotProps.data.product.icon}`"
-                      shape="circle"
-                    />
-                    <Avatar v-else icon="pi pi-image" shape="circle" />
+                    <IconAvatar :path="slotProps.data.product.icon" />
                     <span class="ml-2">{{ slotProps.data.product.name }}</span>
                   </div>
                 </template>
@@ -804,12 +775,24 @@ export default {
 
   methods: {
     async load() {
-      this.roles = await this.$api.get('/admin/roles').then((res) => res.data)
-      this.servers = await this.$api.get('/servers').then((res) => res.data)
-      this.autocompleate = await this.$api.get('/admin/roles/autocompleate').then((res) => res.data)
-      this.periods = await this.$api.get('/donates/periods').then((res) => res.data)
-      this.donatePermissions = await this.$api.get('/donates/permissions').then((res) => res.data)
-      this.donateGroups = await this.$api.get('/donates/groups').then((res) => res.data)
+      const optional = (url) => this.$api.get(url).then((res) => res.data).catch(() => [])
+
+      const [roles, servers, autocompleate, periods, donatePermissions, donateGroups] = await Promise.all([
+        optional('/admin/roles'),
+        optional('/servers'),
+        optional('/admin/roles/autocompleate'),
+        optional('/donates/periods'),
+        optional('/donates/permissions'),
+        optional('/donates/groups'),
+      ])
+
+      this.roles = roles
+      this.servers = servers
+      this.autocompleate = autocompleate
+      this.periods = periods
+      this.donatePermissions = donatePermissions
+      this.donateGroups = donateGroups
+
       await this.fetchUser()
 
       if (this.servers.length) {
@@ -837,26 +820,38 @@ export default {
 
     async warehouseFetch() {
       this.wh_loading = true
-      this.warehouse = await this.$api.get(`/store/warehouse/admin/${this.user.uuid}/${this.warehouse_server.id}`).then((res) => res.data)
+      this.warehouse = await this.$api
+        .get(`/store/warehouse/admin/${this.user.uuid}/${this.warehouse_server.id}`)
+        .then((res) => res.data)
+        .catch(() => [])
       this.wh_loading = false
     },
 
     async moneyFetch() {
       this.money_loading = true
-      this.money = await this.$api.get(`/cabinet/money/admin/` + this.user.uuid).then((res) => res.data)
+      this.money = await this.$api
+        .get(`/cabinet/money/admin/` + this.user.uuid)
+        .then((res) => res.data)
+        .catch(() => [])
       this.money_loading = false
     },
 
     async udgFetch() {
       this.udg_loading = true
-      this.udg = await this.$api.get(`/donates/groups/admin/${this.user.uuid}`).then((res) => res.data)
+      this.udg = await this.$api
+        .get(`/donates/groups/admin/${this.user.uuid}`)
+        .then((res) => res.data)
+        .catch(() => [])
       this.giveUDGDialog = false
       this.udg_loading = false
     },
 
     async udpFetch() {
       this.udp_loading = true
-      this.udp = await this.$api.get(`/donates/permissions/admin/${this.user.uuid}`).then((res) => res.data)
+      this.udp = await this.$api
+        .get(`/donates/permissions/admin/${this.user.uuid}`)
+        .then((res) => res.data)
+        .catch(() => [])
       this.giveUDPDialog = false
       this.udp_loading = false
     },

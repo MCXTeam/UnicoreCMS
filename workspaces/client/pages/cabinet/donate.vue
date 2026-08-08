@@ -182,8 +182,7 @@
             class="d-flex justify-content-between align-items-center cab-donate-block mt-3 pb-3"
           >
             <div class="d-flex align-items-center">
-              <Avatar v-if="group.icon" size="xlarge" :image="`${$pub.apiBaseurl}/${group.icon}`"> </Avatar>
-              <Avatar v-else size="xlarge"> <i class="bx bx-crown"></i> </Avatar>
+              <IconAvatar :path="group.icon" size="xlarge" icon="bx bx-crown" />
               <div class="ms-4">
                 <div class="d-flex align-items-center">
                   <h2 class="text-uppercase m-0" v-text="group.name" />

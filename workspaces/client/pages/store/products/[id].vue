@@ -14,8 +14,7 @@
           <h4 class="mt-2 mb-0">{{ $t('store.server', { server: server.name }) }}</h4>
           <h3 class="mt-0" v-if="product.type == 'product'" v-text="product.payload.name" />
           <h3 class="mt-0" v-else>{{ $t('store.kit_name', { name: product.payload.name }) }}</h3>
-          <Avatar v-if="product.payload.icon" size="xlarge" :image="`${apiUrl}/${product.payload.icon}`"> </Avatar>
-          <Avatar v-else size="xlarge"> <i class="bx bxs-image"></i> </Avatar>
+          <IconAvatar :path="product.payload.icon" size="xlarge" />
         </div>
       </template>
       <div class="description-html mb-3" v-if="product.payload.description" v-html="$sanitize(product.payload.description)" />
@@ -33,8 +32,7 @@
         <h3 class="mt-0 text-center">{{ $t('store.kit_contents') }}</h3>
         <div v-if="product.payload.items">
           <div class="d-flex mb-1" v-for="item in product.payload.items" :key="item.product.id">
-            <Avatar v-if="item.product.icon" :image="`${apiUrl}/${item.product.icon}`"> </Avatar>
-            <Avatar v-else> <i class="bx bxs-image"></i> </Avatar>
+            <IconAvatar :path="item.product.icon" />
             <h4 class="ms-2 my-0">{{ item.product.name }} x{{ item.amount }}</h4>
           </div>
         </div>
@@ -71,8 +69,7 @@
       <table class="store-table" v-if="products.data.length">
         <tr :key="product.payload.id" v-for="product in products.data">
           <td class="d-flex align-items-center">
-            <Avatar v-if="product.payload.icon" size="large" :image="`${apiUrl}/${product.payload.icon}`"> </Avatar>
-            <Avatar v-else size="large"> <i class="bx bxs-image"></i> </Avatar>
+            <IconAvatar :path="product.payload.icon" size="large" />
             <div class="ms-3">
               <h4 class="m-0">
                 {{ product.payload.name }} <small class="sale-wrapper ms-2" v-if="product.type == 'kit'">{{ $t('store.kit') }}</small>
@@ -117,7 +114,6 @@ definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'head
 const { $api, $unicore, $t } = useNuxtApp()
 
 useHead({ title: computed(() => $t('header.store')) })
-const apiUrl = useRuntimeConfig().public.apiBaseurl
 const route = useRoute()
 const ui = useUiStore()
 const configStore = useConfigStore()

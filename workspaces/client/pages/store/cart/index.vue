@@ -18,8 +18,7 @@
       <table class="store-table" v-if="cart.items.length">
         <tr :key="cartItem.id" v-for="cartItem in cart.items.filter((ci) => ci.type == 'kit')">
           <td class="d-flex align-items-center">
-            <Avatar v-if="cartItem.payload.kit.icon" size="large" :image="`${$pub.apiBaseurl}/${cartItem.payload.kit.icon}`"> </Avatar>
-            <Avatar v-else size="large"> <i class="bx bxs-image"></i> </Avatar>
+            <IconAvatar :path="cartItem.payload.kit.icon" size="large" />
             <div class="ms-3">
               <h4 class="m-0">
                 {{ cartItem.payload.kit.name }} <small class="sale-wrapper ms-2">{{ $t('store.kit') }}</small>
@@ -45,9 +44,7 @@
         </tr>
         <tr :key="cartItem.id" v-for="cartItem in cart.items.filter((ci) => ci.type == 'product')">
           <td class="d-flex align-items-center">
-            <Avatar v-if="cartItem.payload.product.icon" size="large" :image="`${$pub.apiBaseurl}/${cartItem.payload.product.icon}`">
-            </Avatar>
-            <Avatar v-else size="large"> <i class="bx bxs-image"></i> </Avatar>
+            <IconAvatar :path="cartItem.payload.product.icon" size="large" />
             <div class="ms-3">
               <h4 class="m-0">
                 {{ cartItem.payload.product.name }}

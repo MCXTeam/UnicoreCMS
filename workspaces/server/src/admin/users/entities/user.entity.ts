@@ -39,7 +39,7 @@ export class User {
   activated: boolean;
 
   @Exclude()
-  @Column({ name: 'access_token', nullable: true })
+  @Column({ name: 'access_token', type: 'text', nullable: true })
   accessToken: string;
 
   @Column({ name: 'server_id', nullable: true })

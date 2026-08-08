@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { SUPERUSER_ONLY, type RouteAccess } from '~/constants/access'
 
 export interface AuthUser {
   uuid: string
@@ -19,6 +20,16 @@ export const useAuthStore = defineStore('auth', {
   getters: {
     loggedIn: (state) => !!state.user,
     isAdmin: (state) => !!state.user?.perms?.includes('admin.dashboard') || !!state.user?.superuser,
+    can:
+      (state) =>
+      (access: RouteAccess | null): boolean => {
+        if (!state.user) return false
+        if (state.user.superuser) return true
+        if (!access) return true
+        if (access === SUPERUSER_ONLY) return false
+
+        return access.some((perm) => state.user?.perms?.includes(perm))
+      },
   },
   actions: {
     loadTokens() {

@@ -5,4 +5,5 @@ export enum GravitError {
   UserNotFound = 'auth.usernotfound',
   WrongPassword = 'auth.wrongpassword',
   UserBlocked = 'auth.userblocked',
+  UserNotActivated = 'auth.usernotactivated',
 }

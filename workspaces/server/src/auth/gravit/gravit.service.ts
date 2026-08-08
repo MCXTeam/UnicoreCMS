@@ -18,6 +18,8 @@ import { Repository } from 'typeorm';
 import { GravitJoinServer } from './dto/inputs/gravit-join-server.input';
 import { GravitCheckServer } from './dto/inputs/gravit-check-server.input';
 import { RefreshToken } from '../entities/refresh-token.entity';
+import { ConfigService } from 'src/admin/config/config.service';
+import { ConfigField } from 'src/admin/config/config.enum';
 
 @Injectable()
 export class GravitService {
@@ -26,6 +28,7 @@ export class GravitService {
     private authService: AuthService,
     private tokensService: TokensService,
     private twoFactorService: TwoFactorService,
+    private configService: ConfigService,
     private jwt: JwtService,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
@@ -67,6 +70,14 @@ export class GravitService {
     return new GravitSessionDto(user);
   }
 
+  private async activated(user: User): Promise<boolean> {
+    if (user.activated || user.superuser) return true;
+
+    const cfg = await this.configService.load();
+
+    return !cfg[ConfigField.EmailActivationRequired];
+  }
+
   async authorize(input: GravitAuthorize) {
     let password: string = null;
     let totp: string = null;
@@ -91,6 +102,8 @@ export class GravitService {
 
       if (!this.twoFactorService.verify(user, totp)) throw new HttpException({ error: GravitError.WrongPassword }, HttpStatus.UNAUTHORIZED);
     }
+
+    if (!(await this.activated(user))) throw new HttpException({ error: GravitError.UserNotActivated }, HttpStatus.FORBIDDEN);
 
     // if (user.ban)
     //   throw new HttpException({ error: GravitError.UserBlocked }, HttpStatus.FORBIDDEN);
@@ -166,6 +179,8 @@ export class GravitService {
     });
 
     if (!token?.user || token?.user.accessToken != input.accessToken) throw new ForbiddenException();
+
+    if (!(await this.activated(token.user))) throw new ForbiddenException();
 
     token.user.serverId = input.serverId;
     await this.usersRepository.save(token?.user);

@@ -230,8 +230,7 @@
                 >
                   <template #option="slotProps">
                     <div class="p-multiselect-representative-option">
-                      <Avatar v-if="slotProps.option.icon" :image="`${apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
-                      <Avatar v-else icon="pi pi-image" shape="circle" />
+                      <IconAvatar :path="slotProps.option.icon" />
                       <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                     </div>
                   </template>
@@ -304,7 +303,6 @@ export default {
     const config = useRuntimeConfig()
     return {
       translations,
-      apiUrl: config.public.apiBaseurl,
       realDecimals: config.public.realDecimals,
     }
   },

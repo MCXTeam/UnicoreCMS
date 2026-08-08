@@ -17,8 +17,7 @@
       <table class="store-table" v-if="warehouse.length">
         <tr :key="whItem.id" v-for="whItem in warehouse">
           <td class="d-flex align-items-center">
-            <Avatar v-if="whItem.product.icon" size="large" :image="`${apiUrl}/${whItem.product.icon}`"> </Avatar>
-            <Avatar v-else size="large"> <i class="bx bxs-image"></i> </Avatar>
+            <IconAvatar :path="whItem.product.icon" size="large" />
             <div class="ms-3">
               <h4 class="m-0">
                 {{ whItem.product.name }} <small class="sale-wrapper ms-2">#{{ whItem.id }}</small>
@@ -45,7 +44,6 @@ definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'stor
 const { $api, $unicore, $t } = useNuxtApp()
 
 useHead({ title: computed(() => $t('store.tab_warehouse')) })
-const apiUrl = useRuntimeConfig().public.apiBaseurl
 const ui = useUiStore()
 
 const server_id = ref('0')

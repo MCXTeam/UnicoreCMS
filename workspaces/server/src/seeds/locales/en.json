@@ -152,6 +152,7 @@
   "admin.inject_web_rights": "Inject web rights",
   "admin.instances_divider": "Extra servers of the pack",
   "admin.instances_hint": "If the pack runs on several servers, add them here. Online is polled from each and summed, and the site shows a breakdown. While the list is empty, the Query above is used.",
+  "admin.instances_incomplete": "Fill in the name and host for every build server",
   "admin.instances_label": "Servers on the same pack",
   "admin.invalid_data": "Some fields are filled in wrong",
   "admin.invalid_data_or_rights": "The data is wrong or you do not have the rights",

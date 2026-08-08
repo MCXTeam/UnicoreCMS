@@ -34,8 +34,7 @@
           <Column field="name" :header="$t('admin.name')">
             <template #body="slotProps">
               <div class="flex align-items-center">
-                <Avatar v-if="slotProps.data.icon" :image="`${apiUrl + '/' + slotProps.data.icon}`" shape="circle" />
-                <Avatar v-else icon="pi pi-image" shape="circle" />
+                <IconAvatar :path="slotProps.data.icon" />
                 <span class="ml-2">{{ slotProps.data.name }}</span>
               </div>
             </template>
@@ -58,8 +57,7 @@
           <label>{{ $t('admin.server_icon') }}</label>
           <div class="grid mb-4 pt-2">
             <div class="col-6">
-              <Avatar v-if="server.icon" :image="`${apiUrl + '/' + server.icon}`" size="xlarge" shape="circle" />
-              <Avatar v-else icon="pi pi-image" size="xlarge" shape="circle" />
+              <IconAvatar :path="server.icon" size="xlarge" />
             </div>
             <div class="col-6">
               <div class="field mb-0 mt-2">
@@ -202,8 +200,7 @@
                     >
                       <template #option="slotProps">
                         <div class="flex align-items-center">
-                          <Avatar v-if="slotProps.option.icon" :image="`${apiUrl + '/' + slotProps.option.icon}`" shape="circle" />
-                          <Avatar v-else icon="pi pi-image" shape="circle" />
+                          <IconAvatar :path="slotProps.option.icon" />
                           <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
                         </div>
                       </template>
@@ -571,9 +568,24 @@ export default {
       this.server.table = event.value
     },
     instancesPayload() {
-      return (this.server.instances || [])
-        .filter((instance) => instance.name && instance.host)
-        .map((instance, priority) => ({ name: instance.name, host: instance.host, port: instance.port || null, priority }))
+      return (this.server.instances || []).map((instance, priority) => ({
+        name: instance.name,
+        host: instance.host,
+        port: instance.port || null,
+        priority,
+      }))
+    },
+    instancesIncomplete() {
+      const incomplete = (this.server.instances || []).some((instance) => !instance.name || !instance.host)
+
+      if (incomplete)
+        this.$toast.add({
+          severity: 'error',
+          detail: this.$t('admin.instances_incomplete'),
+          life: 3000,
+        })
+
+      return incomplete
     },
     onInstanceEditSave(event) {
       const { newData, index } = event
@@ -698,6 +710,8 @@ export default {
       this.serverDialog = true
     },
     async createServer() {
+      if (this.instancesIncomplete()) return
+
       this.loading = true
       try {
         const payload = {
@@ -735,6 +749,8 @@ export default {
       }
     },
     async updateServer() {
+      if (this.instancesIncomplete()) return
+
       this.loading = true
       try {
         const payload = {

@@ -40,7 +40,7 @@
             </div>
             <Select
               v-if="locales.length > 1"
-              class="ms-2 d-none d-lg-block locale-select"
+              class="ms-2 d-none d-lg-inline-flex locale-select"
               :modelValue="locale"
               @update:modelValue="$setLocale"
               :options="locales"

@@ -1,3 +1,4 @@
+export * from './access'
 export * from './config-hints'
 
 export const DASHBOARD_CHART_SECTIONS = [

@@ -46,8 +46,7 @@
           <Column field="name" :header="$t('admin.name')" sortable>
             <template #body="slotProps">
               <div class="flex align-items-center">
-                <Avatar v-if="slotProps.data.icon" :image="`${apiUrl + '/' + slotProps.data.icon}`" shape="circle" />
-                <Avatar v-else icon="pi pi-image" shape="circle" />
+                <IconAvatar :path="slotProps.data.icon" />
                 <span class="ml-2">{{ slotProps.data.name }}</span>
               </div>
             </template>
@@ -67,8 +66,7 @@
         </DataTable>
         <Dialog v-model:visible="fileDialog" :style="{ width: '400px' }" :modal="true" :header="$t('admin.mod_icon')" class="p-fluid">
           <div class="flex align-items-center justify-content-center flex-wrap w-full">
-            <Avatar v-if="mod.icon" :image="`${apiUrl + '/' + mod.icon}`" size="xlarge" shape="circle" />
-            <Avatar v-else icon="pi pi-image" size="xlarge" shape="circle" />
+            <IconAvatar :path="mod.icon" size="xlarge" />
             <div class="field ml-6 mb-0">
               <Button :label="$t('admin.upload')" icon="pi pi-upload" @click="$refs.fileInput.choose()" />
               <Button :label="$t('admin.delete')" icon="pi pi-trash" class="p-button-secondary mt-2" @click="removeIcon()" />
@@ -179,11 +177,10 @@ export default {
   setup() {
     const translations = useContentTranslations('mod')
 
-    const rc = useRuntimeConfig()
     const { $t } = useNuxtApp()
 
     useHead({ title: computed(() => $t('admin.menu_mods')) })
-    return { translations, apiUrl: rc.public.apiBaseurl }
+    return { translations }
   },
   data() {
     return {
