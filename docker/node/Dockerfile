@@ -3,11 +3,12 @@
 # ---- builder ----
 FROM node:22-bookworm-slim AS builder
 
-RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
+RUN corepack enable && corepack prepare pnpm@11.20.0 --activate
 WORKDIR /usr/local/app
 
 # Install all workspace deps (frozen to the committed pnpm-lock.yaml)
 COPY . .
+ENV CI=true
 RUN pnpm install --frozen-lockfile
 
 # Build common + server + frontends
@@ -20,7 +21,7 @@ ENV NODE_ENV=production
 
 # tini for PID1 signal handling + runtime shared libs required by node-canvas (skin rendering)
 RUN corepack enable \
- && corepack prepare pnpm@9.15.9 --activate \
+ && corepack prepare pnpm@11.20.0 --activate \
  && apt-get update \
  && apt-get install -y --no-install-recommends \
       tini \

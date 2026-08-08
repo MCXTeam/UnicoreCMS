@@ -2,9 +2,9 @@
   "name": "unicore-cms",
   "version": "1.2.0",
   "private": true,
-  "packageManager": "pnpm@9.15.9",
+  "packageManager": "pnpm@11.20.0",
   "engines": {
-    "node": ">=20 <25"
+    "node": ">=22 <25"
   },
   "scripts": {
     "dev": "pnpm --filter unicore-common run build && pnpm -r --parallel run dev",
@@ -21,20 +21,5 @@
   },
   "devDependencies": {
     "typescript": "~5.9.3"
-  },
-  "pnpm": {
-    "overrides": {
-      "canvas": "^3.1.0",
-      "discord-api-types": "0.38.49",
-      "fastify": "^5.8.5",
-      "@nestjs/swagger>js-yaml": "^5.2.2",
-      "mailparser>nodemailer": "^9.0.4",
-      "mailparser>linkify-it": "^5.0.2",
-      "tsup>esbuild": "^0.28.1",
-      "bundle-require>esbuild": "^0.28.1"
-    },
-    "peerDependencyRules": {
-      "ignoreMissing": ["fastify"]
-    }
   }
 }
