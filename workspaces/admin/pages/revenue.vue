@@ -15,7 +15,9 @@
           <template #empty>
             <div class="text-center p-4 text-color-secondary">{{ $t('admin.revenue_empty') }}</div>
           </template>
-          <Column field="name" :header="$t('cabinet.server')" sortable />
+          <Column field="name" :header="$t('cabinet.server')" sortable>
+            <template #body="slotProps">{{ slotProps.data.name || $t('admin.revenue_no_server') }}</template>
+          </Column>
           <Column field="real" :header="$t('admin.revenue_real')" sortable>
             <template #body="slotProps">{{ $utils.formatCurrency('real', slotProps.data.real) }}</template>
           </Column>

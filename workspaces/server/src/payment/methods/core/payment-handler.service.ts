@@ -47,15 +47,23 @@ export class PaymentHandlerService {
 
     if (!payment) return false;
 
-    if (reported != null && Number(reported) !== Number(payment.amount))
-      this.logger.warn(`Payment #${id}: provider reported ${reported}, expected ${payment.amount}`);
+    const expected = Number(payment.amount);
+    const declared = Number(reported);
+    const paid = reported != null && Number.isFinite(declared) ? Math.min(declared, expected) : expected;
 
-    const bonus = await this.bonusesRepo.findOne({ order: { amount: 'DESC' }, where: { amount: LessThanOrEqual(payment.amount) } });
+    if (paid !== expected) {
+      this.logger.warn(`Платёж #${id}: провайдер сообщил ${reported}, ожидалось ${expected}, зачислено ${paid}`);
 
-    let credit = currencyUtils.roundByType(payment.amount, SystemCurrency.REAL);
+      payment.amount = paid;
 
-    if (bonus && bonus.bonus > 0)
-      credit = currencyUtils.roundByType(credit + (payment.amount * bonus.bonus) / 100, SystemCurrency.REAL);
+      await this.paymentsRepo.update({ id }, { amount: paid });
+    }
+
+    const bonus = await this.bonusesRepo.findOne({ order: { amount: 'DESC' }, where: { amount: LessThanOrEqual(paid) } });
+
+    let credit = currencyUtils.roundByType(paid, SystemCurrency.REAL);
+
+    if (bonus && bonus.bonus > 0) credit = currencyUtils.roundByType(credit + (paid * bonus.bonus) / 100, SystemCurrency.REAL);
 
     await this.usersRepo.increment({ uuid: payment.user.uuid }, 'real', credit);
     await this.historyService.create(HistoryType.Payment, payment.ip, payment.user, payment);

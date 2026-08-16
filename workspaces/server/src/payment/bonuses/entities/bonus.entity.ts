@@ -9,7 +9,7 @@ export class Bonus {
   @Column('decimal', { name: 'bonus', precision: MONEY_PRECISION, scale: MONEY_SCALE, transformer: decimalColumn })
   bonus: number;
 
-  @Column('float')
+  @Column('decimal', { name: 'amount', precision: MONEY_PRECISION, scale: MONEY_SCALE, transformer: decimalColumn })
   amount: number;
 
   @Column({ nullable: true, name: 'icon' })

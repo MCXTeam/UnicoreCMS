@@ -117,12 +117,15 @@ export class GiftsService {
           await this.donatePermissionsService.give(user, gift.server, gift.donate_permission, gift.period);
           break;
         case GiftType.Money:
-          const userMoney = await this.moneyService.findOneByUserAndServer(gift.server.id, user);
-          userMoney.money = currencyUtils.roundByType(userMoney.money + gift.amount, SystemCurrency.INGAME);
-          await this.moneyRepository.save(userMoney);
+          await this.moneyService.findOneByUserAndServer(gift.server.id, user);
+          await this.moneyRepository.increment(
+            { user: { uuid: user.uuid }, server: { id: gift.server.id } },
+            'money',
+            currencyUtils.roundByType(gift.amount, SystemCurrency.INGAME),
+          );
           break;
         case GiftType.Real:
-          await this.usersRepository.increment({ uuid: user.uuid }, 'real', gift.amount);
+          await this.usersRepository.increment({ uuid: user.uuid }, 'real', currencyUtils.roundByType(gift.amount, SystemCurrency.REAL));
           break;
       }
     } catch (e) {

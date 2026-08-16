@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { Server } from 'src/game/servers/entities/server.entity';
 import { In, Repository } from 'typeorm';
+import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
 import { KitInput } from '../dto/kit.input.dto';
 import { Category } from '../entities/category.entity';
 import { Kit } from '../entities/kit.entity';
@@ -70,7 +71,7 @@ export class KitsService {
 
     kit.name = input.name;
     kit.description = input.description;
-    kit.price = input.price;
+    kit.price = currencyUtils.roundByType(input.price, SystemCurrency.REAL);
     kit.sale = input.sale;
     kit.virtual_percent = input.virtual_percent;
 
@@ -100,7 +101,7 @@ export class KitsService {
     }
 
     kit.name = input.name;
-    kit.price = input.price;
+    kit.price = currencyUtils.roundByType(input.price, SystemCurrency.REAL);
     kit.sale = input.sale;
     kit.description = input.description;
     kit.virtual_percent = input.virtual_percent;

@@ -8,6 +8,7 @@ import { Repository } from 'typeorm';
 import * as _ from 'lodash';
 import { MomentWrapper } from '@common';
 import { User } from 'src/admin/users/entities/user.entity';
+import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
 
 @Injectable()
 export class VotesTasks {
@@ -41,22 +42,20 @@ export class VotesTasks {
       .orderBy(['total'], ['desc'])
       .value();
 
-    const users: User[] = [];
-    for (const gift of gifts) {
-      if (votes[gift.place - 1]) {
-        votes[gift.place - 1].user.real += gift.bonus;
-        users.push({
-          ...votes[gift.place - 1].user,
-          real: votes[gift.place - 1].user.real + gift.bonus,
-        });
-      }
-    }
-
     const ids = votes.map((v) => v.ids).flat();
 
-    if (users.length && ids.length) {
-      await this.votesRepository.delete(ids);
-      await this.usersRepository.save(users);
+    if (!ids.length) return;
+
+    await this.votesRepository.delete(ids);
+
+    for (const gift of gifts) {
+      const winner = votes[gift.place - 1];
+
+      if (!winner) continue;
+
+      const bonus = currencyUtils.roundByType(gift.bonus, SystemCurrency.REAL);
+
+      if (bonus > 0) await this.usersRepository.increment({ uuid: winner.user.uuid }, 'real', bonus);
     }
   }
 }

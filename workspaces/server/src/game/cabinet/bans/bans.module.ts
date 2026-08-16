@@ -6,9 +6,10 @@ import UsersModule from 'src/admin/users/users.module';
 import { BansController } from './bans.controller';
 import { BansService } from './bans.service';
 import { Ban } from './entities/ban.entity';
+import { HistoryModule } from '../history/history.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Ban, User]), UsersModule, ConfigModule],
+  imports: [TypeOrmModule.forFeature([Ban, User]), UsersModule, ConfigModule, HistoryModule],
   providers: [BansService],
   controllers: [BansController],
 })

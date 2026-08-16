@@ -73,6 +73,12 @@
           >
         </Column>
 
+        <Column v-if="history_type == 'unban_purchase'" :header="$t('cabinet.amount')">
+          <template #body="{ data }"
+            ><span> {{ $utils.formatCurrency('real', data.real_spent) }} </span></template
+          >
+        </Column>
+
         <Column v-if="history_type == 'kit_purchase'" :header="$t('store.kit')">
           <template #body="{ data }"
             ><span v-if="data.kit"> {{ data.kit.name }} </span></template
@@ -200,6 +206,7 @@ export default {
         { label: this.$t('cabinet.type_kit'), value: 'kit_purchase' },
         { label: this.$t('cabinet.type_donate_group'), value: 'donate_group_purchase' },
         { label: this.$t('cabinet.type_donate_permission'), value: 'donate_permission_purchase' },
+        { label: this.$t('cabinet.type_unban'), value: 'unban_purchase' },
         { label: this.$t('cabinet.type_money_exchange'), value: 'money_exchange' },
         { label: this.$t('cabinet.type_money_transfer'), value: 'money_transfer' },
         { label: this.$t('cabinet.type_real_transfer'), value: 'real_transfer' },

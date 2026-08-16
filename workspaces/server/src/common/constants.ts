@@ -160,6 +160,7 @@ export const MONEY_COLUMNS = [
 ];
 
 export const VOTE_MIN_INTERVAL_MS = 5 * 60_000;
+export const VOTE_PLACE_MAX = 100;
 
 export const PRICE_MIN = 0;
 export const PRICE_MAX = 1_000_000_000;

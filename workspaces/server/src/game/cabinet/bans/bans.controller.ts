@@ -1,3 +1,4 @@
+import { IpAddress } from '@common';
 import { Body, Controller, Delete, Get, NotFoundException, Param, Post } from '@nestjs/common';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { User } from 'src/admin/users/entities/user.entity';
@@ -14,8 +15,8 @@ export class BansController {
 
   @Permissions([Permission.UserCabinetUnbanBuy])
   @Post('unban')
-  unban(@CurrentUser() user: User) {
-    return this.bansService.unban(user);
+  unban(@CurrentUser() user: User, @IpAddress() ip: string) {
+    return this.bansService.unban(user, ip);
   }
 
   @Permissions([Permission.KernelUnicoreConnect])

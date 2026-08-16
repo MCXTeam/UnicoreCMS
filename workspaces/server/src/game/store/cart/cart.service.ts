@@ -15,7 +15,7 @@ import { CartInput } from './dto/cart.input.dto';
 import { PayloadType } from '../dto/paginated-store.dto';
 import { Kit } from '../entities/kit.entity';
 import { CartItemKitProtected, CartItemProtected, CartProtected, CartUnprotect } from './dto/cart.dto';
-import { HistoryService } from 'src/game/cabinet/history/history.service';
+import { HistoryService, PurchaseCost } from 'src/game/cabinet/history/history.service';
 import { HistoryType } from 'src/game/cabinet/history/enums/history-type.enum';
 import { GiveProductInput } from './dto/give-product.input';
 import { GiveKitInput } from './dto/give-kit.input';
@@ -354,21 +354,34 @@ export class CartService {
       }
     }
 
-    const share = (positionPrice: number) => ({
-      real: price ? currencyUtils.roundByType((realCost * positionPrice) / price, SystemCurrency.REAL) : 0,
-      virtual: price ? currencyUtils.roundByType((virtualCost * positionPrice) / price, SystemCurrency.VIRTAUL) : 0,
-    });
+    const positions = [
+      ...cartItems.map((ci) => ({
+        price: currencyUtils.saleApply(ci.product.price, ci.product.sale) * ci.amount,
+        write: (cost: PurchaseCost) =>
+          this.historyService.create(HistoryType.ProductPurchase, ip, user, ci.product, ci.server, ci.amount, cost),
+      })),
+      ...cartKitItems.map((cik) => ({
+        price: currencyUtils.saleApply(cik.kit.price, cik.kit.sale),
+        write: (cost: PurchaseCost) => this.historyService.create(HistoryType.KitPurchase, ip, user, cik.kit, cik.server, cost),
+      })),
+    ];
 
-    for (const ci of cartItems) {
-      const positionPrice = currencyUtils.saleApply(ci.product.price, ci.product.sale) * ci.amount;
+    let realLeft = realCost;
+    let virtualLeft = virtualCost;
 
-      await this.historyService.create(HistoryType.ProductPurchase, ip, user, ci.product, ci.server, ci.amount, share(positionPrice));
-    }
+    for (const [index, position] of positions.entries()) {
+      const cost =
+        index === positions.length - 1
+          ? { real: realLeft, virtual: virtualLeft }
+          : {
+              real: price ? currencyUtils.roundByType((realCost * position.price) / price, SystemCurrency.REAL) : 0,
+              virtual: price ? currencyUtils.roundByType((virtualCost * position.price) / price, SystemCurrency.VIRTAUL) : 0,
+            };
 
-    for (const cik of cartKitItems) {
-      const positionPrice = currencyUtils.saleApply(cik.kit.price, cik.kit.sale);
+      realLeft = currencyUtils.roundByType(realLeft - cost.real, SystemCurrency.REAL);
+      virtualLeft = currencyUtils.roundByType(virtualLeft - cost.virtual, SystemCurrency.VIRTAUL);
 
-      await this.historyService.create(HistoryType.KitPurchase, ip, user, cik.kit, cik.server, share(positionPrice));
+      await position.write(cost);
     }
 
     await this.cartItemsRepository.remove(cartItems);

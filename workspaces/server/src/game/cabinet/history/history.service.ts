@@ -87,6 +87,7 @@ export class HistoryService {
     period: Period,
     cost?: PurchaseCost,
   );
+  create(type: HistoryType.UnabnPurchase, ip: string, user: User, cost: PurchaseCost);
   create(type: HistoryType.Payment, ip: string, user: User, payment: Payment);
   create(type: HistoryType.MoneyServerTransfer, ip: string, user: User, server: Server, amount: number);
   create(type: HistoryType.MoneyExchange, ip: string, user: User, server: Server, amount: number);
@@ -125,6 +126,10 @@ export class HistoryService {
         history.server = secondPayload;
         history.period = thirdPayload;
         applyCost(history, fourthPayload);
+
+        return this.historyRepository.insert(history);
+      case HistoryType.UnabnPurchase:
+        applyCost(history, payload);
 
         return this.historyRepository.insert(history);
       case HistoryType.Payment:

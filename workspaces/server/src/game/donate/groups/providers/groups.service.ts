@@ -22,6 +22,7 @@ import { ConfigService } from 'src/admin/config/config.service';
 import { ConfigField } from 'src/admin/config/config.enum';
 import { configFieldNumber } from 'src/admin/config/config.utils';
 import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
+import { runAfterCommit } from 'src/common/utils/transaction';
 import { Transactional } from 'typeorm-transactional';
 
 @Injectable()
@@ -155,7 +156,7 @@ export class DonateGroupsService {
       );
     }
 
-    this.eventsService.server?.to(Permission.KernelUnicoreConnect).emit('give_group', saved);
+    runAfterCommit(() => this.eventsService.server?.to(Permission.KernelUnicoreConnect).emit('give_group', saved));
 
     return saved;
   }
@@ -176,7 +177,7 @@ export class DonateGroupsService {
     if (!udg) throw new NotFoundException();
 
     await this.userDonatesRepository.remove(udg);
-    this.eventsService.server.to(Permission.KernelUnicoreConnect).emit('take_group', udg);
+    runAfterCommit(() => this.eventsService.server?.to(Permission.KernelUnicoreConnect).emit('take_group', udg));
 
     if (this.issuanceService.isRcon(udg.server)) {
       await this.issuanceService.removeGroup({ username: udg.user.username, uuid: udg.user.uuid }, udg.server, {

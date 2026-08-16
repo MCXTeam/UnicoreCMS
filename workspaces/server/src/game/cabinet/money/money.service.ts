@@ -172,7 +172,7 @@ export class MoneyService {
       user_money.user,
       user_money.server,
       target_money.user,
-      input.amount,
+      amount,
     );
 
     return this.findOneByUserUuidAndServer(input.server_id, input.user_uuid);
@@ -261,7 +261,7 @@ export class MoneyService {
       if (!debit.affected) throw new BadRequestException();
 
       await this.usersRepo.increment({ uuid: target_user.uuid }, 'real', realAmount);
-      await this.historyService.create(HistoryType.RealTransfer, ip, user, target_user, input.amount);
+      await this.historyService.create(HistoryType.RealTransfer, ip, user, target_user, realAmount);
 
       return true;
     }

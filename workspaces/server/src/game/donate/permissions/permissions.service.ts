@@ -22,6 +22,7 @@ import { ConfigField } from 'src/admin/config/config.enum';
 import { ConfigService } from 'src/admin/config/config.service';
 import { configFieldNumber } from 'src/admin/config/config.utils';
 import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
+import { runAfterCommit } from 'src/common/utils/transaction';
 import { Transactional } from 'typeorm-transactional';
 
 @Injectable()
@@ -106,7 +107,7 @@ export class DonatePermissionsService {
         );
       }
 
-      this.eventsService.server?.to(Permission.KernelUnicoreConnect).emit('give_permission', saved);
+      runAfterCommit(() => this.eventsService.server?.to(Permission.KernelUnicoreConnect).emit('give_permission', saved));
     }
 
     return saved;
@@ -137,7 +138,7 @@ export class DonatePermissionsService {
     await this.userPermissionsRepository.remove(udp);
 
     if (udp.permission.type != PermissionType.Web) {
-      this.eventsService.server.to(Permission.KernelUnicoreConnect).emit('take_permission', udp);
+      runAfterCommit(() => this.eventsService.server?.to(Permission.KernelUnicoreConnect).emit('take_permission', udp));
 
       if (this.issuanceService.isRcon(udp.server)) {
         await this.issuanceService.removePermission({ username: udp.user.username, uuid: udp.user.uuid }, udp.server, {

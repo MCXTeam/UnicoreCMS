@@ -12,6 +12,8 @@ import { ConfigService } from 'src/admin/config/config.service';
 import { ConfigField } from 'src/admin/config/config.enum';
 import { configFieldNumber } from 'src/admin/config/config.utils';
 import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
+import { HistoryService } from '../history/history.service';
+import { HistoryType } from '../history/enums/history-type.enum';
 import { Transactional } from 'typeorm-transactional';
 
 @Injectable()
@@ -25,6 +27,7 @@ export class BansService {
     private usersRepository: Repository<User>,
     private usersService: UsersService,
     private configService: ConfigService,
+    private historyService: HistoryService,
   ) {}
 
   findOne(uuid: string): Promise<Ban> {
@@ -77,7 +80,7 @@ export class BansService {
   }
 
   @Transactional()
-  async unban(user: User) {
+  async unban(user: User, ip: string) {
     if (!user.ban) throw new NotFoundException();
 
     const config = await this.configService.load();
@@ -86,6 +89,8 @@ export class BansService {
     await debitUserBalance(this.usersRepository, user.uuid, price);
 
     await this.bansRepository.delete({ user: { uuid: user.uuid } });
+    await this.historyService.create(HistoryType.UnabnPurchase, ip, user, { real: price, virtual: 0 });
+
     return true;
   }
 
