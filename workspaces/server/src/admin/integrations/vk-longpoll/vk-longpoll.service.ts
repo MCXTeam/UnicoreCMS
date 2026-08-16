@@ -164,8 +164,9 @@ export class VkLongpollService {
 
         await this.newsRepository.save(news);
 
-        // Sending webhooks
-        this.webhooksService.send(WebhookType.VKNewsCreated, payload);
+        this.webhooksService
+          .send(WebhookType.VKNewsCreated, payload)
+          .catch((e) => this.logger.error(`Ретрансляция поста VK в вебхуки не удалась: ${e}`));
       }
     });
 

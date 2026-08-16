@@ -16,6 +16,15 @@ export class Webhook {
   @Column({ name: 'request' })
   request: WebhookRequestType;
 
-  @Column({ name: 'url' })
-  url: string;
+  @Column({ name: 'url', nullable: true })
+  url?: string;
+
+  @Column({ name: 'target', nullable: true })
+  target?: string;
+
+  @Column({ name: 'auto_publish', default: true })
+  auto_publish: boolean;
+
+  @Column({ name: 'update_on_edit', default: true })
+  update_on_edit: boolean;
 }

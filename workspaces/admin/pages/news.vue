@@ -49,16 +49,26 @@
               {{ $moment(slotProps.data.created).format('D MMMM YYYY, HH:mm') }}
             </template>
           </Column>
-          <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
+          <Column :style="{ width: '18rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
-              <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
-              <Button @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary mr-2" />
-              <Button
-                @click="removeNewsSingle(slotProps.data.id)"
-                v-if="!slotProps.data.important"
-                icon="pi pi-trash"
-                class="p-button-rounded p-button-warning mt-2"
-              />
+              <div class="flex justify-content-end align-items-center gap-2">
+                <SplitButton
+                  v-if="publishTargets.length"
+                  :model="publishMenu(slotProps.data)"
+                  icon="pi pi-send"
+                  severity="help"
+                  rounded
+                  @click="openPublishDialog(slotProps.data)"
+                />
+                <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success" />
+                <Button @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary" />
+                <Button
+                  @click="removeNewsSingle(slotProps.data.id)"
+                  v-if="!slotProps.data.important"
+                  icon="pi pi-trash"
+                  class="p-button-rounded p-button-warning"
+                />
+              </div>
             </template>
           </Column>
         </DataTable>
@@ -182,6 +192,16 @@
                   </template>
                 </FileUpload>
               </div>
+              <div class="field mt-4" v-if="!updateMode && publishTargets.length">
+                <label>{{ $t('admin.publish_targets') }}</label>
+                <div v-for="target in publishTargets" :key="target.id" class="flex align-items-center gap-2 mt-2">
+                  <Checkbox v-model="selectedTargets" :inputId="`target-${target.id}`" :value="target.id" />
+                  <label :for="`target-${target.id}`" class="m-0">
+                    {{ target.name }} <span class="text-color-secondary">({{ $t(`admin.webhook_request_${target.request}`) }})</span>
+                  </label>
+                </div>
+                <small>{{ $t('admin.publish_targets_hint') }}</small>
+              </div>
             </template>
             <ContentTranslationFields v-else :translations="translations" />
             <template #footer>
@@ -196,6 +216,69 @@
             </template>
           </Dialog>
         </VeeForm>
+
+        <Dialog v-model:visible="publishDialog" :style="{ width: '640px' }" :modal="true" :header="$t('admin.publish_dialog')" class="p-fluid">
+          <div class="field">
+            <label>{{ $t('admin.publish_targets') }}</label>
+            <div v-for="target in publishTargets" :key="target.id" class="flex align-items-center gap-2 mt-2">
+              <Checkbox v-model="selectedTargets" :inputId="`publish-target-${target.id}`" :value="target.id" />
+              <label :for="`publish-target-${target.id}`" class="m-0">
+                {{ target.name }} <span class="text-color-secondary">({{ $t(`admin.webhook_request_${target.request}`) }})</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>{{ $t('admin.publish_history') }}</label>
+            <DataTable :value="deliveries" responsiveLayout="scroll" class="mt-2">
+              <template #empty>
+                <div class="text-center p-3 text-color-secondary">{{ $t('admin.publish_history_empty') }}</div>
+              </template>
+              <Column field="webhook.name" :header="$t('admin.name')" />
+              <Column :header="$t('common.status')">
+                <template #body="{ data }">
+                  <Tag :severity="deliverySeverity(data.status)" :value="$t(`admin.delivery_status_${data.status}`)" />
+                </template>
+              </Column>
+              <Column :header="$t('common.date')">
+                <template #body="{ data }">{{ $moment(data.sentAt || data.created).format('D MMMM YYYY, HH:mm') }}</template>
+              </Column>
+              <Column :header="$t('admin.attempts')">
+                <template #body="{ data }">
+                  <span v-tooltip.left="data.error">{{ data.attempts }}</span>
+                </template>
+              </Column>
+              <Column :style="{ width: '4rem' }">
+                <template #body="{ data }">
+                  <Button
+                    v-if="data.status === 'failed'"
+                    icon="pi pi-replay"
+                    class="p-button-rounded p-button-text"
+                    @click="retryDelivery(data)"
+                  />
+                </template>
+              </Column>
+            </DataTable>
+          </div>
+
+          <template #footer>
+            <Button :disabled="publishLoading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="publishDialog = false" />
+            <Button
+              :disabled="publishLoading || !selectedTargets.length"
+              :label="$t('admin.publish_update')"
+              icon="pi pi-refresh"
+              class="p-button-text"
+              @click="publish('update')"
+            />
+            <Button
+              :disabled="publishLoading || !selectedTargets.length"
+              :label="$t('admin.publish_new')"
+              icon="pi pi-send"
+              class="p-button-text"
+              @click="publish('create')"
+            />
+          </template>
+        </Dialog>
       </div>
     </div>
   </div>
@@ -261,6 +344,12 @@ export default {
       selected: null,
       newsSingleDialog: false,
       fileDialog: false,
+      publishDialog: false,
+      publishLoading: false,
+      publishTargets: [],
+      selectedTargets: [],
+      deliveries: [],
+      publishNews: null,
       filters: {
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
       },
@@ -283,6 +372,10 @@ export default {
           },
         })
         .then((res) => res.data)
+      this.publishTargets = await this.$api
+        .get('/news/publish/targets', { silent: true })
+        .then((res) => res.data)
+        .catch(() => [])
       this.newsSingleDialog = false
       this.fileDialog = false
       this.loading = false
@@ -345,6 +438,7 @@ export default {
           link: null,
         }
       }
+      this.selectedTargets = this.publishTargets.map((target) => target.id)
       this.translations.attach(this.newsSingle)
       await this.translations.load(newsSingle ? newsSingle.id : null)
       this.newsSingleDialog = true
@@ -390,6 +484,60 @@ export default {
         },
       })
     },
+    publishMenu(newsSingle) {
+      return [
+        {
+          label: this.$t('admin.publish_new'),
+          icon: 'pi pi-plus',
+          command: () => this.openPublishDialog(newsSingle, 'create'),
+        },
+        {
+          label: this.$t('admin.publish_history'),
+          icon: 'pi pi-history',
+          command: () => this.openPublishDialog(newsSingle),
+        },
+      ]
+    },
+    deliverySeverity(status) {
+      if (status === 'sent') return 'success'
+      if (status === 'failed') return 'danger'
+
+      return 'warn'
+    },
+    async openPublishDialog(newsSingle) {
+      this.publishNews = newsSingle
+      this.selectedTargets = this.publishTargets.map((target) => target.id)
+      this.deliveries = await this.$api.get(`/news/${newsSingle.id}/deliveries`).then((res) => res.data)
+      this.publishDialog = true
+    },
+    async publish(mode) {
+      this.publishLoading = true
+      try {
+        await this.$api.post(`/news/${this.publishNews.id}/publish`, {
+          mode,
+          webhooks: this.selectedTargets,
+        })
+        this.$toast.add({
+          severity: 'success',
+          detail: this.$t('admin.publish_queued'),
+          life: 3000,
+        })
+        this.publishDialog = false
+      } catch {
+        this.$toast.add({
+          severity: 'error',
+          detail: this.$t('admin.invalid_data'),
+          life: 3000,
+        })
+      }
+      this.publishLoading = false
+    },
+    async retryDelivery(delivery) {
+      try {
+        await this.$api.post(`/news/deliveries/${delivery.id}/retry`)
+        this.deliveries = await this.$api.get(`/news/${this.publishNews.id}/deliveries`).then((res) => res.data)
+      } catch {}
+    },
     async createNewsSingle() {
       this.loading = true
 
@@ -402,6 +550,7 @@ export default {
       if (this.newsSingle.custom_css) formData.append('custom_css', this.newsSingle.custom_css)
       if (this.newsSingle.custom_js) formData.append('custom_js', this.newsSingle.custom_js)
       if (this.$refs.fileInputSecond.files[0]) formData.append('file', this.$refs.fileInputSecond.files[0])
+      formData.append('webhooks', this.selectedTargets.join(','))
 
       try {
         const { data } = await this.$api.post('/news', formData, {

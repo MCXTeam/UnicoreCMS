@@ -27,6 +27,8 @@ import { ReferalsTasks } from './tasks/referals.tasks';
 import { TokenTasks } from './tasks/tokens.tasks';
 import { BanTasks } from './tasks/ban.tasks';
 import { RconTasks } from './tasks/rcon.tasks';
+import { WebhookTasks } from './tasks/webhook.tasks';
+import { WebhooksModule } from 'src/admin/webhook/webhooks.module';
 import { VotesTasks } from './tasks/votes.tasks';
 import { Vote } from 'src/game/cabinet/votes/entities/vote.entity';
 import { VoteGift } from 'src/game/cabinet/votes/entities/vote-gift.entity';
@@ -54,6 +56,7 @@ import { VoteGift } from 'src/game/cabinet/votes/entities/vote-gift.entity';
     RconModule,
     ConfigModule,
     PlaytimeModule,
+    WebhooksModule,
   ],
   providers: [
     TokenTasks,
@@ -68,6 +71,7 @@ import { VoteGift } from 'src/game/cabinet/votes/entities/vote-gift.entity';
     BanTasks,
     VotesTasks,
     RconTasks,
+    WebhookTasks,
   ],
 })
 export class CronModule {}

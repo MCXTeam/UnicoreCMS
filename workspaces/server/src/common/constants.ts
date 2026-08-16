@@ -153,6 +153,24 @@ export const VK_LINK_PREFIX = 'https://vk.com/';
 export const WEBHOOK_TIMEOUT_MS = 5000;
 export const DISCORD_WEBHOOK_HOSTS = ['discord.com', 'discordapp.com'];
 
+export const TELEGRAM_API_BASEURL = 'https://api.telegram.org';
+export const TELEGRAM_ALLOWED_TAGS = ['b', 'i', 'u', 's', 'a', 'code', 'pre', 'blockquote'];
+
+export const DISCORD_EMBED_TITLE_LIMIT = 256;
+export const DISCORD_EMBED_DESCRIPTION_LIMIT = 4096;
+export const TELEGRAM_MESSAGE_LIMIT = 4096;
+export const TELEGRAM_CAPTION_LIMIT = 1024;
+export const VK_MESSAGE_LIMIT = 4000;
+
+export const WEBHOOK_MAX_ATTEMPTS = 5;
+export const WEBHOOK_BACKOFF_BASE_MS = 60_000;
+export const WEBHOOK_BACKOFF_MAX_MS = 60 * 60_000;
+export const WEBHOOK_BATCH_LIMIT = 50;
+export const WEBHOOK_STALE_MS = 5 * 60_000;
+export const KEEP_WEBHOOK_DELIVERIES_DAYS = 90;
+export const WEBHOOK_ERROR_MAX_LENGTH = 500;
+export const WEBHOOK_TARGET_MAX_LENGTH = 120;
+
 export const CURRENCY_DEFAULT_DECIMALS = 2;
 
 export const MONEY_PRECISION = 16;

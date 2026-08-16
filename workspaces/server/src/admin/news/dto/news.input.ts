@@ -1,6 +1,6 @@
 import { Transform } from 'class-transformer';
-import { IsBoolean, IsDefined, IsOptional, IsString, MaxLength } from 'class-validator';
-import { CUSTOM_CODE_MAX_LENGTH, NAME_MAX_LENGTH, SanitizeHtml } from '@common';
+import { ArrayMaxSize, IsArray, IsBoolean, IsDefined, IsInt, IsOptional, IsString, MaxLength } from 'class-validator';
+import { BULK_ITEMS_MAX, CUSTOM_CODE_MAX_LENGTH, NAME_MAX_LENGTH, SanitizeHtml, toIdList } from '@common';
 
 export class NewsInput {
   @IsDefined()
@@ -32,4 +32,11 @@ export class NewsInput {
   @IsString()
   @MaxLength(CUSTOM_CODE_MAX_LENGTH)
   custom_js?: string;
+
+  @IsOptional()
+  @Transform(({ value }) => toIdList(value))
+  @IsArray()
+  @ArrayMaxSize(BULK_ITEMS_MAX)
+  @IsInt({ each: true })
+  webhooks?: number[];
 }

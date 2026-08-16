@@ -2,8 +2,8 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { In, IsNull, Repository } from 'typeorm';
-import { WebhookType } from '../webhook/enums/webhook-type.enum';
-import { WebhooksService } from '../webhook/webhooks.service';
+import { PublishMode, WebhookDeliveriesService } from '../webhook/webhook-deliveries.service';
+import { WebhookDeliveryDto, WebhookTargetDto } from '../webhook/dto/webhook-target.dto';
 import { NewsInput } from './dto/news.input';
 import { News } from './entities/news.entity';
 import { HtmlSlice } from 'htmlslice';
@@ -16,7 +16,7 @@ export class NewsService {
   constructor(
     @InjectRepository(News)
     private newsRepository: Repository<News>,
-    private webhooksService: WebhooksService,
+    private deliveriesService: WebhookDeliveriesService,
   ) {}
 
   async create(input: NewsInput, file?: Express.Multer.File, allowCustomCode = false): Promise<News> {
@@ -32,7 +32,9 @@ export class NewsService {
 
     const saved = await this.newsRepository.save(news);
 
-    this.webhooksService.send(WebhookType.NewsCreated, { ...saved }).catch((e) => this.logger.error(`Вебхук новости ${saved.id}: ${e}`));
+    this.deliveriesService
+      .enqueueNews(saved, PublishMode.Auto, input.webhooks)
+      .catch((e) => this.logger.error(`Не удалось поставить новость ${saved.id} в очередь вебхуков: ${e}`));
 
     return saved;
   }
@@ -102,7 +104,36 @@ export class NewsService {
 
     applyCustomCode(news, input, allowCustomCode);
 
-    return this.newsRepository.save(news);
+    const saved = await this.newsRepository.save(news);
+
+    this.deliveriesService
+      .enqueueUpdate(saved)
+      .catch((e) => this.logger.error(`Не удалось обновить публикации новости ${saved.id}: ${e}`));
+
+    return saved;
+  }
+
+  async publish(id: number, mode: PublishMode, webhooks?: number[]): Promise<WebhookDeliveryDto[]> {
+    const news = await this.findOne(id);
+    const queued = await this.deliveriesService.enqueueNews(news, mode, webhooks);
+
+    return queued.map((delivery) => new WebhookDeliveryDto(delivery));
+  }
+
+  async publishTargets(): Promise<WebhookTargetDto[]> {
+    return (await this.deliveriesService.targets()).map((webhook) => new WebhookTargetDto(webhook));
+  }
+
+  async retryDelivery(id: number): Promise<WebhookDeliveryDto> {
+    const delivery = await this.deliveriesService.retry(id);
+
+    if (!delivery) throw new NotFoundException();
+
+    return new WebhookDeliveryDto(delivery);
+  }
+
+  async deliveries(id: number): Promise<WebhookDeliveryDto[]> {
+    return (await this.deliveriesService.findByNews(id)).map((delivery) => new WebhookDeliveryDto(delivery));
   }
 
   async remove(id: number) {
@@ -112,11 +143,15 @@ export class NewsService {
       throw new NotFoundException();
     }
 
+    await this.deliveriesService.removePosts(id);
+
     return this.newsRepository.remove(news);
   }
 
   async removeMany(ids: number[]) {
     const news = await this.newsRepository.findBy({ id: In(ids) });
+
+    for (const item of news) await this.deliveriesService.removePosts(item.id);
 
     return this.newsRepository.remove(news);
   }

@@ -1,17 +1,13 @@
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
-import { AttachmentBuilder, EmbedBuilder, HexColorString } from 'discord.js';
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
-import { News } from '../news/entities/news.entity';
 import { WebhookInput } from './dto/webhook.input';
 import { Webhook } from './entities/webhook.entity';
 import { WebhookRequestType } from './enums/webhook-request-type';
 import { WebhookType } from './enums/webhook-type.enum';
 import { VkLongpollService } from '../integrations/vk-longpoll/vk-longpoll.service';
-import { AttachmentType } from 'vk-io';
-import { envConfig } from 'unicore-common';
 import { DISCORD_WEBHOOK_HOSTS, StorageManager, WEBHOOK_TIMEOUT_MS } from '@common';
 
 @Injectable()
@@ -22,6 +18,7 @@ export class WebhooksService {
     @InjectRepository(Webhook)
     private webhooksRepository: Repository<Webhook>,
     private httpService: HttpService,
+    @Inject(forwardRef(() => VkLongpollService))
     private vkService: VkLongpollService,
   ) {}
 
@@ -32,37 +29,21 @@ export class WebhooksService {
 
     for (const wh of webhooks) {
       try {
-        if (wh.type == WebhookType.NewsCreated) {
-          if (payload.image) {
-            const url = new URL(envConfig.apiBaseurl);
-            url.pathname = payload.image;
-            payload.image = url.href;
-          }
-        }
-
         switch (wh.request) {
           case WebhookRequestType.Discord:
             if (!this.isDiscordUrl(wh.url)) continue;
+            if (wh.type !== WebhookType.VKNewsCreated) continue;
 
-            switch (wh.type) {
-              // Срабатывает, когда на сайте добавлена новая новость
-              case WebhookType.NewsCreated:
-                await this.newsCreatedDiscord(wh.url, payload);
-                break;
-              // Срабатывает, когда VK LongPool получил новую новость
-              case WebhookType.VKNewsCreated:
-                await this.vkNewsCreatedDiscord(wh.url, payload);
-                break;
-              default:
-                continue;
-            }
+            await this.vkNewsCreatedDiscord(wh.url, payload);
             break;
-          default:
+          case WebhookRequestType.JSON:
             await this.post(wh.url, payload);
             break;
+          default:
+            continue;
         }
       } catch (error) {
-        this.logger.error(`Webhook ${wh.id} (${wh.url}) failed: ${error}`);
+        this.logger.error(`Вебхук ${wh.id} (${wh.name}) не отработал: ${error}`);
       }
     }
   }
@@ -88,8 +69,6 @@ export class WebhooksService {
     await firstValueFrom(this.httpService.post(url, payload, { timeout: WEBHOOK_TIMEOUT_MS, maxRedirects: 0 }));
   }
 
-  private newsCreatedDiscord(url: string, payload: News) {}
-
   private vkNewsCreatedDiscord(url: string, payload: any) {
     return this.vkService.DiscordParse(url, payload);
   }
@@ -102,13 +81,20 @@ export class WebhooksService {
     return this.webhooksRepository.findOneBy({ id });
   }
 
-  create(input: WebhookInput): Promise<Webhook> {
-    const wh = new Webhook();
-
+  private apply(wh: Webhook, input: WebhookInput): void {
     wh.name = input.name;
     wh.request = input.request;
     wh.type = input.type;
-    wh.url = input.url;
+    wh.url = input.url ?? null;
+    wh.target = input.target ?? null;
+    wh.auto_publish = input.auto_publish ?? true;
+    wh.update_on_edit = input.update_on_edit ?? true;
+  }
+
+  create(input: WebhookInput): Promise<Webhook> {
+    const wh = new Webhook();
+
+    this.apply(wh, input);
 
     return this.webhooksRepository.save(wh);
   }
@@ -120,10 +106,7 @@ export class WebhooksService {
       throw new NotFoundException();
     }
 
-    wh.name = input.name;
-    wh.request = input.request;
-    wh.type = input.type;
-    wh.url = input.url;
+    this.apply(wh, input);
 
     return this.webhooksRepository.save(wh);
   }

@@ -44,6 +44,7 @@ export interface EnvConfig {
   recaptchaDisabled: boolean;
   vkLongpoll: boolean;
   vkApiKey: string;
+  telegramBotToken: string;
   smtpService: string;
   smtpHost: string;
   smtpPort: number;
@@ -237,6 +238,9 @@ export const envConfig: EnvConfig = {
   // VK Longpoll
   vkLongpoll: env.get("VK_LONGPOLL").default(0).asBool(),
   vkApiKey: env.get("VK_APIKEY").asString(),
+
+  // Telegram
+  telegramBotToken: env.get("TELEGRAM_BOT_TOKEN").asString(),
 
   // SMTP
   mailFrom: env.get("MAIL_FROM").asString(),

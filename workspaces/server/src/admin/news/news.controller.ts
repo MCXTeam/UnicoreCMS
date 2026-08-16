@@ -8,6 +8,7 @@ import { User } from '../users/entities/user.entity';
 import { Permission } from 'unicore-common';
 import { Permissions } from '../roles/decorators/permission.decorator';
 import { NewsInput } from './dto/news.input';
+import { NewsPublishInput } from './dto/news-publish.input';
 import { NewsService } from './news.service';
 
 @Controller('news')
@@ -30,6 +31,18 @@ export class NewsController {
   @Permissions([Permission.AdminDashboard, Permission.EditorNewsDeleteMany])
   removeMany(@Body() body: DeleteManyInput) {
     return this.newsService.removeMany(body.items);
+  }
+
+  @Permissions([Permission.AdminDashboard, Permission.EditorNewsPublish])
+  @Post('deliveries/:id/retry')
+  retryDelivery(@Param('id', ParseIntPipe) id: number) {
+    return this.newsService.retryDelivery(id);
+  }
+
+  @Permissions([Permission.AdminDashboard, Permission.EditorNewsPublish])
+  @Get('publish/targets')
+  publishTargets() {
+    return this.newsService.publishTargets();
   }
 
   @Public()
@@ -55,6 +68,18 @@ export class NewsController {
   @Permissions([Permission.AdminDashboard, Permission.EditorNewsUpdate])
   update(@CurrentUser() user: User, @Param('id', ParseIntPipe) id: number, @Body() body: NewsInput) {
     return this.newsService.update(id, body, Boolean(user.superuser));
+  }
+
+  @Permissions([Permission.AdminDashboard, Permission.EditorNewsPublish])
+  @Post(':id/publish')
+  publish(@Param('id', ParseIntPipe) id: number, @Body() body: NewsPublishInput) {
+    return this.newsService.publish(id, body.mode, body.webhooks);
+  }
+
+  @Permissions([Permission.AdminDashboard, Permission.EditorNewsPublish])
+  @Get(':id/deliveries')
+  deliveries(@Param('id', ParseIntPipe) id: number) {
+    return this.newsService.deliveries(id);
   }
 
   @Delete(':id')
