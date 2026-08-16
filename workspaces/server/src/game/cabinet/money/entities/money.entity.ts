@@ -1,3 +1,4 @@
+import { decimalColumn, MONEY_PRECISION, MONEY_SCALE } from '@common';
 import { User } from 'src/admin/users/entities/user.entity';
 import { Server } from 'src/game/servers/entities/server.entity';
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
@@ -27,7 +28,7 @@ export class Money {
   @JoinColumn({ name: 'user_uuid' })
   user: User;
 
-  @Column('float', { name: 'money', default: 0 })
+  @Column('decimal', { name: 'money', precision: MONEY_PRECISION, scale: MONEY_SCALE, default: 0, transformer: decimalColumn })
   money: number;
 
   @CreateDateColumn({ name: 'created' })

@@ -31,6 +31,9 @@ export class RconCommand {
   @Column({ name: 'attempts', type: 'int', default: 0 })
   attempts: number;
 
+  @Column({ name: 'worker', nullable: true })
+  worker?: string | null;
+
   @Column({ name: 'error', type: 'text', nullable: true })
   error?: string | null;
 

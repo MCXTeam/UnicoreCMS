@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { User } from 'src/admin/users/entities/user.entity';
 import { PaymentResp } from 'src/payment/enums/payment-resp.enum';
 import { envConfig } from 'unicore-common';
+import { safeEqual } from '@common';
 import { PaymentCreateDto } from '../core/dto/payment-create.dto';
 import { PaymentCoreService, PaymentLink } from '../core/payment-core.service';
 import { PaymentHandlerService } from '../core/payment-handler.service';
@@ -41,9 +42,9 @@ export class FreekassaService implements PaymentCoreService {
       .update([envConfig.freekassaMerchantID, input.AMOUNT, envConfig.freekassaSecretKeySecond, input.MERCHANT_ORDER_ID].join(':'))
       .digest('hex');
 
-    if (sign != input.SIGN) return PaymentResp.WrongSign;
+    if (!safeEqual(sign, input.SIGN)) return PaymentResp.WrongSign;
 
-    if (!(await this.paymentHandler.handler(input.MERCHANT_ORDER_ID, input.intid))) return PaymentResp.WrongPayID;
+    if (!(await this.paymentHandler.handler(input.MERCHANT_ORDER_ID, input.intid, input.AMOUNT))) return PaymentResp.WrongPayID;
 
     return PaymentResp.OK;
   }

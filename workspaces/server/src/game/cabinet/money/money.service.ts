@@ -16,6 +16,7 @@ import { MoneyPayCommandInput } from './dto/money-pay-command.input';
 import { MoneyWDInput } from './dto/monet-wd.input';
 import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
 import { ConfigField } from 'src/admin/config/config.enum';
+import { configFieldNumber } from 'src/admin/config/config.utils';
 import { Transactional } from 'typeorm-transactional';
 
 @Injectable()
@@ -128,13 +129,16 @@ export class MoneyService {
         throw new NotFoundException();
       }
 
-      user_money.money = currencyUtils.roundByType(input.amount, SystemCurrency.INGAME);
-      await this.moneyRepository.save(user_money);
+      const money = currencyUtils.roundByType(input.amount, SystemCurrency.INGAME);
+
+      await this.moneyRepository.update({ userUuid: user.uuid, serverId: user_money.serverId }, { money });
 
       return true;
     } else {
-      user.real = currencyUtils.roundByType(input.amount, SystemCurrency.REAL);
-      await this.usersRepo.save(user);
+      const real = currencyUtils.roundByType(input.amount, SystemCurrency.REAL);
+
+      await this.usersRepo.update({ uuid: user.uuid }, { real });
+
       return true;
     }
   }
@@ -274,9 +278,9 @@ export class MoneyService {
         throw new NotFoundException();
       }
 
-      const price = currencyUtils.roundByType(input.amount / (cfg[ConfigField.EconomyRate] as number), SystemCurrency.REAL);
+      const price = currencyUtils.roundUpByType(input.amount / configFieldNumber(cfg, ConfigField.EconomyRate), SystemCurrency.REAL);
 
-      if (price <= 0) throw new BadRequestException();
+      if (!Number.isFinite(price) || price <= 0) throw new BadRequestException();
 
       const debit = await this.usersRepo
         .createQueryBuilder()

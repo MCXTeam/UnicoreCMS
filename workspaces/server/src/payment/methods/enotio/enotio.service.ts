@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { User } from 'src/admin/users/entities/user.entity';
 import { PaymentResp } from 'src/payment/enums/payment-resp.enum';
 import { envConfig } from 'unicore-common';
+import { safeEqual } from '@common';
 import { PaymentCreateDto } from '../core/dto/payment-create.dto';
 import { PaymentCoreService, PaymentLink } from '../core/payment-core.service';
 import { PaymentHandlerService } from '../core/payment-handler.service';
@@ -35,9 +36,9 @@ export class EnotioService implements PaymentCoreService {
       .update([envConfig.enotioMerchantID, input.amount, envConfig.enotioSecretKeySecond, input.merchant_id].join(':'))
       .digest('hex');
 
-    if (sign != input.sign_2) return PaymentResp.WrongSign;
+    if (!safeEqual(sign, input.sign_2)) return PaymentResp.WrongSign;
 
-    if (!(await this.paymentHandler.handler(input.merchant_id, input.intid))) return PaymentResp.WrongPayID;
+    if (!(await this.paymentHandler.handler(input.merchant_id, input.intid, input.amount))) return PaymentResp.WrongPayID;
 
     return PaymentResp.OK;
   }

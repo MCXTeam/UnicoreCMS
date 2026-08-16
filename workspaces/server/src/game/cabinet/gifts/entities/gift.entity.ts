@@ -1,3 +1,4 @@
+import { decimalColumn, MONEY_PRECISION, MONEY_SCALE } from '@common';
 import { Period } from 'src/game/donate/entities/period.entity';
 import { DonateGroup } from 'src/game/donate/groups/entities/donate-group.entity';
 import { DonatePermission } from 'src/game/donate/permissions/entities/donate-permission.entity';
@@ -82,9 +83,12 @@ export class Gift {
   @JoinColumn({ name: 'period_id' })
   period?: Period;
 
-  @Column('float', {
+  @Column('decimal', {
     name: 'amount',
+    precision: MONEY_PRECISION,
+    scale: MONEY_SCALE,
     nullable: true,
+    transformer: decimalColumn,
   })
   amount?: number;
 

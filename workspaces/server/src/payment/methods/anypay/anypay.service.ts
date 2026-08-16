@@ -3,6 +3,7 @@ import { PaymentCreateDto } from '../core/dto/payment-create.dto';
 import { PaymentCoreService, PaymentLink } from '../core/payment-core.service';
 import { User } from 'src/admin/users/entities/user.entity';
 import { envConfig } from 'unicore-common';
+import { safeEqual } from '@common';
 import { AnypayModule } from './anypay.module';
 import * as crypto from 'crypto';
 import { PaymentStatuses, PaymentStatusesRedirect } from 'src/payment/enums/payment-statuses.enum';
@@ -64,9 +65,9 @@ export class AnypayService implements PaymentCoreService {
       )
       .digest('hex');
 
-    if (sign != input.sign) return PaymentResp.WrongSign;
+    if (!safeEqual(sign, input.sign)) return PaymentResp.WrongSign;
 
-    if (!(await this.paymentHandler.handler(input.pay_id, input.transaction_id))) return PaymentResp.WrongPayID;
+    if (!(await this.paymentHandler.handler(input.pay_id, input.transaction_id, input.amount))) return PaymentResp.WrongPayID;
 
     return PaymentResp.OK;
   }

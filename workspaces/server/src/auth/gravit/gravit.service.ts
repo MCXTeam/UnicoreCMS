@@ -10,8 +10,10 @@ import { GravitSessionDto } from './dto/gravit-session.dto';
 import { GravitAuthorize } from './dto/inputs/gravit-authorize.input';
 import { AuthService } from '../auth.service';
 import { TwoFactorService } from 'src/game/cabinet/settings/providers/two_factor.service';
-import { JWTMinecraftPayload, JWTRefreshPayload } from '../interfaces/jwt-payload';
+import { JWTMinecraftPayload, JWTPayload, JWTRefreshPayload } from '../interfaces/jwt-payload';
 import { GravitRefreshToken } from './dto/inputs/gravit-refresh-token.input';
+import { GravitDeleteSession, GravitExitUser } from './dto/inputs/gravit-session.input';
+import { isBanActive, safeEqual } from '@common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/admin/users/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -54,7 +56,7 @@ export class GravitService {
 
   async getUserByToken(accessToken: string) {
     try {
-      var accessTokenPayload = await this.jwt.verifyAsync(accessToken);
+      var accessTokenPayload: JWTPayload = await this.jwt.verifyAsync(accessToken);
     } catch (e) {
       if (e instanceof TokenExpiredError) {
         throw new HttpException({ error: GravitError.ExpireToken }, HttpStatus.UNAUTHORIZED);
@@ -62,6 +64,9 @@ export class GravitService {
         throw new HttpException({ error: GravitError.InvalidToken }, HttpStatus.UNAUTHORIZED);
       }
     }
+
+    if (accessTokenPayload.type && accessTokenPayload.type != 'access')
+      throw new HttpException({ error: GravitError.InvalidToken }, HttpStatus.UNAUTHORIZED);
 
     const user = await this.usersService.getById(accessTokenPayload.sub);
 
@@ -76,6 +81,16 @@ export class GravitService {
     const cfg = await this.configService.load();
 
     return !cfg[ConfigField.EmailActivationRequired];
+  }
+
+  private assertPlayable(user: User) {
+    if (isBanActive(user.ban)) throw new HttpException({ error: GravitError.UserBlocked }, HttpStatus.FORBIDDEN);
+  }
+
+  private async assertAllowed(user: User) {
+    if (!(await this.activated(user))) throw new HttpException({ error: GravitError.UserNotActivated }, HttpStatus.FORBIDDEN);
+
+    this.assertPlayable(user);
   }
 
   async authorize(input: GravitAuthorize) {
@@ -100,13 +115,11 @@ export class GravitService {
     if (user.two_factor_enabled) {
       if (!totp) throw new HttpException({ error: GravitError.Require2FA }, HttpStatus.UNAUTHORIZED);
 
-      if (!this.twoFactorService.verify(user, totp)) throw new HttpException({ error: GravitError.WrongPassword }, HttpStatus.UNAUTHORIZED);
+      if (!(await this.twoFactorService.verify(user, totp)))
+        throw new HttpException({ error: GravitError.WrongPassword }, HttpStatus.UNAUTHORIZED);
     }
 
-    if (!(await this.activated(user))) throw new HttpException({ error: GravitError.UserNotActivated }, HttpStatus.FORBIDDEN);
-
-    // if (user.ban)
-    //   throw new HttpException({ error: GravitError.UserBlocked }, HttpStatus.FORBIDDEN);
+    await this.assertAllowed(user);
 
     const refreshToken = await this.tokensService.generateRefreshToken(user, 'launcher', input?.context?.ip);
     const refreshTokenPayload = (await this.tokensService.decodeToken(refreshToken)) as JWTRefreshPayload;
@@ -114,7 +127,7 @@ export class GravitService {
     const accessToken = await this.tokensService.generateAccessToken(user);
 
     user.accessToken = await this.tokensService.generateMinecraftAccessToken(user, refreshTokenPayload);
-    await this.usersRepository.save(user);
+    await this.usersRepository.update({ uuid: user.uuid }, { accessToken: user.accessToken });
 
     return new GravitAuthReportDto(user, accessToken, refreshToken);
   }
@@ -142,26 +155,23 @@ export class GravitService {
     }
   }
 
-  async deleteSession(input: any) {
-    const user = await this.usersRepository.findOneBy({
-      username: input.user?.username,
-    });
+  private async dropLauncherSessions(username: string) {
+    if (!username) return;
 
-    if (user) {
-      const tokens = await this.tokensRepository.findBy({ user: { uuid: user.uuid }, agent: 'launcher' });
-      await this.tokensRepository.remove(tokens);
-    }
+    const user = await this.usersRepository.findOneBy({ username });
+
+    if (!user) return;
+
+    const tokens = await this.tokensRepository.findBy({ user: { uuid: user.uuid }, agent: 'launcher' });
+    await this.tokensRepository.remove(tokens);
   }
 
-  async exitUser(input: any) {
-    const user = await this.usersRepository.findOneBy({
-      username: input.username,
-    });
+  async deleteSession(input: GravitDeleteSession) {
+    await this.dropLauncherSessions(input.user?.username);
+  }
 
-    if (user) {
-      const tokens = await this.tokensRepository.findBy({ user: { uuid: user.uuid }, agent: 'launcher' });
-      await this.tokensRepository.remove(tokens);
-    }
+  async exitUser(input: GravitExitUser) {
+    await this.dropLauncherSessions(input.username);
   }
 
   async joinServer(input: GravitJoinServer) {
@@ -171,28 +181,34 @@ export class GravitService {
       throw new ForbiddenException();
     }
 
+    if (minecraftTokenPayload.type && minecraftTokenPayload.type != 'minecraft') throw new ForbiddenException();
+
     const token = await this.tokensRepository.findOne({
       where: {
         uuid: minecraftTokenPayload.ref,
       },
-      relations: ['user'],
+      relations: ['user', 'user.ban'],
     });
 
-    if (!token?.user || token?.user.accessToken != input.accessToken) throw new ForbiddenException();
+    if (!token?.user || !safeEqual(token.user.accessToken, input.accessToken)) throw new ForbiddenException();
 
-    if (!(await this.activated(token.user))) throw new ForbiddenException();
+    await this.assertAllowed(token.user);
 
-    token.user.serverId = input.serverId;
-    await this.usersRepository.save(token?.user);
+    await this.usersRepository.update({ uuid: token.user.uuid }, { serverId: input.serverId });
   }
 
   async checkServer(input: GravitCheckServer) {
-    const user = await this.usersRepository.findOneBy({
-      username: input.username,
-      serverId: input.serverId,
+    const user = await this.usersRepository.findOne({
+      where: {
+        username: input.username,
+        serverId: input.serverId,
+      },
+      relations: ['ban'],
     });
 
     if (!user) throw new ForbiddenException();
+
+    await this.assertAllowed(user);
 
     return new GravitUserDto(user);
   }

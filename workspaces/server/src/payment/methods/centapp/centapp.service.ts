@@ -2,6 +2,7 @@ import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { User } from 'src/admin/users/entities/user.entity';
 import { PaymentResp } from 'src/payment/enums/payment-resp.enum';
 import { envConfig } from 'unicore-common';
+import { safeEqual } from '@common';
 import { PaymentCreateDto } from '../core/dto/payment-create.dto';
 import { PaymentCoreService, PaymentLink } from '../core/payment-core.service';
 import { PaymentHandlerService } from '../core/payment-handler.service';
@@ -39,9 +40,9 @@ export class CentappService implements PaymentCoreService {
   async handler(ip: string, input: any): Promise<PaymentResp> {
     const sign = crypto.createHash('md5').update([input.OutSum, input.InvId, envConfig.centappToken].join(':')).digest('hex').toUpperCase();
 
-    if (sign != input.SignatureValue || input.Status == 'FAIL') return PaymentResp.WrongSign;
+    if (!safeEqual(sign, input.SignatureValue) || input.Status == 'FAIL') return PaymentResp.WrongSign;
 
-    if (!(await this.paymentHandler.handler(input.InvId, input.TrsId))) return PaymentResp.WrongPayID;
+    if (!(await this.paymentHandler.handler(input.InvId, input.TrsId, input.OutSum))) return PaymentResp.WrongPayID;
 
     return PaymentResp.OK;
   }

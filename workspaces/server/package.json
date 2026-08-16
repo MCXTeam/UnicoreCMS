@@ -16,7 +16,8 @@
     "start": "node .",
     "dev": "nest start --watch --preserveWatchOutput",
     "typeorm:cli": "typeorm -d ./dist/ormconfig-schema.js",
-    "schema:sync": "pnpm run typeorm:cli schema:sync",
+    "money:decimal": "node ./dist/migrations/money-decimal.js",
+    "schema:sync": "pnpm run money:decimal && pnpm run typeorm:cli schema:sync",
     "seed:run": "node dist/cli/main.js seed"
   },
   "dependencies": {
@@ -43,6 +44,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
     "discord.js": "^14.27.0",
+    "helmet": "^8.3.0",
     "htmlslice": "^0.1.1",
     "image-size": "^2.0.2",
     "jszip": "^3.10.1",

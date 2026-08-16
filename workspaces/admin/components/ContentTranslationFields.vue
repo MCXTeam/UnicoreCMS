@@ -7,7 +7,7 @@
       </label>
       <div class="translation-field__original" :class="field.type === 'html' && 'translation-field__original--html'">
         <span v-if="!translations.original(field.path)" class="translation-field__empty">{{ $t('admin.original_empty') }}</span>
-        <div v-else-if="field.type === 'html'" v-html="translations.original(field.path)" />
+        <div v-else-if="field.type === 'html'" v-html="$sanitize(translations.original(field.path))" />
         <span v-else>{{ translations.original(field.path) }}</span>
       </div>
       <Editor

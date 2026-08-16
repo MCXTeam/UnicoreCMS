@@ -1,3 +1,4 @@
+import { decimalColumn, MONEY_PRECISION, MONEY_SCALE } from '@common';
 import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { DonateGroup } from '../groups/entities/donate-group.entity';
 import { DonatePermission } from '../permissions/entities/donate-permission.entity';
@@ -20,9 +21,12 @@ export class Period {
   @Column({ name: 'expire' })
   expire: number;
 
-  @Column('float', {
+  @Column('decimal', {
     name: 'multiplier',
+    precision: MONEY_PRECISION,
+    scale: MONEY_SCALE,
     default: 1,
+    transformer: decimalColumn,
   })
   multiplier: number;
 

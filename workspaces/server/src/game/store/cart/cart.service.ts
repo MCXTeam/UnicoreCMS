@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { debitUserBalance } from '@common';
 import { User } from 'src/admin/users/entities/user.entity';
 import { Server } from 'src/game/servers/entities/server.entity';
 import { IssuanceService } from 'src/game/servers/rcon/issuance.service';
@@ -21,6 +22,7 @@ import { GiveKitInput } from './dto/give-kit.input';
 import { CartBuyInput } from './dto/cart-buy.input';
 import { ConfigService } from 'src/admin/config/config.service';
 import { ConfigField } from 'src/admin/config/config.enum';
+import { configFieldNumber } from 'src/admin/config/config.utils';
 import { CartFindDto } from './dto/cart-find.dto';
 import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
 import { Transactional } from 'typeorm-transactional';
@@ -49,8 +51,8 @@ export class CartService {
   private priceCalc(cartItems, cartKitItems): number {
     return currencyUtils.roundByType(
       _.sum([
-        ...cartItems.map((cartItem) => (cartItem.product.price - (cartItem.product.price * cartItem.product.sale) / 100) * cartItem.amount),
-        ...cartKitItems.map((cartItem) => cartItem.kit.price - (cartItem.kit.price * cartItem.kit.sale) / 100),
+        ...cartItems.map((cartItem) => currencyUtils.saleApply(cartItem.product.price, cartItem.product.sale) * cartItem.amount),
+        ...cartKitItems.map((cartItem) => currencyUtils.saleApply(cartItem.kit.price, cartItem.kit.sale)),
       ]),
       SystemCurrency.REAL,
     );
@@ -60,19 +62,18 @@ export class CartService {
     if (user.virtual == 0) return 0;
 
     const cfg = await this.configService.load();
+    const defaultPercent = configFieldNumber(cfg, ConfigField.VirtualPercent);
     const virtual_sale = _.sum([
       ...(cfg[ConfigField.StoreProductsVirtualUse]
         ? cartItems.map(
             (cartItem) =>
-              (((cartItem.product.price - (cartItem.product.price * cartItem.product.sale) / 100) * cartItem.amount) / 100) *
-              (cartItem.product.virtual_percent == null ? Number(cfg[ConfigField.VirtualPercent]) : cartItem.product.virtual_percent),
+              ((currencyUtils.saleApply(cartItem.product.price, cartItem.product.sale) * cartItem.amount) / 100) *
+              (cartItem.product.virtual_percent ?? defaultPercent),
           )
         : []),
       ...(cfg[ConfigField.StoreKitsVirtualUse]
         ? cartKitItems.map(
-            (cartItem) =>
-              ((cartItem.kit.price - (cartItem.kit.price * cartItem.kit.sale) / 100) / 100) *
-              (cartItem.kit.virtual_percent == null ? Number(cfg[ConfigField.VirtualPercent]) : cartItem.kit.virtual_percent),
+            (cartItem) => (currencyUtils.saleApply(cartItem.kit.price, cartItem.kit.sale) / 100) * (cartItem.kit.virtual_percent ?? defaultPercent),
           )
         : []),
     ]);
@@ -86,25 +87,30 @@ export class CartService {
     return repo.findOneBy({ server: { id: server.id }, user: { uuid: user.uuid }, product: { id: product.id } });
   }
 
-  private async warehousePusher(user: User, cartItems: CartItem[]) {
-    return await Promise.all(
-      cartItems.map(async (cartItem) => {
-        let warehouseItem = (await this.resolver(this.warehouseItemsRepository, cartItem.server, user, cartItem.product)) as WarehouseItem;
+  private async warehousePush(user: User, cartItems: CartItem[]): Promise<WarehouseItem[]> {
+    const items: WarehouseItem[] = [];
 
-        if (warehouseItem) {
-          warehouseItem.amount += cartItem.amount;
-        } else {
-          warehouseItem = new WarehouseItem();
+    for (const cartItem of cartItems) {
+      const existing = (await this.resolver(this.warehouseItemsRepository, cartItem.server, user, cartItem.product)) as WarehouseItem;
 
-          warehouseItem.product = cartItem.product;
-          warehouseItem.server = cartItem.server;
-          warehouseItem.user = user;
-          warehouseItem.amount = cartItem.amount;
-        }
+      if (existing) {
+        await this.warehouseItemsRepository.increment({ id: existing.id }, 'amount', cartItem.amount);
+        existing.amount += cartItem.amount;
+        items.push(existing);
+        continue;
+      }
 
-        return warehouseItem;
-      }),
-    );
+      const warehouseItem = new WarehouseItem();
+
+      warehouseItem.product = cartItem.product;
+      warehouseItem.server = cartItem.server;
+      warehouseItem.user = user;
+      warehouseItem.amount = cartItem.amount;
+
+      items.push(await this.warehouseItemsRepository.save(warehouseItem));
+    }
+
+    return items;
   }
 
   async find(user: User) {
@@ -234,7 +240,7 @@ export class CartService {
     virtualItem.server = server;
     virtualItem.user = user;
 
-    return (await this.warehouseItemsRepository.save(await this.warehousePusher(user, [virtualItem])))[0];
+    return (await this.warehousePush(user, [virtualItem]))[0];
   }
 
   async giveProductByDTO(input: GiveProductInput) {
@@ -270,7 +276,7 @@ export class CartService {
       if (this.issuanceService.isRcon(server)) {
         await this.issuanceService.deliverProduct(user, server, cik.product, cik.amount);
       } else {
-        warehouseItems.push((await this.warehouseItemsRepository.save(await this.warehousePusher(user, [cik])))[0]);
+        warehouseItems.push((await this.warehousePush(user, [cik]))[0]);
       }
     }
 
@@ -324,47 +330,28 @@ export class CartService {
     const realCost = currencyUtils.roundByType(price - virtual_sale, SystemCurrency.REAL);
     const virtualCost = currencyUtils.roundByType(virtual_sale, SystemCurrency.VIRTAUL);
 
-    const debit = await this.usersRepository
-      .createQueryBuilder()
-      .update(User)
-      .set({ real: () => 'real - :realCost', virtual: () => 'virtual - :virtualCost' })
-      .where('uuid = :uuid AND real >= :realCost AND virtual >= :virtualCost', { uuid: user.uuid, realCost, virtualCost })
-      .execute();
+    await debitUserBalance(this.usersRepository, user.uuid, realCost, virtualCost);
 
-    if (!debit.affected) throw new BadRequestException();
-
-    user.real -= realCost;
-    user.virtual -= virtualCost;
+    user.real = currencyUtils.roundByType(user.real - realCost, SystemCurrency.REAL);
+    user.virtual = currencyUtils.roundByType(user.virtual - virtualCost, SystemCurrency.VIRTAUL);
 
     const warehouseUser = { uuid: user.uuid } as User;
 
-    let warehouseItems: WarehouseItem[];
+    let warehouseItems: WarehouseItem[] = [];
 
-    try {
-      if (this.issuanceService.isRcon(server)) {
-        for (const ci of cartItems) {
-          await this.issuanceService.deliverProduct(user, server, ci.product, ci.amount);
-        }
-        for (const cik of cartItemsKits) {
-          await this.issuanceService.deliverProduct(user, server, cik.product, cik.amount);
-        }
-        warehouseItems = [];
-      } else {
-        warehouseItems = await this.warehouseItemsRepository.save(await this.warehousePusher(warehouseUser, cartItems));
-
-        for (const cik of cartItemsKits) {
-          warehouseItems.push((await this.warehouseItemsRepository.save(await this.warehousePusher(warehouseUser, [cik])))[0]);
-        }
+    if (this.issuanceService.isRcon(server)) {
+      for (const ci of cartItems) {
+        await this.issuanceService.deliverProduct(user, server, ci.product, ci.amount);
       }
-    } catch (e) {
-      await this.usersRepository
-        .createQueryBuilder()
-        .update(User)
-        .set({ real: () => 'real + :realCost', virtual: () => 'virtual + :virtualCost' })
-        .where('uuid = :uuid', { uuid: user.uuid, realCost, virtualCost })
-        .execute();
+      for (const cik of cartItemsKits) {
+        await this.issuanceService.deliverProduct(user, server, cik.product, cik.amount);
+      }
+    } else {
+      warehouseItems = await this.warehousePush(warehouseUser, cartItems);
 
-      throw e;
+      for (const cik of cartItemsKits) {
+        warehouseItems.push((await this.warehousePush(warehouseUser, [cik]))[0]);
+      }
     }
 
     for (const ci of cartItems) {

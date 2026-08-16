@@ -4,7 +4,7 @@ import { Ban } from 'src/game/cabinet/bans/entities/ban.entity';
 import { Cloak } from 'src/game/cabinet/skin/entities/cloak.entity';
 import { Skin } from 'src/game/cabinet/skin/entities/skin.entity';
 import { Column, CreateDateColumn, Entity, Generated, JoinTable, ManyToMany, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
-import { encryptedColumn, ENCRYPTED_TWO_FACTOR_SECRET, ENCRYPTED_TWO_FACTOR_SECRET_TEMP } from '@common';
+import { MONEY_PRECISION, MONEY_SCALE, bigintColumn, decimalColumn } from '@common';
 
 @Entity({ name: 'unicore_users' })
 export class User {
@@ -48,21 +48,19 @@ export class User {
   @Column({ name: 'two_factor_enabled', nullable: true })
   two_factor_enabled?: boolean;
 
-  @Column({ name: 'two_factor_secret', type: 'text', nullable: true, transformer: encryptedColumn(ENCRYPTED_TWO_FACTOR_SECRET) })
+  @Column({ name: 'two_factor_secret', type: 'text', nullable: true })
   two_factor_secret?: string;
 
-  @Column({
-    name: 'two_factor_secret_temp',
-    type: 'text',
-    nullable: true,
-    transformer: encryptedColumn(ENCRYPTED_TWO_FACTOR_SECRET_TEMP),
-  })
+  @Column({ name: 'two_factor_secret_temp', type: 'text', nullable: true })
   two_factor_secret_temp?: string;
 
-  @Column('float', { name: 'real', default: 0 })
+  @Column({ name: 'two_factor_counter', type: 'bigint', nullable: true, transformer: bigintColumn })
+  two_factor_counter?: number;
+
+  @Column('decimal', { name: 'real', precision: MONEY_PRECISION, scale: MONEY_SCALE, default: 0, transformer: decimalColumn })
   real: number;
 
-  @Column('float', { name: 'virtual', default: 0 })
+  @Column('decimal', { name: 'virtual', precision: MONEY_PRECISION, scale: MONEY_SCALE, default: 0, transformer: decimalColumn })
   virtual: number;
 
   @ManyToMany(() => Role, (role) => role.users, {

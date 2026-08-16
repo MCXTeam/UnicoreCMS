@@ -8,6 +8,7 @@ import { CartItemProtected } from '../cart/dto/cart.dto';
 import { WarehouseGivedInput } from './dto/warehouse-gived.input';
 import { WarehouseItem } from './entities/warehouse-item.entity';
 import * as _ from 'lodash';
+import { Transactional } from 'typeorm-transactional';
 
 @Injectable()
 export class WarehouseService {
@@ -50,15 +51,28 @@ export class WarehouseService {
     return true;
   }
 
+  @Transactional()
   async afterGive(input: WarehouseGivedInput[]) {
     const givedItems = await this.warehouseItemsRepository.findBy({ id: In(input.map((it) => it.id)) });
 
-    for (const i in givedItems) {
-      const inputItem = input.find((it) => it.id == givedItems[i].id);
-      givedItems[i].amount -= inputItem.amount;
-    }
+    for (const item of givedItems) {
+      const gived = input.find((it) => it.id == item.id);
 
-    const removed = await this.warehouseItemsRepository.remove(givedItems.filter((it) => it.amount <= 0));
-    await this.warehouseItemsRepository.save(_.without(givedItems, ...removed));
+      if (!gived) continue;
+
+      if (item.amount - gived.amount <= 0) {
+        await this.warehouseItemsRepository.remove(item);
+        continue;
+      }
+
+      const decrement = await this.warehouseItemsRepository
+        .createQueryBuilder()
+        .update()
+        .set({ amount: () => 'amount - :amount' })
+        .where('id = :id AND amount > :amount', { id: item.id, amount: gived.amount })
+        .execute();
+
+      if (!decrement.affected) await this.warehouseItemsRepository.delete({ id: item.id });
+    }
   }
 }

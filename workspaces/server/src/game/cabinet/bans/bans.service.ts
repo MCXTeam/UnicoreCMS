@@ -7,10 +7,12 @@ import { Ban } from './entities/ban.entity';
 import * as moment from 'moment';
 import { User } from 'src/admin/users/entities/user.entity';
 import { BanFromAdminInput } from './dto/ban-from-admin.input';
-import { MomentWrapper } from '@common';
+import { debitUserBalance, MomentWrapper } from '@common';
 import { ConfigService } from 'src/admin/config/config.service';
 import { ConfigField } from 'src/admin/config/config.enum';
+import { configFieldNumber } from 'src/admin/config/config.utils';
 import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
+import { Transactional } from 'typeorm-transactional';
 
 @Injectable()
 export class BansService {
@@ -67,26 +69,23 @@ export class BansService {
     if (input.expires) ban.expires = this.moment(input.expires).utc().toDate();
     else ban.expires = null;
 
-    if (!userPermissionCheck(ban.user, actor)) throw new ForbiddenException();
-
     if (!ban.user || !ban.actor || ban.user.uuid == kernel.uuid) throw new BadRequestException();
+
+    if (!(await userPermissionCheck(ban.user, actor))) throw new ForbiddenException();
 
     return this.bansRepository.save(ban);
   }
 
+  @Transactional()
   async unban(user: User) {
     if (!user.ban) throw new NotFoundException();
 
     const config = await this.configService.load();
-    const price = currencyUtils.roundByType(config[ConfigField.UnbanPrice] as number, SystemCurrency.REAL);
+    const price = currencyUtils.roundByType(configFieldNumber(config, ConfigField.UnbanPrice), SystemCurrency.REAL);
 
-    // Price calc
-    if (user.real < price) throw new BadRequestException();
+    await debitUserBalance(this.usersRepository, user.uuid, price);
 
-    user.real -= price;
-
-    await this.usersRepository.save(user);
-    await this.bansRepository.delete({ user });
+    await this.bansRepository.delete({ user: { uuid: user.uuid } });
     return true;
   }
 

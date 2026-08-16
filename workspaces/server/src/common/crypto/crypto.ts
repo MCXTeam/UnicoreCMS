@@ -1,7 +1,9 @@
-import { createCipheriv, createDecipheriv, hkdfSync, randomBytes, timingSafeEqual } from 'crypto';
+import { createCipheriv, createDecipheriv, createHash, hkdfSync, randomBytes, timingSafeEqual } from 'crypto';
 import { envConfig } from 'unicore-common';
 import {
   CRYPTO_CIPHER,
+  CRYPTO_FINGERPRINT_HASH,
+  CRYPTO_FINGERPRINT_LENGTH,
   CRYPTO_HKDF_HASH,
   CRYPTO_HKDF_SALT,
   CRYPTO_IV_BYTES,
@@ -16,8 +18,11 @@ const deriveKey = (master: string, purpose: string): Buffer =>
 
 const keyCache = new Map<string, Buffer>();
 
+const fingerprint = (master: string): string =>
+  createHash(CRYPTO_FINGERPRINT_HASH).update(master).digest('base64url').slice(0, CRYPTO_FINGERPRINT_LENGTH);
+
 const keyFor = (purpose: string, master: string): Buffer => {
-  const cacheKey = `${purpose}:${master.length}:${master.slice(0, 4)}`;
+  const cacheKey = `${purpose}:${fingerprint(master)}`;
   const cached = keyCache.get(cacheKey);
 
   if (cached) return cached;

@@ -9,6 +9,7 @@ import { GravitAuthorize } from './dto/inputs/gravit-authorize.input';
 import { GravitCheckServer } from './dto/inputs/gravit-check-server.input';
 import { GravitJoinServer } from './dto/inputs/gravit-join-server.input';
 import { GravitRefreshToken } from './dto/inputs/gravit-refresh-token.input';
+import { GravitDeleteSession, GravitExitUser } from './dto/inputs/gravit-session.input';
 import { GravitService } from './gravit.service';
 
 @Permissions([Permission.KernelUnicoreProvider])
@@ -54,12 +55,12 @@ export class GravitController {
   }
 
   @Post('deleteSession')
-  deleteSession(@Body() body: any) {
+  deleteSession(@Body() body: GravitDeleteSession) {
     return this.gravitService.deleteSession(body);
   }
 
   @Post('exitUser')
-  exitUser(@Body() body: any) {
+  exitUser(@Body() body: GravitExitUser) {
     return this.gravitService.exitUser(body);
   }
 

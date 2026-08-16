@@ -1,4 +1,4 @@
-import { StorageManager } from '@common';
+import { MONEY_PRECISION, MONEY_SCALE, StorageManager, decimalColumn } from '@common';
 import { AfterRemove, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity({ name: 'unicore_bonuses' })
@@ -6,7 +6,7 @@ export class Bonus {
   @PrimaryGeneratedColumn({ name: 'id' })
   id: number;
 
-  @Column('float', { name: 'bonus' })
+  @Column('decimal', { name: 'bonus', precision: MONEY_PRECISION, scale: MONEY_SCALE, transformer: decimalColumn })
   bonus: number;
 
   @Column('float')

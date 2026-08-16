@@ -1,6 +1,5 @@
 import { INestApplicationContext, UnauthorizedException } from '@nestjs/common';
 import { IoAdapter } from '@nestjs/platform-socket.io';
-import * as minimatch from 'minimatch';
 import { ApiService } from 'src/admin/api/api.service';
 import { UserDto } from 'src/admin/users/dto/user.dto';
 import { UsersService } from 'src/admin/users/users.service';
@@ -8,7 +7,8 @@ import { userRoom } from '../helpers';
 import { ApiKeyRoom } from '../helpers/api-key-room';
 import { AuthSocket } from '../interfaces/auth-socket.interface';
 import { TokensService } from '../tokens.service';
-import { WS_API_KEY_PREFIX, WS_BEARER_PREFIX, WS_PUBLIC_ROOM } from '@common';
+import { ipAllowed, isBanActive, normalizeIp, WS_API_KEY_PREFIX, WS_BEARER_PREFIX, WS_PUBLIC_ROOM } from '@common';
+import { envConfig } from 'unicore-common';
 
 export class AuthAdapter extends IoAdapter {
   private tokensService: TokensService;
@@ -43,11 +43,16 @@ export class AuthAdapter extends IoAdapter {
     return authorization?.startsWith(WS_BEARER_PREFIX) ? authorization.slice(WS_BEARER_PREFIX.length) : null;
   }
 
+  private socketIp(socket: AuthSocket): string {
+    const forwarded = envConfig.trustProxy ? String(socket.handshake.headers?.['x-forwarded-for'] || '').split(',')[0] : '';
+
+    return normalizeIp(forwarded || socket.handshake.address || socket.conn?.remoteAddress);
+  }
+
   private async authorizeApiKey(socket: AuthSocket, apiKey: string): Promise<void> {
     const apiToken = await this.apiService.findByKey(apiKey);
-    const ip = socket.handshake.address || socket.conn?.remoteAddress;
 
-    if (!apiToken?.allow?.length || !apiToken.allow.some((ipPattern) => minimatch.match([ip], ipPattern).length)) {
+    if (!ipAllowed(this.socketIp(socket), apiToken?.allow)) {
       throw new UnauthorizedException();
     }
 
@@ -61,7 +66,9 @@ export class AuthAdapter extends IoAdapter {
   private async authorizeUser(socket: AuthSocket, refreshToken: string): Promise<void> {
     const { user } = await this.tokensService.resolveRefreshToken(refreshToken);
 
-    socket.join([...user.perms, userRoom(user)]);
+    if (isBanActive(user.ban)) throw new UnauthorizedException();
+
+    socket.join([...new UserDto(user).perms, userRoom(user)]);
     socket.user = user;
   }
 

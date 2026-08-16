@@ -2,7 +2,7 @@ import { ForbiddenException, Injectable, NotFoundException, StreamableFile, Unsu
 import { matchPermission } from 'src/admin/roles/guards/permisson.guard';
 import { Permission } from 'unicore-common';
 import { imageSize } from 'image-size';
-import { DEFAULT_CLOAK_FILE, DEFAULT_SKIN_FILE, StorageManager, STORAGE_MAX_IMAGE_UPLOAD } from '@common';
+import { DEFAULT_CLOAK_FILE, DEFAULT_SKIN_FILE, SKIN_MAX_SIZE, StorageManager, STORAGE_MAX_IMAGE_UPLOAD } from '@common';
 import { Repository } from 'typeorm';
 import { Skin } from './entities/skin.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -26,21 +26,26 @@ export class SkinService {
   }
 
   private validateImage(file: Express.Multer.File): { width: number; height: number } {
-    const buffer = StorageManager.read(file.filename, STORAGE_MAX_IMAGE_UPLOAD);
+    let valid = false;
 
-    if (!buffer || !this.isPng(buffer)) {
-      StorageManager.remove(file.filename);
-      throw new UnsupportedMediaTypeException();
+    try {
+      const buffer = StorageManager.read(file.filename, STORAGE_MAX_IMAGE_UPLOAD);
+
+      if (!buffer || !this.isPng(buffer)) throw new UnsupportedMediaTypeException();
+
+      const { width, height, type } = imageSize(buffer);
+
+      if (type !== 'png' || !width || !height || width > SKIN_MAX_SIZE || height > SKIN_MAX_SIZE)
+        throw new UnsupportedMediaTypeException();
+
+      valid = true;
+
+      return { width, height };
+    } catch (e) {
+      throw e instanceof UnsupportedMediaTypeException ? e : new UnsupportedMediaTypeException();
+    } finally {
+      if (!valid) StorageManager.remove(file.filename);
     }
-
-    const { width, height, type } = imageSize(buffer);
-
-    if (type !== 'png' || !width || !height || width > 2048 || height > 2048) {
-      StorageManager.remove(file.filename);
-      throw new UnsupportedMediaTypeException();
-    }
-
-    return { width, height };
   }
 
   async updateSkin(user: User, file: Express.Multer.File) {
@@ -107,12 +112,13 @@ export class SkinService {
   }
 
   async removeCloak(user: User) {
-    if (!user.cloak) return;
+    const cloak = await this.cloaksRepository.findOneBy({ user: { uuid: user.uuid } });
 
-    let cloak = await this.cloaksRepository.findOneBy({ user: { uuid: user.uuid } });
-    cloak.user = user;
+    if (!cloak) return;
 
-    if (cloak) this.cloaksRepository.remove(cloak);
+    if (cloak.file) StorageManager.remove(cloak.file);
+
+    await this.cloaksRepository.remove(cloak);
   }
 
   async removeCloakByUUID(uuid: string) {
@@ -123,12 +129,13 @@ export class SkinService {
   }
 
   async removeSkin(user: User) {
-    if (!user.skin) return;
+    const skin = await this.skinsRepository.findOneBy({ user: { uuid: user.uuid } });
 
-    let skin = await this.skinsRepository.findOneBy({ user: { uuid: user.uuid } });
-    skin.user = user;
+    if (!skin) return;
 
-    if (skin) this.skinsRepository.remove(skin);
+    if (skin.file) StorageManager.remove(skin.file);
+
+    await this.skinsRepository.remove(skin);
   }
 
   async removeSkinByUUID(uuid: string) {

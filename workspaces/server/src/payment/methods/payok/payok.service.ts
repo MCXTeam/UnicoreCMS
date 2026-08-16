@@ -7,6 +7,7 @@ import { PaymentHandlerService } from '../core/payment-handler.service';
 import * as crypto from 'crypto';
 import { PayokModule } from './payok.module';
 import { envConfig } from 'unicore-common';
+import { safeEqual } from '@common';
 
 @Injectable()
 export class PayokService implements PaymentCoreService {
@@ -45,9 +46,9 @@ export class PayokService implements PaymentCoreService {
       .update([envConfig.payokSecretKey, input.desc, input.currency, envConfig.payokShopID, input.payment_id, input.amount].join('|'))
       .digest('hex');
 
-    if (sign != input.sign) return PaymentResp.WrongSign;
+    if (!safeEqual(sign, input.sign)) return PaymentResp.WrongSign;
 
-    if (!(await this.paymentHandler.handler(input.payment_id))) return PaymentResp.WrongPayID;
+    if (!(await this.paymentHandler.handler(input.payment_id, null, input.amount))) return PaymentResp.WrongPayID;
 
     return PaymentResp.OK;
   }

@@ -4,8 +4,8 @@ import { HeaderAPIKeyStrategy } from 'passport-headerapikey';
 import { ApiService } from 'src/admin/api/api.service';
 import { UsersService } from 'src/admin/users/users.service';
 import * as requestIp from 'request-ip';
-import * as minimath from 'minimatch';
 import { Request } from 'express';
+import { ipAllowed } from '@common';
 
 @Injectable()
 export class ApiKeyStrategy extends PassportStrategy(HeaderAPIKeyStrategy) {
@@ -28,13 +28,7 @@ export class ApiKeyStrategy extends PassportStrategy(HeaderAPIKeyStrategy) {
     const kernel = await this.usersService.getKernel();
     const ip = req.ip || requestIp.getClientIp(req);
 
-    if (
-      api &&
-      kernel &&
-      api.allow &&
-      api.allow.length &&
-      api.allow.filter((ipPattern) => minimath.match([ip], ipPattern).length).flat().length
-    ) {
+    if (api && kernel && ipAllowed(ip, api.allow)) {
       kernel.perms = api.perms;
 
       done(null, kernel);

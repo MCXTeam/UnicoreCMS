@@ -7,6 +7,8 @@ export const IMAGE_FALLBACK = '/images/placeholder.svg'
 
 export const KIT_HIDE_DELAY_MS = 250
 
+export const SITEMAP_USERS_MAX_PAGES = 50
+
 export const YANDEX_METRIKA_SCRIPT = 'https://mc.yandex.ru/metrika/tag.js'
 
 export const YANDEX_METRIKA_INIT_OPTIONS = {

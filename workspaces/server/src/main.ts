@@ -7,7 +7,8 @@ import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { join } from 'path';
 import { AuthAdapter } from './auth/adapters/auth.adapter';
 import { EntityNotFoundFilter } from './common/filters/entity-not-found.filter';
-import { ASCII_NAME } from '@common';
+import { ASCII_NAME, STATIC_CONTENT_SECURITY_POLICY } from '@common';
+import helmet from 'helmet';
 import * as clc from 'cli-color';
 import { initializeTransactionalContext } from 'typeorm-transactional';
 import { ContentLocaleInterceptor } from './admin/locales/content-locale.interceptor';
@@ -43,11 +44,23 @@ async function bootstrap() {
     SwaggerModule.setup('docs', app, document);
   }
 
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+      crossOriginEmbedderPolicy: false,
+    }),
+  );
   app.enableCors({
     origin: envConfig.corsOrigins,
     credentials: true,
   });
-  app.useStaticAssets(join(__dirname, '../../../storage'));
+  app.useStaticAssets(join(__dirname, '../../../storage'), {
+    setHeaders: (res) => {
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('Content-Security-Policy', STATIC_CONTENT_SECURITY_POLICY);
+    },
+  });
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
   app.useWebSocketAdapter(new AuthAdapter(app));
   app.useGlobalInterceptors(
@@ -65,6 +78,7 @@ process.on('unhandledRejection', (reason) => {
 
 process.on('uncaughtException', (error) => {
   console.error('Uncaught Exception:', error);
+  process.exit(1);
 });
 
 bootstrap().catch((error) => {

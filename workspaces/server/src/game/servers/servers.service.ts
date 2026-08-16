@@ -1,4 +1,4 @@
-import { StorageManager } from '@common';
+import { encryptField, ENCRYPTED_RCON_PASSWORD, StorageManager } from '@common';
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeliveryMode } from 'unicore-common';
@@ -13,6 +13,7 @@ import { Mod } from './mods/entities/mod.entity';
 import { Online } from './online/entities/online.entity';
 import { Query } from './online/entities/query.entity';
 import { RCON } from './rcon/entities/rcon.entity';
+import { RconService } from './rcon/rcon.service';
 
 @Injectable()
 export class ServersService {
@@ -21,6 +22,7 @@ export class ServersService {
     private serversRepository: Repository<Server>,
     @InjectRepository(Mod)
     private modsRepository: Repository<Mod>,
+    private rconService: RconService,
   ) {}
 
   find(relations: string[] = new Array()): Promise<Server[]> {
@@ -72,7 +74,7 @@ export class ServersService {
       server.rcon = new RCON();
       server.rcon.host = input.rcon.host;
       server.rcon.port = input.rcon.port;
-      server.rcon.password = input.rcon.password ?? '';
+      server.rcon.password = encryptField(input.rcon.password ?? '', ENCRYPTED_RCON_PASSWORD, server.id);
     }
 
     server.mods = await this.modsRepository.findBy({
@@ -110,14 +112,17 @@ export class ServersService {
       }
       server.rcon.host = input.rcon.host;
       server.rcon.port = input.rcon.port;
-      if (input.rcon.password) server.rcon.password = input.rcon.password;
+      if (input.rcon.password) server.rcon.password = encryptField(input.rcon.password, ENCRYPTED_RCON_PASSWORD, server.id);
     }
 
     server.mods = await this.modsRepository.findBy({
       id: In(input.mods ?? []),
     });
 
-    return this.serversRepository.save(server);
+    const saved = await this.serversRepository.save(server);
+    this.rconService.invalidate(id);
+
+    return saved;
   }
 
   async remove(id: string) {
@@ -127,7 +132,10 @@ export class ServersService {
       throw new NotFoundException();
     }
 
-    return this.serversRepository.remove(server);
+    const removed = await this.serversRepository.remove(server);
+    this.rconService.invalidate(id);
+
+    return removed;
   }
 
   async updateMedia(id: string, type: ServerMedia, file: Express.Multer.File) {

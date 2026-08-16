@@ -8,6 +8,7 @@ import { UserDto } from 'src/admin/users/dto/user.dto';
 import { AuthSocket } from 'src/auth/interfaces/auth-socket.interface';
 import { Onlines } from 'src/game/servers/online/dto/onlines.dto';
 import { OnlineService } from 'src/game/servers/online/online.service';
+import { envConfig } from 'unicore-common';
 import { GravitService } from '../auth/gravit/gravit.service';
 import { EventsService } from './events.service';
 
@@ -16,7 +17,8 @@ import { EventsService } from './events.service';
 @UseInterceptors(ClassSerializerInterceptor)
 @WebSocketGateway({
   cors: {
-    origin: '*',
+    origin: envConfig.corsOrigins,
+    credentials: true,
   },
 })
 export class EventsGateway implements OnGatewayInit, OnGatewayConnection {

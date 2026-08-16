@@ -3,6 +3,9 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Upload
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
+import { matchPermission } from 'src/admin/roles/guards/permisson.guard';
+import { User } from 'src/admin/users/entities/user.entity';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { Permission } from 'unicore-common';
 import { ProductFromGameInput } from '../dto/product-fromgame.dto';
 import { ProductsManyInput } from '../dto/product-many.input';
@@ -86,8 +89,10 @@ export class ProductsController {
       limits: { fileSize: 50 * 1024 * 1024, files: 1 },
     }),
   )
-  importItems(@Body() body: ProductsImportInput, @UploadedFile() file: Express.Multer.File) {
-    return this.productsService.importItems(body, file.filename);
+  async importItems(@CurrentUser() user: User, @Body() body: ProductsImportInput, @UploadedFile() file: Express.Multer.File) {
+    const allowCommands = await matchPermission([Permission.AdminDashboard, Permission.AdminServersUpdate], { user });
+
+    return this.productsService.importItems(body, file.filename, allowCommands);
   }
 
   @Permissions([Permission.AdminDashboard, Permission.EditorStoreProductsUpdate])

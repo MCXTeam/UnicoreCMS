@@ -12,7 +12,7 @@ import { WebhookType } from './enums/webhook-type.enum';
 import { VkLongpollService } from '../integrations/vk-longpoll/vk-longpoll.service';
 import { AttachmentType } from 'vk-io';
 import { envConfig } from 'unicore-common';
-import { StorageManager } from '@common';
+import { DISCORD_WEBHOOK_HOSTS, StorageManager, WEBHOOK_TIMEOUT_MS } from '@common';
 
 @Injectable()
 export class WebhooksService {
@@ -42,6 +42,8 @@ export class WebhooksService {
 
         switch (wh.request) {
           case WebhookRequestType.Discord:
+            if (!this.isDiscordUrl(wh.url)) continue;
+
             switch (wh.type) {
               // Срабатывает, когда на сайте добавлена новая новость
               case WebhookType.NewsCreated:
@@ -56,14 +58,34 @@ export class WebhooksService {
             }
             break;
           default:
-            if (!(await StorageManager.isSafeUrl(wh.url))) continue;
-            await firstValueFrom(this.httpService.post(wh.url, payload, { timeout: 5000 }));
+            await this.post(wh.url, payload);
             break;
         }
       } catch (error) {
         this.logger.error(`Webhook ${wh.id} (${wh.url}) failed: ${error}`);
       }
     }
+  }
+
+  private isDiscordUrl(url: string): boolean {
+    try {
+      const { protocol, hostname } = new URL(url);
+
+      if (protocol !== 'https:') return false;
+
+      return DISCORD_WEBHOOK_HOSTS.some((host) => hostname === host || hostname.endsWith(`.${host}`));
+    } catch {
+      return false;
+    }
+  }
+
+  private async post(url: string, payload: unknown) {
+    if (!(await StorageManager.isSafeUrl(url))) {
+      this.logger.error(`Blocked unsafe webhook url: ${url}`);
+      return;
+    }
+
+    await firstValueFrom(this.httpService.post(url, payload, { timeout: WEBHOOK_TIMEOUT_MS, maxRedirects: 0 }));
   }
 
   private newsCreatedDiscord(url: string, payload: News) {}

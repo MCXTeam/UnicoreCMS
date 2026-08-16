@@ -2,7 +2,17 @@ import { Command, CommandRunner } from 'nest-commander';
 import * as clc from 'cli-color';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CRYPTO_PURPOSE_PASSWORD, decrypt, encrypt, isCurrentKey } from '@common';
+import {
+  CRYPTO_PURPOSE_PASSWORD,
+  decrypt,
+  decryptField,
+  encrypt,
+  encryptField,
+  ENCRYPTED_RCON_PASSWORD,
+  ENCRYPTED_TWO_FACTOR_SECRET,
+  ENCRYPTED_TWO_FACTOR_SECRET_TEMP,
+  isCurrentKey,
+} from '@common';
 import { passwordAad } from 'src/auth/password/password-aad';
 import { User } from 'src/admin/users/entities/user.entity';
 import { RCON } from 'src/game/servers/rcon/entities/rcon.entity';
@@ -20,6 +30,16 @@ export class CryptoRewrapCommand extends CommandRunner {
     private rconRepository: Repository<RCON>,
   ) {
     super();
+  }
+
+  private rewrapField(value: string, field: string, id: string): string {
+    if (!value) return value;
+
+    try {
+      return encryptField(decryptField(value, field, id), field, id);
+    } catch {
+      return value;
+    }
   }
 
   async run(): Promise<void> {
@@ -42,22 +62,23 @@ export class CryptoRewrapCommand extends CommandRunner {
         }
       }
 
+      const rewrapped = {
+        two_factor_secret: this.rewrapField(user.two_factor_secret, ENCRYPTED_TWO_FACTOR_SECRET, user.uuid),
+        two_factor_secret_temp: this.rewrapField(user.two_factor_secret_temp, ENCRYPTED_TWO_FACTOR_SECRET_TEMP, user.uuid),
+      };
+
       if (user.two_factor_secret || user.two_factor_secret_temp) secrets++;
 
-      await this.usersRepository.update(
-        { uuid: user.uuid },
-        {
-          password: user.password,
-          two_factor_secret: user.two_factor_secret,
-          two_factor_secret_temp: user.two_factor_secret_temp,
-        },
-      );
+      await this.usersRepository.update({ uuid: user.uuid }, { password: user.password, ...rewrapped });
     }
 
     const rcons = await this.rconRepository.find();
 
     for (const rcon of rcons) {
-      await this.rconRepository.update({ serverId: rcon.serverId }, { password: rcon.password });
+      await this.rconRepository.update(
+        { serverId: rcon.serverId },
+        { password: this.rewrapField(rcon.password, ENCRYPTED_RCON_PASSWORD, rcon.serverId) },
+      );
     }
 
     stdout(clc.magenta('Secrets re-encrypted with the current key'));

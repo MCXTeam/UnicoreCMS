@@ -43,14 +43,9 @@
       </div>
       <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
     </Field>
-    <Field v-model="form.close" :name="$t('auth.sessions')" :rules="sessionsRequired" v-slot="{ value, handleChange }">
-      <div data-aos="zoom-in-right" data-aos-delay="600" class="my-3 w-100">
-        <div class="d-flex align-items-center gap-2">
-          <Checkbox :modelValue="value" @update:modelValue="handleChange" :binary="true" inputId="close_sessions" />
-          <label for="close_sessions">{{ $t('auth.close_sessions') }}</label>
-        </div>
-      </div>
-    </Field>
+    <div data-aos="zoom-in-right" data-aos-delay="600" class="my-3 w-100">
+      <Message severity="info" :closable="false">{{ $t('auth.sessions_closed_hint') }}</Message>
+    </div>
     <div class="w-100" data-aos="zoom-in-right" data-aos-delay="750">
       <Button :disabled="!meta.valid" type="submit" size="large" :label="$t('auth.change_password')" class="w-100" />
     </div>
@@ -71,10 +66,7 @@ const route = useRoute()
 const form = reactive({
   password: '',
   password_confirm: '',
-  close: true,
 })
-
-const sessionsRequired = (value: unknown) => value === true || $t('auth.confirm_required')
 
 onMounted(async () => {
   try {

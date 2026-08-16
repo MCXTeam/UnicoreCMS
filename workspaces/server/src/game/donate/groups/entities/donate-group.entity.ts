@@ -1,4 +1,4 @@
-import { StorageManager } from '@common';
+import { MONEY_PRECISION, MONEY_SCALE, StorageManager, decimalColumn } from '@common';
 import { Server } from 'src/game/servers/entities/server.entity';
 import { AfterRemove, Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Period } from '../../entities/period.entity';
@@ -26,7 +26,7 @@ export class DonateGroup {
   @Column({ name: 'ingame_id' })
   ingame_id: string;
 
-  @Column('float', { name: 'price' })
+  @Column('decimal', { name: 'price', precision: MONEY_PRECISION, scale: MONEY_SCALE, transformer: decimalColumn })
   price: number;
 
   @Column({ nullable: true, name: 'virtual_percent' })

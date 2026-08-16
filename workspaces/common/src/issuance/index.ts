@@ -1,3 +1,5 @@
+import { COMMAND_VALUE_FORBIDDEN } from "../constants";
+
 export enum DeliveryMode {
   Plugin = 0,
   Rcon = 1,
@@ -7,6 +9,7 @@ export enum RconCommandStatus {
   Pending = 0,
   Sent = 1,
   Failed = 2,
+  Processing = 3,
 }
 
 export enum IssuanceKind {
@@ -322,6 +325,10 @@ export function secondsToDuration(seconds: number): string {
   return out || "0s";
 }
 
+export function sanitizeCommandValue(value: string): string {
+  return value.replace(COMMAND_VALUE_FORBIDDEN, "");
+}
+
 export function renderTemplate(template: string, ctx: RenderContext): string {
   const seconds = ctx.period?.seconds ?? 0;
   const amount = ctx.product?.amount ?? ctx.amount;
@@ -350,6 +357,6 @@ export function renderTemplate(template: string, ctx: RenderContext): string {
   };
 
   return template.replace(/\{([a-z0-9_.]+)\}/gi, (match, key) =>
-    key in values ? values[key] : match,
+    key in values ? sanitizeCommandValue(values[key]) : match,
   );
 }

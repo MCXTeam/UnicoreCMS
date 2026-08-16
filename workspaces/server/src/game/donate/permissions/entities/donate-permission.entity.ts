@@ -1,3 +1,4 @@
+import { decimalColumn, MONEY_PRECISION, MONEY_SCALE } from '@common';
 import { Server } from 'src/game/servers/entities/server.entity';
 import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Period } from '../../entities/period.entity';
@@ -26,7 +27,7 @@ export class DonatePermission {
   @Column({ name: 'type' })
   type: PermissionType;
 
-  @Column('float', { name: 'price' })
+  @Column('decimal', { name: 'price', precision: MONEY_PRECISION, scale: MONEY_SCALE, transformer: decimalColumn })
   price: number;
 
   @Column({ nullable: true, name: 'virtual_percent' })

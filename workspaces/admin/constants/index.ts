@@ -10,6 +10,8 @@ export const DASHBOARD_CHART_SECTIONS = [
 
 export const IMAGE_FALLBACK = '/placeholder.svg'
 
+export { SANITIZE_CONFIG } from 'unicore-common/sanitize'
+
 export const RCON_FIELD_MAP = {
   give_item: { cfg: 'rcon_tpl_give_item', op: 'giveItem' },
   group_add: { cfg: 'rcon_tpl_group_add', op: 'groupAdd' },

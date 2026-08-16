@@ -1,16 +1,25 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 import { DEFAULT_ISSUANCE_PRESET, RCON_PRESETS } from 'unicore-common';
-import { KEEP_HISTORY_DAYS, KEEP_PAID_PAYMENTS_DAYS, KEEP_PENDING_PAYMENTS_DAYS } from '@common';
-import { IsNull, Not, Repository } from 'typeorm';
+import { CacheKey, KEEP_HISTORY_DAYS, KEEP_PAID_PAYMENTS_DAYS, KEEP_PENDING_PAYMENTS_DAYS } from '@common';
+import { IsNull, Repository } from 'typeorm';
 import { ConfigField, ConfigType } from './config.enum';
+import { CONFIG_CACHE_TTL_MS } from './config.constants';
+import { isValidConfigNumber } from './config.utils';
 import { ConfigInput } from './dto/config.input';
 import { Config } from './entities/config.entity';
 import * as _ from 'lodash';
 
+export type LoadedConfig = Record<string, string | number | boolean>;
+
 @Injectable()
 export class ConfigService {
-  constructor(@InjectRepository(Config) private configRepo: Repository<Config>) {}
+  constructor(
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @InjectRepository(Config) private configRepo: Repository<Config>,
+  ) {}
 
   private configTransformer(config: Config[]) {
     return config.map((cfg) => {
@@ -94,11 +103,20 @@ export class ConfigService {
     return this.configTransformer(await this.configRepo.find({ order: { important: 'DESC' } }));
   }
 
-  async load() {
-    return _.chain(await this.find())
-      .keyBy('key')
-      .mapValues('value')
-      .value();
+  async load(): Promise<LoadedConfig> {
+    const cached = await this.cacheManager.get<LoadedConfig>(CacheKey.Config);
+
+    if (cached) return cached;
+
+    const config = _.chain(await this.find()).keyBy('key').mapValues('value').value() as LoadedConfig;
+
+    await this.cacheManager.set(CacheKey.Config, config, CONFIG_CACHE_TTL_MS);
+
+    return config;
+  }
+
+  private async invalidate() {
+    await this.cacheManager.del(CacheKey.Config);
   }
 
   async findPublic() {
@@ -108,8 +126,14 @@ export class ConfigService {
       .value();
   }
 
+  private assertValue(input: ConfigInput) {
+    if (input.type == ConfigType.number && !isValidConfigNumber(input.key, input.value)) throw new BadRequestException();
+  }
+
   async create(input: ConfigInput) {
     if (await this.configRepo.findOneBy({ key: input.key })) throw new BadRequestException();
+
+    this.assertValue(input);
 
     const cfg = new Config();
 
@@ -117,7 +141,10 @@ export class ConfigService {
     cfg.key = input.key;
     cfg.type = input.type;
 
-    return this.configRepo.save(cfg);
+    const saved = await this.configRepo.save(cfg);
+    await this.invalidate();
+
+    return saved;
   }
 
   async update(input: ConfigInput) {
@@ -125,10 +152,15 @@ export class ConfigService {
 
     if (!cfg) throw new NotFoundException();
 
+    this.assertValue(input);
+
     cfg.value = input.value;
     cfg.type = input.type;
 
-    return this.configRepo.save(cfg);
+    const saved = await this.configRepo.save(cfg);
+    await this.invalidate();
+
+    return saved;
   }
 
   async delate(key: string) {
@@ -136,6 +168,9 @@ export class ConfigService {
 
     if (!cfg) throw new NotFoundException();
 
-    return this.configRepo.remove(cfg);
+    const removed = await this.configRepo.remove(cfg);
+    await this.invalidate();
+
+    return removed;
   }
 }

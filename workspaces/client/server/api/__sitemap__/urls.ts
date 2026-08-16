@@ -1,8 +1,14 @@
 import type { SitemapUrl } from '#sitemap/types'
+import { SITEMAP_USERS_MAX_PAGES } from '~/constants'
 
 interface ServerEntry {
   id: number | string
   updated?: string
+}
+
+interface PublicUsers {
+  items: string[]
+  total: number
 }
 
 interface PageEntry {
@@ -43,9 +49,14 @@ export default defineSitemapEventHandler(async () => {
     for (const id of news) urls.push({ loc: `/news/${id}`, changefreq: 'daily' })
   }
 
-  const usernames = await safeGet<string[]>('/users/public/users')
-  if (usernames) {
-    for (const username of usernames) urls.push({ loc: `/user/${username}`, changefreq: 'daily' })
+  for (let page = 1; page <= SITEMAP_USERS_MAX_PAGES; page++) {
+    const users = await safeGet<PublicUsers>(`/users/public/users?page=${page}`)
+
+    if (!users?.items?.length) break
+
+    for (const username of users.items) urls.push({ loc: `/user/${username}`, changefreq: 'daily' })
+
+    if (page * users.items.length >= users.total) break
   }
 
   return urls

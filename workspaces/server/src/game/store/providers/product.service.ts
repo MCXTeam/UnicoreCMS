@@ -1,6 +1,8 @@
-import { StorageManager } from '@common';
+import { IMPORT_MAX_ENTRIES, IMPORT_MAX_UNPACKED_BYTES, StorageManager } from '@common';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
 import * as JSZip from 'jszip';
 import * as _ from 'lodash';
 import { FilterOperator, paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
@@ -9,6 +11,7 @@ import { Server } from 'src/game/servers/entities/server.entity';
 import { In, Repository } from 'typeorm';
 import { KitProtectedDto, PaginatedStoreDto, PayloadType } from '../dto/paginated-store.dto';
 import { ProductFromGameInput } from '../dto/product-fromgame.dto';
+import { ProductImportInput } from '../dto/product-import.input';
 import { ProductsManyInput } from '../dto/product-many.input';
 import { ProductInput } from '../dto/product.dto';
 import { ProductsImportInput } from '../dto/products-import.input';
@@ -398,11 +401,47 @@ export class ProductsService {
     return zip.generateAsync({ type: 'base64' });
   }
 
-  async importItems(input: ProductsImportInput, filename: string, remove_tmp: boolean = true) {
+  private async readImportMapping(zipTree: JSZip): Promise<ProductImportInput[]> {
+    const entries = Object.values(zipTree.files);
+
+    if (entries.length > IMPORT_MAX_ENTRIES) throw new BadRequestException();
+
+    const unpacked = entries.reduce((total, entry) => total + ((entry as any)._data?.uncompressedSize || 0), 0);
+
+    if (unpacked > IMPORT_MAX_UNPACKED_BYTES) throw new BadRequestException();
+
+    const content = await zipTree.file('content.json')?.async('string');
+
+    if (!content) throw new BadRequestException();
+
+    let parsed: unknown;
+
+    try {
+      parsed = JSON.parse(content);
+    } catch {
+      throw new BadRequestException();
+    }
+
+    if (!Array.isArray(parsed) || parsed.length > IMPORT_MAX_ENTRIES) throw new BadRequestException();
+
+    const mapping = parsed.map((raw) => plainToInstance(ProductImportInput, raw, { excludeExtraneousValues: false }));
+
+    for (const product of mapping) {
+      const errors = await validate(product, { whitelist: true, forbidNonWhitelisted: false });
+
+      if (errors.length) throw new BadRequestException(errors);
+    }
+
+    return mapping;
+  }
+
+  async importItems(input: ProductsImportInput, filename: string, allowCommands = false, remove_tmp: boolean = true) {
     const fileBuffer = StorageManager.read(filename);
     if (remove_tmp) StorageManager.remove(filename);
+
+    if (!fileBuffer) throw new BadRequestException();
+
     const zipTree = await JSZip.loadAsync(fileBuffer);
-    const content = await zipTree.file('content.json').async('string');
 
     let servers: Server[] = [];
     let categories: Category[] = [];
@@ -412,39 +451,30 @@ export class ProductsService {
     if (input.categories)
       categories = await this.categoriesRepository.find({ where: { id: In(input.categories.split(',').map((i) => Number(i))) } });
 
-    if (!content) throw new BadRequestException();
-
-    let mapping: ProductMap[];
-    try {
-      mapping = JSON.parse(content);
-    } catch {
-      throw new BadRequestException();
-    }
+    const mapping = await this.readImportMapping(zipTree);
     const products: Product[] = [];
 
-    await Promise.all(
-      mapping.map(async (product, index) => {
-        const entity = new Product();
+    for (const product of mapping) {
+      const entity = new Product();
 
-        entity.name = product.name;
-        entity.description = product.description;
-        entity.nbt = product.nbt;
-        entity.price = currencyUtils.roundByType(product.price, SystemCurrency.REAL);
-        entity.sale = product.sale;
-        entity.give_method = product.give_method;
-        entity.item_id = product.item_id;
-        entity.commands = product.commands;
-        entity.servers = servers;
-        entity.categories = categories;
+      entity.name = product.name;
+      entity.description = product.description;
+      entity.nbt = product.nbt;
+      entity.price = currencyUtils.roundByType(product.price, SystemCurrency.REAL);
+      entity.sale = product.sale;
+      entity.give_method = product.give_method;
+      entity.item_id = product.item_id;
+      entity.commands = allowCommands ? product.commands : [];
+      entity.servers = servers;
+      entity.categories = categories;
 
-        if (product.icon) {
-          const iconBuff = await zipTree.file('storage/' + product.icon).async('nodebuffer');
-          if (iconBuff) entity.icon = StorageManager.save(product.icon, iconBuff);
-        }
+      if (product.icon) {
+        const iconBuff = await zipTree.file('storage/' + product.icon)?.async('nodebuffer');
+        if (iconBuff) entity.icon = StorageManager.save(product.icon, iconBuff);
+      }
 
-        products.push(entity);
-      }),
-    );
+      products.push(entity);
+    }
 
     return this.productsRepository.save(products);
   }

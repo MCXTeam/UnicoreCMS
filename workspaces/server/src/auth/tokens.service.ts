@@ -91,7 +91,7 @@ export class TokensService {
 
   async decodeToken(token: string): Promise<JWTRefreshPayload | JWTPayload> {
     try {
-      return this.jwt.verifyAsync(token);
+      return await this.jwt.verifyAsync(token);
     } catch (e) {
       if (e instanceof TokenExpiredError) {
         throw new UnprocessableEntityException('Token expired');

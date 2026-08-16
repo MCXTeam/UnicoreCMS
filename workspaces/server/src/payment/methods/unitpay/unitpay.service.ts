@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { User } from 'src/admin/users/entities/user.entity';
 import { PaymentResp } from 'src/payment/enums/payment-resp.enum';
 import { envConfig } from 'unicore-common';
+import { safeEqual } from '@common';
 import { PaymentCreateDto } from '../core/dto/payment-create.dto';
 import { PaymentCoreService, PaymentLink } from '../core/payment-core.service';
 import { PaymentHandlerService } from '../core/payment-handler.service';
@@ -42,6 +43,8 @@ export class UnitpayService implements PaymentCoreService {
   async handler(ip: string, input: any): Promise<any> {
     if (!this.ips.find((i) => i == ip)) return { error: { message: PaymentResp.BadIp } };
 
+    if (!input?.params || typeof input.params !== 'object') return { error: { message: PaymentResp.WrongSign } };
+
     const sign = crypto
       .createHash('sha256')
       .update(
@@ -56,10 +59,10 @@ export class UnitpayService implements PaymentCoreService {
       )
       .digest('hex');
 
-    if (sign != input.params.signature) return { error: { message: PaymentResp.WrongSign } };
+    if (!safeEqual(sign, input.params.signature)) return { error: { message: PaymentResp.WrongSign } };
 
     if (input.method == 'pay') {
-      if (!(await this.paymentHandler.handler(input.params.account, input.params.unitpayId)))
+      if (!(await this.paymentHandler.handler(input.params.account, input.params.unitpayId, input.params.sum)))
         return { error: { message: PaymentResp.WrongPayID } };
     }
 

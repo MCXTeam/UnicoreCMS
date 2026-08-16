@@ -28,6 +28,7 @@ import { UserDto } from '../users/dto/user.dto';
 import { VerifyInput } from 'src/auth/dto/verify.input';
 import { PasswordReset } from './entities/password-reset.entity';
 import { PasswordResetInput } from 'src/auth/dto/password-reset.input';
+import { renderEmailTemplate } from './email.utils';
 import { PasswordLinkInput } from 'src/auth/dto/password-link.input';
 import { RefreshToken } from 'src/auth/entities/refresh-token.entity';
 import { PasswordService } from 'src/auth/password/password.service';
@@ -111,7 +112,7 @@ export class EmailService {
     const activation = new EmailActivation();
     const code = customAlphabet(EMAIL_CODE_ALPHABET, EMAIL_CODE_LENGTH)();
 
-    const html = content.replace('{USERNAME}', user.username).replace('{SITENAME}', envConfig.sitename).replace('{CODE}', code);
+    const html = renderEmailTemplate(content, { USERNAME: user.username, SITENAME: envConfig.sitename, CODE: code });
 
     activation.user = user;
     activation.code = code;
@@ -151,7 +152,7 @@ export class EmailService {
     await this.emailActivationsRepository.delete({ user: { uuid: user.uuid } });
 
     user.activated = true;
-    await this.usersRepository.save(user);
+    await this.usersRepository.update({ uuid: user.uuid }, { activated: true });
 
     return new UserDto(user);
   }
@@ -191,11 +192,12 @@ export class EmailService {
     link.pathname = '/auth/password';
     link.searchParams.append('hash', hash);
 
-    const html = content
-      .replace('{IP}', ip)
-      .replace('{USERNAME}', user.username)
-      .replace('{SITENAME}', envConfig.sitename)
-      .replace('{LINK}', link.href);
+    const html = renderEmailTemplate(content, {
+      IP: ip,
+      USERNAME: user.username,
+      SITENAME: envConfig.sitename,
+      LINK: link.href,
+    });
 
     activation.user = user;
     activation.hash = hash;
@@ -217,18 +219,17 @@ export class EmailService {
       relations: ['user'],
     });
 
-    if (exist) {
-      if (input.password) {
-        await this.passwordResetRepository.delete({ user: exist.user });
-        exist.user.password = await this.passwordService.hash(input.password, passwordAad(exist.user.uuid));
-        await this.usersRepository.save(exist.user);
+    if (!exist) throw new NotFoundException();
 
-        if (input.close) await this.tokensRepo.delete({ user: exist.user });
-      }
+    if (input.password) {
+      await this.passwordResetRepository.delete({ user: { uuid: exist.user.uuid } });
 
-      return new UserDto(exist.user);
-    } else {
-      throw new NotFoundException();
+      exist.user.password = await this.passwordService.hash(input.password, passwordAad(exist.user.uuid));
+
+      await this.usersRepository.update({ uuid: exist.user.uuid }, { password: exist.user.password });
+      await this.tokensRepo.delete({ user: { uuid: exist.user.uuid } });
     }
+
+    return new UserDto(exist.user);
   }
 }

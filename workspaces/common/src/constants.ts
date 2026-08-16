@@ -39,6 +39,12 @@ export const PUBLIC_ENV_KEYS: string[] = [
   ...Object.values(PUBLIC_ENV_KEY),
 ];
 
+export const COMMAND_VALUE_FORBIDDEN = /[\r\n\x00]/g;
+
+export const USERNAME_MIN_LENGTH = 3;
+export const USERNAME_MAX_LENGTH = 16;
+export const USERNAME_PATTERN = /^[a-zA-Z0-9_-]{3,16}$/;
+
 export const IS_USERNAME = "isUsername";
 export const IS_USERNAME_OR_EMAIL = "isUsernameOrEmail";
 export const IS_DONATE_WEB_PERM = "isDonateWebPerm";

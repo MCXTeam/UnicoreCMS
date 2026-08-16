@@ -38,6 +38,15 @@ const orm = {
   },
 };
 
+const money = {
+  ...base,
+  entry: './src/migrations/money-decimal.ts',
+  output: {
+    path: path.resolve(__dirname, 'dist/migrations'),
+    filename: 'money-decimal.js',
+  },
+};
+
 const main = {
   ...base,
   entry: './src/main.ts',
@@ -57,4 +66,4 @@ const cli = {
   plugins: [new webpack.BannerPlugin({ banner: '#!/usr/bin/env node', raw: true })],
 };
 
-module.exports = [orm, main, cli];
+module.exports = [orm, money, main, cli];

@@ -17,5 +17,6 @@ export class RegisterInput {
   password: string;
 
   @IsOptional()
+  @IsUsername()
   ref: string;
 }

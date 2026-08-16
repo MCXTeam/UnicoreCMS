@@ -19,6 +19,7 @@
     "@vueuse/core": "^14.4.0",
     "axios": "^1.19.0",
     "chart.js": "^4.5.1",
+    "isomorphic-dompurify": "^2.36.0",
     "moment": "^2.30.1",
     "moment-duration-format": "^2.3.2",
     "moment-range": "^4.0.2",

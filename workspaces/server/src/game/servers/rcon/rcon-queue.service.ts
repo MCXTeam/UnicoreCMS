@@ -1,10 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, LessThanOrEqual, Repository } from 'typeorm';
+import { randomUUID } from 'crypto';
+import { In, Repository } from 'typeorm';
 import { RconCommandStatus } from 'unicore-common';
 import { RconCommand } from './entities/rcon-command.entity';
 import { RconService } from './rcon.service';
-import { RCON_BACKOFF_BASE_MS, RCON_BACKOFF_MAX_MS, RCON_BATCH_LIMIT, RCON_MAX_ATTEMPTS } from 'src/common/constants';
+import { RCON_BACKOFF_BASE_MS, RCON_BACKOFF_MAX_MS, RCON_BATCH_LIMIT, RCON_MAX_ATTEMPTS, RCON_STALE_MS } from 'src/common/constants';
 
 export interface EnqueueMeta {
   label?: string;
@@ -14,6 +15,7 @@ export interface EnqueueMeta {
 @Injectable()
 export class RconQueueService {
   private readonly logger = new Logger('RconQueueService');
+  private readonly worker = randomUUID();
   private processing = false;
 
   constructor(
@@ -42,57 +44,94 @@ export class RconQueueService {
     });
   }
 
+  private async releaseStale(): Promise<void> {
+    await this.queueRepository
+      .createQueryBuilder()
+      .update()
+      .set({ status: RconCommandStatus.Pending, worker: null })
+      .where('status = :processing AND updated <= :deadline', {
+        processing: RconCommandStatus.Processing,
+        deadline: new Date(Date.now() - RCON_STALE_MS),
+      })
+      .execute();
+  }
+
+  private async claim(): Promise<RconCommand[]> {
+    const claimed = await this.queueRepository
+      .createQueryBuilder()
+      .update()
+      .set({ status: RconCommandStatus.Processing, worker: this.worker })
+      .where('status = :pending AND (next_attempt IS NULL OR next_attempt <= :now)', {
+        pending: RconCommandStatus.Pending,
+        now: new Date(),
+      })
+      .limit(RCON_BATCH_LIMIT)
+      .execute();
+
+    if (!claimed.affected) return [];
+
+    return this.queueRepository.find({
+      where: { status: RconCommandStatus.Processing, worker: this.worker },
+      order: { id: 'ASC' },
+    });
+  }
+
+  private async release(items: RconCommand[]): Promise<void> {
+    if (!items.length) return;
+
+    await this.queueRepository.update(
+      { id: In(items.map((item) => item.id)) },
+      { status: RconCommandStatus.Pending, worker: null },
+    );
+  }
+
   async process(): Promise<void> {
     if (this.processing) return;
     this.processing = true;
 
     try {
-      const now = new Date();
-      const pending = await this.queueRepository.find({
-        where: [
-          { status: RconCommandStatus.Pending, nextAttempt: IsNull() },
-          { status: RconCommandStatus.Pending, nextAttempt: LessThanOrEqual(now) },
-        ],
-        order: { id: 'ASC' },
-        take: RCON_BATCH_LIMIT,
-      });
+      await this.releaseStale();
 
-      if (!pending.length) return;
+      const claimed = await this.claim();
+
+      if (!claimed.length) return;
 
       const byServer = new Map<string, RconCommand[]>();
-      for (const item of pending) {
+      for (const item of claimed) {
         const list = byServer.get(item.serverId) ?? [];
         list.push(item);
         byServer.set(item.serverId, list);
       }
 
       for (const [serverId, items] of byServer) {
-        let serverDown = false;
-
-        for (const item of items) {
-          if (serverDown) break;
-
+        for (const [index, item] of items.entries()) {
           try {
-            await this.rconService.sendCommand(serverId, item.command);
             item.status = RconCommandStatus.Sent;
             item.error = null;
             item.sentAt = new Date();
+            item.worker = null;
+
             await this.queueRepository.save(item);
+            await this.rconService.sendCommand(serverId, item.command);
           } catch (error: any) {
-            serverDown = true;
             item.attempts += 1;
             item.error = error?.message || String(error);
+            item.sentAt = null;
+            item.worker = null;
 
             if (item.attempts >= RCON_MAX_ATTEMPTS) {
               item.status = RconCommandStatus.Failed;
               this.logger.warn(`RCON command #${item.id} for server ${serverId} failed permanently: ${item.error}`);
             } else {
+              item.status = RconCommandStatus.Pending;
               const delay = Math.min(RCON_BACKOFF_BASE_MS * 2 ** (item.attempts - 1), RCON_BACKOFF_MAX_MS);
               item.nextAttempt = new Date(Date.now() + delay);
             }
 
             await this.queueRepository.save(item);
             this.rconService.invalidate(serverId);
+            await this.release(items.slice(index + 1));
+            break;
           }
         }
       }

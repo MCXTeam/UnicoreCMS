@@ -1,4 +1,4 @@
-import { CommonSortInput, MomentWrapper, StorageManager } from '@common';
+import { CommonSortInput, debitUserBalance, MomentWrapper, StorageManager } from '@common';
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/admin/users/entities/user.entity';
@@ -20,8 +20,9 @@ import { UsersDonateGroup } from '../entities/user-donate.entity';
 import * as _ from 'lodash';
 import { ConfigService } from 'src/admin/config/config.service';
 import { ConfigField } from 'src/admin/config/config.enum';
+import { configFieldNumber } from 'src/admin/config/config.utils';
 import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
-import { isError } from 'lodash';
+import { Transactional } from 'typeorm-transactional';
 
 @Injectable()
 export class DonateGroupsService {
@@ -141,7 +142,9 @@ export class DonateGroupsService {
       userDonate.user = user;
     }
 
-    this.eventsService.server.to(Permission.KernelUnicoreConnect).emit('give_group', userDonate);
+    userDonate.user = { uuid: user.uuid } as User;
+
+    const saved = await this.userDonatesRepository.save(userDonate);
 
     if (this.issuanceService.isRcon(server)) {
       await this.issuanceService.deliverGroup(
@@ -152,8 +155,9 @@ export class DonateGroupsService {
       );
     }
 
-    userDonate.user = { uuid: user.uuid } as User;
-    return this.userDonatesRepository.save(userDonate);
+    this.eventsService.server?.to(Permission.KernelUnicoreConnect).emit('give_group', saved);
+
+    return saved;
   }
 
   async giveByDTO(input: GiveDonateGroupInput) {
@@ -182,6 +186,7 @@ export class DonateGroupsService {
     }
   }
 
+  @Transactional()
   async buy(user: User, ip: string, input: GroupBuyInput) {
     const cfg = await this.configService.load();
     const group = await this.findOne(input.group, ['servers', 'periods']);
@@ -190,10 +195,13 @@ export class DonateGroupsService {
 
     if (!group || !server || !period) throw new NotFoundException();
 
-    const price = currencyUtils.roundByType((group.price - (group.price * group.sale) / 100) * period.multiplier, SystemCurrency.REAL);
+    const price = currencyUtils.roundByType(
+      currencyUtils.saleApply(group.price, group.sale) * period.multiplier,
+      SystemCurrency.REAL,
+    );
     let virtual_sale = currencyUtils.roundByType(
       input.use_virtual && cfg[ConfigField.DonateGroupsVirtualUse] && group.virtual_percent !== 0
-        ? (price / 100) * (group.virtual_percent || Number(cfg[ConfigField.VirtualPercent]))
+        ? (price / 100) * (group.virtual_percent ?? configFieldNumber(cfg, ConfigField.VirtualPercent))
         : 0,
       SystemCurrency.VIRTAUL,
     );
@@ -202,30 +210,12 @@ export class DonateGroupsService {
     const realCost = currencyUtils.roundByType(price - virtual_sale, SystemCurrency.REAL);
     const virtualCost = currencyUtils.roundByType(virtual_sale, SystemCurrency.VIRTAUL);
 
-    const debit = await this.usersRepository
-      .createQueryBuilder()
-      .update(User)
-      .set({ real: () => 'real - :realCost', virtual: () => 'virtual - :virtualCost' })
-      .where('uuid = :uuid AND real >= :realCost AND virtual >= :virtualCost', { uuid: user.uuid, realCost, virtualCost })
-      .execute();
-
-    if (!debit.affected) throw new BadRequestException();
+    await debitUserBalance(this.usersRepository, user.uuid, realCost, virtualCost);
 
     user.real = currencyUtils.roundByType(user.real - realCost, SystemCurrency.REAL);
     user.virtual = currencyUtils.roundByType(user.virtual - virtualCost, SystemCurrency.VIRTAUL);
 
-    try {
-      await this.give(user, server, group, period);
-    } catch {
-      await this.usersRepository
-        .createQueryBuilder()
-        .update(User)
-        .set({ real: () => 'real + :realCost', virtual: () => 'virtual + :virtualCost' })
-        .where('uuid = :uuid', { uuid: user.uuid, realCost, virtualCost })
-        .execute();
-
-      throw new BadRequestException();
-    }
+    await this.give(user, server, group, period);
     await this.historyService.create(HistoryType.DonateGroupPurchase, ip, user, group, server, period);
   }
 

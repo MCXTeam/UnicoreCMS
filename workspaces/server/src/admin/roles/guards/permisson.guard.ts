@@ -4,7 +4,7 @@ import { User } from 'src/admin/users/entities/user.entity';
 import { expandPermissionPattern, filterDonateWebPerms, Permission } from 'unicore-common';
 import * as minimath from 'minimatch';
 import * as _ from 'lodash';
-import { PERMISSIONS_KEY } from 'src/common/constants';
+import { DONATE_PERMS_CACHE_KEY, PERMISSIONS_KEY } from 'src/common/constants';
 import { Role } from '../entities/role.entity';
 import { Repository } from 'typeorm';
 import { getDataSourceByName } from 'typeorm-transactional';
@@ -54,23 +54,33 @@ export function transformPermissions(userPart: Partial<User>) {
   return user;
 }
 
-export async function matchPermission(args: PermissionArgs, request: any): Promise<boolean> {
+async function donateWebPerms(request: any): Promise<string[]> {
+  if (request[DONATE_PERMS_CACHE_KEY]) return request[DONATE_PERMS_CACHE_KEY];
+
   const connection = getDataSourceByName('default');
-  const user_dgroups = await connection
-    .getRepository(UsersDonateGroup)
-    .find({ where: { user: { uuid: request.user.uuid } }, relations: ['user'] });
-  const user_dperms = await connection
-    .getRepository(UsersDonatePermission)
-    .find({ where: { user: { uuid: request.user.uuid } }, relations: ['user'] });
-  const add_perms = filterDonateWebPerms(
+  const [user_dgroups, user_dperms] = await Promise.all([
+    connection.getRepository(UsersDonateGroup).find({ where: { user: { uuid: request.user.uuid } }, relations: ['user'] }),
+    connection.getRepository(UsersDonatePermission).find({ where: { user: { uuid: request.user.uuid } }, relations: ['user'] }),
+  ]);
+
+  const perms = filterDonateWebPerms(
     [user_dperms.map((udp) => udp.permission.web_perms).flat(), user_dgroups.map((udg) => udg.group.web_perms).flat()].flat(),
   );
+
+  request[DONATE_PERMS_CACHE_KEY] = perms;
+
+  return perms;
+}
+
+export async function matchPermission(args: PermissionArgs, request: any): Promise<boolean> {
   const user: User = request.user;
 
   // Первым делом проверяем пользователя на SuperUser aka root
   if (user.superuser) {
     return true;
   }
+
+  const add_perms = await donateWebPerms(request);
 
   var matched: string[] = new Array();
   var permissions: string[] = new Array();

@@ -30,8 +30,8 @@ export class DonateTasks {
       .leftJoinAndSelect('ud.user', 'user')
       .leftJoinAndSelect('ud.server', 'server')
       .leftJoinAndSelect('ud.group', 'group')
-      .where('ud.expired < :expired', { expired })
-      .andWhere('ud.expired != 0', { expired })
+      .where('ud.expired IS NOT NULL')
+      .andWhere('ud.expired < :expired', { expired })
       .getMany();
 
     const expiresUP = await this.upRepository
@@ -39,8 +39,8 @@ export class DonateTasks {
       .leftJoinAndSelect('up.user', 'user')
       .leftJoinAndSelect('up.server', 'server')
       .leftJoinAndSelect('up.permission', 'permission')
-      .where('up.expired < :expired', { expired })
-      .andWhere('up.expired != 0', { expired })
+      .where('up.expired IS NOT NULL')
+      .andWhere('up.expired < :expired', { expired })
       .getMany();
 
     for (const udg of await this.udRepository.remove(expiresUD)) {

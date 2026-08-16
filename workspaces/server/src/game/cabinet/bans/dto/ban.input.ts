@@ -1,19 +1,22 @@
-import { IsDefined, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsDefined, IsInt, IsOptional, IsString, IsUUID, MaxLength, Min } from 'class-validator';
+import { TEXT_MAX_LENGTH } from '@common';
 
 export class BanInput {
   @IsDefined()
-  @IsString()
+  @IsUUID()
   user_uuid: string;
 
   @IsOptional()
-  @IsString()
+  @IsUUID()
   actor_uuid?: string;
 
   @IsOptional()
-  @IsNumber()
+  @IsInt()
+  @Min(0)
   expires?: number;
 
   @IsDefined()
   @IsString()
+  @MaxLength(TEXT_MAX_LENGTH)
   reason: string;
 }

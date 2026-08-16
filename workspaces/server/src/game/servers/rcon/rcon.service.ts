@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Rcon } from 'rcon-client';
 import { RCON } from './entities/rcon.entity';
-import { RCON_TEST_TIMEOUT_MS } from 'src/common/constants';
+import { decryptField, ENCRYPTED_RCON_PASSWORD, RCON_TEST_TIMEOUT_MS } from '@common';
 
 export interface RconTestResult {
   ok: boolean;
@@ -23,6 +23,10 @@ export class RconService implements OnModuleDestroy {
     return this.rconRepository.findOneBy({ serverId });
   }
 
+  private password(creds: RCON): string {
+    return decryptField(creds.password, ENCRYPTED_RCON_PASSWORD, creds.serverId);
+  }
+
   private connect(creds: RCON): Promise<Rcon> {
     const key = creds.serverId;
 
@@ -35,7 +39,7 @@ export class RconService implements OnModuleDestroy {
     const promise = Rcon.connect({
       host: creds.host,
       port: creds.port,
-      password: creds.password,
+      password: this.password(creds),
       timeout: 5000,
     })
       .then((client) => {
@@ -89,7 +93,12 @@ export class RconService implements OnModuleDestroy {
     let client: Rcon | undefined;
 
     try {
-      client = await Rcon.connect({ host: creds.host, port: creds.port, password: creds.password, timeout: RCON_TEST_TIMEOUT_MS });
+      client = await Rcon.connect({
+        host: creds.host,
+        port: creds.port,
+        password: this.password(creds),
+        timeout: RCON_TEST_TIMEOUT_MS,
+      });
       return { ok: true, latency: Date.now() - started };
     } catch (error: any) {
       return { ok: false, error: error?.message || String(error) };

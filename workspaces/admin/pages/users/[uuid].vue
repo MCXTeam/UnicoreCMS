@@ -489,10 +489,7 @@
                       <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
                     </div>
                   </VeeField>
-                  <div class="field-checkbox">
-                    <Checkbox :binary="true" v-model="passwordForm.close" />
-                    <label>{{ $t('admin.close_sessions') }}</label>
-                  </div>
+                  <Message severity="info" :closable="false">{{ $t('auth.sessions_closed_hint') }}</Message>
                 </div>
                 <Button :disabled="!meta.valid" @click="updatePassword()" :label="$t('common.save')" class="p-button mr-2 mb-2" />
                 <Button :label="$t('admin.reset_2fa')" class="p-button-danger p-button mr-2 mb-2" />
@@ -753,7 +750,6 @@ export default {
       passwordForm: {
         password: null,
         password_confirm: null,
-        close: true,
       },
       ban: null,
       udgForm: {

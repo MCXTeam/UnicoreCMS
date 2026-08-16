@@ -41,6 +41,7 @@ export interface EnvConfig {
   discordclientSecret: string;
   recaptchaSecret: string;
   recaptchaPublic: string;
+  recaptchaDisabled: boolean;
   vkLongpoll: boolean;
   vkApiKey: string;
   smtpService: string;
@@ -223,6 +224,7 @@ export const envConfig: EnvConfig = {
 
   // RECAPTHA
   recaptchaSecret: env.get("RECAPTCHA_SECRET").default("").asString(),
+  recaptchaDisabled: env.get("RECAPTCHA_DISABLED").default("false").asBool(),
   recaptchaPublic: env
     .get(PUBLIC_ENV_KEY.recaptchaPublic)
     .default("")
@@ -322,6 +324,22 @@ const isProd = process.env.NODE_ENV === "production";
 if (envConfig.jwtKey.length < 16 || weakSecrets.includes(envConfig.jwtKey)) {
   const message =
     "JWT_KEY is weak or a shipped default. Set a long random secret (>= 16 chars).";
+  if (isProd) throw new Error(message);
+  else console.warn("[SECURITY WARNING] " + message);
+}
+
+if (!env.get("ENCRYPTION_KEY").asString()) {
+  const message =
+    "ENCRYPTION_KEY is not set, data encryption key falls back to JWT_KEY. " +
+    "Changing JWT_KEY without moving the old value to ENCRYPTION_KEY_PREVIOUS locks every user out.";
+  if (isProd) throw new Error(message);
+  else console.warn("[SECURITY WARNING] " + message);
+}
+
+if (!envConfig.recaptchaSecret && !envConfig.recaptchaDisabled) {
+  const message =
+    "RECAPTCHA_SECRET is empty, captcha on login, register and password reset is disabled. " +
+    "Set RECAPTCHA_DISABLED=true to confirm this is intentional.";
   if (isProd) throw new Error(message);
   else console.warn("[SECURITY WARNING] " + message);
 }

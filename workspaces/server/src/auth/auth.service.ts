@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { User } from 'src/admin/users/entities/user.entity';
 import { UsersService } from 'src/admin/users/users.service';
 import { TokensService } from './tokens.service';
@@ -9,7 +9,7 @@ import { EmailService } from 'src/admin/email/email.service';
 import { TwoFactorService } from 'src/game/cabinet/settings/providers/two_factor.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Referal } from 'src/game/cabinet/referals/entities/referal.entity';
-import { Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import { PasswordService } from './password/password.service';
 import { passwordAad } from './password/password-aad';
 import { ConfigField } from 'src/admin/config/config.enum';
@@ -17,6 +17,8 @@ import { ConfigService } from 'src/admin/config/config.service';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private tokensService: TokensService,
     private passwordService: PasswordService,
@@ -45,6 +47,7 @@ export class AuthService {
     const { username_or_email, password } = body;
     const user = await this.usersService.getByUsernameOrEmail(username_or_email, ['skin', 'cloak', 'roles']);
     if (!user) {
+      await this.passwordService.fakeVerify(password);
       throw new UnauthorizedException();
     }
 
@@ -57,7 +60,7 @@ export class AuthService {
     if (user.two_factor_enabled) {
       if (!body.totp) throw new UnauthorizedException('require2fa');
 
-      if (!this.twoFactorService.verify(user, body.totp)) throw new UnauthorizedException();
+      if (!(await this.twoFactorService.verify(user, body.totp))) throw new UnauthorizedException();
     }
 
     const accessToken = await this.tokensService.generateAccessToken(user);
@@ -66,32 +69,46 @@ export class AuthService {
     return new AuthenticatedDto({ accessToken, refreshToken, user });
   }
 
-  async register(input: RegisterInput, agent?: string, ip?: string, locale?: string) {
+  private async attachReferal(user: User, ref: string) {
     try {
-      const { username, email, password } = input;
-      const cfg = await this.configService.load();
-      const activationRequired = Boolean(cfg[ConfigField.EmailActivationRequired]) && !cfg[ConfigField.OrdinaryRegister];
-      const user = await this.usersService.create({ username, email, password, activated: !activationRequired, locale });
+      const inviter = await this.usersService.getByUsername(ref);
 
-      if (activationRequired) this.emailService.sendActivation(user);
-      const accessToken = await this.tokensService.generateAccessToken(user);
-      const refreshToken = await this.tokensService.generateRefreshToken(user, agent, ip);
+      if (!inviter || inviter.uuid === user.uuid) return;
 
-      if (input.ref) {
-        const inviter = await this.usersService.getByUsername(input.ref);
+      const referal = new Referal();
+      referal.inviter = inviter;
+      referal.user = user;
 
-        if (inviter && inviter.uuid !== user.uuid) {
-          const referal = new Referal();
-          referal.inviter = inviter;
-          referal.user = user;
-          await this.referalsRepository.save(referal);
-        }
-      }
-
-      return new AuthenticatedDto({ accessToken, refreshToken, user });
-    } catch {
-      throw new ConflictException();
+      await this.referalsRepository.save(referal);
+    } catch (e) {
+      this.logger.error(`Не удалось привязать реферала для ${user.uuid}: ${e}`);
     }
+  }
+
+  async register(input: RegisterInput, agent?: string, ip?: string, locale?: string) {
+    const { username, email, password } = input;
+    const cfg = await this.configService.load();
+    const activationRequired = Boolean(cfg[ConfigField.EmailActivationRequired]) && !cfg[ConfigField.OrdinaryRegister];
+
+    let user: User;
+
+    try {
+      user = await this.usersService.create({ username, email, password, activated: !activationRequired, locale });
+    } catch (e) {
+      if (e instanceof QueryFailedError && (e.driverError?.code === 'ER_DUP_ENTRY' || e.driverError?.code === '23505'))
+        throw new ConflictException();
+
+      throw e;
+    }
+
+    if (activationRequired) this.emailService.sendActivation(user);
+
+    const accessToken = await this.tokensService.generateAccessToken(user);
+    const refreshToken = await this.tokensService.generateRefreshToken(user, agent, ip);
+
+    if (input.ref) await this.attachReferal(user, input.ref);
+
+    return new AuthenticatedDto({ accessToken, refreshToken, user });
   }
 
   logout(refresh_token: string): void {

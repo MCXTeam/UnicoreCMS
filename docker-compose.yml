@@ -25,7 +25,7 @@ services:
     container_name: unicorecms-mariadb
     restart: unless-stopped
     ports:
-      - 3306:3306
+      - 127.0.0.1:3306:3306
     environment:
       MYSQL_DATABASE: ${MYSQL_DATABASE?err}
       MYSQL_USER: ${MYSQL_USER?err}
@@ -49,9 +49,9 @@ services:
       - ./storage:/usr/local/app/storage
       - ./logs:/usr/local/app/logs
     ports:
-      - "${CLIENT_PORT:-3000}:${CLIENT_PORT:-3000}"
-      - "${ADMIN_PORT:-4000}:${ADMIN_PORT:-4000}"
-      - "${BACKEND_PORT:-${SERVER_PORT:-5000}}:${BACKEND_PORT:-${SERVER_PORT:-5000}}"
+      - "127.0.0.1:${CLIENT_PORT:-3000}:${CLIENT_PORT:-3000}"
+      - "127.0.0.1:${ADMIN_PORT:-4000}:${ADMIN_PORT:-4000}"
+      - "127.0.0.1:${BACKEND_PORT:-${SERVER_PORT:-5000}}:${BACKEND_PORT:-${SERVER_PORT:-5000}}"
     depends_on:
       - mariadb
     extra_hosts:
@@ -70,4 +70,4 @@ services:
       PMA_PORT: 3306
       UPLOAD_LIMIT: 100M
     ports:
-      - 8081:80
+      - 127.0.0.1:8081:80

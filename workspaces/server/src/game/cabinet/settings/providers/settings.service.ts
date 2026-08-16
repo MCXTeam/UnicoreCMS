@@ -16,20 +16,27 @@ export class SettingsService {
     private passwordService: PasswordService,
   ) {}
 
-  async updatePassword(user: User, input: PasswordUpdateInput) {
-    user.password = await this.passwordService.hash(input.password, passwordAad(user.uuid));
-    await this.usersRepo.save(user);
+  private async setPassword(user: User, password: string) {
+    user.password = await this.passwordService.hash(password, passwordAad(user.uuid));
 
-    if (input.close) await this.tokensRepo.delete({ user });
+    await this.usersRepo.update({ uuid: user.uuid }, { password: user.password });
+  }
+
+  private async closeSessions(user: User) {
+    await this.tokensRepo.delete({ user: { uuid: user.uuid } });
+  }
+
+  async updatePassword(user: User, input: PasswordUpdateInput) {
+    await this.setPassword(user, input.password);
+    await this.closeSessions(user);
   }
 
   async changePassword(user: User, input: PasswordChangeInput) {
     const { valid } = await this.passwordService.verify(input.password_old, user.password, passwordAad(user.uuid));
     if (!valid) throw new BadRequestException();
 
-    user.password = await this.passwordService.hash(input.password, passwordAad(user.uuid));
-    await this.usersRepo.save(user);
+    await this.setPassword(user, input.password);
 
-    if (input.close) await this.tokensRepo.delete({ user });
+    if (input.close) await this.closeSessions(user);
   }
 }

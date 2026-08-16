@@ -1,3 +1,4 @@
+import { decimalColumn, MONEY_PRECISION, MONEY_SCALE } from '@common';
 import { User } from 'src/admin/users/entities/user.entity';
 import { Period } from 'src/game/donate/entities/period.entity';
 import { DonateGroup } from 'src/game/donate/groups/entities/donate-group.entity';
@@ -101,9 +102,12 @@ export class History {
   @JoinColumn({ name: 'target_uuid' })
   target?: User;
 
-  @Column('float', {
+  @Column('decimal', {
     name: 'amount',
+    precision: MONEY_PRECISION,
+    scale: MONEY_SCALE,
     nullable: true,
+    transformer: decimalColumn,
   })
   amount?: number;
 

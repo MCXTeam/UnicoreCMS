@@ -1,4 +1,5 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Req } from '@nestjs/common';
+import { Body, Controller, DefaultValuePipe, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Post, Query, Req } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
@@ -10,7 +11,7 @@ import { UserBasicDto, UserDto } from './dto/user.dto';
 import { UserUpdateInput } from './dto/user-update.input';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { User } from './entities/user.entity';
-import { DeleteManyUuidInput } from '@common';
+import { DeleteManyUuidInput, THROTTLE_PUBLIC_USERS } from '@common';
 import { PasswordUpdateInput } from 'src/game/cabinet/settings/dto/password-update.input';
 import { Permissions } from '../roles/decorators/permission.decorator';
 import { matchPermission } from '../roles/guards/permisson.guard';
@@ -114,8 +115,9 @@ export class UsersController {
   }
 
   @Public()
+  @Throttle({ default: THROTTLE_PUBLIC_USERS })
   @Get('public/users')
-  async getAllUsers() {
-    return this.usersService.getAllUsers();
+  async getAllUsers(@Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number) {
+    return this.usersService.getAllUsers(page);
   }
 }

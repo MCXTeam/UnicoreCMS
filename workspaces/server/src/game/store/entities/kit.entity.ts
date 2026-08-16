@@ -1,4 +1,4 @@
-import { StorageManager } from '@common';
+import { MONEY_PRECISION, MONEY_SCALE, StorageManager, decimalColumn } from '@common';
 import { Server } from 'src/game/servers/entities/server.entity';
 import { AfterRemove, Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Category } from './category.entity';
@@ -23,7 +23,7 @@ export class Kit {
   @Column({ name: 'icon', nullable: true })
   icon: string;
 
-  @Column('float', { name: 'price' })
+  @Column('decimal', { name: 'price', precision: MONEY_PRECISION, scale: MONEY_SCALE, transformer: decimalColumn })
   price: number;
 
   @Column({ nullable: true, name: 'virtual_percent' })

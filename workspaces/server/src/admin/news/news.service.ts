@@ -17,7 +17,7 @@ export class NewsService {
     private webhooksService: WebhooksService,
   ) {}
 
-  create(input: NewsInput, file?: Express.Multer.File, allowCustomCode = false): Promise<News> {
+  async create(input: NewsInput, file?: Express.Multer.File, allowCustomCode = false): Promise<News> {
     const news = new News();
 
     news.title = input.title;
@@ -28,8 +28,11 @@ export class NewsService {
 
     applyCustomCode(news, input, allowCustomCode);
 
-    this.webhooksService.send(WebhookType.NewsCreated, news);
-    return this.newsRepository.save(news);
+    const saved = await this.newsRepository.save(news);
+
+    this.webhooksService.send(WebhookType.NewsCreated, { ...saved });
+
+    return saved;
   }
 
   async find(query: PaginateQuery): Promise<Paginated<News>> {

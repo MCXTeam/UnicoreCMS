@@ -1,4 +1,4 @@
-import { StorageManager } from '@common';
+import { MONEY_PRECISION, MONEY_SCALE, StorageManager, decimalColumn } from '@common';
 import { AfterRemove, Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Product } from './product.entity';
 
@@ -16,7 +16,7 @@ export class Enchantment {
   })
   description: string;
 
-  @Column('float', { name: 'price' })
+  @Column('decimal', { name: 'price', precision: MONEY_PRECISION, scale: MONEY_SCALE, transformer: decimalColumn })
   price: number;
 
   @Column({ nullable: true, name: 'icon' })

@@ -5,7 +5,7 @@ import { PaginateQuery, Paginated, paginate, FilterOperator } from 'nestjs-pagin
 import { UserInput } from './dto/user.input';
 import * as _ from 'lodash';
 import { Role } from '../roles/entities/role.entity';
-import { BadRequestException, ConflictException, ForbiddenException, forwardRef, Inject, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, forwardRef, Inject, Logger, NotFoundException } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ImportantRoles } from '../roles/emums/important-roles.enum';
 import { PlaytimeService } from 'src/game/cabinet/playtime/playtime.service';
@@ -16,7 +16,15 @@ import { randomUUID } from 'crypto';
 import { PasswordService } from 'src/auth/password/password.service';
 import { passwordAad } from 'src/auth/password/password-aad';
 import { Cache } from 'cache-manager';
-import { CacheKey, DeleteManyUuidInput, KERNEL_USERNAME } from '@common';
+import {
+  CacheKey,
+  DeleteManyUuidInput,
+  isBanActive,
+  KERNEL_USERNAME,
+  PUBLIC_USERS_CACHE_TTL_MS,
+  PUBLIC_USERS_PAGE_SIZE,
+} from '@common';
+import { PublicUsersDto } from './dto/public-users.dto';
 import { UserUpdateInput } from './dto/user-update.input';
 import { matchPermission, transformPermissions } from '../roles/guards/permisson.guard';
 import { Permission, UserField, USER_FIELDS } from 'unicore-common';
@@ -37,6 +45,8 @@ export async function userPermissionCheck(user: User, actor: User) {
 }
 
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     @InjectRepository(User)
@@ -52,22 +62,46 @@ export class UsersService {
     private settingsService: SettingsService,
   ) {}
 
+  private async requiredRole(id: ImportantRoles): Promise<Role> {
+    const role = await this.rolesRepository.findOneBy({ id });
+
+    if (!role) this.logger.error(`Обязательная роль "${id}" отсутствует в базе`);
+
+    return role;
+  }
+
   private async rolesModificator(user: User) {
-    const oldUser = { ...user };
+    if (!user.roles) user.roles = [];
+
     const banned = user.roles.find((role) => role.id == ImportantRoles.Banned);
     const default_ = user.roles.find((role) => role.id == ImportantRoles.Default);
+    const active = isBanActive(user.ban);
+    let changed = false;
 
-    if (!banned && user.ban) user.roles.push(await this.rolesRepository.findOneBy({ id: ImportantRoles.Banned }));
+    if (!banned && active) {
+      const role = await this.requiredRole(ImportantRoles.Banned);
 
-    if (banned && !user.ban) {
-      user.roles = user.roles.filter((role) => !_.isEqual(role, banned));
+      if (role) {
+        user.roles.push(role);
+        changed = true;
+      }
+    }
+
+    if (banned && !active) {
+      user.roles = user.roles.filter((role) => role.id != ImportantRoles.Banned);
+      changed = true;
     }
 
     if (!default_) {
-      user.roles.push(await this.rolesRepository.findOneBy({ id: ImportantRoles.Default }));
+      const role = await this.requiredRole(ImportantRoles.Default);
+
+      if (role) {
+        user.roles.push(role);
+        changed = true;
+      }
     }
 
-    if (!_.isEqual(oldUser, user)) return this.usersRepository.save(user);
+    if (changed) return this.usersRepository.save(user);
 
     return user;
   }
@@ -128,16 +162,31 @@ export class UsersService {
   }
 
   @Transactional()
-  async getAllUsers(): Promise<string[]> {
-    var users = await this.cacheManager.get<string[]>(CacheKey.Users);
-    if (users) return users;
+  async getAllUsers(page = 1, limit = PUBLIC_USERS_PAGE_SIZE): Promise<PublicUsersDto> {
+    const take = Math.min(Math.max(limit, 1), PUBLIC_USERS_PAGE_SIZE);
+    const skip = (Math.max(page, 1) - 1) * take;
+    const cacheKey = `${CacheKey.Users}:${skip}:${take}`;
+    const cached = await this.cacheManager.get<PublicUsersDto>(cacheKey);
 
-    const allUsers = await this.usersRepository.find({ select: ['username'] });
-    return this.cacheManager.set(
-      CacheKey.Users,
-      allUsers.map((u) => u.username),
-      60 * 1000,
-    );
+    if (cached) return cached;
+
+    const [users, total] = await Promise.all([
+      this.usersRepository
+        .createQueryBuilder('user')
+        .select('user.username', 'username')
+        .where('user.username != :kernel', { kernel: KERNEL_USERNAME })
+        .orderBy('user.created', 'ASC')
+        .offset(skip)
+        .limit(take)
+        .getRawMany<{ username: string }>(),
+      this.usersRepository.countBy({ username: Not(KERNEL_USERNAME) }),
+    ]);
+
+    const result = new PublicUsersDto({ items: users.map((user) => user.username), total });
+
+    await this.cacheManager.set(cacheKey, result, PUBLIC_USERS_CACHE_TTL_MS);
+
+    return result;
   }
 
   @Transactional()
@@ -184,7 +233,7 @@ export class UsersService {
   @Transactional()
   async create(input: UserInput, actor: User = null, allowedFields: UserField[] = USER_FIELDS): Promise<User> {
     const userExist = await this.usersRepository.findOne({
-      where: [{ email: input.username }, { username: input.username }],
+      where: [{ username: input.username }, ...(input.email ? [{ email: input.email }] : [])],
     });
 
     if (userExist) {
@@ -229,7 +278,9 @@ export class UsersService {
 
     const allowed = new Set(allowedFields);
 
-    if (actor && !(await userPermissionCheck(user, actor))) throw new ForbiddenException();
+    const before = { ...user, perms: [...(user.perms || [])], roles: [...(user.roles || [])] } as User;
+
+    if (actor && !(await userPermissionCheck(before, actor))) throw new ForbiddenException();
 
     const superuser = actor && !actor.superuser ? user.superuser : input.superuser;
 
@@ -250,6 +301,8 @@ export class UsersService {
       if (!user.roles.find((role) => role.id === ImportantRoles.Default))
         user.roles.push(await this.rolesRepository.findOneBy({ id: ImportantRoles.Default }));
     }
+
+    if (actor && !(await userPermissionCheck(user, actor))) throw new ForbiddenException();
 
     if (actor && user.uuid == actor.uuid) {
       if (actor.superuser != user.superuser) throw new BadRequestException();

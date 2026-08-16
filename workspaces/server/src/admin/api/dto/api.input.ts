@@ -1,5 +1,5 @@
 import { IsArray, IsDefined, IsOptional, IsString, MaxLength } from 'class-validator';
-import { API_KEY_COMMENT_MAX_LENGTH } from '@common';
+import { API_KEY_COMMENT_MAX_LENGTH, IsIpPattern } from '@common';
 
 export class ApiInput {
   @IsOptional()
@@ -14,6 +14,6 @@ export class ApiInput {
 
   @IsDefined()
   @IsArray()
-  @IsString({ each: true })
+  @IsIpPattern({ each: true })
   allow: string[];
 }

@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import { envConfig } from 'unicore-common';
 import { CRYPTO_PURPOSE_PASSWORD, decrypt, encrypt, isCurrentKey, isEncrypted } from '@common';
 import { passwordAlgorithms, PasswordAlgorithm } from './algorithms';
@@ -11,6 +12,7 @@ export interface PasswordVerifyResult {
 @Injectable()
 export class PasswordService {
   private logger = new Logger(PasswordService.name);
+  private dummy: string;
 
   private get target(): PasswordAlgorithm {
     return passwordAlgorithms.find((algorithm) => algorithm.id === envConfig.passwordAlgorithm) ?? passwordAlgorithms[0];
@@ -28,6 +30,14 @@ export class PasswordService {
 
   async hash(plain: string, aad: string): Promise<string> {
     return encrypt(await this.target.hash(plain), CRYPTO_PURPOSE_PASSWORD, aad);
+  }
+
+  async fakeVerify(plain: string): Promise<false> {
+    if (!this.dummy) this.dummy = await this.target.hash(randomUUID());
+
+    await this.target.verify(plain || randomUUID(), this.dummy);
+
+    return false;
   }
 
   async verify(plain: string, stored: string, aad: string): Promise<PasswordVerifyResult> {

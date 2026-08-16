@@ -1,4 +1,6 @@
+import { Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
 import { User } from 'src/admin/users/entities/user.entity';
 import { HistoryType } from 'src/game/cabinet/history/enums/history-type.enum';
 import { HistoryService } from 'src/game/cabinet/history/history.service';
@@ -9,6 +11,8 @@ import { LessThanOrEqual, Repository } from 'typeorm';
 import { Transactional } from 'typeorm-transactional';
 
 export class PaymentHandlerService {
+  private readonly logger = new Logger(PaymentHandlerService.name);
+
   constructor(
     private historyService: HistoryService,
     @InjectRepository(Payment) private paymentsRepo: Repository<Payment>,
@@ -29,7 +33,7 @@ export class PaymentHandlerService {
   }
 
   @Transactional()
-  async handler(id: number, bill_id: string = null): Promise<boolean> {
+  async handler(id: number, bill_id: string = null, reported?: number): Promise<boolean> {
     const claim = await this.paymentsRepo
       .createQueryBuilder()
       .update(Payment)
@@ -43,11 +47,15 @@ export class PaymentHandlerService {
 
     if (!payment) return false;
 
+    if (reported != null && Number(reported) !== Number(payment.amount))
+      this.logger.warn(`Payment #${id}: provider reported ${reported}, expected ${payment.amount}`);
+
     const bonus = await this.bonusesRepo.findOne({ order: { amount: 'DESC' }, where: { amount: LessThanOrEqual(payment.amount) } });
 
-    let credit = payment.amount;
+    let credit = currencyUtils.roundByType(payment.amount, SystemCurrency.REAL);
 
-    if (bonus && bonus.bonus > 0) credit += (payment.amount * bonus.bonus) / 100;
+    if (bonus && bonus.bonus > 0)
+      credit = currencyUtils.roundByType(credit + (payment.amount * bonus.bonus) / 100, SystemCurrency.REAL);
 
     await this.usersRepo.increment({ uuid: payment.user.uuid }, 'real', credit);
     await this.historyService.create(HistoryType.Payment, payment.ip, payment.user, payment);

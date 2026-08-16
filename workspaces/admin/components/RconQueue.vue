@@ -86,11 +86,13 @@ export default {
     statusLabel(status) {
       if (status === RconCommandStatus.Sent) return this.$t('admin.rcon_status_sent')
       if (status === RconCommandStatus.Failed) return this.$t('admin.rcon_status_failed')
+      if (status === RconCommandStatus.Processing) return this.$t('admin.rcon_status_processing')
       return this.$t('admin.rcon_status_queued')
     },
     statusSeverity(status) {
       if (status === RconCommandStatus.Sent) return 'success'
       if (status === RconCommandStatus.Failed) return 'danger'
+      if (status === RconCommandStatus.Processing) return 'info'
       return 'warn'
     },
   },

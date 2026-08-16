@@ -1,4 +1,4 @@
-import { CommonSortInput, MomentWrapper } from '@common';
+import { CommonSortInput, debitUserBalance, MomentWrapper } from '@common';
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/admin/users/entities/user.entity';
@@ -20,7 +20,9 @@ import { PermissionType } from './enums/permission-type.enum';
 import * as _ from 'lodash';
 import { ConfigField } from 'src/admin/config/config.enum';
 import { ConfigService } from 'src/admin/config/config.service';
+import { configFieldNumber } from 'src/admin/config/config.utils';
 import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
+import { Transactional } from 'typeorm-transactional';
 
 @Injectable()
 export class DonatePermissionsService {
@@ -90,9 +92,11 @@ export class DonatePermissionsService {
       userPermission.user = user;
     }
 
-    if (userPermission.permission.type != PermissionType.Web) {
-      this.eventsService.server.to(Permission.KernelUnicoreConnect).emit('give_permission', userPermission);
+    userPermission.user = { uuid: user.uuid } as User;
 
+    const saved = await this.userPermissionsRepository.save(userPermission);
+
+    if (permission.type != PermissionType.Web) {
       if (this.issuanceService.isRcon(server)) {
         await this.issuanceService.deliverPermission(
           { username: user.username, uuid: user.uuid },
@@ -101,10 +105,11 @@ export class DonatePermissionsService {
           period.expire || 0,
         );
       }
+
+      this.eventsService.server?.to(Permission.KernelUnicoreConnect).emit('give_permission', saved);
     }
 
-    userPermission.user = { uuid: user.uuid } as User;
-    return this.userPermissionsRepository.save(userPermission);
+    return saved;
   }
 
   async giveByDTO(input: GiveDonatePermInput) {
@@ -143,6 +148,7 @@ export class DonatePermissionsService {
     }
   }
 
+  @Transactional()
   async buy(user: User, ip: string, input: PermissionBuyInput) {
     const cfg = await this.configService.load();
     const permission = await this.findOne(input.permission, ['servers', 'periods']);
@@ -152,12 +158,12 @@ export class DonatePermissionsService {
     if (!permission || !period || !(server || permission.type == PermissionType.Web)) throw new NotFoundException();
 
     const price = currencyUtils.roundByType(
-      (permission.price - (permission.price * permission.sale) / 100) * period.multiplier,
+      currencyUtils.saleApply(permission.price, permission.sale) * period.multiplier,
       SystemCurrency.REAL,
     );
     let virtual_sale = currencyUtils.roundByType(
       input.use_virtual && cfg[ConfigField.DonatePermsVirtualUse] && permission.virtual_percent !== 0
-        ? (price / 100) * (permission.virtual_percent || Number(cfg[ConfigField.VirtualPercent]))
+        ? (price / 100) * (permission.virtual_percent ?? configFieldNumber(cfg, ConfigField.VirtualPercent))
         : 0,
       SystemCurrency.VIRTAUL,
     );
@@ -166,30 +172,12 @@ export class DonatePermissionsService {
     const realCost = currencyUtils.roundByType(price - virtual_sale, SystemCurrency.REAL);
     const virtualCost = currencyUtils.roundByType(virtual_sale, SystemCurrency.VIRTAUL);
 
-    const debit = await this.usersRepository
-      .createQueryBuilder()
-      .update(User)
-      .set({ real: () => 'real - :realCost', virtual: () => 'virtual - :virtualCost' })
-      .where('uuid = :uuid AND real >= :realCost AND virtual >= :virtualCost', { uuid: user.uuid, realCost, virtualCost })
-      .execute();
+    await debitUserBalance(this.usersRepository, user.uuid, realCost, virtualCost);
 
-    if (!debit.affected) throw new BadRequestException();
+    user.real = currencyUtils.roundByType(user.real - realCost, SystemCurrency.REAL);
+    user.virtual = currencyUtils.roundByType(user.virtual - virtualCost, SystemCurrency.VIRTAUL);
 
-    user.real -= realCost;
-    user.virtual -= virtualCost;
-
-    try {
-      await this.give(user, server, permission, period);
-    } catch (e) {
-      await this.usersRepository
-        .createQueryBuilder()
-        .update(User)
-        .set({ real: () => 'real + :realCost', virtual: () => 'virtual + :virtualCost' })
-        .where('uuid = :uuid', { uuid: user.uuid, realCost, virtualCost })
-        .execute();
-
-      throw e;
-    }
+    await this.give(user, server, permission, period);
     await this.historyService.create(HistoryType.DonatePermissionPurchase, ip, user, permission, server, period);
   }
 

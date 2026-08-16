@@ -1,3 +1,4 @@
+import { decimalColumn, MONEY_PRECISION, MONEY_SCALE } from '@common';
 import { User } from 'src/admin/users/entities/user.entity';
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { PaymentStatuses } from '../enums/payment-statuses.enum';
@@ -13,7 +14,7 @@ export class Payment {
   @Column({ name: 'method' })
   method: string;
 
-  @Column('float', { name: 'amount' })
+  @Column('decimal', { name: 'amount', precision: MONEY_PRECISION, scale: MONEY_SCALE, transformer: decimalColumn })
   amount: number;
 
   @Column({

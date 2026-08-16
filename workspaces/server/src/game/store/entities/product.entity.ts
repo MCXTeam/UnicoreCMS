@@ -1,4 +1,4 @@
-import { StorageManager } from '@common';
+import { MONEY_PRECISION, MONEY_SCALE, StorageManager, decimalColumn, stringArrayColumn } from '@common';
 import { Server } from 'src/game/servers/entities/server.entity';
 import { AfterRemove, Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Category } from './category.entity';
@@ -61,7 +61,7 @@ export class Product {
   })
   enchantments: Enchantment[];
 
-  @Column('float', { name: 'price' })
+  @Column('decimal', { name: 'price', precision: MONEY_PRECISION, scale: MONEY_SCALE, transformer: decimalColumn })
   price: number;
 
   @Column({ nullable: true, name: 'sale' })
@@ -79,7 +79,7 @@ export class Product {
   @Column({ nullable: true, name: 'item_id' })
   item_id?: string;
 
-  @Column('simple-array', { nullable: true, name: 'commands' })
+  @Column({ type: 'text', nullable: true, name: 'commands', transformer: stringArrayColumn })
   commands?: string[];
 
   @AfterRemove()
