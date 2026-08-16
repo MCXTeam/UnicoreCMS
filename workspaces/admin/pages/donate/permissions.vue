@@ -63,22 +63,25 @@
         </DataTable>
 
         <VeeForm v-slot="{ meta }">
-          <Dialog
+          <SectionedDialog
             v-model:visible="permissionDialog"
-            :closable="false"
-            :style="{ width: '600px' }"
-            :modal="true"
+            v-model="section"
+            :sections="sections"
             :header="$t('admin.permission_dialog')"
+            width="620px"
             class="p-fluid"
           >
-            <LocaleEditorBar
-              v-model="translations.locale"
-              :locales="translations.locales"
-              :status="translations.status"
-              :isDefault="translations.isDefault"
-              @copy="translations.copyFromDefault()"
-            />
-            <template v-if="translations.isDefault">
+            <template #before>
+              <LocaleEditorBar
+                v-model="translations.locale"
+                :locales="translations.locales"
+                :status="translations.status"
+                :isDefault="translations.isDefault"
+                @copy="translations.copyFromDefault()"
+              />
+            </template>
+
+            <template #main>
               <VeeField
                 v-model="permission.name"
                 name="name"
@@ -131,6 +134,58 @@
                   appendTo="body"
                 ></MultiSelect>
               </div>
+              <div class="field" v-if="$_.get(permission.type, 'value') == 'game' || $_.get(permission.type, 'value') == 'kit'">
+                <label>{{ $t('admin.servers') }}</label>
+                <MultiSelect
+                  v-model="permission.servers"
+                  display="chip"
+                  :filter="true"
+                  :options="servers"
+                  optionLabel="name"
+                  :placeholder="$t('admin.choose_servers')"
+                  class="p-column-filter"
+                  appendTo="body"
+                >
+                  <template #option="slotProps">
+                    <div class="p-multiselect-representative-option">
+                      <IconAvatar :path="slotProps.option.icon" />
+                      <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
+                    </div>
+                  </template>
+                </MultiSelect>
+              </div>
+              <div class="field" v-if="$_.get(permission.type, 'value') == 'game' || $_.get(permission.type, 'value') == 'kit'">
+                <label>{{ $t('admin.rights') }}</label>
+                <InputChips v-model="permission.perms" :placeholder="$t('admin.choose_permissions')" />
+              </div>
+              <div class="field" v-if="$_.get(permission.type, 'value') == 'web'">
+                <label>{{ $t('admin.web_rights') }}</label>
+                <AutoComplete
+                  v-model="permission.web_perms"
+                  :multiple="true"
+                  :suggestions="autocompleateFilterd"
+                  @complete="searchAutocompleate($event)"
+                  appendTo="body"
+                  :completeOnFocus="true"
+                  :placeholder="$t('admin.choose_permissions')"
+                />
+              </div>
+              <div class="field" v-if="$_.get(permission.type, 'value') == 'kit'">
+                <label>{{ $t('admin.linked_kits') }}</label>
+                <MultiSelect
+                  v-model="permission.kits"
+                  display="chip"
+                  :filter="true"
+                  :options="kits"
+                  optionLabel="name"
+                  :placeholder="$t('admin.choose_kits')"
+                  class="p-column-filter"
+                  appendTo="body"
+                ></MultiSelect>
+              </div>
+            </template>
+
+            <template #content>
               <div class="field">
                 <label>{{ $t('admin.description') }}</label>
                 <Editor v-model="permission.description" editorStyle="height: 220px">
@@ -145,6 +200,9 @@
                   </template>
                 </Editor>
               </div>
+            </template>
+
+            <template #price>
               <div class="grid">
                 <div class="col-6">
                   <VeeField
@@ -216,57 +274,12 @@
                   <small>{{ $t('admin.virtual_percent_hint') }}</small>
                 </VeeField>
               </div>
-              <div class="field" v-if="$_.get(permission.type, 'value') == 'game' || $_.get(permission.type, 'value') == 'kit'">
-                <label>{{ $t('admin.servers') }}</label>
-                <MultiSelect
-                  v-model="permission.servers"
-                  display="chip"
-                  :filter="true"
-                  :options="servers"
-                  optionLabel="name"
-                  :placeholder="$t('admin.choose_servers')"
-                  class="p-column-filter"
-                  appendTo="body"
-                >
-                  <template #option="slotProps">
-                    <div class="p-multiselect-representative-option">
-                      <IconAvatar :path="slotProps.option.icon" />
-                      <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
-                    </div>
-                  </template>
-                </MultiSelect>
-              </div>
-              <div class="field" v-if="$_.get(permission.type, 'value') == 'game' || $_.get(permission.type, 'value') == 'kit'">
-                <label>{{ $t('admin.rights') }}</label>
-                <InputChips v-model="permission.perms" :placeholder="$t('admin.choose_permissions')" />
-              </div>
-              <div class="field" v-if="$_.get(permission.type, 'value') == 'web'">
-                <label>{{ $t('admin.web_rights') }}</label>
-                <AutoComplete
-                  v-model="permission.web_perms"
-                  :multiple="true"
-                  :suggestions="autocompleateFilterd"
-                  @complete="searchAutocompleate($event)"
-                  appendTo="body"
-                  :completeOnFocus="true"
-                  :placeholder="$t('admin.choose_permissions')"
-                />
-              </div>
-              <div class="field" v-if="$_.get(permission.type, 'value') == 'kit'">
-                <label>{{ $t('admin.linked_kits') }}</label>
-                <MultiSelect
-                  v-model="permission.kits"
-                  display="chip"
-                  :filter="true"
-                  :options="kits"
-                  optionLabel="name"
-                  :placeholder="$t('admin.choose_kits')"
-                  class="p-column-filter"
-                  appendTo="body"
-                ></MultiSelect>
-              </div>
             </template>
-            <ContentTranslationFields v-else :translations="translations" />
+
+            <template #translation>
+              <ContentTranslationFields :translations="translations" />
+            </template>
+
             <template #footer>
               <Button :disabled="loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
@@ -277,7 +290,7 @@
                 @click="updateMode ? updatePermission() : createPermission()"
               />
             </template>
-          </Dialog>
+          </SectionedDialog>
         </VeeForm>
       </div>
     </div>
@@ -327,6 +340,7 @@ export default {
         virtual_percent: null,
       },
       permissionDialog: false,
+      section: 'main',
       autocompleate: null,
       autocompleateFilterd: null,
       servers: null,
@@ -336,6 +350,16 @@ export default {
     }
   },
   computed: {
+    sections() {
+      const isDefault = this.translations.isDefault
+
+      return [
+        { key: 'main', label: 'admin.section_main', icon: 'pi pi-info-circle', hidden: !isDefault },
+        { key: 'content', label: 'admin.section_content', icon: 'pi pi-align-left', hidden: !isDefault },
+        { key: 'price', label: 'admin.section_price', icon: 'pi pi-wallet', hidden: !isDefault },
+        { key: 'translation', label: 'admin.section_translation', icon: 'pi pi-language', hidden: isDefault },
+      ]
+    },
     types() {
       return [
         { name: this.$t('admin.perm_type_game'), value: 'game' },

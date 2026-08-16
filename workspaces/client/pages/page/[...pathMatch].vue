@@ -1,5 +1,5 @@
 <template>
-  <div class="panel description-html" v-html="$sanitize(page.content)" />
+  <div :class="page.full_size ? 'description-html' : 'panel description-html'" v-html="$sanitize(page.content)" />
 </template>
 
 <script setup lang="ts">

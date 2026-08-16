@@ -75,15 +75,15 @@
     </div>
 
     <VeeForm as="div" v-slot="{ meta }">
-      <Dialog
+      <SectionedDialog
         v-model:visible="userDialog"
-        :closable="false"
-        :style="{ width: '450px' }"
-        :modal="true"
+        v-model="section"
+        :sections="sections"
         :header="$t('admin.user_create_dialog')"
+        width="480px"
         class="p-fluid"
       >
-        <div class="p-fluid">
+        <template #main>
           <VeeField
             v-model="user.username"
             name="username"
@@ -113,39 +113,6 @@
           <div class="field-checkbox">
             <Checkbox :binary="true" v-model="user.activated" />
             <label>{{ $t('admin.activated_email') }}</label>
-          </div>
-          <h4>{{ $t('admin.roles_and_rights') }}</h4>
-          <div class="field">
-            <label>{{ $t('admin.roles') }}</label>
-            <MultiSelect
-              display="chip"
-              :filter="true"
-              v-model="user.roles"
-              optionDisabled="important"
-              :options="roles"
-              optionLabel="name"
-              optionValue="id"
-              :placeholder="$t('admin.choose_roles')"
-              class="p-column-filter"
-            />
-          </div>
-          <div class="field">
-            <label>{{ $t('admin.rights') }}</label>
-            <span class="p-fluid">
-              <AutoComplete
-                v-model="user.perms"
-                :multiple="true"
-                :suggestions="autocompleateFilterd"
-                @complete="searchAutocompleate($event)"
-                appendTo="body"
-                :completeOnFocus="true"
-                :placeholder="$t('admin.choose_permissions')"
-              />
-            </span>
-          </div>
-          <div class="field-checkbox" v-if="isSuperuser">
-            <Checkbox :binary="true" v-model="user.superuser" />
-            <label>{{ $t('admin.superuser') }}</label>
           </div>
           <VeeField
             v-model="user.password"
@@ -187,7 +154,43 @@
               <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
             </div>
           </VeeField>
-        </div>
+        </template>
+
+        <template #access>
+          <div class="field">
+            <label>{{ $t('admin.roles') }}</label>
+            <MultiSelect
+              display="chip"
+              :filter="true"
+              v-model="user.roles"
+              optionDisabled="important"
+              :options="roles"
+              optionLabel="name"
+              optionValue="id"
+              :placeholder="$t('admin.choose_roles')"
+              class="p-column-filter"
+            />
+          </div>
+          <div class="field">
+            <label>{{ $t('admin.rights') }}</label>
+            <span class="p-fluid">
+              <AutoComplete
+                v-model="user.perms"
+                :multiple="true"
+                :suggestions="autocompleateFilterd"
+                @complete="searchAutocompleate($event)"
+                appendTo="body"
+                :completeOnFocus="true"
+                :placeholder="$t('admin.choose_permissions')"
+              />
+            </span>
+          </div>
+          <div class="field-checkbox" v-if="isSuperuser">
+            <Checkbox :binary="true" v-model="user.superuser" />
+            <label>{{ $t('admin.superuser') }}</label>
+          </div>
+        </template>
+
         <template #footer>
           <Button :disabled="loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
           <Button
@@ -198,7 +201,7 @@
             @click="createUser()"
           />
         </template>
-      </Dialog>
+      </SectionedDialog>
     </VeeForm>
   </div>
 </template>
@@ -225,6 +228,12 @@ export default {
     return { toast, confirm }
   },
   computed: {
+    sections() {
+      return [
+        { key: 'main', label: 'admin.section_main', icon: 'pi pi-info-circle' },
+        { key: 'access', label: 'admin.roles_and_rights', icon: 'pi pi-key' },
+      ]
+    },
     isSuperuser() {
       return Boolean(useAuthStore().user?.superuser)
     },
@@ -242,6 +251,7 @@ export default {
         },
       },
       userDialog: false,
+      section: 'main',
       autocompleateFilterd: null,
       user: {
         username: null,

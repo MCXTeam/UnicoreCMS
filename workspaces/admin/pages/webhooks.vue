@@ -51,117 +51,123 @@
         </DataTable>
 
         <VeeForm as="div" v-slot="{ meta }">
-          <Dialog
+          <SectionedDialog
             v-model:visible="webhookDialog"
-            :closable="false"
-            :style="{ width: '600px' }"
-            :modal="true"
+            v-model="section"
+            :sections="sections"
             :header="$t('admin.webhook_dialog')"
+            width="620px"
             class="p-fluid"
           >
-            <VeeField
-              v-model="webhook.name"
-              name="name"
-              :label="$t('admin.name')"
-              rules="required"
-              v-slot="{ value, errorMessage, handleChange, handleBlur }"
-            >
+            <template #main>
+              <VeeField
+                v-model="webhook.name"
+                name="name"
+                :label="$t('admin.name')"
+                rules="required"
+                v-slot="{ value, errorMessage, handleChange, handleBlur }"
+              >
+                <div class="field">
+                  <label>{{ $t('admin.name') }}</label>
+                  <InputText :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" />
+                  <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
+                </div>
+              </VeeField>
+              <VeeField
+                v-model="webhook.type"
+                name="type"
+                :label="$t('admin.event')"
+                rules="required"
+                v-slot="{ value, errorMessage, handleChange }"
+              >
+                <div class="field">
+                  <label>{{ $t('admin.event') }}</label>
+                  <Select :modelValue="value" @update:modelValue="handleChange" :options="list" optionLabel="id" appendTo="body">
+                    <template #option="slotProps">
+                      <p class="mb-1">{{ slotProps.option.id }}</p>
+                      <span class="text-gray-200">{{ $t(slotProps.option.description) }}</span>
+                    </template>
+                  </Select>
+                  <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
+                </div>
+              </VeeField>
+              <VeeField
+                v-if="webhook.type"
+                v-model="webhook.request"
+                name="request"
+                :label="$t('admin.format')"
+                rules="required"
+                v-slot="{ value, errorMessage, handleChange }"
+              >
+                <div class="field">
+                  <label>{{ $t('admin.format') }}</label>
+                  <Select
+                    :modelValue="value"
+                    @update:modelValue="handleChange"
+                    :options="
+                      $_.get(
+                        list.find((whl) => whl.id == $_.get(webhook.type, 'id')),
+                        'supports',
+                      )
+                    "
+                    appendTo="body"
+                  />
+                  <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
+                </div>
+              </VeeField>
+              <VeeField
+                v-if="needsUrl"
+                v-model="webhook.url"
+                name="url"
+                label="URL"
+                rules="required|url"
+                v-slot="{ value, errorMessage, handleChange, handleBlur }"
+              >
+                <div class="field">
+                  <label>URL</label>
+                  <InputText :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" />
+                  <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
+                </div>
+              </VeeField>
+              <VeeField
+                v-if="needsTarget"
+                v-model="webhook.target"
+                name="target"
+                :label="$t('admin.webhook_target')"
+                rules="required"
+                v-slot="{ value, errorMessage, handleChange, handleBlur }"
+              >
+                <div class="field">
+                  <label>{{ $t('admin.webhook_target') }}</label>
+                  <InputText
+                    :modelValue="value"
+                    @update:modelValue="handleChange"
+                    @blur="handleBlur"
+                    :placeholder="webhook.request === 'telegram' ? '@channel' : '123456789'"
+                  />
+                  <small>{{ webhook.request === 'telegram' ? $t('admin.webhook_target_telegram') : $t('admin.webhook_target_vk') }}</small>
+                  <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
+                </div>
+              </VeeField>
+            </template>
+
+            <template #publish>
               <div class="field">
-                <label>{{ $t('admin.name') }}</label>
-                <InputText :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" />
-                <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
+                <div class="flex align-items-center gap-2">
+                  <Checkbox v-model="webhook.auto_publish" inputId="webhook-auto-publish" :binary="true" />
+                  <label for="webhook-auto-publish" class="m-0">{{ $t('admin.webhook_auto_publish') }}</label>
+                </div>
+                <small>{{ $t('admin.webhook_auto_publish_hint') }}</small>
               </div>
-            </VeeField>
-            <VeeField
-              v-model="webhook.type"
-              name="type"
-              :label="$t('admin.event')"
-              rules="required"
-              v-slot="{ value, errorMessage, handleChange }"
-            >
               <div class="field">
-                <label>{{ $t('admin.event') }}</label>
-                <Select :modelValue="value" @update:modelValue="handleChange" :options="list" optionLabel="id" appendTo="body">
-                  <template #option="slotProps">
-                    <p class="mb-1">{{ slotProps.option.id }}</p>
-                    <span class="text-gray-200">{{ $t(slotProps.option.description) }}</span>
-                  </template>
-                </Select>
-                <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
+                <div class="flex align-items-center gap-2">
+                  <Checkbox v-model="webhook.update_on_edit" inputId="webhook-update-on-edit" :binary="true" />
+                  <label for="webhook-update-on-edit" class="m-0">{{ $t('admin.webhook_update_on_edit') }}</label>
+                </div>
+                <small>{{ $t('admin.webhook_update_on_edit_hint') }}</small>
               </div>
-            </VeeField>
-            <VeeField
-              v-if="webhook.type"
-              v-model="webhook.request"
-              name="request"
-              :label="$t('admin.format')"
-              rules="required"
-              v-slot="{ value, errorMessage, handleChange }"
-            >
-              <div class="field">
-                <label>{{ $t('admin.format') }}</label>
-                <Select
-                  :modelValue="value"
-                  @update:modelValue="handleChange"
-                  :options="
-                    $_.get(
-                      list.find((whl) => whl.id == $_.get(webhook.type, 'id')),
-                      'supports',
-                    )
-                  "
-                  appendTo="body"
-                />
-                <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
-              </div>
-            </VeeField>
-            <VeeField
-              v-if="needsUrl"
-              v-model="webhook.url"
-              name="url"
-              label="URL"
-              rules="required|url"
-              v-slot="{ value, errorMessage, handleChange, handleBlur }"
-            >
-              <div class="field">
-                <label>URL</label>
-                <InputText :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" />
-                <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
-              </div>
-            </VeeField>
-            <VeeField
-              v-if="needsTarget"
-              v-model="webhook.target"
-              name="target"
-              :label="$t('admin.webhook_target')"
-              rules="required"
-              v-slot="{ value, errorMessage, handleChange, handleBlur }"
-            >
-              <div class="field">
-                <label>{{ $t('admin.webhook_target') }}</label>
-                <InputText
-                  :modelValue="value"
-                  @update:modelValue="handleChange"
-                  @blur="handleBlur"
-                  :placeholder="webhook.request === 'telegram' ? '@channel' : '123456789'"
-                />
-                <small>{{ webhook.request === 'telegram' ? $t('admin.webhook_target_telegram') : $t('admin.webhook_target_vk') }}</small>
-                <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
-              </div>
-            </VeeField>
-            <div class="field" v-if="isNewsWebhook">
-              <div class="flex align-items-center gap-2">
-                <Checkbox v-model="webhook.auto_publish" inputId="webhook-auto-publish" :binary="true" />
-                <label for="webhook-auto-publish" class="m-0">{{ $t('admin.webhook_auto_publish') }}</label>
-              </div>
-              <small>{{ $t('admin.webhook_auto_publish_hint') }}</small>
-            </div>
-            <div class="field" v-if="isNewsWebhook">
-              <div class="flex align-items-center gap-2">
-                <Checkbox v-model="webhook.update_on_edit" inputId="webhook-update-on-edit" :binary="true" />
-                <label for="webhook-update-on-edit" class="m-0">{{ $t('admin.webhook_update_on_edit') }}</label>
-              </div>
-              <small>{{ $t('admin.webhook_update_on_edit_hint') }}</small>
-            </div>
+            </template>
+
             <template #footer>
               <Button :disabled="loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
@@ -172,7 +178,7 @@
                 @click="updateMode ? updateWebhook() : createWebhook()"
               />
             </template>
-          </Dialog>
+          </SectionedDialog>
         </VeeForm>
       </div>
     </div>
@@ -199,6 +205,12 @@ export default {
     return { toast, confirm }
   },
   computed: {
+    sections() {
+      return [
+        { key: 'main', label: 'admin.section_main', icon: 'pi pi-info-circle' },
+        { key: 'publish', label: 'admin.section_publish', icon: 'pi pi-send', hidden: !this.isNewsWebhook },
+      ]
+    },
     isNewsWebhook() {
       return this.$_.get(this.webhook.type, 'id') === 'news_created'
     },
@@ -227,6 +239,7 @@ export default {
         update_on_edit: true,
       },
       webhookDialog: false,
+      section: 'main',
       filters: {
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
       },

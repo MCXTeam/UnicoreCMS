@@ -1,5 +1,6 @@
 <template>
-  <div class="panel description-html">
+  <div v-if="news.full_size" class="description-html" v-html="$sanitize(news.description)" />
+  <div v-else class="panel description-html">
     <div v-if="news.image" class="news-image-full" :style="`background-image: url(${$pub.apiBaseurl}/${news.image})`"></div>
     <div v-else class="news-image-full" style="background-image: url(/images/news.jpg)"></div>
     <div class="mt-4" v-html="$sanitize(news.description)" />

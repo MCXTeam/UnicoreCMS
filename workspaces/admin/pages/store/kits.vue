@@ -142,22 +142,25 @@
         </Dialog>
 
         <VeeForm v-slot="{ meta }">
-          <Dialog
+          <SectionedDialog
             v-model:visible="kitDialog"
-            :closable="false"
-            :style="{ width: '600px' }"
-            :modal="true"
+            v-model="section"
+            :sections="sections"
             :header="$t('admin.kit_dialog')"
+            width="620px"
             class="p-fluid"
           >
-            <LocaleEditorBar
-              v-model="translations.locale"
-              :locales="translations.locales"
-              :status="translations.status"
-              :isDefault="translations.isDefault"
-              @copy="translations.copyFromDefault()"
-            />
-            <template v-if="translations.isDefault">
+            <template #before>
+              <LocaleEditorBar
+                v-model="translations.locale"
+                :locales="translations.locales"
+                :status="translations.status"
+                :isDefault="translations.isDefault"
+                @copy="translations.copyFromDefault()"
+              />
+            </template>
+
+            <template #main>
               <VeeField
                 v-model="kit.name"
                 name="name"
@@ -178,6 +181,47 @@
                 </div>
               </VeeField>
               <div class="field">
+                <label>{{ $t('admin.servers') }}</label>
+                <MultiSelect
+                  display="chip"
+                  :filter="true"
+                  v-model="kit.servers"
+                  :options="servers"
+                  optionLabel="name"
+                  :placeholder="$t('admin.choose_servers')"
+                  class="p-column-filter"
+                >
+                  <template #option="slotProps">
+                    <div class="p-multiselect-representative-option">
+                      <IconAvatar :path="slotProps.option.icon" />
+                      <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
+                    </div>
+                  </template>
+                </MultiSelect>
+              </div>
+              <div class="field">
+                <label>{{ $t('admin.categories') }}</label>
+                <AutoComplete
+                  v-model="kit.categories"
+                  multiple
+                  :suggestions="categories"
+                  @complete="searchCategory($event)"
+                  optionLabel="name"
+                  appendTo="body"
+                  :placeholder="$t('admin.choose_categories')"
+                >
+                  <template #option="slotProps">
+                    <div class="flex align-items-center">
+                      <IconAvatar :path="slotProps.option.icon" />
+                      <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
+                    </div>
+                  </template>
+                </AutoComplete>
+              </div>
+            </template>
+
+            <template #content>
+              <div class="field">
                 <label>{{ $t('admin.description') }}</label>
                 <Editor v-model="kit.description" editorStyle="height: 160px">
                   <template #toolbar>
@@ -191,6 +235,9 @@
                   </template>
                 </Editor>
               </div>
+            </template>
+
+            <template #items>
               <div class="field">
                 <label>{{ $t('admin.products') }}</label>
                 <Button @click="addKitItem" icon="pi pi-plus" class="p-button-rounded p-button-text" />
@@ -242,44 +289,9 @@
                   </Column>
                 </DataTable>
               </div>
-              <div class="field">
-                <label>{{ $t('admin.servers') }}</label>
-                <MultiSelect
-                  display="chip"
-                  :filter="true"
-                  v-model="kit.servers"
-                  :options="servers"
-                  optionLabel="name"
-                  :placeholder="$t('admin.choose_servers')"
-                  class="p-column-filter"
-                >
-                  <template #option="slotProps">
-                    <div class="p-multiselect-representative-option">
-                      <IconAvatar :path="slotProps.option.icon" />
-                      <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
-                    </div>
-                  </template>
-                </MultiSelect>
-              </div>
-              <div class="field">
-                <label>{{ $t('admin.categories') }}</label>
-                <AutoComplete
-                  v-model="kit.categories"
-                  multiple
-                  :suggestions="categories"
-                  @complete="searchCategory($event)"
-                  optionLabel="name"
-                  appendTo="body"
-                  :placeholder="$t('admin.choose_categories')"
-                >
-                  <template #option="slotProps">
-                    <div class="flex align-items-center">
-                      <IconAvatar :path="slotProps.option.icon" />
-                      <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
-                    </div>
-                  </template>
-                </AutoComplete>
-              </div>
+            </template>
+
+            <template #price>
               <div class="grid">
                 <div class="col-6">
                   <VeeField
@@ -349,7 +361,11 @@
                 </VeeField>
               </div>
             </template>
-            <ContentTranslationFields v-else :translations="translations" />
+
+            <template #translation>
+              <ContentTranslationFields :translations="translations" />
+            </template>
+
             <template #footer>
               <Button :disabled="loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
@@ -360,7 +376,7 @@
                 @click="updateMode ? updateKit() : createKit()"
               />
             </template>
-          </Dialog>
+          </SectionedDialog>
         </VeeForm>
       </div>
     </div>
@@ -417,6 +433,7 @@ export default {
       },
       fileDialog: false,
       kitDialog: false,
+      section: 'main',
       filters: {
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
         servers: { value: null, matchMode: FilterMatchMode.IN },
@@ -424,6 +441,19 @@ export default {
       },
       kitItems: null,
     }
+  },
+  computed: {
+    sections() {
+      const isDefault = this.translations.isDefault
+
+      return [
+        { key: 'main', label: 'admin.section_main', icon: 'pi pi-info-circle', hidden: !isDefault },
+        { key: 'content', label: 'admin.section_content', icon: 'pi pi-align-left', hidden: !isDefault },
+        { key: 'items', label: 'admin.section_items', icon: 'pi pi-box', hidden: !isDefault },
+        { key: 'price', label: 'admin.section_price', icon: 'pi pi-wallet', hidden: !isDefault },
+        { key: 'translation', label: 'admin.section_translation', icon: 'pi pi-language', hidden: isDefault },
+      ]
+    },
   },
   mounted() {
     this.load()

@@ -69,202 +69,46 @@
         </DataTable>
 
         <VeeForm v-slot="{ meta }">
-          <Dialog
+          <SectionedDialog
             v-model:visible="giftDialog"
-            :closable="false"
-            :style="{ width: '600px' }"
-            :modal="true"
+            v-model="section"
+            :sections="sections"
             :header="$t('admin.gift_dialog')"
+            width="620px"
             class="p-fluid"
           >
-            <VeeField
-              v-model="gift.promocode"
-              name="promocode"
-              :label="$t('admin.promocode')"
-              rules="required"
-              v-slot="{ value, errorMessage, handleChange, handleBlur }"
-            >
-              <div class="field">
-                <label>{{ $t('admin.promocode') }}</label>
-                <InputText :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" :class="errorMessage && 'p-invalid'" />
-                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
-              </div>
-            </VeeField>
-            <div class="field">
-              <label>{{ $t('admin.expires') }}</label>
-              <DatePicker id="time24" v-model="gift.expires" showTime showSeconds appendTo="body" />
-            </div>
-            <VeeField
-              v-model="gift.max_activations"
-              name="max_activations"
-              :label="$t('admin.type')"
-              rules="min:1"
-              v-slot="{ value, errorMessage, handleChange, handleBlur }"
-            >
-              <div class="field">
-                <label>{{ $t('admin.uses_count') }}</label>
-                <InputNumber :modelValue="value" @update:modelValue="handleChange" @input="handleChange($event.value)" @blur="handleBlur" />
-                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
-              </div>
-            </VeeField>
-            <VeeField
-              v-model="gift.type"
-              name="type"
-              :label="$t('admin.type')"
-              rules="required"
-              v-slot="{ value, errorMessage, handleChange }"
-            >
-              <div class="field">
-                <label>{{ $t('admin.type') }}</label>
-                <Select :modelValue="value" @update:modelValue="handleChange" :options="types" optionLabel="name" appendTo="body" />
-                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
-              </div>
-            </VeeField>
-            <div class="field" v-if="['donate', 'permission'].find((v) => v == $_.get(gift.type, 'value'))">
-              <label>{{ $t('cabinet.period') }}</label>
+            <template #main>
               <VeeField
-                v-model="gift.period"
-                name="period"
-                :label="$t('cabinet.period')"
+                v-model="gift.promocode"
+                name="promocode"
+                :label="$t('admin.promocode')"
                 rules="required"
-                v-slot="{ value, errorMessage, handleChange }"
-              >
-                <Select :modelValue="value" @update:modelValue="handleChange" :options="periods" optionLabel="name" appendTo="body" />
-                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
-              </VeeField>
-            </div>
-            <div
-              class="field"
-              v-if="
-                ['donate', 'permission', 'product', 'kit', 'money'].find((v) => v == $_.get(gift.type, 'value')) &&
-                (!['permission'].find((v) => v == $_.get(gift.type, 'value')) ||
-                  (gift.donate_permission && gift.donate_permission.type != 'web'))
-              "
-            >
-              <label>{{ $t('cabinet.server') }}</label>
-              <VeeField
-                v-model="gift.server"
-                name="server"
-                :label="$t('cabinet.server')"
-                rules="required"
-                v-slot="{ value, errorMessage, handleChange }"
-              >
-                <Select :modelValue="value" @update:modelValue="handleChange" :options="servers" optionLabel="name" appendTo="body">
-                  <template #option="slotProps">
-                    <div class="flex align-items-center">
-                      <IconAvatar :path="slotProps.option.icon" />
-                      <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
-                    </div>
-                  </template>
-                </Select>
-                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
-              </VeeField>
-            </div>
-            <div class="field" v-if="$_.get(gift.type, 'value') == 'donate'">
-              <label>{{ $t('cabinet.donate_group') }}</label>
-              <VeeField
-                v-model="gift.donate_group"
-                name="donate_group"
-                :label="$t('cabinet.donate_group')"
-                rules="required"
-                v-slot="{ value, errorMessage, handleChange }"
-              >
-                <Select :modelValue="value" @update:modelValue="handleChange" :options="donate_groups" optionLabel="name" appendTo="body">
-                  <template #option="slotProps">
-                    <div class="flex align-items-center">
-                      <IconAvatar :path="slotProps.option.icon" />
-                      <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
-                    </div>
-                  </template>
-                </Select>
-                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
-              </VeeField>
-            </div>
-            <div class="field" v-if="$_.get(gift.type, 'value') == 'permission'">
-              <label>{{ $t('cabinet.donate_permission') }}</label>
-              <VeeField
-                v-model="gift.donate_permission"
-                name="donate_permission"
-                :label="$t('cabinet.donate_permission')"
-                rules="required"
-                v-slot="{ value, errorMessage, handleChange }"
-              >
-                <Select
-                  :modelValue="value"
-                  @update:modelValue="handleChange"
-                  :options="donate_permissions"
-                  optionLabel="name"
-                  appendTo="body"
-                >
-                  <template #option="slotProps"> {{ slotProps.option.name }} (#{{ slotProps.option.id }}) </template>
-                </Select>
-                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
-              </VeeField>
-            </div>
-            <div class="field" v-if="$_.get(gift.type, 'value') == 'product'">
-              <label>{{ $t('cabinet.product') }}</label>
-              <VeeField
-                v-model="gift.product"
-                name="product"
-                :label="$t('cabinet.product')"
-                rules="required"
-                v-slot="{ value, errorMessage, handleChange }"
-              >
-                <AutoComplete
-                  :modelValue="value"
-                  @update:modelValue="handleChange"
-                  :suggestions="products"
-                  @complete="searchProduct($event)"
-                  optionLabel="name"
-                  appendTo="body"
-                >
-                  <template #option="slotProps">
-                    <div class="flex align-items-center">
-                      <IconAvatar :path="slotProps.option.icon" />
-                      <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
-                    </div>
-                  </template>
-                </AutoComplete>
-                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
-              </VeeField>
-            </div>
-            <div class="field" v-if="$_.get(gift.type, 'value') == 'kit'">
-              <label>{{ $t('store.kit') }}</label>
-              <VeeField
-                v-model="gift.kit"
-                name="kit"
-                :label="$t('cabinet.product')"
-                rules="required"
-                v-slot="{ value, errorMessage, handleChange }"
-              >
-                <AutoComplete
-                  :modelValue="value"
-                  @update:modelValue="handleChange"
-                  :suggestions="kits"
-                  @complete="searchKit($event)"
-                  optionLabel="name"
-                  appendTo="body"
-                >
-                  <template #option="slotProps">
-                    <div class="flex align-items-center">
-                      <IconAvatar :path="slotProps.option.icon" />
-                      <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
-                    </div>
-                  </template>
-                </AutoComplete>
-                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
-              </VeeField>
-            </div>
-            <div class="field" v-if="['real', 'product', 'money'].find((v) => v == $_.get(gift.type, 'value'))">
-              <VeeField
-                v-model="gift.amount"
-                name="amount"
-                :label="$t('admin.quantity')"
-                rules="required|min:1"
                 v-slot="{ value, errorMessage, handleChange, handleBlur }"
               >
                 <div class="field">
-                  <label>{{ $t('admin.quantity') }}</label>
+                  <label>{{ $t('admin.promocode') }}</label>
+                  <InputText
+                    :modelValue="value"
+                    @update:modelValue="handleChange"
+                    @blur="handleBlur"
+                    :class="errorMessage && 'p-invalid'"
+                  />
+                  <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+                </div>
+              </VeeField>
+              <div class="field">
+                <label>{{ $t('admin.expires') }}</label>
+                <DatePicker id="time24" v-model="gift.expires" showTime showSeconds appendTo="body" />
+              </div>
+              <VeeField
+                v-model="gift.max_activations"
+                name="max_activations"
+                :label="$t('admin.type')"
+                rules="min:1"
+                v-slot="{ value, errorMessage, handleChange, handleBlur }"
+              >
+                <div class="field">
+                  <label>{{ $t('admin.uses_count') }}</label>
                   <InputNumber
                     :modelValue="value"
                     @update:modelValue="handleChange"
@@ -274,7 +118,179 @@
                   <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
                 </div>
               </VeeField>
-            </div>
+            </template>
+
+            <template #issuance>
+              <VeeField
+                v-model="gift.type"
+                name="type"
+                :label="$t('admin.type')"
+                rules="required"
+                v-slot="{ value, errorMessage, handleChange }"
+              >
+                <div class="field">
+                  <label>{{ $t('admin.type') }}</label>
+                  <Select :modelValue="value" @update:modelValue="handleChange" :options="types" optionLabel="name" appendTo="body" />
+                  <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+                </div>
+              </VeeField>
+              <div class="field" v-if="['donate', 'permission'].find((v) => v == $_.get(gift.type, 'value'))">
+                <label>{{ $t('cabinet.period') }}</label>
+                <VeeField
+                  v-model="gift.period"
+                  name="period"
+                  :label="$t('cabinet.period')"
+                  rules="required"
+                  v-slot="{ value, errorMessage, handleChange }"
+                >
+                  <Select :modelValue="value" @update:modelValue="handleChange" :options="periods" optionLabel="name" appendTo="body" />
+                  <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+                </VeeField>
+              </div>
+              <div
+                class="field"
+                v-if="
+                  ['donate', 'permission', 'product', 'kit', 'money'].find((v) => v == $_.get(gift.type, 'value')) &&
+                  (!['permission'].find((v) => v == $_.get(gift.type, 'value')) ||
+                    (gift.donate_permission && gift.donate_permission.type != 'web'))
+                "
+              >
+                <label>{{ $t('cabinet.server') }}</label>
+                <VeeField
+                  v-model="gift.server"
+                  name="server"
+                  :label="$t('cabinet.server')"
+                  rules="required"
+                  v-slot="{ value, errorMessage, handleChange }"
+                >
+                  <Select :modelValue="value" @update:modelValue="handleChange" :options="servers" optionLabel="name" appendTo="body">
+                    <template #option="slotProps">
+                      <div class="flex align-items-center">
+                        <IconAvatar :path="slotProps.option.icon" />
+                        <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
+                      </div>
+                    </template>
+                  </Select>
+                  <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+                </VeeField>
+              </div>
+              <div class="field" v-if="$_.get(gift.type, 'value') == 'donate'">
+                <label>{{ $t('cabinet.donate_group') }}</label>
+                <VeeField
+                  v-model="gift.donate_group"
+                  name="donate_group"
+                  :label="$t('cabinet.donate_group')"
+                  rules="required"
+                  v-slot="{ value, errorMessage, handleChange }"
+                >
+                  <Select :modelValue="value" @update:modelValue="handleChange" :options="donate_groups" optionLabel="name" appendTo="body">
+                    <template #option="slotProps">
+                      <div class="flex align-items-center">
+                        <IconAvatar :path="slotProps.option.icon" />
+                        <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
+                      </div>
+                    </template>
+                  </Select>
+                  <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+                </VeeField>
+              </div>
+              <div class="field" v-if="$_.get(gift.type, 'value') == 'permission'">
+                <label>{{ $t('cabinet.donate_permission') }}</label>
+                <VeeField
+                  v-model="gift.donate_permission"
+                  name="donate_permission"
+                  :label="$t('cabinet.donate_permission')"
+                  rules="required"
+                  v-slot="{ value, errorMessage, handleChange }"
+                >
+                  <Select
+                    :modelValue="value"
+                    @update:modelValue="handleChange"
+                    :options="donate_permissions"
+                    optionLabel="name"
+                    appendTo="body"
+                  >
+                    <template #option="slotProps"> {{ slotProps.option.name }} (#{{ slotProps.option.id }}) </template>
+                  </Select>
+                  <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+                </VeeField>
+              </div>
+              <div class="field" v-if="$_.get(gift.type, 'value') == 'product'">
+                <label>{{ $t('cabinet.product') }}</label>
+                <VeeField
+                  v-model="gift.product"
+                  name="product"
+                  :label="$t('cabinet.product')"
+                  rules="required"
+                  v-slot="{ value, errorMessage, handleChange }"
+                >
+                  <AutoComplete
+                    :modelValue="value"
+                    @update:modelValue="handleChange"
+                    :suggestions="products"
+                    @complete="searchProduct($event)"
+                    optionLabel="name"
+                    appendTo="body"
+                  >
+                    <template #option="slotProps">
+                      <div class="flex align-items-center">
+                        <IconAvatar :path="slotProps.option.icon" />
+                        <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
+                      </div>
+                    </template>
+                  </AutoComplete>
+                  <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+                </VeeField>
+              </div>
+              <div class="field" v-if="$_.get(gift.type, 'value') == 'kit'">
+                <label>{{ $t('store.kit') }}</label>
+                <VeeField
+                  v-model="gift.kit"
+                  name="kit"
+                  :label="$t('cabinet.product')"
+                  rules="required"
+                  v-slot="{ value, errorMessage, handleChange }"
+                >
+                  <AutoComplete
+                    :modelValue="value"
+                    @update:modelValue="handleChange"
+                    :suggestions="kits"
+                    @complete="searchKit($event)"
+                    optionLabel="name"
+                    appendTo="body"
+                  >
+                    <template #option="slotProps">
+                      <div class="flex align-items-center">
+                        <IconAvatar :path="slotProps.option.icon" />
+                        <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
+                      </div>
+                    </template>
+                  </AutoComplete>
+                  <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+                </VeeField>
+              </div>
+              <div class="field" v-if="['real', 'product', 'money'].find((v) => v == $_.get(gift.type, 'value'))">
+                <VeeField
+                  v-model="gift.amount"
+                  name="amount"
+                  :label="$t('admin.quantity')"
+                  rules="required|min:1"
+                  v-slot="{ value, errorMessage, handleChange, handleBlur }"
+                >
+                  <div class="field">
+                    <label>{{ $t('admin.quantity') }}</label>
+                    <InputNumber
+                      :modelValue="value"
+                      @update:modelValue="handleChange"
+                      @input="handleChange($event.value)"
+                      @blur="handleBlur"
+                    />
+                    <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+                  </div>
+                </VeeField>
+              </div>
+            </template>
+
             <template #footer>
               <Button :disabled="loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
@@ -285,7 +301,7 @@
                 @click="updateMode ? updateGift() : createGift()"
               />
             </template>
-          </Dialog>
+          </SectionedDialog>
         </VeeForm>
       </div>
     </div>
@@ -327,6 +343,7 @@ export default {
         amount: null,
       },
       giftDialog: false,
+      section: 'main',
       filters: {
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
         servers: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -340,6 +357,12 @@ export default {
     }
   },
   computed: {
+    sections() {
+      return [
+        { key: 'main', label: 'admin.section_main', icon: 'pi pi-info-circle' },
+        { key: 'issuance', label: 'admin.section_issuance', icon: 'pi pi-gift' },
+      ]
+    },
     types() {
       return [
         { name: this.$t('admin.gift_type_real'), value: 'real' },

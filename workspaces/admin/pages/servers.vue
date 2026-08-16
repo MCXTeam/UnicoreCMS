@@ -131,22 +131,26 @@
         </Dialog>
 
         <VeeForm v-slot="{ meta }">
-          <Dialog
+          <SectionedDialog
+            ref="dialog"
             v-model:visible="serverDialog"
-            :closable="false"
-            :style="{ width: '600px' }"
-            :modal="true"
+            v-model="section"
+            :sections="sections"
             :header="$t('admin.server_dialog')"
+            width="640px"
             class="p-fluid"
           >
-            <LocaleEditorBar
-              v-model="translations.locale"
-              :locales="translations.locales"
-              :status="translations.status"
-              :isDefault="translations.isDefault"
-              @copy="translations.copyFromDefault()"
-            />
-            <template v-if="translations.isDefault">
+            <template #before>
+              <LocaleEditorBar
+                v-model="translations.locale"
+                :locales="translations.locales"
+                :status="translations.status"
+                :isDefault="translations.isDefault"
+                @copy="translations.copyFromDefault()"
+              />
+            </template>
+
+            <template #main>
               <div class="grid">
                 <div class="col-12 md:col-6">
                   <VeeField
@@ -254,6 +258,11 @@
                     <Textarea v-model="server.description" :autoResize="true" />
                   </div>
                 </div>
+              </div>
+            </template>
+
+            <template #table>
+              <div class="grid">
                 <div class="col-12">
                   <div class="field">
                     <label>{{ $t('admin.server_table') }}</label>
@@ -294,6 +303,11 @@
                     </DataTable>
                   </div>
                 </div>
+              </div>
+            </template>
+
+            <template #query>
+              <div class="grid">
                 <div class="col-12 md:col-6">
                   <VeeField
                     v-model="server.query.host"
@@ -383,10 +397,12 @@
                     </DataTable>
                   </div>
                 </div>
+              </div>
+            </template>
+
+            <template #issuance>
+              <div class="grid">
                 <div class="col-12">
-                  <Divider align="left"
-                    ><span class="font-medium">{{ $t('admin.issuance_divider') }}</span></Divider
-                  >
                   <div class="field">
                     <label>{{ $t('admin.issuance_label') }}</label>
                     <Select
@@ -458,7 +474,11 @@
                 </template>
               </div>
             </template>
-            <ContentTranslationFields v-else :translations="translations" />
+
+            <template #translation>
+              <ContentTranslationFields :translations="translations" />
+            </template>
+
             <template #footer>
               <Button :disabled="loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
@@ -469,7 +489,7 @@
                 @click="updateMode ? updateServer() : createServer()"
               />
             </template>
-          </Dialog>
+          </SectionedDialog>
         </VeeForm>
 
         <RconIssuanceDialog v-model:visible="rconSettingsDialog" />
@@ -534,12 +554,24 @@ export default {
         mods: [],
       },
       serverDialog: false,
+      section: 'main',
       filters: {
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
       },
     }
   },
   computed: {
+    sections() {
+      const isDefault = this.translations.isDefault
+
+      return [
+        { key: 'main', label: 'admin.section_main', icon: 'pi pi-info-circle', hidden: !isDefault },
+        { key: 'table', label: 'admin.section_table', icon: 'pi pi-table', hidden: !isDefault },
+        { key: 'query', label: 'admin.section_query', icon: 'pi pi-sitemap', hidden: !isDefault },
+        { key: 'issuance', label: 'admin.section_issuance', icon: 'pi pi-send', hidden: !isDefault },
+        { key: 'translation', label: 'admin.section_translation', icon: 'pi pi-language', hidden: isDefault },
+      ]
+    },
     actions() {
       return [
         {

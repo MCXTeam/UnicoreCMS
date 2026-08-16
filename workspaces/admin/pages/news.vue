@@ -99,22 +99,25 @@
           </div>
         </Dialog>
         <VeeForm v-slot="{ meta }">
-          <Dialog
+          <SectionedDialog
             v-model:visible="newsSingleDialog"
-            :closable="false"
-            :style="{ width: '600px' }"
-            :modal="true"
+            v-model="section"
+            :sections="sections"
             :header="$t('admin.news_dialog')"
+            width="620px"
             class="p-fluid"
           >
-            <LocaleEditorBar
-              v-model="translations.locale"
-              :locales="translations.locales"
-              :status="translations.status"
-              :isDefault="translations.isDefault"
-              @copy="translations.copyFromDefault()"
-            />
-            <template v-if="translations.isDefault">
+            <template #before>
+              <LocaleEditorBar
+                v-model="translations.locale"
+                :locales="translations.locales"
+                :status="translations.status"
+                :isDefault="translations.isDefault"
+                @copy="translations.copyFromDefault()"
+              />
+            </template>
+
+            <template #main>
               <VeeField
                 v-model="newsSingle.title"
                 name="title"
@@ -128,6 +131,21 @@
                   <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
                 </div>
               </VeeField>
+              <div class="field">
+                <label>{{ $t('admin.short_description') }}</label>
+                <Textarea v-model="newsSingle.short_description" :autoResize="true" rows="3" />
+                <small>{{ $t('admin.short_description_hint') }}</small>
+              </div>
+              <div class="field">
+                <div class="flex align-items-center gap-2">
+                  <Checkbox v-model="newsSingle.full_size" :binary="true" inputId="news-full-size" @change="onFullSize()" />
+                  <label for="news-full-size" class="m-0">{{ $t('admin.news_full_size') }}</label>
+                </div>
+                <small v-if="newsSingle.full_size">{{ $t('admin.full_size_hint') }}</small>
+              </div>
+            </template>
+
+            <template #content>
               <VeeField
                 v-model="newsSingle.description"
                 name="description"
@@ -160,39 +178,18 @@
                   <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
                 </div>
               </VeeField>
+            </template>
+
+            <template #media>
+              <FileUpload ref="fileInputSecond" :showUploadButton="false" name="file" accept="image/*">
+                <template #empty>
+                  <p>{{ $t('admin.choose_image') }}</p>
+                </template>
+              </FileUpload>
+            </template>
+
+            <template #publish>
               <div class="field">
-                <label>{{ $t('admin.short_description') }}</label>
-                <Textarea v-model="newsSingle.short_description" :autoResize="true" rows="3" />
-                <small>{{ $t('admin.short_description_hint') }}</small>
-              </div>
-              <div class="field flex align-items-center gap-2">
-                <Checkbox v-model="newsSingle.full_size" :binary="true" inputId="news-full-size" />
-                <label for="news-full-size" class="m-0">{{ $t('admin.news_full_size') }}</label>
-              </div>
-              <div class="field" v-if="isSuperuser">
-                <label>{{ $t('admin.custom_css') }}</label>
-                <Textarea
-                  v-model="newsSingle.custom_css"
-                  class="font-mono"
-                  rows="6"
-                  spellcheck="false"
-                  placeholder=".my-block { color: red }"
-                />
-                <small>{{ $t('admin.custom_css_hint_news') }}</small>
-              </div>
-              <div class="field" v-if="isSuperuser">
-                <label>{{ $t('admin.custom_js') }}</label>
-                <Textarea v-model="newsSingle.custom_js" class="font-mono" rows="6" spellcheck="false" placeholder="console.log('hello')" />
-                <small class="p-error"> {{ $t('admin.custom_js_hint') }} </small>
-              </div>
-              <div v-if="!updateMode">
-                <FileUpload ref="fileInputSecond" :showUploadButton="false" name="file" accept="image/*">
-                  <template #empty>
-                    <p>{{ $t('admin.choose_image') }}</p>
-                  </template>
-                </FileUpload>
-              </div>
-              <div class="field mt-4" v-if="!updateMode && publishTargets.length">
                 <label>{{ $t('admin.publish_targets') }}</label>
                 <div v-for="target in publishTargets" :key="target.id" class="flex align-items-center gap-2 mt-2">
                   <Checkbox v-model="selectedTargets" :inputId="`target-${target.id}`" :value="target.id" />
@@ -203,7 +200,30 @@
                 <small>{{ $t('admin.publish_targets_hint') }}</small>
               </div>
             </template>
-            <ContentTranslationFields v-else :translations="translations" />
+
+            <template #extra>
+              <div class="field">
+                <label>{{ $t('admin.custom_css') }}</label>
+                <Textarea
+                  v-model="newsSingle.custom_css"
+                  class="font-mono"
+                  rows="6"
+                  spellcheck="false"
+                  placeholder=".my-block { color: red }"
+                />
+                <small>{{ $t('admin.custom_css_hint_news') }}</small>
+              </div>
+              <div class="field">
+                <label>{{ $t('admin.custom_js') }}</label>
+                <Textarea v-model="newsSingle.custom_js" class="font-mono" rows="6" spellcheck="false" placeholder="console.log('hello')" />
+                <small class="text-red-500"> {{ $t('admin.custom_js_hint') }} </small>
+              </div>
+            </template>
+
+            <template #translation>
+              <ContentTranslationFields :translations="translations" />
+            </template>
+
             <template #footer>
               <Button :disabled="loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
@@ -214,10 +234,16 @@
                 @click="updateMode ? updateNewsSingle() : createNewsSingle()"
               />
             </template>
-          </Dialog>
+          </SectionedDialog>
         </VeeForm>
 
-        <Dialog v-model:visible="publishDialog" :style="{ width: '640px' }" :modal="true" :header="$t('admin.publish_dialog')" class="p-fluid">
+        <Dialog
+          v-model:visible="publishDialog"
+          :style="{ width: '640px' }"
+          :modal="true"
+          :header="$t('admin.publish_dialog')"
+          class="p-fluid"
+        >
           <div class="field">
             <label>{{ $t('admin.publish_targets') }}</label>
             <div v-for="target in publishTargets" :key="target.id" class="flex align-items-center gap-2 mt-2">
@@ -262,7 +288,13 @@
           </div>
 
           <template #footer>
-            <Button :disabled="publishLoading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="publishDialog = false" />
+            <Button
+              :disabled="publishLoading"
+              :label="$t('common.cancel')"
+              icon="pi pi-times"
+              class="p-button-text"
+              @click="publishDialog = false"
+            />
             <Button
               :disabled="publishLoading || !selectedTargets.length"
               :label="$t('admin.publish_update')"
@@ -286,6 +318,7 @@
 
 <script>
 import { sortTransform } from '~/helpers'
+import { fullSizeTemplate } from '~/constants'
 import { FilterMatchMode } from '@primevue/core/api'
 import { Form, Field } from 'vee-validate'
 
@@ -305,6 +338,23 @@ export default {
   },
 
   computed: {
+    sections() {
+      const isDefault = this.translations.isDefault
+
+      return [
+        { key: 'main', label: 'admin.section_main', icon: 'pi pi-info-circle', hidden: !isDefault },
+        { key: 'content', label: 'admin.section_content', icon: 'pi pi-align-left', hidden: !isDefault },
+        { key: 'media', label: 'admin.section_media', icon: 'pi pi-image', hidden: !isDefault || this.updateMode },
+        {
+          key: 'publish',
+          label: 'admin.section_publish',
+          icon: 'pi pi-send',
+          hidden: !isDefault || this.updateMode || !this.publishTargets.length,
+        },
+        { key: 'extra', label: 'admin.section_extra', icon: 'pi pi-code', hidden: !isDefault || !this.isSuperuser },
+        { key: 'translation', label: 'admin.section_translation', icon: 'pi pi-language', hidden: isDefault },
+      ]
+    },
     contentModes() {
       return [
         { label: this.$t('admin.visual'), value: 'visual' },
@@ -343,6 +393,7 @@ export default {
       contentMode: 'visual',
       selected: null,
       newsSingleDialog: false,
+      section: 'main',
       fileDialog: false,
       publishDialog: false,
       publishLoading: false,
@@ -483,6 +534,12 @@ export default {
           await this.load()
         },
       })
+    },
+    onFullSize() {
+      if (!this.newsSingle.full_size || String(this.newsSingle.description || '').trim()) return
+
+      this.newsSingle.description = fullSizeTemplate(this.$t('admin.full_size_template_heading'), this.$t('admin.full_size_template_text'))
+      this.contentMode = 'html'
     },
     publishMenu(newsSingle) {
       return [

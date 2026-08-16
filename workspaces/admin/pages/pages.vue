@@ -46,22 +46,25 @@
         </DataTable>
 
         <VeeForm v-slot="{ meta }">
-          <Dialog
-            :style="{ width: '800px' }"
+          <SectionedDialog
             v-model:visible="pageDialog"
-            :closable="false"
-            :modal="true"
+            v-model="section"
+            :sections="sections"
             :header="$t('admin.page_dialog')"
+            width="800px"
             class="p-fluid"
           >
-            <LocaleEditorBar
-              v-model="translations.locale"
-              :locales="translations.locales"
-              :status="translations.status"
-              :isDefault="translations.isDefault"
-              @copy="translations.copyFromDefault()"
-            />
-            <template v-if="translations.isDefault">
+            <template #before>
+              <LocaleEditorBar
+                v-model="translations.locale"
+                :locales="translations.locales"
+                :status="translations.status"
+                :isDefault="translations.isDefault"
+                @copy="translations.copyFromDefault()"
+              />
+            </template>
+
+            <template #main>
               <VeeField
                 v-model="page.path"
                 name="path"
@@ -89,6 +92,20 @@
                 </div>
               </VeeField>
               <div class="field">
+                <div class="flex align-items-center gap-2">
+                  <Checkbox v-model="page.full_size" :binary="true" inputId="page-full-size" @change="onFullSize()" />
+                  <label for="page-full-size" class="m-0">{{ $t('admin.page_full_size') }}</label>
+                </div>
+                <small v-if="page.full_size">{{ $t('admin.full_size_hint') }}</small>
+              </div>
+              <div class="field">
+                <label>{{ $t('admin.meta_description') }}</label>
+                <Textarea v-model="page.description" :autoResize="true" />
+              </div>
+            </template>
+
+            <template #content>
+              <div class="field">
                 <div class="flex justify-content-between align-items-center mb-2">
                   <label class="m-0">{{ $t('admin.content') }}</label>
                   <SelectButton v-model="contentMode" :options="contentModes" optionLabel="label" optionValue="value" :allowEmpty="false" />
@@ -97,26 +114,25 @@
                 <Textarea v-else v-model="page.content" class="font-mono" rows="18" spellcheck="false" />
                 <small v-if="contentMode === 'html'">{{ $t('admin.html_sanitize_hint') }}</small>
               </div>
-              <div class="field flex align-items-center gap-2">
-                <Checkbox v-model="page.full_size" :binary="true" inputId="page-full-size" />
-                <label for="page-full-size" class="m-0">{{ $t('admin.page_full_size') }}</label>
-              </div>
-              <div class="field" v-if="isSuperuser">
+            </template>
+
+            <template #extra>
+              <div class="field">
                 <label>{{ $t('admin.custom_css') }}</label>
                 <Textarea v-model="page.custom_css" class="font-mono" rows="6" spellcheck="false" placeholder=".my-block { color: red }" />
                 <small>{{ $t('admin.custom_css_hint') }}</small>
               </div>
-              <div class="field" v-if="isSuperuser">
+              <div class="field">
                 <label>{{ $t('admin.custom_js') }}</label>
                 <Textarea v-model="page.custom_js" class="font-mono" rows="6" spellcheck="false" placeholder="console.log('hello')" />
-                <small class="p-error"> {{ $t('admin.custom_js_hint') }} </small>
-              </div>
-              <div class="field">
-                <label>{{ $t('admin.meta_description') }}</label>
-                <Textarea v-model="page.description" :autoResize="true" />
+                <small class="text-red-500"> {{ $t('admin.custom_js_hint') }} </small>
               </div>
             </template>
-            <ContentTranslationFields v-else :translations="translations" />
+
+            <template #translation>
+              <ContentTranslationFields :translations="translations" />
+            </template>
+
             <template #footer>
               <Button :disabled="loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
@@ -127,7 +143,7 @@
                 @click="updateMode ? updatePage() : createPage()"
               />
             </template>
-          </Dialog>
+          </SectionedDialog>
         </VeeForm>
       </div>
     </div>
@@ -135,6 +151,7 @@
 </template>
 
 <script>
+import { fullSizeTemplate } from '~/constants'
 import { FilterMatchMode } from '@primevue/core/api'
 import { Form, Field } from 'vee-validate'
 
@@ -154,6 +171,16 @@ export default {
   },
 
   computed: {
+    sections() {
+      const isDefault = this.translations.isDefault
+
+      return [
+        { key: 'main', label: 'admin.section_main', icon: 'pi pi-info-circle', hidden: !isDefault },
+        { key: 'content', label: 'admin.section_content', icon: 'pi pi-align-left', hidden: !isDefault },
+        { key: 'extra', label: 'admin.section_extra', icon: 'pi pi-code', hidden: !isDefault || !this.isSuperuser },
+        { key: 'translation', label: 'admin.section_translation', icon: 'pi pi-language', hidden: isDefault },
+      ]
+    },
     contentModes() {
       return [
         { label: this.$t('admin.visual'), value: 'visual' },
@@ -182,6 +209,7 @@ export default {
       },
       contentMode: 'visual',
       pageDialog: false,
+      section: 'main',
       filters: {
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
       },
@@ -191,6 +219,12 @@ export default {
     this.load()
   },
   methods: {
+    onFullSize() {
+      if (!this.page.full_size || String(this.page.content || '').trim()) return
+
+      this.page.content = fullSizeTemplate(this.$t('admin.full_size_template_heading'), this.$t('admin.full_size_template_text'))
+      this.contentMode = 'html'
+    },
     async load() {
       this.loading = true
       this.pageDialog = false

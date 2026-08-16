@@ -10,6 +10,9 @@ export const DASHBOARD_CHART_SECTIONS = [
 
 export const IMAGE_FALLBACK = '/placeholder.svg'
 
+export const fullSizeTemplate = (heading: string, text: string) =>
+  `<div class="panel description-html">\n  <h2>${heading}</h2>\n  <p>${text}</p>\n</div>`
+
 export { SANITIZE_CONFIG } from 'unicore-common/sanitize'
 
 export const RCON_FIELD_MAP = {

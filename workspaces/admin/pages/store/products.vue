@@ -333,22 +333,25 @@
         </VeeForm>
 
         <VeeForm v-slot="{ meta }">
-          <Dialog
+          <SectionedDialog
             v-model:visible="productDialog"
-            :closable="false"
-            :style="{ width: '600px' }"
-            :modal="true"
+            v-model="section"
+            :sections="sections"
             :header="$t('admin.product_dialog')"
+            width="620px"
             class="p-fluid"
           >
-            <LocaleEditorBar
-              v-model="translations.locale"
-              :locales="translations.locales"
-              :status="translations.status"
-              :isDefault="translations.isDefault"
-              @copy="translations.copyFromDefault()"
-            />
-            <template v-if="translations.isDefault">
+            <template #before>
+              <LocaleEditorBar
+                v-model="translations.locale"
+                :locales="translations.locales"
+                :status="translations.status"
+                :isDefault="translations.isDefault"
+                @copy="translations.copyFromDefault()"
+              />
+            </template>
+
+            <template #main>
               <VeeField
                 v-model="product.name"
                 name="name"
@@ -455,6 +458,9 @@
                   <small>{{ $t('admin.quantity_multiple_hint') }}</small>
                 </div>
               </VeeField>
+            </template>
+
+            <template #content>
               <div class="field">
                 <label>{{ $t('admin.description') }}</label>
                 <Editor v-model="product.description" editorStyle="height: 160px">
@@ -507,6 +513,9 @@
                   </template>
                 </AutoComplete>
               </div>
+            </template>
+
+            <template #price>
               <div class="grid">
                 <div class="col-6">
                   <VeeField
@@ -576,7 +585,11 @@
                 </VeeField>
               </div>
             </template>
-            <ContentTranslationFields v-else :translations="translations" />
+
+            <template #translation>
+              <ContentTranslationFields :translations="translations" />
+            </template>
+
             <template #footer>
               <Button :disabled="loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
@@ -587,7 +600,7 @@
                 @click="updateMode ? updateProduct() : createProduct()"
               />
             </template>
-          </Dialog>
+          </SectionedDialog>
         </VeeForm>
       </div>
     </div>
@@ -657,6 +670,7 @@ export default {
       importDialog: false,
       fileDialog: false,
       productDialog: false,
+      section: 'main',
       filters: {
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
         servers: { value: null, matchMode: FilterMatchMode.IN },
@@ -665,6 +679,16 @@ export default {
     }
   },
   computed: {
+    sections() {
+      const isDefault = this.translations.isDefault
+
+      return [
+        { key: 'main', label: 'admin.section_main', icon: 'pi pi-info-circle', hidden: !isDefault },
+        { key: 'content', label: 'admin.section_content', icon: 'pi pi-align-left', hidden: !isDefault },
+        { key: 'price', label: 'admin.section_price', icon: 'pi pi-wallet', hidden: !isDefault },
+        { key: 'translation', label: 'admin.section_translation', icon: 'pi pi-language', hidden: isDefault },
+      ]
+    },
     giveMethods() {
       return [
         { label: this.$t('admin.give_method_item'), value: 0 },
