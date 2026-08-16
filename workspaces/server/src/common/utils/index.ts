@@ -6,3 +6,5 @@ export * from './getDigest';
 export * from './ip';
 export * from './replace-async';
 export * from './sanitize-html';
+export * from './transaction';
+export * from './upload';

@@ -74,8 +74,8 @@ export class VotesService {
     const user = await this.usersRepository.findOneBy({ uuid: input.uuid });
     if (!user) throw new NotFoundException();
 
-    user.virtual = currencyUtils.roundByType(input.amount, SystemCurrency.VIRTAUL);
-    await this.usersRepository.save(user);
+    await this.usersRepository.update({ uuid: user.uuid }, { virtual: currencyUtils.roundByType(input.amount, SystemCurrency.VIRTAUL) });
+
     return true;
   }
 }

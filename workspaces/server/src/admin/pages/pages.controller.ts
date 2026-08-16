@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
@@ -32,7 +32,7 @@ export class PagesController {
 
   @Public()
   @Get(':id')
-  async findOne(@Param('id') id: number) {
+  async findOne(@Param('id', ParseIntPipe) id: number) {
     const page = await this.pagesService.findOne(id);
 
     if (!page) {
@@ -56,13 +56,13 @@ export class PagesController {
 
   @Permissions([Permission.AdminDashboard, Permission.AdminPagesUpdate])
   @Patch(':id')
-  update(@CurrentUser() user: User, @Param('id') id: number, @Body() body: PageInput) {
+  update(@CurrentUser() user: User, @Param('id', ParseIntPipe) id: number, @Body() body: PageInput) {
     return this.pagesService.update(id, body, Boolean(user.superuser));
   }
 
   @Permissions([Permission.AdminDashboard, Permission.AdminPagesDelete])
   @Delete(':id')
-  remove(@Param('id') id: number) {
+  remove(@Param('id', ParseIntPipe) id: number) {
     return this.pagesService.remove(id);
   }
 }

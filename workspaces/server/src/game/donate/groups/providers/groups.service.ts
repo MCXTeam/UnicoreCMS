@@ -1,4 +1,4 @@
-import { CommonSortInput, debitUserBalance, MomentWrapper, StorageManager } from '@common';
+import { assertUploadedFile, debitUserBalance, MomentWrapper, NumberSortInput, StorageManager } from '@common';
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/admin/users/entities/user.entity';
@@ -251,7 +251,7 @@ export class DonateGroupsService {
     return this.donateGroupsRepository.save(group);
   }
 
-  async sort(input: CommonSortInput) {
+  async sort(input: NumberSortInput) {
     const servers = await this.donateGroupsRepository.findBy({ id: In(input.items.map((srv) => srv.id)) });
 
     return this.donateGroupsRepository.save(
@@ -317,6 +317,8 @@ export class DonateGroupsService {
   }
 
   async updateIcon(id: number, file: Express.Multer.File) {
+    assertUploadedFile(file);
+
     const group = await this.findOne(id);
 
     if (!group) {

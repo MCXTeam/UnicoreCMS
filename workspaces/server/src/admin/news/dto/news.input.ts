@@ -1,10 +1,11 @@
 import { Transform } from 'class-transformer';
-import { IsBoolean, IsDefined, IsOptional, IsString } from 'class-validator';
-import { SanitizeHtml } from '@common';
+import { IsBoolean, IsDefined, IsOptional, IsString, MaxLength } from 'class-validator';
+import { CUSTOM_CODE_MAX_LENGTH, NAME_MAX_LENGTH, SanitizeHtml } from '@common';
 
 export class NewsInput {
   @IsDefined()
   @IsString()
+  @MaxLength(NAME_MAX_LENGTH)
   title: string;
 
   @IsDefined()
@@ -24,9 +25,11 @@ export class NewsInput {
 
   @IsOptional()
   @IsString()
+  @MaxLength(CUSTOM_CODE_MAX_LENGTH)
   custom_css?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(CUSTOM_CODE_MAX_LENGTH)
   custom_js?: string;
 }

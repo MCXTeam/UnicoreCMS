@@ -1,4 +1,4 @@
-import { CommonSortInput, debitUserBalance, MomentWrapper } from '@common';
+import { NumberSortInput, debitUserBalance, MomentWrapper } from '@common';
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/admin/users/entities/user.entity';
@@ -260,7 +260,7 @@ export class DonatePermissionsService {
     return this.donatePermissionsRepository.findOne({ where: { id }, relations });
   }
 
-  async sort(input: CommonSortInput) {
+  async sort(input: NumberSortInput) {
     const servers = await this.donatePermissionsRepository.findBy({ id: In(input.items.map((srv) => srv.id)) });
 
     return this.donatePermissionsRepository.save(

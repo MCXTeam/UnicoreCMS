@@ -1,5 +1,5 @@
 import { DeleteManyInput, imageFileFilter, StorageManager, zipFileFilter } from '@common';
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
@@ -52,7 +52,7 @@ export class ProductsController {
   }
 
   @Get('protected/kit/:id')
-  kit(@Param('id') id: number) {
+  kit(@Param('id', ParseIntPipe) id: number) {
     return this.productsService.kit(id);
   }
 
@@ -90,6 +90,8 @@ export class ProductsController {
     }),
   )
   async importItems(@CurrentUser() user: User, @Body() body: ProductsImportInput, @UploadedFile() file: Express.Multer.File) {
+    if (!file) throw new BadRequestException();
+
     const allowCommands = await matchPermission([Permission.AdminDashboard, Permission.AdminServersUpdate], { user });
 
     return this.productsService.importItems(body, file.filename, allowCommands);

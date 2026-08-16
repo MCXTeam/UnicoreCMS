@@ -19,10 +19,21 @@ function matchPerms(list: string[], pattern: string): string[] {
 }
 
 export type PermissionOptions = {
-  handle?: (req: any) => Record<string, string | number | boolean> | Promise<Record<string, string | number | boolean>>;
   or?: boolean;
 };
 export type PermissionArgs = Permission[] | [Permission[], PermissionOptions]; // Or condition
+
+export function resolvePermissions(patterns: string[], universe: string[]): string[] {
+  const allow: string[] = [];
+  const deny: string[] = [];
+
+  for (const pattern of patterns) {
+    if (pattern.charAt(0) === '!') deny.push(...matchPerms(universe, pattern.slice(1)));
+    else allow.push(...matchPerms(universe, pattern));
+  }
+
+  return _.difference(_.union(allow), deny);
+}
 
 export function transformPermissions(userPart: Partial<User>) {
   const user = { ...userPart };
@@ -30,22 +41,7 @@ export function transformPermissions(userPart: Partial<User>) {
   if (!user?.roles) user.roles = [];
   user.perms.push(...user.roles.map((role) => role.perms).flat());
 
-  if (user.perms.length) {
-    // Проходимся по правам пользователя
-    const exclude = user.perms
-      .filter((perm) => perm.charAt(0) === '!')
-      .map((perm) => matchPerms(Object.values(Permission), perm.slice(1)))
-      .flat();
-    user.perms = _.union(
-      _.pull(
-        user.perms
-          .filter((perm) => perm.charAt(0) !== '!')
-          .map((perm) => matchPerms(Object.values(Permission), perm))
-          .flat(),
-        ...exclude,
-      ),
-    );
-  }
+  if (user.perms.length) user.perms = resolvePermissions(user.perms, Object.values(Permission));
 
   user.roles = user.roles.map((role) => _.omit(role, 'perms')) as Role[];
 
@@ -82,7 +78,6 @@ export async function matchPermission(args: PermissionArgs, request: any): Promi
 
   const add_perms = await donateWebPerms(request);
 
-  var matched: string[] = new Array();
   var permissions: string[] = new Array();
   var options: PermissionOptions = null;
 
@@ -93,69 +88,10 @@ export async function matchPermission(args: PermissionArgs, request: any): Promi
     permissions = args as Permission[];
   }
 
-  // Каките кустом параметры
-  if (options && options.handle) {
-    // Заполняем %...% переменными
-    // Например server => hitech (id) из handle
-    permissions = _.uniq(
-      permissions.map((permission) => {
-        const handleObj = options.handle(request);
-        // Проходимся по предоставленным параметрам (ибо вдруг их несколько)
-        for (const handle in handleObj) {
-          permission = permission.replace(`%${handle}%`, handleObj[handle]);
-        }
-
-        return permission;
-      }),
-    );
-  }
-
-  if (user.roles) {
-    // Сортируем по приоритету
-    user.roles = _.sortBy(user.roles, 'priority');
-
-    // Проходимся по ролям
-    for (const role of user.roles) {
-      if (role.perms && role.perms.length) {
-        // Проходимся по правам роли
-        for (const perm of role.perms) {
-          // Проверям наличие права по паттерну
-          if (perm.charAt(0) !== '!') {
-            matched = _.union(matched, matchPerms(permissions, perm));
-          } else {
-            // !Исключения (exclude) всегда в приоритете...
-            // Они же права (патерны) начинающиеся на "!"
-            // Фильтруем их, а потом удаляем "мусор"
-            matched = _.pull(matched, ...matchPerms(permissions, perm.slice(1)));
-          }
-        }
-      }
-    }
-  }
-
-  // Проверяем уникальные права пользователя (логика работы идентична, но приоритет всегда выше)
-  if (user.perms && user.perms.length) {
-    // Проходимся по правам пользователя
-    for (const perm of user.perms) {
-      if (perm.charAt(0) !== '!') {
-        matched = _.union(matched, matchPerms(permissions, perm));
-      } else {
-        matched = _.pull(matched, ...matchPerms(permissions, perm.slice(1)));
-      }
-    }
-  }
-
-  // Накладные права групп и прав (донат)
-  if (add_perms && add_perms.length) {
-    // Проходимся по правам пользователя
-    for (const perm of add_perms) {
-      if (perm.charAt(0) !== '!') {
-        matched = _.union(matched, matchPerms(permissions, perm));
-      } else {
-        matched = _.pull(matched, ...matchPerms(permissions, perm.slice(1)));
-      }
-    }
-  }
+  const matched = resolvePermissions(
+    [...(user.roles || []).map((role) => role.perms || []).flat(), ...(user.perms || []), ...(add_perms || [])],
+    permissions,
+  );
 
   // Подводим итог
   // OR или AND

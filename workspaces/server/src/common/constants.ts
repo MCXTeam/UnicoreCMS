@@ -2,6 +2,7 @@ export const ASCII_NAME =
   " __  __                                          ____              ____       \r\n/\\ \\/\\ \\          __                            /\\  _`\\    /'\\_/`\\/\\  _`\\     \r\n\\ \\ \\ \\ \\    ___ /\\_\\    ___    ___   _ __    __\\ \\ \\/\\_\\ /\\      \\ \\,\\L\\_\\   \r\n \\ \\ \\ \\ \\ /' _ `\\/\\ \\  /'___\\ / __`\\/\\`'__\\/'__`\\ \\ \\/_/_\\ \\ \\__\\ \\/_\\__ \\   \r\n  \\ \\ \\_\\ \\/\\ \\/\\ \\ \\ \\/\\ \\__//\\ \\L\\ \\ \\ \\//\\  __/\\ \\ \\L\\ \\\\ \\ \\_/\\ \\/\\ \\L\\ \\ \r\n   \\ \\_____\\ \\_\\ \\_\\ \\_\\ \\____\\ \\____/\\ \\_\\\\ \\____\\\\ \\____/ \\ \\_\\\\ \\_\\ `\\____\\\r\n    \\/_____/\\/_/\\/_/\\/_/\\/____/\\/___/  \\/_/ \\/____/ \\/___/   \\/_/ \\/_/\\/_____/";
 
 export const TOTP_WINDOW = 1;
+export const TOTP_CODE_MAX_LENGTH = 10;
 export const TOTP_STEP_SECONDS = 30;
 
 export const REFRESH_ROTATION_LEEWAY_MS = 30_000;
@@ -90,6 +91,7 @@ export const SERVER_ID_MAX_LENGTH = 128;
 export const IP_MAX_LENGTH = 45;
 
 export const NAME_MAX_LENGTH = 120;
+export const CUSTOM_CODE_MAX_LENGTH = 100_000;
 export const TEXT_MAX_LENGTH = 2000;
 export const PATH_MAX_LENGTH = 120;
 export const PATH_PATTERN = /^[a-zA-Z0-9_-]+$/;
@@ -104,7 +106,14 @@ export const API_KEY_HASH = 'sha256';
 
 export const SKIN_MAX_SIZE = 2048;
 
+export const BULK_ITEMS_MAX = 500;
+export const CART_AMOUNT_MIN = 1;
+export const CART_AMOUNT_MAX = 10000;
+
 export const SERVER_GALLERY_MAX_IMAGES = 30;
+export const SERVER_TABLE_MAX_ROWS = 50;
+export const SERVER_INSTANCES_MAX = 50;
+export const SERVER_MODS_MAX = 5000;
 
 export const DEFAULT_SKIN_FILE = 'default/skin.png';
 export const DEFAULT_CLOAK_FILE = 'default/cloak.png';
@@ -115,6 +124,8 @@ export const PUBLIC_USERS_PAGE_SIZE = 1000;
 export const PUBLIC_USERS_CACHE_TTL_MS = 60_000;
 export const THROTTLE_PUBLIC_USERS = { ttl: 60_000, limit: 30 };
 
+export const PORT_MIN = 0;
+export const PORT_MAX = 65535;
 export const DEFAULT_MINECRAFT_PORT = 25565;
 export const PING_TIMEOUT_MS = 3000;
 
@@ -161,6 +172,7 @@ export const MONEY_COLUMNS = [
 
 export const VOTE_MIN_INTERVAL_MS = 5 * 60_000;
 export const VOTE_PLACE_MAX = 100;
+export const VOTES_RECENT_MAX = 20;
 
 export const PRICE_MIN = 0;
 export const PRICE_MAX = 1_000_000_000;

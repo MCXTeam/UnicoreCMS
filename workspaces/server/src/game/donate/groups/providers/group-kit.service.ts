@@ -1,4 +1,4 @@
-import { CommonSortInput, StorageManager } from '@common';
+import { NumberSortInput, StorageManager } from '@common';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Server } from 'src/game/servers/entities/server.entity';
@@ -33,7 +33,7 @@ export class GroupKitsService {
     return this.groupKitsRepository.save(kit);
   }
 
-  async sort(input: CommonSortInput) {
+  async sort(input: NumberSortInput) {
     const servers = await this.groupKitsRepository.findBy({ id: In(input.items.map((srv) => srv.id)) });
 
     return this.groupKitsRepository.save(

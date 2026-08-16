@@ -13,6 +13,7 @@ import { GiftsService } from './gifts.service';
 export class GiftsController {
   constructor(private giftsService: GiftsService) {}
 
+  @Permissions([Permission.UserCabinetGiftActivate])
   @UseGuards(ThrottlerCoreGuard)
   @Recaptcha({ action: 'gift' })
   @Post('activate')

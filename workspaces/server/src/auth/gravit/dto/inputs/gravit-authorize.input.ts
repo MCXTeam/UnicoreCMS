@@ -1,50 +1,74 @@
-import { IsBoolean, IsObject, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsDefined, IsObject, IsOptional, IsString, MaxLength, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ValidateNested } from 'class-validator';
-
-export class Password {
-  @IsString()
-  password: string;
-  @IsString()
-  type: string;
-}
+import { NAME_MAX_LENGTH, PASSWORD_MAX_LENGTH, TOTP_CODE_MAX_LENGTH } from '@common';
+import { GravitContext } from './gravit-refresh-token.input';
 
 export class FirstPasswordDto {
+  @IsOptional()
   @IsString()
-  password: string;
+  @MaxLength(PASSWORD_MAX_LENGTH)
+  password?: string;
 
+  @IsOptional()
   @IsString()
-  type: string;
+  @MaxLength(NAME_MAX_LENGTH)
+  type?: string;
 }
 
 export class SecondPasswordDto {
+  @IsOptional()
   @IsString()
-  totp: string;
+  @MaxLength(TOTP_CODE_MAX_LENGTH)
+  totp?: string;
 
+  @IsOptional()
   @IsString()
-  type: string;
+  @MaxLength(NAME_MAX_LENGTH)
+  type?: string;
 }
 
-export class Password2FA {
+export class GravitPassword {
+  @IsOptional()
+  @IsString()
+  @MaxLength(PASSWORD_MAX_LENGTH)
+  password?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(NAME_MAX_LENGTH)
+  type?: string;
+
+  @IsOptional()
+  @IsObject()
   @ValidateNested()
   @Type(() => FirstPasswordDto)
-  firstPassword: FirstPasswordDto;
+  firstPassword?: FirstPasswordDto;
 
+  @IsOptional()
+  @IsObject()
   @ValidateNested()
   @Type(() => SecondPasswordDto)
-  secondPassword: SecondPasswordDto;
+  secondPassword?: SecondPasswordDto;
 }
 
 export class GravitAuthorize {
+  @IsDefined()
   @IsString()
+  @MaxLength(NAME_MAX_LENGTH)
   login: string;
+
   @IsOptional()
   @IsObject()
-  context?: {
-    ip: string;
-  };
+  @ValidateNested()
+  @Type(() => GravitContext)
+  context?: GravitContext;
+
+  @IsDefined()
   @IsObject()
-  password: Password | Password2FA;
+  @ValidateNested()
+  @Type(() => GravitPassword)
+  password: GravitPassword;
+
   @IsBoolean()
   minecraftAccess: boolean;
 }

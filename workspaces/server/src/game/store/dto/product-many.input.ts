@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsDefined, IsInt, IsNumber, IsOptional, IsString, Length, Max, Min, ValidateNested } from 'class-validator';
-import { PRICE_MIN } from '@common';
+import { ArrayMaxSize, IsArray, IsDefined, IsInt, IsNumber, IsOptional, IsString, Length, Max, MaxLength, Min, ValidateNested } from 'class-validator';
+import { BULK_ITEMS_MAX, PRICE_MIN, SERVER_ID_MAX_LENGTH } from '@common';
 
 export class ProductManyInput {
   @IsDefined()
@@ -20,11 +20,14 @@ export class ProductManyInput {
 
   @IsOptional()
   @IsArray()
+  @ArrayMaxSize(BULK_ITEMS_MAX)
   @IsString({ each: true })
+  @MaxLength(SERVER_ID_MAX_LENGTH, { each: true })
   servers?: string[];
 
   @IsOptional()
   @IsArray()
+  @ArrayMaxSize(BULK_ITEMS_MAX)
   @IsInt({ each: true })
   categories?: number[];
 }
@@ -32,6 +35,7 @@ export class ProductManyInput {
 export class ProductsManyInput {
   @IsDefined()
   @IsArray()
+  @ArrayMaxSize(BULK_ITEMS_MAX)
   @ValidateNested({ each: true })
   @Type(() => ProductManyInput)
   products: ProductManyInput[];

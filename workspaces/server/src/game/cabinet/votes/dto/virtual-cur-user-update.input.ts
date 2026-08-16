@@ -1,11 +1,14 @@
-import { IsDefined, IsNumber, IsString } from 'class-validator';
+import { PRICE_MAX, PRICE_MIN } from '@common';
+import { IsDefined, IsNumber, IsUUID, Max, Min } from 'class-validator';
 
 export class VirtualCurrencyUserUpdate {
   @IsDefined()
-  @IsString()
+  @IsUUID()
   uuid: string;
 
   @IsDefined()
   @IsNumber()
+  @Min(PRICE_MIN)
+  @Max(PRICE_MAX)
   amount: number;
 }

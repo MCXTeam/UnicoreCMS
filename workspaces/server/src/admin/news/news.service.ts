@@ -7,7 +7,7 @@ import { WebhooksService } from '../webhook/webhooks.service';
 import { NewsInput } from './dto/news.input';
 import { News } from './entities/news.entity';
 import { HtmlSlice } from 'htmlslice';
-import { applyCustomCode, NEWS_PREVIEW_LENGTH, StorageManager } from '@common';
+import { applyCustomCode, assertUploadedFile, NEWS_PREVIEW_LENGTH, StorageManager } from '@common';
 
 @Injectable()
 export class NewsService {
@@ -122,6 +122,8 @@ export class NewsService {
   }
 
   async updateMedia(id: number, file: Express.Multer.File) {
+    assertUploadedFile(file);
+
     const news = await this.findOne(id);
 
     if (!news) {

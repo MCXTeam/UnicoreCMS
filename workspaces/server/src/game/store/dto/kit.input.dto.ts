@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsBoolean, IsDefined, IsInt, IsNumber, IsOptional, IsString, Max, Min, ValidateNested } from 'class-validator';
-import { PRICE_MIN, SanitizeHtml } from '@common';
+import { ArrayMaxSize, IsArray, IsBoolean, IsDefined, IsInt, IsNumber, IsOptional, IsString, Max, MaxLength, Min, ValidateNested } from 'class-validator';
+import { BULK_ITEMS_MAX, NAME_MAX_LENGTH, PRICE_MIN, SanitizeHtml, SERVER_ID_MAX_LENGTH } from '@common';
 
 export class KitItemInput {
   @IsDefined()
@@ -16,6 +16,7 @@ export class KitItemInput {
 export class KitInput {
   @IsDefined()
   @IsString()
+  @MaxLength(NAME_MAX_LENGTH)
   name: string;
 
   @IsOptional()
@@ -36,16 +37,20 @@ export class KitInput {
 
   @IsDefined()
   @IsArray()
+  @ArrayMaxSize(BULK_ITEMS_MAX)
   @IsString({ each: true })
+  @MaxLength(SERVER_ID_MAX_LENGTH, { each: true })
   servers: string[];
 
   @IsDefined()
   @IsArray()
+  @ArrayMaxSize(BULK_ITEMS_MAX)
   @IsInt({ each: true })
   categories: number[];
 
   @IsDefined()
   @IsArray()
+  @ArrayMaxSize(BULK_ITEMS_MAX)
   @ValidateNested({ each: true })
   @Type(() => KitItemInput)
   items: KitItemInput[];

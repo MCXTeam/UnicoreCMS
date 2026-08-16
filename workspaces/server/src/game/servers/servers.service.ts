@@ -1,14 +1,14 @@
-import { encryptField, ENCRYPTED_RCON_PASSWORD, SERVER_GALLERY_MAX_IMAGES, StorageManager } from '@common';
+import { encryptField, ENCRYPTED_RCON_PASSWORD, NumberSortInput, SERVER_GALLERY_MAX_IMAGES, StorageManager, StringSortInput } from '@common';
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeliveryMode } from 'unicore-common';
 import { In, Repository } from 'typeorm';
 import { ServerCreateInput } from './dto/server-create.input';
 import { ServerUpdateInput } from './dto/server-update.input';
-import { GalleryImageInput, GallerySortInput } from './dto/gallery.input';
+import { GalleryImageInput } from './dto/gallery.input';
 import { ServerGalleryImage } from './entities/server-gallery.entity';
 import { ServerInstance } from './entities/server-instance.entity';
-import { ServersSortInput } from './dto/servers-sort.input';
+import { ServerTable } from './entities/server-table.entity';
 import { Server } from './entities/server.entity';
 import { ServerMedia } from './enums/server-media.enum';
 import { Mod } from './mods/entities/mod.entity';
@@ -37,7 +37,7 @@ export class ServersService {
     return this.serversRepository.findOne({ where: { id }, relations });
   }
 
-  async sort(input: ServersSortInput) {
+  async sort(input: StringSortInput) {
     const servers = await this.serversRepository.findBy({ id: In(input.items.map((srv) => srv.id)) });
 
     return this.serversRepository.save(
@@ -64,7 +64,7 @@ export class ServersService {
     server.slogan = input.slogan;
     server.description = input.description;
     server.content = input.content;
-    server.table = input.table;
+    server.table = (input.table ?? []).map((row, index) => ({ ...row, priority: index } as ServerTable));
     server.instances = (input.instances ?? []).map((instance, index) => ({ ...instance, priority: index } as ServerInstance));
 
     server.online = new Online();
@@ -100,7 +100,7 @@ export class ServersService {
     server.slogan = input.slogan;
     server.description = input.description;
     server.content = input.content;
-    server.table = input.table;
+    server.table = (input.table ?? []).map((row, index) => ({ ...row, priority: index } as ServerTable));
     server.instances = (input.instances ?? []).map((instance, index) => ({ ...instance, priority: index } as ServerInstance));
 
     server.query.host = input.query.host;
@@ -158,7 +158,7 @@ export class ServersService {
     return this.galleryRepository.save(image);
   }
 
-  async sortGallery(id: string, input: GallerySortInput): Promise<ServerGalleryImage[]> {
+  async sortGallery(id: string, input: NumberSortInput): Promise<ServerGalleryImage[]> {
     const images = await this.galleryRepository.findBy({ serverId: id, id: In(input.items.map((item) => item.id)) });
 
     for (const image of images) {

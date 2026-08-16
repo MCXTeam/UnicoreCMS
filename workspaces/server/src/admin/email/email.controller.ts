@@ -1,4 +1,4 @@
-import { Body, Controller, Get, NotFoundException, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Get, NotFoundException, Param, ParseEnumPipe, Patch, Post } from '@nestjs/common';
 import { Permission } from 'unicore-common';
 import { Permissions } from '../roles/decorators/permission.decorator';
 import { EmailInput } from './dto/email.input';
@@ -19,7 +19,7 @@ export class EmailController {
 
   @Permissions([Permission.AdminEmailRead])
   @Get(':id')
-  async findOne(@Param('id') id: EmailMessageType) {
+  async findOne(@Param('id', new ParseEnumPipe(EmailMessageType)) id: EmailMessageType) {
     const message = await this.emailService.findOne(id);
 
     if (!message) {
@@ -31,7 +31,7 @@ export class EmailController {
 
   @Permissions([Permission.AdminEmailUpdate])
   @Patch(':id')
-  update(@Param('id') id: EmailMessageType, @Body() body: EmailInput) {
+  update(@Param('id', new ParseEnumPipe(EmailMessageType)) id: EmailMessageType, @Body() body: EmailInput) {
     return this.emailService.update(id, body);
   }
 

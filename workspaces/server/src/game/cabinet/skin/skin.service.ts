@@ -2,7 +2,7 @@ import { ForbiddenException, Injectable, NotFoundException, StreamableFile, Unsu
 import { matchPermission } from 'src/admin/roles/guards/permisson.guard';
 import { Permission } from 'unicore-common';
 import { imageSize } from 'image-size';
-import { DEFAULT_CLOAK_FILE, DEFAULT_SKIN_FILE, SKIN_MAX_SIZE, StorageManager, STORAGE_MAX_IMAGE_UPLOAD } from '@common';
+import { assertUploadedFile, DEFAULT_CLOAK_FILE, DEFAULT_SKIN_FILE, SKIN_MAX_SIZE, STORAGE_MAX_IMAGE_UPLOAD, StorageManager } from '@common';
 import { Repository } from 'typeorm';
 import { Skin } from './entities/skin.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -49,6 +49,8 @@ export class SkinService {
   }
 
   async updateSkin(user: User, file: Express.Multer.File) {
+    assertUploadedFile(file);
+
     let skin = (await this.skinsRepository.findOneBy({ user: { uuid: user.uuid } })) || new Skin();
 
     if (skin.file) StorageManager.remove(skin.file);
@@ -81,6 +83,8 @@ export class SkinService {
   }
 
   async updateCloak(user: User, file: Express.Multer.File) {
+    assertUploadedFile(file);
+
     let cloak = (await this.cloaksRepository.findOneBy({ user: { uuid: user.uuid } })) || new Cloak();
 
     if (cloak.file) StorageManager.remove(cloak.file);

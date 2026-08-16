@@ -1,23 +1,26 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsDefined, IsEnum, IsInt, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { ArrayMaxSize, IsArray, IsDefined, IsEnum, IsInt, IsOptional, IsString, MaxLength, ValidateNested } from 'class-validator';
 import { DeliveryMode } from 'unicore-common';
-import { ServerInstance } from '../entities/server-instance.entity';
-import { ServerTable } from '../entities/server-table.entity';
-import { Query } from '../online/entities/query.entity';
+import { QueryInput } from '../online/dto/query.input';
 import { RconInput } from './rcon.input';
-import { SanitizeHtml } from '@common';
+import { ServerInstanceInput } from './server-instance.input';
+import { ServerTableInput } from './server-table.input';
+import { NAME_MAX_LENGTH, SanitizeHtml, SERVER_INSTANCES_MAX, SERVER_MODS_MAX, SERVER_TABLE_MAX_ROWS, TEXT_MAX_LENGTH } from '@common';
 
 export class ServerUpdateInput {
   @IsDefined()
   @IsString()
+  @MaxLength(NAME_MAX_LENGTH)
   name: string;
 
   @IsDefined()
   @IsString()
+  @MaxLength(NAME_MAX_LENGTH)
   version: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(TEXT_MAX_LENGTH)
   slogan: string;
 
   @IsOptional()
@@ -31,8 +34,9 @@ export class ServerUpdateInput {
   content: string;
 
   @IsDefined()
-  @Type(() => Query)
-  query: Query;
+  @ValidateNested()
+  @Type(() => QueryInput)
+  query: QueryInput;
 
   @IsOptional()
   @IsEnum(DeliveryMode)
@@ -45,16 +49,21 @@ export class ServerUpdateInput {
 
   @IsDefined()
   @IsArray()
-  @Type(() => ServerTable)
-  table: ServerTable[];
+  @ArrayMaxSize(SERVER_TABLE_MAX_ROWS)
+  @ValidateNested({ each: true })
+  @Type(() => ServerTableInput)
+  table: ServerTableInput[];
 
   @IsOptional()
   @IsArray()
-  @Type(() => ServerInstance)
-  instances?: ServerInstance[];
+  @ArrayMaxSize(SERVER_INSTANCES_MAX)
+  @ValidateNested({ each: true })
+  @Type(() => ServerInstanceInput)
+  instances?: ServerInstanceInput[];
 
   @IsOptional()
   @IsArray()
+  @ArrayMaxSize(SERVER_MODS_MAX)
   @IsInt({ each: true })
   mods: number[];
 }

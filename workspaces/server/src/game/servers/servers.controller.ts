@@ -1,4 +1,4 @@
-import { imageFileFilter, StorageManager, STORAGE_MAX_IMAGE_UPLOAD } from '@common';
+import { imageFileFilter, NumberSortInput, StorageManager, STORAGE_MAX_IMAGE_UPLOAD, StringSortInput } from '@common';
 import {
   Body,
   Controller,
@@ -17,10 +17,9 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { Permission } from 'unicore-common';
-import { GalleryImageInput, GallerySortInput } from './dto/gallery.input';
+import { GalleryImageInput } from './dto/gallery.input';
 import { ServerCreateInput } from './dto/server-create.input';
 import { ServerUpdateInput } from './dto/server-update.input';
-import { ServersSortInput } from './dto/servers-sort.input';
 import { ServerMedia } from './enums/server-media.enum';
 import { ServersService } from './servers.service';
 
@@ -72,7 +71,7 @@ export class ServersController {
 
   @Permissions([Permission.AdminDashboard, Permission.AdminServersUpdate])
   @Post('sort')
-  sort(@Body() body: ServersSortInput) {
+  sort(@Body() body: StringSortInput) {
     return this.serversService.sort(body);
   }
 
@@ -103,7 +102,7 @@ export class ServersController {
 
   @Permissions([Permission.AdminDashboard, Permission.AdminServersUpdate])
   @Post(':id/gallery/sort')
-  sortGallery(@Param('id') id: string, @Body() body: GallerySortInput) {
+  sortGallery(@Param('id') id: string, @Body() body: NumberSortInput) {
     return this.serversService.sortGallery(id, body);
   }
 

@@ -1,4 +1,4 @@
-import { StorageManager } from '@common';
+import { assertUploadedFile, StorageManager } from '@common';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -57,6 +57,8 @@ export class BonusesService {
   }
 
   async updateIcon(id: number, file: Express.Multer.File) {
+    assertUploadedFile(file);
+
     const bonus = await this.bonusesRepository.findOneBy({ id });
 
     if (!bonus) {

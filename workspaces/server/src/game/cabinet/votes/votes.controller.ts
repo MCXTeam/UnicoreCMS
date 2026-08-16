@@ -40,7 +40,7 @@ export class VotesController {
     return this.votesService.remove(id);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
+  @Permissions([Permission.AdminDashboard, Permission.AdminUsersMoney])
   @Patch('admin')
   updateVirtual(@Body() body: VirtualCurrencyUserUpdate) {
     return this.votesService.updateVirtual(body);

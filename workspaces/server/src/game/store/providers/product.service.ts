@@ -1,4 +1,4 @@
-import { IMPORT_MAX_ENTRIES, IMPORT_MAX_UNPACKED_BYTES, StorageManager } from '@common';
+import { assertUploadedFile, IMPORT_MAX_ENTRIES, IMPORT_MAX_UNPACKED_BYTES, StorageManager } from '@common';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { plainToInstance } from 'class-transformer';
@@ -514,6 +514,8 @@ export class ProductsService {
   }
 
   async updateIcon(id: number, file: Express.Multer.File) {
+    assertUploadedFile(file);
+
     const product = await this.findOne(id);
 
     if (!product) {

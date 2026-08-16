@@ -1,4 +1,4 @@
-import { CommonSortInput, DeleteManyInput, imageFileFilter, IpAddress, StorageManager } from '@common';
+import { NumberSortInput, DeleteManyInput, imageFileFilter, IpAddress, StorageManager } from '@common';
 import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Post, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
@@ -24,7 +24,7 @@ export class DonateGroupsController {
 
   @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsUpdate])
   @Post('sort')
-  sort(@Body() body: CommonSortInput) {
+  sort(@Body() body: NumberSortInput) {
     return this.donateGroupsService.sort(body);
   }
 
@@ -121,7 +121,7 @@ export class DonateGroupsController {
 
   @Permissions([Permission.AdminDashboard, Permission.AdminUsersDonate])
   @Delete('admin/:id')
-  take(@Param('id') id: number) {
+  take(@Param('id', ParseIntPipe) id: number) {
     return this.donateGroupsService.take(id);
   }
 }

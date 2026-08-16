@@ -1,4 +1,4 @@
-import { StorageManager } from '@common';
+import { assertUploadedFile, StorageManager } from '@common';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
@@ -74,6 +74,8 @@ export class CategoriesService {
   }
 
   async updateIcon(id: number, file: Express.Multer.File) {
+    assertUploadedFile(file);
+
     const category = await this.findOne(id);
 
     if (!category) {

@@ -1,4 +1,4 @@
-import { CommonSortInput, DeleteManyInput, imageFileFilter, StorageManager } from '@common';
+import { NumberSortInput, DeleteManyInput, imageFileFilter, StorageManager } from '@common';
 import {
   Body,
   Controller,
@@ -30,7 +30,7 @@ export class GroupKitsController {
 
   @Permissions([Permission.AdminDashboard, Permission.EditorDonateKitsUpdate])
   @Post('sort')
-  sort(@Body() body: CommonSortInput) {
+  sort(@Body() body: NumberSortInput) {
     return this.groupKitsService.sort(body);
   }
 

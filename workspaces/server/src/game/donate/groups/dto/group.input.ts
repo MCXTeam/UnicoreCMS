@@ -1,15 +1,17 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsDefined, IsInt, IsNumber, IsOptional, IsString, Max, Min, ValidateNested } from 'class-validator';
+import { ArrayMaxSize, IsArray, IsDefined, IsInt, IsNumber, IsOptional, IsString, Max, MaxLength, Min, ValidateNested } from 'class-validator';
 import { GroupFeatureInput } from './group-feature.input';
-import { IsDonateWebPerm, PRICE_MIN, SanitizeHtml } from '@common';
+import { BULK_ITEMS_MAX, IsDonateWebPerm, NAME_MAX_LENGTH, PRICE_MIN, SanitizeHtml, SERVER_ID_MAX_LENGTH } from '@common';
 
 export class GroupInput {
   @IsDefined()
   @IsString()
+  @MaxLength(NAME_MAX_LENGTH)
   name: string;
 
   @IsDefined()
   @IsString()
+  @MaxLength(NAME_MAX_LENGTH)
   ingame_id: string;
 
   @IsOptional()
@@ -30,28 +32,34 @@ export class GroupInput {
 
   @IsDefined()
   @IsArray()
+  @ArrayMaxSize(BULK_ITEMS_MAX)
   @ValidateNested({ each: true })
   @Type(() => GroupFeatureInput)
   features: GroupFeatureInput[];
 
   @IsDefined()
   @IsArray()
+  @ArrayMaxSize(BULK_ITEMS_MAX)
   @IsString({ each: true })
+  @MaxLength(SERVER_ID_MAX_LENGTH, { each: true })
   servers: string[];
 
   @IsOptional()
   @IsArray()
+  @ArrayMaxSize(BULK_ITEMS_MAX)
   @IsString({ each: true })
   @IsDonateWebPerm({ each: true })
   web_perms: string[];
 
   @IsDefined()
   @IsArray()
+  @ArrayMaxSize(BULK_ITEMS_MAX)
   @IsInt({ each: true })
   kits: number[];
 
   @IsDefined()
   @IsArray()
+  @ArrayMaxSize(BULK_ITEMS_MAX)
   @IsInt({ each: true })
   periods: number[];
 

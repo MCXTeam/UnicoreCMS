@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseArrayPipe, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseArrayPipe, ParseIntPipe, Post } from '@nestjs/common';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
@@ -40,7 +40,7 @@ export class WarehouseController {
 
   @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
   @Delete('admin/:id')
-  async take(@Param('id') id: number) {
+  async take(@Param('id', ParseIntPipe) id: number) {
     return this.warehouseService.take(id);
   }
 }

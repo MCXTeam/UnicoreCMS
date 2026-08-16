@@ -1,11 +1,15 @@
-import { IsDefined, IsPort, IsString } from 'class-validator';
+import { NAME_MAX_LENGTH, PORT_MAX, PORT_MIN } from '@common';
+import { IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 
 export class QueryInput {
-  @IsDefined()
+  @IsOptional()
   @IsString()
-  host: string;
+  @MaxLength(NAME_MAX_LENGTH)
+  host?: string;
 
-  @IsDefined()
-  @IsPort()
-  port: number;
+  @IsOptional()
+  @IsInt()
+  @Min(PORT_MIN)
+  @Max(PORT_MAX)
+  port?: number;
 }

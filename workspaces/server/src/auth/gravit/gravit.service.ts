@@ -94,15 +94,8 @@ export class GravitService {
   }
 
   async authorize(input: GravitAuthorize) {
-    let password: string = null;
-    let totp: string = null;
-
-    if ('password' in input.password) {
-      password = input.password?.password;
-    } else {
-      password = input.password?.firstPassword?.password;
-      totp = input.password?.secondPassword?.totp;
-    }
+    const password = input.password?.password ?? input.password?.firstPassword?.password;
+    const totp = input.password?.secondPassword?.totp;
 
     const user = await this.usersService.getByUsernameOrEmail(input.login);
     if (!user) throw new HttpException({ error: GravitError.UserNotFound }, HttpStatus.NOT_FOUND);

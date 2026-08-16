@@ -1,4 +1,4 @@
-import { CacheKey } from '@common';
+import { CacheKey, VOTES_RECENT_MAX } from '@common';
 import { Inject, Injectable } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -39,7 +39,8 @@ export class VotesListService {
   }
 
   async recent(limit: number) {
-    if (limit > 20) limit = 20;
+    limit = Math.min(Math.max(limit, 1), VOTES_RECENT_MAX);
+
     const data = await this.votesRepo
       .createQueryBuilder('vote')
       .leftJoinAndSelect('vote.user', 'user')
