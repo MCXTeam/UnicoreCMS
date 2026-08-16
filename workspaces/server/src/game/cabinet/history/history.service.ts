@@ -16,6 +16,18 @@ import { PaginatedHistoryDto } from './dto/history.dto';
 import { History } from './entities/history.entity';
 import { HistoryType } from './enums/history-type.enum';
 
+export interface PurchaseCost {
+  real: number;
+  virtual: number;
+}
+
+function applyCost(history: History, cost?: PurchaseCost) {
+  if (!cost) return;
+
+  history.real_spent = cost.real;
+  history.virtual_spent = cost.virtual;
+}
+
 @Injectable()
 export class HistoryService {
   constructor(@InjectRepository(History) private historyRepository: Repository<History>, private usersService: UsersService) {}
@@ -55,9 +67,17 @@ export class HistoryService {
     );
   }
 
-  create(type: HistoryType.ProductPurchase, ip: string, user: User, product: Product, server: Server, amount: number);
-  create(type: HistoryType.KitPurchase, ip: string, user: User, product: Kit, server: Server);
-  create(type: HistoryType.DonateGroupPurchase, ip: string, user: User, donateGroup: DonateGroup, server: Server, period: Period);
+  create(type: HistoryType.ProductPurchase, ip: string, user: User, product: Product, server: Server, amount: number, cost?: PurchaseCost);
+  create(type: HistoryType.KitPurchase, ip: string, user: User, product: Kit, server: Server, cost?: PurchaseCost);
+  create(
+    type: HistoryType.DonateGroupPurchase,
+    ip: string,
+    user: User,
+    donateGroup: DonateGroup,
+    server: Server,
+    period: Period,
+    cost?: PurchaseCost,
+  );
   create(
     type: HistoryType.DonatePermissionPurchase,
     ip: string,
@@ -65,6 +85,7 @@ export class HistoryService {
     donatePermission: DonatePermission,
     server: Server,
     period: Period,
+    cost?: PurchaseCost,
   );
   create(type: HistoryType.Payment, ip: string, user: User, payment: Payment);
   create(type: HistoryType.MoneyServerTransfer, ip: string, user: User, server: Server, amount: number);
@@ -72,7 +93,7 @@ export class HistoryService {
   create(type: HistoryType.RealTransfer, ip: string, user: User, target: User, amount: number);
   create(type: HistoryType.MoneyTransfer, ip: string, user: User, server: Server, target: User, amount: number);
   @Transactional()
-  create(type: HistoryType, ip: string, user: User, payload?: any, secondPayload?: any, thirdPayload?: any) {
+  create(type: HistoryType, ip: string, user: User, payload?: any, secondPayload?: any, thirdPayload?: any, fourthPayload?: any) {
     const history = new History();
     history.user = user;
     history.type = type;
@@ -83,23 +104,27 @@ export class HistoryService {
         history.product = payload;
         history.server = secondPayload;
         history.amount = thirdPayload;
+        applyCost(history, fourthPayload);
 
         return this.historyRepository.insert(history);
       case HistoryType.KitPurchase:
         history.kit = payload;
         history.server = secondPayload;
+        applyCost(history, thirdPayload);
 
         return this.historyRepository.insert(history);
       case HistoryType.DonateGroupPurchase:
         history.donate_group = payload;
         history.server = secondPayload;
         history.period = thirdPayload;
+        applyCost(history, fourthPayload);
 
         return this.historyRepository.insert(history);
       case HistoryType.DonatePermissionPurchase:
         history.donate_permission = payload;
         history.server = secondPayload;
         history.period = thirdPayload;
+        applyCost(history, fourthPayload);
 
         return this.historyRepository.insert(history);
       case HistoryType.Payment:

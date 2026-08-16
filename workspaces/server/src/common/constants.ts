@@ -103,6 +103,8 @@ export const API_KEY_HASH = 'sha256';
 
 export const SKIN_MAX_SIZE = 2048;
 
+export const SERVER_GALLERY_MAX_IMAGES = 30;
+
 export const DEFAULT_SKIN_FILE = 'default/skin.png';
 export const DEFAULT_CLOAK_FILE = 'default/cloak.png';
 

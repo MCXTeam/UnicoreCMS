@@ -43,6 +43,8 @@
               @update:modelValue="handleChange"
               :suggestions="products"
               @complete="searchProduct($event)"
+              :disabled="!whItem.server"
+              :placeholder="whItem.server ? '' : $t('admin.choose_server_first')"
               optionLabel="name"
               appendTo="body"
             >
@@ -119,6 +121,8 @@
               @update:modelValue="handleChange"
               :suggestions="kits"
               @complete="searchKit($event)"
+              :disabled="!whItem.server"
+              :placeholder="whItem.server ? '' : $t('admin.choose_server_first')"
               optionLabel="name"
               appendTo="body"
             >
@@ -183,7 +187,15 @@
         >
           <div class="field">
             <label>{{ $t('admin.group') }}</label>
-            <Select :modelValue="value" @update:modelValue="handleChange" :options="donateGroups" optionLabel="name" appendTo="body">
+            <Select
+              :modelValue="value"
+              @update:modelValue="handleChange"
+              :options="serverDonateGroups"
+              :disabled="!udgForm.server"
+              :placeholder="udgForm.server ? '' : $t('admin.choose_server_first')"
+              optionLabel="name"
+              appendTo="body"
+            >
               <template #option="slotProps">
                 <div class="flex align-items-center">
                   <IconAvatar :path="slotProps.option.icon" />
@@ -258,7 +270,7 @@
         >
           <div class="field">
             <label>{{ $t('cabinet.server') }}</label>
-            <Select :modelValue="value" @update:modelValue="handleChange" :options="servers" optionLabel="name" appendTo="body">
+            <Select :modelValue="value" @update:modelValue="handleChange" :options="permissionServers" optionLabel="name" appendTo="body">
               <template #option="slotProps">
                 <div class="flex align-items-center">
                   <IconAvatar :path="slotProps.option.icon" />
@@ -439,7 +451,7 @@
                       />
                     </span>
                   </div>
-                  <div class="field-checkbox">
+                  <div class="field-checkbox" v-if="isSuperuser">
                     <Checkbox :binary="true" v-model="user.superuser" />
                     <label>{{ $t('admin.superuser') }}</label>
                   </div>
@@ -498,9 +510,9 @@
           </div>
         </div>
       </TabPanel>
-      <TabPanel header="E-Commerce">
+      <TabPanel header="E-Commerce" v-if="canMoney || canDonate || canGive">
         <div class="grid">
-          <div class="col-12">
+          <div class="col-12" v-if="canMoney">
             <div class="p-4">
               <h4>{{ $t('admin.economy') }}</h4>
               <div class="p-fluid grid">
@@ -572,7 +584,7 @@
           <div class="col-12 md:col-6 p-4">
             <div class="flex justify-content-between align-items-center">
               <h4>{{ $t('admin.menu_donate_groups') }}</h4>
-              <Button :label="$t('admin.give')" class="p-button mr-2 mb-2" @click="showUDGDialog()" />
+              <Button v-if="canDonate" :label="$t('admin.give')" class="p-button mr-2 mb-2" @click="showUDGDialog()" />
             </div>
             <DataTable :value="udg" :loading="udg_loading" responsiveLayout="scroll" dataKey="m.id">
               <Column field="server" :header="$t('cabinet.server')">
@@ -606,7 +618,7 @@
           <div class="col-12 md:col-6 p-4">
             <div class="flex justify-content-between align-items-center">
               <h4>{{ $t('admin.menu_donate_permissions') }}</h4>
-              <Button :label="$t('admin.give')" class="p-button mr-2 mb-2" @click="showUDPDialog()" />
+              <Button v-if="canDonate" :label="$t('admin.give')" class="p-button mr-2 mb-2" @click="showUDPDialog()" />
             </div>
             <DataTable :value="udp" :loading="udp_loading" responsiveLayout="scroll" dataKey="m.id">
               <Column field="server" :header="$t('cabinet.server')">
@@ -656,8 +668,8 @@
                 </template>
               </Select>
             </div>
-            <Button :label="$t('admin.give_product')" class="p-button mr-2 mb-2" @click="showProductDialog()" />
-            <Button :label="$t('admin.give_kit')" class="p-button mr-2 mb-2" @click="showKitDialog()" />
+            <Button v-if="canGive" :label="$t('admin.give_product')" class="p-button mr-2 mb-2" @click="showProductDialog()" />
+            <Button v-if="canGive" :label="$t('admin.give_kit')" class="p-button mr-2 mb-2" @click="showKitDialog()" />
             <DataTable :value="warehouse" :loading="wh_loading" responsiveLayout="scroll" dataKey="id">
               <Column field="id" header="ID" :style="{ width: '8rem' }" sortable></Column>
               <Column field="name" :header="$t('admin.name')" sortable>
@@ -696,6 +708,8 @@
 
 <script>
 import { Form, Field } from 'vee-validate'
+import { useAuthStore } from '~/stores/auth'
+import { Permission } from 'unicore-common/enums'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 
@@ -765,13 +779,70 @@ export default {
     }
   },
 
+  computed: {
+    isSuperuser() {
+      return Boolean(useAuthStore().user?.superuser)
+    },
+
+    canMoney() {
+      return this.hasPermission(Permission.AdminUsersMoney)
+    },
+
+    canGive() {
+      return this.hasPermission(Permission.AdminUsersGive)
+    },
+
+    canDonate() {
+      return this.hasPermission(Permission.AdminUsersDonate)
+    },
+
+    serverDonateGroups() {
+      if (!this.udgForm.server) return []
+
+      return this.donateGroups.filter((group) => group.servers?.some((server) => server.id == this.udgForm.server.id))
+    },
+
+    permissionServers() {
+      const permission = this.udpForm.permission
+
+      if (!permission?.servers?.length) return this.servers
+
+      return this.servers.filter((server) => permission.servers.some((allowed) => allowed.id == server.id))
+    },
+  },
+
+  watch: {
+    'whItem.server'() {
+      this.whItem.product = null
+      this.whItem.kit = null
+      this.products = []
+      this.kits = []
+    },
+
+    'udgForm.server'() {
+      this.udgForm.group = null
+    },
+
+    'udpForm.permission'() {
+      this.udpForm.server = null
+    },
+  },
+
   mounted() {
     this.load()
   },
 
   methods: {
+    hasPermission(permission) {
+      const auth = useAuthStore()
+
+      if (auth.user?.superuser) return true
+
+      return Boolean(auth.user?.perms?.some((perm) => perm === permission || perm.startsWith(`${permission}.`)))
+    },
+
     async load() {
-      const optional = (url) => this.$api.get(url).then((res) => res.data).catch(() => [])
+      const optional = (url) => this.$api.get(url, { silent: true }).then((res) => res.data).catch(() => [])
 
       const [roles, servers, autocompleate, periods, donatePermissions, donateGroups] = await Promise.all([
         optional('/admin/roles'),
@@ -912,7 +983,7 @@ export default {
         await this.$api.patch('/users/' + this.user.uuid, {
           username: this.user.username,
           email: this.user.email,
-          superuser: this.user.superuser,
+          ...(this.isSuperuser ? { superuser: this.user.superuser } : {}),
           activated: this.user.activated,
           roles: this.rolesUser,
           perms: this.user.perms,
@@ -1153,23 +1224,18 @@ export default {
     hideUDPDialog() {
       this.giveUDPDialog = false
     },
+    searchParams(query) {
+      const params = { search: query.trim() }
+
+      if (this.whItem.server) params['filter.servers'] = this.whItem.server.id
+
+      return params
+    },
     async searchProduct(event) {
-      this.products = await this.$api
-        .get('/store/products', {
-          params: {
-            search: event.query.trim(),
-          },
-        })
-        .then((res) => res.data.data)
+      this.products = await this.$api.get('/store/products', { params: this.searchParams(event.query) }).then((res) => res.data.data)
     },
     async searchKit(event) {
-      this.kits = await this.$api
-        .get('/store/kits', {
-          params: {
-            search: event.query.trim(),
-          },
-        })
-        .then((res) => res.data.data)
+      this.kits = await this.$api.get('/store/kits', { params: this.searchParams(event.query) }).then((res) => res.data.data)
     },
     async giveProduct() {
       this.wh_loading = true

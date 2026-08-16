@@ -111,6 +111,24 @@ export class History {
   })
   amount?: number;
 
+  @Column('decimal', {
+    name: 'real_spent',
+    precision: MONEY_PRECISION,
+    scale: MONEY_SCALE,
+    nullable: true,
+    transformer: decimalColumn,
+  })
+  real_spent?: number;
+
+  @Column('decimal', {
+    name: 'virtual_spent',
+    precision: MONEY_PRECISION,
+    scale: MONEY_SCALE,
+    nullable: true,
+    transformer: decimalColumn,
+  })
+  virtual_spent?: number;
+
   @CreateDateColumn({ name: 'created' })
   created: Date;
 }

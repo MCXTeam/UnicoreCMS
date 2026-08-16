@@ -1,5 +1,6 @@
 import './load-env'
 import { publicConfig } from 'unicore-common/public-config'
+import { SITEMAP_EXCLUDE } from './constants'
 import Aura from '@primevue/themes/aura'
 
 export default defineNuxtConfig({
@@ -80,7 +81,7 @@ export default defineNuxtConfig({
   site: { url: publicConfig.baseurl },
 
   sitemap: {
-    exclude: ['/auth/**', '/cabinet/**', '/store/**', '/players/**', '/page'],
+    exclude: SITEMAP_EXCLUDE,
     sources: ['/api/__sitemap__/urls'],
     defaults: { changefreq: 'daily', priority: 0.8 },
   },

@@ -9,7 +9,9 @@ import { DASHBOARD_MONTH_DAYS, DASHBOARD_WEEK_DAYS, KERNEL_USERNAME, MomentWrapp
 import { DashboardStatSection, DASHBOARD_STAT_SECTIONS } from 'unicore-common';
 import { OnlinesRecord } from 'src/game/servers/online/entities/onlines-record.entity';
 import { History } from 'src/game/cabinet/history/entities/history.entity';
-import { HistoryGroupType } from 'src/game/cabinet/history/enums/history-type.enum';
+import { HistoryGroupType, HistoryType } from 'src/game/cabinet/history/enums/history-type.enum';
+import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
+import { RevenueQuery, RevenueReport, RevenueRow } from './dto/revenue.dto';
 import { Payment } from 'src/payment/entities/payment.entity';
 import { PaymentStatuses } from 'src/payment/enums/payment-statuses.enum';
 import { StatsInterface } from './interfaces/stats.inteface';
@@ -30,6 +32,66 @@ export class DashboardService {
     private paymentsRepository: Repository<Payment>,
     private onlineService: OnlineService,
   ) {}
+
+
+  async revenue(query: RevenueQuery): Promise<RevenueReport> {
+    const from = query.from ? this.moment(query.from).utc().startOf('day') : this.moment().utc().subtract(DASHBOARD_MONTH_DAYS - 1, 'day').startOf('day');
+    const to = query.to ? this.moment(query.to).utc().endOf('day') : this.moment().utc().endOf('day');
+
+    const rows = await this.historyRepository
+      .createQueryBuilder('history')
+      .leftJoin('history.server', 'server')
+      .select('history.server_id', 'server')
+      .addSelect('MAX(server.name)', 'name')
+      .addSelect('COALESCE(SUM(history.real_spent), 0)', 'real')
+      .addSelect('COALESCE(SUM(history.virtual_spent), 0)', 'virtual')
+      .addSelect('COUNT(*)', 'purchases')
+      .addSelect(`SUM(CASE WHEN history.type = :product THEN 1 ELSE 0 END)`, 'products')
+      .addSelect(`SUM(CASE WHEN history.type = :kit THEN 1 ELSE 0 END)`, 'kits')
+      .addSelect(`SUM(CASE WHEN history.type = :group THEN 1 ELSE 0 END)`, 'groups')
+      .addSelect(`SUM(CASE WHEN history.type = :permission THEN 1 ELSE 0 END)`, 'permissions')
+      .where('history.type IN (:...types)', { types: HistoryGroupType.Purchase })
+      .andWhere('history.server_id IS NOT NULL')
+      .andWhere('history.created BETWEEN :from AND :to', { from: from.toDate(), to: to.toDate() })
+      .setParameters({
+        product: HistoryType.ProductPurchase,
+        kit: HistoryType.KitPurchase,
+        group: HistoryType.DonateGroupPurchase,
+        permission: HistoryType.DonatePermissionPurchase,
+      })
+      .groupBy('history.server_id')
+      .orderBy('`real`', 'DESC')
+      .getRawMany();
+
+    const report: RevenueRow[] = rows.map((row) => ({
+      server: row.server,
+      name: row.name ?? row.server,
+      real: currencyUtils.roundByType(Number(row.real), SystemCurrency.REAL),
+      virtual: currencyUtils.roundByType(Number(row.virtual), SystemCurrency.VIRTAUL),
+      purchases: Number(row.purchases),
+      products: Number(row.products),
+      kits: Number(row.kits),
+      groups: Number(row.groups),
+      permissions: Number(row.permissions),
+    }));
+
+    const sum = (key: keyof Omit<RevenueRow, 'server' | 'name'>) => report.reduce((total, row) => total + row[key], 0);
+
+    return {
+      from: from.toISOString(),
+      to: to.toISOString(),
+      rows: report,
+      total: {
+        real: currencyUtils.roundByType(sum('real'), SystemCurrency.REAL),
+        virtual: currencyUtils.roundByType(sum('virtual'), SystemCurrency.VIRTAUL),
+        purchases: sum('purchases'),
+        products: sum('products'),
+        kits: sum('kits'),
+        groups: sum('groups'),
+        permissions: sum('permissions'),
+      },
+    };
+  }
 
   private async daysStatBuilder(type: StatType, days: number = DASHBOARD_WEEK_DAYS): Promise<StatGroup[]> {
     var result: StatGroup[] = new Array();

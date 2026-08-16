@@ -7,6 +7,7 @@ export type RouteAccess = typeof SUPERUSER_ONLY | Permission[]
 export const ROUTE_ACCESS: Record<string, RouteAccess> = {
   '/': [Permission.AdminDashboard],
   '/users': [Permission.AdminUsersRead],
+  '/revenue': [Permission.AdminDashboardRevenue],
   '/roles': SUPERUSER_ONLY,
   '/config': SUPERUSER_ONLY,
   '/locales': SUPERUSER_ONLY,

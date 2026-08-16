@@ -29,6 +29,24 @@
         </div>
       </div>
     </div>
+    <div class="mb-4 panel" v-if="gallery && gallery.length">
+      <h2 class="mt-0 mb-3">{{ $t('servers.gallery') }}</h2>
+      <Galleria
+        :value="gallery"
+        :numVisible="4"
+        :circular="true"
+        :showItemNavigators="true"
+        :showThumbnails="gallery.length > 1"
+        containerStyle="max-width: 100%"
+      >
+        <template #item="slotProps">
+          <img :src="`${$pub.apiBaseurl}/${slotProps.item.file}`" :alt="slotProps.item.title || server.name" class="w-100" />
+        </template>
+        <template #thumbnail="slotProps">
+          <img :src="`${$pub.apiBaseurl}/${slotProps.item.file}`" :alt="slotProps.item.title || server.name" width="80" />
+        </template>
+      </Galleria>
+    </div>
     <div v-if="server.mods && server.mods.length">
       <h2 class="mt-5 mb-4">{{ $t('servers.mods') }}</h2>
       <div v-for="mod in server.mods" :key="mod.id" class="mb-4 panel" v-show="mod.description">
@@ -66,6 +84,11 @@ const { data: server, error } = await useAsyncData<any>(`server-${route.params.i
 if (error.value || !server.value) {
   throw createError({ statusCode: 404, fatal: true })
 }
+
+const { data: gallery } = await useAsyncData<any[]>(`server-gallery-${route.params.id}`, () =>
+  $api.get(`/servers/${route.params.id}/gallery`).then((res) => res.data),
+  { default: () => [] },
+)
 
 const othermods = server.value?.mods
   ?.filter((m: any) => !m.description)

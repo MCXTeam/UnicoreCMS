@@ -354,12 +354,21 @@ export class CartService {
       }
     }
 
+    const share = (positionPrice: number) => ({
+      real: price ? currencyUtils.roundByType((realCost * positionPrice) / price, SystemCurrency.REAL) : 0,
+      virtual: price ? currencyUtils.roundByType((virtualCost * positionPrice) / price, SystemCurrency.VIRTAUL) : 0,
+    });
+
     for (const ci of cartItems) {
-      await this.historyService.create(HistoryType.ProductPurchase, ip, user, ci.product, ci.server, ci.amount);
+      const positionPrice = currencyUtils.saleApply(ci.product.price, ci.product.sale) * ci.amount;
+
+      await this.historyService.create(HistoryType.ProductPurchase, ip, user, ci.product, ci.server, ci.amount, share(positionPrice));
     }
 
     for (const cik of cartKitItems) {
-      await this.historyService.create(HistoryType.KitPurchase, ip, user, cik.kit, cik.server);
+      const positionPrice = currencyUtils.saleApply(cik.kit.price, cik.kit.sale);
+
+      await this.historyService.create(HistoryType.KitPurchase, ip, user, cik.kit, cik.server, share(positionPrice));
     }
 
     await this.cartItemsRepository.remove(cartItems);

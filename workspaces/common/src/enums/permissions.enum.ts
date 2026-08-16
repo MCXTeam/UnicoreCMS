@@ -9,6 +9,7 @@ export enum Permission {
   AdminDashboardStatsPurchases = "admin.dashboard.stats.purchases",
   AdminDashboardStatsOnline = "admin.dashboard.stats.online",
   AdminDashboardStatsUsers = "admin.dashboard.stats.users",
+  AdminDashboardRevenue = "admin.dashboard.revenue",
 
   // User admin manipulations
   AdminUsersRead = "admin.users.read",
@@ -22,7 +23,11 @@ export enum Permission {
   AdminUsersUpdateActivation = "admin.users.update.activation",
   AdminUsersUpdateRoles = "admin.users.update.roles",
   AdminUsersMoney = "admin.users.money",
+  AdminUsersMoneyServer = "admin.users.money.%server%",
   AdminUsersGive = "admin.users.give",
+  AdminUsersGiveServer = "admin.users.give.%server%",
+  AdminUsersDonate = "admin.users.donate",
+  AdminUsersDonateServer = "admin.users.donate.%server%",
 
   // Server admin manipulations
   AdminServersCreate = "admin.servers.create",

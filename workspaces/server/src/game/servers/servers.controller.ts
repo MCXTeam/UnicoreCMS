@@ -1,4 +1,4 @@
-import { imageFileFilter, StorageManager } from '@common';
+import { imageFileFilter, StorageManager, STORAGE_MAX_IMAGE_UPLOAD } from '@common';
 import {
   Body,
   Controller,
@@ -7,6 +7,7 @@ import {
   NotFoundException,
   Param,
   ParseEnumPipe,
+  ParseIntPipe,
   Patch,
   Post,
   UploadedFile,
@@ -16,6 +17,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { Permission } from 'unicore-common';
+import { GalleryImageInput, GallerySortInput } from './dto/gallery.input';
 import { ServerCreateInput } from './dto/server-create.input';
 import { ServerUpdateInput } from './dto/server-update.input';
 import { ServersSortInput } from './dto/servers-sort.input';
@@ -78,6 +80,37 @@ export class ServersController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.serversService.remove(id);
+  }
+
+  @Public()
+  @Get(':id/gallery')
+  gallery(@Param('id') id: string) {
+    return this.serversService.gallery(id);
+  }
+
+  @Permissions([Permission.AdminDashboard, Permission.AdminServersUpdate])
+  @Post(':id/gallery')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: StorageManager.disk(),
+      fileFilter: imageFileFilter,
+      limits: { fileSize: STORAGE_MAX_IMAGE_UPLOAD, files: 1 },
+    }),
+  )
+  addGalleryImage(@Param('id') id: string, @Body() body: GalleryImageInput, @UploadedFile() file: Express.Multer.File) {
+    return this.serversService.addGalleryImage(id, body, file);
+  }
+
+  @Permissions([Permission.AdminDashboard, Permission.AdminServersUpdate])
+  @Post(':id/gallery/sort')
+  sortGallery(@Param('id') id: string, @Body() body: GallerySortInput) {
+    return this.serversService.sortGallery(id, body);
+  }
+
+  @Permissions([Permission.AdminDashboard, Permission.AdminServersUpdate])
+  @Delete(':id/gallery/:imageId')
+  removeGalleryImage(@Param('id') id: string, @Param('imageId', ParseIntPipe) imageId: number) {
+    return this.serversService.removeGalleryImage(id, imageId);
   }
 
   @Permissions([Permission.AdminDashboard, Permission.AdminServersUpdate])

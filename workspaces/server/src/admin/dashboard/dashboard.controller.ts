@@ -1,7 +1,8 @@
-import { Controller, Get, Req } from '@nestjs/common';
+import { Controller, Get, Query, Req } from '@nestjs/common';
 import { Permissions } from '../roles/decorators/permission.decorator';
 import { matchPermission } from '../roles/guards/permisson.guard';
 import { DashboardService } from './dashboard.service';
+import { RevenueQuery } from './dto/revenue.dto';
 import { DashboardStatSection, DASHBOARD_STAT_PERMISSIONS, DASHBOARD_STAT_SECTIONS, Permission } from 'unicore-common';
 
 @Permissions([Permission.AdminDashboard])
@@ -18,5 +19,11 @@ export class DashboardController {
     );
 
     return this.dahboardService.stats(allowed.filter(Boolean) as DashboardStatSection[]);
+  }
+
+  @Permissions([Permission.AdminDashboard, Permission.AdminDashboardRevenue])
+  @Get('revenue')
+  async revenue(@Query() query: RevenueQuery) {
+    return this.dahboardService.revenue(query);
   }
 }

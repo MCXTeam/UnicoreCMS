@@ -55,6 +55,11 @@ export default {
               to: '/roles',
             },
             {
+              label: 'admin.menu_revenue',
+              icon: 'pi pi-fw pi-wallet',
+              to: '/revenue',
+            },
+            {
               label: 'admin.menu_settings',
               icon: 'pi pi-fw pi-bars',
               to: '/config',

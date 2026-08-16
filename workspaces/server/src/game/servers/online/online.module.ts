@@ -8,11 +8,12 @@ import { OnlinesRecord } from './entities/onlines-record.entity';
 import { OnlinesAbsoluteRecord } from './entities/onlines-absolute-record.entity';
 import { Query } from './entities/query.entity';
 import { Mod } from '../mods/entities/mod.entity';
+import { ServerGalleryImage } from '../entities/server-gallery.entity';
 import { ServerInstance } from '../entities/server-instance.entity';
 import { RconModule } from '../rcon/rcon.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Online, Server, OnlinesRecord, OnlinesAbsoluteRecord, Query, Mod, ServerInstance]), RconModule],
+  imports: [TypeOrmModule.forFeature([Online, Server, OnlinesRecord, OnlinesAbsoluteRecord, Query, Mod, ServerInstance, ServerGalleryImage]), RconModule],
   providers: [OnlineService, ServersService],
   exports: [OnlineService],
 })

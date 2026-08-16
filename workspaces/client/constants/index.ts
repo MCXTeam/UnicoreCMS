@@ -9,6 +9,9 @@ export const KIT_HIDE_DELAY_MS = 250
 
 export const SITEMAP_USERS_MAX_PAGES = 50
 
+export const PRIVATE_ROUTES = ['/auth', '/cabinet', '/store', '/players']
+export const SITEMAP_EXCLUDE = [...PRIVATE_ROUTES.map((route) => `${route}/**`), '/page']
+
 export const YANDEX_METRIKA_SCRIPT = 'https://mc.yandex.ru/metrika/tag.js'
 
 export const YANDEX_METRIKA_INIT_OPTIONS = {

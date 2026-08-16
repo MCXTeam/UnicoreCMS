@@ -143,7 +143,7 @@
               />
             </span>
           </div>
-          <div class="field-checkbox">
+          <div class="field-checkbox" v-if="isSuperuser">
             <Checkbox :binary="true" v-model="user.superuser" />
             <label>{{ $t('admin.superuser') }}</label>
           </div>
@@ -207,6 +207,7 @@
 import { sortTransform } from '~/helpers'
 import { FilterMatchMode } from '@primevue/core/api'
 import { Form, Field } from 'vee-validate'
+import { useAuthStore } from '~/stores/auth'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 
@@ -222,6 +223,11 @@ export default {
     const toast = useToast()
     const confirm = useConfirm()
     return { toast, confirm }
+  },
+  computed: {
+    isSuperuser() {
+      return Boolean(useAuthStore().user?.superuser)
+    },
   },
   data() {
     return {

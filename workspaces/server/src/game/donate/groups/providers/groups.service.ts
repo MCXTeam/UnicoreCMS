@@ -216,7 +216,7 @@ export class DonateGroupsService {
     user.virtual = currencyUtils.roundByType(user.virtual - virtualCost, SystemCurrency.VIRTAUL);
 
     await this.give(user, server, group, period);
-    await this.historyService.create(HistoryType.DonateGroupPurchase, ip, user, group, server, period);
+    await this.historyService.create(HistoryType.DonateGroupPurchase, ip, user, group, server, period, { real: realCost, virtual: virtualCost });
   }
 
   findOne(id: number, relations?: string[]): Promise<DonateGroup> {

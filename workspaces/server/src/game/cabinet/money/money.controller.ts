@@ -1,6 +1,7 @@
 import { IpAddress } from '@common';
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Req } from '@nestjs/common';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
+import { assertServerPermission } from 'src/admin/roles/guards/permisson.guard';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { Permission } from 'unicore-common';
@@ -68,9 +69,11 @@ export class MoneyController {
     return this.moneyService.findOneByUser(uuid);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminUsersMoney])
+  @Permissions([Permission.AdminDashboard])
   @Patch('admin')
-  async update(@Body() body: MoneyUpdateInput) {
+  async update(@Req() request: any, @Body() body: MoneyUpdateInput) {
+    await assertServerPermission(request, Permission.AdminUsersMoney, body.server);
+
     return this.moneyService.update(body);
   }
 }

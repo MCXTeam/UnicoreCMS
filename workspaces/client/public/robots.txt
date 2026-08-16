@@ -1,6 +1,0 @@
-User-agent: *
-
-Disallow: /auth
-Disallow: /cabinet
-Disallow: /store
-Disallow: /players

@@ -9,12 +9,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Server } from './entities/server.entity';
 import { Mod } from './mods/entities/mod.entity';
 import { Query } from './online/entities/query.entity';
+import { ServerGalleryImage } from './entities/server-gallery.entity';
 import { ServerInstance } from './entities/server-instance.entity';
 import { RconModule } from './rcon/rcon.module';
 
 @Module({
   providers: [ServersService],
-  imports: [ModsModule, OnlineModule, RconModule, TypeOrmModule.forFeature([Server, Mod, Query, ServerInstance])],
+  imports: [ModsModule, OnlineModule, RconModule, TypeOrmModule.forFeature([Server, Mod, Query, ServerInstance, ServerGalleryImage])],
   exports: [ServersService],
   controllers: [ModsController, OnlineController, ServersController],
 })

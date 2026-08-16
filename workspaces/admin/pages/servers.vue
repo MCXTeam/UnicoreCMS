@@ -99,6 +99,35 @@
               </div>
             </div>
           </div>
+          <label>{{ $t('admin.server_gallery') }}</label>
+          <div class="grid mb-2 pt-2">
+            <div class="col-12">
+              <div v-if="gallery.length" class="flex flex-wrap gap-3 mb-3">
+                <div v-for="image in gallery" :key="image.id" class="gallery-item">
+                  <Image width="140" :src="`${apiUrl + '/' + image.file}`" preview />
+                  <Button
+                    icon="pi pi-trash"
+                    class="p-button-rounded p-button-danger p-button-sm mt-2"
+                    @click="removeGalleryImage(image.id)"
+                  />
+                </div>
+              </div>
+              <span v-else class="text-color-secondary">{{ $t('admin.server_gallery_empty') }}</span>
+            </div>
+            <div class="col-12">
+              <Button :label="$t('admin.upload')" icon="pi pi-upload" @click="$refs.galleryInput.choose()" />
+              <FileUpload
+                ref="galleryInput"
+                :pt="{ root: { class: 'hidden' } }"
+                mode="basic"
+                name="file"
+                accept="image/*"
+                :auto="true"
+                :customUpload="true"
+                @uploader="uploadGalleryImage($event)"
+              />
+            </div>
+          </div>
         </Dialog>
 
         <VeeForm v-slot="{ meta }">
@@ -475,6 +504,7 @@ export default {
       mods: null,
       updateMode: false,
       fileDialog: false,
+      gallery: [],
       table: [],
       instances: [],
       rconSettingsDialog: false,
@@ -656,6 +686,34 @@ export default {
     async openFileDialog(server) {
       this.server = this.$_.pick(await this.$api.get('/servers/' + server.id).then((res) => res.data), this.$_.deepKeys(this.server))
       this.fileDialog = true
+
+      await this.loadGallery()
+    },
+    async loadGallery() {
+      this.gallery = await this.$api.get(`/servers/${this.server.id}/gallery`).then((res) => res.data)
+    },
+    async uploadGalleryImage(event) {
+      const formData = new FormData()
+      formData.append('file', event.files[0])
+
+      try {
+        await this.$api.post(`/servers/${this.server.id}/gallery`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        })
+        await this.loadGallery()
+      } catch {
+        this.$toast.add({
+          severity: 'error',
+          detail: this.$t('admin.images_only'),
+          life: 3000,
+        })
+      }
+    },
+    async removeGalleryImage(id) {
+      try {
+        await this.$api.delete(`/servers/${this.server.id}/gallery/${id}`)
+        await this.loadGallery()
+      } catch {}
     },
     async removeMedia(type) {
       try {

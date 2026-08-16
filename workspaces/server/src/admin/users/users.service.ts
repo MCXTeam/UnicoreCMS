@@ -245,6 +245,8 @@ export class UsersService {
     const allowed = new Set(allowedFields);
 
     user.uuid = randomUUID();
+    if (actor && !actor.superuser && input.superuser) throw new ForbiddenException();
+
     user.username = input.username;
     user.superuser = actor && !actor.superuser ? null : input.superuser;
     user.locale = input.locale;
@@ -281,6 +283,9 @@ export class UsersService {
     const before = { ...user, perms: [...(user.perms || [])], roles: [...(user.roles || [])] } as User;
 
     if (actor && !(await userPermissionCheck(before, actor))) throw new ForbiddenException();
+
+    if (actor && !actor.superuser && input.superuser !== undefined && Boolean(input.superuser) !== Boolean(user.superuser))
+      throw new ForbiddenException();
 
     const superuser = actor && !actor.superuser ? user.superuser : input.superuser;
 

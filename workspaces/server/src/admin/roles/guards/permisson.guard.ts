@@ -1,4 +1,4 @@
-import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, ForbiddenException, Inject } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { User } from 'src/admin/users/entities/user.entity';
 import { expandPermissionPattern, filterDonateWebPerms, Permission } from 'unicore-common';
@@ -164,6 +164,18 @@ export async function matchPermission(args: PermissionArgs, request: any): Promi
   } else {
     return permissions.length === matched.length;
   }
+}
+
+export async function matchServerPermission(request: any, permission: Permission, serverId?: string): Promise<boolean> {
+  const permissions = [permission];
+
+  if (serverId) permissions.push(`${permission}.${serverId}` as Permission);
+
+  return matchPermission([permissions, { or: true }], request);
+}
+
+export async function assertServerPermission(request: any, permission: Permission, serverId?: string): Promise<void> {
+  if (!(await matchServerPermission(request, permission, serverId))) throw new ForbiddenException();
 }
 
 @Injectable()

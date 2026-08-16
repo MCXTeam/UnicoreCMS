@@ -7,7 +7,7 @@
             <span class="block text-6xl font-bold mb-1">UnicoreCMS</span>
             <div class="text-6xl text-primary font-bold mb-3">{{ $t('admin.home_title') }}</div>
             <p class="mt-0 mb-4 text-700 line-height-3">{{ $t('admin.home_text') }}</p>
-            <a href="https://unicorecms.ru/docs" target="_blank">
+            <a href="https://docs.unicorecms.ru/" target="_blank">
               <Button :label="$t('admin.docs')" type="button" class="mr-3 p-button-raised"></Button>
             </a>
           </section>

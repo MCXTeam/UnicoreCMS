@@ -1,6 +1,7 @@
 import { IpAddress } from '@common';
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Req } from '@nestjs/common';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
+import { assertServerPermission } from 'src/admin/roles/guards/permisson.guard';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { Permission } from 'unicore-common';
@@ -57,15 +58,19 @@ export class CartController {
     return this.cartService.remove(id);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminUsersGive])
+  @Permissions([Permission.AdminDashboard])
   @Post('admin/give/product')
-  giveProduct(@Body() body: GiveProductInput) {
+  async giveProduct(@Req() request: any, @Body() body: GiveProductInput) {
+    await assertServerPermission(request, Permission.AdminUsersGive, body.server_id);
+
     return this.cartService.giveProductByDTO(body);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminUsersGive])
+  @Permissions([Permission.AdminDashboard])
   @Post('admin/give/kit')
-  giveKit(@Body() body: GiveKitInput) {
+  async giveKit(@Req() request: any, @Body() body: GiveKitInput) {
+    await assertServerPermission(request, Permission.AdminUsersGive, body.server_id);
+
     return this.cartService.giveKitByDTO(body);
   }
 }

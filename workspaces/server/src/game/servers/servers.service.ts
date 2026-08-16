@@ -1,10 +1,12 @@
-import { encryptField, ENCRYPTED_RCON_PASSWORD, StorageManager } from '@common';
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { encryptField, ENCRYPTED_RCON_PASSWORD, SERVER_GALLERY_MAX_IMAGES, StorageManager } from '@common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeliveryMode } from 'unicore-common';
 import { In, Repository } from 'typeorm';
 import { ServerCreateInput } from './dto/server-create.input';
 import { ServerUpdateInput } from './dto/server-update.input';
+import { GalleryImageInput, GallerySortInput } from './dto/gallery.input';
+import { ServerGalleryImage } from './entities/server-gallery.entity';
 import { ServerInstance } from './entities/server-instance.entity';
 import { ServersSortInput } from './dto/servers-sort.input';
 import { Server } from './entities/server.entity';
@@ -22,6 +24,8 @@ export class ServersService {
     private serversRepository: Repository<Server>,
     @InjectRepository(Mod)
     private modsRepository: Repository<Mod>,
+    @InjectRepository(ServerGalleryImage)
+    private galleryRepository: Repository<ServerGalleryImage>,
     private rconService: RconService,
   ) {}
 
@@ -123,6 +127,55 @@ export class ServersService {
     this.rconService.invalidate(id);
 
     return saved;
+  }
+
+  gallery(id: string): Promise<ServerGalleryImage[]> {
+    return this.galleryRepository.find({ where: { serverId: id }, order: { priority: 'ASC', id: 'ASC' } });
+  }
+
+  async addGalleryImage(id: string, input: GalleryImageInput, file: Express.Multer.File): Promise<ServerGalleryImage> {
+    const server = await this.findOne(id);
+
+    if (!server) {
+      StorageManager.remove(file?.filename);
+      throw new NotFoundException();
+    }
+
+    if ((await this.galleryRepository.countBy({ serverId: id })) >= SERVER_GALLERY_MAX_IMAGES) {
+      StorageManager.remove(file?.filename);
+      throw new BadRequestException();
+    }
+
+    if (!file) throw new BadRequestException();
+
+    const image = new ServerGalleryImage();
+
+    image.serverId = id;
+    image.file = file.filename;
+    image.title = input.title;
+    image.priority = await this.galleryRepository.countBy({ serverId: id });
+
+    return this.galleryRepository.save(image);
+  }
+
+  async sortGallery(id: string, input: GallerySortInput): Promise<ServerGalleryImage[]> {
+    const images = await this.galleryRepository.findBy({ serverId: id, id: In(input.items.map((item) => item.id)) });
+
+    for (const image of images) {
+      image.priority = input.items.find((item) => item.id == image.id).priority;
+    }
+
+    await this.galleryRepository.save(images);
+
+    return this.gallery(id);
+  }
+
+  async removeGalleryImage(id: string, imageId: number): Promise<ServerGalleryImage> {
+    const image = await this.galleryRepository.findOneBy({ serverId: id, id: imageId });
+
+    if (!image) throw new NotFoundException();
+
+    return this.galleryRepository.remove(image);
   }
 
   async remove(id: string) {

@@ -1,6 +1,7 @@
 import { CommonSortInput, DeleteManyInput, IpAddress } from '@common';
-import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Post, Req } from '@nestjs/common';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
+import { assertServerPermission } from 'src/admin/roles/guards/permisson.guard';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { Permission } from 'unicore-common';
@@ -94,13 +95,15 @@ export class PermissionsController {
     return this.donatePermissionsService.udpByUUID(uuid);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
+  @Permissions([Permission.AdminDashboard])
   @Post('admin/give')
-  give(@Body() body: GiveDonatePermInput) {
+  async give(@Req() request: any, @Body() body: GiveDonatePermInput) {
+    await assertServerPermission(request, Permission.AdminUsersDonate, body.server_id);
+
     return this.donatePermissionsService.giveByDTO(body);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
+  @Permissions([Permission.AdminDashboard, Permission.AdminUsersDonate])
   @Delete('admin/:id')
   take(@Param('id') id: number) {
     return this.donatePermissionsService.take(id);

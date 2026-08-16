@@ -22,6 +22,7 @@ import { Online } from '../online/entities/online.entity';
 import { Query } from '../online/entities/query.entity';
 import { RCON } from '../rcon/entities/rcon.entity';
 import { ServerGroup } from './server-group.entity';
+import { ServerGalleryImage } from './server-gallery.entity';
 import { ServerInstance } from './server-instance.entity';
 import { ServerTable } from './server-table.entity';
 import { Translatable } from 'src/admin/locales/translatable.decorator';
@@ -161,6 +162,9 @@ export class Server {
     cascade: ['insert', 'update'],
   })
   instances: ServerInstance[];
+
+  @OneToMany(() => ServerGalleryImage, (image) => image.server)
+  gallery: ServerGalleryImage[];
 
   @CreateDateColumn({ name: 'created' })
   created: Date;

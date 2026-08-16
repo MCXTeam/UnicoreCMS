@@ -39,7 +39,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         }
       }
 
-      if (status === 403 && import.meta.client) {
+      if (status === 403 && import.meta.client && !original?.silent) {
         const toast = nuxtApp.vueApp.config.globalProperties.$toast
         const t = (key: string) => String((nuxtApp as any).$t?.(key) ?? key)
 

@@ -178,7 +178,10 @@ export class DonatePermissionsService {
     user.virtual = currencyUtils.roundByType(user.virtual - virtualCost, SystemCurrency.VIRTAUL);
 
     await this.give(user, server, permission, period);
-    await this.historyService.create(HistoryType.DonatePermissionPurchase, ip, user, permission, server, period);
+    await this.historyService.create(HistoryType.DonatePermissionPurchase, ip, user, permission, server, period, {
+      real: realCost,
+      virtual: virtualCost,
+    });
   }
 
   async findByServer(id: string) {
