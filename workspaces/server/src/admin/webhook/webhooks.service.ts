@@ -91,7 +91,7 @@ export class WebhooksService {
   private newsCreatedDiscord(url: string, payload: News) {}
 
   private vkNewsCreatedDiscord(url: string, payload: any) {
-    this.vkService.DiscordParse(url, payload);
+    return this.vkService.DiscordParse(url, payload);
   }
 
   find(): Promise<Webhook[]> {

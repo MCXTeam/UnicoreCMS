@@ -1,6 +1,7 @@
 import {
   IpAddress,
   Locale,
+  THROTTLE_LOGIN,
   THROTTLE_PASSWORD_RESET,
   THROTTLE_REGISTER,
   THROTTLE_RESEND,
@@ -36,6 +37,7 @@ export class AuthController {
 
   @Public()
   @Recaptcha({ action: 'login' })
+  @Throttle({ default: THROTTLE_LOGIN })
   @Post('login')
   login(@Body() input: LoginInput, @UserAgent() agent: string, @IpAddress() ip: string): Promise<AuthenticatedDto> {
     return this.authService.login(input, agent, ip);

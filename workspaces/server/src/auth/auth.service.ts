@@ -101,7 +101,8 @@ export class AuthService {
       throw e;
     }
 
-    if (activationRequired) this.emailService.sendActivation(user);
+    if (activationRequired)
+      this.emailService.sendActivation(user).catch((e) => this.logger.error(`Не удалось отправить письмо активации ${user.uuid}: ${e}`));
 
     const accessToken = await this.tokensService.generateAccessToken(user);
     const refreshToken = await this.tokensService.generateRefreshToken(user, agent, ip);
@@ -109,9 +110,5 @@ export class AuthService {
     if (input.ref) await this.attachReferal(user, input.ref);
 
     return new AuthenticatedDto({ accessToken, refreshToken, user });
-  }
-
-  logout(refresh_token: string): void {
-    this.tokensService.revokeRefreshToken(refresh_token);
   }
 }

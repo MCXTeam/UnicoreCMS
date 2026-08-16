@@ -23,6 +23,7 @@ import {
   PASSWORD_RESET_MAX,
   PASSWORD_RESET_TTL_MINUTES,
   PASSWORD_RESET_WINDOW_MINUTES,
+  safeEqual,
 } from '@common';
 import { UserDto } from '../users/dto/user.dto';
 import { VerifyInput } from 'src/auth/dto/verify.input';
@@ -137,7 +138,7 @@ export class EmailService {
       throw new NotFoundException();
     }
 
-    if (activation.code !== input.code) {
+    if (!safeEqual(activation.code, input.code)) {
       activation.attempts += 1;
 
       if (activation.attempts >= EMAIL_ACTIVATION_MAX_ATTEMPTS) {

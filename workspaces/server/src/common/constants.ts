@@ -43,6 +43,7 @@ export const PASSWORD_RESET_TTL_MINUTES = 60;
 export const PASSWORD_RESET_WINDOW_MINUTES = 5;
 export const PASSWORD_RESET_MAX = 3;
 
+export const THROTTLE_LOGIN = { ttl: 5 * 60_000, limit: 15 };
 export const THROTTLE_REGISTER = { ttl: 60 * 60_000, limit: 5 };
 export const THROTTLE_VERIFY = { ttl: 10 * 60_000, limit: 10 };
 export const THROTTLE_RESEND = { ttl: 10 * 60_000, limit: 3 };

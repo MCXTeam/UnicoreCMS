@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { In, IsNull, Repository } from 'typeorm';
@@ -11,6 +11,8 @@ import { applyCustomCode, NEWS_PREVIEW_LENGTH, StorageManager } from '@common';
 
 @Injectable()
 export class NewsService {
+  private readonly logger = new Logger(NewsService.name);
+
   constructor(
     @InjectRepository(News)
     private newsRepository: Repository<News>,
@@ -30,7 +32,7 @@ export class NewsService {
 
     const saved = await this.newsRepository.save(news);
 
-    this.webhooksService.send(WebhookType.NewsCreated, { ...saved });
+    this.webhooksService.send(WebhookType.NewsCreated, { ...saved }).catch((e) => this.logger.error(`Вебхук новости ${saved.id}: ${e}`));
 
     return saved;
   }
