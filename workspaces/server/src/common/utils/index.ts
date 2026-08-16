@@ -1,3 +1,4 @@
+export * from './console';
 export * from './balance';
 export * from './ban';
 export * from './config-value';

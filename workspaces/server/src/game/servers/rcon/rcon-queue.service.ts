@@ -1,11 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { randomUUID } from 'crypto';
-import { In, Repository } from 'typeorm';
+import { In, LessThan, Repository } from 'typeorm';
 import { RconCommandStatus } from 'unicore-common';
 import { RconCommand } from './entities/rcon-command.entity';
 import { RconService } from './rcon.service';
-import { RCON_BACKOFF_BASE_MS, RCON_BACKOFF_MAX_MS, RCON_BATCH_LIMIT, RCON_MAX_ATTEMPTS, RCON_STALE_MS } from 'src/common/constants';
+import {
+  KEEP_RCON_COMMANDS_DAYS,
+  RCON_BACKOFF_BASE_MS,
+  RCON_BACKOFF_MAX_MS,
+  RCON_BATCH_LIMIT,
+  RCON_MAX_ATTEMPTS,
+  RCON_STALE_MS,
+} from 'src/common/constants';
 
 export interface EnqueueMeta {
   label?: string;
@@ -106,13 +113,14 @@ export class RconQueueService {
       for (const [serverId, items] of byServer) {
         for (const [index, item] of items.entries()) {
           try {
+            await this.rconService.sendCommand(serverId, item.command);
+
             item.status = RconCommandStatus.Sent;
             item.error = null;
             item.sentAt = new Date();
             item.worker = null;
 
             await this.queueRepository.save(item);
-            await this.rconService.sendCommand(serverId, item.command);
           } catch (error: any) {
             item.attempts += 1;
             item.error = error?.message || String(error);
@@ -154,6 +162,17 @@ export class RconQueueService {
       { serverId, status: RconCommandStatus.Failed },
       { status: RconCommandStatus.Pending, attempts: 0, nextAttempt: null, error: null },
     );
+  }
+
+  async cleanup(days = KEEP_RCON_COMMANDS_DAYS): Promise<void> {
+    if (days <= 0) return;
+
+    const deadline = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+    await this.queueRepository.delete({
+      status: In([RconCommandStatus.Sent, RconCommandStatus.Failed]),
+      created: LessThan(deadline),
+    });
   }
 
   listByServer(serverId: string, limit = 100): Promise<RconCommand[]> {

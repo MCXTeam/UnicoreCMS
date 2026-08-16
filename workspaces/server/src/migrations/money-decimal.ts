@@ -1,5 +1,5 @@
 import { DataSource } from 'typeorm';
-import { MONEY_COLUMNS, MONEY_PRECISION, MONEY_SCALE } from '@common';
+import { formatError, MONEY_COLUMNS, MONEY_PRECISION, MONEY_SCALE, stderr, stdout } from '@common';
 import { ormconfig } from '../ormconfig';
 
 interface ColumnInfo {
@@ -27,7 +27,7 @@ async function run() {
       if (!current || String(current.type).toLowerCase() === 'decimal') continue;
 
       const nullable = current.nullable === 'YES' ? 'NULL' : 'NOT NULL';
-      const parsed = Number(current.default);
+      const parsed = current.default === null ? NaN : Number(current.default);
       const defaults = Number.isFinite(parsed) ? ` DEFAULT ${parsed}` : current.nullable === 'YES' ? '' : ' DEFAULT 0';
 
       await dataSource.query(
@@ -35,16 +35,16 @@ async function run() {
       );
 
       converted++;
-      console.log(`${table}.${column}: float -> decimal(${MONEY_PRECISION},${MONEY_SCALE})`);
+      stdout(`${table}.${column}: float -> decimal(${MONEY_PRECISION},${MONEY_SCALE})`);
     }
   } finally {
     await dataSource.destroy();
   }
 
-  if (converted) console.log(`Денежные колонки переведены в decimal: ${converted}`);
+  if (converted) stdout(`Денежные колонки переведены в decimal: ${converted}`);
 }
 
 run().catch((error) => {
-  console.error(error);
+  stderr(formatError(error));
   process.exit(1);
 });

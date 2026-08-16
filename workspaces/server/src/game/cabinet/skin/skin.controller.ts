@@ -1,4 +1,4 @@
-import { StorageManager, STORAGE_MAX_IMAGE_UPLOAD } from '@common';
+import { STORAGE_MAX_IMAGE_UPLOAD, StorageManager } from '@common';
 import { Controller, Delete, Get, Param, Patch, Req, Response, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';

@@ -1,9 +1,9 @@
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as moment from 'moment';
 import { ConfigService } from 'src/admin/config/config.service';
 import { ConfigField } from 'src/admin/config/config.enum';
-import { KEEP_FOREVER, KEEP_HISTORY_DAYS } from '@common';
+import { KEEP_FOREVER, KEEP_HISTORY_DAYS, SafeCron } from '@common';
 import { History } from 'src/game/cabinet/history/entities/history.entity';
 import { LessThan, Repository } from 'typeorm';
 
@@ -14,7 +14,7 @@ export class HistoryTasks {
     private configService: ConfigService,
   ) {}
 
-  @Cron(CronExpression.EVERY_HOUR)
+  @SafeCron(CronExpression.EVERY_HOUR, 'history-cleanup')
   async clean() {
     const config = await this.configService.load();
     const raw = Number(config[ConfigField.KeepHistoryDays]);

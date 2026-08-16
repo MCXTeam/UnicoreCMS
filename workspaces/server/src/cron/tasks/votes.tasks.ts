@@ -1,12 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { VoteGift } from 'src/game/cabinet/votes/entities/vote-gift.entity';
 import { Vote } from 'src/game/cabinet/votes/entities/vote.entity';
 import { VotesGroupped } from 'src/game/players/votes-list/votes-groupped.interface';
 import { Repository } from 'typeorm';
 import * as _ from 'lodash';
-import { MomentWrapper } from '@common';
+import { MomentWrapper, SafeCron } from '@common';
 import { User } from 'src/admin/users/entities/user.entity';
 import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
 
@@ -23,7 +23,7 @@ export class VotesTasks {
     private votesGiftsRepository: Repository<VoteGift>,
   ) {}
 
-  @Cron(CronExpression.EVERY_30_MINUTES)
+  @SafeCron(CronExpression.EVERY_30_MINUTES, 'votes-rewards')
   async clean() {
     const gifts = await this.votesGiftsRepository.find();
 

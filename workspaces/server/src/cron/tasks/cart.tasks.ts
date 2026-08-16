@@ -1,4 +1,5 @@
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { SafeCron } from '@common';
+import { CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as moment from 'moment';
 import { CartItemKit } from 'src/game/store/cart/entities/cart-item-kit.entity';
@@ -13,7 +14,7 @@ export class CartTasks {
     private cartItemKitsRepository: Repository<CartItemKit>,
   ) {}
 
-  @Cron(CronExpression.EVERY_HOUR)
+  @SafeCron(CronExpression.EVERY_HOUR, 'cart-cleanup')
   async clean() {
     const cartItemsClean = await this.cartItemsRepository.findBy({
       updated: LessThan(moment().utc().subtract(30, 'days').toDate()),

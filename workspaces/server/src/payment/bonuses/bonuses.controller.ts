@@ -1,4 +1,4 @@
-import { imageFileFilter, StorageManager } from '@common';
+import { imageFileFilter, STORAGE_MAX_IMAGE_UPLOAD, StorageManager } from '@common';
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
@@ -40,6 +40,7 @@ export class BonusesController {
     FileInterceptor('file', {
       storage: StorageManager.disk(),
       fileFilter: imageFileFilter,
+      limits: { fileSize: STORAGE_MAX_IMAGE_UPLOAD, files: 1 },
     }),
   )
   updateMedia(@Param('id', ParseIntPipe) id: number, @UploadedFile() file: Express.Multer.File) {

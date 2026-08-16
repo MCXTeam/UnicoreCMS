@@ -19,6 +19,11 @@ export const ALLOW_INACTIVE_KEY = 'allowInactive';
 export const STATIC_CONTENT_SECURITY_POLICY = "default-src 'none'; img-src 'self'; style-src 'none'; script-src 'none'; sandbox";
 
 export const STORAGE_MAX_IMAGE_UPLOAD = 2 * 1024 * 1024;
+export const STORAGE_MAX_ZIP_UPLOAD = 50 * 1024 * 1024;
+
+export const IMAGE_EXTENSION_PATTERN = /\.(jpg|jpeg|png|gif|webp)$/i;
+export const ZIP_EXTENSION_PATTERN = /\.zip$/i;
+export const PNG_EXTENSION_PATTERN = /\.png$/i;
 export const STORAGE_MAX_REMOTE_DOWNLOAD = 10 * 1024 * 1024;
 
 export const IMPORT_MAX_ENTRIES = 1000;
@@ -140,6 +145,7 @@ export const PAYMENT_AMOUNT_MAX = 1_000_000;
 export const KEEP_PAID_PAYMENTS_DAYS = 365;
 export const KEEP_PENDING_PAYMENTS_DAYS = 7;
 export const KEEP_HISTORY_DAYS = 365;
+export const KEEP_RCON_COMMANDS_DAYS = 30;
 export const KEEP_FOREVER = 0;
 
 export const VK_LINK_PREFIX = 'https://vk.com/';

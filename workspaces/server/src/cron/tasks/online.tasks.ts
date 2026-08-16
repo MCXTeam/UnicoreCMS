@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { CronExpression } from '@nestjs/schedule';
+import { SafeCron } from '@common';
 import { EventsService } from 'src/events/events.service';
 import { UpdateOnline } from 'src/game/servers/online/interfaces/update-online.interface';
 import { OnlineService } from 'src/game/servers/online/online.service';
@@ -12,7 +13,7 @@ export class OnlineTasks {
 
   constructor(private eventsService: EventsService, private onlineService: OnlineService, private serversService: ServersService) {}
 
-  @Cron(CronExpression.EVERY_5_SECONDS)
+  @SafeCron(CronExpression.EVERY_5_SECONDS, 'online-update')
   async updateOnline() {
     if (this.running) return;
     this.running = true;
@@ -26,8 +27,6 @@ export class OnlineTasks {
         this.eventsService.server.to('public').emit('servers/online', onlines);
         this.logger.debug('Online updated');
       }
-    } catch (error) {
-      this.logger.error(`Online update failed: ${error}`);
     } finally {
       this.running = false;
     }

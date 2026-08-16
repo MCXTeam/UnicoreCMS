@@ -35,6 +35,9 @@ const locateEnvFile = (): string => {
 
 export const envFilePath = locateEnvFile();
 
+export const projectRoot = dirname(envFilePath);
+export const storagePath = resolve(projectRoot, "storage");
+
 export const loadEnvFile = (): void => {
   config({ path: envFilePath });
 };

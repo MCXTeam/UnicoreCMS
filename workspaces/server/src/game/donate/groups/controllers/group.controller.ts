@@ -1,4 +1,4 @@
-import { NumberSortInput, DeleteManyInput, imageFileFilter, IpAddress, StorageManager } from '@common';
+import { DeleteManyInput, imageFileFilter, IpAddress, NumberSortInput, STORAGE_MAX_IMAGE_UPLOAD, StorageManager } from '@common';
 import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Post, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
@@ -93,6 +93,7 @@ export class DonateGroupsController {
     FileInterceptor('file', {
       storage: StorageManager.disk(),
       fileFilter: imageFileFilter,
+      limits: { fileSize: STORAGE_MAX_IMAGE_UPLOAD, files: 1 },
     }),
   )
   updateMedia(@Param('id', ParseIntPipe) id: number, @UploadedFile() file: Express.Multer.File) {

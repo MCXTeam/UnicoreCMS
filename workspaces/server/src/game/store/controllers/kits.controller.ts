@@ -1,4 +1,4 @@
-import { DeleteManyInput, imageFileFilter, StorageManager } from '@common';
+import { DeleteManyInput, imageFileFilter, STORAGE_MAX_IMAGE_UPLOAD, StorageManager } from '@common';
 import {
   Body,
   Controller,
@@ -69,6 +69,7 @@ export class KitsController {
     FileInterceptor('file', {
       storage: StorageManager.disk(),
       fileFilter: imageFileFilter,
+      limits: { fileSize: STORAGE_MAX_IMAGE_UPLOAD, files: 1 },
     }),
   )
   updateMedia(@Param('id', ParseIntPipe) id: number, @UploadedFile() file: Express.Multer.File) {

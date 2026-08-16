@@ -33,6 +33,12 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD?err}
     volumes:
       - ./docker/mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
 
   app:
     container_name: unicorecms
@@ -53,7 +59,8 @@ services:
       - "127.0.0.1:${ADMIN_PORT:-4000}:${ADMIN_PORT:-4000}"
       - "127.0.0.1:${BACKEND_PORT:-${SERVER_PORT:-5000}}:${BACKEND_PORT:-${SERVER_PORT:-5000}}"
     depends_on:
-      - mariadb
+      mariadb:
+        condition: service_healthy
     extra_hosts:
       - "host.docker.internal:host-gateway"
 

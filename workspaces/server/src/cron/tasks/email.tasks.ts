@@ -1,5 +1,5 @@
-import { EMAIL_ACTIVATION_TTL_MINUTES, PASSWORD_RESET_TTL_MINUTES } from '@common';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { EMAIL_ACTIVATION_TTL_MINUTES, PASSWORD_RESET_TTL_MINUTES, SafeCron } from '@common';
+import { CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as moment from 'moment';
 import { EmailActivation } from 'src/admin/email/entities/email-activation.entity';
@@ -14,7 +14,7 @@ export class EmailTasks {
     private eaRepository: Repository<EmailActivation>,
   ) {}
 
-  @Cron(CronExpression.EVERY_HOUR)
+  @SafeCron(CronExpression.EVERY_HOUR, 'email-cleanup')
   async clean() {
     const prClean = await this.prRepository.findBy({
       created: LessThan(moment().utc().subtract(PASSWORD_RESET_TTL_MINUTES, 'minutes').toDate()),

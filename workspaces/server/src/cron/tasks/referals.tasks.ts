@@ -1,4 +1,5 @@
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { SafeCron } from '@common';
+import { CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from 'src/admin/config/config.service';
 import { PlaytimeService } from 'src/game/cabinet/playtime/playtime.service';
@@ -18,7 +19,7 @@ export class ReferalsTasks {
     private playtimeService: PlaytimeService,
   ) {}
 
-  @Cron(CronExpression.EVERY_HOUR)
+  @SafeCron(CronExpression.EVERY_HOUR, 'referals-reward')
   async clean() {
     const config = await this.configService.load();
     const referals = await this.referalsRepository.find({

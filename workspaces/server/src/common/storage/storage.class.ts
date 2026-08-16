@@ -19,10 +19,10 @@ import { parse as urlParse } from 'url';
 import { promises as dns } from 'dns';
 import { isIP } from 'net';
 import { Logger } from '@nestjs/common';
-import { envConfig } from 'unicore-common';
+import { envConfig, storagePath } from 'unicore-common';
 import { STORAGE_MAX_REMOTE_DOWNLOAD } from '../constants';
 
-const destination = '../../storage';
+const destination = storagePath;
 
 export class StorageManager {
   /**

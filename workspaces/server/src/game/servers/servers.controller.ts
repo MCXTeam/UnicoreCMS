@@ -1,4 +1,4 @@
-import { imageFileFilter, NumberSortInput, StorageManager, STORAGE_MAX_IMAGE_UPLOAD, StringSortInput } from '@common';
+import { imageFileFilter, NumberSortInput, STORAGE_MAX_IMAGE_UPLOAD, StorageManager, StringSortInput } from '@common';
 import {
   Body,
   Controller,
@@ -118,6 +118,7 @@ export class ServersController {
     FileInterceptor('file', {
       storage: StorageManager.disk(),
       fileFilter: imageFileFilter,
+      limits: { fileSize: STORAGE_MAX_IMAGE_UPLOAD, files: 1 },
     }),
   )
   updateMedia(

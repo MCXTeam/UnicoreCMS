@@ -1,13 +1,12 @@
-import { envConfig, NestLogger } from 'unicore-common';
+import { envConfig, NestLogger, storagePath } from 'unicore-common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
-import { join } from 'path';
 import { AuthAdapter } from './auth/adapters/auth.adapter';
 import { EntityNotFoundFilter } from './common/filters/entity-not-found.filter';
-import { ASCII_NAME, STATIC_CONTENT_SECURITY_POLICY } from '@common';
+import { ASCII_NAME, formatError, STATIC_CONTENT_SECURITY_POLICY, stderr, stdout } from '@common';
 import helmet from 'helmet';
 import * as clc from 'cli-color';
 import { initializeTransactionalContext } from 'typeorm-transactional';
@@ -18,14 +17,14 @@ import { LocalesService } from './admin/locales/locales.service';
 process.env.TZ = envConfig.timezone;
 
 async function bootstrap() {
-  console.log(
+  stdout(
     ASCII_NAME.split('\n')
       .map((line) => clc.magenta(line))
       .join(''),
   );
-  console.log(' ');
-  console.log(`\tVersion: ${process.env.npm_package_version}, Starting Server...`);
-  console.log(' ');
+  stdout(' ');
+  stdout(`\tVersion: ${process.env.npm_package_version}, Starting Server...`);
+  stdout(' ');
 
   await new Promise((res) => setTimeout(res, 2500));
 
@@ -55,7 +54,7 @@ async function bootstrap() {
     origin: envConfig.corsOrigins,
     credentials: true,
   });
-  app.useStaticAssets(join(__dirname, '../../../storage'), {
+  app.useStaticAssets(storagePath, {
     setHeaders: (res) => {
       res.setHeader('X-Content-Type-Options', 'nosniff');
       res.setHeader('Content-Security-Policy', STATIC_CONTENT_SECURITY_POLICY);
@@ -73,15 +72,15 @@ async function bootstrap() {
 }
 
 process.on('unhandledRejection', (reason) => {
-  console.error('Unhandled Rejection:', reason);
+  stderr(`Unhandled Rejection: ${formatError(reason)}`);
 });
 
 process.on('uncaughtException', (error) => {
-  console.error('Uncaught Exception:', error);
+  stderr(`Uncaught Exception: ${formatError(error)}`);
   process.exit(1);
 });
 
 bootstrap().catch((error) => {
-  console.error(error);
+  stderr(formatError(error));
   process.exit(1);
 });

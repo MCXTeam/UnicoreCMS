@@ -1,4 +1,4 @@
-import { DeleteManyInput, imageFileFilter, StorageManager, zipFileFilter } from '@common';
+import { DeleteManyInput, imageFileFilter, STORAGE_MAX_IMAGE_UPLOAD, STORAGE_MAX_ZIP_UPLOAD, StorageManager, zipFileFilter } from '@common';
 import { BadRequestException, Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
@@ -86,7 +86,7 @@ export class ProductsController {
     FileInterceptor('file', {
       storage: StorageManager.disk(),
       fileFilter: zipFileFilter,
-      limits: { fileSize: 50 * 1024 * 1024, files: 1 },
+      limits: { fileSize: STORAGE_MAX_ZIP_UPLOAD, files: 1 },
     }),
   )
   async importItems(@CurrentUser() user: User, @Body() body: ProductsImportInput, @UploadedFile() file: Express.Multer.File) {
@@ -115,6 +115,7 @@ export class ProductsController {
     FileInterceptor('file', {
       storage: StorageManager.disk(),
       fileFilter: imageFileFilter,
+      limits: { fileSize: STORAGE_MAX_IMAGE_UPLOAD, files: 1 },
     }),
   )
   updateMedia(@Param('id', ParseIntPipe) id: number, @UploadedFile() file: Express.Multer.File) {

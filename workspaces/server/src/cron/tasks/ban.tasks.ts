@@ -1,5 +1,6 @@
+import { SafeCron } from '@common';
 import { Injectable } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as moment from 'moment';
 import { Ban } from 'src/game/cabinet/bans/entities/ban.entity';
@@ -12,7 +13,7 @@ export class BanTasks {
     private bansRepository: Repository<Ban>,
   ) {}
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
+  @SafeCron(CronExpression.EVERY_10_MINUTES, 'ban-cleanup')
   async clean() {
     const expiresBans = await this.bansRepository
       .createQueryBuilder('ud')

@@ -1,4 +1,4 @@
-import { NumberSortInput, DeleteManyInput, imageFileFilter, StorageManager } from '@common';
+import { DeleteManyInput, imageFileFilter, NumberSortInput, STORAGE_MAX_IMAGE_UPLOAD, StorageManager } from '@common';
 import {
   Body,
   Controller,
@@ -76,6 +76,7 @@ export class GroupKitsController {
     FileInterceptor('file', {
       storage: StorageManager.disk(),
       fileFilter: imageFileFilter,
+      limits: { fileSize: STORAGE_MAX_IMAGE_UPLOAD, files: 1 },
     }),
   )
   updateMedia(@Param('server') server: string, @Param('id', ParseIntPipe) id: number, @UploadedFile() file: Express.Multer.File) {

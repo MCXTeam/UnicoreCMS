@@ -5,7 +5,9 @@ import { snakeCase } from 'typeorm/util/StringUtils';
 
 export class NamingStrategy extends DefaultNamingStrategy implements NamingStrategyInterface {
   tableName(className: string, customName: string): string {
-    return customName || `unicore_${pluralize(snakeCase(className))}`;
+    if (!customName) throw new Error(`Сущность "${className}" объявлена без имени таблицы: укажите @Entity({ name: '...' })`);
+
+    return customName;
   }
 
   columnName(propertyName: string, customName: string, embeddedPrefixes: string[]): string {

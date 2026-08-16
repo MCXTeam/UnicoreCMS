@@ -1,5 +1,6 @@
+import { SafeCron } from '@common';
 import { Injectable } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as moment from 'moment';
 import { EventsService } from 'src/events/events.service';
@@ -21,7 +22,7 @@ export class DonateTasks {
     private issuanceService: IssuanceService,
   ) {}
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
+  @SafeCron(CronExpression.EVERY_10_MINUTES, 'donate-expire')
   async clean() {
     const expired = moment().utc().toDate();
 

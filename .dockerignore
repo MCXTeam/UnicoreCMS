@@ -3,5 +3,10 @@
 **/dist
 /docker
 docker-*.yml
-/storage
+/storage/*
+!/storage/default
 /logs
+/.git
+.env
+.env.*
+!.env.example

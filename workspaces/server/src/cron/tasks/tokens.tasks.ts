@@ -1,5 +1,6 @@
+import { SafeCron } from '@common';
 import { Injectable } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as moment from 'moment';
 import { RefreshToken } from 'src/auth/entities/refresh-token.entity';
@@ -12,7 +13,7 @@ export class TokenTasks {
     private tokensRepository: Repository<RefreshToken>,
   ) {}
 
-  @Cron(CronExpression.EVERY_HOUR)
+  @SafeCron(CronExpression.EVERY_HOUR, 'tokens-cleanup')
   async clean() {
     const expiresTokens = await this.tokensRepository.findBy({
       expires: LessThan(moment().toDate()),
