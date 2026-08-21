@@ -1,4 +1,4 @@
-import { IsOptional, IsString, Matches } from 'class-validator';
+import { IsIn, IsOptional, IsString, Matches } from 'class-validator';
 import { THEME_ID_PATTERN } from 'unicore-api';
 
 export class ThemeActiveInput {
@@ -6,4 +6,8 @@ export class ThemeActiveInput {
   @IsString()
   @Matches(THEME_ID_PATTERN, { message: 'Некорректный идентификатор темы' })
   id?: string | null;
+
+  @IsOptional()
+  @IsIn(['client', 'admin'])
+  side?: 'client' | 'admin';
 }

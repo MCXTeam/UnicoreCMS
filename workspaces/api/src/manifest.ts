@@ -35,6 +35,10 @@ export interface ModuleManifest {
   requires?: { modules?: Record<string, string> }
 }
 
+export const PRIMEVUE_PRESETS = ['aura', 'lara', 'nora', 'material'] as const
+
+export type PrimeVuePreset = (typeof PRIMEVUE_PRESETS)[number]
+
 export interface ThemeManifest {
   id: string
   name: LocalizedText
@@ -42,7 +46,8 @@ export interface ThemeManifest {
   unicoreApi: string
   side?: 'client' | 'admin'
   componentPrefix?: string
-  primevue?: string
+  primevue?: PrimeVuePreset
+  primevueTokens?: Record<string, unknown>
   tokens?: string
   author?: string
   homepage?: string
@@ -153,7 +158,12 @@ export const validateThemeManifest = (raw: unknown): ValidationResult<ThemeManif
 
   if (raw.componentPrefix !== undefined && typeof raw.componentPrefix !== 'string') errors.push('поле componentPrefix должно быть строкой')
 
-  for (const key of ['tokens', 'primevue'] as const) validateRelativePath(raw[key], key, errors)
+  validateRelativePath(raw.tokens, 'tokens', errors)
+
+  if (raw.primevue !== undefined && !PRIMEVUE_PRESETS.includes(String(raw.primevue) as PrimeVuePreset))
+    errors.push(`поле primevue должно быть одним из: ${PRIMEVUE_PRESETS.join(', ')}`)
+
+  if (raw.primevueTokens !== undefined && !isRecord(raw.primevueTokens)) errors.push('поле primevueTokens должно быть объектом')
 
   if (raw.pages !== undefined) {
     if (!isRecord(raw.pages)) errors.push('поле pages должно быть объектом')

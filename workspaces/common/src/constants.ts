@@ -30,6 +30,7 @@ export const PUBLIC_ENV_KEY = {
   colorModePreference: "COLOR_MODE_PREFERENCE",
   colorModeFallback: "COLOR_MODE_FALLBACK",
   theme: "UNICORE_THEME",
+  adminTheme: "UNICORE_ADMIN_THEME",
   devseed: "DEV_SEED",
 } as const;
 

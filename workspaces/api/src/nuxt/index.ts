@@ -50,15 +50,22 @@ const readState = (root: string): Record<string, { enabled?: boolean }> => {
   return state && typeof state === 'object' ? (state as Record<string, { enabled?: boolean }>) : {}
 }
 
-const readActiveTheme = (root: string): string | null => {
+const readActiveTheme = (root: string, side: LayerSide): string | null => {
   const state = readJson(join(root, 'themes', 'state.json'))
 
   if (!state || typeof state !== 'object') return null
 
-  const active = (state as { active?: unknown }).active
+  const value = (state as Record<string, unknown>)[side]
 
-  return typeof active === 'string' && active ? active : null
+  if (typeof value === 'string' && value) return value
+
+  const legacy = (state as { active?: unknown }).active
+
+  return side === 'client' && typeof legacy === 'string' && legacy ? legacy : null
 }
+
+const themeFromEnv = (side: LayerSide): string | null =>
+  (side === 'admin' ? process.env.UNICORE_ADMIN_THEME : process.env.UNICORE_THEME) || null
 
 const directories = (path: string): string[] => {
   if (!existsSync(path)) return []
@@ -107,7 +114,7 @@ export const resolveLayers = (options: ResolveLayersOptions): ResolvedLayers => 
   }
 
   const requestedTheme =
-    options.theme === undefined ? process.env.UNICORE_THEME || readActiveTheme(root) || null : options.theme
+    options.theme === undefined ? themeFromEnv(options.side) || readActiveTheme(root, options.side) : options.theme
   let themeLayer: ResolvedThemeLayer | null = null
 
   if (requestedTheme) {

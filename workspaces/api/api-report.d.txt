@@ -66,9 +66,9 @@ export { CLIENT_NAV_PLACES, CLIENT_SLOTS, type ClientModuleDefinition, type Clie
 
 === index.d.ts ===
 import { ConfigFieldSchema } from './manifest.js';
-export { ConfigFieldType, LocalizedText, ModuleManifest, ThemeManifest, ValidationResult, localizedText, validateModuleManifest, validateThemeManifest } from './manifest.js';
+export { ConfigFieldType, LocalizedText, ModuleManifest, PRIMEVUE_PRESETS, PrimeVuePreset, ThemeManifest, ValidationResult, localizedText, validateModuleManifest, validateThemeManifest } from './manifest.js';
 import { DataSource } from 'typeorm';
-declare const API_VERSION = "1.2.0";
+declare const API_VERSION = "1.3.0";
 declare const API_MAJOR: number;
 declare const IS_PUBLIC_KEY = "isPublic";
 declare const PERMISSIONS_KEY = "permissions";
@@ -464,6 +464,8 @@ interface ModuleManifest {
         modules?: Record<string, string>;
     };
 }
+declare const PRIMEVUE_PRESETS: readonly ["aura", "lara", "nora", "material"];
+type PrimeVuePreset = (typeof PRIMEVUE_PRESETS)[number];
 interface ThemeManifest {
     id: string;
     name: LocalizedText;
@@ -471,7 +473,8 @@ interface ThemeManifest {
     unicoreApi: string;
     side?: 'client' | 'admin';
     componentPrefix?: string;
-    primevue?: string;
+    primevue?: PrimeVuePreset;
+    primevueTokens?: Record<string, unknown>;
     tokens?: string;
     author?: string;
     homepage?: string;
@@ -487,7 +490,7 @@ interface ValidationResult<T> {
 declare const validateModuleManifest: (raw: unknown) => ValidationResult<ModuleManifest>;
 declare const validateThemeManifest: (raw: unknown) => ValidationResult<ThemeManifest>;
 declare const localizedText: (value: LocalizedText | undefined, locale: string, fallback?: string) => string;
-export { type ConfigFieldSchema, type ConfigFieldType, type LocalizedText, type ModuleManifest, type ThemeManifest, type ValidationResult, localizedText, validateModuleManifest, validateThemeManifest };
+export { type ConfigFieldSchema, type ConfigFieldType, type LocalizedText, type ModuleManifest, PRIMEVUE_PRESETS, type PrimeVuePreset, type ThemeManifest, type ValidationResult, localizedText, validateModuleManifest, validateThemeManifest };
 
 === nuxt/index.d.ts ===
 import { ModuleManifest, ThemeManifest } from '../manifest.js';
@@ -523,7 +526,7 @@ export { type LayerSide, type ResolveLayersOptions, type ResolvedLayers, type Re
 
 === server/index.d.ts ===
 export { ALLOW_INACTIVE_KEY, API_MAJOR, API_VERSION, CORE_API, CacheApi, Capabilities, ConfigApi, CoreApi, CoreEventMap, CoreEventName, EVENT_BUS, EventBus, EventErrorReporter, EventHandler, IS_PUBLIC_KEY, IssuanceApi, IssuanceGroupRef, IssuancePermissionRef, IssuanceProductRef, IssuanceServerRef, IssuanceTarget, LocalesApi, LoggerApi, MODULE_CONFIG, MODULE_ID, MODULE_ID_PATTERN, MailApi, ModuleContext, ModuleContribution, ModuleDefinition, MoneyApi, PERMISSIONS_KEY, PaymentCoreModule, PaymentCoreService, PaymentCreateInput, PaymentLink, PaymentsApi, REGISTRY_SYMBOL, Registry, ServerOnline, ServerRecord, ServersApi, StorageApi, THEME_ID_PATTERN, UnicoreApiNotReadyError, UserRecord, UsersApi, WebhookChannel, WebhookDeliveryResult, WebhookPost, WebhookTarget, WebhooksApi, capabilities, contribution, contributions, core, coreReady, defineModule, events, getRegistry, moduleContext, modulePrefixes, registerContribution, setCore } from '../index.js';
-export { ConfigFieldSchema, ConfigFieldType, LocalizedText, ModuleManifest, ThemeManifest, ValidationResult, localizedText, validateModuleManifest, validateThemeManifest } from '../manifest.js';
+export { ConfigFieldSchema, ConfigFieldType, LocalizedText, ModuleManifest, PRIMEVUE_PRESETS, PrimeVuePreset, ThemeManifest, ValidationResult, localizedText, validateModuleManifest, validateThemeManifest } from '../manifest.js';
 import * as _nestjs_common from '@nestjs/common';
 import { CronOptions } from '@nestjs/schedule';
 import 'typeorm';

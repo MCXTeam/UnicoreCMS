@@ -1,11 +1,11 @@
 <template>
   <div class="grid">
-    <div class="col-12">
+    <div v-for="section in sections" :key="section.side" class="col-12">
       <div class="card">
-        <DataTable :value="themes" :loading="loading" responsiveLayout="scroll" dataKey="id">
+        <DataTable :value="section.themes" :loading="loading" responsiveLayout="scroll" dataKey="id">
           <template #header>
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-              <h5 class="m-0">{{ $t('admin.themes_title') }}</h5>
+              <h5 class="m-0">{{ $t(section.title) }}</h5>
               <div class="flex align-items-center">
                 <ExtensionInstall @installed="load()" />
                 <Button :label="$t('admin.refresh')" icon="pi pi-refresh" class="p-button-text" @click="load()" />
@@ -41,23 +41,27 @@
                 :label="$t('admin.theme_deactivate')"
                 icon="pi pi-power-off"
                 class="p-button-text p-button-warning"
-                :disabled="loading || locked"
-                @click="setActive(null)"
+                :disabled="loading || locked[section.side]"
+                @click="setActive(null, section.side)"
               />
               <Button
                 v-else
                 :label="$t('admin.theme_activate')"
                 icon="pi pi-check"
                 class="p-button-text p-button-success"
-                :disabled="loading || locked || slotProps.data.status !== 'available'"
-                @click="setActive(slotProps.data.id)"
+                :disabled="loading || locked[section.side] || slotProps.data.status !== 'available'"
+                @click="setActive(slotProps.data.id, section.side)"
               />
             </template>
           </Column>
         </DataTable>
 
-        <Message v-if="locked" severity="warn" :closable="false" class="mt-3">{{ $t('admin.theme_locked') }}</Message>
-        <Message v-else severity="info" :closable="false" class="mt-3">{{ $t('admin.theme_hint') }}</Message>
+        <Message v-if="locked[section.side]" severity="warn" :closable="false" class="mt-3">
+          {{ $t(section.side === 'admin' ? 'admin.theme_locked_admin' : 'admin.theme_locked') }}
+        </Message>
+        <Message v-else severity="info" :closable="false" class="mt-3">
+          {{ $t(section.side === 'admin' ? 'admin.theme_hint_admin' : 'admin.theme_hint') }}
+        </Message>
       </div>
     </div>
   </div>
@@ -65,6 +69,11 @@
 
 <script>
 import { useToast } from 'primevue/usetoast'
+
+const SECTIONS = [
+  { side: 'client', title: 'admin.themes_title' },
+  { side: 'admin', title: 'admin.themes_title_admin' },
+]
 
 export default {
   setup() {
@@ -77,9 +86,17 @@ export default {
   data() {
     return {
       themes: [],
-      locked: false,
+      locked: { client: false, admin: false },
       loading: true,
     }
+  },
+  computed: {
+    sections() {
+      return SECTIONS.map((section) => ({
+        ...section,
+        themes: this.themes.filter((theme) => theme.side === section.side),
+      }))
+    },
   },
   mounted() {
     this.load()
@@ -106,14 +123,14 @@ export default {
         .catch(() => null)
 
       this.themes = data?.themes || []
-      this.locked = Boolean(data?.locked)
+      this.locked = data?.locked || { client: false, admin: false }
       this.loading = false
     },
-    async setActive(id) {
+    async setActive(id, side) {
       this.loading = true
 
       const result = await this.$api
-        .put('/admin/themes/active', { id })
+        .put('/admin/themes/active', { id, side })
         .then((res) => res.data)
         .catch(() => null)
 
@@ -124,7 +141,7 @@ export default {
       this.toast.add({
         severity: 'warn',
         summary: this.$t(id ? 'admin.theme_activated' : 'admin.theme_deactivated'),
-        detail: this.$t('admin.theme_rebuild'),
+        detail: this.$t(side === 'admin' ? 'admin.theme_rebuild_admin' : 'admin.theme_rebuild'),
         life: 8000,
       })
 

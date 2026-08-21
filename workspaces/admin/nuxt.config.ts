@@ -2,7 +2,7 @@ import './load-env'
 import { publicConfig } from 'unicore-common/public-config'
 import { projectRoot } from 'unicore-common/ports'
 import { resolveLayers } from 'unicore-api/nuxt'
-import { preset } from './theme/preset'
+import { presetFor } from './theme/preset'
 
 const layers = resolveLayers({ side: 'admin', root: projectRoot })
 
@@ -62,7 +62,7 @@ export default defineNuxtConfig({
     options: {
       ripple: true,
       theme: {
-        preset,
+        preset: presetFor(layers.themeLayer?.manifest.primevue, layers.themeLayer?.manifest.primevueTokens),
         options: {
           darkModeSelector: '.dark',
           cssLayer: false,

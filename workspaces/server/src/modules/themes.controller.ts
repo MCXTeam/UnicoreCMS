@@ -15,6 +15,6 @@ export class ThemesController {
 
   @Put('active')
   setActive(@Body() input: ThemeActiveInput) {
-    return this.service.setActive(input.id);
+    return this.service.setActive(input.id, input.side);
   }
 }

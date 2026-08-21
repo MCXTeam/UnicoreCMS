@@ -27,6 +27,7 @@ export interface PublicConfig {
   virtualDecimals: number;
   ingameDecimals: number;
   theme: string;
+  adminTheme: string;
   colorModePreference: string;
   colorModeFallback: string;
   devseed: boolean;
@@ -79,6 +80,7 @@ export const publicConfig: PublicConfig = {
     .default("dark")
     .asString(),
   theme: env.get(PUBLIC_ENV_KEY.theme).default("").asString(),
+  adminTheme: env.get(PUBLIC_ENV_KEY.adminTheme).default("").asString(),
   devseed: env.get(PUBLIC_ENV_KEY.devseed).default(0).asBool(),
 };
 
