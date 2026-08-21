@@ -19,6 +19,7 @@ import { DiscordChannel } from './channels/discord.channel';
 import { JsonChannel } from './channels/json.channel';
 import { TelegramChannel } from './channels/telegram.channel';
 import { VkChannel } from './channels/vk.channel';
+import { moduleWebhookChannels } from 'src/modules/runtime';
 import { WebhookDelivery } from './entities/webhook-delivery.entity';
 import { Webhook } from './entities/webhook.entity';
 import { WebhookDeliveryAction } from './enums/webhook-delivery-action.enum';
@@ -48,11 +49,39 @@ export class WebhookDeliveriesService {
     vk: VkChannel,
     json: JsonChannel,
   ) {
-    this.channels = new Map([discord, telegram, vk, json].map((channel) => [channel.request, channel]));
+    this.channels = new Map(
+      [discord, telegram, vk, json, ...(moduleWebhookChannels() as WebhookChannel[])].map((channel) => [channel.request, channel]),
+    );
   }
 
   channel(request: WebhookRequestType): WebhookChannel {
     return this.channels.get(request);
+  }
+
+  channelNames(): string[] {
+    return [...this.channels.keys()];
+  }
+
+  async broadcast(request: string, post: NewsPost): Promise<number> {
+    const channel = this.channel(request as WebhookRequestType);
+
+    if (!channel) throw new Error(`Канал ${request} недоступен`);
+
+    const webhooks = (await this.targets()).filter((webhook) => String(webhook.request) === request);
+    let sent = 0;
+
+    for (const webhook of webhooks) {
+      try {
+        await channel.publish(webhook, { ...post, text: htmlToSocial(post.text, channel.format) });
+        sent += 1;
+      } catch (error: any) {
+        this.logger.warn(
+          `Рассылка в вебхук ${webhook.id}: ${truncate(error?.message || String(error), WEBHOOK_ERROR_MAX_LENGTH)}`,
+        );
+      }
+    }
+
+    return sent;
   }
 
   buildPost(news: News, request: WebhookRequestType): NewsPost {

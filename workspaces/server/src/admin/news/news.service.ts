@@ -1,4 +1,5 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { events } from 'unicore-api';
 import { InjectRepository } from '@nestjs/typeorm';
 import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { In, IsNull, Repository } from 'typeorm';
@@ -116,6 +117,8 @@ export class NewsService {
   async publish(id: number, mode: PublishMode, webhooks?: number[]): Promise<WebhookDeliveryDto[]> {
     const news = await this.findOne(id);
     const queued = await this.deliveriesService.enqueueNews(news, mode, webhooks);
+
+    await events().emit('news.published', { id: news.id, title: news.title });
 
     return queued.map((delivery) => new WebhookDeliveryDto(delivery));
   }

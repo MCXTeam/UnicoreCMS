@@ -1,4 +1,5 @@
 import { NumberSortInput, debitUserBalance, MomentWrapper } from '@common';
+import { events } from 'unicore-api';
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/admin/users/entities/user.entity';
@@ -110,6 +111,15 @@ export class DonatePermissionsService {
       runAfterCommit(() => this.eventsService.server?.to(Permission.KernelUnicoreConnect).emit('give_permission', saved));
     }
 
+    runAfterCommit(() =>
+      events().emit('donate.permission.granted', {
+        uuid: user.uuid,
+        serverId: Number(server?.id || 0),
+        permissionId: permission.id,
+        seconds: period.expire || 0,
+      }),
+    );
+
     return saved;
   }
 
@@ -136,6 +146,14 @@ export class DonatePermissionsService {
     if (!udp) throw new NotFoundException();
 
     await this.userPermissionsRepository.remove(udp);
+
+    runAfterCommit(() =>
+      events().emit('donate.permission.revoked', {
+        uuid: udp.user.uuid,
+        serverId: Number(udp.server?.id || 0),
+        permissionId: udp.permission.id,
+      }),
+    );
 
     if (udp.permission.type != PermissionType.Web) {
       runAfterCommit(() => this.eventsService.server?.to(Permission.KernelUnicoreConnect).emit('take_permission', udp));

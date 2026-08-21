@@ -21,6 +21,10 @@ import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { CronModule } from './cron/cron.module';
 import { AppController } from './app.controller';
+import { ApiHostModule } from './modules/api-host.module';
+import { ModulesModule } from './modules/modules.module';
+import { ThemesModule } from './modules/themes.module';
+import { moduleNestImports } from './modules/runtime';
 
 @Injectable()
 export class AppLoggerMiddleware implements NestMiddleware {
@@ -91,6 +95,10 @@ export class AppLoggerMiddleware implements NestMiddleware {
     GameModule,
     PaymentModule,
     CronModule,
+    ApiHostModule,
+    ModulesModule,
+    ThemesModule,
+    ...moduleNestImports(),
   ],
   controllers: [AppController],
 })

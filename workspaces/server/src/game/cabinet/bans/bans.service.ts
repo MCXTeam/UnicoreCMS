@@ -1,4 +1,6 @@
 import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { runAfterCommit } from 'src/common/utils/transaction';
+import { events } from 'unicore-api';
 import { InjectRepository } from '@nestjs/typeorm';
 import { userPermissionCheck, UsersService } from 'src/admin/users/users.service';
 import { Repository } from 'typeorm';
@@ -56,7 +58,16 @@ export class BansService {
 
     if (!ban.user || !ban.actor || ban.user.uuid == kernel.uuid) throw new BadRequestException();
 
-    return this.bansRepository.save(ban);
+    const saved = await this.bansRepository.save(ban);
+
+    await events().emit('user.banned', {
+      uuid: saved.user.uuid,
+      username: saved.user.username,
+      reason: saved.reason,
+      until: saved.expires,
+    });
+
+    return saved;
   }
 
   async createFromAdmin(actor: User, input: BanFromAdminInput) {
@@ -91,10 +102,16 @@ export class BansService {
     await this.bansRepository.delete({ user: { uuid: user.uuid } });
     await this.historyService.create(HistoryType.UnabnPurchase, ip, user, { real: price, virtual: 0 });
 
+    runAfterCommit(() => events().emit('user.unbanned', { uuid: user.uuid, username: user.username }));
+
     return true;
   }
 
   async remove(uuid: string): Promise<void> {
+    const ban = await this.bansRepository.findOne({ where: { user: { uuid } }, relations: ['user'] });
+
     await this.bansRepository.delete({ user: { uuid: uuid } });
+
+    if (ban) await events().emit('user.unbanned', { uuid, username: ban.user?.username || '' });
   }
 }

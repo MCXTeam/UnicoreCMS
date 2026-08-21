@@ -9,7 +9,7 @@ import { RoleCreateInput } from './dto/role-create.input';
 import { User } from '../users/entities/user.entity';
 import { ServersService } from 'src/game/servers/servers.service';
 import { ImportantRoles } from './emums/important-roles.enum';
-import { PermissionMapper } from './mappers/permissions.mapper';
+import { permissionAutocomplete } from './mappers/permissions.mapper';
 
 @Injectable()
 export class RolesService {
@@ -49,7 +49,7 @@ export class RolesService {
 
   async findAutoCompleate(): Promise<string[]> {
     const servers = await this.serversService.find();
-    const autocompleate = PermissionMapper.map((perm: any) => {
+    const autocompleate = permissionAutocomplete().map((perm: any) => {
       if (perm.includes('%server%')) {
         perm = servers.map((server) => perm.replace('%server%', server.id));
       }

@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { events } from 'unicore-api';
 import { InjectRepository } from '@nestjs/typeorm';
 import { debitUserBalance } from '@common';
 import { User } from 'src/admin/users/entities/user.entity';
@@ -357,12 +358,29 @@ export class CartService {
     const positions = [
       ...cartItems.map((ci) => ({
         price: currencyUtils.saleApply(ci.product.price, ci.product.sale) * ci.amount,
-        write: (cost: PurchaseCost) =>
-          this.historyService.create(HistoryType.ProductPurchase, ip, user, ci.product, ci.server, ci.amount, cost),
+        write: async (cost: PurchaseCost) => {
+          await this.historyService.create(HistoryType.ProductPurchase, ip, user, ci.product, ci.server, ci.amount, cost);
+          await events().emit('purchase.completed', {
+            uuid: user.uuid,
+            serverId: Number(ci.server.id),
+            kind: 'product',
+            itemId: ci.product.id,
+            amount: ci.amount,
+          });
+        },
       })),
       ...cartKitItems.map((cik) => ({
         price: currencyUtils.saleApply(cik.kit.price, cik.kit.sale),
-        write: (cost: PurchaseCost) => this.historyService.create(HistoryType.KitPurchase, ip, user, cik.kit, cik.server, cost),
+        write: async (cost: PurchaseCost) => {
+          await this.historyService.create(HistoryType.KitPurchase, ip, user, cik.kit, cik.server, cost);
+          await events().emit('purchase.completed', {
+            uuid: user.uuid,
+            serverId: Number(cik.server.id),
+            kind: 'kit',
+            itemId: cik.kit.id,
+            amount: 1,
+          });
+        },
       })),
     ];
 

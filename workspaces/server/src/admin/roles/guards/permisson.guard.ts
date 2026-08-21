@@ -11,6 +11,7 @@ import { getDataSourceByName } from 'typeorm-transactional';
 import { UsersDonateGroup } from 'src/game/donate/groups/entities/user-donate.entity';
 import { UsersDonatePermission } from 'src/game/donate/permissions/entities/user-permission.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { permissionUniverse } from '../permission-universe';
 
 function matchPerms(list: string[], pattern: string): string[] {
   return expandPermissionPattern(pattern)
@@ -21,7 +22,7 @@ function matchPerms(list: string[], pattern: string): string[] {
 export type PermissionOptions = {
   or?: boolean;
 };
-export type PermissionArgs = Permission[] | [Permission[], PermissionOptions]; // Or condition
+export type PermissionArgs = (Permission | string)[] | [(Permission | string)[], PermissionOptions]; // Or condition
 
 export function resolvePermissions(patterns: string[], universe: string[]): string[] {
   const allow: string[] = [];
@@ -41,11 +42,11 @@ export function transformPermissions(userPart: Partial<User>) {
   if (!user?.roles) user.roles = [];
   user.perms.push(...user.roles.map((role) => role.perms).flat());
 
-  if (user.perms.length) user.perms = resolvePermissions(user.perms, Object.values(Permission));
+  if (user.perms.length) user.perms = resolvePermissions(user.perms, permissionUniverse());
 
   user.roles = user.roles.map((role) => _.omit(role, 'perms')) as Role[];
 
-  if (user.superuser) user.perms = Object.values(Permission);
+  if (user.superuser) user.perms = permissionUniverse();
 
   return user;
 }

@@ -1,6 +1,7 @@
 import { NAME_MAX_LENGTH, TOKEN_MAX_LENGTH, WEBHOOK_TARGET_MAX_LENGTH } from '@common';
 import { IsBoolean, IsDefined, IsEnum, IsOptional, IsString, IsUrl, MaxLength } from 'class-validator';
 import { WebhookRequestType } from '../enums/webhook-request-type';
+import { IsWebhookChannel } from '../webhook-channels';
 import { WebhookType } from '../enums/webhook-type.enum';
 
 export class WebhookInput {
@@ -14,7 +15,7 @@ export class WebhookInput {
   type: WebhookType;
 
   @IsDefined()
-  @IsEnum(WebhookRequestType)
+  @IsWebhookChannel()
   request: WebhookRequestType;
 
   @IsOptional()

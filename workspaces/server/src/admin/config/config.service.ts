@@ -6,6 +6,8 @@ import { DEFAULT_ISSUANCE_PRESET, RCON_PRESETS } from 'unicore-common';
 import { CacheKey, KEEP_HISTORY_DAYS, KEEP_PAID_PAYMENTS_DAYS, KEEP_PENDING_PAYMENTS_DAYS } from '@common';
 import { IsNull, Repository } from 'typeorm';
 import { ConfigField, ConfigType } from './config.enum';
+import { moduleConfigSchema } from 'src/modules/runtime';
+import { configTypeOf, moduleConfigKey } from './module-config';
 import { CONFIG_CACHE_TTL_MS } from './config.constants';
 import { isValidConfigNumber } from './config.utils';
 import { ConfigInput } from './dto/config.input';
@@ -97,6 +99,23 @@ export class ConfigService {
       ])
       .orIgnore()
       .execute();
+
+    await this.initModules();
+  }
+
+  private async initModules(): Promise<void> {
+    const values = moduleConfigSchema().flatMap((module) =>
+      module.fields.map((field) => ({
+        key: moduleConfigKey(module.id, field),
+        value: field.default === undefined || field.default === null ? null : String(field.default),
+        important: true,
+        type: configTypeOf(field.type),
+      })),
+    );
+
+    if (!values.length) return;
+
+    await this.configRepo.createQueryBuilder().insert().into(Config).values(values).orIgnore().execute();
   }
 
   async find() {

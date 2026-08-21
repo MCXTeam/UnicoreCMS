@@ -29,6 +29,7 @@ export const PUBLIC_ENV_KEY = {
   ingameDecimals: "INGAME_DECIMALS",
   colorModePreference: "COLOR_MODE_PREFERENCE",
   colorModeFallback: "COLOR_MODE_FALLBACK",
+  theme: "UNICORE_THEME",
   devseed: "DEV_SEED",
 } as const;
 

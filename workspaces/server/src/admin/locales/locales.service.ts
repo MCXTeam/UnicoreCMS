@@ -6,6 +6,8 @@ import { LocaleInput } from './dto/locale.input';
 import { TranslationsInput } from './dto/translations.input';
 import { Locale } from './entities/locale.entity';
 import { Translation } from './entities/translation.entity';
+import { moduleLocales } from 'src/modules/runtime';
+import { activeThemeLocales } from 'src/modules/runtime/themes';
 import * as ru from 'src/seeds/locales/ru.json';
 import * as en from 'src/seeds/locales/en.json';
 
@@ -34,6 +36,28 @@ export class LocalesService {
       if (values.length) {
         await this.translationsRepository.createQueryBuilder().insert().into(Translation).values(values).orIgnore().execute();
       }
+    }
+
+    await this.seedModules();
+    await this.seedTheme();
+  }
+
+  private async seedModules(): Promise<void> {
+    for (const module of moduleLocales())
+      for (const [code, messages] of Object.entries(module.locales)) {
+        const values = Object.entries(messages).map(([key, value]) => ({ localeCode: code, key, value }));
+
+        if (values.length)
+          await this.translationsRepository.createQueryBuilder().insert().into(Translation).values(values).orIgnore().execute();
+      }
+  }
+
+  private async seedTheme(): Promise<void> {
+    for (const [code, messages] of Object.entries(activeThemeLocales())) {
+      const values = Object.entries(messages).map(([key, value]) => ({ localeCode: code, key, value }));
+
+      if (values.length)
+        await this.translationsRepository.createQueryBuilder().insert().into(Translation).values(values).orIgnore().execute();
     }
   }
 

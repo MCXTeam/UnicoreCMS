@@ -1,4 +1,5 @@
 import { assertUploadedFile, debitUserBalance, MomentWrapper, NumberSortInput, StorageManager } from '@common';
+import { events } from 'unicore-api';
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/admin/users/entities/user.entity';
@@ -157,6 +158,14 @@ export class DonateGroupsService {
     }
 
     runAfterCommit(() => this.eventsService.server?.to(Permission.KernelUnicoreConnect).emit('give_group', saved));
+    runAfterCommit(() =>
+      events().emit('donate.group.granted', {
+        uuid: user.uuid,
+        serverId: Number(server.id),
+        groupId: group.id,
+        seconds: period.expire || 0,
+      }),
+    );
 
     return saved;
   }
@@ -178,6 +187,9 @@ export class DonateGroupsService {
 
     await this.userDonatesRepository.remove(udg);
     runAfterCommit(() => this.eventsService.server?.to(Permission.KernelUnicoreConnect).emit('take_group', udg));
+    runAfterCommit(() =>
+      events().emit('donate.group.revoked', { uuid: udg.user.uuid, serverId: Number(udg.server.id), groupId: udg.group.id }),
+    );
 
     if (this.issuanceService.isRcon(udg.server)) {
       await this.issuanceService.removeGroup({ username: udg.user.username, uuid: udg.user.uuid }, udg.server, {

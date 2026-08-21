@@ -7,6 +7,7 @@ import { RefreshToken } from 'src/auth/entities/refresh-token.entity';
 import { PasswordUpdateInput } from '../dto/password-update.input';
 import { PasswordService } from 'src/auth/password/password.service';
 import { passwordAad } from 'src/auth/password/password-aad';
+import { events } from 'unicore-api';
 
 @Injectable()
 export class SettingsService {
@@ -20,6 +21,8 @@ export class SettingsService {
     user.password = await this.passwordService.hash(password, passwordAad(user.uuid));
 
     await this.usersRepo.update({ uuid: user.uuid }, { password: user.password });
+
+    await events().emit('user.password.changed', { uuid: user.uuid, username: user.username });
   }
 
   private async closeSessions(user: User) {

@@ -1,5 +1,6 @@
 import { envConfig, timezoneOffset } from 'unicore-common';
 import { NamingStrategy } from './common/database';
+import { moduleEntities } from './modules/runtime';
 
 const importAllFunctions = (
   // @ts-ignore
@@ -38,6 +39,6 @@ export const ormconfig: any = {
   password: envConfig.databasePassword,
   database: envConfig.databaseName,
   timezone: timezoneOffset(envConfig.timezone),
-  entities: importEntities(),
+  entities: [...importEntities(), ...moduleEntities()],
   namingStrategy: new NamingStrategy(),
 };

@@ -1,4 +1,5 @@
 import { ConflictException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { events } from 'unicore-api';
 import { User } from 'src/admin/users/entities/user.entity';
 import { UsersService } from 'src/admin/users/users.service';
 import { TokensService } from './tokens.service';
@@ -66,6 +67,8 @@ export class AuthService {
     const accessToken = await this.tokensService.generateAccessToken(user);
     const refreshToken = await this.tokensService.generateRefreshToken(user, agent, ip);
 
+    await events().emit('user.login', { uuid: user.uuid, username: user.username, ip });
+
     return new AuthenticatedDto({ accessToken, refreshToken, user });
   }
 
@@ -108,6 +111,8 @@ export class AuthService {
     const refreshToken = await this.tokensService.generateRefreshToken(user, agent, ip);
 
     if (input.ref) await this.attachReferal(user, input.ref);
+
+    await events().emit('user.registered', { uuid: user.uuid, username: user.username, email: user.email });
 
     return new AuthenticatedDto({ accessToken, refreshToken, user });
   }

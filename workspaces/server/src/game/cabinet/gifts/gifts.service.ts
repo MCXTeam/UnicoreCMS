@@ -1,4 +1,5 @@
 import { MomentWrapper } from '@common';
+import { events } from 'unicore-api';
 import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/admin/users/entities/user.entity';
@@ -136,6 +137,8 @@ export class GiftsService {
         .execute();
       throw e;
     }
+
+    await events().emit('gift.activated', { uuid: user.uuid, promocode: gift.promocode, type: String(gift.type) });
 
     return new GiftDto(gift);
   }

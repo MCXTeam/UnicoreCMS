@@ -3,6 +3,7 @@ import { Inject, Injectable, Logger, NotFoundException, ServiceUnavailableExcept
 import { InjectRepository } from '@nestjs/typeorm';
 import { MoreThan, Repository } from 'typeorm';
 import { envConfig } from 'unicore-common';
+import { events } from 'unicore-api';
 import { User } from '../users/entities/user.entity';
 import { EmailInput } from './dto/email.input';
 import { TestEmailInput } from './dto/test-email.input';
@@ -229,6 +230,8 @@ export class EmailService {
 
       await this.usersRepository.update({ uuid: exist.user.uuid }, { password: exist.user.password });
       await this.tokensRepo.delete({ user: { uuid: exist.user.uuid } });
+
+      await events().emit('user.password.changed', { uuid: exist.user.uuid, username: exist.user.username });
     }
 
     return new UserDto(exist.user);

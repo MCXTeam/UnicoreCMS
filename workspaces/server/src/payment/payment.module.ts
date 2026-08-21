@@ -10,8 +10,9 @@ import { CentappModule } from './methods/centapp/centapp.module';
 import { EnotioModule } from './methods/enotio/enotio.module';
 import { PayokModule } from './methods/payok/payok.module';
 import { UnitpayModule } from './methods/unitpay/unitpay.module';
+import { modulePaymentModules } from 'src/modules/runtime';
 
-const register = [AnypayModule, UnitpayModule, FreekassaModule, EnotioModule, PayokModule, CentappModule].filter(
+const register = [AnypayModule, UnitpayModule, FreekassaModule, EnotioModule, PayokModule, CentappModule, ...modulePaymentModules()].filter(
   (method) => method.enabled,
 );
 

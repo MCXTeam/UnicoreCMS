@@ -9,6 +9,8 @@ import { Payment } from 'src/payment/entities/payment.entity';
 import { PaymentStatuses } from 'src/payment/enums/payment-statuses.enum';
 import { LessThanOrEqual, Repository } from 'typeorm';
 import { Transactional } from 'typeorm-transactional';
+import { events } from 'unicore-api';
+import { runAfterCommit } from 'src/common/utils/transaction';
 
 export class PaymentHandlerService {
   private readonly logger = new Logger(PaymentHandlerService.name);
@@ -20,7 +22,7 @@ export class PaymentHandlerService {
     @InjectRepository(User) private usersRepo: Repository<User>,
   ) {}
 
-  create(method: string, amount: number, user: User, ip: string): Promise<Payment> {
+  async create(method: string, amount: number, user: User, ip: string): Promise<Payment> {
     const payment = new Payment();
 
     payment.method = method;
@@ -29,7 +31,11 @@ export class PaymentHandlerService {
     payment.user = user;
     payment.ip = ip;
 
-    return this.paymentsRepo.save(payment);
+    const saved = await this.paymentsRepo.save(payment);
+
+    await events().emit('payment.created', { id: saved.id, uuid: user.uuid, amount: Number(saved.amount), method });
+
+    return saved;
   }
 
   @Transactional()
@@ -67,6 +73,8 @@ export class PaymentHandlerService {
 
     await this.usersRepo.increment({ uuid: payment.user.uuid }, 'real', credit);
     await this.historyService.create(HistoryType.Payment, payment.ip, payment.user, payment);
+
+    runAfterCommit(() => events().emit('payment.paid', { id, uuid: payment.user.uuid, amount: credit, method: payment.method }));
 
     return true;
   }
