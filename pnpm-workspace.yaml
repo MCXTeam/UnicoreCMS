@@ -1,5 +1,8 @@
 packages:
   - 'workspaces/*'
+  - 'modules/*'
+  - 'themes/*'
+  - 'examples/*'
 
 nodeLinker: hoisted
 engineStrict: true
@@ -21,6 +24,7 @@ peerDependencyRules:
     - fastify
 
 allowBuilds:
+  '@swc/core': true
   '@parcel/watcher': true
   bcrypt: true
   canvas: true

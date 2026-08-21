@@ -1,0 +1,138 @@
+import { existsSync, readdirSync, readFileSync, statSync } from 'fs'
+import { join, resolve } from 'path'
+import { satisfies } from 'semver'
+import { API_VERSION } from '../version'
+import { ModuleManifest, ThemeManifest, validateModuleManifest, validateThemeManifest } from '../manifest'
+
+export type LayerSide = 'client' | 'admin'
+
+export interface ResolvedModuleLayer {
+  id: string
+  path: string
+  componentPrefix: string
+  manifest: ModuleManifest
+}
+
+export interface ResolvedThemeLayer {
+  id: string
+  path: string
+  componentPrefix: string
+  manifest: ThemeManifest
+}
+
+export interface ResolvedLayers {
+  modules: string[]
+  theme: string[]
+  moduleLayers: ResolvedModuleLayer[]
+  themeLayer: ResolvedThemeLayer | null
+  enabledIds: string[]
+  themeId: string | null
+  problems: string[]
+}
+
+export interface ResolveLayersOptions {
+  side: LayerSide
+  root?: string
+  theme?: string | null
+}
+
+const readJson = (path: string): unknown => {
+  try {
+    return JSON.parse(readFileSync(path, 'utf-8'))
+  } catch {
+    return null
+  }
+}
+
+const readState = (root: string): Record<string, { enabled?: boolean }> => {
+  const state = readJson(join(root, 'modules', 'state.json'))
+
+  return state && typeof state === 'object' ? (state as Record<string, { enabled?: boolean }>) : {}
+}
+
+const readActiveTheme = (root: string): string | null => {
+  const state = readJson(join(root, 'themes', 'state.json'))
+
+  if (!state || typeof state !== 'object') return null
+
+  const active = (state as { active?: unknown }).active
+
+  return typeof active === 'string' && active ? active : null
+}
+
+const directories = (path: string): string[] => {
+  if (!existsSync(path)) return []
+
+  return readdirSync(path)
+    .filter((name) => !name.startsWith('.'))
+    .map((name) => join(path, name))
+    .filter((item) => statSync(item).isDirectory())
+}
+
+export const resolveLayers = (options: ResolveLayersOptions): ResolvedLayers => {
+  const root = options.root || process.cwd()
+  const state = readState(root)
+  const problems: string[] = []
+
+  const moduleLayers: ResolvedModuleLayer[] = []
+
+  for (const dir of directories(join(root, 'modules'))) {
+    const raw = readJson(join(dir, 'module.json'))
+    if (!raw) continue
+
+    const { manifest, errors } = validateModuleManifest(raw)
+
+    if (!manifest) {
+      problems.push(`modules/${dir.split('/').pop()}: ${errors.join('; ')}`)
+      continue
+    }
+
+    if (state[manifest.id]?.enabled === false) continue
+
+    if (!satisfies(API_VERSION, manifest.unicoreApi)) {
+      problems.push(`Модуль «${manifest.id}» требует API ${manifest.unicoreApi}, установлен ${API_VERSION}`)
+      continue
+    }
+
+    const layer = manifest[options.side]
+    if (!layer) continue
+
+    const path = resolve(dir, layer)
+    if (!existsSync(path)) {
+      problems.push(`Модуль «${manifest.id}»: слой ${options.side} не найден по пути ${layer}`)
+      continue
+    }
+
+    moduleLayers.push({ id: manifest.id, path, componentPrefix: manifest.componentPrefix || '', manifest })
+  }
+
+  const requestedTheme =
+    options.theme === undefined ? process.env.UNICORE_THEME || readActiveTheme(root) || null : options.theme
+  let themeLayer: ResolvedThemeLayer | null = null
+
+  if (requestedTheme) {
+    const dir = join(root, 'themes', requestedTheme)
+    const raw = readJson(join(dir, 'theme.json'))
+
+    if (!raw) problems.push(`Тема «${requestedTheme}» не найдена в themes/`)
+    else {
+      const { manifest, errors } = validateThemeManifest(raw)
+
+      if (!manifest) problems.push(`themes/${requestedTheme}: ${errors.join('; ')}`)
+      else if (!satisfies(API_VERSION, manifest.unicoreApi))
+        problems.push(`Тема «${manifest.id}» требует API ${manifest.unicoreApi}, установлен ${API_VERSION}`)
+      else if ((manifest.side || 'client') !== options.side) themeLayer = null
+      else themeLayer = { id: manifest.id, path: dir, componentPrefix: manifest.componentPrefix || 'Theme', manifest }
+    }
+  }
+
+  return {
+    modules: moduleLayers.map((item) => item.path),
+    theme: themeLayer ? [themeLayer.path] : [],
+    moduleLayers,
+    themeLayer,
+    enabledIds: moduleLayers.map((item) => item.id),
+    themeId: themeLayer?.id || null,
+    problems,
+  }
+}

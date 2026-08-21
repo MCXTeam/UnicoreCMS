@@ -1,0 +1,532 @@
+=== admin/index.d.ts ===
+interface AdminMenuItem {
+    label: string;
+    icon?: string;
+    to?: string;
+    items?: AdminMenuItem[];
+}
+interface AdminMenuGroup {
+    label: string;
+    items: AdminMenuItem[];
+}
+type AdminRouteAccess = 'superuser' | string[];
+interface AdminSlotEntry {
+    slot: string;
+    component: string;
+    order?: number;
+}
+interface AdminModuleDefinition {
+    id: string;
+    menu?: AdminMenuItem[];
+    group?: string;
+    access?: Record<string, AdminRouteAccess>;
+    slots?: AdminSlotEntry[];
+}
+declare const defineAdminModule: (definition: AdminModuleDefinition) => AdminModuleDefinition;
+declare const adminModules: () => AdminModuleDefinition[];
+declare const adminMenu: () => AdminMenuItem[];
+declare const adminAccess: () => Record<string, AdminRouteAccess>;
+declare const adminSlots: (slot: string) => AdminSlotEntry[];
+export { type AdminMenuGroup, type AdminMenuItem, type AdminModuleDefinition, type AdminRouteAccess, type AdminSlotEntry, adminAccess, adminMenu, adminModules, adminSlots, defineAdminModule };
+
+=== client/index.d.ts ===
+interface ClientNavItem {
+    key: string;
+    to: string;
+    label: string;
+    icon?: string;
+    when?: 'always' | 'auth' | 'guest';
+    places?: ('navbar' | 'cabinet' | 'footer')[];
+    order?: number;
+}
+interface ClientSlotEntry {
+    slot: string;
+    component: string;
+    order?: number;
+    when?: 'always' | 'auth' | 'guest';
+}
+interface ClientModuleDefinition {
+    id: string;
+    nav?: ClientNavItem[];
+    slots?: ClientSlotEntry[];
+}
+declare const defineClientModule: (definition: ClientModuleDefinition) => ClientModuleDefinition;
+declare const clientModules: () => ClientModuleDefinition[];
+declare const clientNav: (place: ClientNavItem["places"] extends (infer T)[] | undefined ? T : never) => ClientNavItem[];
+declare const clientSlots: (slot: string) => ClientSlotEntry[];
+export { type ClientModuleDefinition, type ClientNavItem, type ClientSlotEntry, clientModules, clientNav, clientSlots, defineClientModule };
+
+=== index.d.ts ===
+import { ConfigFieldSchema } from './manifest.js';
+export { ConfigFieldType, LocalizedText, ModuleManifest, ThemeManifest, ValidationResult, localizedText, validateModuleManifest, validateThemeManifest } from './manifest.js';
+import { DataSource } from 'typeorm';
+declare const API_VERSION = "1.1.0";
+declare const API_MAJOR: number;
+declare const IS_PUBLIC_KEY = "isPublic";
+declare const PERMISSIONS_KEY = "permissions";
+declare const ALLOW_INACTIVE_KEY = "allowInactive";
+declare const REGISTRY_SYMBOL: unique symbol;
+declare const MODULE_ID_PATTERN: RegExp;
+declare const THEME_ID_PATTERN: RegExp;
+declare const modulePrefixes: (id: string) => {
+    table: string;
+    config: string;
+    publicConfig: string;
+    locale: string;
+    permission: string;
+    route: string;
+    page: string;
+};
+interface CoreEventMap {
+    'core.ready': {
+        version: string;
+    };
+    'core.shutdown': Record<string, never>;
+    'user.registered': {
+        uuid: string;
+        username: string;
+        email: string;
+    };
+    'user.activated': {
+        uuid: string;
+        username: string;
+    };
+    'user.login': {
+        uuid: string;
+        username: string;
+        ip?: string;
+    };
+    'user.password.changed': {
+        uuid: string;
+        username: string;
+    };
+    'user.banned': {
+        uuid: string;
+        username: string;
+        reason?: string;
+        until?: Date | null;
+    };
+    'user.unbanned': {
+        uuid: string;
+        username: string;
+    };
+    'payment.created': {
+        id: number;
+        uuid: string;
+        amount: number;
+        method: string;
+    };
+    'payment.paid': {
+        id: number;
+        uuid: string;
+        amount: number;
+        method: string;
+    };
+    'purchase.completed': {
+        uuid: string;
+        serverId: number;
+        kind: 'product' | 'kit';
+        itemId: number;
+        amount: number;
+    };
+    'donate.group.granted': {
+        uuid: string;
+        serverId: number;
+        groupId: number;
+        seconds: number;
+    };
+    'donate.group.revoked': {
+        uuid: string;
+        serverId: number;
+        groupId: number;
+    };
+    'donate.permission.granted': {
+        uuid: string;
+        serverId: number;
+        permissionId: number;
+        seconds: number;
+    };
+    'donate.permission.revoked': {
+        uuid: string;
+        serverId: number;
+        permissionId: number;
+    };
+    'gift.activated': {
+        uuid: string;
+        promocode: string;
+        type: string;
+    };
+    'news.published': {
+        id: number;
+        title: string;
+    };
+}
+type CoreEventName = keyof CoreEventMap;
+type EventHandler<T> = (payload: T) => void | Promise<void>;
+type EventErrorReporter = (event: string, owner: string | undefined, error: unknown) => void;
+declare class EventBus {
+    private subscriptions;
+    private reporter;
+    setErrorReporter(reporter: EventErrorReporter): void;
+    on<K extends CoreEventName>(event: K, handler: EventHandler<CoreEventMap[K]>, owner?: string): () => void;
+    on(event: string, handler: EventHandler<any>, owner?: string): () => void;
+    once<K extends CoreEventName>(event: K, handler: EventHandler<CoreEventMap[K]>, owner?: string): () => void;
+    once(event: string, handler: EventHandler<any>, owner?: string): () => void;
+    off(event: string, handler: EventHandler<any>): void;
+    offOwner(owner: string): void;
+    emit<K extends CoreEventName>(event: K, payload: CoreEventMap[K]): Promise<void>;
+    emit(event: string, payload: unknown): Promise<void>;
+    listeners(event: string): number;
+    private subscribe;
+}
+declare class Capabilities {
+    private items;
+    replace(list: Iterable<string>): void;
+    add(name: string): void;
+    has(name: string): boolean;
+    require(name: string): void;
+    list(): string[];
+}
+interface ModuleContribution {
+    id: string;
+    entities: unknown[];
+    nestModules: unknown[];
+    permissions: string[];
+    config: ConfigFieldSchema[];
+    locales: Record<string, Record<string, string>>;
+    paymentModules: unknown[];
+    webhookChannels: unknown[];
+    setup?: (context: unknown) => void | Promise<void>;
+}
+interface Registry {
+    apiVersion: string;
+    events: EventBus;
+    capabilities: Capabilities;
+    core: unknown | null;
+    modules: Map<string, ModuleContribution>;
+}
+declare const getRegistry: () => Registry;
+declare const registerContribution: (contribution: ModuleContribution) => void;
+declare const contributions: () => ModuleContribution[];
+declare const contribution: (id: string) => ModuleContribution | undefined;
+declare const events: () => EventBus;
+declare const capabilities: () => Capabilities;
+interface WebhookPost {
+    title: string;
+    description: string;
+    image?: string | null;
+    url?: string;
+}
+interface WebhookDeliveryResult {
+    messageId?: string;
+    code?: number;
+    warning?: string;
+}
+interface WebhookChannel {
+    readonly request: string;
+    publish(target: {
+        url?: string;
+        target?: string;
+    }, post: WebhookPost): Promise<WebhookDeliveryResult>;
+    edit?(target: {
+        url?: string;
+        target?: string;
+    }, messageId: string, post: WebhookPost): Promise<WebhookDeliveryResult>;
+    remove?(target: {
+        url?: string;
+        target?: string;
+    }, messageId: string): Promise<void>;
+}
+interface UserRecord {
+    uuid: string;
+    username: string;
+    email: string;
+    activated: boolean;
+    superuser: boolean;
+    perms: string[];
+}
+interface IssuanceTarget {
+    uuid?: string;
+    username?: string;
+    email?: string;
+}
+interface IssuanceServerRef {
+    id: string | number;
+    name?: string;
+}
+interface IssuanceProductRef {
+    id?: number;
+    name?: string;
+    item_id?: string;
+    nbt?: string;
+    give_method?: string;
+    commands?: string[] | null;
+}
+interface IssuanceGroupRef {
+    ingame_id?: string;
+    name?: string;
+}
+interface IssuancePermissionRef {
+    name?: string;
+    perms?: string[];
+}
+interface UsersApi {
+    getById(uuid: string): Promise<UserRecord | null>;
+    getByUsername(username: string): Promise<UserRecord | null>;
+    getByEmail(email: string): Promise<UserRecord | null>;
+    perms(uuid: string): Promise<string[]>;
+}
+interface ConfigApi {
+    get(key: string): Promise<string | null>;
+    getNumber(key: string, fallback?: number): Promise<number>;
+    getBoolean(key: string, fallback?: boolean): Promise<boolean>;
+    set(key: string, value: string | number | boolean): Promise<void>;
+}
+interface LocalesApi {
+    defaultCode(): Promise<string>;
+    enabled(): Promise<string[]>;
+    messages(code: string): Promise<Record<string, string>>;
+}
+interface IssuanceApi {
+    isRcon(server: IssuanceServerRef): Promise<boolean>;
+    deliverProduct(user: IssuanceTarget, server: IssuanceServerRef, product: IssuanceProductRef, amount: number): Promise<boolean>;
+    deliverGroup(user: IssuanceTarget, server: IssuanceServerRef, group: IssuanceGroupRef, seconds?: number): Promise<boolean>;
+    removeGroup(user: IssuanceTarget, server: IssuanceServerRef, group: IssuanceGroupRef): Promise<boolean>;
+    deliverPermission(user: IssuanceTarget, server: IssuanceServerRef, permission: IssuancePermissionRef, seconds?: number): Promise<boolean>;
+    removePermission(user: IssuanceTarget, server: IssuanceServerRef, permission: IssuancePermissionRef): Promise<boolean>;
+    runCommands(serverId: string | number, commands: string[]): Promise<void>;
+}
+interface ServerRecord {
+    id: string;
+    name: string;
+    icon?: string | null;
+    version?: string;
+}
+interface ServerOnline {
+    id: string;
+    online: boolean;
+    players: number;
+    maxplayers: number;
+}
+interface ServersApi {
+    all(): Promise<ServerRecord[]>;
+    one(id: string | number): Promise<ServerRecord | null>;
+    online(): Promise<ServerOnline[]>;
+}
+interface MoneyApi {
+    ingame(uuid: string, serverId: string | number): Promise<number>;
+    giveIngame(uuid: string, serverId: string | number, amount: number): Promise<void>;
+    takeIngame(uuid: string, serverId: string | number, amount: number): Promise<void>;
+    giveReal(uuid: string, amount: number): Promise<void>;
+    takeReal(uuid: string, amount: number): Promise<void>;
+}
+interface PaymentsApi {
+    methods(): Promise<string[]>;
+    create(uuid: string, amount: number, method: string, ip?: string): Promise<number>;
+    complete(paymentId: number, billId?: string, reportedAmount?: number): Promise<boolean>;
+    credit(uuid: string, amount: number, method: string, ip?: string): Promise<boolean>;
+}
+interface WebhookTarget {
+    id: number;
+    name: string;
+    channel: string;
+}
+interface WebhooksApi {
+    channels(): string[];
+    targets(channel?: string): Promise<WebhookTarget[]>;
+    send(channel: string, post: WebhookPost): Promise<number>;
+}
+interface MailApi {
+    send(to: string, subject: string, html: string): Promise<void>;
+    sendToUser(uuid: string, subject: string, html: string): Promise<void>;
+}
+interface StorageApi {
+    url(filename: string): string;
+    save(filename: string, content: Buffer): Promise<string>;
+    remove(filename: string): Promise<void>;
+}
+interface CacheApi {
+    get<T>(key: string): Promise<T | undefined>;
+    set(key: string, value: unknown, ttlSeconds?: number): Promise<void>;
+    del(key: string): Promise<void>;
+}
+interface LoggerApi {
+    log(message: string): void;
+    warn(message: string): void;
+    error(message: string, error?: unknown): void;
+    debug(message: string): void;
+}
+interface CoreApi {
+    version: string;
+    users: UsersApi;
+    config: ConfigApi;
+    locales: LocalesApi;
+    issuance: IssuanceApi;
+    servers: ServersApi;
+    money: MoneyApi;
+    payments: PaymentsApi;
+    webhooks: WebhooksApi;
+    mail: MailApi;
+    storage: StorageApi;
+    cache: CacheApi;
+    db: DataSource;
+    logger(moduleId: string): LoggerApi;
+}
+declare class UnicoreApiNotReadyError extends Error {
+    constructor();
+}
+declare const setCore: (core: CoreApi) => void;
+declare const coreReady: () => boolean;
+declare const core: () => CoreApi;
+interface ModuleContext {
+    id: string;
+    events: EventBus;
+    capabilities: Capabilities;
+    logger: LoggerApi;
+    core: () => CoreApi;
+}
+interface ModuleDefinition {
+    id: string;
+    entities?: unknown[];
+    nestModules?: unknown[];
+    permissions?: string[];
+    config?: ConfigFieldSchema[];
+    locales?: Record<string, Record<string, string>>;
+    paymentModules?: unknown[];
+    webhookChannels?: unknown[];
+    setup?: (context: ModuleContext) => void | Promise<void>;
+}
+declare const defineModule: (definition: ModuleDefinition) => ModuleDefinition;
+declare const moduleContext: (id: string) => ModuleContext;
+interface PaymentLink {
+    link: string;
+}
+interface PaymentCreateInput {
+    amount: number;
+    method: string;
+}
+declare abstract class PaymentCoreModule {
+    static id: string;
+    static enabled: boolean;
+}
+declare abstract class PaymentCoreService {
+    abstract createLink(user: unknown, input: PaymentCreateInput, ip: string): Promise<PaymentLink>;
+    abstract handler(ip: string, input: unknown): Promise<unknown>;
+}
+declare const CORE_API = "UNICORE_CORE_API";
+declare const MODULE_ID = "UNICORE_MODULE_ID";
+declare const EVENT_BUS = "UNICORE_EVENT_BUS";
+declare const MODULE_CONFIG = "UNICORE_MODULE_CONFIG";
+export { ALLOW_INACTIVE_KEY, API_MAJOR, API_VERSION, CORE_API, type CacheApi, Capabilities, type ConfigApi, ConfigFieldSchema, type CoreApi, type CoreEventMap, type CoreEventName, EVENT_BUS, EventBus, type EventErrorReporter, type EventHandler, IS_PUBLIC_KEY, type IssuanceApi, type IssuanceGroupRef, type IssuancePermissionRef, type IssuanceProductRef, type IssuanceServerRef, type IssuanceTarget, type LocalesApi, type LoggerApi, MODULE_CONFIG, MODULE_ID, MODULE_ID_PATTERN, type MailApi, type ModuleContext, type ModuleContribution, type ModuleDefinition, type MoneyApi, PERMISSIONS_KEY, PaymentCoreModule, PaymentCoreService, type PaymentCreateInput, type PaymentLink, type PaymentsApi, REGISTRY_SYMBOL, type Registry, type ServerOnline, type ServerRecord, type ServersApi, type StorageApi, THEME_ID_PATTERN, UnicoreApiNotReadyError, type UserRecord, type UsersApi, type WebhookChannel, type WebhookDeliveryResult, type WebhookPost, type WebhookTarget, type WebhooksApi, capabilities, contribution, contributions, core, coreReady, defineModule, events, getRegistry, moduleContext, modulePrefixes, registerContribution, setCore };
+
+=== manifest.d.ts ===
+type ConfigFieldType = 'string' | 'number' | 'boolean' | 'select';
+interface ConfigFieldSchema {
+    key: string;
+    type: ConfigFieldType;
+    default?: string | number | boolean;
+    public?: boolean;
+    min?: number;
+    max?: number;
+    options?: {
+        value: string;
+        label: string;
+    }[];
+    label?: string;
+    hint?: string;
+}
+type LocalizedText = string | Record<string, string>;
+interface ModuleManifest {
+    id: string;
+    name: LocalizedText;
+    version: string;
+    unicoreApi: string;
+    description?: LocalizedText;
+    author?: string;
+    homepage?: string;
+    license?: string;
+    server?: string;
+    client?: string;
+    admin?: string;
+    componentPrefix?: string;
+    locales?: string;
+    permissions?: string[];
+    config?: ConfigFieldSchema[];
+    requires?: {
+        modules?: Record<string, string>;
+    };
+}
+interface ThemeManifest {
+    id: string;
+    name: LocalizedText;
+    version: string;
+    unicoreApi: string;
+    side?: 'client' | 'admin';
+    componentPrefix?: string;
+    primevue?: string;
+    tokens?: string;
+    author?: string;
+    homepage?: string;
+    pages?: {
+        replace?: Record<string, string>;
+        remove?: string[];
+    };
+}
+interface ValidationResult<T> {
+    manifest: T | null;
+    errors: string[];
+}
+declare const validateModuleManifest: (raw: unknown) => ValidationResult<ModuleManifest>;
+declare const validateThemeManifest: (raw: unknown) => ValidationResult<ThemeManifest>;
+declare const localizedText: (value: LocalizedText | undefined, locale: string, fallback?: string) => string;
+export { type ConfigFieldSchema, type ConfigFieldType, type LocalizedText, type ModuleManifest, type ThemeManifest, type ValidationResult, localizedText, validateModuleManifest, validateThemeManifest };
+
+=== nuxt/index.d.ts ===
+import { ModuleManifest, ThemeManifest } from '../manifest.js';
+type LayerSide = 'client' | 'admin';
+interface ResolvedModuleLayer {
+    id: string;
+    path: string;
+    componentPrefix: string;
+    manifest: ModuleManifest;
+}
+interface ResolvedThemeLayer {
+    id: string;
+    path: string;
+    componentPrefix: string;
+    manifest: ThemeManifest;
+}
+interface ResolvedLayers {
+    modules: string[];
+    theme: string[];
+    moduleLayers: ResolvedModuleLayer[];
+    themeLayer: ResolvedThemeLayer | null;
+    enabledIds: string[];
+    themeId: string | null;
+    problems: string[];
+}
+interface ResolveLayersOptions {
+    side: LayerSide;
+    root?: string;
+    theme?: string | null;
+}
+declare const resolveLayers: (options: ResolveLayersOptions) => ResolvedLayers;
+export { type LayerSide, type ResolveLayersOptions, type ResolvedLayers, type ResolvedModuleLayer, type ResolvedThemeLayer, resolveLayers };
+
+=== server/index.d.ts ===
+export { ALLOW_INACTIVE_KEY, API_MAJOR, API_VERSION, CORE_API, CacheApi, Capabilities, ConfigApi, CoreApi, CoreEventMap, CoreEventName, EVENT_BUS, EventBus, EventErrorReporter, EventHandler, IS_PUBLIC_KEY, IssuanceApi, IssuanceGroupRef, IssuancePermissionRef, IssuanceProductRef, IssuanceServerRef, IssuanceTarget, LocalesApi, LoggerApi, MODULE_CONFIG, MODULE_ID, MODULE_ID_PATTERN, MailApi, ModuleContext, ModuleContribution, ModuleDefinition, MoneyApi, PERMISSIONS_KEY, PaymentCoreModule, PaymentCoreService, PaymentCreateInput, PaymentLink, PaymentsApi, REGISTRY_SYMBOL, Registry, ServerOnline, ServerRecord, ServersApi, StorageApi, THEME_ID_PATTERN, UnicoreApiNotReadyError, UserRecord, UsersApi, WebhookChannel, WebhookDeliveryResult, WebhookPost, WebhookTarget, WebhooksApi, capabilities, contribution, contributions, core, coreReady, defineModule, events, getRegistry, moduleContext, modulePrefixes, registerContribution, setCore } from '../index.js';
+export { ConfigFieldSchema, ConfigFieldType, LocalizedText, ModuleManifest, ThemeManifest, ValidationResult, localizedText, validateModuleManifest, validateThemeManifest } from '../manifest.js';
+import * as _nestjs_common from '@nestjs/common';
+import { CronOptions } from '@nestjs/schedule';
+import 'typeorm';
+interface PermissionOptions {
+    or?: boolean;
+}
+declare const Public: () => _nestjs_common.CustomDecorator<string>;
+declare const AllowInactive: () => _nestjs_common.CustomDecorator<string>;
+declare const Permissions: (permissions: string[], options?: PermissionOptions) => _nestjs_common.CustomDecorator<string>;
+declare const CurrentUser: (...dataOrPipes: unknown[]) => ParameterDecorator;
+declare const IpAddress: (...dataOrPipes: unknown[]) => ParameterDecorator;
+declare const UserAgent: (...dataOrPipes: unknown[]) => ParameterDecorator;
+declare function SafeCron(expression: string, task: string, options?: CronOptions): MethodDecorator;
+export { AllowInactive, CurrentUser, IpAddress, type PermissionOptions, Permissions, Public, SafeCron, UserAgent };

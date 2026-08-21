@@ -1,0 +1,4 @@
+export const CORE_API = 'UNICORE_CORE_API'
+export const MODULE_ID = 'UNICORE_MODULE_ID'
+export const EVENT_BUS = 'UNICORE_EVENT_BUS'
+export const MODULE_CONFIG = 'UNICORE_MODULE_CONFIG'

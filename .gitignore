@@ -54,3 +54,9 @@ license.pem
 # Markdown (кроме README)
 *.md
 !README.md
+
+/modules/*
+!/modules/.gitkeep
+/themes/*
+!/themes/.gitkeep
+/examples/*/server/

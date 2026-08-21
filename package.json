@@ -7,9 +7,9 @@
     "node": ">=22 <25"
   },
   "scripts": {
-    "dev": "pnpm --filter unicore-common run build && pnpm -r --parallel run dev",
+    "dev": "pnpm --filter unicore-common run build && pnpm --filter unicore-api run build && pnpm -r --parallel run dev",
     "build": "pnpm -r --workspace-concurrency=1 run build",
-    "build:server": "pnpm --filter unicore-common run build && pnpm --filter unicore-server run build",
+    "build:server": "pnpm --filter unicore-common run build && pnpm --filter unicore-api run build && pnpm --filter unicore-server run build",
     "build:client": "pnpm --filter unicore-client run build",
     "build:admin": "pnpm --filter unicore-admin run build",
     "start": "pnpm -r --parallel run start",
@@ -18,6 +18,9 @@
     "sync": "pnpm --filter unicore-server run schema:sync",
     "seed": "pnpm --filter unicore-server run seed:run",
     "boot": "pnpm install && pnpm run build:server && pnpm run sync"
+  },
+  "dependencies": {
+    "unicore-api": "workspace:*"
   },
   "devDependencies": {
     "typescript": "~5.9.3"

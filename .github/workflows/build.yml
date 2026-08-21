@@ -33,6 +33,9 @@ jobs:
         pnpm install --frozen-lockfile
         pnpm run build
 
+    - name: API contract
+      run: pnpm --filter unicore-api run api:check
+
     - name: Typecheck
       run: |
         pnpm --filter unicore-server run typecheck
