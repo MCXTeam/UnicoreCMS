@@ -93,6 +93,7 @@
           <Column field="date" :header="$t('common.date')" style="width: 35%">
             <template #body="slotProps">
               {{ $moment(slotProps.data.date).format('DD.MM.YYYY (dddd)') }}
+    <ExtensionSlot name="dashboard" />
             </template>
           </Column>
           <Column field="amount" :header="$t('admin.stat_income')" style="width: 35%">

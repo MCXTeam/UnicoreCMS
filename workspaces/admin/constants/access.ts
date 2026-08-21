@@ -1,8 +1,9 @@
 import { Permission } from 'unicore-common/enums'
+import { adminAccess } from 'unicore-api/admin'
 
 export const SUPERUSER_ONLY = 'superuser'
 
-export type RouteAccess = typeof SUPERUSER_ONLY | Permission[]
+export type RouteAccess = typeof SUPERUSER_ONLY | (Permission | string)[]
 
 export const ROUTE_ACCESS: Record<string, RouteAccess> = {
   '/': [Permission.AdminDashboard],
@@ -12,6 +13,8 @@ export const ROUTE_ACCESS: Record<string, RouteAccess> = {
   '/config': SUPERUSER_ONLY,
   '/locales': SUPERUSER_ONLY,
   '/api': SUPERUSER_ONLY,
+  '/modules': SUPERUSER_ONLY,
+  '/themes': SUPERUSER_ONLY,
   '/news': [
     Permission.EditorNewsCreate,
     Permission.EditorNewsUpdate,
@@ -45,11 +48,13 @@ export const ROUTE_ACCESS: Record<string, RouteAccess> = {
 }
 
 export function routeAccess(path: string): RouteAccess | null {
-  if (ROUTE_ACCESS[path]) return ROUTE_ACCESS[path]
+  const routes: Record<string, RouteAccess> = { ...ROUTE_ACCESS, ...adminAccess() }
 
-  const parent = Object.keys(ROUTE_ACCESS)
+  if (routes[path]) return routes[path]
+
+  const parent = Object.keys(routes)
     .filter((route) => route !== '/' && path.startsWith(route + '/'))
     .sort((a, b) => b.length - a.length)[0]
 
-  return parent ? ROUTE_ACCESS[parent] : null
+  return parent ? routes[parent] : null
 }
