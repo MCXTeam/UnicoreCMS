@@ -6,6 +6,7 @@
     <div class="mt-4" v-html="$sanitize(news.description)" />
     <div class="d-flex justify-content-end mt-4" v-text="$moment(news.created).format('D MMMM YYYY, HH:mm')" />
   </div>
+  <ExtensionSlot name="news.page" :news="news" />
 </template>
 
 <script setup lang="ts">

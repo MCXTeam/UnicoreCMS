@@ -1,4 +1,5 @@
 import { defineAdminModule } from 'unicore-api/admin'
+import UserNotes from '../components/UserNotes.vue'
 
 export default defineNuxtPlugin(() => {
   defineAdminModule({
@@ -11,5 +12,6 @@ export default defineNuxtPlugin(() => {
       },
     ],
     access: { '/mod/demo': ['mod.demo.read'] },
+    slots: [{ slot: 'users.profile', component: UserNotes, order: 10 }],
   })
 })

@@ -2,6 +2,7 @@ import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from '
 import { join } from 'path';
 import { themesPath } from 'unicore-common';
 import { ThemeManifest, validateThemeManifest } from 'unicore-api';
+import { readLocaleFiles } from './locales';
 
 export interface DiscoveredTheme {
   id: string;
@@ -44,27 +45,7 @@ export const activeThemeId = (): string | null => process.env.UNICORE_THEME || r
 
 export const themeLockedByEnv = (): boolean => Boolean(process.env.UNICORE_THEME);
 
-export const themeLocales = (id: string): Record<string, Record<string, string>> => {
-  const dir = join(themesPath, id, 'locales');
-
-  if (!existsSync(dir)) return {};
-
-  const locales: Record<string, Record<string, string>> = {};
-
-  for (const file of readdirSync(dir)) {
-    if (!file.endsWith('.json')) continue;
-
-    try {
-      const parsed = JSON.parse(readFileSync(join(dir, file), 'utf-8'));
-
-      if (parsed && typeof parsed === 'object') locales[file.replace(/\.json$/, '')] = parsed;
-    } catch {
-      continue;
-    }
-  }
-
-  return locales;
-};
+export const themeLocales = (id: string): Record<string, Record<string, string>> => readLocaleFiles(join(themesPath, id, 'locales'));
 
 export const activeThemeLocales = (): Record<string, Record<string, string>> => {
   const id = activeThemeId();

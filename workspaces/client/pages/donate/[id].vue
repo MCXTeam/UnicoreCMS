@@ -64,6 +64,7 @@
         </div>
       </div>
     </div>
+    <ExtensionSlot name="donate.server" :server="server" />
   </div>
 </template>
 

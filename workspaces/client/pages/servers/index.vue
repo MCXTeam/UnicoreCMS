@@ -13,6 +13,7 @@
       <img v-if="server.icon" :src="`${$pub.apiBaseurl}/${server.icon}`" width="96px" />
       <div class="image" :style="server.image && `background-image: url('${$pub.apiBaseurl}/${server.image}')`" />
     </NuxtLink>
+    <ExtensionSlot name="servers.list" :servers="servers" />
   </div>
 </template>
 

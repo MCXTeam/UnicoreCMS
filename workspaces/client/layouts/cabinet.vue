@@ -9,15 +9,8 @@
           <img class="my-1" src="/icon.png" height="64px" />
           <h2 class="ms-3 my-0 d-none d-md-block">{{ $pub.sitename }}</h2>
         </NuxtLink>
-        <NuxtLink to="/cabinet" class="vs-navbar__item d-none d-lg-block ms-4">
-          <i class="bx bx-user"></i> {{ $t('header.cabinet') }}
-        </NuxtLink>
-        <NuxtLink to="/store" class="vs-navbar__item d-none d-lg-block"> <i class="bx bx-cart"></i> {{ $t('header.store') }} </NuxtLink>
-        <NuxtLink to="/players" class="vs-navbar__item d-none d-lg-block">
-          <i class="bx bx-stats"></i> {{ $t('header.players') }}
-        </NuxtLink>
-        <NuxtLink to="/start" class="vs-navbar__item d-none d-lg-block">
-          <i class="bx bxl-windows"></i> {{ $t('header.download_short') }}
+        <NuxtLink v-for="item in navbar" :key="item.key" :to="item.to" class="vs-navbar__item d-none d-lg-block ms-lg-2">
+          <i :class="item.icon"></i> {{ $t(item.label) }}
         </NuxtLink>
       </div>
       <div class="d-flex align-items-center p-2">
@@ -48,17 +41,8 @@
         <NuxtLink to="/"
           ><span class="vs-sidebar__item exact"><i class="bx bx-home"></i> {{ $t('header.home') }}</span></NuxtLink
         >
-        <NuxtLink to="/cabinet"
-          ><span class="vs-sidebar__item"><i class="bx bx-user"></i> {{ $t('header.cabinet') }}</span></NuxtLink
-        >
-        <NuxtLink to="/store"
-          ><span class="vs-sidebar__item"><i class="bx bx-cart"></i> {{ $t('header.store') }}</span></NuxtLink
-        >
-        <NuxtLink to="/players"
-          ><span class="vs-sidebar__item"><i class="bx bx-stats"></i> {{ $t('header.players') }}</span></NuxtLink
-        >
-        <NuxtLink to="/start"
-          ><span class="vs-sidebar__item"><i class="bx bxl-windows"></i> {{ $t('header.download_short') }}</span></NuxtLink
+        <NuxtLink v-for="item in navbar" :key="item.key" :to="item.to"
+          ><span class="vs-sidebar__item"><i :class="item.icon"></i> {{ $t(item.label) }}</span></NuxtLink
         >
         <div class="mt-auto d-flex align-items-center justify-content-between">
           <Avatar>
@@ -79,32 +63,10 @@
       <h1 class="py-3">{{ $t(name) }}</h1>
       <div class="row">
         <div class="col">
-          <div class="panel cabinet-tab-panel mb-4" v-if="$route.path.startsWith('/cabinet')">
-            <NuxtLink to="/cabinet"> <i class="bx bx-user"></i> {{ $t('cabinet.tab_general') }} </NuxtLink>
-            <NuxtLink to="/cabinet/stats"> <i class="bx bx-bar-chart-alt-2"></i> {{ $t('cabinet.tab_stats') }} </NuxtLink>
-            <NuxtLink to="/cabinet/donate"> <i class="bx bx-crown"></i> {{ $t('cabinet.tab_donate') }} </NuxtLink>
-            <NuxtLink to="/cabinet/settings"> <i class="bx bx-edit-alt"></i> {{ $t('cabinet.tab_settings') }} </NuxtLink>
-            <NuxtLink to="/cabinet/payment"> <i class="bx bx-wallet-alt"></i> {{ $t('cabinet.tab_payment') }} </NuxtLink>
-            <NuxtLink to="/cabinet/history"> <i class="bx bx-history"></i> {{ $t('cabinet.tab_history') }} </NuxtLink>
-            <NuxtLink to="/cabinet/auth"> <i class="bx bx-bug"></i> {{ $t('cabinet.tab_auth') }} </NuxtLink>
-            <NuxtLink to="/cabinet/referals"> <i class="bx bxs-megaphone"></i> {{ $t('cabinet.tab_referals') }} </NuxtLink>
-            <NuxtLink to="/cabinet/gifts"> <i class="bx bx-party"></i> {{ $t('cabinet.tab_gifts') }} </NuxtLink>
-          </div>
-          <div v-else-if="$route.path.startsWith('/store')">
-            <div class="panel cabinet-tab-panel mb-4">
-              <NuxtLink class="no-exact" to="/store/products"> <i class="bx bx-store"></i> {{ $t('store.tab_products') }} </NuxtLink>
-              <NuxtLink class="no-exact" to="/store/cart"> <i class="bx bx-cart-alt"></i> {{ $t('store.tab_cart') }} </NuxtLink>
-              <NuxtLink class="no-exact" to="/store/warehouse"> <i class="bx bx-package"></i> {{ $t('store.tab_warehouse') }} </NuxtLink>
-            </div>
-          </div>
-          <div v-else-if="$route.path.startsWith('/players')">
-            <div class="panel cabinet-tab-panel mb-4">
-              <NuxtLink class="no-exact" to="/players/votes"> <i class="bx bx-party"></i> {{ $t('players.tab_votes') }} </NuxtLink>
-              <NuxtLink class="no-exact" to="/players/playtime"> <i class="bx bx-game"></i> {{ $t('players.tab_playtime') }} </NuxtLink>
-              <NuxtLink class="no-exact" to="/players/banlist">
-                <i class="bx bxs-shield-alt-2"></i> {{ $t('players.tab_banlist') }}
-              </NuxtLink>
-            </div>
+          <div class="panel cabinet-tab-panel mb-4" v-if="tabs.length">
+            <NuxtLink v-for="tab in tabs" :key="tab.key" :to="tab.to" :class="tabClass(tab)">
+              <i :class="tab.icon"></i> {{ $t(tab.label) }}
+            </NuxtLink>
           </div>
           <component v-if="storeSidebarComponent" :is="storeSidebarComponent" v-bind="storeSidebar?.payload" />
         </div>
@@ -125,6 +87,7 @@ import CartSidebar from '~/components/CartSidebar.vue'
 import StoreProductsSidebar from '~/components/StoreProductsSidebar.vue'
 import WarehouseSidebar from '~/components/WarehouseSidebar.vue'
 import { useUiStore, type StoreSidebarName } from '~/stores/ui'
+import type { NavItem } from '~/constants/navigation'
 
 const storeSidebars: Record<StoreSidebarName, Component> = {
   CartSidebar,
@@ -135,6 +98,24 @@ const storeSidebars: Record<StoreSidebarName, Component> = {
 const route = useRoute()
 const ui = useUiStore()
 const { $t } = useNuxtApp()
+
+const navbar = useNavigation('cabinet')
+const cabinetTabs = useNavigation('cabinet.tabs')
+const storeTabs = useNavigation('store.tabs')
+const playersTabs = useNavigation('players.tabs')
+
+const tabs = computed(() => {
+  if (route.path.startsWith('/store')) return storeTabs.value
+  if (route.path.startsWith('/players')) return playersTabs.value
+
+  return cabinetTabs.value
+})
+
+function tabClass(tab: NavItem) {
+  if (tab.exact !== false) return ''
+
+  return ['no-exact', route.path.startsWith(String(tab.to)) ? 'nuxt-link-active' : '']
+}
 
 const activeSidebar = ref(false)
 const name = computed(() => String(route.meta.title || ''))

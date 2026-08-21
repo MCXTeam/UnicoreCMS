@@ -56,6 +56,7 @@
         </div>
       </div>
     </div>
+    <ExtensionSlot name="start.page" />
   </div>
 </template>
 

@@ -79,6 +79,7 @@
           </template>
         </DataTable>
       </div>
+      <ExtensionSlot name="user.profile" :user="user" />
     </div>
   </div>
 </template>

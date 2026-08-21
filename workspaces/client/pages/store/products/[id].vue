@@ -51,6 +51,9 @@
         <i class="bx bxs-gift me-2"></i>
         {{ $t('store.virtual_hint', { percent: product.payload.virtual_percent || config.public_virtual_percent }) }}
       </Message>
+
+      <ExtensionSlot name="store.product" :product="product" :server="server" />
+
       <template #footer>
         <div class="d-flex justify-content-center">
           <Button v-if="product.type == 'product'" size="large" text @click="addToCart()">

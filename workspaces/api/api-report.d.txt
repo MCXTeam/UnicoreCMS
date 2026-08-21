@@ -1,4 +1,6 @@
 === admin/index.d.ts ===
+declare const ADMIN_SLOTS: readonly ["dashboard", "users.profile"];
+type AdminSlotName = (typeof ADMIN_SLOTS)[number];
 interface AdminMenuItem {
     label: string;
     icon?: string;
@@ -10,9 +12,10 @@ interface AdminMenuGroup {
     items: AdminMenuItem[];
 }
 type AdminRouteAccess = 'superuser' | string[];
+type SlotComponent = string | object;
 interface AdminSlotEntry {
-    slot: string;
-    component: string;
+    slot: AdminSlotName;
+    component: SlotComponent;
     order?: number;
 }
 interface AdminModuleDefinition {
@@ -26,22 +29,27 @@ declare const defineAdminModule: (definition: AdminModuleDefinition) => AdminMod
 declare const adminModules: () => AdminModuleDefinition[];
 declare const adminMenu: () => AdminMenuItem[];
 declare const adminAccess: () => Record<string, AdminRouteAccess>;
-declare const adminSlots: (slot: string) => AdminSlotEntry[];
-export { type AdminMenuGroup, type AdminMenuItem, type AdminModuleDefinition, type AdminRouteAccess, type AdminSlotEntry, adminAccess, adminMenu, adminModules, adminSlots, defineAdminModule };
+declare const adminSlots: (slot: AdminSlotName) => AdminSlotEntry[];
+export { ADMIN_SLOTS, type AdminMenuGroup, type AdminMenuItem, type AdminModuleDefinition, type AdminRouteAccess, type AdminSlotEntry, type AdminSlotName, type SlotComponent, adminAccess, adminMenu, adminModules, adminSlots, defineAdminModule };
 
 === client/index.d.ts ===
+declare const CLIENT_NAV_PLACES: readonly ["navbar", "footer", "cabinet", "cabinet.tabs", "store.tabs", "players.tabs"];
+declare const CLIENT_SLOTS: readonly ["home.top", "home.bottom", "footer", "servers.list", "server.page", "news.page", "user.profile", "start.page", "cabinet.index", "store.catalog", "store.product", "donate.index", "donate.server"];
+type ClientNavPlace = (typeof CLIENT_NAV_PLACES)[number];
+type ClientSlotName = (typeof CLIENT_SLOTS)[number];
 interface ClientNavItem {
     key: string;
     to: string;
     label: string;
     icon?: string;
     when?: 'always' | 'auth' | 'guest';
-    places?: ('navbar' | 'cabinet' | 'footer')[];
+    places?: ClientNavPlace[];
     order?: number;
 }
+type SlotComponent = string | object;
 interface ClientSlotEntry {
-    slot: string;
-    component: string;
+    slot: ClientSlotName;
+    component: SlotComponent;
     order?: number;
     when?: 'always' | 'auth' | 'guest';
 }
@@ -52,15 +60,15 @@ interface ClientModuleDefinition {
 }
 declare const defineClientModule: (definition: ClientModuleDefinition) => ClientModuleDefinition;
 declare const clientModules: () => ClientModuleDefinition[];
-declare const clientNav: (place: ClientNavItem["places"] extends (infer T)[] | undefined ? T : never) => ClientNavItem[];
-declare const clientSlots: (slot: string) => ClientSlotEntry[];
-export { type ClientModuleDefinition, type ClientNavItem, type ClientSlotEntry, clientModules, clientNav, clientSlots, defineClientModule };
+declare const clientNav: (place: ClientNavPlace) => ClientNavItem[];
+declare const clientSlots: (slot: ClientSlotName) => ClientSlotEntry[];
+export { CLIENT_NAV_PLACES, CLIENT_SLOTS, type ClientModuleDefinition, type ClientNavItem, type ClientNavPlace, type ClientSlotEntry, type ClientSlotName, type SlotComponent, clientModules, clientNav, clientSlots, defineClientModule };
 
 === index.d.ts ===
 import { ConfigFieldSchema } from './manifest.js';
 export { ConfigFieldType, LocalizedText, ModuleManifest, ThemeManifest, ValidationResult, localizedText, validateModuleManifest, validateThemeManifest } from './manifest.js';
 import { DataSource } from 'typeorm';
-declare const API_VERSION = "1.1.1";
+declare const API_VERSION = "1.2.0";
 declare const API_MAJOR: number;
 declare const IS_PUBLIC_KEY = "isPublic";
 declare const PERMISSIONS_KEY = "permissions";

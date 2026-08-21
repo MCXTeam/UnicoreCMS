@@ -1,12 +1,12 @@
 <template>
-  <component v-for="entry in entries" :key="`${entry.slot}-${entry.component}`" :is="entry.component" v-bind="$attrs" />
+  <component v-for="(entry, index) in entries" :key="`${entry.slot}-${index}`" :is="entry.component" v-bind="$attrs" />
 </template>
 
 <script setup lang="ts">
-import { clientSlots } from 'unicore-api/client'
+import { clientSlots, type ClientSlotName } from 'unicore-api/client'
 import { useAuthStore } from '~/stores/auth'
 
-const props = defineProps<{ name: string }>()
+const props = defineProps<{ name: ClientSlotName }>()
 
 defineOptions({ inheritAttrs: false })
 

@@ -19,28 +19,28 @@
         <div class="col ms-xl-4">
           <h3 class="mt-0 mb-2">{{ $t('footer.navigation') }}</h3>
           <div class="row">
-            <div class="col links">
-              <NuxtLink to="/">{{ $t('header.home') }}</NuxtLink>
-              <NuxtLink to="/servers">{{ $t('header.servers') }}</NuxtLink>
-              <a :href="forumLink" target="_blank">{{ $t('header.forum') }}</a>
-            </div>
-            <div class="col links">
-              <NuxtLink to="/start">{{ $t('header.start') }}</NuxtLink>
-              <NuxtLink to="/start">{{ $t('header.download') }}</NuxtLink>
-              <NuxtLink to="/donate">{{ $t('header.donate') }}</NuxtLink>
+            <div v-for="(column, index) in columns" :key="index" class="col links">
+              <template v-for="item in column" :key="item.key">
+                <a v-if="item.href" :href="item.href" target="_blank">{{ $t(item.label) }}</a>
+                <NuxtLink v-else :to="item.to">{{ $t(item.label) }}</NuxtLink>
+              </template>
             </div>
           </div>
         </div>
       </div>
+      <ExtensionSlot name="footer" />
     </div>
   </footer>
 </template>
 
 <script setup lang="ts">
 import systemLogo from '~/assets/images/system-logo.png'
-import { useConfigStore } from '~/stores/config'
 
-const configStore = useConfigStore()
+const links = useNavigation('footer')
 
-const forumLink = computed(() => String(configStore.config.public_link_forum ?? ''))
+const columns = computed(() => {
+  const half = Math.ceil(links.value.length / 2)
+
+  return [links.value.slice(0, half), links.value.slice(half)]
+})
 </script>

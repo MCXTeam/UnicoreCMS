@@ -1,4 +1,6 @@
+import { resolve } from 'path';
 import { discover, DiscoveredModule } from './discovery';
+import { readLocaleFiles } from './locales';
 import { checkRequirements, load, LoadedModule, LoadFailure } from './loader';
 
 export interface ModuleRuntimeState {
@@ -43,10 +45,27 @@ export const moduleConfigSchema = (): { id: string; fields: NonNullable<LoadedMo
     .loaded.filter((item) => item.contribution?.config.length)
     .map((item) => ({ id: item.id, fields: item.contribution!.config }));
 
+const mergeLocales = (
+  first: Record<string, Record<string, string>>,
+  second: Record<string, Record<string, string>>,
+): Record<string, Record<string, string>> => {
+  const merged: Record<string, Record<string, string>> = { ...first };
+
+  for (const [code, messages] of Object.entries(second)) merged[code] = { ...(merged[code] || {}), ...messages };
+
+  return merged;
+};
+
 export const moduleLocales = (): { id: string; locales: Record<string, Record<string, string>> }[] =>
   moduleRuntime()
-    .loaded.filter((item) => Object.keys(item.contribution?.locales || {}).length)
-    .map((item) => ({ id: item.id, locales: item.contribution!.locales }));
+    .loaded.map((item) => ({
+      id: item.id,
+      locales: mergeLocales(
+        item.contribution?.locales || {},
+        item.manifest.locales ? readLocaleFiles(resolve(item.dir, item.manifest.locales)) : {},
+      ),
+    }))
+    .filter((item) => Object.keys(item.locales).length);
 
 export * from './discovery';
 export * from './loader';

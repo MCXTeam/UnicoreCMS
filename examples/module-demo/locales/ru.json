@@ -1,7 +1,14 @@
 {
-  "mod.demo.title": "Демо-модуль",
-  "mod.demo.notes": "Заметки",
+  "mod.demo.cabinet_tab": "Демо-вкладка",
+  "mod.demo.cabinet_tab_text": "Вкладка кабинета, добавленная модулем",
   "mod.demo.config_greeting": "Приветствие",
   "mod.demo.config_limit": "Лимит заметок",
-  "mod.demo.server_widget": "Виджет модуля встроен в страницу сервера через слот"
+  "mod.demo.footer_note": "Строка в футере от демо-модуля",
+  "mod.demo.news_note": "Демо-модуль встроился в новость «{title}»",
+  "mod.demo.news_note_title": "Блок под новостью",
+  "mod.demo.notes": "Заметки",
+  "mod.demo.server_widget": "Виджет модуля встроен в страницу сервера через слот",
+  "mod.demo.title": "Демо-модуль",
+  "mod.demo.user_notes": "Заметки демо-модуля",
+  "mod.demo.user_notes_text": "Блок в карточке игрока {username}"
 }

@@ -703,6 +703,8 @@
         </div>
       </TabPanel>
     </TabView>
+
+    <ExtensionSlot name="users.profile" :user="user" />
   </div>
 </template>
 

@@ -1,3 +1,9 @@
+import { warnUnknown } from '../warn'
+
+export const ADMIN_SLOTS = ['dashboard', 'users.profile'] as const
+
+export type AdminSlotName = (typeof ADMIN_SLOTS)[number]
+
 export interface AdminMenuItem {
   label: string
   icon?: string
@@ -12,9 +18,11 @@ export interface AdminMenuGroup {
 
 export type AdminRouteAccess = 'superuser' | string[]
 
+export type SlotComponent = string | object
+
 export interface AdminSlotEntry {
-  slot: string
-  component: string
+  slot: AdminSlotName
+  component: SlotComponent
   order?: number
 }
 
@@ -37,6 +45,9 @@ const store = (): Map<string, AdminModuleDefinition> => {
 }
 
 export const defineAdminModule = (definition: AdminModuleDefinition): AdminModuleDefinition => {
+  for (const entry of definition.slots || [])
+    warnUnknown(ADMIN_SLOTS, entry.slot, `[unicore] модуль «${definition.id}» указал неизвестный слот «${entry.slot}»`)
+
   store().set(definition.id, definition)
 
   return definition
@@ -49,7 +60,7 @@ export const adminMenu = (): AdminMenuItem[] => adminModules().flatMap((item) =>
 export const adminAccess = (): Record<string, AdminRouteAccess> =>
   adminModules().reduce<Record<string, AdminRouteAccess>>((result, item) => ({ ...result, ...(item.access || {}) }), {})
 
-export const adminSlots = (slot: string): AdminSlotEntry[] =>
+export const adminSlots = (slot: AdminSlotName): AdminSlotEntry[] =>
   adminModules()
     .flatMap((item) => item.slots || [])
     .filter((item) => item.slot === slot)
