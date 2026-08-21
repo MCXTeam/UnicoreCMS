@@ -60,7 +60,7 @@ export { type ClientModuleDefinition, type ClientNavItem, type ClientSlotEntry, 
 import { ConfigFieldSchema } from './manifest.js';
 export { ConfigFieldType, LocalizedText, ModuleManifest, ThemeManifest, ValidationResult, localizedText, validateModuleManifest, validateThemeManifest } from './manifest.js';
 import { DataSource } from 'typeorm';
-declare const API_VERSION = "1.1.0";
+declare const API_VERSION = "1.1.1";
 declare const API_MAJOR: number;
 declare const IS_PUBLIC_KEY = "isPublic";
 declare const PERMISSIONS_KEY = "permissions";

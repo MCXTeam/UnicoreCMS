@@ -69,6 +69,20 @@ const validateName = (value: unknown, errors: string[]): void => {
   errors.push('поле name должно быть строкой или объектом переводов')
 }
 
+const validateRelativePath = (value: unknown, field: string, errors: string[]): void => {
+  if (value === undefined) return
+
+  if (typeof value !== 'string' || !value.trim()) {
+    errors.push(`поле ${field} должно быть строкой`)
+    return
+  }
+
+  const normalized = value.replace(/\\/g, '/')
+
+  if (normalized.startsWith('/') || /^[a-zA-Z]:/.test(normalized) || normalized.split('/').includes('..'))
+    errors.push(`поле ${field} должно быть путём внутри папки расширения`)
+}
+
 const validateConfigField = (field: unknown, index: number, errors: string[]): void => {
   if (!isRecord(field)) {
     errors.push(`config[${index}] должен быть объектом`)
@@ -98,8 +112,9 @@ export const validateModuleManifest = (raw: unknown): ValidationResult<ModuleMan
 
   if (typeof raw.unicoreApi !== 'string' || !raw.unicoreApi.trim()) errors.push('поле unicoreApi обязательно и задаёт диапазон версий API')
 
-  for (const key of ['server', 'client', 'admin', 'locales', 'componentPrefix'] as const)
-    if (raw[key] !== undefined && typeof raw[key] !== 'string') errors.push(`поле ${key} должно быть строкой`)
+  if (raw.componentPrefix !== undefined && typeof raw.componentPrefix !== 'string') errors.push('поле componentPrefix должно быть строкой')
+
+  for (const key of ['server', 'client', 'admin', 'locales'] as const) validateRelativePath(raw[key], key, errors)
 
   if (raw.permissions !== undefined) {
     if (!Array.isArray(raw.permissions)) errors.push('поле permissions должно быть массивом строк')
@@ -135,6 +150,26 @@ export const validateThemeManifest = (raw: unknown): ValidationResult<ThemeManif
   if (typeof raw.unicoreApi !== 'string' || !raw.unicoreApi.trim()) errors.push('поле unicoreApi обязательно и задаёт диапазон версий API')
 
   if (raw.side !== undefined && !['client', 'admin'].includes(String(raw.side))) errors.push('поле side должно быть client или admin')
+
+  if (raw.componentPrefix !== undefined && typeof raw.componentPrefix !== 'string') errors.push('поле componentPrefix должно быть строкой')
+
+  for (const key of ['tokens', 'primevue'] as const) validateRelativePath(raw[key], key, errors)
+
+  if (raw.pages !== undefined) {
+    if (!isRecord(raw.pages)) errors.push('поле pages должно быть объектом')
+    else {
+      const replace = raw.pages.replace
+
+      if (replace !== undefined) {
+        if (!isRecord(replace)) errors.push('поле pages.replace должно быть объектом')
+        else for (const [route, file] of Object.entries(replace)) validateRelativePath(file, `pages.replace["${route}"]`, errors)
+      }
+
+      const remove = raw.pages.remove
+
+      if (remove !== undefined && !Array.isArray(remove)) errors.push('поле pages.remove должно быть массивом маршрутов')
+    }
+  }
 
   return { manifest: errors.length ? null : (raw as unknown as ThemeManifest), errors }
 }

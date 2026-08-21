@@ -6,7 +6,10 @@
           <template #header>
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
               <h5 class="m-0">{{ $t('admin.themes_title') }}</h5>
-              <Button :label="$t('admin.refresh')" icon="pi pi-refresh" class="p-button-text" @click="load()" />
+              <div class="flex align-items-center">
+                <ExtensionInstall @installed="load()" />
+                <Button :label="$t('admin.refresh')" icon="pi pi-refresh" class="p-button-text" @click="load()" />
+              </div>
             </div>
           </template>
           <template #empty>
