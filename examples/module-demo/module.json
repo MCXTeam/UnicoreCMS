@@ -1,0 +1,41 @@
+{
+  "id": "demo",
+  "name": {
+    "ru": "Демо-модуль",
+    "en": "Demo module"
+  },
+  "description": {
+    "ru": "Пример модуля: заметки, событие оплаты, настройка приветствия",
+    "en": "Example module"
+  },
+  "version": "1.0.0",
+  "unicoreApi": "^1.0.0",
+  "author": "UnicoreCMS",
+  "license": "MIT",
+  "server": "./server/index.js",
+  "locales": "./locales",
+  "componentPrefix": "ModDemo",
+  "permissions": [
+    "mod.demo.read",
+    "mod.demo.write"
+  ],
+  "config": [
+    {
+      "key": "greeting",
+      "type": "string",
+      "default": "Привет",
+      "public": true,
+      "label": "mod.demo.config_greeting"
+    },
+    {
+      "key": "limit",
+      "type": "number",
+      "default": 10,
+      "min": 1,
+      "max": 100,
+      "label": "mod.demo.config_limit"
+    }
+  ],
+  "client": "./client",
+  "admin": "./admin"
+}

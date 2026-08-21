@@ -1,0 +1,12 @@
+{
+  "id": "noir",
+  "name": { "ru": "Нуар", "en": "Noir" },
+  "version": "1.0.0",
+  "unicoreApi": "^1.0.0",
+  "side": "client",
+  "componentPrefix": "Theme",
+  "tokens": "./assets/tokens.scss",
+  "pages": {
+    "replace": { "/": "./pages/index.vue", "/donate": "./pages/donate.vue" }
+  }
+}

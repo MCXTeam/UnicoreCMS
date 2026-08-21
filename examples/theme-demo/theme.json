@@ -1,0 +1,12 @@
+{
+  "id": "aurora",
+  "name": { "ru": "Аврора", "en": "Aurora" },
+  "version": "1.0.0",
+  "unicoreApi": "^1.0.0",
+  "side": "client",
+  "componentPrefix": "Theme",
+  "tokens": "./assets/tokens.scss",
+  "pages": {
+    "replace": { "/": "./pages/index.vue" }
+  }
+}

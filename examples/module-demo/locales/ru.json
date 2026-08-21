@@ -1,0 +1,7 @@
+{
+  "mod.demo.title": "Демо-модуль",
+  "mod.demo.notes": "Заметки",
+  "mod.demo.config_greeting": "Приветствие",
+  "mod.demo.config_limit": "Лимит заметок",
+  "mod.demo.server_widget": "Виджет модуля встроен в страницу сервера через слот"
+}

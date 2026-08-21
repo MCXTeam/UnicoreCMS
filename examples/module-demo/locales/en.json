@@ -1,0 +1,7 @@
+{
+  "mod.demo.title": "Demo module",
+  "mod.demo.notes": "Notes",
+  "mod.demo.config_greeting": "Greeting",
+  "mod.demo.config_limit": "Notes limit",
+  "mod.demo.server_widget": "Module widget injected into the server page via a slot"
+}
