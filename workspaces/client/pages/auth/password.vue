@@ -60,7 +60,9 @@ import { Form, Field } from 'vee-validate'
 
 definePageMeta({ layout: 'auth', middleware: 'guest' })
 
-const { $unicore, $api, $t } = useNuxtApp()
+const { $unicore, $t } = useNuxtApp()
+
+const authFlow = useAuthFlow()
 const route = useRoute()
 
 const form = reactive({
@@ -70,7 +72,7 @@ const form = reactive({
 
 onMounted(async () => {
   try {
-    await $api.post('/auth/password', { hash: route.query.hash })
+    await authFlow.password({ hash: route.query.hash })
   } catch {
     $unicore.errorNotification($t('auth.reset_link_invalid'))
     await navigateTo('/auth')
@@ -80,7 +82,7 @@ onMounted(async () => {
 async function reset() {
   const loading = $unicore.loading()
   try {
-    await $api.post('/auth/password', { ...form, hash: route.query.hash })
+    await authFlow.password({ ...form, hash: route.query.hash })
     $unicore.successNotification($t('auth.password_changed'))
     await navigateTo('/auth')
   } catch {

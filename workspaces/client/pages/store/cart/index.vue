@@ -94,6 +94,8 @@ export default {
     useHead({ title: computed(() => $t('store.tab_cart')) })
 
     return {
+      cartApi: useCart(),
+      catalogApi: useStoreCatalog(),
       ui: useUiStore(),
       cartUpdateBus: useEventBus('storeCartUpdate'),
       cartClearBus: useEventBus('storeCartClear'),
@@ -141,11 +143,11 @@ export default {
 
   methods: {
     async load() {
-      this.servers = await this.$api.get('/store/products/protected/servers').then((res) => res.data)
+      this.servers = await this.catalogApi.servers()
 
       if (!this.servers.length) return
 
-      const filled = await this.$api.get('/store/cart/servers').then((res) => res.data)
+      const filled = await this.cartApi.servers()
       const index = this.servers.findIndex((server) => filled.includes(server.id))
       const target = String(index === -1 ? 0 : index)
 
@@ -156,7 +158,7 @@ export default {
     async cartFind() {
       const loading = this.$unicore.loading()
       try {
-        this.cart = await this.$api.get('/store/cart/' + this.servers[Number(this.server_id)].id).then((res) => res.data)
+        this.cart = await this.cartApi.load(this.servers[Number(this.server_id)].id)
         this.cartUpdateBus.emit(this.cart)
       } catch {}
       loading.close()
@@ -165,7 +167,7 @@ export default {
     async cartDelete(item) {
       this.ui.setStoreSidebarLoading(true)
       this.deletingKey = `${item.type}-${item.payload.id}`
-      await this.$api.delete(`/store/cart/item/${item.type}/${item.payload.id}`)
+      await this.cartApi.remove(item.type, item.payload.id)
       await this.cartFind()
       this.deletingKey = null
       this.ui.setStoreSidebarLoading(false)
@@ -175,7 +177,7 @@ export default {
       const loading = this.$unicore.loading()
       this.ui.setStoreSidebarLoading(true)
       try {
-        await this.$api.delete('/store/cart/server/' + this.servers[Number(this.server_id)].id)
+        await this.cartApi.clear(this.servers[Number(this.server_id)].id)
         await this.cartFind()
       } catch {}
       loading.close()
@@ -186,7 +188,7 @@ export default {
       const loading = this.$unicore.loading()
       this.ui.setStoreSidebarLoading(true)
       try {
-        await this.$api.post('/store/cart/buy', {
+        await this.cartApi.buy({
           server_id: this.servers[Number(this.server_id)].id,
           use_virtual: this.use_virtual,
         })

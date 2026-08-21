@@ -14,12 +14,9 @@ import { useUiStore } from '~/stores/ui'
 
 definePageMeta({ layout: 'landing' })
 
-const { $api } = useNuxtApp()
 const route = useRoute()
 
-const { data: news, error } = await useAsyncData<any>(`news-${route.params.id}`, () =>
-  $api.get(`/news/${route.params.id}`).then((res) => res.data),
-)
+const { data: news, error } = await useNews().one(route.params.id as string)
 
 if (error.value || !news.value) throw createError({ statusCode: 404, fatal: true })
 

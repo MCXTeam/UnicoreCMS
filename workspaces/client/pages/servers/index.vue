@@ -21,10 +21,10 @@ import { useUiStore } from '~/stores/ui'
 
 definePageMeta({ layout: 'landing' })
 
-const { $api, $pub, $t } = useNuxtApp()
+const { $pub, $t } = useNuxtApp()
 const ui = useUiStore()
 
-const { data: servers } = await useAsyncData<any>('servers', () => $api.get('/servers').then((res) => res.data))
+const { data: servers } = await useServers().list()
 
 useHead({ title: computed(() => $t('header.servers')) })
 ui.setName($t('servers.page_name', { sitename: $pub.sitename }))

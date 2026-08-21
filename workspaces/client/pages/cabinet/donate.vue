@@ -331,7 +331,10 @@ import { useConfigStore } from '~/stores/config'
 
 definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'cabinet.tab_donate' })
 
-const { $api, $auth, $unicore, $t } = useNuxtApp()
+const { $auth, $unicore, $t } = useNuxtApp()
+
+const donateApi = useDonate()
+const serversApi = useServers()
 
 useHead({ title: computed(() => $t('header.cabinet')) })
 const config = computed(() => useConfigStore().config)
@@ -404,7 +407,7 @@ function openPermissionDialog(id) {
 async function buyGroup() {
   loading.value = true
   try {
-    await $api.post('/donates/groups/buy', {
+    await donateApi.buyGroup({
       server: servers.value[Number(donate.server_id)].id,
       group: donate.group.id,
       period: donate.period,
@@ -421,7 +424,7 @@ async function buyGroup() {
 async function buyPermission() {
   loading.value = true
   try {
-    await $api.post('/donates/permissions/buy', {
+    await donateApi.buyPermission({
       server: servers.value[Number(permission.server_id)].id,
       permission: permission.permission.id,
       period: permission.period,
@@ -436,19 +439,19 @@ async function buyPermission() {
   loading.value = false
 }
 async function fetchDonatesMe() {
-  donateGroupsMe.value = await $api.get('/donates/groups/me').then((res) => res.data)
+  donateGroupsMe.value = await donateApi.myGroups()
 }
 async function fetchPermissionsMe() {
-  donatePermissionsMe.value = await $api.get('/donates/permissions/me').then((res) => res.data)
+  donatePermissionsMe.value = await donateApi.myPermissions()
 }
 async function fetchDonates(id) {
   donateGroups.value = null
-  donateGroups.value = await $api.get('/donates/groups/server/' + id).then((res) => res.data)
+  donateGroups.value = await donateApi.groupsByServer(id)
   donate.server = servers.value.find((srv) => srv.id == id)
 }
 async function fetchPermissions(id) {
   donatePermissions.value = null
-  donatePermissions.value = await $api.get('/donates/permissions/server/' + id).then((res) => res.data)
+  donatePermissions.value = await donateApi.permissionsByServer(id)
   permission.server = servers.value[Number(permission.server_id)]
 }
 
@@ -467,7 +470,7 @@ watch(
 
 onMounted(async () => {
   await Promise.all([fetchPermissionsMe(), fetchDonatesMe()])
-  servers.value = await $api.get('/servers').then((res) => res.data)
+  servers.value = await serversApi.fetchList()
 
   if (servers.value.length) {
     donate.server_id = String(0)

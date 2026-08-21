@@ -40,7 +40,9 @@ import { useAuthStore } from '~/stores/auth'
 
 definePageMeta({ layout: 'auth', middleware: 'auth' })
 
-const { $unicore, $api, $t } = useNuxtApp()
+const { $unicore, $t } = useNuxtApp()
+
+const authFlow = useAuthFlow()
 const auth = useAuthStore()
 const recaptcha = useReCaptcha()
 
@@ -57,8 +59,7 @@ async function verify() {
   try {
     await recaptcha?.recaptchaLoaded?.()
     const token = await recaptcha?.executeRecaptcha?.('verify')
-    const { data } = await $api.post('/auth/verify', form, { headers: { recaptcha: token } })
-    auth.setUser(data)
+    auth.setUser(await authFlow.verify(form, token))
     await navigateTo('/cabinet')
   } catch (err: any) {
     $unicore.authErrorNotification(err, $t('auth.code_invalid'))
@@ -70,7 +71,7 @@ async function verify() {
 async function resend() {
   const loading = $unicore.loading()
   try {
-    await $api.get('/auth/resend')
+    await authFlow.resend()
     $unicore.successNotification($t('auth.code_resent'))
   } catch {
     $unicore.errorNotification($t('error.too_many_requests'))

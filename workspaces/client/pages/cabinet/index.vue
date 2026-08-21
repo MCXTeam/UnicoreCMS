@@ -111,6 +111,7 @@
       </div>
     </div>
   </section>
+    <ExtensionSlot name="cabinet.index" />
 </template>
 
 <script setup>
@@ -118,7 +119,11 @@ import { useConfigStore } from '~/stores/config'
 
 definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'cabinet.tab_general' })
 
-const { $api, $auth, $unicore, $t } = useNuxtApp()
+const { $auth, $unicore, $t } = useNuxtApp()
+
+const cabinet = useCabinet()
+const moneyApi = useMoney()
+const skinApi = useSkin()
 
 useHead({ title: computed(() => $t('header.cabinet')) })
 const config = computed(() => useConfigStore().config)
@@ -143,9 +148,9 @@ onMounted(async () => {
   SkinBack.value.viewer.controls.enableRotate = false
   SkinBack.value.viewer.playerObject.rotation.set(0, 3.15, 0)
 
-  money.value = await $api.get('/cabinet/money/me').then((res) => res.data)
+  money.value = await moneyApi.balance()
   try {
-    inviter.value = await $api.get('/cabinet/referals/me/inviter').then((res) => res.data)
+    inviter.value = await cabinet.inviter()
   } catch {}
 })
 
@@ -155,11 +160,7 @@ async function updateSkin() {
   skinData.append('file', skin.value.files[0])
 
   try {
-    await $api.patch('/cabinet/skin/skin', skinData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
+    await skinApi.uploadSkin(skinData)
     await $auth.fetchUser()
     $unicore.successNotification($t('cabinet.skin_updated'))
   } catch (e) {
@@ -176,11 +177,7 @@ async function updateCloak() {
   cloakData.append('file', cloak.value.files[0])
 
   try {
-    await $api.patch('/cabinet/skin/cloak', cloakData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
+    await skinApi.uploadCloak(cloakData)
     await $auth.fetchUser()
     $unicore.successNotification($t('cabinet.cloak_updated'))
   } catch (e) {
@@ -194,7 +191,7 @@ async function updateCloak() {
 async function deleteSkin() {
   skinLoading.value = true
   try {
-    await $api.delete('/cabinet/skin/skin')
+    await skinApi.removeSkin()
     await $auth.fetchUser()
     $unicore.successNotification($t('cabinet.skin_deleted'))
   } catch {}
@@ -204,7 +201,7 @@ async function deleteSkin() {
 async function deleteCloak() {
   cloakLoading.value = true
   try {
-    await $api.delete('/cabinet/skin/cloak')
+    await skinApi.removeCloak()
     await $auth.fetchUser()
     $unicore.successNotification($t('cabinet.cloak_deleted'))
   } catch {}
@@ -214,7 +211,7 @@ async function deleteCloak() {
 async function unabn() {
   banLoading.value = true
   try {
-    await $api.post('/bans/unban')
+    await cabinet.unban()
     await $auth.fetchUser()
     $unicore.successNotification($t('cabinet.unbanned'))
   } catch {

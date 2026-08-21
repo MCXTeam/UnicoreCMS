@@ -36,7 +36,9 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'header.store' })
 
-const { $api, $t } = useNuxtApp()
+const { $t } = useNuxtApp()
+
+const catalogApi = useStoreCatalog()
 
 useHead({ title: computed(() => $t('header.store')) })
 const apiUrl = useRuntimeConfig().public.apiBaseurl
@@ -44,6 +46,6 @@ const apiUrl = useRuntimeConfig().public.apiBaseurl
 const servers = ref<any[]>([])
 
 onMounted(async () => {
-  servers.value = await $api.get('/store/products/protected/servers').then((res) => res.data)
+  servers.value = await catalogApi.servers()
 })
 </script>

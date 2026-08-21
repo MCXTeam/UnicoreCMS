@@ -26,12 +26,14 @@
 <script setup>
 definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'cabinet.tab_stats' })
 
-const { $api, $t } = useNuxtApp()
+const { $t } = useNuxtApp()
+
+const cabinet = useCabinet()
 
 useHead({ title: computed(() => $t('header.cabinet')) })
 const playtime = ref(null)
 
 onMounted(async () => {
-  playtime.value = await $api.get('/cabinet/playtime/me').then((res) => res.data)
+  playtime.value = await cabinet.playtime()
 })
 </script>

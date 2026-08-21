@@ -41,7 +41,10 @@ import { useUiStore } from '~/stores/ui'
 
 definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'store.tab_warehouse' })
 
-const { $api, $unicore, $t } = useNuxtApp()
+const { $unicore, $t } = useNuxtApp()
+
+const warehouseApi = useWarehouse()
+const catalogApi = useStoreCatalog()
 
 useHead({ title: computed(() => $t('store.tab_warehouse')) })
 const ui = useUiStore()
@@ -59,7 +62,7 @@ function joinCategoryNames(categories: Array<{ name: string }>) {
 async function warehouseFind() {
   const loading = $unicore.loading()
   try {
-    warehouse.value = await $api.get('/store/warehouse/' + servers.value[Number(server_id.value)].id).then((res) => res.data)
+    warehouse.value = await warehouseApi.items(servers.value[Number(server_id.value)].id)
   } catch {}
   loading.close()
 }
@@ -70,11 +73,11 @@ watch(server_id, async () => {
 
 onMounted(async () => {
   ui.setStoreSidebar({ component: 'WarehouseSidebar' })
-  servers.value = await $api.get('/store/products/protected/servers').then((res) => res.data)
+  servers.value = await catalogApi.servers()
 
   if (!servers.value.length) return
 
-  const filled = await $api.get('/store/warehouse/servers').then((res) => res.data)
+  const filled = await warehouseApi.servers()
   const index = servers.value.findIndex((server) => filled.includes(server.id))
   const target = String(index === -1 ? 0 : index)
 

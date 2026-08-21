@@ -42,7 +42,9 @@ import { Form, Field } from 'vee-validate'
 
 definePageMeta({ layout: 'auth', middleware: 'guest' })
 
-const { $unicore, $api, $t } = useNuxtApp()
+const { $unicore, $t } = useNuxtApp()
+
+const authFlow = useAuthFlow()
 
 const form = reactive({
   email: '',
@@ -52,7 +54,7 @@ const modal = ref(false)
 async function reset() {
   const loading = $unicore.loading()
   try {
-    await $api.post('/auth/reset', form)
+    await authFlow.reset(form)
     modal.value = true
   } catch {
     $unicore.errorNotification($t('auth.email_not_found'))

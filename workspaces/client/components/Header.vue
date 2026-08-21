@@ -65,7 +65,6 @@ import { useConfigStore } from '~/stores/config'
 import { useIoStore } from '~/stores/io'
 import { useUiStore } from '~/stores/ui'
 
-const { $api } = useNuxtApp()
 const ioStore = useIoStore()
 const configStore = useConfigStore()
 const uiStore = useUiStore()
@@ -73,5 +72,5 @@ const uiStore = useUiStore()
 const onlines = computed(() => ioStore.serversOnline)
 const config = computed(() => configStore.config)
 
-const { data: users } = await useAsyncData('header-users-count', () => $api.get('/users/count').then((r) => r.data), { default: () => 0 })
+const { data: users } = await usePlayers().count()
 </script>

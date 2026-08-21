@@ -54,6 +54,8 @@ export default {
     const { $t } = useNuxtApp()
 
     useHead({ title: computed(() => $t('header.cabinet')) })
+
+    return { cabinet: useCabinet() }
   },
 
   data() {
@@ -72,36 +74,28 @@ export default {
 
   methods: {
     async load() {
-      this.sessions = await this.$api
-        .post('/auth/sessions/me', {
-          token: this.$auth.refreshToken,
-        })
-        .then((res) => res.data)
+      this.sessions = await this.cabinet.sessions(this.$auth.refreshToken)
 
       if (!this.sessions.curnet) this.$unicore.logout()
     },
 
     async sessionDelete(id) {
       this.deletingId = id
-      await this.$api.delete(`/auth/sessions/${id}`)
+      await this.cabinet.closeSession(id)
       await this.load()
       this.deletingId = null
     },
 
     async sessionsAll() {
       const loading = this.$unicore.loading()
-      await this.$api.delete(`/auth/sessions_all`)
+      await this.cabinet.closeAllSessions()
       await this.load()
       loading.close()
     },
 
     async sessionsOther() {
       const loading = this.$unicore.loading()
-      await this.$api.delete(`/auth/sessions_other`, {
-        data: {
-          token: this.$auth.refreshToken,
-        },
-      })
+      await this.cabinet.closeOtherSessions(this.$auth.refreshToken)
       await this.load()
       loading.close()
     },

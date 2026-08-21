@@ -275,7 +275,7 @@ export default {
 
     useHead({ title: computed(() => $t('header.cabinet')) })
 
-    return { config: computed(() => configStore.config) }
+    return { config: computed(() => configStore.config), moneyApi: useMoney(), serversApi: useServers() }
   },
 
   data() {
@@ -350,10 +350,10 @@ export default {
     async load() {
       this.loading = true
 
-      this.payment_methods = await this.$api.get('/payment/methods').then((res) => res.data)
-      this.bonuses = await this.$api.get('/payment/bonuses').then((res) => res.data)
-      this.money = await this.$api.get('/cabinet/money/me').then((res) => res.data)
-      this.servers = await this.$api.get('/servers').then((res) => res.data)
+      this.payment_methods = await this.moneyApi.paymentMethods()
+      this.bonuses = await this.moneyApi.bonuses()
+      this.money = await this.moneyApi.balance()
+      this.servers = await this.serversApi.fetchList()
 
       if (this.payment_methods.length) this.payment.method = this.payment_methods[0]
 
@@ -369,10 +369,7 @@ export default {
     async generateLink(method) {
       this.loading_paylink = true
       try {
-        const link = await this.$api
-          .post(`/payment/methods/${method}/link`, { amount: Number(this.payment.amount) })
-          .then((res) => res.data.link)
-        window.location.href = link
+        window.location.href = await this.moneyApi.paymentLink(method, Number(this.payment.amount))
       } catch {
         this.$unicore.errorNotification(this.$t('cabinet.payment_link_error'))
         this.loading_paylink = false
@@ -381,7 +378,7 @@ export default {
 
     async transfer() {
       try {
-        await this.$api.post('cabinet/money/own/transfer', {
+        await this.moneyApi.transfer({
           ...this.transfer_form,
           amount: Number(this.transfer_form.amount),
           type: Number(this.transfer_form.type),
@@ -397,7 +394,7 @@ export default {
 
     async exchange() {
       try {
-        await this.$api.post('cabinet/money/own/exchange', {
+        await this.moneyApi.exchange({
           amount: Number(this.exchange_form.amount),
           type: Number(this.exchange_form.type),
           server: this.servers[Number(this.exchange_form.server)].id,

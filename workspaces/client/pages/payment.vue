@@ -43,7 +43,9 @@ import { PAYMENT_POLL_ATTEMPTS, PAYMENT_POLL_INTERVAL_MS } from '~/constants'
 
 definePageMeta({ layout: 'empty' })
 
-const { $api, $t } = useNuxtApp()
+const { $t } = useNuxtApp()
+
+const moneyApi = useMoney()
 const route = useRoute()
 
 if (!route.query.status) throw createError({ statusCode: 404, fatal: true })
@@ -56,10 +58,7 @@ let timer: ReturnType<typeof setTimeout> | null = null
 let attempts = 0
 
 async function loadPayment() {
-  payment.value = await $api
-    .get('/payment/last', { params: { method: route.query.method } })
-    .then((res: any) => res.data)
-    .catch(() => null)
+  payment.value = await moneyApi.lastPayment({ method: route.query.method }).catch(() => null)
 
   pending.value = payment.value?.status === 'waiting'
 

@@ -180,6 +180,8 @@ export default {
     const { $t } = useNuxtApp()
 
     useHead({ title: computed(() => $t('header.cabinet')) })
+
+    return { cabinet: useCabinet() }
   },
 
   data() {
@@ -222,14 +224,10 @@ export default {
     async load() {
       this.loading = true
 
-      this.history = await this.$api
-        .get('/cabinet/history/me', {
-          params: {
-            page: this.history.meta.currentPage,
-            'filter.type': '$eq:' + this.history_type,
-          },
-        })
-        .then((res) => res.data)
+      this.history = await this.cabinet.history({
+        page: this.history.meta.currentPage,
+        'filter.type': '$eq:' + this.history_type,
+      })
 
       this.loading = false
     },

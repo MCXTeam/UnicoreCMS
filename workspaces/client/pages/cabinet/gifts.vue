@@ -120,7 +120,10 @@ import { useConfigStore } from '~/stores/config'
 
 definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'cabinet.tab_gifts' })
 
-const { $api, $auth, $unicore, $t } = useNuxtApp()
+const { $auth, $unicore, $t } = useNuxtApp()
+
+const cabinet = useCabinet()
+const votesApi = useVotes()
 
 useHead({ title: computed(() => $t('header.cabinet')) })
 const recaptcha = useReCaptcha()
@@ -134,7 +137,7 @@ const loading = ref(false)
 const gift_code = ref('')
 
 onMounted(async () => {
-  monitorings.value = await $api.get('cabinet/votes/monitorings').then((res) => res.data)
+  monitorings.value = await votesApi.monitorings()
 })
 
 async function activateGift() {
@@ -142,15 +145,7 @@ async function activateGift() {
   try {
     await recaptcha?.recaptchaLoaded?.()
     const token = await recaptcha?.executeRecaptcha?.('gift')
-    gift.value = await $api
-      .post(
-        '/cabinet/gifts/activate',
-        {
-          gift_code: gift_code.value,
-        },
-        { headers: { recaptcha: token } },
-      )
-      .then((res) => res.data)
+    gift.value = await cabinet.activateGift(gift_code.value, token)
 
     if (gift.value.type == 'real') $auth.fetchUser()
 

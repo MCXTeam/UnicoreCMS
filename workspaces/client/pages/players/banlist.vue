@@ -60,7 +60,9 @@ import { useUiStore } from '~/stores/ui'
 
 definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'header.players' })
 
-const { $api, $t } = useNuxtApp()
+const { $t } = useNuxtApp()
+
+const playersApi = usePlayers()
 
 useHead({ title: computed(() => $t('players.tab_banlist')) })
 useUiStore().setName($t('header.players'))
@@ -78,7 +80,7 @@ const banlist = ref<any>({
 
 async function load() {
   loading.value = true
-  banlist.value = await $api.get('players/banlist', { params: { page: banlist.value.meta.currentPage } }).then((res) => res.data)
+  banlist.value = await playersApi.banlist({ page: banlist.value.meta.currentPage })
   loading.value = false
 }
 

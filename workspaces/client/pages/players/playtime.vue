@@ -46,7 +46,9 @@ import { useUiStore } from '~/stores/ui'
 
 definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'header.players' })
 
-const { $api, $t } = useNuxtApp()
+const { $t } = useNuxtApp()
+
+const playersApi = usePlayers()
 
 useHead({ title: computed(() => $t('players.tab_playtime')) })
 useUiStore().setName($t('header.players'))
@@ -62,7 +64,7 @@ const playtimes = ref<any>({
 
 async function load() {
   loading.value = true
-  playtimes.value = await $api.get('players/playtime', { params: { page: playtimes.value.meta.page } }).then((res) => res.data)
+  playtimes.value = await playersApi.playtime({ page: playtimes.value.meta.page })
   loading.value = false
 }
 

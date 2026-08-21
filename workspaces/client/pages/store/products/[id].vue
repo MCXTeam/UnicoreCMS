@@ -16,6 +16,7 @@
           <h3 class="mt-0" v-else>{{ $t('store.kit_name', { name: product.payload.name }) }}</h3>
           <IconAvatar :path="product.payload.icon" size="xlarge" />
         </div>
+    <ExtensionSlot name="store.catalog" />
       </template>
       <div class="description-html mb-3" v-if="product.payload.description" v-html="$sanitize(product.payload.description)" />
       <div v-if="product.type == 'product'" class="mb-4">
@@ -111,7 +112,10 @@ import { useConfigStore } from '~/stores/config'
 
 definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'header.store' })
 
-const { $api, $unicore, $t } = useNuxtApp()
+const { $unicore, $t } = useNuxtApp()
+
+const catalogApi = useStoreCatalog()
+const cartApi = useCart()
 
 useHead({ title: computed(() => $t('header.store')) })
 const route = useRoute()
@@ -159,7 +163,7 @@ async function openDialog(item: any) {
   if (item.type == 'kit') {
     loading.value = true
     try {
-      product.value.payload = await $api.get(`/store/products/protected/kit/${product.value.payload.id}`).then((res) => res.data)
+      product.value.payload = await catalogApi.kit(product.value.payload.id)
     } catch {
       productDialog.value = false
     }
@@ -170,7 +174,7 @@ async function openDialog(item: any) {
 async function addToCart() {
   loading.value = true
   try {
-    await $api.post('/store/cart/add', {
+    await cartApi.add({
       id: product.value.payload.id,
       type: product.value.type,
       server_id: server.value.id,
@@ -195,19 +199,15 @@ async function catalog(params: StoreFilters = {}) {
   const l = $unicore.loading()
   ui.setStoreSidebarLoading(true)
   try {
-    const res = await $api
-      .get('/store/products/protected/products', {
-        params: {
-          page: products.meta.currentPage,
-          limit: products.meta.itemsPerPage,
-          sortBy: params.sort,
-          search: params.search,
-          'filter.server': route.params.id,
-          'filter.categories': params.category ? params.category : null,
-          'filter.price': priceFilter.length ? '$btw:' + priceFilter.join(',') : undefined,
-        },
-      })
-      .then((r) => r.data)
+    const res = await catalogApi.products({
+      page: products.meta.currentPage,
+      limit: products.meta.itemsPerPage,
+      sortBy: params.sort,
+      search: params.search,
+      'filter.server': route.params.id,
+      'filter.categories': params.category ? params.category : null,
+      'filter.price': priceFilter.length ? '$btw:' + priceFilter.join(',') : undefined,
+    })
     products.data = res.data
     products.meta = res.meta
   } catch {}
@@ -238,7 +238,7 @@ watch(
 
 onMounted(async () => {
   try {
-    server.value = await $api.get(`/store/products/protected/servers/${route.params.id}`).then((res) => res.data)
+    server.value = await catalogApi.server(route.params.id as string)
   } catch (_) {
     showError(createError({ statusCode: 404, statusMessage: 'Not Found' }))
     return

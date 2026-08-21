@@ -19,6 +19,7 @@
       <Skeleton v-for="(n, index) in 3" :key="index" height="180px" width="100%" class="mb-3"></Skeleton>
     </div>
   </section>
+    <ExtensionSlot name="donate.index" />
 </template>
 
 <script setup lang="ts">
@@ -26,10 +27,10 @@ import { useUiStore } from '~/stores/ui'
 
 definePageMeta({ layout: 'landing' })
 
-const { $api, $pub, $t } = useNuxtApp()
+const { $pub, $t } = useNuxtApp()
 
 useHead({ title: computed(() => $t('header.donate')) })
 useUiStore().setName($t('donate.page_name', { sitename: $pub.sitename }))
 
-const { data: servers } = await useAsyncData<any>('donate-servers', () => $api.get('/servers').then((res) => res.data))
+const { data: servers } = await useServers().list('donate-servers')
 </script>

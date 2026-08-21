@@ -73,14 +73,10 @@ import { useUiStore } from '~/stores/ui'
 
 definePageMeta({ layout: 'landing' })
 
-const { $api, $t } = useNuxtApp()
+const { $t } = useNuxtApp()
 const route = useRoute()
 
-const { data, error } = await useAsyncData<any>(`donate-${route.params.id}`, async () => {
-  const server = await $api.get(`/servers/${route.params.id}`).then((res) => res.data)
-  const donates = await $api.get(`/donates/groups/server/${route.params.id}`).then((res) => res.data)
-  return { server, donates }
-})
+const { data, error } = await useDonate().page(route.params.id as string)
 
 if (error.value || !data.value) throw createError({ statusCode: 404, fatal: true })
 

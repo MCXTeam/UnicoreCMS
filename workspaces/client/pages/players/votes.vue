@@ -63,7 +63,9 @@ import { useUiStore } from '~/stores/ui'
 
 definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'header.players' })
 
-const { $api, $t } = useNuxtApp()
+const { $t } = useNuxtApp()
+
+const votesApi = useVotes()
 
 useHead({ title: computed(() => $t('players.tab_votes')) })
 useUiStore().setName($t('header.players'))
@@ -80,7 +82,7 @@ const votes = ref<any>({
 
 async function load() {
   loading.value = true
-  votes.value = await $api.get('players/votes-list', { params: { page: votes.value.meta.page } }).then((res) => res.data)
+  votes.value = await votesApi.list({ page: votes.value.meta.page })
   loading.value = false
 }
 
@@ -91,6 +93,6 @@ function onPage(event: any) {
 
 onMounted(async () => {
   await load()
-  votesGifts.value = await $api.get('cabinet/votes/gifts').then((res) => res.data)
+  votesGifts.value = await votesApi.gifts()
 })
 </script>

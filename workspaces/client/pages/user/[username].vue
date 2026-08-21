@@ -88,11 +88,13 @@ import { useUiStore } from '~/stores/ui'
 
 definePageMeta({ layout: 'landing' })
 
-const { $api, $moment, $t } = useNuxtApp()
+const { $moment, $t } = useNuxtApp()
+
+const playersApi = usePlayers()
 const route = useRoute()
 
 const { data, error } = await useAsyncData<any>(`user-${route.params.username}`, async () => {
-  const user = await $api.get(`/users/public/user/${route.params.username}`).then((res) => res.data)
+  const user = await playersApi.profile(route.params.username as string)
   const online = user.playtimes.find((pt: any) => pt.updated != pt.created && $moment(pt.updated).isAfter($moment().subtract(2, 'minutes')))
   return { user, online }
 })

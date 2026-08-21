@@ -1,9 +1,17 @@
 import './load-env'
 import { publicConfig } from 'unicore-common/public-config'
+import { projectRoot } from 'unicore-common/ports'
+import { resolveLayers } from 'unicore-api/nuxt'
 import { SITEMAP_EXCLUDE } from './constants'
-import Aura from '@primevue/themes/aura'
+import { preset } from './theme/preset'
+
+const layers = resolveLayers({ side: 'client', root: projectRoot })
+
+for (const problem of layers.problems) console.warn(`[unicore] ${problem}`)
 
 export default defineNuxtConfig({
+  extends: [...layers.theme, ...layers.modules],
+
   ssr: true,
 
   devServer: {
@@ -12,6 +20,7 @@ export default defineNuxtConfig({
   },
 
   modules: [
+    '~/modules/unicore-guard',
     '@primevue/nuxt-module',
     '@pinia/nuxt',
     '@vueuse/nuxt',
@@ -91,7 +100,7 @@ export default defineNuxtConfig({
     options: {
       ripple: true,
       theme: {
-        preset: Aura,
+        preset,
         options: {
           darkModeSelector: '.dark',
           cssLayer: false,

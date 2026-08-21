@@ -11,18 +11,14 @@
               <img class="my-1" src="/icon.png" height="64px" />
               <h2 class="ms-3 my-0 d-none d-md-block">{{ $pub.sitename }}</h2>
             </NuxtLink>
-            <NuxtLink to="/servers" class="vs-navbar__item d-none d-lg-block">
-              <i class="bx bx-server"></i> {{ $t('header.servers') }}
-            </NuxtLink>
-            <a :href="config.public_link_forum" target="_blank" class="vs-navbar__item d-none d-lg-block">
-              <i class="bx bx-chat"></i> {{ $t('header.forum') }}
-            </a>
-            <NuxtLink to="/page/rules" class="vs-navbar__item d-none d-lg-block">
-              <i class="bx bx-paperclip"></i> {{ $t('header.rules') }}
-            </NuxtLink>
-            <NuxtLink to="/donate" class="vs-navbar__item d-none d-lg-block">
-              <i class="bx bx-donate-heart"></i> {{ $t('header.donate') }}
-            </NuxtLink>
+            <template v-for="item in navbar" :key="item.key">
+              <a v-if="item.href" :href="item.href" target="_blank" class="vs-navbar__item d-none d-lg-block">
+                <i :class="item.icon"></i> {{ $t(item.label) }}
+              </a>
+              <NuxtLink v-else :to="item.to" class="vs-navbar__item d-none d-lg-block">
+                <i :class="item.icon"></i> {{ $t(item.label) }}
+              </NuxtLink>
+            </template>
           </div>
           <div class="d-flex align-items-center">
             <div class="d-flex align-items-center" v-if="$auth.loggedIn">
@@ -63,27 +59,14 @@
           <NuxtLink to="/"
             ><span class="vs-sidebar__item exact"><i class="bx bx-home"></i> {{ $t('header.home') }}</span></NuxtLink
           >
-          <NuxtLink to="/servers"
-            ><span class="vs-sidebar__item"><i class="bx bx-server"></i> {{ $t('header.servers') }}</span></NuxtLink
-          >
-          <a :href="config.public_link_forum" target="_blank"
-            ><span class="vs-sidebar__item"><i class="bx bx-chat"></i> {{ $t('header.forum') }}</span></a
-          >
-          <NuxtLink to="/page/rules"
-            ><span class="vs-sidebar__item"><i class="bx bx-paperclip"></i> {{ $t('header.rules') }}</span></NuxtLink
-          >
-          <NuxtLink to="/donate"
-            ><span class="vs-sidebar__item"><i class="bx bx-donate-heart"></i> {{ $t('header.donate') }}</span></NuxtLink
-          >
-          <NuxtLink v-if="$auth.user" to="/cabinet"
-            ><span class="vs-sidebar__item"><i class="bx bx-user"></i> {{ $t('header.cabinet') }}</span></NuxtLink
-          >
-          <NuxtLink v-if="$auth.user" to="/store"
-            ><span class="vs-sidebar__item"><i class="bx bx-cart"></i> {{ $t('header.store') }}</span></NuxtLink
-          >
-          <NuxtLink v-if="$auth.user" to="/players"
-            ><span class="vs-sidebar__item"><i class="bx bx-stats"></i> {{ $t('header.players') }}</span></NuxtLink
-          >
+          <template v-for="item in sidebarNav" :key="item.key">
+            <a v-if="item.href" :href="item.href" target="_blank"
+              ><span class="vs-sidebar__item"><i :class="item.icon"></i> {{ $t(item.label) }}</span></a
+            >
+            <NuxtLink v-else :to="item.to"
+              ><span class="vs-sidebar__item"><i :class="item.icon"></i> {{ $t(item.label) }}</span></NuxtLink
+            >
+          </template>
           <div class="mt-auto">
             <div v-if="$auth.user" class="d-flex align-items-center justify-content-between">
               <Avatar>
@@ -147,6 +130,10 @@ const config = computed(() => configStore.config)
 
 const locales = useLocales()
 const locale = useLocale()
+
+const navbar = useNavigation('navbar')
+const cabinetNav = useNavigation('cabinet')
+const sidebarNav = computed(() => [...navbar.value, ...cabinetNav.value])
 
 const activeSidebar = ref(false)
 const scrolled = ref(false)

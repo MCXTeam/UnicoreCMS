@@ -79,7 +79,7 @@ export default {
 
     useHead({ title: computed(() => $t('header.cabinet')) })
 
-    return { config: computed(() => configStore.config) }
+    return { config: computed(() => configStore.config), cabinet: useCabinet() }
   },
 
   data() {
@@ -96,7 +96,7 @@ export default {
 
   methods: {
     async load() {
-      this.referals = await this.$api.get('/cabinet/referals/me').then((res) => res.data)
+      this.referals = await this.cabinet.referals()
     },
 
     async copyLink() {

@@ -8,12 +8,11 @@ import { useUiStore } from '~/stores/ui'
 
 definePageMeta({ layout: 'landing' })
 
-const { $api } = useNuxtApp()
 const route = useRoute()
 
 const path = Array.isArray(route.params.pathMatch) ? route.params.pathMatch.join('/') : route.params.pathMatch
 
-const { data: page, error } = await useAsyncData<any>(`page-${path}`, () => $api.post('/pages/path', { path }).then((res) => res.data))
+const { data: page, error } = await usePages().byPath(path)
 
 if (error.value || !page.value) throw createError({ statusCode: 404, fatal: true })
 

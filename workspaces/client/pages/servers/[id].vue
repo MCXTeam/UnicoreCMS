@@ -65,6 +65,7 @@
       <h2 class="mt-0 mb-2">{{ $t('servers.other_mods') }}</h2>
       <div v-text="othermods"></div>
     </div>
+    <ExtensionSlot name="server.page" :server="server" />
   </div>
 </template>
 
@@ -74,21 +75,17 @@ import { useUiStore } from '~/stores/ui'
 definePageMeta({ layout: 'landing' })
 
 const route = useRoute()
-const { $api, $t } = useNuxtApp()
+const { $t } = useNuxtApp()
 const ui = useUiStore()
+const serversApi = useServers()
 
-const { data: server, error } = await useAsyncData<any>(`server-${route.params.id}`, () =>
-  $api.get(`/servers/${route.params.id}`).then((res) => res.data),
-)
+const { data: server, error } = await serversApi.one(route.params.id as string)
 
 if (error.value || !server.value) {
   throw createError({ statusCode: 404, fatal: true })
 }
 
-const { data: gallery } = await useAsyncData<any[]>(`server-gallery-${route.params.id}`, () =>
-  $api.get(`/servers/${route.params.id}/gallery`).then((res) => res.data),
-  { default: () => [] },
-)
+const { data: gallery } = await serversApi.gallery(route.params.id as string)
 
 const othermods = server.value?.mods
   ?.filter((m: any) => !m.description)

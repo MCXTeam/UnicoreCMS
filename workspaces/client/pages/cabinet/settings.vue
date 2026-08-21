@@ -174,7 +174,10 @@ import { Form, Field } from 'vee-validate'
 
 definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'cabinet.tab_settings' })
 
-const { $api, $auth, $unicore, $t } = useNuxtApp()
+const { $auth, $unicore, $t } = useNuxtApp()
+
+const cabinet = useCabinet()
+const twoFactor = useTwoFactor()
 
 useHead({ title: computed(() => $t('header.cabinet')) })
 
@@ -199,7 +202,7 @@ async function changePassword() {
 
   const loading = $unicore.loading()
   try {
-    await $api.post('/cabinet/settings/password', password_form).then((res) => res.data)
+    await cabinet.changePassword(password_form)
     $unicore.successNotification($t('cabinet.password_changed'))
     if (password_form.close) $unicore.logout()
   } catch {
@@ -209,7 +212,7 @@ async function changePassword() {
 }
 
 async function GenerateQR() {
-  two_factor.value = await $api.get('/cabinet/2fa/generate').then((res) => res.data)
+  two_factor.value = await twoFactor.generate()
   await new QRCode({
     canvas: qrcode.value,
     content: two_factor.value.otpauth_url,
@@ -220,13 +223,13 @@ async function GenerateQR() {
     nodeQrCodeOptions: {
       margin: 1,
     },
-  }).toImage()
+  }).getCanvas()
 }
 
 async function TwoFactorEnable() {
   const loading = $unicore.loading()
   try {
-    await $api.post('/cabinet/2fa/enable', two_factor_form).then((res) => res.data)
+    await twoFactor.enable(two_factor_form.code)
     await $auth.fetchUser()
     two_factor_form.code = ''
     two_factor.value = null
@@ -240,7 +243,7 @@ async function TwoFactorEnable() {
 async function TwoFactorDisable() {
   const loading = $unicore.loading()
   try {
-    await $api.post('/cabinet/2fa/disable', two_factor_form).then((res) => res.data)
+    await twoFactor.disable(two_factor_form.code)
     await Promise.all([$auth.fetchUser(), GenerateQR()])
     two_factor_form.code = ''
     $unicore.successNotification($t('cabinet.two_factor_disabled'))

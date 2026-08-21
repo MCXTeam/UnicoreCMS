@@ -1,5 +1,7 @@
 <template>
   <section>
+    <ExtensionSlot name="home.top" />
+
     <div v-if="news && news.data">
       <div v-for="news_ in news.data" :key="news_.id" class="mb-4 row news-block">
         <div class="col-md-4 mb-4">
@@ -40,21 +42,21 @@
       :first="(news.meta.currentPage - 1) * news.meta.itemsPerPage"
       @page="onPage"
     />
+
+    <ExtensionSlot name="home.bottom" />
   </section>
 </template>
 
 <script setup lang="ts">
 definePageMeta({ layout: 'landing' })
 
-const { $api } = useNuxtApp()
+const newsApi = useNews()
 
-const { data: news } = await useAsyncData<any>('index-news', () =>
-  $api.get('/news', { params: { limit: 10, page: 1 } }).then((res) => res.data),
-)
+const { data: news } = await newsApi.list({ limit: 10, page: 1 })
 
 async function onPage(event: any) {
   news.value.data = null
-  news.value = await $api.get('/news', { params: { limit: news.value.meta.itemsPerPage, page: event.page + 1 } }).then((res) => res.data)
+  news.value = await newsApi.fetchList({ limit: news.value.meta.itemsPerPage, page: event.page + 1 })
   nextTick(() => {
     window.scrollTo({ top: 700, behavior: 'smooth' })
   })

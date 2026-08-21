@@ -109,7 +109,10 @@ import { useReCaptcha } from 'vue-recaptcha-v3'
 
 definePageMeta({ layout: 'auth', middleware: 'guest' })
 
-const { $unicore, $auth, $api, $t } = useNuxtApp()
+const { $unicore, $auth, $t } = useNuxtApp()
+
+const authFlow = useAuthFlow()
+const pagesApi = usePages()
 const recaptcha = useReCaptcha()
 
 const form = reactive({
@@ -129,9 +132,9 @@ const rules = reactive({
 const rulesAccepted = (value: unknown) => value === true || $t('auth.rules_required')
 
 onMounted(async () => {
-  const { data } = await $api.get('/pages/rules')
-  rules.title = data.title
-  rules.content = data.content
+  const page = await pagesApi.rules()
+  rules.title = page.title
+  rules.content = page.content
 })
 
 async function register() {
@@ -139,8 +142,8 @@ async function register() {
   try {
     await recaptcha?.recaptchaLoaded?.()
     const token = await recaptcha?.executeRecaptcha?.('register')
-    const { data } = await $api.post('/auth/register', { ...form, ref: localStorage.getItem('ref') }, { headers: { recaptcha: token } })
-    $auth.setTokens(data.accessToken, data.refreshToken)
+    const tokens = await authFlow.register({ ...form, ref: localStorage.getItem('ref') }, token)
+    $auth.setTokens(tokens.accessToken, tokens.refreshToken)
     await $auth.fetchUser()
     await navigateTo('/cabinet')
   } catch (err: any) {
