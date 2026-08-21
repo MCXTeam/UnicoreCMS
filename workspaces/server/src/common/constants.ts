@@ -176,24 +176,6 @@ export const CURRENCY_DEFAULT_DECIMALS = 2;
 export const MONEY_PRECISION = 16;
 export const MONEY_SCALE = 4;
 
-export const MONEY_COLUMNS = [
-  { table: 'unicore_users', column: 'real' },
-  { table: 'unicore_users', column: 'virtual' },
-  { table: 'unicore_monies', column: 'money' },
-  { table: 'unicore_payments', column: 'amount' },
-  { table: 'unicore_bonuses', column: 'bonus' },
-  { table: 'unicore_bonuses', column: 'amount' },
-  { table: 'unicore_products', column: 'price' },
-  { table: 'unicore_kits', column: 'price' },
-  { table: 'unicore_enchantments', column: 'price' },
-  { table: 'unicore_donate_groups', column: 'price' },
-  { table: 'unicore_donate_permissions', column: 'price' },
-  { table: 'unicore_periods', column: 'multiplier' },
-  { table: 'unicore_gifts', column: 'amount' },
-  { table: 'unicore_histories', column: 'amount' },
-  { table: 'unicore_vote_gifts', column: 'bonus' },
-];
-
 export const VOTE_MIN_INTERVAL_MS = 5 * 60_000;
 export const VOTE_PLACE_MAX = 100;
 export const VOTES_RECENT_MAX = 20;
