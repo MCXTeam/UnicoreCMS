@@ -6,12 +6,13 @@ import { MinecraftRatingModule } from './minecraftrating.module';
 import { MonitoringResp } from '../core/monitoring-resp.enum';
 import { envConfig } from 'unicore-common';
 import { safeEqual } from '@common';
+import { VoteCallbackInput } from '../core/dto/vote-callback.input';
 
 @Injectable()
 export class MinecraftRatingService implements MonitoringCoreService {
   constructor(private mhService: MonitoringHandlerService) {}
 
-  async handler(input: any) {
+  async handler(input: VoteCallbackInput) {
     const token = crypto
       .createHash('sha1')
       .update(input.username + input.timestamp + envConfig.minecraftratingSecretKey)

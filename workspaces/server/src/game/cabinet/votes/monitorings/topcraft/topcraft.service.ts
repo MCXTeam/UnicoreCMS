@@ -6,12 +6,13 @@ import { MonitoringResp } from '../core/monitoring-resp.enum';
 import { envConfig } from 'unicore-common';
 import { safeEqual } from '@common';
 import { TopcraftModule } from './topcraft.module';
+import { VoteCallbackInput } from '../core/dto/vote-callback.input';
 
 @Injectable()
 export class TopcraftService implements MonitoringCoreService {
   constructor(private mhService: MonitoringHandlerService) {}
 
-  async handler(input: any) {
+  async handler(input: VoteCallbackInput) {
     const token = crypto
       .createHash('sha1')
       .update(input.username + input.timestamp + envConfig.topcraftSecretKey)

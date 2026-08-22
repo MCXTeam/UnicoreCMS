@@ -6,12 +6,13 @@ import { safeEqual } from '@common';
 import { MonitoringHandlerService } from '../core/monitoring-handler.service';
 import { MonitoringResp } from '../core/monitoring-resp.enum';
 import { McrateModule } from './mcrate.module';
+import { McrateCallbackInput } from './dto/mcrate-callback.input';
 
 @Injectable()
 export class McrateService implements MonitoringCoreService {
   constructor(private mhService: MonitoringHandlerService) {}
 
-  async handler(input: any) {
+  async handler(input: McrateCallbackInput) {
     const hash = crypto
       .createHash('md5')
       .update(

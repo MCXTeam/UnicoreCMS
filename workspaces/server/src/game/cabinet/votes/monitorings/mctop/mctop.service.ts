@@ -6,12 +6,13 @@ import { safeEqual } from '@common';
 import { MonitoringHandlerService } from '../core/monitoring-handler.service';
 import { MctopModule } from './mctop.module';
 import { MonitoringResp } from '../core/monitoring-resp.enum';
+import { MctopCallbackInput } from './dto/mctop-callback.input';
 
 @Injectable()
 export class MctopService implements MonitoringCoreService {
   constructor(private mhService: MonitoringHandlerService) {}
 
-  async handler(input: any) {
+  async handler(input: MctopCallbackInput) {
     const token = crypto
       .createHash('md5')
       .update(input.nickname + envConfig.mctopSecretKey)

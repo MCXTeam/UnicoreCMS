@@ -6,12 +6,13 @@ import { safeEqual } from '@common';
 import { MonitoringHandlerService } from '../core/monitoring-handler.service';
 import { MonitoringResp } from '../core/monitoring-resp.enum';
 import { MonitoringminecraftModule } from './monitoringminecraft.module';
+import { VoteCallbackInput } from '../core/dto/vote-callback.input';
 
 @Injectable()
 export class MonitoringminecraftService implements MonitoringCoreService {
   constructor(private mhService: MonitoringHandlerService) {}
 
-  async handler(input: any) {
+  async handler(input: VoteCallbackInput) {
     const token = crypto
       .createHash('sha1')
       .update(input.username + input.timestamp + envConfig.monitoringminecraftSecretKey)

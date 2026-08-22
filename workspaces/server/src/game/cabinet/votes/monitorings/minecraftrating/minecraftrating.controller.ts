@@ -1,5 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { Public } from 'src/auth/decorators/public.decorator';
+import { VoteCallbackInput } from '../core/dto/vote-callback.input';
 import { MinecraftRatingService } from './minecraftrating.service';
 
 @Controller('monitorings/minecraftrating')
@@ -8,7 +9,7 @@ export class MinecraftRatingController {
 
   @Public()
   @Post()
-  handler(@Body() body) {
+  handler(@Body() body: VoteCallbackInput) {
     return this.mrService.handler(body);
   }
 }
