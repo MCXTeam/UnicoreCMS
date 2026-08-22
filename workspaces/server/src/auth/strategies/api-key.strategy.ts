@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { HeaderAPIKeyStrategy } from 'passport-headerapikey';
 import { ApiService } from 'src/admin/api/api.service';
+import { ApiToken } from 'src/admin/api/entities/api-token.entity';
 import { UsersService } from 'src/admin/users/users.service';
 import { Request } from 'express';
 import { clientIp, ipAllowed } from '@common';
@@ -29,6 +30,7 @@ export class ApiKeyStrategy extends PassportStrategy(HeaderAPIKeyStrategy) {
 
     if (api && kernel && ipAllowed(ip, api.allow)) {
       kernel.perms = api.perms;
+      (req as Request & { apiToken?: ApiToken }).apiToken = api;
 
       done(null, kernel);
       return;

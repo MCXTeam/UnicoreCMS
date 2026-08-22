@@ -21,6 +21,7 @@ import { Referal } from 'src/game/cabinet/referals/entities/referal.entity';
 import { PasswordModule } from './password/password.module';
 import { ConfigModule } from 'src/admin/config/config.module';
 import { ActivatedGuard } from './guards/activated.guard';
+import { ApiServerGuard } from './guards/api-server.guard';
 
 @Module({
   imports: [
@@ -49,6 +50,10 @@ import { ActivatedGuard } from './guards/activated.guard';
     {
       provide: APP_GUARD,
       useClass: ActivatedGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ApiServerGuard,
     },
   ],
   exports: [AuthService, TokensService],

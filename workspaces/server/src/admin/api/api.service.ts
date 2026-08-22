@@ -42,6 +42,7 @@ export class ApiService {
     apikey.comment = input.comment;
     apikey.allow = input.allow;
     apikey.perms = input.perms;
+    apikey.servers = input.servers;
 
     return { ...(await this.apiTokensRepository.save(apikey)), key };
   }
@@ -56,6 +57,7 @@ export class ApiService {
     apikey.comment = input.comment;
     apikey.allow = input.allow;
     apikey.perms = input.perms;
+    apikey.servers = input.servers;
 
     this.eventsService.server.to(ApiKeyRoom(apikey)).disconnectSockets();
     return this.apiTokensRepository.save(apikey);

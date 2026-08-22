@@ -9,7 +9,6 @@ import { UsersDonatePermission } from 'src/game/donate/permissions/entities/user
 import { PermissionType } from 'src/game/donate/permissions/enums/permission-type.enum';
 import { IssuanceService } from 'src/game/servers/rcon/issuance.service';
 import { Repository } from 'typeorm';
-import { Permission } from 'unicore-common';
 
 @Injectable()
 export class DonateTasks {
@@ -45,7 +44,7 @@ export class DonateTasks {
       .getMany();
 
     for (const udg of await this.udRepository.remove(expiresUD)) {
-      this.eventsService.server.to(Permission.KernelUnicoreConnect).emit('take_group', udg);
+      this.eventsService.emitKernel('take_group', udg, udg.server?.id);
 
       if (this.issuanceService.isRcon(udg.server)) {
         await this.issuanceService.removeGroup({ username: udg.user?.username, uuid: udg.user?.uuid }, udg.server, {
@@ -57,7 +56,7 @@ export class DonateTasks {
 
     for (const udp of await this.upRepository.remove(expiresUP)) {
       if (udp.permission?.type != PermissionType.Web) {
-        this.eventsService.server.to(Permission.KernelUnicoreConnect).emit('take_permission', udp);
+        this.eventsService.emitKernel('take_permission', udp, udp.server?.id);
 
         if (this.issuanceService.isRcon(udp.server)) {
           await this.issuanceService.removePermission({ username: udp.user?.username, uuid: udp.user?.uuid }, udp.server, {

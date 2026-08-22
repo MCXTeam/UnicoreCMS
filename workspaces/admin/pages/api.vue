@@ -22,6 +22,11 @@
           <Column sortable field="comment" :header="$t('admin.comment')">
             <template #body="slotProps">{{ slotProps.data.comment || '—' }}</template>
           </Column>
+          <Column field="servers" :header="$t('admin.api_servers')">
+            <template #body="slotProps">
+              {{ slotProps.data.servers?.length ? slotProps.data.servers.join(', ') : $t('admin.api_servers_all') }}
+            </template>
+          </Column>
           <Column sortable field="created" :header="$t('admin.created')" :style="{ width: '8rem' }">
             <template #body="slotProps">
               {{ $moment(slotProps.data.created).format('MM/DD/YYYY HH:mm:ss') }}
@@ -93,6 +98,22 @@
                 <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
             </VeeField>
+            <div class="field">
+              <label class="flex align-items-center gap-1">
+                {{ $t('admin.api_servers') }}
+                <i v-tooltip.right="$t('admin.api_servers_hint')" class="pi pi-question-circle text-color-secondary" />
+              </label>
+              <MultiSelect
+                v-model="token.servers"
+                :options="servers"
+                optionLabel="name"
+                optionValue="id"
+                display="chip"
+                :placeholder="$t('admin.api_servers_all')"
+                :showToggleAll="false"
+                appendTo="body"
+              />
+            </div>
             <VeeField
               v-model="token.allow"
               name="allow"
@@ -145,6 +166,7 @@ export default {
   data() {
     return {
       api: null,
+      servers: [],
       autocompleate: null,
       autocompleateFilterd: null,
       loading: true,
@@ -154,6 +176,7 @@ export default {
         comment: null,
         perms: [],
         allow: ['*'],
+        servers: [],
       },
       tokenDialog: false,
       createdKey: null,
@@ -171,6 +194,7 @@ export default {
       this.loading = true
       this.tokenDialog = false
       this.autocompleate = await this.$api.get('/admin/roles/autocompleate').then((res) => res.data)
+      this.servers = await this.$api.get('/servers').then((res) => res.data)
       this.api = await this.$api.get('/admin/api').then((res) => res.data)
       this.loading = false
     },
@@ -203,6 +227,7 @@ export default {
           comment: null,
           perms: [],
           allow: ['*'],
+          servers: [],
         }
       }
       this.tokenDialog = true

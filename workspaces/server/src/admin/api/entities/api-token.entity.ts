@@ -24,6 +24,12 @@ export class ApiToken {
   })
   perms?: string[];
 
+  @Column('simple-array', {
+    nullable: true,
+    name: 'servers',
+  })
+  servers?: string[];
+
   @UpdateDateColumn({ name: 'updated' })
   updated: Date;
 

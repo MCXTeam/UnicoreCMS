@@ -193,3 +193,5 @@ export const VIRTUAL_PERCENT_MAX = 100;
 export const PERIOD_MULTIPLIER_MIN = 0.01;
 export const PERIOD_MULTIPLIER_MAX = 1000;
 export const PERIOD_EXPIRE_MAX = 100 * 365 * 24 * 60 * 60;
+
+export const API_SERVER_FIELDS = ['server', 'server_id', 'serverId', 'from_server', 'servers'];

@@ -9,7 +9,6 @@ import { HistoryService } from 'src/game/cabinet/history/history.service';
 import { Server } from 'src/game/servers/entities/server.entity';
 import { IssuanceService } from 'src/game/servers/rcon/issuance.service';
 import { In, Repository } from 'typeorm';
-import { Permission } from 'unicore-common';
 import { Period } from '../../entities/period.entity';
 import { GiveDonateGroupInput } from '../dto/give-donate-group.input';
 import { GroupBuyInput } from '../dto/group-buy.input';
@@ -157,7 +156,7 @@ export class DonateGroupsService {
       );
     }
 
-    runAfterCommit(() => this.eventsService.server?.to(Permission.KernelUnicoreConnect).emit('give_group', saved));
+    runAfterCommit(() => this.eventsService.emitKernel('give_group', saved, server?.id));
     runAfterCommit(() =>
       events().emit('donate.group.granted', {
         uuid: user.uuid,
@@ -186,7 +185,7 @@ export class DonateGroupsService {
     if (!udg) throw new NotFoundException();
 
     await this.userDonatesRepository.remove(udg);
-    runAfterCommit(() => this.eventsService.server?.to(Permission.KernelUnicoreConnect).emit('take_group', udg));
+    runAfterCommit(() => this.eventsService.emitKernel('take_group', udg, udg.server?.id));
     runAfterCommit(() =>
       events().emit('donate.group.revoked', { uuid: udg.user.uuid, serverId: Number(udg.server.id), groupId: udg.group.id }),
     );

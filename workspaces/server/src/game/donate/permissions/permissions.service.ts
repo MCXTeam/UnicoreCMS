@@ -108,7 +108,7 @@ export class DonatePermissionsService {
         );
       }
 
-      runAfterCommit(() => this.eventsService.server?.to(Permission.KernelUnicoreConnect).emit('give_permission', saved));
+      runAfterCommit(() => this.eventsService.emitKernel('give_permission', saved, server?.id));
     }
 
     runAfterCommit(() =>
@@ -156,7 +156,7 @@ export class DonatePermissionsService {
     );
 
     if (udp.permission.type != PermissionType.Web) {
-      runAfterCommit(() => this.eventsService.server?.to(Permission.KernelUnicoreConnect).emit('take_permission', udp));
+      runAfterCommit(() => this.eventsService.emitKernel('take_permission', udp, udp.server?.id));
 
       if (this.issuanceService.isRcon(udp.server)) {
         await this.issuanceService.removePermission({ username: udp.user.username, uuid: udp.user.uuid }, udp.server, {

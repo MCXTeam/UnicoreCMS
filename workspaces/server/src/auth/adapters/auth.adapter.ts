@@ -3,7 +3,10 @@ import { IoAdapter } from '@nestjs/platform-socket.io';
 import { ApiService } from 'src/admin/api/api.service';
 import { UserDto } from 'src/admin/users/dto/user.dto';
 import { UsersService } from 'src/admin/users/users.service';
-import { userRoom } from '../helpers';
+import { User } from 'src/admin/users/entities/user.entity';
+import { ApiToken } from 'src/admin/api/entities/api-token.entity';
+import { Permission } from 'unicore-common';
+import { kernelServerRoom, userRoom } from '../helpers';
 import { ApiKeyRoom } from '../helpers/api-key-room';
 import { AuthSocket } from '../interfaces/auth-socket.interface';
 import { TokensService } from '../tokens.service';
@@ -49,6 +52,17 @@ export class AuthAdapter extends IoAdapter {
     });
   }
 
+  private kernelRooms(apiToken: ApiToken, user: User): string[] {
+    const perms = new UserDto(user).perms;
+
+    if (!apiToken.servers?.length) return perms;
+
+    return [
+      ...perms.filter((perm) => perm !== Permission.KernelUnicoreConnect),
+      ...apiToken.servers.map((server) => kernelServerRoom(server)),
+    ];
+  }
+
   private async authorizeApiKey(socket: AuthSocket, apiKey: string): Promise<void> {
     const apiToken = await this.apiService.findByKey(apiKey);
 
@@ -59,7 +73,7 @@ export class AuthAdapter extends IoAdapter {
     const user = await this.usersService.getKernel();
     user.perms = apiToken.perms;
 
-    socket.join([...new UserDto(user).perms, userRoom(user), ApiKeyRoom(apiToken)]);
+    socket.join([...this.kernelRooms(apiToken, user), userRoom(user), ApiKeyRoom(apiToken)]);
     socket.user = user;
   }
 
