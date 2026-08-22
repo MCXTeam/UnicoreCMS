@@ -29,7 +29,6 @@ export interface AdminSlotEntry {
 export interface AdminModuleDefinition {
   id: string
   menu?: AdminMenuItem[]
-  group?: string
   access?: Record<string, AdminRouteAccess>
   slots?: AdminSlotEntry[]
 }

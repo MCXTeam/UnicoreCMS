@@ -21,7 +21,6 @@ interface AdminSlotEntry {
 interface AdminModuleDefinition {
     id: string;
     menu?: AdminMenuItem[];
-    group?: string;
     access?: Record<string, AdminRouteAccess>;
     slots?: AdminSlotEntry[];
 }
@@ -68,7 +67,7 @@ export { CLIENT_NAV_PLACES, CLIENT_SLOTS, type ClientModuleDefinition, type Clie
 import { ConfigFieldSchema } from './manifest.js';
 export { ConfigFieldType, LocalizedText, ModuleManifest, PRIMEVUE_PRESETS, PrimeVuePreset, ThemeManifest, ValidationResult, localizedText, validateModuleManifest, validateThemeManifest } from './manifest.js';
 import { DataSource } from 'typeorm';
-declare const API_VERSION = "1.3.0";
+declare const API_VERSION = "1.3.1";
 declare const API_MAJOR: number;
 declare const IS_PUBLIC_KEY = "isPublic";
 declare const PERMISSIONS_KEY = "permissions";
