@@ -195,3 +195,8 @@ export const PERIOD_MULTIPLIER_MAX = 1000;
 export const PERIOD_EXPIRE_MAX = 100 * 365 * 24 * 60 * 60;
 
 export const API_SERVER_FIELDS = ['server', 'server_id', 'serverId', 'from_server', 'servers'];
+
+export const SCHEMA_LOCK_NAME = 'unicore_schema';
+export const SCHEMA_LOCK_TIMEOUT = 60;
+export const SCHEMA_LOCK_ATTEMPTS = 2;
+export const SCHEMA_MIGRATIONS_TABLE = 'unicore_migrations';

@@ -126,7 +126,6 @@
   "admin.extension_step_dependencies": "install the extension dependencies",
   "admin.extension_step_rebuild": "rebuild the frontends",
   "admin.extension_step_restart": "restart the server",
-  "admin.extension_step_sync": "synchronize the database schema",
   "admin.extension_steps": "Next: {steps}",
   "admin.extension_updated_module": "Module updated",
   "admin.extension_updated_theme": "Theme updated",

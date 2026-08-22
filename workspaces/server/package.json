@@ -16,9 +16,10 @@
     "start": "node .",
     "dev": "nest start --watch --preserveWatchOutput",
     "typeorm:cli": "typeorm -d ./dist/ormconfig-schema.js",
-    "money:decimal": "node ./dist/migrations/money-decimal.js",
-    "schema:sync": "pnpm run money:decimal && pnpm run typeorm:cli schema:sync",
-    "seed:run": "node dist/cli/main.js seed"
+    "schema:sync": "pnpm run typeorm:cli schema:sync",
+    "seed:run": "node dist/cli/main.js seed",
+    "migrate:status": "node ./dist/migrations/cli.js status",
+    "schema:align": "node ./dist/migrations/cli.js align"
   },
   "dependencies": {
     "@faker-js/faker": "^8.4.1",

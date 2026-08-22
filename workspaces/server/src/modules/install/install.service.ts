@@ -25,10 +25,7 @@ import { discover } from '../runtime/discovery';
 export class InstallService {
   private readonly logger = new Logger('Modules');
 
-  constructor(
-    private readonly modules: ModulesService,
-    private readonly dataSource: DataSource,
-  ) {}
+  constructor(private readonly modules: ModulesService, private readonly dataSource: DataSource) {}
 
   async install(filename: string): Promise<InstallResultDto> {
     const buffer = StorageManager.read(filename);
@@ -164,7 +161,6 @@ export class InstallService {
 
     return {
       dependencies: this.hasDependencies(target),
-      sync: Boolean(module?.server),
       rebuild: kind === 'theme' || Boolean(module?.client || module?.admin),
       restart: kind === 'module',
     };

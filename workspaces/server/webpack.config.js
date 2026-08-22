@@ -38,12 +38,12 @@ const orm = {
   },
 };
 
-const money = {
+const schema = {
   ...base,
-  entry: './src/migrations/money-decimal.ts',
+  entry: './src/migrations/cli.ts',
   output: {
     path: path.resolve(__dirname, 'dist/migrations'),
-    filename: 'money-decimal.js',
+    filename: 'cli.js',
   },
 };
 
@@ -66,4 +66,4 @@ const cli = {
   plugins: [new webpack.BannerPlugin({ banner: '#!/usr/bin/env node', raw: true })],
 };
 
-module.exports = [orm, money, main, cli];
+module.exports = [orm, schema, main, cli];

@@ -1,5 +1,6 @@
 import { envConfig, timezoneOffset } from 'unicore-common';
 import { NamingStrategy } from './common/database';
+import { SCHEMA_MIGRATIONS_TABLE } from './common/constants';
 import { moduleEntities } from './modules/runtime';
 
 const importAllFunctions = (
@@ -31,6 +32,15 @@ const importEntities = () => {
   }
 };
 
+const importMigrations = () => {
+  try {
+    // @ts-ignore
+    return importAllFunctions(require.context('./migrations/steps', true, /\.migration\.ts$/));
+  } catch {
+    return ['./migrations/steps/*.migration.js'];
+  }
+};
+
 export const ormconfig: any = {
   type: envConfig.databaseType,
   host: envConfig.databaseHost,
@@ -40,5 +50,7 @@ export const ormconfig: any = {
   database: envConfig.databaseName,
   timezone: timezoneOffset(envConfig.timezone),
   entities: [...importEntities(), ...moduleEntities()],
+  migrations: importMigrations(),
+  migrationsTableName: SCHEMA_MIGRATIONS_TABLE,
   namingStrategy: new NamingStrategy(),
 };

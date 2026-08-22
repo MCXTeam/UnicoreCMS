@@ -2,7 +2,6 @@ import { LocalizedText } from 'unicore-api';
 
 export interface InstallSteps {
   dependencies: boolean;
-  sync: boolean;
   rebuild: boolean;
   restart: boolean;
 }

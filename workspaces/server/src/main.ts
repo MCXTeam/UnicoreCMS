@@ -13,6 +13,7 @@ import { initializeTransactionalContext } from 'typeorm-transactional';
 import { ContentLocaleInterceptor } from './admin/locales/content-locale.interceptor';
 import { ContentTranslationsService } from './admin/locales/content-translations.service';
 import { LocalesService } from './admin/locales/locales.service';
+import { applySchema } from './migrations/runner';
 
 process.env.TZ = envConfig.timezone;
 
@@ -29,6 +30,8 @@ async function bootstrap() {
   await new Promise((res) => setTimeout(res, 2500));
 
   initializeTransactionalContext();
+
+  await applySchema();
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: NestLogger,

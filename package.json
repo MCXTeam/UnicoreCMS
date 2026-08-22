@@ -17,7 +17,9 @@
     "format": "pnpm -r run format",
     "sync": "pnpm --filter unicore-server run schema:sync",
     "seed": "pnpm --filter unicore-server run seed:run",
-    "boot": "pnpm install && pnpm run build:server && pnpm run sync"
+    "boot": "pnpm install && pnpm run build:server && pnpm run align",
+    "align": "pnpm --filter unicore-server run schema:align",
+    "migrate:status": "pnpm --filter unicore-server run migrate:status"
   },
   "dependencies": {
     "unicore-api": "workspace:*"

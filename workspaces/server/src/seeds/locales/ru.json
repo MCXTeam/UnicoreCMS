@@ -126,7 +126,6 @@
   "admin.extension_step_dependencies": "установить зависимости расширения",
   "admin.extension_step_rebuild": "пересобрать фронты",
   "admin.extension_step_restart": "перезапустить сервер",
-  "admin.extension_step_sync": "синхронизировать схему базы",
   "admin.extension_steps": "Дальше: {steps}",
   "admin.extension_updated_module": "Модуль обновлён",
   "admin.extension_updated_theme": "Тема обновлена",

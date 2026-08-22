@@ -35,6 +35,7 @@ export interface EnvConfig {
   jwtExpires: string;
   jwtRefreshExpires: string;
   trustProxy: boolean | number | string;
+  migrationsSkip: boolean;
   corsOrigins: string[];
   apiBaseurl: string;
   recaptchaSecret: string;
@@ -208,6 +209,8 @@ export const envConfig: EnvConfig = {
     .get(PUBLIC_ENV_KEY.jwtRefreshExpires)
     .default("30d")
     .asString(),
+
+  migrationsSkip: env.get("MIGRATIONS_SKIP").default("false").asBool(),
 
   trustProxy: (() => {
     const raw = env.get("TRUST_PROXY").asString();
