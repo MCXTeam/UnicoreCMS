@@ -1,3 +1,5 @@
+@use '../breakpoints' as *;
+
 .unicore-content {
   min-height: calc(100vh - 180px - 72px - 148px);
 }
@@ -11,7 +13,7 @@
 }
 
 .news-image-full {
-  @extend .rounded;
+  @include rounded;
   width: 100%;
   height: 300px;
   box-shadow: 0px 3px 3px rgba(0, 0, 0, 0.15);
@@ -70,7 +72,8 @@
 }
 
 .mini-profile {
-  @extend .rounded, .shadow-sm;
+  @include rounded;
+  @include shadow-sm;
   background-color: var(--vs-theme-bg);
 }
 
@@ -212,7 +215,7 @@ a.server-block:hover {
 }
 
 .skin-view {
-  @extend .shadow;
+  @include shadow;
   background:
     url('/images/bg.jpg') center,
     linear-gradient(180deg, var(--vs-theme-bg) 120px, rgba(var(--vs-primary), 0.3));
@@ -287,7 +290,7 @@ a.server-block:hover {
 }
 
 .sale-wrapper {
-  @extend .shadow-sm;
+  @include shadow-sm;
   background-color: rgba(var(--vs-primary), 1);
   color: #fff;
   transition: all 200ms;
@@ -462,7 +465,8 @@ a.server-block:hover {
       font-size: 42px;
       padding: 10px;
       box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.15);
-      @extend .rounded, .shadow-sm;
+      @include rounded;
+  @include shadow-sm;
     }
   }
 }
@@ -478,7 +482,7 @@ a.server-block:hover {
     }
 
     &.discord {
-      @extend .rounded;
+      @include rounded;
       background-color: #7289da;
       h2 {
         color: #fff !important;
@@ -486,7 +490,7 @@ a.server-block:hover {
     }
 
     &.vk {
-      @extend .rounded;
+      @include rounded;
       background-color: #4e8ace;
       h2 {
         color: #fff !important;
@@ -494,7 +498,7 @@ a.server-block:hover {
     }
 
     &.telegram {
-      @extend .rounded;
+      @include rounded;
       background-color: #32afed;
       h2 {
         color: #fff !important;
@@ -502,7 +506,7 @@ a.server-block:hover {
     }
 
     &.youtube {
-      @extend .rounded;
+      @include rounded;
       background-color: #ff0000;
       h2 {
         color: #fff !important;

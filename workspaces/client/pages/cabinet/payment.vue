@@ -255,7 +255,6 @@
 
 <script>
 import { Form, Field } from 'vee-validate'
-import { useConfigStore } from '~/stores/config'
 
 definePageMeta({
   layout: 'cabinet',
@@ -270,12 +269,11 @@ export default {
   },
 
   setup() {
-    const configStore = useConfigStore()
     const { $t } = useNuxtApp()
 
     useHead({ title: computed(() => $t('header.cabinet')) })
 
-    return { config: computed(() => configStore.config), moneyApi: useMoney(), serversApi: useServers() }
+    return { config: usePublicConfig().config, moneyApi: useMoney(), serversApi: useServers() }
   },
 
   data() {

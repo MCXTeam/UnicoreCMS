@@ -52,7 +52,12 @@
           </div>
         </div>
         <div class="header-content-sm">
-          <h1 class="mb-3">{{ uiStore.pageName }}</h1>
+          <h1 class="mb-3">
+            <ClientOnly>
+              {{ uiStore.pageName }}
+              <template #fallback>{{ $route.meta.title ? $t(String($route.meta.title)) : '' }}</template>
+            </ClientOnly>
+          </h1>
         </div>
       </div>
       <img class="header-render d-none d-lg-block" src="/images/render.png" />
@@ -61,16 +66,14 @@
 </template>
 
 <script setup lang="ts">
-import { useConfigStore } from '~/stores/config'
 import { useIoStore } from '~/stores/io'
 import { useUiStore } from '~/stores/ui'
 
 const ioStore = useIoStore()
-const configStore = useConfigStore()
 const uiStore = useUiStore()
 
 const onlines = computed(() => ioStore.serversOnline)
-const config = computed(() => configStore.config)
+const { config } = usePublicConfig()
 
 const { data: users } = await usePlayers().count()
 </script>

@@ -18,31 +18,33 @@
       <div class="panel">
         <h2 class="mt-0 mb-3">{{ $t('profile.account_info') }}</h2>
         <table class="player-info-table w-100">
-          <tr>
-            <td>{{ $t('profile.login') }}</td>
-            <td v-text="user.username" />
-          </tr>
-          <tr>
-            <td>{{ $t('profile.registered') }}</td>
-            <td v-text="$moment(user.created).format('D MMMM YYYY, HH:mm')" />
-          </tr>
-          <tr>
-            <td>{{ $t('profile.account_age') }}</td>
-            <td v-text="$utils.formatDuration($moment().diff($moment(user.created)), 'milliseconds')" />
-          </tr>
-          <tr>
-            <td>{{ $t('profile.votes_this_month') }}</td>
-            <td v-text="user.votes" />
-          </tr>
-          <tr>
-            <td>{{ $t('profile.total_playtime') }}</td>
-            <td v-text="$utils.formatDuration($_.sumBy(user.playtimes, 'time'))" />
-          </tr>
-          <tr>
-            <td>{{ $t('profile.ban') }}</td>
-            <td v-if="!user.ban">{{ $t('profile.ban_none') }}</td>
-            <td v-else>{{ $t('profile.ban_yes') }}</td>
-          </tr>
+          <tbody>
+            <tr>
+              <td>{{ $t('profile.login') }}</td>
+              <td v-text="user.username" />
+            </tr>
+            <tr>
+              <td>{{ $t('profile.registered') }}</td>
+              <td v-text="$moment(user.created).format('D MMMM YYYY, HH:mm')" />
+            </tr>
+            <tr>
+              <td>{{ $t('profile.account_age') }}</td>
+              <td v-text="$utils.formatDuration($moment().diff($moment(user.created)), 'milliseconds')" />
+            </tr>
+            <tr>
+              <td>{{ $t('profile.votes_this_month') }}</td>
+              <td v-text="user.votes" />
+            </tr>
+            <tr>
+              <td>{{ $t('profile.total_playtime') }}</td>
+              <td v-text="$utils.formatDuration($_.sumBy(user.playtimes, 'time'))" />
+            </tr>
+            <tr>
+              <td>{{ $t('profile.ban') }}</td>
+              <td v-if="!user.ban">{{ $t('profile.ban_none') }}</td>
+              <td v-else>{{ $t('profile.ban_yes') }}</td>
+            </tr>
+          </tbody>
         </table>
         <h2 class="mt-4 mb-3">{{ $t('profile.server_stats') }}</h2>
         <div v-for="pt in user.playtimes" :key="pt.server.id" class="d-flex align-items-center mb-2">

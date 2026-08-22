@@ -15,21 +15,23 @@
 
     <div class="store-table-overflow position-relative">
       <table class="store-table" v-if="warehouse.length">
-        <tr :key="whItem.id" v-for="whItem in warehouse">
-          <td class="d-flex align-items-center">
-            <IconAvatar :path="whItem.product.icon" size="large" />
-            <div class="ms-3">
-              <h4 class="m-0">
-                {{ whItem.product.name }} <small class="sale-wrapper ms-2">#{{ whItem.id }}</small>
-              </h4>
-              <span v-text="joinCategoryNames(whItem.product.categories)" />
-            </div>
-          </td>
-          <td align="right">
-            <small v-text="$moment(whItem.updated).format('DD.MM.YYYY, HH.mm')" />
-            <h4 class="m-0">{{ $t('store.pieces', { amount: whItem.amount }) }}</h4>
-          </td>
-        </tr>
+        <tbody>
+          <tr :key="whItem.id" v-for="whItem in warehouse">
+            <td class="d-flex align-items-center">
+              <IconAvatar :path="whItem.product.icon" size="large" />
+              <div class="ms-3">
+                <h4 class="m-0">
+                  {{ whItem.product.name }} <small class="sale-wrapper ms-2">#{{ whItem.id }}</small>
+                </h4>
+                <span v-text="joinCategoryNames(whItem.product.categories)" />
+              </div>
+            </td>
+            <td align="right">
+              <small v-text="$moment(whItem.updated).format('DD.MM.YYYY, HH.mm')" />
+              <h4 class="m-0">{{ $t('store.pieces', { amount: whItem.amount }) }}</h4>
+            </td>
+          </tr>
+        </tbody>
       </table>
       <h4 class="text-center m-0" v-else>{{ $t('store.warehouse_empty') }}</h4>
     </div>

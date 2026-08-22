@@ -116,17 +116,15 @@
 
 <script setup>
 import { useIoStore } from '~/stores/io'
-import { useConfigStore } from '~/stores/config'
 import { useLocale, useLocales } from '~/composables/useLocale'
 
 const route = useRoute()
 const { $socket, $setLocale } = useNuxtApp()
 
 const ioStore = useIoStore()
-const configStore = useConfigStore()
 
 const onlines = computed(() => ioStore.serversOnline)
-const config = computed(() => configStore.config)
+const { config } = usePublicConfig()
 
 const locales = useLocales()
 const locale = useLocale()

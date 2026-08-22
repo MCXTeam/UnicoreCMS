@@ -16,62 +16,64 @@
 
     <div class="store-table-overflow position-relative">
       <table class="store-table" v-if="cart.items.length">
-        <tr :key="cartItem.id" v-for="cartItem in cart.items.filter((ci) => ci.type == 'kit')">
-          <td class="d-flex align-items-center">
-            <IconAvatar :path="cartItem.payload.kit.icon" size="large" />
-            <div class="ms-3">
-              <h4 class="m-0">
-                {{ cartItem.payload.kit.name }} <small class="sale-wrapper ms-2">{{ $t('store.kit') }}</small>
-                <small class="sale-wrapper ms-2" v-if="cartItem.payload.kit.sale">-{{ cartItem.payload.kit.sale }}%</small>
-              </h4>
-              <span v-text="cartItem.payload.kit.categories.map((c) => c.name).join(', ')" />
-            </div>
-          </td>
-          <td>
-            <strike
-              v-if="cartItem.payload.kit.sale"
-              v-text="$utils.formatCurrency('real', cartItem.payload.kit.price)"
-              class="me-1"
-            ></strike>
-            <span v-text="$utils.formatCurrency('real', cartItem.payload.kit.price, cartItem.payload.kit.sale)"></span>
-            <h5 class="m-0">{{ $t('store.pieces', { amount: 1 }) }}</h5>
-          </td>
-          <td align="right">
-            <Button :loading="deletingKey == `${cartItem.type}-${cartItem.payload.id}`" @click="cartDelete(cartItem)" severity="danger"
-              ><i class="bx bx-trash"></i
-            ></Button>
-          </td>
-        </tr>
-        <tr :key="cartItem.id" v-for="cartItem in cart.items.filter((ci) => ci.type == 'product')">
-          <td class="d-flex align-items-center">
-            <IconAvatar :path="cartItem.payload.product.icon" size="large" />
-            <div class="ms-3">
-              <h4 class="m-0">
-                {{ cartItem.payload.product.name }}
-                <small class="sale-wrapper ms-2" v-if="cartItem.payload.product.sale">-{{ cartItem.payload.product.sale }}%</small>
-              </h4>
-              <span v-text="cartItem.payload.product.categories.map((c) => c.name).join(', ')" />
-            </div>
-          </td>
-          <td>
-            <strike
-              v-if="cartItem.payload.product.sale"
-              v-text="$utils.formatCurrency('real', cartItem.payload.product.price * cartItem.payload.amount)"
-              class="me-1"
-            ></strike>
-            <span
-              v-text="
-                $utils.formatCurrency('real', cartItem.payload.product.price * cartItem.payload.amount, cartItem.payload.product.sale)
-              "
-            ></span>
-            <h5 class="m-0">{{ $t('store.pieces', { amount: cartItem.payload.amount }) }}</h5>
-          </td>
-          <td align="right">
-            <Button :loading="deletingKey == `${cartItem.type}-${cartItem.payload.id}`" @click="cartDelete(cartItem)" severity="danger"
-              ><i class="bx bx-trash"></i
-            ></Button>
-          </td>
-        </tr>
+        <tbody>
+          <tr :key="cartItem.id" v-for="cartItem in cart.items.filter((ci) => ci.type == 'kit')">
+            <td class="d-flex align-items-center">
+              <IconAvatar :path="cartItem.payload.kit.icon" size="large" />
+              <div class="ms-3">
+                <h4 class="m-0">
+                  {{ cartItem.payload.kit.name }} <small class="sale-wrapper ms-2">{{ $t('store.kit') }}</small>
+                  <small class="sale-wrapper ms-2" v-if="cartItem.payload.kit.sale">-{{ cartItem.payload.kit.sale }}%</small>
+                </h4>
+                <span v-text="cartItem.payload.kit.categories.map((c) => c.name).join(', ')" />
+              </div>
+            </td>
+            <td>
+              <strike
+                v-if="cartItem.payload.kit.sale"
+                v-text="$utils.formatCurrency('real', cartItem.payload.kit.price)"
+                class="me-1"
+              ></strike>
+              <span v-text="$utils.formatCurrency('real', cartItem.payload.kit.price, cartItem.payload.kit.sale)"></span>
+              <h5 class="m-0">{{ $t('store.pieces', { amount: 1 }) }}</h5>
+            </td>
+            <td align="right">
+              <Button :loading="deletingKey == `${cartItem.type}-${cartItem.payload.id}`" @click="cartDelete(cartItem)" severity="danger"
+                ><i class="bx bx-trash"></i
+              ></Button>
+            </td>
+          </tr>
+          <tr :key="cartItem.id" v-for="cartItem in cart.items.filter((ci) => ci.type == 'product')">
+            <td class="d-flex align-items-center">
+              <IconAvatar :path="cartItem.payload.product.icon" size="large" />
+              <div class="ms-3">
+                <h4 class="m-0">
+                  {{ cartItem.payload.product.name }}
+                  <small class="sale-wrapper ms-2" v-if="cartItem.payload.product.sale">-{{ cartItem.payload.product.sale }}%</small>
+                </h4>
+                <span v-text="cartItem.payload.product.categories.map((c) => c.name).join(', ')" />
+              </div>
+            </td>
+            <td>
+              <strike
+                v-if="cartItem.payload.product.sale"
+                v-text="$utils.formatCurrency('real', cartItem.payload.product.price * cartItem.payload.amount)"
+                class="me-1"
+              ></strike>
+              <span
+                v-text="
+                  $utils.formatCurrency('real', cartItem.payload.product.price * cartItem.payload.amount, cartItem.payload.product.sale)
+                "
+              ></span>
+              <h5 class="m-0">{{ $t('store.pieces', { amount: cartItem.payload.amount }) }}</h5>
+            </td>
+            <td align="right">
+              <Button :loading="deletingKey == `${cartItem.type}-${cartItem.payload.id}`" @click="cartDelete(cartItem)" severity="danger"
+                ><i class="bx bx-trash"></i
+              ></Button>
+            </td>
+          </tr>
+        </tbody>
       </table>
       <h4 class="text-center m-0" v-else>{{ $t('store.cart_empty') }}</h4>
     </div>

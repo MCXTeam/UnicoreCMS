@@ -1,5 +1,7 @@
+@use '../breakpoints' as *;
+
 .vs-navbar {
-  @extend .container;
+  @include container;
 }
 
 .vs-navbar-content {

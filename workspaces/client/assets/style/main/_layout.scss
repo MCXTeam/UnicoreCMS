@@ -1,9 +1,12 @@
-@import './buttons';
-@import './navbar';
-@import './contetn';
-@import './header';
-@import './_firefly.sass';
-@import './footer';
+@use '../breakpoints' as *;
+@use '../varriables' as *;
+
+@use './buttons';
+@use './navbar';
+@use './contetn';
+@use './header';
+@use './_firefly.sass';
+@use './footer';
 
 :root {
   --vs-primary: #{$primary};
@@ -211,11 +214,11 @@ a.p-button:visited {
 }
 
 .rounded-circle canvas {
-  @extend .rounded-circle;
+  @include rounded-circle;
 }
 
 .rounded canvas {
-  @extend .rounded;
+  @include rounded;
 }
 
 .pixalated {

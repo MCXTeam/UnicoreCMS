@@ -1,0 +1,62 @@
+@use 'sass:map';
+
+$breakpoints: (
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px,
+  xxl: 1400px,
+);
+
+@mixin media-breakpoint-up($name) {
+  @media (min-width: map.get($breakpoints, $name)) {
+    @content;
+  }
+}
+
+@mixin media-breakpoint-down($name) {
+  @media (max-width: map.get($breakpoints, $name) - 0.02) {
+    @content;
+  }
+}
+
+@mixin rounded {
+  border-radius: var(--bs-border-radius) !important;
+}
+
+@mixin rounded-circle {
+  border-radius: 50% !important;
+}
+
+@mixin shadow {
+  box-shadow: var(--bs-box-shadow) !important;
+}
+
+@mixin shadow-sm {
+  box-shadow: var(--bs-box-shadow-sm) !important;
+}
+
+$container-widths: (
+  sm: 540px,
+  md: 720px,
+  lg: 960px,
+  xl: 1140px,
+  xxl: 1320px,
+);
+
+@mixin container {
+  --bs-gutter-x: 1.5rem;
+  --bs-gutter-y: 0;
+
+  width: 100%;
+  padding-right: calc(var(--bs-gutter-x) * 0.5);
+  padding-left: calc(var(--bs-gutter-x) * 0.5);
+  margin-right: auto;
+  margin-left: auto;
+
+  @each $name, $width in $container-widths {
+    @include media-breakpoint-up($name) {
+      max-width: $width;
+    }
+  }
+}

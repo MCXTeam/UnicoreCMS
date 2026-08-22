@@ -37,8 +37,6 @@ export interface EnvConfig {
   trustProxy: boolean | number | string;
   corsOrigins: string[];
   apiBaseurl: string;
-  discordClientID: string;
-  discordclientSecret: string;
   recaptchaSecret: string;
   recaptchaPublic: string;
   recaptchaDisabled: boolean;
@@ -232,8 +230,6 @@ export const envConfig: EnvConfig = {
     .asString(),
 
   // OAUTH
-  discordClientID: env.get("DISCORD_CLIENT_ID").asString(),
-  discordclientSecret: env.get("DISCORD_CLIENT_SECRET").asString(),
 
   // VK Longpoll
   vkLongpoll: env.get("VK_LONGPOLL").default(0).asBool(),

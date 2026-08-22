@@ -327,7 +327,6 @@
 </template>
 
 <script setup>
-import { useConfigStore } from '~/stores/config'
 
 definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'cabinet.tab_donate' })
 
@@ -337,7 +336,7 @@ const donateApi = useDonate()
 const serversApi = useServers()
 
 useHead({ title: computed(() => $t('header.cabinet')) })
-const config = computed(() => useConfigStore().config)
+const { config } = usePublicConfig()
 
 const donate = reactive({
   server_id: '',

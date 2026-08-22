@@ -76,17 +76,19 @@
       <div class="row settings-split">
         <div class="col-xl-6 input-fw pe-xl-4 mb-4">
           <table class="player-info-table w-100">
-            <tr v-for="mon in monitorings" :key="mon">
-              <td class="d-flex align-items-center py-2">
-                <img width="30px" :src="monitorings_map[mon].icon" />
-                <h4 class="m-0 ms-3" v-text="monitorings_map[mon].name" />
-              </td>
-              <td>
-                <Button as="a" :href="config['public_link_' + mon]" class="w-full">
-                  {{ $t('cabinet.vote_on', { monitoring: monitorings_map[mon].name }) }}
-                </Button>
-              </td>
-            </tr>
+            <tbody>
+              <tr v-for="mon in monitorings" :key="mon">
+                <td class="d-flex align-items-center py-2">
+                  <img width="30px" :src="monitorings_map[mon].icon" />
+                  <h4 class="m-0 ms-3" v-text="monitorings_map[mon].name" />
+                </td>
+                <td>
+                  <Button as="a" :href="config['public_link_' + mon]" class="w-full">
+                    {{ $t('cabinet.vote_on', { monitoring: monitorings_map[mon].name }) }}
+                  </Button>
+                </td>
+              </tr>
+            </tbody>
           </table>
         </div>
         <div class="col ps-xl-5">
@@ -116,7 +118,6 @@
 import { Form, Field } from 'vee-validate'
 import { useReCaptcha } from 'vue-recaptcha-v3'
 import monitoringsMap from '~/json/monitorings.json'
-import { useConfigStore } from '~/stores/config'
 
 definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'cabinet.tab_gifts' })
 
@@ -127,7 +128,7 @@ const votesApi = useVotes()
 
 useHead({ title: computed(() => $t('header.cabinet')) })
 const recaptcha = useReCaptcha()
-const config = computed(() => useConfigStore().config)
+const { config } = usePublicConfig()
 
 const monitorings_map = monitoringsMap
 const monitorings = ref([])

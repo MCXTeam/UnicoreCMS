@@ -307,8 +307,13 @@
       </Dialog>
     </VeeForm>
 
-    <TabView v-if="user">
-      <TabPanel :header="$t('admin.tab_main')">
+    <Tabs v-if="user" value="main">
+      <TabList>
+        <Tab value="main">{{ $t('admin.tab_main') }}</Tab>
+        <Tab v-if="canMoney || canDonate || canGive" value="commerce">E-Commerce</Tab>
+      </TabList>
+      <TabPanels>
+        <TabPanel value="main">
         <div class="grid" v-if="user">
           <div class="col-12 md:col-6">
             <div class="p-fluid p-4">
@@ -509,8 +514,8 @@
             </div>
           </div>
         </div>
-      </TabPanel>
-      <TabPanel header="E-Commerce" v-if="canMoney || canDonate || canGive">
+        </TabPanel>
+        <TabPanel v-if="canMoney || canDonate || canGive" value="commerce">
         <div class="grid">
           <div class="col-12" v-if="canMoney">
             <div class="p-4">
@@ -701,8 +706,9 @@
             </DataTable>
           </div>
         </div>
-      </TabPanel>
-    </TabView>
+        </TabPanel>
+      </TabPanels>
+    </Tabs>
 
     <ExtensionSlot name="users.profile" :user="user" />
   </div>

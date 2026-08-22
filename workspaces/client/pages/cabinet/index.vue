@@ -40,30 +40,32 @@
           </NuxtLink>
         </div>
         <table class="player-info-table w-100">
-          <tr>
-            <td>{{ $t('profile.login') }}</td>
-            <td v-text="$auth.user.username" />
-          </tr>
-          <tr>
-            <td>{{ $t('cabinet.bonus_balance') }}</td>
-            <td>{{ $utils.formatCurrency('virtual', $auth.user.virtual) }} <i class="bx bx-gift"></i></td>
-          </tr>
-          <tr>
-            <td>Email</td>
-            <td v-text="$auth.user.email || '-'" />
-          </tr>
-          <tr>
-            <td>{{ $t('profile.registered') }}</td>
-            <td v-text="$moment($auth.user.created).format('D MMMM YYYY, HH:mm')" />
-          </tr>
-          <tr>
-            <td>{{ $t('profile.account_age') }}</td>
-            <td v-text="$utils.formatDuration($moment() - $moment($auth.user.created), 'milliseconds')" />
-          </tr>
-          <tr v-if="inviter">
-            <td>{{ $t('cabinet.invited_by') }}</td>
-            <td v-text="inviter.inviter.username" />
-          </tr>
+          <tbody>
+            <tr>
+              <td>{{ $t('profile.login') }}</td>
+              <td v-text="$auth.user.username" />
+            </tr>
+            <tr>
+              <td>{{ $t('cabinet.bonus_balance') }}</td>
+              <td>{{ $utils.formatCurrency('virtual', $auth.user.virtual) }} <i class="bx bx-gift"></i></td>
+            </tr>
+            <tr>
+              <td>Email</td>
+              <td v-text="$auth.user.email || '-'" />
+            </tr>
+            <tr>
+              <td>{{ $t('profile.registered') }}</td>
+              <td v-text="$moment($auth.user.created).format('D MMMM YYYY, HH:mm')" />
+            </tr>
+            <tr>
+              <td>{{ $t('profile.account_age') }}</td>
+              <td v-text="$utils.formatDuration($moment() - $moment($auth.user.created), 'milliseconds')" />
+            </tr>
+            <tr v-if="inviter">
+              <td>{{ $t('cabinet.invited_by') }}</td>
+              <td v-text="inviter.inviter.username" />
+            </tr>
+          </tbody>
         </table>
       </div>
     </div>
@@ -115,7 +117,6 @@
 </template>
 
 <script setup>
-import { useConfigStore } from '~/stores/config'
 
 definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'cabinet.tab_general' })
 
@@ -126,7 +127,7 @@ const moneyApi = useMoney()
 const skinApi = useSkin()
 
 useHead({ title: computed(() => $t('header.cabinet')) })
-const config = computed(() => useConfigStore().config)
+const { config } = usePublicConfig()
 
 const Skin3D = ref(null)
 const SkinFront = ref(null)

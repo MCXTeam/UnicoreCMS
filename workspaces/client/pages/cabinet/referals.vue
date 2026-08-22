@@ -64,7 +64,6 @@
 </template>
 
 <script>
-import { useConfigStore } from '~/stores/config'
 
 definePageMeta({
   layout: 'cabinet',
@@ -74,12 +73,11 @@ definePageMeta({
 
 export default {
   setup() {
-    const configStore = useConfigStore()
     const { $t } = useNuxtApp()
 
     useHead({ title: computed(() => $t('header.cabinet')) })
 
-    return { config: computed(() => configStore.config), cabinet: useCabinet() }
+    return { config: usePublicConfig().config, cabinet: useCabinet() }
   },
 
   data() {

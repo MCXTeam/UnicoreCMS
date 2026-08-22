@@ -34,14 +34,14 @@
             {{ $t('start.step2_java_after') }}
           </p>
           <div class="mt-4 download-content" style="max-width: 400px">
-            <a :href="config.public_launcher_exe" target="download" class="d-block mb-2">
+            <a :href="text('public_launcher_exe')" target="download" class="d-block mb-2">
               <Button size="large" class="w-full">{{ $t('header.download') }} <i class="bx bxl-windows ms-2"></i></Button>
             </a>
             <div class="d-flex justify-content-between">
               <span>{{ $t('header.other_platforms') }}</span>
               <div class="d-flex">
-                <a :href="config.public_launcher_jar" target="download" class="m-0"><Button text label="Linux" /></a>
-                <a :href="config.public_launcher_jar" target="download" class="m-0"><Button text label="MacOS" /></a>
+                <a :href="text('public_launcher_jar')" target="download" class="m-0"><Button text label="Linux" /></a>
+                <a :href="text('public_launcher_jar')" target="download" class="m-0"><Button text label="MacOS" /></a>
               </div>
             </div>
           </div>
@@ -61,13 +61,12 @@
 </template>
 
 <script setup lang="ts">
-import { useConfigStore } from '~/stores/config'
 import { useUiStore } from '~/stores/ui'
 
 definePageMeta({ layout: 'landing' })
 
 const { $pub, $t } = useNuxtApp()
-const config = computed(() => useConfigStore().config as Record<string, any>)
+const { config, text } = usePublicConfig()
 
 useHead({ title: computed(() => $t('header.start')) })
 useUiStore().setName($t('start.page_name', { sitename: $pub.sitename }))

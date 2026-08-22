@@ -50,7 +50,12 @@
           </div>
           <div class="d-flex flex-column align-items-end">
             <div v-tooltip.top="$t('panel.record_tooltip', { record: online.record, today: online.record_today })">
-              <h2 v-if="online.online" class="mb-1 mt-0"><CountTo :startVal="0" :endVal="online.players" :duration="1000" /></h2>
+              <h2 v-if="online.online" class="mb-1 mt-0">
+                <ClientOnly>
+                  <CountTo :startVal="0" :endVal="online.players" :duration="1000" />
+                  <template #fallback>{{ online.players }}</template>
+                </ClientOnly>
+              </h2>
               <h2 v-else class="mb-1 mt-0 text-uppercase">{{ $t('panel.offline') }}</h2>
             </div>
             <span v-if="online.online">{{ $t('panel.of') }} {{ online.maxplayers }}</span>
@@ -67,14 +72,31 @@
       </div>
       <div class="text-center">
         <p class="m-0">
-          {{ $t('panel.total_online') }}: <b><CountTo :startVal="0" :endVal="onlines.total.online" :duration="1000" /></b>
+          {{ $t('panel.total_online') }}:
+          <b>
+            <ClientOnly>
+              <CountTo :startVal="0" :endVal="onlines.total.online" :duration="1000" />
+              <template #fallback>{{ onlines.total.online }}</template>
+            </ClientOnly>
+          </b>
         </p>
         <p class="m-0" v-tooltip.top="$moment(onlines.total.records.today.created).format('D MMMM YYYY, HH:mm')">
-          {{ $t('panel.record_today') }}: <b><CountTo :startVal="0" :endVal="onlines.total.records.today.online" :duration="1000" /></b>
+          {{ $t('panel.record_today') }}:
+          <b>
+            <ClientOnly>
+              <CountTo :startVal="0" :endVal="onlines.total.records.today.online" :duration="1000" />
+              <template #fallback>{{ onlines.total.records.today.online }}</template>
+            </ClientOnly>
+          </b>
         </p>
         <p class="m-0" v-tooltip.top="$moment(onlines.total.records.absolute.created).format('D MMMM YYYY, HH:mm')">
           {{ $t('panel.record_absolute') }}:
-          <b><CountTo :startVal="0" :endVal="onlines.total.records.absolute.online" :duration="1000" /></b>
+          <b>
+            <ClientOnly>
+              <CountTo :startVal="0" :endVal="onlines.total.records.absolute.online" :duration="1000" />
+              <template #fallback>{{ onlines.total.records.absolute.online }}</template>
+            </ClientOnly>
+          </b>
         </p>
       </div>
     </div>

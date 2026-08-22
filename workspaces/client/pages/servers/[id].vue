@@ -17,14 +17,16 @@
         <div class="col-xl-5">
           <h3 class="mt-4 mb-2">{{ $t('servers.info') }}</h3>
           <table class="server-table w-100">
-            <tr>
-              <td>{{ $t('servers.game_version') }}</td>
-              <td v-text="server.version" />
-            </tr>
-            <tr v-for="(row, i) in server.table" :key="i">
-              <td v-text="row.title" />
-              <td v-text="row.description" />
-            </tr>
+            <tbody>
+              <tr>
+                <td>{{ $t('servers.game_version') }}</td>
+                <td v-text="server.version" />
+              </tr>
+              <tr v-for="(row, i) in server.table" :key="i">
+                <td v-text="row.title" />
+                <td v-text="row.description" />
+              </tr>
+            </tbody>
           </table>
         </div>
       </div>

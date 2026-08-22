@@ -71,30 +71,32 @@
     <h2 class="mt-0 mb-4 text-center" v-if="server">{{ $t('store.catalog', { server: server.name }) }}</h2>
     <div class="store-table-overflow position-relative">
       <table class="store-table" v-if="products.data.length">
-        <tr :key="product.payload.id" v-for="product in products.data">
-          <td class="d-flex align-items-center">
-            <IconAvatar :path="product.payload.icon" size="large" />
-            <div class="ms-3">
-              <h4 class="m-0">
-                {{ product.payload.name }} <small class="sale-wrapper ms-2" v-if="product.type == 'kit'">{{ $t('store.kit') }}</small>
-                <small class="sale-wrapper ms-2" v-if="product.payload.sale">-{{ product.payload.sale }}%</small>
-              </h4>
-              <span v-text="joinCategoryNames(product.payload.categories)" />
-            </div>
-          </td>
-          <td>
-            <strike v-if="product.payload.sale" v-text="$utils.formatCurrency('real', product.payload.price)" class="me-1"></strike>
-            <span
-              v-text="$utils.formatCurrency('real', product.payload.price * (product.payload.multiple_of || 1), product.payload.sale)"
-            ></span>
-            <h5 class="m-0" v-if="product.type == 'product'">
-              {{ $t('store.price_per', { amount: product.payload.multiple_of || 1 }) }}
-            </h5>
-          </td>
-          <td align="right">
-            <Button @click="openDialog(product)">{{ $t('store.add_to_cart') }} <i class="bx bxs-cart-add ms-1"></i></Button>
-          </td>
-        </tr>
+        <tbody>
+          <tr :key="product.payload.id" v-for="product in products.data">
+            <td class="d-flex align-items-center">
+              <IconAvatar :path="product.payload.icon" size="large" />
+              <div class="ms-3">
+                <h4 class="m-0">
+                  {{ product.payload.name }} <small class="sale-wrapper ms-2" v-if="product.type == 'kit'">{{ $t('store.kit') }}</small>
+                  <small class="sale-wrapper ms-2" v-if="product.payload.sale">-{{ product.payload.sale }}%</small>
+                </h4>
+                <span v-text="joinCategoryNames(product.payload.categories)" />
+              </div>
+            </td>
+            <td>
+              <strike v-if="product.payload.sale" v-text="$utils.formatCurrency('real', product.payload.price)" class="me-1"></strike>
+              <span
+                v-text="$utils.formatCurrency('real', product.payload.price * (product.payload.multiple_of || 1), product.payload.sale)"
+              ></span>
+              <h5 class="m-0" v-if="product.type == 'product'">
+                {{ $t('store.price_per', { amount: product.payload.multiple_of || 1 }) }}
+              </h5>
+            </td>
+            <td align="right">
+              <Button @click="openDialog(product)">{{ $t('store.add_to_cart') }} <i class="bx bxs-cart-add ms-1"></i></Button>
+            </td>
+          </tr>
+        </tbody>
       </table>
       <h4 class="text-center m-0" v-else>{{ $t('common.no_results') }}</h4>
     </div>
@@ -111,7 +113,6 @@
 
 <script setup lang="ts">
 import { useUiStore, type StoreFilters } from '~/stores/ui'
-import { useConfigStore } from '~/stores/config'
 
 definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'header.store' })
 
@@ -123,8 +124,7 @@ const cartApi = useCart()
 useHead({ title: computed(() => $t('header.store')) })
 const route = useRoute()
 const ui = useUiStore()
-const configStore = useConfigStore()
-const config = computed(() => configStore.config)
+const { config } = usePublicConfig()
 
 const amount = ref(1)
 const server = ref<any>(null)
