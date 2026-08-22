@@ -112,7 +112,9 @@ useHead({ title: computed(() => $t('profile.page_name', { username: user.value.u
 
 const skin = ref<any>(null)
 
-onMounted(() => {
+onMounted(async () => {
+  await skin.value?.ready
+
   skin.value?.viewer?.playerObject?.rotation.set(0, 0.3, 0)
 })
 </script>

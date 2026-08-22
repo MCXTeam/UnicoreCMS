@@ -19,12 +19,12 @@
               </div>
               <div class="d-flex gap-2 mt-3">
                 <input type="file" ref="skin" class="d-none" accept="image/png" @change="updateSkin()" />
-                <Button @click="skin.click()" class="w-full" :loading="skinLoading" :label="$t('cabinet.upload_skin')" />
+                <Button @click="skin.click()" class="w-100" :loading="skinLoading" :label="$t('cabinet.upload_skin')" />
                 <Button @click="deleteSkin()" severity="danger" class="w-25" :loading="skinLoading"><i class="bx bx-trash"></i></Button>
               </div>
               <div class="d-flex gap-2 mt-2">
                 <input type="file" ref="cloak" class="d-none" accept="image/png" @change="updateCloak()" />
-                <Button @click="cloak.click()" class="w-full" :loading="cloakLoading" :label="$t('cabinet.upload_cloak')" />
+                <Button @click="cloak.click()" class="w-100" :loading="cloakLoading" :label="$t('cabinet.upload_cloak')" />
                 <Button @click="deleteCloak()" severity="danger" class="w-25" :loading="cloakLoading"><i class="bx bx-trash"></i></Button>
               </div>
             </div>
@@ -81,7 +81,7 @@
         <p v-if="$auth.user.ban && !$auth.user.ban.expires" class="text-danger">{{ $t('cabinet.ban_forever') }}</p>
       </div>
       <div class="col-xl-4 d-flex align-items-center">
-        <Button class="w-full" size="large" :disabled="!$auth.user.ban" :loading="banLoading" @click="unabn()">
+        <Button class="w-100" size="large" :disabled="!$auth.user.ban" :loading="banLoading" @click="unabn()">
           {{ $t('cabinet.buy_unban', { price: $utils.formatCurrency('real', config.public_unban_price) }) }}
         </Button>
       </div>
@@ -113,11 +113,10 @@
       </div>
     </div>
   </section>
-    <ExtensionSlot name="cabinet.index" />
+  <ExtensionSlot name="cabinet.index" />
 </template>
 
 <script setup>
-
 definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'cabinet.tab_general' })
 
 const { $auth, $unicore, $t } = useNuxtApp()
@@ -142,12 +141,16 @@ const cloakLoading = ref(false)
 const banLoading = ref(false)
 
 onMounted(async () => {
-  Skin3D.value.viewer.playerObject.rotation.set(0, 0.3, 0)
+  await Promise.all([Skin3D.value?.ready, SkinFront.value?.ready, SkinBack.value?.ready])
 
-  SkinFront.value.viewer.controls.enableRotate = false
+  Skin3D.value?.viewer?.playerObject.rotation.set(0, 0.3, 0)
 
-  SkinBack.value.viewer.controls.enableRotate = false
-  SkinBack.value.viewer.playerObject.rotation.set(0, 3.15, 0)
+  if (SkinFront.value?.viewer) SkinFront.value.viewer.controls.enableRotate = false
+
+  if (SkinBack.value?.viewer) {
+    SkinBack.value.viewer.controls.enableRotate = false
+    SkinBack.value.viewer.playerObject.rotation.set(0, 3.15, 0)
+  }
 
   money.value = await moneyApi.balance()
   try {

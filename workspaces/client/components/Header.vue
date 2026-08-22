@@ -39,7 +39,7 @@
             </div>
           </div>
           <div class="mt-4 download-content" style="max-width: 400px">
-            <Button as="a" :href="config.public_launcher_exe" target="download" class="w-full mb-2" size="large"
+            <Button as="a" :href="config.public_launcher_exe" target="download" class="w-100 mb-2" size="large"
               >{{ $t('header.download') }} <i class="bx bxl-windows ms-2"></i
             ></Button>
             <div class="d-flex justify-content-between">

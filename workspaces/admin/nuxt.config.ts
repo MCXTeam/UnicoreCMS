@@ -1,12 +1,27 @@
 import './load-env'
 import { publicConfig } from 'unicore-common/public-config'
 import { projectRoot } from 'unicore-common/ports'
+import { CHUNK_SIZE_WARNING_LIMIT, vendorChunks, woff2Only } from 'unicore-common/vite'
+import { FRONTEND_TEMPLATE_ROOTS, usedPrimevueComponents } from 'unicore-common/primevue'
+import { components as primevueComponents } from '@primevue/metadata'
+import { createRequire } from 'module'
+import { dirname, resolve } from 'path'
+import { fileURLToPath } from 'url'
 import { resolveLayers } from 'unicore-api/nuxt'
 import { presetFor } from './theme/preset'
 
 const layers = resolveLayers({ side: 'admin', root: projectRoot })
 
 for (const problem of layers.problems) console.warn(`[unicore] ${problem}`)
+
+const templateRoots = FRONTEND_TEMPLATE_ROOTS.map((entry) => resolve(dirname(fileURLToPath(import.meta.url)), entry))
+const primevueRoot = resolve(dirname(createRequire(import.meta.url).resolve('primevue/config')), '..')
+
+const primevueInUse = usedPrimevueComponents({
+  roots: [...templateRoots, ...layers.theme, ...layers.modules],
+  components: primevueComponents,
+  primevueRoot,
+})
 
 export default defineNuxtConfig({
   extends: [...layers.theme, ...layers.modules],
@@ -59,6 +74,11 @@ export default defineNuxtConfig({
 
   primevue: {
     autoImport: true,
+
+    components: {
+      include: primevueInUse,
+    },
+
     options: {
       ripple: true,
       theme: {
@@ -79,6 +99,18 @@ export default defineNuxtConfig({
   },
 
   vite: {
+    plugins: [woff2Only()],
+
+    build: {
+      chunkSizeWarningLimit: CHUNK_SIZE_WARNING_LIMIT,
+
+      rollupOptions: {
+        output: {
+          manualChunks: vendorChunks(),
+        },
+      },
+    },
+
     resolve: {
       alias: [
         { find: /^moment-timezone$/, replacement: 'moment-timezone/builds/moment-timezone-with-data-10-year-range' },

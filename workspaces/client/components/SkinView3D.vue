@@ -3,8 +3,6 @@
 </template>
 
 <script>
-import * as skinview3d from 'skinview3d'
-
 export default {
   setup() {
     const rc = useRuntimeConfig()
@@ -26,6 +24,9 @@ export default {
   data() {
     return {
       viewer: null,
+      ready: null,
+      library: null,
+      unmounted: false,
     }
   },
 
@@ -42,55 +43,79 @@ export default {
       },
       deep: true,
     },
-    width() {
-      this.viewer.width = this.width
+    async width() {
+      await this.ready
+      if (this.viewer) this.viewer.width = this.width
     },
-    height() {
-      this.viewer.height = this.height
+    async height() {
+      await this.ready
+      if (this.viewer) this.viewer.height = this.height
     },
   },
 
   beforeUnmount() {
+    this.unmounted = true
     this.viewer?.dispose()
   },
 
   mounted() {
-    this.viewer = new skinview3d.SkinViewer({
-      canvas: this.$refs.viewer,
-      width: this.width,
-      height: this.height,
-    })
-
-    this.viewer.controls.enableRotate = true
-    this.viewer.controls.enableZoom = false
-    this.viewer.controls.enablePan = false
-
-    this.loadSkin()
-    this.loadCloak()
+    this.ready = this.init()
   },
 
   methods: {
-    loadSkin() {
+    async init() {
+      const library = await import('skinview3d')
+
+      if (this.unmounted) return
+
+      this.library = library
+      this.viewer = new library.SkinViewer({
+        canvas: this.$refs.viewer,
+        width: this.width,
+        height: this.height,
+      })
+
+      this.viewer.controls.enableRotate = true
+      this.viewer.controls.enableZoom = false
+      this.viewer.controls.enablePan = false
+
+      this.loadSkin()
+      this.loadCloak()
+    },
+
+    async loadSkin() {
+      await this.ready
+
+      if (!this.viewer) return
+
       this.viewer.loadSkin(
         this.skin && this.$_.get(this.skin, 'file') ? `${this.rc.apiBaseurl}/${this.$_.get(this.skin, 'file')}` : '/default.png',
       )
     },
 
-    loadCloak() {
+    async loadCloak() {
+      await this.ready
+
+      if (!this.viewer) return
+
       this.viewer.loadCape(
         this.cloak && this.$_.get(this.cloak, 'file') ? `${this.rc.apiBaseurl}/${this.$_.get(this.cloak, 'file')}` : null,
       )
     },
 
-    setAnimation(animation) {
+    async setAnimation(animation) {
+      await this.ready
+
+      if (!this.viewer) return
+
       this.viewer.autoRotate = animation === 'rotate'
 
       switch (animation) {
         case 'walk':
-          this.viewer.animation = new skinview3d.WalkingAnimation()
+          this.viewer.animation = new this.library.WalkingAnimation()
           break
         case 'run':
-          this.viewer.animation = new skinview3d.RunningAnimation()
+          this.viewer.animation = new this.library.RunningAnimation()
           break
         default:
           this.viewer.animation = null

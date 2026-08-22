@@ -32,7 +32,7 @@
           <InputText class="w-100" v-model="link" readonly />
         </div>
         <div class="col d-flex align-items-center">
-          <Button @click="copyLink()" class="w-full" size="large" :label="$t('common.copy')" />
+          <Button @click="copyLink()" class="w-100" size="large" :label="$t('common.copy')" />
         </div>
       </div>
       <h3 class="mb-3 mt-4">{{ $t('profile.referals') }}</h3>

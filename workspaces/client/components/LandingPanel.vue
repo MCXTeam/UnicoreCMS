@@ -12,10 +12,10 @@
           </div>
         </div>
         <div class="tab-panel w-100">
-          <Button :as="NuxtLink" to="/cabinet" text class="m-0 w-full" size="large" :label="$t('header.cabinet')" />
-          <Button :as="NuxtLink" to="/store" text class="m-0 w-full" size="large" :label="$t('header.store')" />
-          <Button :as="NuxtLink" to="/players" text class="m-0 w-full" size="large" :label="$t('header.players')" />
-          <Button @click="$unicore.logout()" text severity="danger" class="m-0 w-full" size="large" :label="$t('header.logout')" />
+          <Button :as="NuxtLink" to="/cabinet" text class="m-0 w-100" size="large" :label="$t('header.cabinet')" />
+          <Button :as="NuxtLink" to="/store" text class="m-0 w-100" size="large" :label="$t('header.store')" />
+          <Button :as="NuxtLink" to="/players" text class="m-0 w-100" size="large" :label="$t('header.players')" />
+          <Button @click="$unicore.logout()" text severity="danger" class="m-0 w-100" size="large" :label="$t('header.logout')" />
         </div>
       </div>
       <div v-else class="panel d-flex flex-column align-items-center py-4 mb-5">

@@ -35,7 +35,7 @@
         {{ $t('store.virtual_hint', { percent: donate.group.virtual_percent || config.public_virtual_percent }) }}
       </Message>
       <div v-if="calcGroupVirtSale() > 0" class="d-flex justify-content-between align-items-center mt-2">
-        <div class="flex align-items-center gap-2">
+        <div class="d-flex align-items-center gap-2">
           <Checkbox v-model="donate.use_virtual" :binary="true" inputId="groupUseVirtual" />
           <label for="groupUseVirtual">{{ $t('store.use_bonuses') }}</label>
         </div>
@@ -116,7 +116,7 @@
         {{ $t('store.virtual_hint', { percent: permission.permission.virtual_percent || config.public_virtual_percent }) }}
       </Message>
       <div v-if="calcPermissionVirtSale() > 0" class="d-flex justify-content-between align-items-center mt-2">
-        <div class="flex align-items-center gap-2">
+        <div class="d-flex align-items-center gap-2">
           <Checkbox v-model="permission.use_virtual" :binary="true" inputId="permissionUseVirtual" />
           <label for="permissionUseVirtual">{{ $t('store.use_bonuses') }}</label>
         </div>

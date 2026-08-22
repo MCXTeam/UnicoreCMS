@@ -1,6 +1,6 @@
 <template>
   <div class="mb-4">
-    <Button :as="NuxtLink" to="/store/products" size="large" class="mx-0 mb-5 server-changer w-full"
+    <Button :as="NuxtLink" to="/store/products" size="large" class="mx-0 mb-5 server-changer w-100"
       >{{ $t('store.change_server') }} <i class="bx bx-server"></i
     ></Button>
 
@@ -19,7 +19,7 @@
         <span>{{ $utils.formatCurrency('real', priceLocal[0]) }}</span>
         <span>{{ $utils.formatCurrency('real', priceLocal[1]) }}</span>
       </div>
-      <Button :loading="loading" @click="update()" size="large" class="mx-0 mt-3 text-uppercase w-full" :label="$t('store.apply')" />
+      <Button :loading="loading" @click="update()" size="large" class="mx-0 mt-3 text-uppercase w-100" :label="$t('store.apply')" />
     </div>
   </div>
 </template>

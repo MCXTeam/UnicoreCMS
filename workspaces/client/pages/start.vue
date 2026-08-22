@@ -35,7 +35,7 @@
           </p>
           <div class="mt-4 download-content" style="max-width: 400px">
             <a :href="text('public_launcher_exe')" target="download" class="d-block mb-2">
-              <Button size="large" class="w-full">{{ $t('header.download') }} <i class="bx bxl-windows ms-2"></i></Button>
+              <Button size="large" class="w-100">{{ $t('header.download') }} <i class="bx bxl-windows ms-2"></i></Button>
             </a>
             <div class="d-flex justify-content-between">
               <span>{{ $t('header.other_platforms') }}</span>

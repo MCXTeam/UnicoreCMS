@@ -86,6 +86,16 @@
       "import": "./dist/console/index.mjs",
       "require": "./dist/console/index.js"
     },
+    "./primevue": {
+      "types": "./dist/primevue.d.ts",
+      "import": "./dist/primevue.mjs",
+      "require": "./dist/primevue.js"
+    },
+    "./vite": {
+      "types": "./dist/vite.d.ts",
+      "import": "./dist/vite.mjs",
+      "require": "./dist/vite.js"
+    },
     "./dist/*": "./dist/*.js"
   },
   "scripts": {

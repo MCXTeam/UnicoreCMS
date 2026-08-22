@@ -18,6 +18,8 @@ export default defineConfig({
     "src/sanitize.ts",
     "src/console/index.ts",
     "src/build.ts",
+    "src/vite.ts",
+    "src/primevue.ts",
   ],
   format: ["cjs", "esm"],
   dts: true,

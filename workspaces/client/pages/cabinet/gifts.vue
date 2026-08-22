@@ -56,7 +56,7 @@
               :loading="loading"
               @click="activateGift()"
               :disabled="!meta.valid"
-              class="mt-3 w-full"
+              class="mt-3 w-100"
               size="large"
               :label="$t('cabinet.activate')"
             />
@@ -83,7 +83,7 @@
                   <h4 class="m-0 ms-3" v-text="monitorings_map[mon].name" />
                 </td>
                 <td>
-                  <Button as="a" :href="config['public_link_' + mon]" class="w-full">
+                  <Button as="a" :href="config['public_link_' + mon]" class="w-100">
                     {{ $t('cabinet.vote_on', { monitoring: monitorings_map[mon].name }) }}
                   </Button>
                 </td>

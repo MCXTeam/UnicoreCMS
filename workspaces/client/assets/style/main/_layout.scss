@@ -56,7 +56,7 @@
 }
 
 body {
-  font-family: 'Brutal Type';
+  font-family: 'Brutal Type', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   background-color: var(--vs-theme-bg);
   transition: background-color 0.3s;
   color: rgba(var(--vs-text), 0.75);

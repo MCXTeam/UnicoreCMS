@@ -64,11 +64,11 @@
           />
           <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
         </Field>
-        <div class="flex align-items-center gap-2 mb-1 mt-3">
+        <div class="d-flex align-items-center gap-2 mb-1 mt-3">
           <Checkbox v-model="password_form.close" :binary="true" inputId="sessionsClose" />
           <label for="sessionsClose">{{ $t('auth.close_sessions') }}</label>
         </div>
-        <Button @click="changePassword()" :disabled="!meta.valid" class="mt-3 w-full" size="large" :label="$t('auth.change_password')" />
+        <Button @click="changePassword()" :disabled="!meta.valid" class="mt-3 w-100" size="large" :label="$t('auth.change_password')" />
       </Form>
     </div>
     <div class="col ps-xl-5 mt-5 mt-xl-0">
@@ -108,7 +108,7 @@
               <Button
                 :disabled="!meta.valid"
                 @click="TwoFactorEnable()"
-                class="mt-3 w-full"
+                class="mt-3 w-100"
                 size="large"
                 :label="$t('cabinet.two_factor_enable')"
               />
@@ -143,7 +143,7 @@
           <Button
             :disabled="!meta.valid"
             @click="TwoFactorDisable()"
-            class="mt-3 w-full"
+            class="mt-3 w-100"
             size="large"
             :label="$t('cabinet.two_factor_disable')"
           />

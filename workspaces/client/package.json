@@ -24,7 +24,6 @@
     "axios": "^1.19.0",
     "bootstrap": "^5.3.8",
     "boxicons": "^2.1.4",
-    "flag-icons": "^7.5.0",
     "isomorphic-dompurify": "^2.36.0",
     "lodash": "^4.18.1",
     "moment": "^2.30.1",
@@ -35,7 +34,6 @@
     "nprogress": "^0.2.0",
     "nuxt-gtag": "^4.1.0",
     "pinia": "^3.0.4",
-    "primeflex": "^4.0.0",
     "primeicons": "^7.0.0",
     "primevue": "^4.5.5",
     "qrcode": "^1.5.4",
@@ -52,6 +50,7 @@
   },
   "devDependencies": {
     "@pinia/nuxt": "^0.11.3",
+    "@primevue/metadata": "^4.5.5",
     "@primevue/nuxt-module": "^4.5.5",
     "@types/lodash": "^4.17.25",
     "@types/moment-duration-format": "^2.2.7",

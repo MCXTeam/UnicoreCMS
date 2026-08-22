@@ -224,3 +224,31 @@ export const SANITIZE_FORBID_ATTR = [
 ];
 
 export const SANITIZE_ALLOWED_SCHEMES = ["http", "https", "mailto", "tel"];
+
+export const LEGACY_FONT_EXTENSIONS = [".eot", ".ttf", ".woff", ".svg"];
+
+export const SCAN_SKIP_DIRECTORIES = [
+  "node_modules",
+  ".nuxt",
+  ".output",
+  "dist",
+  ".git",
+];
+
+export const FRONTEND_TEMPLATE_ROOTS = [
+  "app.vue",
+  "error.vue",
+  "components",
+  "layouts",
+  "pages",
+];
+
+export const VENDOR_CHUNKS: [string, RegExp][] = [
+  ["editor", /node_modules[\\/](quill|quill-delta|primevue[\\/]editor)[\\/]/],
+  ["chart", /node_modules[\\/](chart\.js|primevue[\\/]chart)[\\/]/],
+  ["primevue", /node_modules[\\/](@primevue|@primeuix|primevue)[\\/]/],
+  ["moment", /node_modules[\\/]moment/],
+  ["socket", /node_modules[\\/](socket\.io|engine\.io)/],
+];
+
+export const CHUNK_SIZE_WARNING_LIMIT = 1500;
