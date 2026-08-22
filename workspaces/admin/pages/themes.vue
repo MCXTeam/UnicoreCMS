@@ -136,7 +136,7 @@ export default {
     },
     confirmRemove(theme) {
       this.confirm.require({
-        message: this.$t('admin.extension_remove_confirm'),
+        message: this.$t('admin.theme_remove_confirm'),
         header: theme.id,
         icon: 'pi pi-exclamation-triangle',
         acceptLabel: this.$t('admin.extension_remove'),
@@ -150,7 +150,7 @@ export default {
             .catch((error) => {
               this.toast.add({
                 severity: 'error',
-                summary: this.$t('admin.extension_remove_error'),
+                summary: this.$t('admin.theme_remove_error'),
                 detail: error.response?.data?.message || this.$t('common.unknown_error'),
                 life: 8000,
               })
@@ -160,7 +160,7 @@ export default {
 
           this.loading = false
 
-          if (result) this.toast.add({ severity: 'success', summary: this.$t('admin.extension_removed'), life: 4000 })
+          if (result) this.toast.add({ severity: 'success', summary: this.$t('admin.theme_removed'), life: 4000 })
 
           await this.load()
         },

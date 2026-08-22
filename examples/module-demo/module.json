@@ -25,7 +25,8 @@
       "type": "string",
       "default": "Привет",
       "public": true,
-      "label": "mod.demo.config_greeting"
+      "label": "mod.demo.config_greeting",
+      "hint": "mod.demo.config_greeting_hint"
     },
     {
       "key": "limit",
@@ -33,7 +34,8 @@
       "default": 10,
       "min": 1,
       "max": 100,
-      "label": "mod.demo.config_limit"
+      "label": "mod.demo.config_limit",
+      "hint": "mod.demo.config_limit_hint"
     }
   ],
   "client": "./client",

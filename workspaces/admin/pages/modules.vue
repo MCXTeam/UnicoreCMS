@@ -77,7 +77,10 @@
 
         <Dialog v-model:visible="settingsDialog" :modal="true" :header="$t('admin.module_settings')" :style="{ width: '520px' }" class="p-fluid">
           <div v-for="item in settings" :key="item.key" class="field">
-            <label>{{ item.field.label ? $t(item.field.label) : item.field.key }}</label>
+            <label class="flex align-items-center gap-1">
+              {{ item.field.label ? $t(item.field.label) : item.field.key }}
+              <i v-if="item.field.hint" v-tooltip.right="$t(item.field.hint)" class="pi pi-question-circle text-color-secondary" />
+            </label>
             <InputText v-if="item.field.type === 'string'" v-model="item.value" />
             <InputNumber
               v-else-if="item.field.type === 'number'"
@@ -89,7 +92,6 @@
             />
             <div v-else-if="item.field.type === 'boolean'" class="flex align-items-center gap-2">
               <Checkbox :binary="true" :modelValue="item.value === 'true'" @update:modelValue="item.value = String($event)" />
-              <label class="m-0">{{ item.field.hint ? $t(item.field.hint) : '' }}</label>
             </div>
             <Select
               v-else-if="item.field.type === 'select'"
@@ -99,7 +101,7 @@
               optionValue="value"
               appendTo="body"
             />
-            <small v-if="item.field.hint && item.field.type !== 'boolean'">{{ $t(item.field.hint) }}</small>
+
           </div>
           <template #footer>
             <Button :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="settingsDialog = false" />
@@ -211,7 +213,7 @@ export default {
 
     confirmRemove(module) {
       this.confirm.require({
-        message: this.$t('admin.extension_remove_confirm'),
+        message: this.$t('admin.module_remove_confirm'),
         header: module.id,
         icon: 'pi pi-exclamation-triangle',
         acceptLabel: this.$t('admin.extension_remove'),
@@ -225,7 +227,7 @@ export default {
             .catch((error) => {
               this.toast.add({
                 severity: 'error',
-                summary: this.$t('admin.extension_remove_error'),
+                summary: this.$t('admin.module_remove_error'),
                 detail: error.response?.data?.message || this.$t('common.unknown_error'),
                 life: 8000,
               })
@@ -235,7 +237,7 @@ export default {
 
           this.loading = false
 
-          if (result) this.toast.add({ severity: 'success', summary: this.$t('admin.extension_removed'), life: 4000 })
+          if (result) this.toast.add({ severity: 'success', summary: this.$t('admin.module_removed'), life: 4000 })
 
           await this.load()
         },
