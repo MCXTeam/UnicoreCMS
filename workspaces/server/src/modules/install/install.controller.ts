@@ -1,4 +1,4 @@
-import { BadRequestException, Controller, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Controller, Delete, Param, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { STORAGE_MAX_ZIP_UPLOAD } from '@common';
 import { SuperUserGuard } from 'src/admin/roles/guards/superuser.guard';
@@ -23,5 +23,12 @@ export class InstallController {
     if (!file) throw new BadRequestException('Файл не передан');
 
     return this.service.install(file.filename);
+  }
+
+  @Delete(':kind/:id')
+  remove(@Param('kind') kind: string, @Param('id') id: string) {
+    if (kind !== 'module' && kind !== 'theme') throw new BadRequestException('Неизвестный тип расширения');
+
+    return this.service.remove(kind, id);
   }
 }

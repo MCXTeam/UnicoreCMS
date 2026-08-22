@@ -52,6 +52,13 @@
                 :disabled="loading || locked[section.side] || slotProps.data.status !== 'available'"
                 @click="setActive(slotProps.data.id, section.side)"
               />
+              <Button
+                v-if="slotProps.data.status !== 'active'"
+                icon="pi pi-trash"
+                class="p-button-rounded p-button-text p-button-danger"
+                :disabled="loading"
+                @click="confirmRemove(slotProps.data)"
+              />
             </template>
           </Column>
         </DataTable>
@@ -68,6 +75,7 @@
 </template>
 
 <script>
+import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
 
 const SECTIONS = [
@@ -81,7 +89,7 @@ export default {
 
     useHead({ title: computed(() => $t('admin.menu_themes')) })
 
-    return { toast: useToast(), locale: useLocale() }
+    return { toast: useToast(), confirm: useConfirm(), locale: useLocale() }
   },
   data() {
     return {
@@ -126,6 +134,39 @@ export default {
       this.locked = data?.locked || { client: false, admin: false }
       this.loading = false
     },
+    confirmRemove(theme) {
+      this.confirm.require({
+        message: this.$t('admin.extension_remove_confirm'),
+        header: theme.id,
+        icon: 'pi pi-exclamation-triangle',
+        acceptLabel: this.$t('admin.extension_remove'),
+        rejectLabel: this.$t('admin.extension_keep'),
+        accept: async () => {
+          this.loading = true
+
+          const result = await this.$api
+            .delete(`/admin/extensions/theme/${theme.id}`)
+            .then((res) => res.data)
+            .catch((error) => {
+              this.toast.add({
+                severity: 'error',
+                summary: this.$t('admin.extension_remove_error'),
+                detail: error.response?.data?.message || this.$t('common.unknown_error'),
+                life: 8000,
+              })
+
+              return null
+            })
+
+          this.loading = false
+
+          if (result) this.toast.add({ severity: 'success', summary: this.$t('admin.extension_removed'), life: 4000 })
+
+          await this.load()
+        },
+      })
+    },
+
     async setActive(id, side) {
       this.loading = true
 

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, statSync } from 'fs';
 import { join, resolve } from 'path';
 import { satisfies } from 'semver';
@@ -6,6 +6,7 @@ import { modulesPath, themesPath } from 'unicore-common';
 import {
   API_VERSION,
   LocalizedText,
+  MODULE_ID_PATTERN,
   ModuleManifest,
   ThemeManifest,
   validateModuleManifest,
@@ -13,12 +14,21 @@ import {
 } from 'unicore-api';
 import { StorageManager } from 'src/common/storage/storage.class';
 import { formatError } from '@common';
+import { DataSource } from 'typeorm';
 import { ExtensionKind, extractArchive, readExtensionArchive } from './archive';
 import { InstallResultDto } from '../dto/install-result.dto';
+import { ModulesService } from '../modules.service';
+import { activeThemeId, readThemesState, ThemeSide, writeThemesState } from '../runtime/themes';
+import { discover } from '../runtime/discovery';
 
 @Injectable()
 export class InstallService {
   private readonly logger = new Logger('Modules');
+
+  constructor(
+    private readonly modules: ModulesService,
+    private readonly dataSource: DataSource,
+  ) {}
 
   async install(filename: string): Promise<InstallResultDto> {
     const buffer = StorageManager.read(filename);
@@ -158,6 +168,45 @@ export class InstallService {
       rebuild: kind === 'theme' || Boolean(module?.client || module?.admin),
       restart: kind === 'module',
     };
+  }
+
+  async remove(kind: ExtensionKind, id: string): Promise<{ removed: boolean }> {
+    if (!MODULE_ID_PATTERN.test(id)) throw new BadRequestException('Некорректный идентификатор расширения');
+
+    const root = kind === 'module' ? modulesPath : themesPath;
+    const target = join(root, id);
+
+    if (!existsSync(target)) throw new NotFoundException();
+
+    if (kind === 'module') {
+      const module = discover().modules.find((item) => item.id === id);
+
+      if (module?.enabled) throw new BadRequestException('Сначала выключите модуль');
+
+      await this.modules.purge(id);
+    } else {
+      await this.removeThemeData(id);
+    }
+
+    rmSync(target, { recursive: true, force: true });
+
+    this.logger.log(`${kind === 'module' ? 'Модуль' : 'Тема'} ${id} удалён вместе с папкой`);
+
+    return { removed: true };
+  }
+
+  private async removeThemeData(id: string): Promise<void> {
+    for (const side of ['client', 'admin'] as ThemeSide[])
+      if (activeThemeId(side) === id) throw new BadRequestException('Тема активна, сначала выберите другую');
+
+    await this.dataSource.query('DELETE FROM unicore_translations WHERE translation_key LIKE ?', [`theme.${id}.%`]);
+
+    const state = readThemesState();
+
+    writeThemesState({
+      client: state.client === id ? null : state.client,
+      admin: state.admin === id ? null : state.admin,
+    });
   }
 
   private hasDependencies(target: string): boolean {

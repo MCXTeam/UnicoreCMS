@@ -65,11 +65,11 @@
                 @click="openSettings(slotProps.data)"
               />
               <Button
-                v-if="slotProps.data.status === 'disabled'"
+                v-if="slotProps.data.status !== 'active'"
                 icon="pi pi-trash"
                 class="p-button-rounded p-button-text p-button-danger"
                 :disabled="loading"
-                @click="confirmPurge(slotProps.data)"
+                @click="confirmRemove(slotProps.data)"
               />
             </template>
           </Column>
@@ -209,15 +209,34 @@ export default {
       return 1
     },
 
-    confirmPurge(module) {
+    confirmRemove(module) {
       this.confirm.require({
-        message: this.$t('admin.module_purge_confirm'),
+        message: this.$t('admin.extension_remove_confirm'),
         header: module.id,
         icon: 'pi pi-exclamation-triangle',
+        acceptLabel: this.$t('admin.extension_remove'),
+        rejectLabel: this.$t('admin.extension_keep'),
         accept: async () => {
           this.loading = true
-          await this.$api.delete(`/admin/modules/${module.id}?purge=1`).catch(() => null)
+
+          const result = await this.$api
+            .delete(`/admin/extensions/module/${module.id}`)
+            .then((res) => res.data)
+            .catch((error) => {
+              this.toast.add({
+                severity: 'error',
+                summary: this.$t('admin.extension_remove_error'),
+                detail: error.response?.data?.message || this.$t('common.unknown_error'),
+                life: 8000,
+              })
+
+              return null
+            })
+
           this.loading = false
+
+          if (result) this.toast.add({ severity: 'success', summary: this.$t('admin.extension_removed'), life: 4000 })
+
           await this.load()
         },
       })

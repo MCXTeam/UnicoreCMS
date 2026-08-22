@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, QueryRunner, Repository } from 'typeorm';
 import { modulePrefixes } from 'unicore-api';
 import { ModuleDto, ModuleStatus } from './dto/module.dto';
 import { ModuleRecord } from './entities/module.entity';
@@ -122,6 +122,8 @@ export class ModulesService implements OnModuleInit {
       ]);
 
       await runner.query('DELETE FROM unicore_translations WHERE translation_key LIKE ?', [`${prefixes.locale}%`]);
+
+      await this.dropPermissions(runner, prefixes.permission);
     } finally {
       await runner.release();
     }
@@ -132,6 +134,28 @@ export class ModulesService implements OnModuleInit {
 
     delete state[id];
     writeState(state);
+  }
+
+  private async dropPermissions(runner: QueryRunner, prefix: string): Promise<void> {
+    const targets = [
+      { table: 'unicore_roles', key: 'id' },
+      { table: 'unicore_users', key: 'uuid' },
+    ];
+
+    for (const { table, key } of targets) {
+      const rows: { id: string; perms: string | null }[] = await runner.query(
+        `SELECT \`${key}\` AS id, perms FROM \`${table}\` WHERE perms LIKE ?`,
+        [`%${prefix}%`],
+      );
+
+      for (const row of rows) {
+        const kept = (row.perms || '')
+          .split(',')
+          .filter((item) => item && !item.replace(/^!/, '').startsWith(prefix));
+
+        await runner.query(`UPDATE \`${table}\` SET perms = ? WHERE \`${key}\` = ?`, [kept.join(','), row.id]);
+      }
+    }
   }
 
   async settings(id: string): Promise<{ key: string; value: string | null; field: unknown }[]> {
