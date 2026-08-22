@@ -7,8 +7,7 @@ import { userRoom } from '../helpers';
 import { ApiKeyRoom } from '../helpers/api-key-room';
 import { AuthSocket } from '../interfaces/auth-socket.interface';
 import { TokensService } from '../tokens.service';
-import { ipAllowed, isBanActive, normalizeIp, WS_API_KEY_PREFIX, WS_BEARER_PREFIX, WS_PUBLIC_ROOM } from '@common';
-import { envConfig } from 'unicore-common';
+import { handshakeIp, ipAllowed, isBanActive, WS_API_KEY_PREFIX, WS_BEARER_PREFIX, WS_PUBLIC_ROOM } from '@common';
 
 export class AuthAdapter extends IoAdapter {
   private tokensService: TokensService;
@@ -44,9 +43,10 @@ export class AuthAdapter extends IoAdapter {
   }
 
   private socketIp(socket: AuthSocket): string {
-    const forwarded = envConfig.trustProxy ? String(socket.handshake.headers?.['x-forwarded-for'] || '').split(',')[0] : '';
-
-    return normalizeIp(forwarded || socket.handshake.address || socket.conn?.remoteAddress);
+    return handshakeIp({
+      address: socket.handshake.address || socket.conn?.remoteAddress,
+      headers: socket.handshake.headers,
+    });
   }
 
   private async authorizeApiKey(socket: AuthSocket, apiKey: string): Promise<void> {

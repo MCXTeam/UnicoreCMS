@@ -1,7 +1,6 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import * as requestIp from 'request-ip';
+import { clientIp } from '../utils/ip';
 
 export const IpAddress = createParamDecorator((data: unknown, ctx: ExecutionContext) => {
-  const request = ctx.switchToHttp().getRequest();
-  return request.ip || requestIp.getClientIp(request);
+  return clientIp(ctx.switchToHttp().getRequest());
 });

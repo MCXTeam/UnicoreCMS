@@ -1,3 +1,5 @@
+import * as proxyaddr from 'proxy-addr';
+import { envConfig } from 'unicore-common';
 import { IP_ANY_PATTERN, IPV4_MAPPED_PREFIX } from '../constants';
 
 export function normalizeIp(ip?: string): string {
@@ -68,4 +70,27 @@ export function isIpPattern(pattern: string): boolean {
   if (rule.includes('/')) return matchCidr(rule.split('/')[0], rule);
 
   return toLong(rule) !== null || rule.includes(':');
+}
+
+export function clientIp(request: { ip?: string; socket?: { remoteAddress?: string }; connection?: { remoteAddress?: string } }): string {
+  return normalizeIp(request.ip || request.socket?.remoteAddress || request.connection?.remoteAddress);
+}
+
+function compileTrust(value: boolean | number | string): (address: string, hop: number) => boolean {
+  if (value === true) return () => true;
+  if (value === false) return () => false;
+  if (typeof value === 'number') return (address, hop) => hop < value;
+
+  return proxyaddr.compile(value.split(',').map((entry) => entry.trim()));
+}
+
+const trustedProxies = compileTrust(envConfig.trustProxy);
+
+export function handshakeIp(handshake: { address?: string; headers?: Record<string, unknown> }): string {
+  const request = {
+    headers: handshake.headers || {},
+    connection: { remoteAddress: handshake.address },
+  };
+
+  return normalizeIp(proxyaddr(request as never, trustedProxies));
 }
