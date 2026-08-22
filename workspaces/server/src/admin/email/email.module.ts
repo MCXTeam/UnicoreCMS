@@ -41,6 +41,11 @@ export class EmailModule implements OnModuleInit {
           title: 'Вход с нового устройства',
           content: `<h1>Привет, {USERNAME}!</h1><p><br></p><p>В ваш аккаунт был выполнен вход с нового устройства, если это не вы, немедленно смените пароль!</p><p><br></p><p>IP-адресс: {IP}</p>`,
         },
+        {
+          id: EmailMessageType.Gift,
+          title: 'Вам подарок',
+          content: `<h1>Привет, {USERNAME}!</h1><p><br></p><p>Игрок {SENDER} сделал вам подарок на {SITENAME}: {GIFT}.</p><p>Подарок уже выдан, загляните в личный кабинет.</p>`,
+        },
       ])
       .orIgnore()
       .execute();

@@ -28,6 +28,23 @@ import { CartFindDto } from './dto/cart-find.dto';
 import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
 import { Transactional } from 'typeorm-transactional';
 
+export interface SingleQuoteInput {
+  server: string;
+  product?: number;
+  kit?: number;
+  amount?: number;
+  use_virtual?: boolean;
+}
+
+export interface SingleQuote {
+  server: Server;
+  product: Product | null;
+  kit: Kit | null;
+  amount: number;
+  realCost: number;
+  virtualCost: number;
+}
+
 @Injectable()
 export class CartService {
   constructor(
@@ -227,6 +244,59 @@ export class CartService {
     const cartItem = await this.cartItemsRepository.findOneBy({ id });
 
     return this.cartItemsRepository.remove(cartItem);
+  }
+
+  async quoteSingle(user: User, input: SingleQuoteInput): Promise<SingleQuote> {
+    const server = await this.serversService.findOne(input.server);
+
+    if (!server) throw new NotFoundException();
+
+    const items: CartItem[] = [];
+    const kits: CartItemKit[] = [];
+    const amount = input.amount ?? 1;
+    let product: Product = null;
+    let kit: Kit = null;
+
+    if (input.product) {
+      product = await this.productsRepository.findOne({ where: { id: input.product }, relations: ['servers'] });
+
+      if (!product || !product.servers.find((srv) => srv.id == server.id)) throw new NotFoundException();
+
+      if (product.multiple_of && amount % product.multiple_of != 0) throw new BadRequestException();
+
+      const item = new CartItem();
+
+      item.product = product;
+      item.server = server;
+      item.user = user;
+      item.amount = amount;
+
+      items.push(item);
+    } else {
+      kit = await this.kitsRepository.findOne({ where: { id: input.kit }, relations: ['servers', 'items'] });
+
+      if (!kit || !kit.servers.find((srv) => srv.id == server.id)) throw new NotFoundException();
+
+      const item = new CartItemKit();
+
+      item.kit = kit;
+      item.server = server;
+      item.user = user;
+
+      kits.push(item);
+    }
+
+    const price = this.priceCalc(items, kits);
+    const virtualSale = input.use_virtual ? await this.virtualSaleCalulate(items, kits, user, price) : 0;
+
+    return {
+      server,
+      product,
+      kit,
+      amount,
+      realCost: currencyUtils.roundByType(price - virtualSale, SystemCurrency.REAL),
+      virtualCost: currencyUtils.roundByType(virtualSale, SystemCurrency.VIRTAUL),
+    };
   }
 
   async giveItem(user: User, product: Product, server: Server, amount: number) {

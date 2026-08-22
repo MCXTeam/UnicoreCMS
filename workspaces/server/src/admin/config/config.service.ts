@@ -3,7 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { DEFAULT_ISSUANCE_PRESET, RCON_PRESETS } from 'unicore-common';
-import { CacheKey, KEEP_HISTORY_DAYS, KEEP_PAID_PAYMENTS_DAYS, KEEP_PENDING_PAYMENTS_DAYS } from '@common';
+import {
+  CacheKey,
+  GIFTS_CODE_EXPIRE_DAYS,
+  GIFTS_DAILY_LIMIT,
+  KEEP_HISTORY_DAYS,
+  KEEP_PAID_PAYMENTS_DAYS,
+  KEEP_PENDING_PAYMENTS_DAYS,
+} from '@common';
 import { IsNull, Repository } from 'typeorm';
 import { ConfigField, ConfigType } from './config.enum';
 import { moduleConfigSchema } from 'src/modules/runtime';
@@ -73,6 +80,10 @@ export class ConfigService {
         { key: ConfigField.StoreProductsVirtualUse, important: true, type: ConfigType.boolean, value: 'true' },
         { key: ConfigField.DonateGroupsVirtualUse, important: true, type: ConfigType.boolean, value: 'true' },
         { key: ConfigField.DonatePermsVirtualUse, important: true, type: ConfigType.boolean, value: 'true' },
+        { key: ConfigField.GiftsCodeEnabled, important: true, type: ConfigType.boolean, value: 'true' },
+        { key: ConfigField.GiftsDirectEnabled, important: true, type: ConfigType.boolean, value: 'true' },
+        { key: ConfigField.GiftsDailyLimit, important: true, type: ConfigType.number, value: String(GIFTS_DAILY_LIMIT) },
+        { key: ConfigField.GiftsCodeExpireDays, important: true, type: ConfigType.number, value: String(GIFTS_CODE_EXPIRE_DAYS) },
         { key: ConfigField.EmailActivationRequired, important: true, type: ConfigType.boolean, value: 'true' },
         { key: ConfigField.OrdinaryRegister, important: true, type: ConfigType.boolean, value: 'false' },
         { key: ConfigField.KeepPaidPaymentsDays, important: true, type: ConfigType.number, value: String(KEEP_PAID_PAYMENTS_DAYS) },

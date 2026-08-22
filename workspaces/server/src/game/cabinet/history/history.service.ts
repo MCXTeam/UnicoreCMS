@@ -10,7 +10,7 @@ import { Server } from 'src/game/servers/entities/server.entity';
 import { Kit } from 'src/game/store/entities/kit.entity';
 import { Product } from 'src/game/store/entities/product.entity';
 import { Payment } from 'src/payment/entities/payment.entity';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { Transactional } from 'typeorm-transactional';
 import { PaginatedHistoryDto } from './dto/history.dto';
 import { History } from './entities/history.entity';
@@ -26,6 +26,21 @@ function applyCost(history: History, cost?: PurchaseCost) {
 
   history.real_spent = cost.real;
   history.virtual_spent = cost.virtual;
+}
+
+export interface GiftHistoryInput {
+  type: HistoryType.GiftPurchase | HistoryType.GiftReceived;
+  ip: string;
+  user: User;
+  target?: User;
+  server?: Server;
+  period?: Period;
+  product?: Product;
+  kit?: Kit;
+  donateGroup?: DonateGroup;
+  donatePermission?: DonatePermission;
+  amount?: number;
+  cost?: PurchaseCost;
 }
 
 @Injectable()
@@ -65,6 +80,33 @@ export class HistoryService {
         maxLimit: 25,
       }),
     );
+  }
+
+  countGifts(user: User, since: Date): Promise<number> {
+    return this.historyRepository.count({
+      where: { user: { uuid: user.uuid }, type: HistoryType.GiftPurchase, created: MoreThan(since) },
+    });
+  }
+
+  @Transactional()
+  gift(input: GiftHistoryInput) {
+    const history = new History();
+
+    history.user = input.user;
+    history.type = input.type;
+    history.ip = input.ip;
+    history.target = input.target;
+    history.server = input.server;
+    history.period = input.period;
+    history.product = input.product;
+    history.kit = input.kit;
+    history.donate_group = input.donateGroup;
+    history.donate_permission = input.donatePermission;
+    history.amount = input.amount;
+
+    applyCost(history, input.cost);
+
+    return this.historyRepository.insert(history);
   }
 
   create(type: HistoryType.ProductPurchase, ip: string, user: User, product: Product, server: Server, amount: number, cost?: PurchaseCost);

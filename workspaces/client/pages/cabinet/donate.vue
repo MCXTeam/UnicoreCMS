@@ -4,7 +4,11 @@
       <template #header>
         <div class="d-flex flex-column align-items-center">
           <h4 class="mt-2 mb-0">
-            {{ $t('cabinet.buy_group_title', { group: donate.group.name, server: donate.server.name }) }}
+            {{
+              donate.gift_only
+                ? $t('cabinet.gift_group_title', { group: donate.group.name, server: donate.server.name })
+                : $t('cabinet.buy_group_title', { group: donate.group.name, server: donate.server.name })
+            }}
           </h4>
           <h3 v-if="donate.group.periods.find((p) => p.id == donate.period).expire" class="m-0">
             {{ $t('cabinet.until') }}
@@ -41,8 +45,9 @@
         </div>
         <b>-{{ $utils.formatCurrency('virtual', calcGroupVirtSale()) }}</b>
       </div>
+      <GiftPurchase v-if="donate.period" :payload="giftGroupPayload" :price="giftGroupPrice" @done="afterGift()" />
       <template #footer>
-        <div class="d-flex justify-content-center" v-if="donate.period">
+        <div class="d-flex justify-content-center" v-if="donate.period && !donate.gift_only">
           <Button v-if="donate.use_virtual" size="large" @click="buyGroup()" text>
             {{ $t('cabinet.buy_for') }} &nbsp;<small
               ><strike>{{ $utils.formatCurrency('real', calcGroupPrice()) }}</strike></small
@@ -66,13 +71,14 @@
     >
       <template #header>
         <div class="d-flex flex-column align-items-center">
-          <h4 v-if="permission.permission.type == 'game'" class="mt-2 mb-0">
+          <h4 v-if="permission.gift_only" class="mt-2 mb-0">{{ $t('cabinet.gift_title') }}</h4>
+          <h4 v-else-if="permission.permission.type == 'game'" class="mt-2 mb-0">
             {{ $t('cabinet.buy_permission_game', { server: permission.server.name }) }}
           </h4>
-          <h4 v-if="permission.permission.type == 'kit'" class="mt-2 mb-0">
+          <h4 v-else-if="permission.permission.type == 'kit'" class="mt-2 mb-0">
             {{ $t('cabinet.buy_permission_kit', { server: permission.server.name }) }}
           </h4>
-          <h4 v-if="permission.permission.type == 'web'" class="mt-2 mb-0">{{ $t('cabinet.buy_permission_web') }}</h4>
+          <h4 v-else class="mt-2 mb-0">{{ $t('cabinet.buy_permission_web') }}</h4>
           <h4 v-if="permission.permission.periods.find((p) => p.id == permission.period).expire" class="m-0">
             {{ $t('cabinet.until') }}
             {{
@@ -122,8 +128,9 @@
         </div>
         <b>-{{ $utils.formatCurrency('virtual', calcPermissionVirtSale()) }}</b>
       </div>
+      <GiftPurchase v-if="permission.period" :payload="giftPermissionPayload" :price="giftPermissionPrice" @done="afterGift()" />
       <template #footer>
-        <div class="d-flex justify-content-center" v-if="permission.period">
+        <div class="d-flex justify-content-center" v-if="permission.period && !permission.gift_only">
           <Button v-if="permission.use_virtual" size="large" @click="buyPermission()" text>
             {{ $t('cabinet.buy_for') }} &nbsp;<small
               ><strike>{{ $utils.formatCurrency('real', calcPermissionPrice()) }}</strike></small
@@ -164,6 +171,19 @@
               <template #body="{ data }">{{
                 data.expired ? $moment(data.expired).format('D MMMM YYYY, HH:mm') : $t('players.never')
               }}</template>
+            </Column>
+            <Column v-if="giftsAvailable" style="width: 1%">
+              <template #body="{ data }">
+                <Button
+                  v-tooltip.left="$t('cabinet.gift_give')"
+                  size="small"
+                  text
+                  :disabled="!donateGroups"
+                  @click="openGroupDialog(data.group.id, true)"
+                >
+                  <i class="bx bxs-gift"></i>
+                </Button>
+              </template>
             </Column>
           </DataTable>
         </div>
@@ -256,6 +276,19 @@
                 data.expired ? $moment(data.expired).format('D MMMM YYYY, HH:mm') : $t('players.never')
               }}</template>
             </Column>
+            <Column v-if="giftsAvailable" style="width: 1%">
+              <template #body="{ data }">
+                <Button
+                  v-tooltip.left="$t('cabinet.gift_give')"
+                  size="small"
+                  text
+                  :disabled="!donatePermissions"
+                  @click="openPermissionDialog(data.permission.id, true)"
+                >
+                  <i class="bx bxs-gift"></i>
+                </Button>
+              </template>
+            </Column>
           </DataTable>
         </div>
         <div v-if="donatePermissions">
@@ -334,6 +367,7 @@ const { $auth, $unicore, $t } = useNuxtApp()
 
 const donateApi = useDonate()
 const serversApi = useServers()
+const giftsApi = useGifts()
 
 useHead({ title: computed(() => $t('header.cabinet')) })
 const { config } = usePublicConfig()
@@ -343,12 +377,14 @@ const donate = reactive({
   period: '',
   group: null,
   use_virtual: false,
+  gift_only: false,
 })
 const permission = reactive({
   server_id: '',
   period: '',
   permission: null,
   use_virtual: false,
+  gift_only: false,
 })
 const servers = ref([])
 const donateGroups = ref(null)
@@ -360,6 +396,23 @@ const permissionDialog = ref(false)
 const loading = ref(false)
 
 const serverOptions = computed(() => servers.value.map((server, index) => ({ label: server.name, value: String(index) })))
+const giftsAvailable = computed(() => giftsApi.codeEnabled.value || giftsApi.directEnabled.value)
+const giftGroupPayload = computed(() => ({
+  type: 'donate',
+  server: donate.server?.id,
+  donate_group: donate.group?.id,
+  period: donate.period,
+  use_virtual: donate.use_virtual,
+}))
+const giftPermissionPayload = computed(() => ({
+  type: 'permission',
+  server: permission.server?.id,
+  donate_permission: permission.permission?.id,
+  period: permission.period,
+  use_virtual: permission.use_virtual,
+}))
+const giftGroupPrice = computed(() => calcGroupPrice() - (donate.use_virtual ? calcGroupVirtSale() : 0))
+const giftPermissionPrice = computed(() => calcPermissionPrice() - (permission.use_virtual ? calcPermissionVirtSale() : 0))
 
 function calcPermissionPrice() {
   const price = permission.permission.price * permission.permission.periods.find((p) => p.id == permission.period).multiplier
@@ -391,17 +444,23 @@ function calcGroupVirtSale() {
 
   return virt_sale
 }
-function openGroupDialog(id) {
+function openGroupDialog(id, giftOnly = false) {
   donate.group = donateGroups.value.find((dg) => dg.id == id)
   donate.period = donate.group.periods[0].id
   donate.use_virtual = false
+  donate.gift_only = giftOnly
   groupDialog.value = true
 }
-function openPermissionDialog(id) {
+function openPermissionDialog(id, giftOnly = false) {
   permission.permission = donatePermissions.value.find((dg) => dg.id == id)
   permission.period = permission.permission.periods[0].id
   permission.use_virtual = false
+  permission.gift_only = giftOnly
   permissionDialog.value = true
+}
+function afterGift() {
+  groupDialog.value = false
+  permissionDialog.value = false
 }
 async function buyGroup() {
   loading.value = true

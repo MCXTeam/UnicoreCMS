@@ -26,6 +26,14 @@ import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
 import { runAfterCommit } from 'src/common/utils/transaction';
 import { Transactional } from 'typeorm-transactional';
 
+export interface PermissionQuote {
+  permission: DonatePermission;
+  server: Server;
+  period: Period;
+  realCost: number;
+  virtualCost: number;
+}
+
 @Injectable()
 export class DonatePermissionsService {
   constructor(
@@ -167,8 +175,7 @@ export class DonatePermissionsService {
     }
   }
 
-  @Transactional()
-  async buy(user: User, ip: string, input: PermissionBuyInput) {
+  async quote(user: User, input: PermissionBuyInput): Promise<PermissionQuote> {
     const cfg = await this.configService.load();
     const permission = await this.findOne(input.permission, ['servers', 'periods']);
     const server = permission?.servers?.find((server) => server.id == input.server);
@@ -188,8 +195,19 @@ export class DonatePermissionsService {
     );
 
     if (virtual_sale >= user.virtual) virtual_sale = user.virtual;
-    const realCost = currencyUtils.roundByType(price - virtual_sale, SystemCurrency.REAL);
-    const virtualCost = currencyUtils.roundByType(virtual_sale, SystemCurrency.VIRTAUL);
+
+    return {
+      permission,
+      server,
+      period,
+      realCost: currencyUtils.roundByType(price - virtual_sale, SystemCurrency.REAL),
+      virtualCost: currencyUtils.roundByType(virtual_sale, SystemCurrency.VIRTAUL),
+    };
+  }
+
+  @Transactional()
+  async buy(user: User, ip: string, input: PermissionBuyInput) {
+    const { permission, server, period, realCost, virtualCost } = await this.quote(user, input);
 
     await debitUserBalance(this.usersRepository, user.uuid, realCost, virtualCost);
 

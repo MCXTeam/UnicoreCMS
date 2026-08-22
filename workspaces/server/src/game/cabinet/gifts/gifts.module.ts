@@ -16,6 +16,10 @@ import { Money } from '../money/entities/money.entity';
 import { DonatePermissionsModule } from 'src/game/donate/permissions/permissions.module';
 import { DonateGroupsModule } from 'src/game/donate/groups/groups.module';
 import { CartModule } from 'src/game/store/cart/cart.module';
+import { HistoryModule } from '../history/history.module';
+import { ConfigModule } from 'src/admin/config/config.module';
+import { EmailModule } from 'src/admin/email/email.module';
+import { GiftPurchaseService } from './gift-purchase.service';
 
 @Module({
   imports: [
@@ -24,8 +28,11 @@ import { CartModule } from 'src/game/store/cart/cart.module';
     DonatePermissionsModule,
     DonateGroupsModule,
     CartModule,
+    HistoryModule,
+    ConfigModule,
+    EmailModule,
   ],
-  providers: [GiftsService],
+  providers: [GiftsService, GiftPurchaseService],
   controllers: [GiftsController],
 })
 export class GiftsModule {}

@@ -160,6 +160,21 @@
           >
         </Column>
 
+        <Column v-if="history_type.startsWith('gift_')" :header="$t('cabinet.gift_my_what')">
+          <template #body="{ data }">{{ gifts.describe(data) }}</template>
+        </Column>
+        <Column v-if="history_type == 'gift_purchase'" :header="$t('cabinet.gift_recipient')">
+          <template #body="{ data }">
+            <NuxtLink v-if="data.target" :to="`/user/${data.target.username}`">{{ data.target.username }}</NuxtLink>
+            <span v-else>{{ $t('cabinet.gift_by_code') }}</span>
+          </template>
+        </Column>
+        <Column v-if="history_type == 'gift_received'" :header="$t('cabinet.gift_from')">
+          <template #body="{ data }">
+            <NuxtLink v-if="data.target" :to="`/user/${data.target.username}`">{{ data.target.username }}</NuxtLink>
+          </template>
+        </Column>
+
         <template #empty>
           <span>{{ $t('cabinet.history_empty') }}</span>
         </template>
@@ -181,7 +196,7 @@ export default {
 
     useHead({ title: computed(() => $t('header.cabinet')) })
 
-    return { cabinet: useCabinet() }
+    return { cabinet: useCabinet(), gifts: useGifts() }
   },
 
   data() {
@@ -212,6 +227,8 @@ export default {
         { label: this.$t('cabinet.type_money_exchange'), value: 'money_exchange' },
         { label: this.$t('cabinet.type_money_transfer'), value: 'money_transfer' },
         { label: this.$t('cabinet.type_real_transfer'), value: 'real_transfer' },
+        { label: this.$t('cabinet.type_gift_purchase'), value: 'gift_purchase' },
+        { label: this.$t('cabinet.type_gift_received'), value: 'gift_received' },
       ]
     },
   },

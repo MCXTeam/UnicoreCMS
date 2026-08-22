@@ -54,6 +54,8 @@
 
       <ExtensionSlot name="store.product" :product="product" :server="server" />
 
+      <GiftPurchase :payload="giftPayload" :price="giftPrice" @done="productDialog = false" />
+
       <template #footer>
         <div class="d-flex justify-content-center">
           <Button v-if="product.type == 'product'" size="large" text @click="addToCart()">
@@ -140,6 +142,22 @@ const products = reactive<{ data: any[]; meta: Record<string, any> }>({
     totalPages: 1,
     sortBy: null,
   },
+})
+
+const giftPayload = computed(() => ({
+  type: product.value?.type,
+  server: server.value?.id,
+  product: product.value?.type == 'product' ? product.value?.payload.id : undefined,
+  kit: product.value?.type == 'kit' ? product.value?.payload.id : undefined,
+  amount: amount.value,
+}))
+const giftPrice = computed(() => {
+  const payload = product.value?.payload
+  if (!payload) return 0
+
+  const price = payload.price * (product.value.type == 'product' ? amount.value : 1)
+
+  return price - (price / 100) * (payload.sale || 0)
 })
 
 function joinCategoryNames(categories: Array<{ name: string }>) {

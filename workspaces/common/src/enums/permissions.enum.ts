@@ -134,4 +134,5 @@ export enum Permission {
   UserCabinetTransfer = "user.cabinet.transfer",
   UserCabinetExchange = "user.cabinet.exchange",
   UserCabinetGiftActivate = "user.cabinet.gift.activate",
+  UserCabinetGiftBuy = "user.cabinet.gift.buy",
 }

@@ -144,4 +144,20 @@ export const CONFIG_HINTS: Record<string, ConfigHint> = {
     title: 'cfg.rcon_tpl_perm_unset_title',
     hint: 'cfg.rcon_tpl_perm_unset_hint',
   },
+  public_gifts_code_enabled: {
+    title: 'cfg.public_gifts_code_enabled_title',
+    hint: 'cfg.public_gifts_code_enabled_hint',
+  },
+  public_gifts_direct_enabled: {
+    title: 'cfg.public_gifts_direct_enabled_title',
+    hint: 'cfg.public_gifts_direct_enabled_hint',
+  },
+  gifts_daily_limit: {
+    title: 'cfg.gifts_daily_limit_title',
+    hint: 'cfg.gifts_daily_limit_hint',
+  },
+  gifts_code_expire_days: {
+    title: 'cfg.gifts_code_expire_days_title',
+    hint: 'cfg.gifts_code_expire_days_hint',
+  },
 }

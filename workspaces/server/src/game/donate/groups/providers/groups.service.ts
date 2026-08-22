@@ -25,6 +25,14 @@ import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
 import { runAfterCommit } from 'src/common/utils/transaction';
 import { Transactional } from 'typeorm-transactional';
 
+export interface GroupQuote {
+  group: DonateGroup;
+  server: Server;
+  period: Period;
+  realCost: number;
+  virtualCost: number;
+}
+
 @Injectable()
 export class DonateGroupsService {
   constructor(
@@ -198,8 +206,7 @@ export class DonateGroupsService {
     }
   }
 
-  @Transactional()
-  async buy(user: User, ip: string, input: GroupBuyInput) {
+  async quote(user: User, input: GroupBuyInput): Promise<GroupQuote> {
     const cfg = await this.configService.load();
     const group = await this.findOne(input.group, ['servers', 'periods']);
     const server = group?.servers?.find((server) => server.id == input.server);
@@ -219,8 +226,19 @@ export class DonateGroupsService {
     );
 
     if (virtual_sale >= user.virtual) virtual_sale = user.virtual;
-    const realCost = currencyUtils.roundByType(price - virtual_sale, SystemCurrency.REAL);
-    const virtualCost = currencyUtils.roundByType(virtual_sale, SystemCurrency.VIRTAUL);
+
+    return {
+      group,
+      server,
+      period,
+      realCost: currencyUtils.roundByType(price - virtual_sale, SystemCurrency.REAL),
+      virtualCost: currencyUtils.roundByType(virtual_sale, SystemCurrency.VIRTAUL),
+    };
+  }
+
+  @Transactional()
+  async buy(user: User, ip: string, input: GroupBuyInput) {
+    const { group, server, period, realCost, virtualCost } = await this.quote(user, input);
 
     await debitUserBalance(this.usersRepository, user.uuid, realCost, virtualCost);
 

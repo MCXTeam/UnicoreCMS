@@ -1,4 +1,5 @@
 import { decimalColumn, MONEY_PRECISION, MONEY_SCALE } from '@common';
+import { User } from 'src/admin/users/entities/user.entity';
 import { Period } from 'src/game/donate/entities/period.entity';
 import { DonateGroup } from 'src/game/donate/groups/entities/donate-group.entity';
 import { DonatePermission } from 'src/game/donate/permissions/entities/donate-permission.entity';
@@ -6,6 +7,7 @@ import { Server } from 'src/game/servers/entities/server.entity';
 import { Kit } from 'src/game/store/entities/kit.entity';
 import { Product } from 'src/game/store/entities/product.entity';
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Exclude } from 'class-transformer';
 import { GiftType } from '../enums/gift-type.enum';
 import { GiftActivation } from './gift-activation.entity';
 
@@ -91,6 +93,15 @@ export class Gift {
     transformer: decimalColumn,
   })
   amount?: number;
+
+  @ManyToOne(() => User, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+    nullable: true,
+  })
+  @JoinColumn({ name: 'issued_by_uuid' })
+  @Exclude()
+  issued_by?: User;
 
   @CreateDateColumn({ name: 'created' })
   created: Date;

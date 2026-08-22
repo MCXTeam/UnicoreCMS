@@ -9,27 +9,7 @@
       </template>
       <div class="text-center">
         <img height="100px" src="/images/chest-minecraft.gif" />
-        <h4 v-if="gift.type == 'real'" class="m-0">
-          {{ $t('cabinet.referal_to_balance', { amount: $utils.formatCurrency('real', gift.amount) }) }}
-        </h4>
-        <h4 v-if="gift.type == 'money'" class="m-0">
-          {{ $t('cabinet.gift_money', { amount: $utils.formatCurrency('ingame', gift.amount), server: gift.server.name }) }}
-        </h4>
-        <h4 v-if="gift.type == 'donate'" class="m-0">
-          {{ $t('cabinet.gift_donate', { name: gift.donate_group.name, period: gift.period.name, server: gift.server.name }) }}
-        </h4>
-        <h4 v-if="gift.type == 'permission' && gift.donate_permission.type == 'web'" class="m-0">
-          {{ $t('cabinet.gift_permission_web', { name: gift.donate_permission.name, period: gift.period.name }) }}
-        </h4>
-        <h4 v-if="gift.type == 'permission' && gift.donate_permission.type != 'web'" class="m-0">
-          {{ $t('cabinet.gift_permission', { name: gift.donate_permission.name, period: gift.period.name, server: gift.server.name }) }}
-        </h4>
-        <h4 v-if="gift.type == 'product' && gift.donate_permission != 'web'" class="m-0">
-          {{ $t('cabinet.gift_product', { name: gift.product.name, amount: gift.amount, server: gift.server.name }) }}
-        </h4>
-        <h4 v-if="gift.type == 'kit' && gift.donate_permission != 'web'" class="m-0">
-          {{ $t('cabinet.gift_kit', { name: gift.kit.name, server: gift.server.name }) }}
-        </h4>
+        <h4 class="m-0">{{ giftsApi.describe(gift) }}</h4>
       </div>
     </Dialog>
     <section class="px-4 pb-3">
@@ -70,6 +50,33 @@
         </div>
       </div>
     </section>
+    <template v-if="myGifts.length">
+      <hr />
+      <section class="px-4 mt-5">
+        <h2 class="mt-0 mb-3">{{ $t('cabinet.gift_my_title') }}</h2>
+        <DataTable class="no-overflow-table" :value="myGifts">
+          <Column :header="$t('cabinet.gift_my_what')">
+            <template #body="{ data }">{{ giftsApi.describe(data) }}</template>
+          </Column>
+          <Column :header="$t('cabinet.gift_code_column')">
+            <template #body="{ data }">
+              <div class="d-flex align-items-center">
+                <span class="gift-code" v-text="data.promocode" />
+                <Button v-tooltip.top="$t('cabinet.gift_copy')" size="small" text @click="copyCode(data.promocode)">
+                  <i class="bx bx-copy"></i>
+                </Button>
+              </div>
+            </template>
+          </Column>
+          <Column :header="$t('cabinet.gift_my_status')">
+            <template #body="{ data }">{{ giftStatus(data) }}</template>
+          </Column>
+          <Column :header="$t('cabinet.gift_my_created')">
+            <template #body="{ data }">{{ $moment(data.created).format('D MMMM YYYY, HH:mm') }}</template>
+          </Column>
+        </DataTable>
+      </section>
+    </template>
     <hr />
     <section class="px-4 mt-5">
       <h2 class="mt-0 mb-3">{{ $t('panel.vote') }}</h2>
@@ -121,10 +128,11 @@ import monitoringsMap from '~/json/monitorings.json'
 
 definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'cabinet.tab_gifts' })
 
-const { $auth, $unicore, $t } = useNuxtApp()
+const { $auth, $unicore, $t, $moment } = useNuxtApp()
 
 const cabinet = useCabinet()
 const votesApi = useVotes()
+const giftsApi = useGifts()
 
 useHead({ title: computed(() => $t('header.cabinet')) })
 const recaptcha = useReCaptcha()
@@ -132,6 +140,7 @@ const { config } = usePublicConfig()
 
 const monitorings_map = monitoringsMap
 const monitorings = ref([])
+const myGifts = ref([])
 const giftDialog = ref(false)
 const gift = ref(null)
 const loading = ref(false)
@@ -139,7 +148,20 @@ const gift_code = ref('')
 
 onMounted(async () => {
   monitorings.value = await votesApi.monitorings()
+  myGifts.value = await giftsApi.mine().catch(() => [])
 })
+
+function giftStatus(item) {
+  if (item.activations?.length) return $t('cabinet.gift_status_used')
+  if (item.expires && $moment(item.expires).isBefore()) return $t('cabinet.gift_status_expired')
+
+  return $t('cabinet.gift_status_new')
+}
+
+async function copyCode(code) {
+  await navigator.clipboard.writeText(code)
+  $unicore.successNotification($t('cabinet.gift_code_copied'))
+}
 
 async function activateGift() {
   loading.value = true

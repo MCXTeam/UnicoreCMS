@@ -8,10 +8,13 @@ import { Permission } from 'unicore-common';
 import { GiftActivateInput } from './dto/gift-activate.input';
 import { GiftInput } from './dto/gift.input';
 import { GiftsService } from './gifts.service';
+import { GiftPurchaseService } from './gift-purchase.service';
+import { GiftPurchaseInput } from './dto/gift-purchase.input';
+import { IpAddress } from 'src/common/decorators/IpAddress.decorator';
 
 @Controller('cabinet/gifts')
 export class GiftsController {
-  constructor(private giftsService: GiftsService) {}
+  constructor(private giftsService: GiftsService, private giftPurchaseService: GiftPurchaseService) {}
 
   @Permissions([Permission.UserCabinetGiftActivate])
   @UseGuards(ThrottlerCoreGuard)
@@ -19,6 +22,19 @@ export class GiftsController {
   @Post('activate')
   giftActivate(@CurrentUser() user: User, @Body() input: GiftActivateInput) {
     return this.giftsService.activate(user, input.gift_code);
+  }
+
+  @Permissions([Permission.UserCabinetGiftBuy])
+  @UseGuards(ThrottlerCoreGuard)
+  @Post('purchase')
+  purchase(@CurrentUser() user: User, @IpAddress() ip: string, @Body() input: GiftPurchaseInput) {
+    return this.giftPurchaseService.purchase(user, ip, input);
+  }
+
+  @Permissions([Permission.UserCabinetGiftBuy])
+  @Get('my')
+  mine(@CurrentUser() user: User) {
+    return this.giftPurchaseService.mine(user);
   }
 
   @Permissions([Permission.AdminDashboard, Permission.EditorCabinetGiftsCreate])

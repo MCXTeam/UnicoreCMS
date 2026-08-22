@@ -4,6 +4,8 @@ export enum HistoryType {
   DonateGroupPurchase = 'donate_group_purchase',
   DonatePermissionPurchase = 'donate_permission_purchase',
   UnabnPurchase = 'unban_purchase',
+  GiftPurchase = 'gift_purchase',
+  GiftReceived = 'gift_received',
 
   MoneyServerTransfer = 'money_server_transfer',
   MoneyExchange = 'money_exchange',
@@ -22,6 +24,7 @@ export class HistoryGroupType {
     HistoryType.ProductPurchase,
     HistoryType.KitPurchase,
     HistoryType.UnabnPurchase,
+    HistoryType.GiftPurchase,
   ];
 
   static Transfer = [HistoryType.RealTransfer, HistoryType.MoneyTransfer, HistoryType.MoneyServerTransfer];

@@ -159,6 +159,28 @@ export class EmailService {
     return new UserDto(user);
   }
 
+  async sendGift(recipient: User, sender: string, gift: string) {
+    if (!recipient.email) return;
+
+    const { content, title } = await this.contentTranslations.localize(
+      'email_message',
+      EmailMessageType.Gift,
+      recipient.locale,
+      await this.emailMessagesRepository.findOneBy({ id: EmailMessageType.Gift }),
+    );
+
+    const html = renderEmailTemplate(content, {
+      USERNAME: recipient.username,
+      SENDER: sender,
+      SITENAME: envConfig.sitename,
+      GIFT: gift,
+    });
+
+    this.mailerService.sendMail({ to: recipient.email, subject: title, html }).catch((e) => {
+      this.logger.error(e.toString());
+    });
+  }
+
   async sendPasswordLink(ip: string, input: PasswordLinkInput) {
     const user = await this.usersRepository.findOneBy({ email: input.email });
     if (!user) return;

@@ -78,6 +78,7 @@
       </div>
     </div>
     <Footer style="margin-top: 120px" />
+    <GiftCodeDialog />
   </div>
 </template>
 

@@ -13,4 +13,9 @@ export enum EmailMessageType {
    * Сброс пароля
    */
   Reset = 'reset',
+
+  /**
+   * Подарок от другого игрока
+   */
+  Gift = 'gift',
 }
