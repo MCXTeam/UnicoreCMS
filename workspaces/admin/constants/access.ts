@@ -23,7 +23,12 @@ export const ROUTE_ACCESS: Record<string, RouteAccess> = {
   ],
   '/pages': [Permission.AdminPagesRead],
   '/email': [Permission.AdminEmailRead],
-  '/servers': [Permission.AdminServersCreate, Permission.AdminServersUpdate, Permission.AdminServersDelete],
+  '/servers': [
+    Permission.AdminServersRead,
+    Permission.AdminServersCreate,
+    Permission.AdminServersUpdate,
+    Permission.AdminServersDelete,
+  ],
   '/mods': [
     Permission.EditorModsCreate,
     Permission.EditorModsUpdate,

@@ -51,7 +51,7 @@ export class ServersController {
     return server;
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminServersUpdate])
+  @Permissions([[Permission.AdminServersRead, Permission.AdminServersUpdate], { or: true }])
   @Get(':id/admin')
   async findOneAdmin(@Param('id') id: string) {
     const server = await this.serversService.findOne(id, ['mods', 'query', 'table', 'rcon', 'instances']);

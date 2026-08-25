@@ -15,7 +15,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
-import { Permission } from 'unicore-common';
+import { anyServerPermission, Permission } from 'unicore-common';
 import { KitInput } from '../dto/kit.input.dto';
 import { KitsService } from '../providers/kits.service';
 
@@ -23,7 +23,10 @@ import { KitsService } from '../providers/kits.service';
 export class KitsController {
   constructor(private kitsService: KitsService) {}
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorStoreRead])
+  @Permissions([
+    [Permission.EditorStoreRead, Permission.AdminUsersGive, anyServerPermission(Permission.AdminUsersGiveServer)],
+    { or: true },
+  ])
   @Get()
   find(@Paginate() query: PaginateQuery) {
     return this.kitsService.find(query);
@@ -35,7 +38,10 @@ export class KitsController {
     return this.kitsService.removeMany(body.items);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorStoreRead])
+  @Permissions([
+    [Permission.EditorStoreRead, Permission.AdminUsersGive, anyServerPermission(Permission.AdminUsersGiveServer)],
+    { or: true },
+  ])
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     const kit = this.kitsService.findOne(id, ['items', 'servers', 'categories']);

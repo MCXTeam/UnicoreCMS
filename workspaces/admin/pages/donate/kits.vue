@@ -5,8 +5,9 @@
         <Toolbar class="mb-4">
           <template v-slot:start>
             <div class="my-2">
-              <Button :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
+              <Button v-if="canCreate" :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
               <Button
+                v-if="canDeleteMany"
                 :label="$t('admin.delete')"
                 icon="pi pi-trash"
                 class="p-button-danger"
@@ -37,9 +38,20 @@
           <Column field="name" :header="$t('admin.name')"></Column>
           <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
-              <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
-              <Button @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary mr-2" />
-              <Button @click="removeKit(slotProps.data.id)" icon="pi pi-trash" class="p-button-rounded p-button-warning mt-2" />
+              <Button
+                v-if="canUpdate"
+                @click="openDialog(slotProps.data)"
+                icon="pi pi-pencil"
+                class="p-button-rounded p-button-success mr-2"
+              />
+              <Button
+                  v-if="canUpdate" @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary mr-2" />
+              <Button
+                v-if="canDelete"
+                @click="removeKit(slotProps.data.id)"
+                icon="pi pi-trash"
+                class="p-button-rounded p-button-warning mt-2"
+              />
             </template>
           </Column>
         </DataTable>
@@ -138,6 +150,7 @@
 </template>
 
 <script>
+import { Permission } from 'unicore-common/enums'
 import { Form, Field } from 'vee-validate'
 
 export default {
@@ -152,7 +165,18 @@ export default {
 
     useHead({ title: computed(() => $t('admin.menu_donate_kits')) })
     const config = useRuntimeConfig()
-    return { translations, apiUrl: config.public.apiBaseurl }
+    const access = useAccess({
+      canCreate: Permission.EditorDonateKitsCreate,
+      canUpdate: Permission.EditorDonateKitsUpdate,
+      canDelete: Permission.EditorDonateKitsDelete,
+      canDeleteMany: Permission.EditorDonateKitsDeleteMany,
+    })
+
+    return {
+      ...access,
+      translations,
+      apiUrl: config.public.apiBaseurl,
+    }
   },
   data() {
     return {

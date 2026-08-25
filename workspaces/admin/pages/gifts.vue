@@ -5,8 +5,9 @@
         <Toolbar class="mb-4">
           <template v-slot:start>
             <div class="my-2">
-              <Button :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
+              <Button v-if="canCreate" :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
               <Button
+                v-if="canDeleteMany"
                 :label="$t('admin.delete')"
                 icon="pi pi-trash"
                 class="p-button-danger"
@@ -62,8 +63,18 @@
           </Column>
           <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
-              <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
-              <Button @click="removeGift(slotProps.data.id)" icon="pi pi-trash" class="p-button-rounded p-button-warning mt-2" />
+              <Button
+                v-if="canUpdate"
+                @click="openDialog(slotProps.data)"
+                icon="pi pi-pencil"
+                class="p-button-rounded p-button-success mr-2"
+              />
+              <Button
+                v-if="canDelete"
+                @click="removeGift(slotProps.data.id)"
+                icon="pi pi-trash"
+                class="p-button-rounded p-button-warning mt-2"
+              />
             </template>
           </Column>
         </DataTable>
@@ -309,6 +320,7 @@
 </template>
 
 <script>
+import { Permission } from 'unicore-common/enums'
 import { FilterMatchMode } from '@primevue/core/api'
 import { Form, Field } from 'vee-validate'
 
@@ -323,7 +335,15 @@ export default {
     useHead({ title: computed(() => $t('admin.menu_gifts')) })
   },
   data() {
+    const access = useAccess({
+      canCreate: Permission.EditorCabinetGiftsCreate,
+      canUpdate: Permission.EditorCabinetGiftsUpdate,
+      canDelete: Permission.EditorCabinetGiftsDelete,
+      canDeleteMany: Permission.EditorCabinetGiftsDeleteMany,
+    })
+
     return {
+      ...access,
       gifts: null,
       loading: true,
       selected: null,

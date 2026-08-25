@@ -4,7 +4,7 @@ import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { assertServerPermission } from 'src/admin/roles/guards/permisson.guard';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
-import { Permission } from 'unicore-common';
+import { anyServerPermission, Permission } from 'unicore-common';
 import { GiveDonatePermInput } from './dto/give-donate-perm.input';
 import { PermissionBuyInput } from './dto/permission-buy.input';
 import { PermissionInput } from './dto/permission.input';
@@ -26,7 +26,10 @@ export class PermissionsController {
     return this.donatePermissionsService.sort(body);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateRead])
+  @Permissions([
+    [Permission.EditorDonateRead, Permission.AdminUsersDonate, anyServerPermission(Permission.AdminUsersDonateServer)],
+    { or: true },
+  ])
   @Get()
   find() {
     return this.donatePermissionsService.find(['servers', 'kits', 'periods']);
@@ -65,7 +68,10 @@ export class PermissionsController {
     return this.donatePermissionsService.buy(user, ip, body);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateRead])
+  @Permissions([
+    [Permission.EditorDonateRead, Permission.AdminUsersDonate, anyServerPermission(Permission.AdminUsersDonateServer)],
+    { or: true },
+  ])
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
     const server = await this.donatePermissionsService.findOne(id, ['periods', 'servers', 'kits']);

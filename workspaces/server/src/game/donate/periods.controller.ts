@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
-import { Permission } from 'unicore-common';
+import { anyServerPermission, Permission } from 'unicore-common';
 import { PeriodInput } from './dto/period.input';
 import { Period } from './entities/period.entity';
 import { PeriodsService } from './periods.service';
@@ -10,7 +10,10 @@ import { PeriodsService } from './periods.service';
 export class PeriodsController {
   constructor(private periodsService: PeriodsService) {}
 
-  @Permissions([Permission.EditorDonateRead])
+  @Permissions([
+    [Permission.EditorDonateRead, Permission.AdminUsersDonate, anyServerPermission(Permission.AdminUsersDonateServer)],
+    { or: true },
+  ])
   @Get()
   findAll(): Promise<Period[]> {
     return this.periodsService.find();

@@ -5,8 +5,9 @@
         <Toolbar class="mb-4">
           <template v-slot:start>
             <div class="my-2">
-              <Button :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
+              <Button v-if="canCreate" :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
               <Button
+                v-if="canDeleteMany"
                 :label="$t('admin.delete')"
                 icon="pi pi-trash"
                 class="p-button-danger"
@@ -53,18 +54,24 @@
             <template #body="slotProps">
               <div class="flex justify-content-end align-items-center gap-2">
                 <SplitButton
-                  v-if="publishTargets.length"
+                  v-if="canPublish && publishTargets.length"
                   :model="publishMenu(slotProps.data)"
                   icon="pi pi-send"
                   severity="help"
                   rounded
                   @click="openPublishDialog(slotProps.data)"
                 />
-                <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success" />
-                <Button @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary" />
+                <Button
+                  v-if="canUpdate"
+                  @click="openDialog(slotProps.data)"
+                  icon="pi pi-pencil"
+                  class="p-button-rounded p-button-success"
+                />
+                <Button
+                  v-if="canUpdate" @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary" />
                 <Button
                   @click="removeNewsSingle(slotProps.data.id)"
-                  v-if="!slotProps.data.important"
+                  v-if="canDelete && !slotProps.data.important"
                   icon="pi pi-trash"
                   class="p-button-rounded p-button-warning"
                 />
@@ -317,6 +324,7 @@
 </template>
 
 <script>
+import { Permission } from 'unicore-common/enums'
 import { sortTransform } from '~/helpers'
 import { fullSizeTemplate } from '~/constants'
 import { FilterMatchMode } from '@primevue/core/api'
@@ -334,7 +342,20 @@ export default {
 
     useHead({ title: computed(() => $t('admin.menu_news')) })
     const auth = useAuthStore()
-    return { translations, runtimeConfig: useRuntimeConfig().public, auth }
+    const access = useAccess({
+      canCreate: Permission.EditorNewsCreate,
+      canUpdate: Permission.EditorNewsUpdate,
+      canDelete: Permission.EditorNewsDelete,
+      canDeleteMany: Permission.EditorNewsDeleteMany,
+      canPublish: Permission.EditorNewsPublish,
+    })
+
+    return {
+      ...access,
+      translations,
+      runtimeConfig: useRuntimeConfig().public,
+      auth,
+    }
   },
 
   computed: {

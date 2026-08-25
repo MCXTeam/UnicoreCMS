@@ -5,7 +5,7 @@
         <Toolbar class="mb-4">
           <template v-slot:start>
             <div class="my-2">
-              <Button :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
+              <Button v-if="canCreate" :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
             </div>
           </template>
         </Toolbar>
@@ -34,10 +34,15 @@
           <Column sortable field="path" :header="$t('admin.path')"></Column>
           <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
-              <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
+              <Button
+                v-if="canUpdate"
+                @click="openDialog(slotProps.data)"
+                icon="pi pi-pencil"
+                class="p-button-rounded p-button-success mr-2"
+              />
               <Button
                 @click="removePage(slotProps.data.id)"
-                v-if="!slotProps.data.is_rules"
+                v-if="canDelete && !slotProps.data.is_rules"
                 icon="pi pi-trash"
                 class="p-button-rounded p-button-warning mt-2"
               />
@@ -151,6 +156,7 @@
 </template>
 
 <script>
+import { Permission } from 'unicore-common/enums'
 import { fullSizeTemplate } from '~/constants'
 import { FilterMatchMode } from '@primevue/core/api'
 import { Form, Field } from 'vee-validate'
@@ -167,7 +173,13 @@ export default {
 
     useHead({ title: computed(() => $t('admin.menu_pages')) })
     const auth = useAuthStore()
-    return { translations, auth }
+    const access = useAccess({
+      canCreate: Permission.AdminPagesCreate,
+      canUpdate: Permission.AdminPagesUpdate,
+      canDelete: Permission.AdminPagesDelete,
+    })
+
+    return { translations, auth, ...access }
   },
 
   computed: {

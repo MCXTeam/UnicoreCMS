@@ -26,3 +26,9 @@ export function filterAdminPermissions(values: unknown): string[] {
 
   return values.filter(isAdminPermission);
 }
+
+export const SERVER_PERMISSION_PLACEHOLDER = "%server%";
+
+export function anyServerPermission(permission: string): string {
+  return permission.replace(SERVER_PERMISSION_PLACEHOLDER, "*");
+}

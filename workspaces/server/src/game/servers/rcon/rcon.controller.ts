@@ -9,25 +9,25 @@ import { RconService } from './rcon.service';
 export class RconController {
   constructor(private rconService: RconService, private rconQueueService: RconQueueService) {}
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminServersUpdate])
+  @Permissions([Permission.AdminDashboard, Permission.AdminServersRcon])
   @Post(':server/test')
   test(@Param('server') server: string) {
     return this.rconService.test(server);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminServersUpdate])
+  @Permissions([Permission.AdminDashboard, Permission.AdminServersRcon])
   @Post(':server/run')
   run(@Param('server') server: string, @Body() body: RconRunInput) {
     return this.rconService.sendCommand(server, body.command);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminServersUpdate])
+  @Permissions([Permission.AdminDashboard, Permission.AdminServersRcon])
   @Get(':server/queue')
   queue(@Param('server') server: string) {
     return this.rconQueueService.listByServer(server);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminServersUpdate])
+  @Permissions([Permission.AdminDashboard, Permission.AdminServersRcon])
   @Post(':server/retry')
   retry(@Param('server') server: string) {
     return this.rconQueueService.retryFailed(server);

@@ -31,9 +31,11 @@ export enum Permission {
   AdminUsersDonateServer = "admin.users.donate.%server%",
 
   // Server admin manipulations
+  AdminServersRead = "admin.servers.read",
   AdminServersCreate = "admin.servers.create",
   AdminServersUpdate = "admin.servers.update",
   AdminServersDelete = "admin.servers.delete",
+  AdminServersRcon = "admin.servers.rcon",
 
   AdminPagesRead = "admin.pages.read",
   AdminPagesCreate = "admin.pages.create",

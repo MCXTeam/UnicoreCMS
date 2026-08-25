@@ -3,7 +3,7 @@ import { Body, Controller, Get, Post, Patch, Param, Delete, UseInterceptors, Par
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
-import { Permission } from 'unicore-common';
+import { anyServerPermission, Permission } from 'unicore-common';
 import { CategoryInput } from '../dto/category.input';
 import { CategoriesService } from '../providers/categories.service';
 
@@ -11,7 +11,10 @@ import { CategoriesService } from '../providers/categories.service';
 export class CategoriesController {
   constructor(private categoriesService: CategoriesService) {}
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorStoreRead])
+  @Permissions([
+    [Permission.EditorStoreRead, Permission.AdminUsersGive, anyServerPermission(Permission.AdminUsersGiveServer)],
+    { or: true },
+  ])
   @Get()
   find(@Paginate() query: PaginateQuery) {
     return this.categoriesService.find(query);

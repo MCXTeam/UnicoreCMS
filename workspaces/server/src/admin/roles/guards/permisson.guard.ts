@@ -1,7 +1,7 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException, Inject } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { User } from 'src/admin/users/entities/user.entity';
-import { expandPermissionPattern, filterDonateWebPerms, Permission } from 'unicore-common';
+import { anyServerPermission, expandPermissionPattern, filterDonateWebPerms, Permission, SERVER_PERMISSION_PLACEHOLDER } from 'unicore-common';
 import * as minimath from 'minimatch';
 import * as _ from 'lodash';
 import { DONATE_PERMS_CACHE_KEY, PERMISSIONS_KEY } from 'src/common/constants';
@@ -12,6 +12,10 @@ import { UsersDonateGroup } from 'src/game/donate/groups/entities/user-donate.en
 import { UsersDonatePermission } from 'src/game/donate/permissions/entities/user-permission.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { permissionUniverse } from '../permission-universe';
+
+function matchesPattern(value: string, pattern: string): boolean {
+  return minimath.match([value], pattern).length > 0;
+}
 
 function matchPerms(list: string[], pattern: string): string[] {
   return expandPermissionPattern(pattern)
@@ -36,13 +40,36 @@ export function resolvePermissions(patterns: string[], universe: string[]): stri
   return _.difference(_.union(allow), deny);
 }
 
+export function satisfiesPermission(granted: string[], required: string): string[] {
+  const direct = resolvePermissions(granted, [required]);
+
+  if (direct.length || !required.includes('*')) return direct;
+
+  const denied = granted.filter((pattern) => pattern.charAt(0) === '!').map((pattern) => pattern.slice(1));
+  const covered = granted
+    .filter((pattern) => pattern.charAt(0) !== '!')
+    .some((pattern) => matchesPattern(pattern, required) && !denied.some((deny) => matchesPattern(pattern, deny)));
+
+  return covered ? [required] : [];
+}
+
+function serverScopedPermissions(patterns: string[]): string[] {
+  const templates = permissionUniverse()
+    .filter((permission) => permission.includes(SERVER_PERMISSION_PLACEHOLDER))
+    .map((permission) => anyServerPermission(permission));
+
+  return patterns.filter(
+    (pattern) => pattern.charAt(0) !== '!' && !pattern.includes('*') && templates.some((template) => matchesPattern(pattern, template)),
+  );
+}
+
 export function transformPermissions(userPart: Partial<User>) {
   const user = { ...userPart };
   if (!user?.perms) user.perms = [];
   if (!user?.roles) user.roles = [];
   user.perms.push(...user.roles.map((role) => role.perms).flat());
 
-  if (user.perms.length) user.perms = resolvePermissions(user.perms, permissionUniverse());
+  if (user.perms.length) user.perms = _.union(resolvePermissions(user.perms, permissionUniverse()), serverScopedPermissions(user.perms));
 
   user.roles = user.roles.map((role) => _.omit(role, 'perms')) as Role[];
 
@@ -89,17 +116,15 @@ export async function matchPermission(args: PermissionArgs, request: any): Promi
     permissions = args as Permission[];
   }
 
-  const matched = resolvePermissions(
-    [...(user.roles || []).map((role) => role.perms || []).flat(), ...(user.perms || []), ...(add_perms || [])],
-    permissions,
-  );
+  const granted = [...(user.roles || []).map((role) => role.perms || []).flat(), ...(user.perms || []), ...(add_perms || [])];
+  const satisfied = permissions.filter((permission) => satisfiesPermission(granted, permission).length > 0);
 
   // Подводим итог
   // OR или AND
   if (options && options.or) {
-    return matched.length > 0;
+    return satisfied.length > 0;
   } else {
-    return permissions.length === matched.length;
+    return permissions.length === satisfied.length;
   }
 }
 

@@ -1,12 +1,25 @@
 import { DeleteManyInput, imageFileFilter, IpAddress, NumberSortInput, STORAGE_MAX_IMAGE_UPLOAD, StorageManager } from '@common';
-import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Post, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Req,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { assertServerPermission } from 'src/admin/roles/guards/permisson.guard';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { Public } from 'src/auth/decorators/public.decorator';
-import { Permission } from 'unicore-common';
+import { anyServerPermission, Permission } from 'unicore-common';
 import { GiveDonateGroupInput } from '../dto/give-donate-group.input';
 import { GroupBuyInput } from '../dto/group-buy.input';
 import { GroupInput } from '../dto/group.input';
@@ -28,7 +41,10 @@ export class DonateGroupsController {
     return this.donateGroupsService.sort(body);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateRead])
+  @Permissions([
+    [Permission.EditorDonateRead, Permission.AdminUsersDonate, anyServerPermission(Permission.AdminUsersDonateServer)],
+    { or: true },
+  ])
   @Get()
   find() {
     return this.donateGroupsService.find(['servers', 'kits', 'periods', 'features']);
@@ -63,7 +79,10 @@ export class DonateGroupsController {
     return this.donateGroupsService.buy(user, ip, body);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateRead])
+  @Permissions([
+    [Permission.EditorDonateRead, Permission.AdminUsersDonate, anyServerPermission(Permission.AdminUsersDonateServer)],
+    { or: true },
+  ])
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
     const server = await this.donateGroupsService.findOne(id, ['periods', 'servers', 'kits']);

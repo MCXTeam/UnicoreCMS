@@ -5,8 +5,9 @@
         <Toolbar class="mb-4">
           <template v-slot:start>
             <div class="my-2">
-              <Button :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
+              <Button v-if="canCreate" :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
               <Button
+                v-if="canDeleteMany"
                 :label="$t('admin.delete')"
                 icon="pi pi-trash"
                 class="p-button-danger"
@@ -67,7 +68,12 @@
               <NuxtLink :to="`/users/` + slotProps.data.uuid">
                 <Button icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
               </NuxtLink>
-              <Button @click="removeUser(slotProps.data.uuid)" icon="pi pi-trash" class="p-button-rounded p-button-warning mt-2" />
+              <Button
+                v-if="canDelete"
+                @click="removeUser(slotProps.data.uuid)"
+                icon="pi pi-trash"
+                class="p-button-rounded p-button-warning mt-2"
+              />
             </template>
           </Column>
         </DataTable>
@@ -207,6 +213,7 @@
 </template>
 
 <script>
+import { Permission } from 'unicore-common/enums'
 import { sortTransform } from '~/helpers'
 import { FilterMatchMode } from '@primevue/core/api'
 import { Form, Field } from 'vee-validate'
@@ -225,7 +232,13 @@ export default {
     useHead({ title: computed(() => $t('admin.menu_users')) })
     const toast = useToast()
     const confirm = useConfirm()
-    return { toast, confirm }
+    const access = useAccess({
+      canCreate: Permission.AdminUsersCreate,
+      canDelete: Permission.AdminUsersDelete,
+      canDeleteMany: Permission.AdminUsersDeleteMany,
+    })
+
+    return { toast, confirm, ...access }
   },
   computed: {
     sections() {

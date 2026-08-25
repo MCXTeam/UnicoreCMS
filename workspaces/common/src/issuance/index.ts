@@ -360,3 +360,24 @@ export function renderTemplate(template: string, ctx: RenderContext): string {
     key in values ? sanitizeCommandValue(values[key]) : match,
   );
 }
+
+export const RCON_FIELD_MAP = {
+  give_item: { cfg: "rcon_tpl_give_item", op: "giveItem" },
+  group_add: { cfg: "rcon_tpl_group_add", op: "groupAdd" },
+  group_add_temp: { cfg: "rcon_tpl_group_add_temp", op: "groupAddTemp" },
+  group_remove: { cfg: "rcon_tpl_group_remove", op: "groupRemove" },
+  perm_set: { cfg: "rcon_tpl_perm_set", op: "permSet" },
+  perm_set_temp: { cfg: "rcon_tpl_perm_set_temp", op: "permSetTemp" },
+  perm_unset: { cfg: "rcon_tpl_perm_unset", op: "permUnset" },
+} as const;
+
+export const RCON_PRESET_CONFIG_KEY = "rcon_preset";
+
+export const RCON_CONFIG_KEYS: string[] = [
+  RCON_PRESET_CONFIG_KEY,
+  ...Object.values(RCON_FIELD_MAP).map((field) => field.cfg),
+];
+
+export function isRconConfigKey(key: string): boolean {
+  return RCON_CONFIG_KEYS.includes(key);
+}

@@ -1,12 +1,24 @@
 import { DeleteManyInput, imageFileFilter, STORAGE_MAX_IMAGE_UPLOAD, STORAGE_MAX_ZIP_UPLOAD, StorageManager, zipFileFilter } from '@common';
-import { BadRequestException, Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { matchPermission } from 'src/admin/roles/guards/permisson.guard';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
-import { Permission } from 'unicore-common';
+import { anyServerPermission, Permission } from 'unicore-common';
 import { ProductFromGameInput } from '../dto/product-fromgame.dto';
 import { ProductsManyInput } from '../dto/product-many.input';
 import { ProductInput } from '../dto/product.dto';
@@ -17,7 +29,10 @@ import { ProductsService } from '../providers/product.service';
 export class ProductsController {
   constructor(private productsService: ProductsService) {}
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorStoreRead])
+  @Permissions([
+    [Permission.EditorStoreRead, Permission.AdminUsersGive, anyServerPermission(Permission.AdminUsersGiveServer)],
+    { or: true },
+  ])
   @Get()
   find(@Paginate() query: PaginateQuery) {
     return this.productsService.find(query);
@@ -35,7 +50,10 @@ export class ProductsController {
     return this.productsService.updateMany(body);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorStoreRead])
+  @Permissions([
+    [Permission.EditorStoreRead, Permission.AdminUsersGive, anyServerPermission(Permission.AdminUsersGiveServer)],
+    { or: true },
+  ])
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.productsService.findOne(id, ['categories', 'servers']);

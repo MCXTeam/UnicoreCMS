@@ -18,7 +18,7 @@
         >
           <div class="field">
             <label>{{ $t('cabinet.server') }}</label>
-            <Select :modelValue="value" @update:modelValue="handleChange" :options="servers" optionLabel="name" appendTo="body">
+            <Select :modelValue="value" @update:modelValue="handleChange" :options="giveServers" optionLabel="name" appendTo="body">
               <template #option="slotProps">
                 <div class="flex align-items-center">
                   <IconAvatar :path="slotProps.option.icon" />
@@ -102,7 +102,7 @@
         >
           <div class="field">
             <label>{{ $t('cabinet.server') }}</label>
-            <Select :modelValue="value" @update:modelValue="handleChange" :options="servers" optionLabel="name" appendTo="body">
+            <Select :modelValue="value" @update:modelValue="handleChange" :options="giveServers" optionLabel="name" appendTo="body">
               <template #option="slotProps">
                 <div class="flex align-items-center">
                   <IconAvatar :path="slotProps.option.icon" />
@@ -167,7 +167,7 @@
         >
           <div class="field">
             <label>{{ $t('cabinet.server') }}</label>
-            <Select :modelValue="value" @update:modelValue="handleChange" :options="servers" optionLabel="name" appendTo="body">
+            <Select :modelValue="value" @update:modelValue="handleChange" :options="donateServers" optionLabel="name" appendTo="body">
               <template #option="slotProps">
                 <div class="flex align-items-center">
                   <IconAvatar :path="slotProps.option.icon" />
@@ -558,7 +558,7 @@
                   </div>
                 </div>
               </div>
-              <DataTable :value="money" :loading="money_loading" responsiveLayout="scroll" dataKey="m.id">
+              <DataTable :value="moneyRows" :loading="money_loading" responsiveLayout="scroll" dataKey="m.id">
                 <Column field="m.server.name" :header="$t('cabinet.server')" sortable>
                   <template #body="slotProps">
                     <div class="flex align-items-center">
@@ -660,7 +660,7 @@
               <Select
                 @change="warehouseFetch()"
                 v-model="warehouse_server"
-                :options="servers"
+                :options="giveServers"
                 optionLabel="name"
                 appendTo="body"
                 style="min-width: 150px"
@@ -812,10 +812,23 @@ export default {
 
     permissionServers() {
       const permission = this.udpForm.permission
+      const allowed = this.donateServers
 
-      if (!permission?.servers?.length) return this.servers
+      if (!permission?.servers?.length) return allowed
 
-      return this.servers.filter((server) => permission.servers.some((allowed) => allowed.id == server.id))
+      return allowed.filter((server) => permission.servers.some((entry) => entry.id == server.id))
+    },
+
+    donateServers() {
+      return this.servers.filter((server) => this.hasServerPermission(Permission.AdminUsersDonate, server.id))
+    },
+
+    giveServers() {
+      return this.servers.filter((server) => this.hasServerPermission(Permission.AdminUsersGive, server.id))
+    },
+
+    moneyRows() {
+      return this.money.filter((row) => this.hasServerPermission(Permission.AdminUsersMoney, row.server?.id))
     },
   },
 
@@ -842,11 +855,17 @@ export default {
 
   methods: {
     hasPermission(permission) {
+      return useAuthStore().has(permission)
+    },
+
+    hasServerPermission(permission, serverId) {
       const auth = useAuthStore()
 
       if (auth.user?.superuser) return true
 
-      return Boolean(auth.user?.perms?.some((perm) => perm === permission || perm.startsWith(`${permission}.`)))
+      const perms = auth.user?.perms || []
+
+      return perms.includes(permission) || (Boolean(serverId) && perms.includes(`${permission}.${serverId}`))
     },
 
     async load() {
@@ -871,7 +890,7 @@ export default {
       await this.fetchUser()
 
       if (this.servers.length) {
-        this.warehouse_server = this.servers[0]
+        this.warehouse_server = this.giveServers[0] || null
         this.warehouseFetch()
         this.moneyFetch()
         this.udgFetch()

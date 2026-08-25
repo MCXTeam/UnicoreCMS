@@ -5,8 +5,9 @@
         <Toolbar class="mb-4">
           <template v-slot:start>
             <div class="my-2">
-              <Button :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
+              <Button v-if="canCreate" :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
               <Button
+                v-if="canDeleteMany"
                 :label="$t('admin.delete')"
                 icon="pi pi-trash"
                 class="p-button-danger"
@@ -56,8 +57,18 @@
           </Column>
           <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
-              <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
-              <Button @click="removePermission(slotProps.data.id)" icon="pi pi-trash" class="p-button-rounded p-button-warning mt-2" />
+              <Button
+                v-if="canUpdate"
+                @click="openDialog(slotProps.data)"
+                icon="pi pi-pencil"
+                class="p-button-rounded p-button-success mr-2"
+              />
+              <Button
+                v-if="canDelete"
+                @click="removePermission(slotProps.data.id)"
+                icon="pi pi-trash"
+                class="p-button-rounded p-button-warning mt-2"
+              />
             </template>
           </Column>
         </DataTable>
@@ -298,6 +309,7 @@
 </template>
 
 <script>
+import { Permission } from 'unicore-common/enums'
 import { Form, Field } from 'vee-validate'
 import { filterDonateWebPerms } from 'unicore-common/validation'
 import { donateWebPermSuggestions } from '~/helpers'
@@ -314,7 +326,15 @@ export default {
 
     useHead({ title: computed(() => $t('admin.menu_donate_permissions')) })
     const config = useRuntimeConfig()
+    const access = useAccess({
+      canCreate: Permission.EditorDonatePermsCreate,
+      canUpdate: Permission.EditorDonatePermsUpdate,
+      canDelete: Permission.EditorDonatePermsDelete,
+      canDeleteMany: Permission.EditorDonatePermsDeleteMany,
+    })
+
     return {
+      ...access,
       translations,
       realDecimals: config.public.realDecimals,
     }

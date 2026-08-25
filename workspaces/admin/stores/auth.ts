@@ -20,16 +20,24 @@ export const useAuthStore = defineStore('auth', {
   getters: {
     loggedIn: (state) => !!state.user,
     isAdmin: (state) => !!state.user?.perms?.includes('admin.dashboard') || !!state.user?.superuser,
-    can:
+    has:
       (state) =>
-      (access: RouteAccess | null): boolean => {
+      (permission: string): boolean => {
         if (!state.user) return false
         if (state.user.superuser) return true
+
+        return Boolean(state.user.perms?.some((perm) => perm === permission || perm.startsWith(`${permission}.`)))
+      },
+    can(): (access: RouteAccess | null) => boolean {
+      return (access: RouteAccess | null): boolean => {
+        if (!this.user) return false
+        if (this.user.superuser) return true
         if (!access) return true
         if (access === SUPERUSER_ONLY) return false
 
-        return access.some((perm) => state.user?.perms?.includes(perm))
-      },
+        return access.some((perm) => this.has(perm))
+      }
+    },
   },
   actions: {
     loadTokens() {

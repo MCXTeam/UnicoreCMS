@@ -5,7 +5,7 @@
         <Toolbar class="mb-4">
           <template v-slot:start>
             <div class="my-2">
-              <Button :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
+              <Button v-if="canCreate" :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
             </div>
           </template>
         </Toolbar>
@@ -40,8 +40,18 @@
           </Column>
           <Column :style="{ width: '8rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
-              <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
-              <Button @click="removePeriod(slotProps.data.id)" icon="pi pi-trash" class="p-button-rounded p-button-warning mt-2" />
+              <Button
+                v-if="canUpdate"
+                @click="openDialog(slotProps.data)"
+                icon="pi pi-pencil"
+                class="p-button-rounded p-button-success mr-2"
+              />
+              <Button
+                v-if="canDelete"
+                @click="removePeriod(slotProps.data.id)"
+                icon="pi pi-trash"
+                class="p-button-rounded p-button-warning mt-2"
+              />
             </template>
           </Column>
         </DataTable>
@@ -142,6 +152,7 @@
   </div>
 </template>
 <script>
+import { Permission } from 'unicore-common/enums'
 import { FilterMatchMode } from '@primevue/core/api'
 import { Form, Field } from 'vee-validate'
 
@@ -157,7 +168,16 @@ export default {
 
     useHead({ title: computed(() => $t('admin.menu_periods')) })
 
-    return { translations }
+    const access = useAccess({
+      canCreate: Permission.EditorDonatePeriodsCreate,
+      canUpdate: Permission.EditorDonatePeriodsUpdate,
+      canDelete: Permission.EditorDonatePeriodsDelete,
+    })
+
+    return {
+      ...access,
+      translations,
+    }
   },
   data() {
     return {

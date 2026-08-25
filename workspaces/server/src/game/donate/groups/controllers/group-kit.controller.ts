@@ -14,7 +14,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
-import { Permission } from 'unicore-common';
+import { anyServerPermission, Permission } from 'unicore-common';
 import { GroupKitInput } from '../dto/group-kit.input';
 import { GroupKitsService } from '../providers/group-kit.service';
 
@@ -34,7 +34,10 @@ export class GroupKitsController {
     return this.groupKitsService.sort(body);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateRead])
+  @Permissions([
+    [Permission.EditorDonateRead, Permission.AdminUsersDonate, anyServerPermission(Permission.AdminUsersDonateServer)],
+    { or: true },
+  ])
   @Get()
   find() {
     return this.groupKitsService.find();
@@ -46,7 +49,10 @@ export class GroupKitsController {
     return this.groupKitsService.removeMany(body.items);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateRead])
+  @Permissions([
+    [Permission.EditorDonateRead, Permission.AdminUsersDonate, anyServerPermission(Permission.AdminUsersDonateServer)],
+    { or: true },
+  ])
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
     const server = await this.groupKitsService.findOne(id);

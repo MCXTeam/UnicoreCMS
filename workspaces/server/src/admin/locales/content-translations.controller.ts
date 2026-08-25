@@ -10,8 +10,8 @@ import { ContentTranslationsInput } from './dto/content-translations.input';
 export class ContentTranslationsController {
   constructor(private contentTranslations: ContentTranslationsService) {}
 
-  private async assertAccess(request: any, entity: string): Promise<void> {
-    const permissions = contentTranslationPermissions(entity);
+  private async assertAccess(request: any, entity: string, mode: 'read' | 'write'): Promise<void> {
+    const permissions = contentTranslationPermissions(entity, mode);
 
     if (!permissions.length) throw new ForbiddenException();
 
@@ -22,14 +22,14 @@ export class ContentTranslationsController {
 
   @Get(':entity/:id')
   async find(@Req() request: any, @Param('entity') entity: string, @Param('id') id: string) {
-    await this.assertAccess(request, entity);
+    await this.assertAccess(request, entity, 'read');
 
     return this.contentTranslations.find(entity, id);
   }
 
   @Patch(':entity/:id')
   async save(@Req() request: any, @Param('entity') entity: string, @Param('id') id: string, @Body() body: ContentTranslationsInput) {
-    await this.assertAccess(request, entity);
+    await this.assertAccess(request, entity, 'write');
 
     return this.contentTranslations.save(entity, id, body.translations);
   }

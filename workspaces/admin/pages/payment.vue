@@ -5,7 +5,7 @@
         <Toolbar class="mb-4">
           <template v-slot:start>
             <div class="my-2">
-              <Button :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
+              <Button v-if="canCreate" :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
             </div>
           </template>
         </Toolbar>
@@ -33,9 +33,19 @@
           </Column>
           <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
-              <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
+              <Button
+                v-if="canUpdate"
+                @click="openDialog(slotProps.data)"
+                icon="pi pi-pencil"
+                class="p-button-rounded p-button-success mr-2"
+              />
               <Button @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary mr-2" />
-              <Button @click="removeBonus(slotProps.data.id)" icon="pi pi-trash" class="p-button-rounded p-button-warning mt-2" />
+              <Button
+                v-if="canDelete"
+                @click="removeBonus(slotProps.data.id)"
+                icon="pi pi-trash"
+                class="p-button-rounded p-button-warning mt-2"
+              />
             </template>
           </Column>
         </DataTable>
@@ -125,6 +135,7 @@
   </div>
 </template>
 <script>
+import { Permission } from 'unicore-common/enums'
 import { FilterMatchMode } from '@primevue/core/api'
 import { Form, Field } from 'vee-validate'
 
@@ -137,7 +148,16 @@ export default {
     const { $t } = useNuxtApp()
 
     useHead({ title: computed(() => $t('admin.payment_bonuses_title')) })
-    return { runtimeConfig: useRuntimeConfig().public }
+    const access = useAccess({
+      canCreate: Permission.EditorPaymentBonusesGiftsCreate,
+      canUpdate: Permission.EditorPaymentBonusesUpdate,
+      canDelete: Permission.EditorPaymentBonusesDelete,
+    })
+
+    return {
+      ...access,
+      runtimeConfig: useRuntimeConfig().public,
+    }
   },
   data() {
     return {

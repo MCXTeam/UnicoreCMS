@@ -5,8 +5,9 @@
         <Toolbar class="mb-4">
           <template #start>
             <div class="my-2">
-              <Button :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
+              <Button v-if="canCreate" :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
               <Button
+                v-if="canDeleteMany"
                 :label="$t('admin.delete')"
                 icon="pi pi-trash"
                 class="p-button-danger"
@@ -109,11 +110,17 @@
           </Column>
           <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
-              <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
-              <Button @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary mr-2" />
+              <Button
+                v-if="canUpdate"
+                @click="openDialog(slotProps.data)"
+                icon="pi pi-pencil"
+                class="p-button-rounded p-button-success mr-2"
+              />
+              <Button
+                  v-if="canUpdate" @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary mr-2" />
               <Button
                 @click="removeKit(slotProps.data.id)"
-                v-if="!slotProps.data.important"
+                v-if="canDelete && !slotProps.data.important"
                 icon="pi pi-trash"
                 class="p-button-rounded p-button-warning mt-2"
               />
@@ -384,6 +391,7 @@
 </template>
 
 <script>
+import { Permission } from 'unicore-common/enums'
 import { sortTransform } from '~/helpers'
 import { FilterMatchMode } from '@primevue/core/api'
 import { Form, Field } from 'vee-validate'
@@ -400,7 +408,18 @@ export default {
     const { $t } = useNuxtApp()
 
     useHead({ title: computed(() => $t('admin.menu_kits')) })
-    return { translations, realDecimals: rc.public.realDecimals }
+    const access = useAccess({
+      canCreate: Permission.EditorStoreKitsCreate,
+      canUpdate: Permission.EditorStoreKitsUpdate,
+      canDelete: Permission.EditorStoreKitsDelete,
+      canDeleteMany: Permission.EditorStoreKitsDeleteMany,
+    })
+
+    return {
+      ...access,
+      translations,
+      realDecimals: rc.public.realDecimals,
+    }
   },
   data() {
     return {
