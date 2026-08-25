@@ -1,83 +1,91 @@
 <template>
-  <div>
-    <nav class="vs-navbar cabinet-navbar d-flex align-items-center justify-content-between py-2">
-      <div class="d-flex align-items-center">
-        <Button @click="activeSidebar = true" class="d-lg-none d-md-block me-4" text>
+  <div class="cab">
+    <header class="cab-top">
+      <div class="cab-top__inner">
+        <Button class="cab-burger d-xl-none" text @click="activeSidebar = true">
           <i class="bx bx-menu"></i>
         </Button>
-        <NuxtLink to="/" class="d-flex align-items-center without-underline">
-          <img class="my-1" src="/icon.png" height="64px" />
-          <h2 class="ms-3 my-0 d-none d-md-block">{{ $pub.sitename }}</h2>
+        <NuxtLink to="/" class="cab-brand without-underline">
+          <img src="/icon.png" height="34" />
+          <span class="d-none d-md-inline">{{ $pub.sitename }}</span>
         </NuxtLink>
-        <NuxtLink v-for="item in navbar" :key="item.key" :to="item.to" class="vs-navbar__item d-none d-lg-block ms-lg-2">
-          <i :class="item.icon"></i> {{ $t(item.label) }}
-        </NuxtLink>
-      </div>
-      <div class="d-flex align-items-center p-2">
-        <Avatar class="rounded shadow">
-          <SkinView2D class="rounded" :width="32" :height="32" :skin="$auth.user?.skin" />
-        </Avatar>
-        <div class="ms-3">
-          <h4 class="d-block d-lg-none m-0">{{ $auth.user?.username }}</h4>
-          <h4 class="d-none d-lg-block m-0">{{ $t('panel.hello', { username: $auth.user?.username || '' }) }}</h4>
-          <h5 class="m-0">{{ $t('panel.balance', { amount: $utils.formatCurrency('real', $auth.user?.real) }) }}</h5>
-        </div>
-        <Button @click="$unicore.logout()" text severity="danger" size="large" class="ms-2 d-none d-lg-block">
-          <i class="bx bx-exit"></i>
-        </Button>
-        <div class="d-none d-lg-block" style="font-size: 1.5rem">
-          <i v-if="$colorMode.preference == 'light'" @click="$unicore.switchTheme()" class="bx bxs-sun" style="cursor: pointer"></i>
-          <i v-else @click="$unicore.switchTheme()" class="bx bxs-moon" style="cursor: pointer"></i>
+        <nav class="cab-top__nav d-none d-xl-flex">
+          <NuxtLink v-for="item in navbar" :key="item.key" :to="item.to" class="cab-top__link">
+            <i :class="item.icon"></i> {{ $t(item.label) }}
+          </NuxtLink>
+        </nav>
+        <div class="cab-top__side">
+          <NuxtLink to="/cabinet/payment" class="cab-wallet without-underline">
+            <i class="bx bx-wallet-alt"></i>
+            <span>{{ $utils.formatCurrency('real', $auth.user?.real) }}</span>
+          </NuxtLink>
+          <Button text class="cab-icon-btn" @click="$unicore.switchTheme()">
+            <i v-if="$colorMode.preference == 'light'" class="bx bxs-sun"></i>
+            <i v-else class="bx bxs-moon"></i>
+          </Button>
+          <Button text severity="danger" class="cab-icon-btn" @click="$unicore.logout()">
+            <i class="bx bx-exit"></i>
+          </Button>
         </div>
       </div>
-    </nav>
+    </header>
 
     <Drawer v-model:visible="activeSidebar" class="vs-sidebar">
       <template #header>
-        <img src="/icon.png" height="48px" />
-        <h2 class="ms-2 my-0">{{ $pub.sitename }}</h2>
+        <img src="/icon.png" height="40" />
+        <h3 class="ms-2 my-0">{{ $pub.sitename }}</h3>
       </template>
-      <div class="d-flex flex-column h-100">
-        <NuxtLink to="/"
-          ><span class="vs-sidebar__item exact"><i class="bx bx-home"></i> {{ $t('header.home') }}</span></NuxtLink
-        >
-        <NuxtLink v-for="item in navbar" :key="item.key" :to="item.to"
-          ><span class="vs-sidebar__item"><i :class="item.icon"></i> {{ $t(item.label) }}</span></NuxtLink
-        >
-        <div class="mt-auto d-flex align-items-center justify-content-between">
-          <Avatar>
-            <SkinView2D class="rounded" :width="48" :height="48" :skin="$auth.user?.skin" />
-          </Avatar>
-          <div class="d-flex flex-column justify-content-center">
-            <h4 class="m-0">{{ $auth.user?.username }}</h4>
-            <h5 class="m-0">{{ $t('panel.balance', { amount: $utils.formatCurrency('real', $auth.user?.real) }) }}</h5>
-          </div>
-          <Avatar style="cursor: pointer" @click="$unicore.logout()">
-            <i class="bx bx-power-off"></i>
-          </Avatar>
-        </div>
-      </div>
+      <nav class="cab-menu">
+        <NuxtLink v-for="item in navbar" :key="item.key" :to="item.to" class="cab-menu__item">
+          <i :class="item.icon"></i> {{ $t(item.label) }}
+        </NuxtLink>
+      </nav>
+      <hr />
+      <nav class="cab-menu">
+        <NuxtLink v-for="tab in tabs" :key="tab.key" :to="tab.to" :class="['cab-menu__item', tabClass(tab)]">
+          <i :class="tab.icon"></i> {{ $t(tab.label) }}
+        </NuxtLink>
+      </nav>
     </Drawer>
 
-    <div class="container cabinet-container unicore-content">
-      <h1 class="py-3">{{ $t(name) }}</h1>
-      <div class="row">
-        <div class="col">
-          <div class="panel cabinet-tab-panel mb-4" v-if="tabs.length">
-            <NuxtLink v-for="tab in tabs" :key="tab.key" :to="tab.to" :class="tabClass(tab)">
-              <i :class="tab.icon"></i> {{ $t(tab.label) }}
-            </NuxtLink>
+    <div class="cab-shell">
+      <aside class="cab-aside">
+        <div class="cab-aside__sticky">
+          <div class="cab-aside__desktop">
+            <div class="cab-card cab-me">
+              <SkinView2D class="cab-me__face" :width="52" :height="52" :skin="$auth.user?.skin" />
+              <div class="cab-me__text">
+                <h4 class="m-0" v-text="$auth.user?.username" />
+                <span>{{ $utils.formatCurrency('virtual', $auth.user?.virtual) }} {{ $t('cabinet.bonuses').toLowerCase() }}</span>
+              </div>
+            </div>
+            <nav class="cab-menu cab-menu--rail">
+              <NuxtLink v-for="tab in tabs" :key="tab.key" :to="tab.to" :class="['cab-menu__item', tabClass(tab)]">
+                <i :class="tab.icon"></i> {{ $t(tab.label) }}
+              </NuxtLink>
+            </nav>
           </div>
-          <component v-if="storeSidebarComponent" :is="storeSidebarComponent" v-bind="storeSidebar?.payload" />
-        </div>
-        <div class="col-xl-9 pe-xl-5">
-          <div class="panel px-0 py-4">
-            <slot />
+          <div v-if="storeSidebarComponent" class="cab-card cab-store-side">
+            <component :is="storeSidebarComponent" v-bind="storeSidebar?.payload" />
           </div>
         </div>
-      </div>
+      </aside>
+
+      <main class="cab-main">
+        <div class="cab-head">
+          <h1 class="m-0">{{ $t(name) }}</h1>
+          <p v-if="hint" class="m-0">{{ $t(hint) }}</p>
+        </div>
+        <div class="cab-tabs d-xl-none">
+          <NuxtLink v-for="tab in tabs" :key="tab.key" :to="tab.to" :class="['cab-tabs__item', tabClass(tab)]">
+            <i :class="tab.icon"></i> {{ $t(tab.label) }}
+          </NuxtLink>
+        </div>
+        <slot />
+      </main>
     </div>
-    <Footer style="margin-top: 120px" />
+
+    <Footer style="margin-top: 100px" />
     <GiftCodeDialog />
   </div>
 </template>
@@ -120,6 +128,7 @@ function tabClass(tab: NavItem) {
 
 const activeSidebar = ref(false)
 const name = computed(() => String(route.meta.title || ''))
+const hint = computed(() => String(route.meta.hint || ''))
 const storeSidebar = computed(() => ui.storeSidebar)
 const storeSidebarComponent = computed(() => (storeSidebar.value ? storeSidebars[storeSidebar.value.component] : null))
 

@@ -45,7 +45,13 @@
         </div>
         <b>-{{ $utils.formatCurrency('virtual', calcGroupVirtSale()) }}</b>
       </div>
-      <GiftPurchase v-if="donate.period" :payload="giftGroupPayload" :price="giftGroupPrice" @done="afterGift()" />
+      <GiftPurchase
+        v-if="donate.period"
+        :payload="giftGroupPayload"
+        :price="giftGroupPrice"
+        :allowed="donate.group.giftable !== false"
+        @done="afterGift()"
+      />
       <template #footer>
         <div class="d-flex justify-content-center" v-if="donate.period && !donate.gift_only">
           <Button v-if="donate.use_virtual" size="large" @click="buyGroup()" text>
@@ -128,7 +134,13 @@
         </div>
         <b>-{{ $utils.formatCurrency('virtual', calcPermissionVirtSale()) }}</b>
       </div>
-      <GiftPurchase v-if="permission.period" :payload="giftPermissionPayload" :price="giftPermissionPrice" @done="afterGift()" />
+      <GiftPurchase
+        v-if="permission.period"
+        :payload="giftPermissionPayload"
+        :price="giftPermissionPrice"
+        :allowed="permission.permission.giftable !== false"
+        @done="afterGift()"
+      />
       <template #footer>
         <div class="d-flex justify-content-center" v-if="permission.period && !permission.gift_only">
           <Button v-if="permission.use_virtual" size="large" @click="buyPermission()" text>
@@ -144,217 +156,151 @@
       </template>
     </Dialog>
 
-    <div class="row px-3">
-      <div class="col-xl-6 px-4">
-        <div class="d-flex justify-content-between align-items-center">
-          <h2 class="m-0">{{ $t('cabinet.donate_groups') }}</h2>
+    <div class="cab-grid">
+      <CabTile :title="$t('cabinet.donate_groups')" icon="bx bx-crown" :span="6">
+        <template #actions>
           <Select
+            class="cab-select"
             :options="serverOptions"
             optionLabel="label"
             optionValue="value"
             :loading="!servers.length"
             :placeholder="$t('store.choose_server')"
             v-model="donate.server_id"
-            style="max-width: 150px"
           />
-        </div>
-        <div v-if="donateGroupsMe && donate.server">
-          <h4 class="mt-4 mb-2">{{ $t('cabinet.active_groups', { server: donate.server.name }) }}</h4>
-          <DataTable class="no-overflow-table" :value="donateGroupsMe.filter((dgm) => dgm.server.id == donate.server.id)">
-            <template #empty
-              ><span>{{ $t('cabinet.no_purchases') }}</span></template
-            >
-            <Column :header="$t('cabinet.donate_group')">
-              <template #body="{ data }">{{ data.group.name }}</template>
-            </Column>
-            <Column :header="$t('cabinet.expires')">
-              <template #body="{ data }">{{
-                data.expired ? $moment(data.expired).format('D MMMM YYYY, HH:mm') : $t('players.never')
-              }}</template>
-            </Column>
-            <Column v-if="giftsAvailable" style="width: 1%">
-              <template #body="{ data }">
-                <Button
-                  v-tooltip.left="$t('cabinet.gift_give')"
-                  size="small"
-                  text
-                  :disabled="!donateGroups"
-                  @click="openGroupDialog(data.group.id, true)"
-                >
-                  <i class="bx bxs-gift"></i>
-                </Button>
-              </template>
-            </Column>
-          </DataTable>
-        </div>
-        <div class="d-flex justify-content-between align-items-center mt-4">
-          <h4 class="text-uppercase m-0">{{ $t('cabinet.purchase') }}</h4>
-          <NuxtLink v-if="donate.server" :to="`/donate/${donate.server.id}`" class="d-none d-xl-block m-0">
-            <Button size="small"><i class="bx bx-link me-1"></i> {{ $t('common.more') }}</Button>
+        </template>
+
+        <template v-if="donateGroupsMe && donate.server">
+          <h5 class="cab-section">{{ $t('cabinet.active_groups', { server: donate.server.name }) }}</h5>
+          <div v-if="activeGroups.length" class="cab-servers mb-4">
+            <div v-for="item in activeGroups" :key="item.id" class="cab-servers__row">
+              <IconAvatar :path="item.group.icon" icon="bx bx-crown" />
+              <div>
+                <h4 v-text="item.group.name" />
+                <span>{{ item.expired ? $moment(item.expired).format('D MMMM YYYY, HH:mm') : $t('players.never') }}</span>
+              </div>
+              <Button
+                v-if="giftsAvailable && item.group.giftable !== false"
+                v-tooltip.left="$t('cabinet.gift_give')"
+                class="ms-auto"
+                text
+                size="small"
+                @click="openGroupDialog(item.group.id, true)"
+              >
+                <i class="bx bxs-gift"></i>
+              </Button>
+            </div>
+          </div>
+          <p v-else class="cab-sub mb-4">{{ $t('cabinet.no_purchases') }}</p>
+        </template>
+
+        <div class="cab-section-head">
+          <h5 class="cab-section m-0">{{ $t('cabinet.purchase') }}</h5>
+          <NuxtLink v-if="donate.server" :to="`/donate/${donate.server.id}`">
+            <Button size="small" text><i class="bx bx-link me-1"></i> {{ $t('common.more') }}</Button>
           </NuxtLink>
         </div>
-        <div v-if="donateGroups">
-          <div
-            v-for="group in donateGroups.filter(
-              (don) => !donateGroupsMe.find((dgm) => dgm.server.id == donate.server.id && dgm.group.id == don.id && !dgm.expired),
-            )"
-            :key="group.id"
-            class="d-flex justify-content-between align-items-center cab-donate-block mt-3 pb-3"
-          >
-            <div class="d-flex align-items-center">
-              <IconAvatar :path="group.icon" size="xlarge" icon="bx bx-crown" />
-              <div class="ms-4">
-                <div class="d-flex align-items-center">
-                  <h2 class="text-uppercase m-0" v-text="group.name" />
-                  <h5 class="sale-wrapper ms-3 my-0" v-if="group.sale">-{{ group.sale }}%</h5>
-                </div>
-                <span v-if="!group.sale">
-                  {{ $t('cabinet.from_price', { price: $utils.formatCurrency('real', group.price * group.periods[0].multiplier) }) }}
-                </span>
-                <div v-else class="d-flex">
-                  <strike v-text="$utils.formatCurrency('real', group.price * group.periods[0].multiplier)"></strike>
-                  <h4 class="ms-2 my-0">
-                    {{
-                      $t('cabinet.from_price', {
-                        price: $utils.formatCurrency('real', group.price * group.periods[0].multiplier, group.sale),
-                      })
-                    }}
-                  </h4>
-                </div>
+
+        <div v-if="donateGroups" class="cab-offers">
+          <div v-for="group in purchasableGroups" :key="group.id" class="cab-offer">
+            <IconAvatar :path="group.icon" size="large" icon="bx bx-crown" />
+            <div class="cab-offer__text">
+              <div class="cab-offer__name">
+                <h4 v-text="group.name" />
+                <span v-if="group.sale" class="cab-badge">-{{ group.sale }}%</span>
+              </div>
+              <div class="cab-offer__price">
+                <strike v-if="group.sale" v-text="$utils.formatCurrency('real', group.price * group.periods[0].multiplier)" />
+                <b>
+                  {{
+                    $t('cabinet.from_price', {
+                      price: $utils.formatCurrency('real', group.price * group.periods[0].multiplier, group.sale),
+                    })
+                  }}
+                </b>
               </div>
             </div>
-            <Button
-              v-if="donateGroupsMe.find((dgm) => dgm.server.id == donate.server.id && dgm.group.id == group.id && dgm.expired)"
-              @click="openGroupDialog(group.id)"
-              ><i class="bx bx-cart me-1"></i> {{ $t('cabinet.renew') }}</Button
-            >
-            <Button
-              v-else-if="!donateGroupsMe.find((dgm) => dgm.server.id == donate.server.id && dgm.group.id == group.id)"
-              @click="openGroupDialog(group.id)"
-              ><i class="bx bx-cart me-1"></i> {{ $t('cabinet.buy') }}</Button
-            >
+            <Button size="small" @click="openGroupDialog(group.id)">
+              <i class="bx bx-cart me-1"></i> {{ isGroupRenew(group.id) ? $t('cabinet.renew') : $t('cabinet.buy') }}
+            </Button>
           </div>
+          <p v-if="!purchasableGroups.length" class="cab-sub m-0">{{ $t('cabinet.groups_all_bought') }}</p>
         </div>
-        <div v-else>
-          <div class="col-xl-4 d-flex align-items-center w-100 cab-donate-block mt-3 pb-3" v-for="(n, index) in 3" :key="index">
-            <Skeleton size="4rem"></Skeleton>
-            <div class="ms-3" style="flex: 1">
-              <Skeleton width="75%" class="mb-2"></Skeleton>
-              <Skeleton width="50%"></Skeleton>
-            </div>
-            <Skeleton width="25%" height="25px"></Skeleton>
-          </div>
+        <div v-else class="cab-offers">
+          <Skeleton v-for="n in 3" :key="n" height="72px" borderRadius="14px" />
         </div>
-      </div>
-      <div class="col px-4 pt-4 pt-xl-0">
-        <div class="d-flex justify-content-between align-items-center">
-          <h2 class="m-0">{{ $t('cabinet.donate_permissions') }}</h2>
+      </CabTile>
+
+      <CabTile :title="$t('cabinet.donate_permissions')" icon="bx bx-key" :span="6">
+        <template #actions>
           <Select
+            class="cab-select"
             :options="serverOptions"
             optionLabel="label"
             optionValue="value"
             :loading="!servers.length"
             :placeholder="$t('store.choose_server')"
             v-model="permission.server_id"
-            style="max-width: 150px"
           />
-        </div>
-        <div v-if="donatePermissionsMe && permission.server">
-          <h4 class="mt-4 mb-2">{{ $t('cabinet.active_permissions', { server: permission.server.name }) }}</h4>
-          <DataTable
-            class="no-overflow-table"
-            :value="donatePermissionsMe.filter((dpm) => dpm.permission.type == 'web' || dpm.server.id == permission.server.id)"
-          >
-            <template #empty
-              ><span>{{ $t('cabinet.no_purchases') }}</span></template
-            >
-            <Column :header="$t('cabinet.donate_permission')">
-              <template #body="{ data }">{{ data.permission.name }}</template>
-            </Column>
-            <Column :header="$t('cabinet.expires')">
-              <template #body="{ data }">{{
-                data.expired ? $moment(data.expired).format('D MMMM YYYY, HH:mm') : $t('players.never')
-              }}</template>
-            </Column>
-            <Column v-if="giftsAvailable" style="width: 1%">
-              <template #body="{ data }">
-                <Button
-                  v-tooltip.left="$t('cabinet.gift_give')"
-                  size="small"
-                  text
-                  :disabled="!donatePermissions"
-                  @click="openPermissionDialog(data.permission.id, true)"
-                >
-                  <i class="bx bxs-gift"></i>
-                </Button>
-              </template>
-            </Column>
-          </DataTable>
-        </div>
-        <div v-if="donatePermissions">
-          <div
-            v-for="perm in donatePermissions.filter(
-              (perm) =>
-                !donatePermissionsMe.find(
-                  (dpm) =>
-                    (dpm.permission.type == 'web' || dpm.server.id == permission.server.id) && dpm.permission.id == perm.id && !dpm.expired,
-                ),
-            )"
-            :key="perm.id"
-            class="d-flex justify-content-between align-items-center cab-donate-block mt-3 pb-3"
-          >
-            <div class="d-flex align-items-center">
+        </template>
+
+        <template v-if="donatePermissionsMe && permission.server">
+          <h5 class="cab-section">{{ $t('cabinet.active_permissions', { server: permission.server.name }) }}</h5>
+          <div v-if="activePermissions.length" class="cab-servers mb-4">
+            <div v-for="item in activePermissions" :key="item.id" class="cab-servers__row">
+              <IconAvatar icon="bx bx-key" />
               <div>
-                <div class="d-flex align-items-center">
-                  <h4 class="text-uppercase m-0" v-text="perm.name" />
-                  <h5 class="sale-wrapper ms-3 my-0" v-if="perm.sale">-{{ perm.sale }}%</h5>
-                </div>
-                <span v-if="!perm.sale">
-                  {{ $t('cabinet.from_price', { price: $utils.formatCurrency('real', perm.price * perm.periods[0].multiplier) }) }}
-                </span>
-                <div v-else class="d-flex">
-                  <strike v-text="$utils.formatCurrency('real', perm.price * perm.periods[0].multiplier)"></strike>
-                  <h4 class="ms-2 my-0">
-                    {{
-                      $t('cabinet.from_price', {
-                        price: $utils.formatCurrency('real', perm.price * perm.periods[0].multiplier, perm.sale),
-                      })
-                    }}
-                  </h4>
-                </div>
+                <h4 v-text="item.permission.name" />
+                <span>{{ item.expired ? $moment(item.expired).format('D MMMM YYYY, HH:mm') : $t('players.never') }}</span>
+              </div>
+              <Button
+                v-if="giftsAvailable && item.permission.giftable !== false"
+                v-tooltip.left="$t('cabinet.gift_give')"
+                class="ms-auto"
+                text
+                size="small"
+                @click="openPermissionDialog(item.permission.id, true)"
+              >
+                <i class="bx bxs-gift"></i>
+              </Button>
+            </div>
+          </div>
+          <p v-else class="cab-sub mb-4">{{ $t('cabinet.no_purchases') }}</p>
+        </template>
+
+        <div class="cab-section-head">
+          <h5 class="cab-section m-0">{{ $t('cabinet.purchase') }}</h5>
+        </div>
+
+        <div v-if="donatePermissions" class="cab-offers">
+          <div v-for="perm in purchasablePermissions" :key="perm.id" class="cab-offer">
+            <IconAvatar icon="bx bx-key" size="large" />
+            <div class="cab-offer__text">
+              <div class="cab-offer__name">
+                <h4 v-text="perm.name" />
+                <span v-if="perm.sale" class="cab-badge">-{{ perm.sale }}%</span>
+              </div>
+              <div class="cab-offer__price">
+                <strike v-if="perm.sale" v-text="$utils.formatCurrency('real', perm.price * perm.periods[0].multiplier)" />
+                <b>
+                  {{
+                    $t('cabinet.from_price', {
+                      price: $utils.formatCurrency('real', perm.price * perm.periods[0].multiplier, perm.sale),
+                    })
+                  }}
+                </b>
               </div>
             </div>
-            <Button
-              v-if="
-                donatePermissionsMe.find(
-                  (dpm) =>
-                    (dpm.permission.type == 'web' || dpm.server.id == permission.server.id) && dpm.permission.id == perm.id && dpm.expired,
-                )
-              "
-              @click="openPermissionDialog(perm.id)"
-              ><i class="bx bx-cart me-1"></i> {{ $t('cabinet.renew') }}</Button
-            >
-            <Button
-              v-else-if="
-                !donatePermissionsMe.find(
-                  (dpm) => (dpm.permission.type == 'web' || dpm.server.id == permission.server.id) && dpm.permission.id == perm.id,
-                )
-              "
-              @click="openPermissionDialog(perm.id)"
-              ><i class="bx bx-cart me-1"></i> {{ $t('cabinet.buy') }}</Button
-            >
+            <Button size="small" @click="openPermissionDialog(perm.id)">
+              <i class="bx bx-cart me-1"></i> {{ isPermissionRenew(perm.id) ? $t('cabinet.renew') : $t('cabinet.buy') }}
+            </Button>
           </div>
+          <p v-if="!purchasablePermissions.length" class="cab-sub m-0">{{ $t('cabinet.permissions_all_bought') }}</p>
         </div>
-        <div v-else>
-          <div class="col-xl-4 d-flex align-items-center w-100 cab-donate-block mt-3 pb-3" v-for="(n, index) in 3" :key="index">
-            <div style="flex: 1">
-              <Skeleton width="75%" class="mb-2"></Skeleton>
-              <Skeleton width="50%"></Skeleton>
-            </div>
-            <Skeleton width="25%" height="25px"></Skeleton>
-          </div>
+        <div v-else class="cab-offers">
+          <Skeleton v-for="n in 4" :key="n" height="72px" borderRadius="14px" />
         </div>
-      </div>
+      </CabTile>
     </div>
   </section>
 </template>
@@ -411,6 +357,28 @@ const giftPermissionPayload = computed(() => ({
   period: permission.period,
   use_virtual: permission.use_virtual,
 }))
+const activeGroups = computed(() =>
+  (donateGroupsMe.value || []).filter((item) => item.server.id == donate.server?.id),
+)
+const purchasableGroups = computed(() =>
+  (donateGroups.value || []).filter((group) => !activeGroups.value.find((item) => item.group.id == group.id && !item.expired)),
+)
+const activePermissions = computed(() =>
+  (donatePermissionsMe.value || []).filter((item) => item.permission.type == 'web' || item.server.id == permission.server?.id),
+)
+const purchasablePermissions = computed(() =>
+  (donatePermissions.value || []).filter(
+    (perm) => !activePermissions.value.find((item) => item.permission.id == perm.id && !item.expired),
+  ),
+)
+
+function isGroupRenew(id) {
+  return !!activeGroups.value.find((item) => item.group.id == id && item.expired)
+}
+function isPermissionRenew(id) {
+  return !!activePermissions.value.find((item) => item.permission.id == id && item.expired)
+}
+
 const giftGroupPrice = computed(() => calcGroupPrice() - (donate.use_virtual ? calcGroupVirtSale() : 0))
 const giftPermissionPrice = computed(() => calcPermissionPrice() - (permission.use_virtual ? calcPermissionVirtSale() : 0))
 

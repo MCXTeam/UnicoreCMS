@@ -1,12 +1,11 @@
 <template>
-  <div class="px-4">
-    <h2 class="m-0">{{ $t('players.tab_banlist') }}</h2>
-    <p class="mt-1 mb-2">
-      {{ $t('players.banlist_hint_before') }}
-      <NuxtLink to="/page/rules">{{ $t('players.banlist_hint_link') }}</NuxtLink>
-      {{ $t('players.banlist_hint_after') }}
-    </p>
-    <div>
+  <div class="cab-grid">
+    <CabTile :title="$t('players.tab_banlist')" icon="bx bxs-shield-alt-2" :span="12">
+      <p class="cab-sub mt-0 mb-3">
+        {{ $t('players.banlist_hint_before') }}
+        <NuxtLink to="/page/rules">{{ $t('players.banlist_hint_link') }}</NuxtLink>
+        {{ $t('players.banlist_hint_after') }}
+      </p>
       <DataTable
         class="no-overflow-table mt-4 large-table"
         :value="banlist.data"
@@ -51,7 +50,7 @@
           <span>{{ $t('common.no_results') }}</span>
         </template>
       </DataTable>
-    </div>
+    </CabTile>
   </div>
 </template>
 

@@ -1,23 +1,20 @@
 <template>
-  <div class="px-4">
-    <div class="d-flex align-items-center justify-content-between w-100">
-      <h2 class="m-0">{{ $t('players.votes_title', { month: $moment().format('MMMM') }) }}</h2>
-      <NuxtLink to="/cabinet/gifts">
-        <Button size="large" :label="$t('panel.vote_button')" />
-      </NuxtLink>
-    </div>
-    <div v-if="votesGifts.length">
-      <h4 class="m-0">{{ $t('players.votes_prizes') }}</h4>
-      <div class="row d-flex justify-content-center my-3">
-        <div v-for="vg in votesGifts" :key="vg.id" class="col-6 col-lg mb-2">
-          <div class="mini-profile px-3 py-2" :class="'vote-gift-' + vg.place">
-            <h3 class="m-0">{{ $t('players.place_number', { place: vg.place }) }}</h3>
-            <span v-text="$utils.formatCurrency('real', vg.bonus)" />
-          </div>
+  <div class="cab-grid">
+    <CabTile v-if="votesGifts.length" :title="$t('players.votes_prizes')" icon="bx bx-medal" :span="12">
+      <div class="cab-prizes">
+        <div v-for="vg in votesGifts" :key="vg.id" :class="['cab-prize', 'vote-gift-' + vg.place]">
+          <h3 class="m-0">{{ $t('players.place_number', { place: vg.place }) }}</h3>
+          <span v-text="$utils.formatCurrency('real', vg.bonus)" />
         </div>
       </div>
-    </div>
-    <div>
+    </CabTile>
+
+    <CabTile :title="$t('players.votes_title', { month: $moment().format('MMMM') })" icon="bx bx-party" :span="12">
+      <template #actions>
+        <NuxtLink to="/cabinet/gifts">
+          <Button size="small" :label="$t('panel.vote_button')" />
+        </NuxtLink>
+      </template>
       <DataTable
         class="no-overflow-table mt-4 large-table"
         :value="votes.data"
@@ -54,7 +51,7 @@
           <span>{{ $t('common.no_results') }}</span>
         </template>
       </DataTable>
-    </div>
+    </CabTile>
   </div>
 </template>
 

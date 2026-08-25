@@ -1,10 +1,9 @@
 <template>
-  <div class="row settings-split px-4">
-    <div class="col-xl-6">
-      <h2 class="mt-0 mb-2">{{ $t('auth.change_password') }}</h2>
-      <p class="mt-0 mb-3">{{ $t('cabinet.password_hint') }}</p>
-      <Form v-slot="{ meta }">
-        <h3 class="mb-1 mt-0">{{ $t('cabinet.current_password') }}</h3>
+  <div class="cab-grid">
+    <CabTile :title="$t('auth.change_password')" icon="bx bx-lock-alt" :span="6">
+      <p class="cab-sub mt-0 mb-3">{{ $t('cabinet.password_hint') }}</p>
+      <Form v-slot="{ meta }" class="cab-form">
+        <label class="cab-label">{{ $t('cabinet.current_password') }}</label>
         <Field
           v-model="password_form.password_old"
           :name="$t('cabinet.current_password')"
@@ -24,7 +23,7 @@
           />
           <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
         </Field>
-        <h3 class="mb-1 mt-3">{{ $t('auth.new_password') }}</h3>
+        <label class="cab-label">{{ $t('auth.new_password') }}</label>
         <Field
           v-model="password_form.password"
           name="password"
@@ -44,7 +43,7 @@
           />
           <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
         </Field>
-        <h3 class="mb-1 mt-3">{{ $t('cabinet.repeat_password') }}</h3>
+        <label class="cab-label">{{ $t('cabinet.repeat_password') }}</label>
         <Field
           v-model="password_form.password_confirm"
           :name="$t('cabinet.repeat_password')"
@@ -64,17 +63,17 @@
           />
           <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
         </Field>
-        <div class="d-flex align-items-center gap-2 mb-1 mt-3">
+        <div class="d-flex align-items-center gap-2">
           <Checkbox v-model="password_form.close" :binary="true" inputId="sessionsClose" />
           <label for="sessionsClose">{{ $t('auth.close_sessions') }}</label>
         </div>
-        <Button @click="changePassword()" :disabled="!meta.valid" class="mt-3 w-100" size="large" :label="$t('auth.change_password')" />
+        <Button @click="changePassword()" :disabled="!meta.valid" class="w-100" :label="$t('auth.change_password')" />
       </Form>
-    </div>
-    <div class="col ps-xl-5 mt-5 mt-xl-0">
-      <h2 class="mb-2 mt-0">{{ $t('cabinet.two_factor') }}</h2>
+    </CabTile>
+
+    <CabTile :title="$t('cabinet.two_factor')" icon="bx bx-shield-quarter" :span="6">
       <div v-if="!$auth.user.two_factor_enabled" v-show="two_factor && !$auth.user.two_factor_enabled">
-        <div class="text-sm mini-profile p-2 my-3">
+        <div class="cab-note mb-3">
           <p class="m-0">{{ $t('cabinet.two_factor_text1') }}</p>
           <p class="mt-1 mb-0">{{ $t('cabinet.two_factor_text2') }}</p>
           <p class="m-0">{{ $t('cabinet.two_factor_text3') }}</p>
@@ -89,7 +88,7 @@
             <canvas ref="qrcode" />
           </div>
           <div class="col">
-            <Form v-slot="{ meta }">
+            <Form v-slot="{ meta }" class="cab-form">
               <Field
                 v-model="two_factor_form.code"
                 :name="$t('auth.totp_code')"
@@ -105,13 +104,7 @@
                 />
                 <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </Field>
-              <Button
-                :disabled="!meta.valid"
-                @click="TwoFactorEnable()"
-                class="mt-3 w-100"
-                size="large"
-                :label="$t('cabinet.two_factor_enable')"
-              />
+              <Button :disabled="!meta.valid" class="w-100" :label="$t('cabinet.two_factor_enable')" @click="TwoFactorEnable()" />
             </Form>
           </div>
         </div>
@@ -124,7 +117,7 @@
         <p class="mt-0 mb-3">
           {{ $t('cabinet.time_based') }} <b>{{ $t('cabinet.time_based_value') }}</b>
         </p>
-        <Form v-slot="{ meta }">
+        <Form v-slot="{ meta }" class="cab-form">
           <Field
             v-model="two_factor_form.code"
             :name="$t('auth.totp_code')"
@@ -140,13 +133,7 @@
             />
             <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
           </Field>
-          <Button
-            :disabled="!meta.valid"
-            @click="TwoFactorDisable()"
-            class="mt-3 w-100"
-            size="large"
-            :label="$t('cabinet.two_factor_disable')"
-          />
+          <Button :disabled="!meta.valid" class="w-100" :label="$t('cabinet.two_factor_disable')" @click="TwoFactorDisable()" />
         </Form>
       </div>
       <div v-if="!two_factor && !$auth.user.two_factor_enabled">
@@ -164,7 +151,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </CabTile>
   </div>
 </template>
 
@@ -172,7 +159,7 @@
 import QRCode from 'qrcode-with-logos'
 import { Form, Field } from 'vee-validate'
 
-definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'cabinet.tab_settings' })
+definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'cabinet.tab_settings', hint: 'cabinet.settings_hint' })
 
 const { $auth, $unicore, $t } = useNuxtApp()
 

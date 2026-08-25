@@ -1,158 +1,205 @@
 <template>
-  <section>
-    <div class="row px-4">
-      <div class="col-xl-6 pe-xl-2">
-        <div class="skin-view p-4">
-          <div class="row">
-            <div class="col-auto d-flex flex-column align-items-center">
-              <SkinView3D class="rounded" :width="140" :height="200" :skin="$auth.user.skin" :cloak="$auth.user.cloak" ref="Skin3D" />
-              <div class="skin-animation">
-                <i @click="Skin3D.setAnimation(null)" class="bx bx-male"></i>
-                <i @click="Skin3D.setAnimation('walk')" class="bx bx-walk"></i>
-                <i @click="Skin3D.setAnimation('run')" class="bx bx-run"></i>
-              </div>
-            </div>
-            <div class="col mt-4 mt-xxl-0">
-              <div class="d-flex d-none d-xxl-flex justify-content-around skin-2d">
-                <SkinView3D class="rounded" :width="75" :height="150" :skin="$auth.user.skin" :cloak="$auth.user.cloak" ref="SkinFront" />
-                <SkinView3D class="rounded" :width="75" :height="150" :skin="$auth.user.skin" :cloak="$auth.user.cloak" ref="SkinBack" />
-              </div>
-              <div class="d-flex gap-2 mt-3">
-                <input type="file" ref="skin" class="d-none" accept="image/png" @change="updateSkin()" />
-                <Button @click="skin.click()" class="w-100" :loading="skinLoading" :label="$t('cabinet.upload_skin')" />
-                <Button @click="deleteSkin()" severity="danger" class="w-25" :loading="skinLoading"><i class="bx bx-trash"></i></Button>
-              </div>
-              <div class="d-flex gap-2 mt-2">
-                <input type="file" ref="cloak" class="d-none" accept="image/png" @change="updateCloak()" />
-                <Button @click="cloak.click()" class="w-100" :loading="cloakLoading" :label="$t('cabinet.upload_cloak')" />
-                <Button @click="deleteCloak()" severity="danger" class="w-25" :loading="cloakLoading"><i class="bx bx-trash"></i></Button>
-              </div>
-            </div>
-          </div>
+  <div class="cab-grid">
+    <CabTile :title="$t('cabinet.card_appearance')" icon="bx bx-user-circle" :span="7" bodyClass="cab-skin">
+      <template #actions>
+        <NuxtLink :to="`/user/${$auth.user.username}`">
+          <Button size="small" text><i class="bx bx-link-external me-1"></i> {{ $t('cabinet.public_profile') }}</Button>
+        </NuxtLink>
+      </template>
+      <div class="cab-skin__stage">
+        <SkinView3D :width="140" :height="190" :skin="$auth.user.skin" :cloak="$auth.user.cloak" ref="Skin3D" />
+        <div class="cab-skin__anim">
+          <i v-tooltip.top="$t('cabinet.pose_stand')" class="bx bx-male" @click="Skin3D.setAnimation(null)"></i>
+          <i v-tooltip.top="$t('cabinet.pose_walk')" class="bx bx-walk" @click="Skin3D.setAnimation('walk')"></i>
+          <i v-tooltip.top="$t('cabinet.pose_run')" class="bx bx-run" @click="Skin3D.setAnimation('run')"></i>
         </div>
       </div>
-      <div class="col-xl-6 px-4 mt-4 mt-xl-0 player-info">
-        <h5 class="text-uppercase mt-0 d-none d-xl-block"><b>UUID:</b> {{ $auth.user.uuid }}</h5>
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h3 class="m-0">{{ $t('profile.account_info') }}</h3>
-          <NuxtLink :to="`/user/${$auth.user.username}`" class="d-none d-xl-block">
-            <Button size="small"><i class="bx bx-link me-1"></i> {{ $t('cabinet.public_profile') }}</Button>
+      <div class="cab-skin__actions">
+        <div class="cab-skin__row">
+          <input type="file" ref="skin" class="d-none" accept="image/png" @change="updateSkin()" />
+          <Button class="w-100" :loading="skinLoading" :label="$t('cabinet.upload_skin')" @click="skin.click()" />
+          <Button
+            v-tooltip.top="$t('cabinet.remove_skin')"
+            severity="danger"
+            outlined
+            :loading="skinLoading"
+            :disabled="!$auth.user.skin"
+            @click="deleteSkin()"
+          >
+            <i class="bx bx-trash"></i>
+          </Button>
+        </div>
+        <div class="cab-skin__row">
+          <input type="file" ref="cloak" class="d-none" accept="image/png" @change="updateCloak()" />
+          <Button class="w-100" outlined :loading="cloakLoading" :label="$t('cabinet.upload_cloak')" @click="cloak.click()" />
+          <Button
+            v-tooltip.top="$t('cabinet.remove_cloak')"
+            severity="danger"
+            outlined
+            :loading="cloakLoading"
+            :disabled="!$auth.user.cloak"
+            @click="deleteCloak()"
+          >
+            <i class="bx bx-trash"></i>
+          </Button>
+        </div>
+      </div>
+    </CabTile>
+
+    <CabTile :title="$t('cabinet.card_balance')" icon="bx bx-wallet-alt" :span="5" accent bodyClass="cab-metrics">
+      <div class="cab-metrics__item">
+        <span class="cab-metrics__label">{{ $t('cabinet.real_balance') }}</span>
+        <span class="cab-metrics__value">{{ $utils.formatCurrency('real', $auth.user.real) }}</span>
+      </div>
+      <div class="cab-metrics__item">
+        <span class="cab-metrics__label">{{ $t('cabinet.bonuses') }}</span>
+        <span class="cab-metrics__value cab-metrics__value--soft">{{ $utils.formatCurrency('virtual', $auth.user.virtual) }}</span>
+      </div>
+      <template #footer>
+        <div class="d-flex gap-2">
+          <NuxtLink to="/cabinet/payment" class="w-100">
+            <Button class="w-100" :label="$t('cabinet.top_up')" />
+          </NuxtLink>
+          <NuxtLink to="/cabinet/history" class="w-100">
+            <Button class="w-100" outlined :label="$t('cabinet.tab_history')" />
           </NuxtLink>
         </div>
-        <table class="player-info-table w-100">
-          <tbody>
-            <tr>
-              <td>{{ $t('profile.login') }}</td>
-              <td v-text="$auth.user.username" />
-            </tr>
-            <tr>
-              <td>{{ $t('cabinet.bonus_balance') }}</td>
-              <td>{{ $utils.formatCurrency('virtual', $auth.user.virtual) }} <i class="bx bx-gift"></i></td>
-            </tr>
-            <tr>
-              <td>Email</td>
-              <td v-text="$auth.user.email || '-'" />
-            </tr>
-            <tr>
-              <td>{{ $t('profile.registered') }}</td>
-              <td v-text="$moment($auth.user.created).format('D MMMM YYYY, HH:mm')" />
-            </tr>
-            <tr>
-              <td>{{ $t('profile.account_age') }}</td>
-              <td v-text="$utils.formatDuration($moment() - $moment($auth.user.created), 'milliseconds')" />
-            </tr>
-            <tr v-if="inviter">
-              <td>{{ $t('cabinet.invited_by') }}</td>
-              <td v-text="inviter.inviter.username" />
-            </tr>
-          </tbody>
-        </table>
+      </template>
+    </CabTile>
+
+    <CabTile :title="$t('profile.account_info')" icon="bx bx-id-card" :span="5" bodyClass="cab-rows">
+      <div class="cab-rows__row">
+        <span>{{ $t('profile.login') }}</span>
+        <b v-text="$auth.user.username" />
       </div>
-    </div>
-    <hr class="my-3" />
-    <div class="row px-4">
-      <div class="col-xl-8">
-        <h2 class="m-0">{{ $t('cabinet.bans_title') }}</h2>
-        <p>{{ $t('cabinet.bans_hint') }}</p>
-        <p v-if="!$auth.user.ban" class="text-success">{{ $t('cabinet.ban_none') }}</p>
-        <p v-if="$auth.user.ban && $auth.user.ban.expires" class="text-danger">
-          {{ $t('cabinet.ban_until', { date: $moment($auth.user.expires).format('DD.MM.YYYY, HH:mm:ss') }) }}
-        </p>
-        <p v-if="$auth.user.ban && !$auth.user.ban.expires" class="text-danger">{{ $t('cabinet.ban_forever') }}</p>
+      <div class="cab-rows__row">
+        <span>Email</span>
+        <b v-text="$auth.user.email || '—'" />
       </div>
-      <div class="col-xl-4 d-flex align-items-center">
-        <Button class="w-100" size="large" :disabled="!$auth.user.ban" :loading="banLoading" @click="unabn()">
-          {{ $t('cabinet.buy_unban', { price: $utils.formatCurrency('real', config.public_unban_price) }) }}
-        </Button>
+      <div class="cab-rows__row">
+        <span>{{ $t('profile.registered') }}</span>
+        <b v-text="$moment($auth.user.created).format('D MMMM YYYY')" />
       </div>
-    </div>
-    <hr class="my-3" />
-    <div class="px-4">
-      <h2 class="m-0">{{ $t('cabinet.ingame_balances') }}</h2>
-      <p>
-        {{ $t('cabinet.ingame_balances_hint') }}
-        <NuxtLink to="/cabinet/payment">{{ $t('cabinet.tab_payment') }}</NuxtLink>
-      </p>
-      <div class="row mt-2" v-if="money">
-        <div class="col-xl-4 d-flex align-items-center mb-3" v-for="m in money" :key="m.server.id">
-          <IconAvatar :path="m.server.icon" size="xlarge" icon="bx bxs-server" />
-          <div class="ms-3">
-            <h3 class="m-0" v-text="m.server.name" />
-            <span>{{ $t('cabinet.coins', { amount: $utils.formatCurrency('ingame', m.money) }) }}</span>
+      <div class="cab-rows__row">
+        <span>{{ $t('profile.account_age') }}</span>
+        <b v-text="$utils.formatDuration($moment() - $moment($auth.user.created), 'milliseconds')" />
+      </div>
+      <div v-if="inviter" class="cab-rows__row">
+        <span>{{ $t('cabinet.invited_by') }}</span>
+        <b v-text="inviter.inviter.username" />
+      </div>
+    </CabTile>
+
+    <CabTile :title="$t('cabinet.card_privileges')" icon="bx bx-crown" :span="7">
+      <template #actions>
+        <NuxtLink to="/cabinet/donate">
+          <Button size="small" text><i class="bx bx-plus me-1"></i> {{ $t('cabinet.tab_donate') }}</Button>
+        </NuxtLink>
+      </template>
+      <div v-if="groups === null" class="cab-servers">
+        <Skeleton v-for="n in 2" :key="n" height="52px" borderRadius="14px" />
+      </div>
+      <div v-else-if="groups.length" class="cab-servers">
+        <div v-for="item in groups" :key="item.id" class="cab-servers__row">
+          <IconAvatar :path="item.group.icon" icon="bx bx-crown" />
+          <div>
+            <h4 v-text="item.group.name" />
+            <span v-text="item.server.name" />
+          </div>
+          <div class="cab-servers__value">
+            <span>{{ $t('cabinet.expires') }}</span>
+            <b>{{ item.expired ? $moment(item.expired).format('D MMMM YYYY') : $t('players.never') }}</b>
           </div>
         </div>
       </div>
-      <div class="row mt-2" v-else>
-        <div class="col-xl-4 d-flex align-items-center mb-3" v-for="(n, index) in 3" :key="index">
-          <Skeleton size="4rem"></Skeleton>
-          <div class="ms-3" style="flex: 1">
-            <Skeleton width="100%" class="mb-2"></Skeleton>
-            <Skeleton width="75%"></Skeleton>
+      <div v-else class="cab-empty">
+        <i class="bx bx-crown"></i>
+        <span>{{ $t('cabinet.privileges_empty') }}</span>
+      </div>
+    </CabTile>
+
+    <CabTile :title="$t('cabinet.ingame_balances')" icon="bx bx-coin-stack" :span="7">
+      <template #actions>
+        <NuxtLink to="/cabinet/payment">
+          <Button size="small" text><i class="bx bx-transfer me-1"></i> {{ $t('cabinet.tab_payment') }}</Button>
+        </NuxtLink>
+      </template>
+      <div v-if="money === null" class="cab-servers">
+        <Skeleton v-for="n in 3" :key="n" height="52px" borderRadius="14px" />
+      </div>
+      <div v-else-if="money.length" class="cab-servers">
+        <div v-for="m in money" :key="m.server.id" class="cab-servers__row">
+          <IconAvatar :path="m.server.icon" icon="bx bxs-server" />
+          <div>
+            <h4 v-text="m.server.name" />
+            <span v-text="m.server.id" />
+          </div>
+          <div class="cab-servers__value">
+            <b>{{ $t('cabinet.coins', { amount: $utils.formatCurrency('ingame', m.money) }) }}</b>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+      <div v-else class="cab-empty">
+        <i class="bx bxs-server"></i>
+        <span>{{ $t('cabinet.servers_empty') }}</span>
+      </div>
+    </CabTile>
+
+    <CabTile :title="$t('cabinet.bans_title')" icon="bx bxs-shield-alt-2" :span="5">
+      <span v-if="!$auth.user.ban" class="cab-status cab-status--ok"><i class="bx bx-check"></i> {{ $t('cabinet.ban_none') }}</span>
+      <span v-else-if="$auth.user.ban.expires" class="cab-status cab-status--bad">
+        <i class="bx bx-block"></i>
+        {{ $t('cabinet.ban_until', { date: $moment($auth.user.ban.expires).format('DD.MM.YYYY, HH:mm') }) }}
+      </span>
+      <span v-else class="cab-status cab-status--bad"><i class="bx bx-block"></i> {{ $t('cabinet.ban_forever') }}</span>
+      <p class="cab-sub mt-3 mb-0">{{ $t('cabinet.bans_hint') }}</p>
+      <template #footer>
+        <Button
+          class="w-100"
+          outlined
+          :disabled="!$auth.user.ban"
+          :loading="banLoading"
+          :label="$t('cabinet.buy_unban', { price: $utils.formatCurrency('real', config.public_unban_price) })"
+          @click="unabn()"
+        />
+      </template>
+    </CabTile>
+  </div>
   <ExtensionSlot name="cabinet.index" />
 </template>
 
 <script setup>
-definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'cabinet.tab_general' })
+definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'cabinet.tab_general', hint: 'cabinet.general_hint' })
 
 const { $auth, $unicore, $t } = useNuxtApp()
 
 const cabinet = useCabinet()
 const moneyApi = useMoney()
 const skinApi = useSkin()
+const donateApi = useDonate()
 
 useHead({ title: computed(() => $t('header.cabinet')) })
 const { config } = usePublicConfig()
 
 const Skin3D = ref(null)
-const SkinFront = ref(null)
-const SkinBack = ref(null)
 const skin = ref(null)
 const cloak = ref(null)
 
 const inviter = ref(null)
 const money = ref(null)
+const groups = ref(null)
 const skinLoading = ref(false)
 const cloakLoading = ref(false)
 const banLoading = ref(false)
 
 onMounted(async () => {
-  await Promise.all([Skin3D.value?.ready, SkinFront.value?.ready, SkinBack.value?.ready])
+  await Skin3D.value?.ready
 
-  Skin3D.value?.viewer?.playerObject.rotation.set(0, 0.3, 0)
+  Skin3D.value?.viewer?.playerObject.rotation.set(0, 0.5, 0)
 
-  if (SkinFront.value?.viewer) SkinFront.value.viewer.controls.enableRotate = false
+  money.value = await moneyApi.balance().catch(() => [])
+  groups.value = await donateApi.myGroups().catch(() => [])
 
-  if (SkinBack.value?.viewer) {
-    SkinBack.value.viewer.controls.enableRotate = false
-    SkinBack.value.viewer.playerObject.rotation.set(0, 3.15, 0)
-  }
-
-  money.value = await moneyApi.balance()
   try {
     inviter.value = await cabinet.inviter()
   } catch {}

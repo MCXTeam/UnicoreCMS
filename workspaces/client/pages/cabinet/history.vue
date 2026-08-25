@@ -1,21 +1,16 @@
 <template>
-  <div class="px-4">
-    <div class="row justify-content-between">
-      <div class="col-12 col-xl-7">
-        <h2 class="mt-0 mb-4">{{ $t('cabinet.tab_history') }}</h2>
-      </div>
-      <div class="col input-fw">
+  <div class="cab-grid">
+    <CabTile :title="$t('cabinet.operations')" icon="bx bx-history" :span="12">
+      <template #actions>
         <Select
-          class="mb-4 w-100"
+          class="cab-select"
           :placeholder="$t('cabinet.operation_type')"
           v-model="history_type"
           :options="typeOptions"
           optionLabel="label"
           optionValue="value"
         />
-      </div>
-    </div>
-    <div class="position-relative">
+      </template>
       <DataTable
         class="no-overflow-table large-table"
         :key="history_type"
@@ -179,7 +174,7 @@
           <span>{{ $t('cabinet.history_empty') }}</span>
         </template>
       </DataTable>
-    </div>
+    </CabTile>
   </div>
 </template>
 
@@ -188,6 +183,7 @@ definePageMeta({
   layout: 'cabinet',
   middleware: ['auth', 'verify'],
   title: 'cabinet.tab_history',
+  hint: 'cabinet.history_hint',
 })
 
 export default {

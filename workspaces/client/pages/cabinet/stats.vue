@@ -1,30 +1,29 @@
 <template>
-  <section class="px-4">
-    <h2 class="mt-0 mb-4">{{ $t('profile.server_stats') }}</h2>
-    <div v-if="playtime">
-      <div v-for="pt in playtime" :key="pt.server.id" class="d-flex align-items-center mb-4">
-        <IconAvatar :path="pt.server.icon" size="xlarge" icon="bx bxs-server" />
-        <div class="ms-4">
-          <h2 class="text-uppercase m-0" v-text="pt.server.name" />
-          <span v-if="pt.time" v-text="$utils.formatDuration(pt.time)" />
-          <span v-else>{{ $t('cabinet.never_played') }}</span>
+  <div class="cab-grid">
+    <CabTile :title="$t('profile.server_stats')" icon="bx bx-bar-chart-alt-2" :span="7">
+      <div v-if="playtime" class="cab-servers">
+        <div v-for="pt in playtime" :key="pt.server.id" class="cab-servers__row">
+          <IconAvatar :path="pt.server.icon" size="large" icon="bx bxs-server" />
+          <div>
+            <h4 v-text="pt.server.name" />
+            <span v-text="pt.server.id" />
+          </div>
+          <div class="cab-servers__value">
+            <span>{{ $t('cabinet.playtime') }}</span>
+            <b v-if="pt.time">{{ $utils.formatDuration(pt.time) }}</b>
+            <b v-else>{{ $t('cabinet.never_played') }}</b>
+          </div>
         </div>
       </div>
-    </div>
-    <div v-else>
-      <div class="d-flex align-items-center mb-3" v-for="(n, index) in 3" :key="index">
-        <Skeleton size="4rem"></Skeleton>
-        <div class="ms-3" style="flex: 1">
-          <Skeleton width="100%" class="mb-2"></Skeleton>
-          <Skeleton width="75%"></Skeleton>
-        </div>
+      <div v-else class="cab-servers">
+        <Skeleton v-for="n in 3" :key="n" height="62px" borderRadius="14px" />
       </div>
-    </div>
-  </section>
+    </CabTile>
+  </div>
 </template>
 
 <script setup>
-definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'cabinet.tab_stats' })
+definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'cabinet.tab_stats', hint: 'cabinet.stats_hint' })
 
 const { $t } = useNuxtApp()
 

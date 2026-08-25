@@ -1,47 +1,48 @@
 <template>
-  <div class="px-4">
-    <div class="d-flex justify-content-between">
-      <h2 class="mt-0 mb-4">{{ $t('store.warehouse_title') }}</h2>
-      <Select
-        v-model="server_id"
-        :options="serverOptions"
-        optionLabel="label"
-        optionValue="value"
-        :loading="!servers.length"
-        :placeholder="$t('store.choose_server')"
-        style="max-width: 150px"
-      />
-    </div>
+  <div class="cab-grid">
+    <CabTile :title="$t('store.warehouse_title')" icon="bx bx-package" :span="12">
+      <template #actions>
+        <Select
+          class="cab-select"
+          v-model="server_id"
+          :options="serverOptions"
+          optionLabel="label"
+          optionValue="value"
+          :loading="!servers.length"
+          :placeholder="$t('store.choose_server')"
+        />
+      </template>
 
-    <div class="store-table-overflow position-relative">
-      <table class="store-table" v-if="warehouse.length">
-        <tbody>
-          <tr :key="whItem.id" v-for="whItem in warehouse">
-            <td class="d-flex align-items-center">
-              <IconAvatar :path="whItem.product.icon" size="large" />
-              <div class="ms-3">
-                <h4 class="m-0">
-                  {{ whItem.product.name }} <small class="sale-wrapper ms-2">#{{ whItem.id }}</small>
-                </h4>
-                <span v-text="joinCategoryNames(whItem.product.categories)" />
-              </div>
-            </td>
-            <td align="right">
-              <small v-text="$moment(whItem.updated).format('DD.MM.YYYY, HH.mm')" />
-              <h4 class="m-0">{{ $t('store.pieces', { amount: whItem.amount }) }}</h4>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <h4 class="text-center m-0" v-else>{{ $t('store.warehouse_empty') }}</h4>
-    </div>
+      <div v-if="warehouse.length" class="cab-offers">
+        <div v-for="whItem in warehouse" :key="whItem.id" class="cab-offer">
+          <IconAvatar :path="whItem.product.icon" size="large" />
+          <div class="cab-offer__text">
+            <div class="cab-offer__name">
+              <h4 v-text="whItem.product.name" />
+              <span class="cab-badge">#{{ whItem.id }}</span>
+            </div>
+            <div class="cab-offer__price">
+              <span v-text="joinCategoryNames(whItem.product.categories)" />
+            </div>
+          </div>
+          <div class="cab-servers__value">
+            <span>{{ $moment(whItem.updated).format('DD.MM.YYYY, HH:mm') }}</span>
+            <b>{{ $t('store.pieces', { amount: whItem.amount }) }}</b>
+          </div>
+        </div>
+      </div>
+      <div v-else class="cab-empty">
+        <i class="bx bx-package"></i>
+        <span>{{ $t('store.warehouse_empty') }}</span>
+      </div>
+    </CabTile>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useUiStore } from '~/stores/ui'
 
-definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'store.tab_warehouse' })
+definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'store.tab_warehouse', hint: 'store.warehouse_hint' })
 
 const { $unicore, $t } = useNuxtApp()
 

@@ -1,82 +1,79 @@
 <template>
-  <div class="px-4">
-    <div class="d-flex justify-content-between">
-      <h2 class="mt-0 mb-4">{{ $t('store.cart_title') }}</h2>
-      <Select
-        :loading="!servers.length"
-        :key="servers.length"
-        :placeholder="$t('store.choose_server')"
-        v-model="server_id"
-        :options="serverOptions"
-        optionLabel="label"
-        optionValue="value"
-        style="max-width: 150px"
-      />
-    </div>
+  <div class="cab-grid">
+    <CabTile :title="$t('store.cart_title')" icon="bx bx-cart-alt" :span="12">
+      <template #actions>
+        <Select
+          class="cab-select"
+          :loading="!servers.length"
+          :key="servers.length"
+          :placeholder="$t('store.choose_server')"
+          v-model="server_id"
+          :options="serverOptions"
+          optionLabel="label"
+          optionValue="value"
+        />
+      </template>
 
-    <div class="store-table-overflow position-relative">
-      <table class="store-table" v-if="cart.items.length">
-        <tbody>
-          <tr :key="cartItem.id" v-for="cartItem in cart.items.filter((ci) => ci.type == 'kit')">
-            <td class="d-flex align-items-center">
-              <IconAvatar :path="cartItem.payload.kit.icon" size="large" />
-              <div class="ms-3">
-                <h4 class="m-0">
-                  {{ cartItem.payload.kit.name }} <small class="sale-wrapper ms-2">{{ $t('store.kit') }}</small>
-                  <small class="sale-wrapper ms-2" v-if="cartItem.payload.kit.sale">-{{ cartItem.payload.kit.sale }}%</small>
-                </h4>
-                <span v-text="cartItem.payload.kit.categories.map((c) => c.name).join(', ')" />
-              </div>
-            </td>
-            <td>
-              <strike
-                v-if="cartItem.payload.kit.sale"
-                v-text="$utils.formatCurrency('real', cartItem.payload.kit.price)"
-                class="me-1"
-              ></strike>
-              <span v-text="$utils.formatCurrency('real', cartItem.payload.kit.price, cartItem.payload.kit.sale)"></span>
-              <h5 class="m-0">{{ $t('store.pieces', { amount: 1 }) }}</h5>
-            </td>
-            <td align="right">
-              <Button :loading="deletingKey == `${cartItem.type}-${cartItem.payload.id}`" @click="cartDelete(cartItem)" severity="danger"
-                ><i class="bx bx-trash"></i
-              ></Button>
-            </td>
-          </tr>
-          <tr :key="cartItem.id" v-for="cartItem in cart.items.filter((ci) => ci.type == 'product')">
-            <td class="d-flex align-items-center">
-              <IconAvatar :path="cartItem.payload.product.icon" size="large" />
-              <div class="ms-3">
-                <h4 class="m-0">
-                  {{ cartItem.payload.product.name }}
-                  <small class="sale-wrapper ms-2" v-if="cartItem.payload.product.sale">-{{ cartItem.payload.product.sale }}%</small>
-                </h4>
-                <span v-text="cartItem.payload.product.categories.map((c) => c.name).join(', ')" />
-              </div>
-            </td>
-            <td>
+      <div v-if="cart.items.length" class="cab-offers">
+        <div v-for="cartItem in cartKits" :key="`kit-${cartItem.payload.id}`" class="cab-offer">
+          <IconAvatar :path="cartItem.payload.kit.icon" size="large" />
+          <div class="cab-offer__text">
+            <div class="cab-offer__name">
+              <h4 v-text="cartItem.payload.kit.name" />
+              <span class="cab-badge">{{ $t('store.kit') }}</span>
+              <span v-if="cartItem.payload.kit.sale" class="cab-badge">-{{ cartItem.payload.kit.sale }}%</span>
+            </div>
+            <div class="cab-offer__price">
+              <strike v-if="cartItem.payload.kit.sale" v-text="$utils.formatCurrency('real', cartItem.payload.kit.price)" />
+              <b>{{ $utils.formatCurrency('real', cartItem.payload.kit.price, cartItem.payload.kit.sale) }}</b>
+              <span>{{ $t('store.pieces', { amount: 1 }) }}</span>
+            </div>
+          </div>
+          <Button
+            v-tooltip.left="$t('common.delete')"
+            severity="danger"
+            text
+            :loading="deletingKey == `${cartItem.type}-${cartItem.payload.id}`"
+            @click="cartDelete(cartItem)"
+          >
+            <i class="bx bx-trash"></i>
+          </Button>
+        </div>
+
+        <div v-for="cartItem in cartProducts" :key="`product-${cartItem.payload.id}`" class="cab-offer">
+          <IconAvatar :path="cartItem.payload.product.icon" size="large" />
+          <div class="cab-offer__text">
+            <div class="cab-offer__name">
+              <h4 v-text="cartItem.payload.product.name" />
+              <span v-if="cartItem.payload.product.sale" class="cab-badge">-{{ cartItem.payload.product.sale }}%</span>
+            </div>
+            <div class="cab-offer__price">
               <strike
                 v-if="cartItem.payload.product.sale"
                 v-text="$utils.formatCurrency('real', cartItem.payload.product.price * cartItem.payload.amount)"
-                class="me-1"
-              ></strike>
-              <span
-                v-text="
-                  $utils.formatCurrency('real', cartItem.payload.product.price * cartItem.payload.amount, cartItem.payload.product.sale)
-                "
-              ></span>
-              <h5 class="m-0">{{ $t('store.pieces', { amount: cartItem.payload.amount }) }}</h5>
-            </td>
-            <td align="right">
-              <Button :loading="deletingKey == `${cartItem.type}-${cartItem.payload.id}`" @click="cartDelete(cartItem)" severity="danger"
-                ><i class="bx bx-trash"></i
-              ></Button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <h4 class="text-center m-0" v-else>{{ $t('store.cart_empty') }}</h4>
-    </div>
+              />
+              <b>
+                {{ $utils.formatCurrency('real', cartItem.payload.product.price * cartItem.payload.amount, cartItem.payload.product.sale) }}
+              </b>
+              <span>{{ $t('store.pieces', { amount: cartItem.payload.amount }) }}</span>
+            </div>
+          </div>
+          <Button
+            v-tooltip.left="$t('common.delete')"
+            severity="danger"
+            text
+            :loading="deletingKey == `${cartItem.type}-${cartItem.payload.id}`"
+            @click="cartDelete(cartItem)"
+          >
+            <i class="bx bx-trash"></i>
+          </Button>
+        </div>
+      </div>
+      <div v-else class="cab-empty">
+        <i class="bx bx-cart"></i>
+        <span>{{ $t('store.cart_empty') }}</span>
+      </div>
+    </CabTile>
   </div>
 </template>
 
@@ -87,6 +84,7 @@ definePageMeta({
   layout: 'cabinet',
   middleware: ['auth', 'verify'],
   title: 'store.tab_cart',
+  hint: 'store.cart_hint',
 })
 
 export default {
@@ -123,6 +121,12 @@ export default {
   computed: {
     serverOptions() {
       return this.servers.map((server, index) => ({ label: server.name, value: String(index) }))
+    },
+    cartKits() {
+      return this.cart.items.filter((item) => item.type == 'kit')
+    },
+    cartProducts() {
+      return this.cart.items.filter((item) => item.type == 'product')
     },
   },
 

@@ -1,7 +1,6 @@
 <template>
-  <div class="px-4">
-    <h2 class="m-0">{{ $t('players.tab_playtime') }}</h2>
-    <div>
+  <div class="cab-grid">
+    <CabTile :title="$t('players.tab_playtime')" icon="bx bx-game" :span="12">
       <DataTable
         class="no-overflow-table mt-4 large-table"
         :value="playtimes.data"
@@ -37,7 +36,7 @@
           <span>{{ $t('common.no_results') }}</span>
         </template>
       </DataTable>
-    </div>
+    </CabTile>
   </div>
 </template>
 

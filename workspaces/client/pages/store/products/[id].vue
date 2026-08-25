@@ -1,5 +1,5 @@
 <template>
-  <section class="px-4">
+  <section>
     <Dialog
       class="buy-dialog"
       v-if="product"
@@ -16,7 +16,7 @@
           <h3 class="mt-0" v-else>{{ $t('store.kit_name', { name: product.payload.name }) }}</h3>
           <IconAvatar :path="product.payload.icon" size="xlarge" />
         </div>
-    <ExtensionSlot name="store.catalog" />
+        <ExtensionSlot name="store.catalog" />
       </template>
       <div class="description-html mb-3" v-if="product.payload.description" v-html="$sanitize(product.payload.description)" />
       <div v-if="product.type == 'product'" class="mb-4">
@@ -54,7 +54,12 @@
 
       <ExtensionSlot name="store.product" :product="product" :server="server" />
 
-      <GiftPurchase :payload="giftPayload" :price="giftPrice" @done="productDialog = false" />
+      <GiftPurchase
+        :payload="giftPayload"
+        :price="giftPrice"
+        :allowed="product?.payload?.giftable !== false"
+        @done="productDialog = false"
+      />
 
       <template #footer>
         <div class="d-flex justify-content-center">
@@ -70,53 +75,56 @@
       </template>
     </Dialog>
 
-    <h2 class="mt-0 mb-4 text-center" v-if="server">{{ $t('store.catalog', { server: server.name }) }}</h2>
-    <div class="store-table-overflow position-relative">
-      <table class="store-table" v-if="products.data.length">
-        <tbody>
-          <tr :key="product.payload.id" v-for="product in products.data">
-            <td class="d-flex align-items-center">
-              <IconAvatar :path="product.payload.icon" size="large" />
-              <div class="ms-3">
-                <h4 class="m-0">
-                  {{ product.payload.name }} <small class="sale-wrapper ms-2" v-if="product.type == 'kit'">{{ $t('store.kit') }}</small>
-                  <small class="sale-wrapper ms-2" v-if="product.payload.sale">-{{ product.payload.sale }}%</small>
-                </h4>
-                <span v-text="joinCategoryNames(product.payload.categories)" />
+    <div class="cab-grid">
+      <CabTile :title="server ? $t('store.catalog', { server: server.name }) : $t('header.store')" icon="bx bx-store" :span="12">
+        <div v-if="products.data.length" class="cab-cards">
+          <button
+            v-for="product in products.data"
+            :key="`${product.type}-${product.payload.id}`"
+            type="button"
+            class="cab-card-item"
+            @click="openDialog(product)"
+          >
+            <IconAvatar :path="product.payload.icon" size="large" />
+            <div class="cab-card-item__text">
+              <div class="cab-offer__name">
+                <h4 v-text="product.payload.name" />
+                <span v-if="product.type == 'kit'" class="cab-badge">{{ $t('store.kit') }}</span>
+                <span v-if="product.payload.sale" class="cab-badge">-{{ product.payload.sale }}%</span>
               </div>
-            </td>
-            <td>
-              <strike v-if="product.payload.sale" v-text="$utils.formatCurrency('real', product.payload.price)" class="me-1"></strike>
-              <span
-                v-text="$utils.formatCurrency('real', product.payload.price * (product.payload.multiple_of || 1), product.payload.sale)"
-              ></span>
-              <h5 class="m-0" v-if="product.type == 'product'">
-                {{ $t('store.price_per', { amount: product.payload.multiple_of || 1 }) }}
-              </h5>
-            </td>
-            <td align="right">
-              <Button @click="openDialog(product)">{{ $t('store.add_to_cart') }} <i class="bx bxs-cart-add ms-1"></i></Button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <h4 class="text-center m-0" v-else>{{ $t('common.no_results') }}</h4>
+              <span class="cab-card-item__cats" v-text="joinCategoryNames(product.payload.categories)" />
+            </div>
+            <div class="cab-card-item__price">
+              <strike v-if="product.payload.sale" v-text="$utils.formatCurrency('real', product.payload.price)" />
+              <b>{{ $utils.formatCurrency('real', product.payload.price * (product.payload.multiple_of || 1), product.payload.sale) }}</b>
+              <span v-if="product.type == 'product'">{{ $t('store.price_per', { amount: product.payload.multiple_of || 1 }) }}</span>
+            </div>
+            <i class="bx bxs-cart-add cab-card-item__cart"></i>
+          </button>
+        </div>
+        <div v-else class="cab-empty">
+          <i class="bx bx-search-alt"></i>
+          <span>{{ $t('common.no_results') }}</span>
+        </div>
+
+        <template #footer>
+          <Paginator
+            v-if="products.data.length"
+            :rows="products.meta.itemsPerPage"
+            :totalRecords="products.meta.totalItems"
+            :first="(products.meta.currentPage - 1) * products.meta.itemsPerPage"
+            @page="onPage"
+          />
+        </template>
+      </CabTile>
     </div>
-    <Paginator
-      v-if="products.data.length"
-      class="mt-4"
-      :rows="products.meta.itemsPerPage"
-      :totalRecords="products.meta.totalItems"
-      :first="(products.meta.currentPage - 1) * products.meta.itemsPerPage"
-      @page="onPage"
-    />
   </section>
 </template>
 
 <script setup lang="ts">
 import { useUiStore, type StoreFilters } from '~/stores/ui'
 
-definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'header.store' })
+definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'header.store', hint: 'store.products_hint' })
 
 const { $unicore, $t } = useNuxtApp()
 
