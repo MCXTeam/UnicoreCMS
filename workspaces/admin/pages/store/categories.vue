@@ -116,7 +116,7 @@
                 v-slot="{ value, errorMessage, handleChange, handleBlur }"
               >
                 <div class="field">
-                  <label>{{ $t('admin.name') }}</label>
+                  <label>{{ $t('admin.name') }}<span class="p-error"> *</span></label>
                   <InputText
                     :modelValue="value"
                     @update:modelValue="handleChange"

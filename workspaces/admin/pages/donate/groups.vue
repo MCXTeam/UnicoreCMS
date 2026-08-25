@@ -123,7 +123,7 @@
                 v-slot="{ value, errorMessage, handleChange, handleBlur }"
               >
                 <div class="field">
-                  <label>{{ $t('admin.name') }}</label>
+                  <label>{{ $t('admin.name') }}<span class="p-error"> *</span></label>
                   <InputText
                     :modelValue="value"
                     @update:modelValue="handleChange"
@@ -141,7 +141,7 @@
                 v-slot="{ value, errorMessage, handleChange, handleBlur }"
               >
                 <div class="field">
-                  <label>{{ $t('admin.ingame_id') }}</label>
+                  <label>{{ $t('admin.ingame_id') }}<span class="p-error"> *</span></label>
                   <InputText
                     :modelValue="value"
                     @update:modelValue="handleChange"
@@ -274,7 +274,7 @@
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>{{ $t('admin.price') }}</label>
+                      <label>{{ $t('admin.price') }}<span class="p-error"> *</span></label>
                       <InputNumber
                         :modelValue="value"
                         @update:modelValue="handleChange"

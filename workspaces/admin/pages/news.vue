@@ -138,7 +138,7 @@
                 v-slot="{ value, errorMessage, handleChange }"
               >
                 <div class="field">
-                  <label>{{ $t('admin.name') }}</label>
+                  <label>{{ $t('admin.name') }}<span class="p-error"> *</span></label>
                   <InputText :modelValue="value" @update:modelValue="handleChange" autofocus />
                   <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
                 </div>
@@ -174,7 +174,7 @@
               >
                 <div class="field">
                   <div class="flex justify-content-between align-items-center mb-2">
-                    <label class="m-0">{{ $t('admin.content') }}</label>
+                    <label class="m-0">{{ $t('admin.content') }}<span class="p-error"> *</span></label>
                     <SelectButton
                       v-model="contentMode"
                       :options="contentModes"

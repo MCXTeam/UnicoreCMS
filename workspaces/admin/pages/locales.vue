@@ -88,7 +88,7 @@
           v-slot="{ value, errorMessage, handleChange }"
         >
           <div class="field">
-            <label>{{ $t('admin.key') }}</label>
+            <label>{{ $t('admin.key') }}<span class="p-error"> *</span></label>
             <InputText :modelValue="value" @update:modelValue="handleChange" class="font-mono" autofocus placeholder="header.servers" />
             <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
             <small v-else>{{ $t('admin.key_hint') }}</small>
@@ -156,7 +156,7 @@
           v-slot="{ value, errorMessage, handleChange }"
         >
           <div class="field">
-            <label>{{ $t('admin.code') }}</label>
+            <label>{{ $t('admin.code') }}<span class="p-error"> *</span></label>
             <InputText :modelValue="value" @update:modelValue="handleChange" :disabled="localeUpdateMode" class="font-mono" />
             <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
             <small v-else>{{ $t('admin.locale_code_hint') }}</small>
@@ -170,7 +170,7 @@
           v-slot="{ value, errorMessage, handleChange }"
         >
           <div class="field">
-            <label>{{ $t('admin.name') }}</label>
+            <label>{{ $t('admin.name') }}<span class="p-error"> *</span></label>
             <InputText :modelValue="value" @update:modelValue="handleChange" placeholder="Deutsch" />
             <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
             <small v-else>{{ $t('admin.locale_name_hint') }}</small>

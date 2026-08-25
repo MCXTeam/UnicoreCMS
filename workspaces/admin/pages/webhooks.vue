@@ -79,7 +79,7 @@
                 v-slot="{ value, errorMessage, handleChange, handleBlur }"
               >
                 <div class="field">
-                  <label>{{ $t('admin.name') }}</label>
+                  <label>{{ $t('admin.name') }}<span class="p-error"> *</span></label>
                   <InputText :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" />
                   <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
                 </div>
@@ -92,7 +92,7 @@
                 v-slot="{ value, errorMessage, handleChange }"
               >
                 <div class="field">
-                  <label>{{ $t('admin.event') }}</label>
+                  <label>{{ $t('admin.event') }}<span class="p-error"> *</span></label>
                   <Select :modelValue="value" @update:modelValue="handleChange" :options="list" optionLabel="id" appendTo="body">
                     <template #option="slotProps">
                       <p class="mb-1">{{ slotProps.option.id }}</p>
@@ -111,7 +111,7 @@
                 v-slot="{ value, errorMessage, handleChange }"
               >
                 <div class="field">
-                  <label>{{ $t('admin.format') }}</label>
+                  <label>{{ $t('admin.format') }}<span class="p-error"> *</span></label>
                   <Select
                     :modelValue="value"
                     @update:modelValue="handleChange"
@@ -135,7 +135,7 @@
                 v-slot="{ value, errorMessage, handleChange, handleBlur }"
               >
                 <div class="field">
-                  <label>URL</label>
+                  <label>URL<span class="p-error"> *</span></label>
                   <InputText :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" />
                   <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
                 </div>
@@ -149,7 +149,7 @@
                 v-slot="{ value, errorMessage, handleChange, handleBlur }"
               >
                 <div class="field">
-                  <label>{{ $t('admin.webhook_target') }}</label>
+                  <label>{{ $t('admin.webhook_target') }}<span class="p-error"> *</span></label>
                   <InputText
                     :modelValue="value"
                     @update:modelValue="handleChange"

@@ -78,7 +78,7 @@
                 v-slot="{ value, errorMessage, handleChange }"
               >
                 <div class="field">
-                  <label>{{ $t('admin.path') }}</label>
+                  <label>{{ $t('admin.path') }}<span class="p-error"> *</span></label>
                   <InputText :modelValue="value" @update:modelValue="handleChange" autofocus />
                   <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
                 </div>
@@ -91,7 +91,7 @@
                 v-slot="{ value, errorMessage, handleChange }"
               >
                 <div class="field">
-                  <label>{{ $t('admin.heading') }}</label>
+                  <label>{{ $t('admin.heading') }}<span class="p-error"> *</span></label>
                   <InputText :modelValue="value" @update:modelValue="handleChange" />
                   <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
                 </div>

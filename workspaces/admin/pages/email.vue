@@ -44,7 +44,7 @@
                 v-slot="{ value, errorMessage, handleChange }"
               >
                 <div class="field">
-                  <label>{{ $t('admin.heading') }}</label>
+                  <label>{{ $t('admin.heading') }}<span class="p-error"> *</span></label>
                   <InputText :modelValue="value" @update:modelValue="handleChange" />
                   <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
                 </div>
@@ -78,7 +78,7 @@
           >
             <VeeField v-model="test.email" name="email" label="Email" rules="required|email" v-slot="{ value, errorMessage, handleChange }">
               <div class="field">
-                <label>Email</label>
+                <label>Email<span class="p-error"> *</span></label>
                 <InputText :modelValue="value" @update:modelValue="handleChange" />
                 <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>

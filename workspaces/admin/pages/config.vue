@@ -58,7 +58,7 @@
               v-slot="{ value, errorMessage, handleChange }"
             >
               <div class="field">
-                <label>{{ $t('admin.key') }}</label>
+                <label>{{ $t('admin.key') }}<span class="p-error"> *</span></label>
                 <InputText :disabled="updateMode" :modelValue="value" @update:modelValue="handleChange" />
                 <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
@@ -71,7 +71,7 @@
               v-slot="{ value, errorMessage, handleChange }"
             >
               <div class="field">
-                <label>{{ $t('admin.type') }}</label>
+                <label>{{ $t('admin.type') }}<span class="p-error"> *</span></label>
                 <Select
                   :disabled="cfgField.important"
                   :modelValue="value"

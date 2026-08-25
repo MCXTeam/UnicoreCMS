@@ -366,7 +366,7 @@
                 v-slot="{ value, errorMessage, handleChange, handleBlur }"
               >
                 <div class="field">
-                  <label>{{ $t('admin.name') }}</label>
+                  <label>{{ $t('admin.name') }}<span class="p-error"> *</span></label>
                   <InputText
                     :modelValue="value"
                     @update:modelValue="handleChange"
@@ -385,7 +385,7 @@
                 v-slot="{ value, errorMessage, handleChange }"
               >
                 <div class="field">
-                  <label>{{ $t('admin.type') }}</label>
+                  <label>{{ $t('admin.type') }}<span class="p-error"> *</span></label>
                   <Select
                     :modelValue="value"
                     @update:modelValue="handleChange"
@@ -406,7 +406,7 @@
                 v-slot="{ value, errorMessage, handleChange, handleBlur }"
               >
                 <div class="field">
-                  <label>{{ $t('admin.item_id') }}</label>
+                  <label>{{ $t('admin.item_id') }}<span class="p-error"> *</span></label>
                   <InputText
                     :modelValue="value"
                     @update:modelValue="handleChange"
@@ -429,7 +429,7 @@
                 v-slot="{ value, errorMessage, handleChange }"
               >
                 <div class="field">
-                  <label>{{ $t('admin.commands') }}</label>
+                  <label>{{ $t('admin.commands') }}<span class="p-error"> *</span></label>
                   <InputChips :modelValue="value" @update:modelValue="handleChange" />
                   <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
                   <Divider align="left" type="dashed">
@@ -532,7 +532,7 @@
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>{{ $t('admin.price') }}</label>
+                      <label>{{ $t('admin.price') }}<span class="p-error"> *</span></label>
                       <InputNumber
                         :modelValue="value"
                         @update:modelValue="handleChange"

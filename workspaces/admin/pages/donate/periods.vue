@@ -81,7 +81,7 @@
                 v-slot="{ value, errorMessage, handleChange, handleBlur }"
               >
                 <div class="field">
-                  <label>{{ $t('admin.name') }}</label>
+                  <label>{{ $t('admin.name') }}<span class="p-error"> *</span></label>
                   <InputText
                     :modelValue="value"
                     @update:modelValue="handleChange"
@@ -99,7 +99,7 @@
                 v-slot="{ value, errorMessage, handleChange, handleBlur }"
               >
                 <div class="field">
-                  <label>{{ $t('admin.period_seconds_hint') }}</label>
+                  <label>{{ $t('admin.period_seconds_hint') }}<span class="p-error"> *</span></label>
                   <InputNumber
                     :modelValue="value"
                     @update:modelValue="handleChange"

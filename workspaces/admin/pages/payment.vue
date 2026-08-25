@@ -93,7 +93,7 @@
               v-slot="{ value, errorMessage, handleChange }"
             >
               <div class="field">
-                <label>{{ $t('admin.payment_amount_hint') }}</label>
+                <label>{{ $t('admin.payment_amount_hint') }}<span class="p-error"> *</span></label>
                 <InputNumber
                   :modelValue="value"
                   @update:modelValue="handleChange"
@@ -113,7 +113,7 @@
               v-slot="{ value, errorMessage, handleChange }"
             >
               <div class="field">
-                <label>{{ $t('admin.payment_bonus') }}</label>
+                <label>{{ $t('admin.payment_bonus') }}<span class="p-error"> *</span></label>
                 <InputNumber :modelValue="value" @update:modelValue="handleChange" @input="handleChange($event.value)" suffix="%" />
                 <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>

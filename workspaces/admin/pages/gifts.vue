@@ -97,7 +97,7 @@
                 v-slot="{ value, errorMessage, handleChange, handleBlur }"
               >
                 <div class="field">
-                  <label>{{ $t('admin.promocode') }}</label>
+                  <label>{{ $t('admin.promocode') }}<span class="p-error"> *</span></label>
                   <InputText
                     :modelValue="value"
                     @update:modelValue="handleChange"
@@ -140,7 +140,7 @@
                 v-slot="{ value, errorMessage, handleChange }"
               >
                 <div class="field">
-                  <label>{{ $t('admin.type') }}</label>
+                  <label>{{ $t('admin.type') }}<span class="p-error"> *</span></label>
                   <Select :modelValue="value" @update:modelValue="handleChange" :options="types" optionLabel="name" appendTo="body" />
                   <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
                 </div>
@@ -289,7 +289,7 @@
                   v-slot="{ value, errorMessage, handleChange, handleBlur }"
                 >
                   <div class="field">
-                    <label>{{ $t('admin.quantity') }}</label>
+                    <label>{{ $t('admin.quantity') }}<span class="p-error"> *</span></label>
                     <InputNumber
                       :modelValue="value"
                       @update:modelValue="handleChange"
