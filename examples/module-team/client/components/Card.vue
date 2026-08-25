@@ -29,8 +29,8 @@ const labelStyle = computed(() => (props.member.color ? { color: props.member.co
 .team-card {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 14px 16px;
+  gap: 12px;
+  padding: 12px 14px;
   border-radius: 16px;
   background: rgba(var(--vs-text), 0.04);
   transition: background 160ms;
@@ -49,17 +49,20 @@ const labelStyle = computed(() => (props.member.color ? { color: props.member.co
 .team-card__name {
   margin: 0;
   font-size: 15px;
+  line-height: 1.3;
   overflow-wrap: anywhere;
 }
 .team-card__label {
   display: block;
   font-size: 13px;
   font-weight: 600;
+  line-height: 1.35;
   color: rgb(var(--vs-primary));
 }
 .team-card__note {
-  margin: 4px 0 0;
+  margin: 3px 0 0;
   font-size: 13px;
+  line-height: 1.45;
   color: rgba(var(--vs-text), 0.6);
   overflow-wrap: anywhere;
 }
