@@ -54,13 +54,13 @@
       />
       <template #footer>
         <div class="d-flex justify-content-center" v-if="donate.period && !donate.gift_only">
-          <Button v-if="donate.use_virtual" size="large" @click="buyGroup()" text>
+          <Button v-if="donate.use_virtual" size="large" @click="buyGroup()">
             {{ $t('cabinet.buy_for') }} &nbsp;<small
               ><strike>{{ $utils.formatCurrency('real', calcGroupPrice()) }}</strike></small
             >
             &nbsp;{{ $utils.formatCurrency('real', calcGroupPrice() - calcGroupVirtSale()) }}
           </Button>
-          <Button v-else size="large" @click="buyGroup()" text>
+          <Button v-else size="large" @click="buyGroup()">
             {{ $t('cabinet.buy_for') }} {{ $utils.formatCurrency('real', calcGroupPrice()) }}
           </Button>
         </div>
@@ -143,13 +143,13 @@
       />
       <template #footer>
         <div class="d-flex justify-content-center" v-if="permission.period && !permission.gift_only">
-          <Button v-if="permission.use_virtual" size="large" @click="buyPermission()" text>
+          <Button v-if="permission.use_virtual" size="large" @click="buyPermission()">
             {{ $t('cabinet.buy_for') }} &nbsp;<small
               ><strike>{{ $utils.formatCurrency('real', calcPermissionPrice()) }}</strike></small
             >
             &nbsp;{{ $utils.formatCurrency('real', calcPermissionPrice() - calcPermissionVirtSale()) }}
           </Button>
-          <Button v-else size="large" @click="buyPermission()" text>
+          <Button v-else size="large" @click="buyPermission()">
             {{ $t('cabinet.buy_for') }} {{ $utils.formatCurrency('real', calcPermissionPrice()) }}
           </Button>
         </div>
