@@ -37,7 +37,7 @@
 <script>
 import { useToast } from 'primevue/usetoast'
 
-const STEP_KEYS = ['dependencies', 'rebuild', 'restart']
+const STEP_KEYS = ['dependencies', 'enable', 'rebuild', 'restart']
 
 export default {
   emits: ['installed'],

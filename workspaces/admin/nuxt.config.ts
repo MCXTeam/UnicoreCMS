@@ -46,6 +46,7 @@ export default defineNuxtConfig({
     'primeicons/primeicons.css',
     'primeflex/primeflex.css',
     'unicore-common/styles/role-badge.css',
+    'unicore-common/styles/toast.css',
     '~/assets/fonts/main.scss',
     '~/assets/styles/layout.scss',
   ],

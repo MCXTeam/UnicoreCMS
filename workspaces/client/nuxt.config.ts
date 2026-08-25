@@ -58,6 +58,7 @@ export default defineNuxtConfig({
     'bootstrap/dist/css/bootstrap-utilities.css',
     'nprogress/nprogress.css',
     'unicore-common/styles/role-badge.css',
+    'unicore-common/styles/toast.css',
     '~/assets/style/main.scss',
     '~/assets/fonts/main.scss',
   ],

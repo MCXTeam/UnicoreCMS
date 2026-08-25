@@ -21,7 +21,7 @@ export class WebhookInput {
 
   @ValidateIf((input: WebhookInput) => webhookChannelNeeds(input.request, 'url'))
   @IsOptional()
-  @IsUrl()
+  @IsUrl({ protocols: ['http', 'https'], require_protocol: true })
   @MaxLength(TOKEN_MAX_LENGTH)
   url?: string;
 

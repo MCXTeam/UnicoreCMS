@@ -4,6 +4,7 @@ export interface InstallSteps {
   dependencies: boolean;
   rebuild: boolean;
   restart: boolean;
+  enable: boolean;
 }
 
 export class InstallResultDto {

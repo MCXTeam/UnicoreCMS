@@ -136,7 +136,13 @@
               >
                 <div class="field">
                   <label>URL<span class="p-error"> *</span></label>
-                  <InputText :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" />
+                  <InputText
+                    :modelValue="value"
+                    @update:modelValue="handleChange"
+                    @blur="handleBlur"
+                    :placeholder="webhook.request === 'discord' ? 'https://discord.com/api/webhooks/…' : 'https://example.com/hook'"
+                  />
+                  <small>{{ webhook.request === 'discord' ? $t('admin.webhook_url_discord') : $t('admin.webhook_url_json') }}</small>
                   <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
                 </div>
               </VeeField>

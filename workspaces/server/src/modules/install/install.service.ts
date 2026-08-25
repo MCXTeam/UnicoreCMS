@@ -19,7 +19,7 @@ import { ExtensionKind, extractArchive, readExtensionArchive } from './archive';
 import { InstallResultDto } from '../dto/install-result.dto';
 import { ModulesService } from '../modules.service';
 import { activeThemeId, readThemesState, ThemeSide, writeThemesState } from '../runtime/themes';
-import { discover } from '../runtime/discovery';
+import { discover, readState, writeState } from '../runtime/discovery';
 
 @Injectable()
 export class InstallService {
@@ -54,6 +54,10 @@ export class InstallService {
       rmSync(temp, { recursive: true, force: true });
     }
 
+    const fresh = content.kind === 'module' && !previous;
+
+    if (fresh) this.installDisabled(manifest.id, manifest.version);
+
     this.logger.log(
       `${content.kind === 'module' ? 'Модуль' : 'Тема'} ${manifest.id} ${manifest.version} ${previous ? 'обновлён' : 'установлен'}`,
     );
@@ -64,7 +68,7 @@ export class InstallService {
       name: manifest.name as LocalizedText,
       version: manifest.version,
       previousVersion: previous,
-      steps: this.steps(content.kind, manifest, target),
+      steps: this.steps(content.kind, manifest, target, fresh),
     });
   }
 
@@ -156,13 +160,22 @@ export class InstallService {
     rmSync(backup, { recursive: true, force: true });
   }
 
-  private steps(kind: ExtensionKind, manifest: ModuleManifest | ThemeManifest, target: string) {
+  private installDisabled(id: string, version: string): void {
+    const state = readState();
+
+    state[id] = { ...(state[id] || {}), enabled: false, installedVersion: version };
+
+    writeState(state);
+  }
+
+  private steps(kind: ExtensionKind, manifest: ModuleManifest | ThemeManifest, target: string, fresh: boolean) {
     const module = kind === 'module' ? (manifest as ModuleManifest) : null;
 
     return {
       dependencies: this.hasDependencies(target),
       rebuild: kind === 'theme' || Boolean(module?.client || module?.admin),
       restart: kind === 'module',
+      enable: fresh,
     };
   }
 
