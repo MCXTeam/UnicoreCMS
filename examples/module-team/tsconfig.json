@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2021",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "outDir": "server",
+    "resolveJsonModule": true
+  },
+  "include": [
+    "server-src"
+  ]
+}

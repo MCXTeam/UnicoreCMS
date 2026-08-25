@@ -1,0 +1,50 @@
+{
+  "id": "team",
+  "name": {
+    "ru": "Команда проекта",
+    "en": "Project team"
+  },
+  "description": {
+    "ru": "Страница с составом команды: группы, участники, роли и описания",
+    "en": "A page with the project team: groups, members, roles and notes"
+  },
+  "version": "1.0.0",
+  "unicoreApi": "^1.4.0",
+  "author": "UnicoreCMS",
+  "license": "MIT",
+  "server": "./server/index.js",
+  "locales": "./locales",
+  "componentPrefix": "ModTeam",
+  "permissions": [
+    "mod.team.read",
+    "mod.team.write"
+  ],
+  "config": [
+    {
+      "key": "title",
+      "type": "string",
+      "default": "Команда проекта",
+      "public": true,
+      "label": "mod.team.config_title",
+      "hint": "mod.team.config_title_hint"
+    },
+    {
+      "key": "subtitle",
+      "type": "string",
+      "default": "Люди, которые делают проект",
+      "public": true,
+      "label": "mod.team.config_subtitle",
+      "hint": "mod.team.config_subtitle_hint"
+    },
+    {
+      "key": "global",
+      "type": "string",
+      "default": "На всех серверах",
+      "public": true,
+      "label": "mod.team.config_global",
+      "hint": "mod.team.config_global_hint"
+    }
+  ],
+  "client": "./client",
+  "admin": "./admin"
+}

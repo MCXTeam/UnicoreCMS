@@ -1,0 +1,19 @@
+{
+  "mod.team.config_global": "Shared section heading",
+  "mod.team.config_global_hint": "The title of the section with holders of staff site roles — those are not bound to a server.",
+  "mod.team.config_subtitle": "Subheading",
+  "mod.team.config_subtitle_hint": "The line under the heading. Empty means no line.",
+  "mod.team.config_title": "Page heading",
+  "mod.team.config_title_hint": "The large heading at the top of the team page.",
+  "mod.team.empty": "The team is empty",
+  "mod.team.empty_hint": "Mark a role or a privilege as staff and its holders show up here.",
+  "mod.team.member_label": "Role",
+  "mod.team.member_note": "Note",
+  "mod.team.member_note_hint": "The line under the role: what the person does. Empty means no line.",
+  "mod.team.member_username": "Player",
+  "mod.team.note_saved": "Note saved",
+  "mod.team.page_title": "Project team",
+  "mod.team.source_hint": "The team is taken from site roles and privileges marked as staff. Here you can only add a note about a person.",
+  "mod.team.title": "Team",
+  "mod.team.translations": "Translations"
+}
