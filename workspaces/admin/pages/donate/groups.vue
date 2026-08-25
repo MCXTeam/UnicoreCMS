@@ -339,6 +339,20 @@
                 <Checkbox :binary="true" v-model="group.giftable" inputId="group-giftable" />
                 <label for="group-giftable">{{ $t('admin.giftable') }}</label>
               </div>
+              <div class="field-checkbox">
+                <Checkbox :binary="true" v-model="group.staff" inputId="group-staff" />
+                <label for="group-staff" class="flex align-items-center gap-1">
+                  {{ $t('admin.staff') }}
+                  <i v-tooltip.right="$t('admin.staff_group_hint')" class="pi pi-question-circle text-color-secondary" />
+                </label>
+              </div>
+              <ColorField
+                v-if="group.staff"
+                v-model="group.color"
+                :label="$t('admin.staff_color')"
+                :hint="$t('admin.staff_color_hint')"
+                :placeholder="$t('admin.role_color_empty')"
+              />
             </template>
 
             <template #translation>
@@ -415,6 +429,8 @@ export default {
         periods: [],
         virtual_percent: null,
         giftable: true,
+        staff: false,
+        color: null,
       },
       groupDialog: false,
       section: 'main',
@@ -548,6 +564,8 @@ export default {
           periods: [],
           virtual_percent: null,
         giftable: true,
+        staff: false,
+        color: null,
         }
       }
       this.translations.attach(this.group)

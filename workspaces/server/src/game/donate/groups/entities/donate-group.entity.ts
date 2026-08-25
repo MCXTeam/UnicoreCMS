@@ -1,4 +1,5 @@
 import { MONEY_PRECISION, MONEY_SCALE, StorageManager, decimalColumn } from '@common';
+import { ROLE_COLOR_MAX_LENGTH } from 'unicore-common';
 import { Server } from 'src/game/servers/entities/server.entity';
 import { AfterRemove, Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Period } from '../../entities/period.entity';
@@ -22,6 +23,12 @@ export class DonateGroup {
 
   @Column({ name: 'giftable', default: true })
   giftable: boolean;
+
+  @Column({ name: 'staff', default: false })
+  staff: boolean;
+
+  @Column({ name: 'color', length: ROLE_COLOR_MAX_LENGTH, nullable: true })
+  color: string;
 
   @Column({ name: 'priority', nullable: true })
   priority?: number;

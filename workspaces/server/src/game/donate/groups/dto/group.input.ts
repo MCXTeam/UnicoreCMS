@@ -4,6 +4,7 @@ import {
   IsArray,
   IsBoolean,
   IsDefined,
+  IsHexColor,
   IsInt,
   IsNumber,
   IsOptional,
@@ -86,4 +87,11 @@ export class GroupInput {
   @IsBoolean()
   giftable?: boolean;
 
+  @IsOptional()
+  @IsBoolean()
+  staff?: boolean;
+
+  @IsOptional()
+  @IsHexColor()
+  color?: string;
 }

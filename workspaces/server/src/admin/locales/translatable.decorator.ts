@@ -1,26 +1,15 @@
-export interface TranslatableMeta {
-  entity: string;
-  paths: string[];
-}
+import { contentTranslationPermissions } from 'unicore-common';
+import { Translatable, TranslatableMeta, translatableByEntity, translatableOf } from 'unicore-api';
 
-const byTarget = new Map<Function, TranslatableMeta>();
-const byEntity = new Map<string, TranslatableMeta>();
+export { Translatable, translatableByEntity, translatableOf };
+export type { TranslatableMeta };
 
-export function Translatable(entity: string, paths: string[]): ClassDecorator {
-  return (target) => {
-    const meta: TranslatableMeta = { entity, paths };
+export function translationAccess(entity: string, mode: 'read' | 'write'): string[] {
+  const core = contentTranslationPermissions(entity, mode);
 
-    byTarget.set(target as unknown as Function, meta);
-    byEntity.set(entity, meta);
-  };
-}
+  if (core.length) return core;
 
-export function translatableOf(target: Function): TranslatableMeta | undefined {
-  return byTarget.get(target);
-}
-
-export function translatableByEntity(entity: string): TranslatableMeta | undefined {
-  return byEntity.get(entity);
+  return translatableByEntity(entity)?.access?.[mode] || [];
 }
 
 export function isAllowedPath(meta: TranslatableMeta, path: string): boolean {

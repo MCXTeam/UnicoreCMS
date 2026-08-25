@@ -143,3 +143,5 @@ export const resolveLayers = (options: ResolveLayersOptions): ResolvedLayers => 
     problems,
   }
 }
+
+export * from './guard'

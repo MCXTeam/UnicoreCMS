@@ -5,11 +5,12 @@ import { ModulesController } from './modules.controller';
 import { ModulesService } from './modules.service';
 import { InstallController } from './install/install.controller';
 import { InstallService } from './install/install.service';
+import { RebuildService } from './rebuild.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([ModuleRecord])],
   controllers: [ModulesController, InstallController],
-  providers: [ModulesService, InstallService],
+  providers: [ModulesService, InstallService, RebuildService],
   exports: [ModulesService],
 })
 export class ModulesModule {}

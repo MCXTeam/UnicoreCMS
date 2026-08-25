@@ -77,6 +77,7 @@ export class RolesService {
 
   private applyAppearance(role: Role, input: RoleUpdateInput): void {
     role.color = input.color ?? null;
+    role.staff = Boolean(input.staff);
     role.badge = !!input.badge;
     role.badge_color = input.badge_color ?? null;
     role.badge_background = input.badge_background ?? null;

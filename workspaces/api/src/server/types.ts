@@ -1,5 +1,11 @@
 import type { DataSource } from 'typeorm'
+import type { RoleAppearance } from 'unicore-common'
 import type { WebhookPost } from './webhook'
+
+export interface SkinRecord {
+  file: string
+  slim?: boolean
+}
 
 export interface UserRecord {
   uuid: string
@@ -8,6 +14,9 @@ export interface UserRecord {
   activated: boolean
   superuser: boolean
   perms: string[]
+  skin?: SkinRecord | null
+  cloak?: SkinRecord | null
+  role?: (RoleAppearance & { id?: string }) | null
 }
 
 export interface IssuanceTarget {
@@ -44,6 +53,7 @@ export interface UsersApi {
   getById(uuid: string): Promise<UserRecord | null>
   getByUsername(username: string): Promise<UserRecord | null>
   getByEmail(email: string): Promise<UserRecord | null>
+  search(query: string, limit?: number): Promise<UserRecord[]>
   perms(uuid: string): Promise<string[]>
 }
 
@@ -88,6 +98,21 @@ export interface ServersApi {
   all(): Promise<ServerRecord[]>
   one(id: string | number): Promise<ServerRecord | null>
   online(): Promise<ServerOnline[]>
+}
+
+export interface StaffMember {
+  uuid: string
+  username: string
+  label: string
+  color: string | null
+  serverId: string | null
+  priority: number
+  skin?: SkinRecord | null
+  cloak?: SkinRecord | null
+}
+
+export interface StaffApi {
+  members(): Promise<StaffMember[]>
 }
 
 export interface MoneyApi {
@@ -148,6 +173,7 @@ export interface CoreApi {
   locales: LocalesApi
   issuance: IssuanceApi
   servers: ServersApi
+  staff: StaffApi
   money: MoneyApi
   payments: PaymentsApi
   webhooks: WebhooksApi

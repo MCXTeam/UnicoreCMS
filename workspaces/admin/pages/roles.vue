@@ -144,6 +144,13 @@
               :placeholder="$t('admin.role_color_empty')"
             />
             <div class="field-checkbox">
+              <Checkbox :binary="true" inputId="role_staff" v-model="role.staff" />
+              <label for="role_staff" class="flex align-items-center gap-1">
+                {{ $t('admin.staff') }}
+                <i v-tooltip.right="$t('admin.staff_role_hint')" class="pi pi-question-circle text-color-secondary" />
+              </label>
+            </div>
+            <div class="field-checkbox">
               <Checkbox :binary="true" inputId="role_badge" v-model="role.badge" />
               <label for="role_badge" class="flex align-items-center gap-1">
                 {{ $t('admin.role_badge') }}
@@ -260,6 +267,7 @@ export default {
         priority: 0,
         perms: [],
         color: null,
+        staff: false,
         badge: false,
         badge_color: null,
         badge_background: null,
@@ -322,6 +330,7 @@ export default {
           priority: 0,
           perms: [],
           color: null,
+          staff: false,
           badge: false,
           badge_color: null,
           badge_background: null,

@@ -1,7 +1,8 @@
 import { Body, Controller, ForbiddenException, Get, Param, Patch, Req } from '@nestjs/common';
-import { contentTranslationPermissions, Permission } from 'unicore-common';
+import { Permission } from 'unicore-common';
 import { RuntimePermissions } from '../roles/decorators/permission.decorator';
 import { matchPermission } from '../roles/guards/permisson.guard';
+import { translationAccess } from './translatable.decorator';
 import { ContentTranslationsService } from './content-translations.service';
 import { ContentTranslationsInput } from './dto/content-translations.input';
 
@@ -11,7 +12,7 @@ export class ContentTranslationsController {
   constructor(private contentTranslations: ContentTranslationsService) {}
 
   private async assertAccess(request: any, entity: string, mode: 'read' | 'write'): Promise<void> {
-    const permissions = contentTranslationPermissions(entity, mode);
+    const permissions = translationAccess(entity, mode);
 
     if (!permissions.length) throw new ForbiddenException();
 

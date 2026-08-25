@@ -265,6 +265,8 @@ export class DonateGroupsService {
     group.features = input.features.map((feature) => Object.assign(new GroupFeature(), feature));
     group.virtual_percent = input.virtual_percent;
     group.giftable = input.giftable !== false;
+    group.staff = Boolean(input.staff);
+    group.color = input.color ?? null;
 
     group.servers = await this.serversRepository.findBy({
       id: In(input.servers),
@@ -311,6 +313,8 @@ export class DonateGroupsService {
     group.features = input.features.map((feature) => Object.assign(new GroupFeature(), feature));
     group.virtual_percent = input.virtual_percent;
     group.giftable = input.giftable !== false;
+    group.staff = Boolean(input.staff);
+    group.color = input.color ?? null;
 
     group.servers = await this.serversRepository.findBy({
       id: In(input.servers),

@@ -39,6 +39,8 @@ export const projectRoot = dirname(envFilePath);
 export const storagePath = resolve(projectRoot, "storage");
 export const modulesPath = resolve(projectRoot, "modules");
 export const themesPath = resolve(projectRoot, "themes");
+export const clientPath = resolve(projectRoot, "workspaces", "client");
+export const adminPath = resolve(projectRoot, "workspaces", "admin");
 
 export const loadEnvFile = (): void => {
   config({ path: envFilePath });

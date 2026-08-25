@@ -20,11 +20,11 @@ function write(target: Record<string, any> | null, path: string, value: any) {
   if (node) node[last] = value
 }
 
-export function useContentTranslations(entity: string) {
+export function useContentTranslations(entity: string, fieldSpec?: TranslatableField[]) {
   const { $api } = useNuxtApp()
   const locales = useLocales()
   const defaultLocale = useDefaultLocale()
-  const spec = TRANSLATABLE_FIELDS[entity] || []
+  const spec = fieldSpec || TRANSLATABLE_FIELDS[entity] || []
 
   const locale = ref(defaultLocale.value)
   const map = ref<TranslationsMap>({})

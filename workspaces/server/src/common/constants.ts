@@ -131,6 +131,14 @@ export const DEFAULT_CLOAK_FILE = 'default/cloak.png';
 export const KERNEL_USERNAME = 'Kernel';
 
 export const PUBLIC_USERS_PAGE_SIZE = 1000;
+
+export const REBUILD_LOG_LINES = 300;
+
+export const REBUILD_BUILD_SCRIPT = 'build.mjs';
+
+export const USER_SEARCH_LIMIT = 10;
+
+export const USER_SEARCH_MAX_LIMIT = 50;
 export const PUBLIC_USERS_CACHE_TTL_MS = 60_000;
 export const THROTTLE_PUBLIC_USERS = { ttl: 60_000, limit: 30 };
 

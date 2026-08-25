@@ -23,6 +23,8 @@ import {
   KERNEL_USERNAME,
   PUBLIC_USERS_CACHE_TTL_MS,
   PUBLIC_USERS_PAGE_SIZE,
+  USER_SEARCH_LIMIT,
+  USER_SEARCH_MAX_LIMIT,
 } from '@common';
 import { PublicUsersDto } from './dto/public-users.dto';
 import { UserUpdateInput } from './dto/user-update.input';
@@ -163,6 +165,24 @@ export class UsersService {
     const user = await this.usersRepository.findOne({ where: { email }, relations });
     if (!user) return null;
     return this.rolesModificator(user);
+  }
+
+  @Transactional()
+  async search(query: string, limit = USER_SEARCH_LIMIT): Promise<User[]> {
+    const term = query.trim();
+
+    if (!term) return [];
+
+    return this.usersRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.skin', 'skin')
+      .leftJoinAndSelect('user.cloak', 'cloak')
+      .leftJoinAndSelect('user.roles', 'roles')
+      .where('user.username LIKE :term', { term: `%${term}%` })
+      .andWhere('user.username != :kernel', { kernel: KERNEL_USERNAME })
+      .orderBy('user.username', 'ASC')
+      .take(Math.min(Math.max(limit, 1), USER_SEARCH_MAX_LIMIT))
+      .getMany();
   }
 
   @Transactional()

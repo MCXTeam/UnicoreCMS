@@ -1,14 +1,17 @@
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { Global, Inject, Injectable, Logger, Module, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { DataSource } from 'typeorm';
 import { API_VERSION, capabilities, events, setCore } from 'unicore-api';
-import type { CoreApi, LoggerApi } from 'unicore-api';
+import type { CoreApi, LoggerApi, StaffMember, UserRecord } from 'unicore-api';
 import { formatError, stdout } from '@common';
 import { StorageManager } from 'src/common/storage/storage.class';
 import { ConfigService } from 'src/admin/config/config.service';
 import { LocalesService } from 'src/admin/locales/locales.service';
 import { UsersService } from 'src/admin/users/users.service';
+import { User } from 'src/admin/users/entities/user.entity';
+import { roleAppearanceRecord } from 'src/admin/roles/dto/role-appearance.dto';
 import { IssuanceService } from 'src/game/servers/rcon/issuance.service';
 import { RconService } from 'src/game/servers/rcon/rcon.service';
 import { RconModule } from 'src/game/servers/rcon/rcon.module';
@@ -28,6 +31,10 @@ import { Webhook } from 'src/admin/webhook/entities/webhook.entity';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigModule } from 'src/admin/config/config.module';
 import UsersModule from 'src/admin/users/users.module';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, IsNull, MoreThan } from 'typeorm';
+import { Role } from 'src/admin/roles/entities/role.entity';
+import { UsersDonateGroup } from 'src/game/donate/groups/entities/user-donate.entity';
 import { CORE_CAPABILITIES } from './capabilities';
 import { moduleRuntime } from './runtime';
 
@@ -50,6 +57,8 @@ export class ApiHostService implements OnApplicationBootstrap, OnApplicationShut
     private readonly webhookDeliveries: WebhookDeliveriesService,
     private readonly mailerService: MailerService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+    @InjectRepository(Role) private readonly roles: Repository<Role>,
+    @InjectRepository(UsersDonateGroup) private readonly userGroups: Repository<UsersDonateGroup>,
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
@@ -95,6 +104,59 @@ export class ApiHostService implements OnApplicationBootstrap, OnApplicationShut
     };
   }
 
+  private userRecord(user: User | null): UserRecord | null {
+    if (!user) return null;
+
+    return {
+      uuid: user.uuid,
+      username: user.username,
+      email: user.email,
+      activated: Boolean(user.activated),
+      superuser: Boolean(user.superuser),
+      perms: user.perms || [],
+      skin: user.skin ? { file: user.skin.file, slim: Boolean(user.skin.slim) } : null,
+      cloak: user.cloak ? { file: user.cloak.file } : null,
+      role: roleAppearanceRecord(user.roles),
+    };
+  }
+
+  private async staffMembers(): Promise<StaffMember[]> {
+    const [roles, granted] = await Promise.all([
+      this.roles.find({ where: { staff: true }, relations: ['users'] }),
+      this.userGroups.find({ where: [{ expired: IsNull() }, { expired: MoreThan(new Date()) }], relations: ['user'] }),
+    ]);
+
+    const members: StaffMember[] = [];
+
+    for (const role of roles)
+      for (const user of role.users || [])
+        members.push({
+          uuid: user.uuid,
+          username: user.username,
+          label: role.name,
+          color: role.color ?? null,
+          serverId: null,
+          priority: role.priority ?? 0,
+          skin: user.skin ? { file: user.skin.file, slim: Boolean(user.skin.slim) } : null,
+          cloak: user.cloak ? { file: user.cloak.file } : null,
+        });
+
+    for (const row of granted)
+      if (row.group?.staff && row.user && row.server)
+        members.push({
+          uuid: row.user.uuid,
+          username: row.user.username,
+          label: row.group.name,
+          color: row.group.color ?? null,
+          serverId: row.server.id,
+          priority: row.group.priority ?? 0,
+          skin: row.user.skin ? { file: row.user.skin.file, slim: Boolean(row.user.skin.slim) } : null,
+          cloak: row.user.cloak ? { file: row.user.cloak.file } : null,
+        });
+
+    return members;
+  }
+
   private moduleLogger(id: string): LoggerApi {
     const logger = new Logger(`module:${id}`);
 
@@ -116,9 +178,11 @@ export class ApiHostService implements OnApplicationBootstrap, OnApplicationShut
     return {
       version: API_VERSION,
       users: {
-        getById: async (uuid) => (await this.usersService.getById(uuid).catch(() => null)) as never,
-        getByUsername: async (username) => (await this.usersService.getByUsername(username).catch(() => null)) as never,
-        getByEmail: async (email) => (await this.usersService.getByEmail(email).catch(() => null)) as never,
+        getById: async (uuid) => this.userRecord(await this.usersService.getById(uuid).catch(() => null)),
+        getByUsername: async (username) => this.userRecord(await this.usersService.getByUsername(username).catch(() => null)),
+        getByEmail: async (email) => this.userRecord(await this.usersService.getByEmail(email).catch(() => null)),
+        search: async (query, limit) =>
+          (await this.usersService.search(String(query || ''), limit).catch(() => [])).map((user) => this.userRecord(user)),
         perms: async (uuid) => {
           const user = (await this.usersService.getById(uuid, ['roles']).catch(() => null)) as { perms?: string[] } | null;
 
@@ -164,6 +228,9 @@ export class ApiHostService implements OnApplicationBootstrap, OnApplicationShut
         runCommands: async (serverId, commands) => {
           await this.rconService.sendCommands(String(serverId), commands);
         },
+      },
+      staff: {
+        members: () => this.staffMembers(),
       },
       servers: {
         all: async () => (await this.serversService.find()) as never,
@@ -265,7 +332,18 @@ export class ApiHostService implements OnApplicationBootstrap, OnApplicationShut
 
 @Global()
 @Module({
-  imports: [UsersModule, ConfigModule, RconModule, ServersModule, MoneyModule, OnlineModule, PaymentModule, PaymentHandlerModule, WebhooksModule],
+  imports: [
+    TypeOrmModule.forFeature([Role, UsersDonateGroup]),
+    UsersModule,
+    ConfigModule,
+    RconModule,
+    ServersModule,
+    MoneyModule,
+    OnlineModule,
+    PaymentModule,
+    PaymentHandlerModule,
+    WebhooksModule,
+  ],
   providers: [ApiHostService],
   exports: [ApiHostService],
 })

@@ -26,6 +26,9 @@ export class Role {
   @Column({ name: 'color', length: ROLE_COLOR_MAX_LENGTH, nullable: true })
   color: string;
 
+  @Column({ default: false, name: 'staff' })
+  staff: boolean;
+
   @Column({ default: false, name: 'badge' })
   badge: boolean;
 

@@ -22,6 +22,11 @@ export class RoleUpdateInput {
   @IsOptional()
   @Transform(({ value }) => value === true || value === 'true')
   @IsBoolean()
+  staff?: boolean;
+
+  @IsOptional()
+  @Transform(({ value }) => value === true || value === 'true')
+  @IsBoolean()
   badge?: boolean;
 
   @IsOptional()
