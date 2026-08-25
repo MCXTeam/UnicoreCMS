@@ -24,6 +24,11 @@ export class NewsInput {
   full_size?: boolean;
 
   @IsOptional()
+  @Transform(({ value }) => value === true || value === 'true')
+  @IsBoolean()
+  hidden?: boolean;
+
+  @IsOptional()
   @IsString()
   @MaxLength(CUSTOM_CODE_MAX_LENGTH)
   custom_css?: string;

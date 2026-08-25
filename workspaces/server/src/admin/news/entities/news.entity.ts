@@ -25,6 +25,12 @@ export class News {
   @Column({ default: false, name: 'full_size' })
   full_size: boolean;
 
+  @Column({ default: false, name: 'hidden' })
+  hidden: boolean;
+
+  @Column({ name: 'published_at', type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
+  published_at: Date;
+
   @Column({ nullable: true, name: 'image' })
   image: string;
 

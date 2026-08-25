@@ -67,6 +67,7 @@ export enum Permission {
   EditorNewsDelete = "editor.news.delete",
   EditorNewsDeleteMany = "editor.news.delete.many",
   EditorNewsPublish = "editor.news.publish",
+  EditorNewsHidden = "editor.news.hidden",
 
   EditorDonateRead = "editor.groups.read",
 

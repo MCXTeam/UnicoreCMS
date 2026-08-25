@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { events } from 'unicore-api';
 import { InjectRepository } from '@nestjs/typeorm';
 import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
@@ -27,24 +27,28 @@ export class NewsService {
     news.description = input.description;
     news.short_description = input.short_description;
     news.full_size = Boolean(input.full_size);
+    news.hidden = Boolean(input.hidden);
+    news.published_at = new Date();
     news.image = file?.filename;
 
     applyCustomCode(news, input, allowCustomCode);
 
     const saved = await this.newsRepository.save(news);
 
-    this.deliveriesService
-      .enqueueNews(saved, PublishMode.Auto, input.webhooks)
-      .catch((e) => this.logger.error(`Не удалось поставить новость ${saved.id} в очередь вебхуков: ${e}`));
+    if (!saved.hidden)
+      this.deliveriesService
+        .enqueueNews(saved, PublishMode.Auto, input.webhooks)
+        .catch((e) => this.logger.error(`Не удалось поставить новость ${saved.id} в очередь вебхуков: ${e}`));
 
     return saved;
   }
 
-  async find(query: PaginateQuery): Promise<Paginated<News>> {
+  async find(query: PaginateQuery, withHidden = false): Promise<Paginated<News>> {
     const paginated = await paginate(query, this.newsRepository, {
-      sortableColumns: ['id', 'title', 'created'],
-      defaultSortBy: [['created', 'DESC']],
+      sortableColumns: ['id', 'title', 'created', 'published_at'],
+      defaultSortBy: [['published_at', 'DESC']],
       maxLimit: 100,
+      where: withHidden ? undefined : { hidden: false },
     });
 
     return {
@@ -79,17 +83,18 @@ export class NewsService {
       await this.newsRepository.find({
         where: {
           link: IsNull(),
+          hidden: false,
         },
         order: {
-          created: 'DESC',
+          published_at: 'DESC',
         },
       })
     ).map((news) => news.id);
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, withHidden = true) {
     const news = await this.newsRepository.findOneBy({ id });
-    if (!news) throw new NotFoundException();
+    if (!news || (news.hidden && !withHidden)) throw new NotFoundException();
     return news;
   }
 
@@ -98,10 +103,15 @@ export class NewsService {
 
     if (!news) throw new NotFoundException();
 
+    const wasHidden = news.hidden;
+
     news.title = input.title;
     news.description = input.description;
     news.short_description = input.short_description;
     news.full_size = Boolean(input.full_size);
+    news.hidden = Boolean(input.hidden);
+
+    if (wasHidden && !news.hidden) news.published_at = new Date();
 
     applyCustomCode(news, input, allowCustomCode);
 
@@ -116,6 +126,8 @@ export class NewsService {
 
   async publish(id: number, mode: PublishMode, webhooks?: number[]): Promise<WebhookDeliveryDto[]> {
     const news = await this.findOne(id);
+
+    if (news.hidden) throw new BadRequestException('Скрытую новость публиковать некуда: сначала снимите скрытие');
     const queued = await this.deliveriesService.enqueueNews(news, mode, webhooks);
 
     await events().emit('news.published', { id: news.id, title: news.title });

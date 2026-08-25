@@ -12,7 +12,10 @@
         </div>
         <div class="col d-flex flex-column justify-content-between min-w-100 mb-4">
           <div>
-            <h3 class="text-break mt-0 mb-2" v-text="news_.title" />
+            <h3 class="text-break mt-0 mb-2">
+              <span v-text="news_.title" />
+              <span v-if="news_.hidden" class="cab-badge ms-2">{{ $t('news.draft') }}</span>
+            </h3>
             <span class="text-break" v-html="$sanitize(news_.description)"></span>
           </div>
           <div class="d-flex justify-content-between">

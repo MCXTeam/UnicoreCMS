@@ -1,5 +1,5 @@
 import { DeleteManyInput, imageFileFilter, STORAGE_MAX_IMAGE_UPLOAD, StorageManager } from '@common';
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { Public } from 'src/auth/decorators/public.decorator';
@@ -7,6 +7,7 @@ import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { Permission } from 'unicore-common';
 import { Permissions } from '../roles/decorators/permission.decorator';
+import { matchPermission } from '../roles/guards/permisson.guard';
 import { NewsInput } from './dto/news.input';
 import { NewsPublishInput } from './dto/news-publish.input';
 import { NewsService } from './news.service';
@@ -15,10 +16,16 @@ import { NewsService } from './news.service';
 export class NewsController {
   constructor(private newsService: NewsService) {}
 
+  private async seesHidden(request: any): Promise<boolean> {
+    if (!request?.user) return false;
+
+    return matchPermission([Permission.EditorNewsHidden], request);
+  }
+
   @Public()
   @Get()
-  find(@Paginate() query: PaginateQuery) {
-    return this.newsService.find(query);
+  async find(@Req() request: any, @Paginate() query: PaginateQuery) {
+    return this.newsService.find(query, await this.seesHidden(request));
   }
 
   @Public()
@@ -47,8 +54,8 @@ export class NewsController {
 
   @Public()
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.newsService.findOne(id);
+  async findOne(@Req() request: any, @Param('id', ParseIntPipe) id: number) {
+    return this.newsService.findOne(id, await this.seesHidden(request));
   }
 
   @Post()

@@ -44,7 +44,12 @@
           </template>
           <Column selectionMode="multiple" :style="{ width: '3rem' }"></Column>
           <Column field="id" header="ID" :style="{ width: '8rem' }" sortable></Column>
-          <Column field="title" :header="$t('admin.name')" sortable />
+          <Column field="title" :header="$t('admin.name')" sortable>
+            <template #body="slotProps">
+              <span>{{ slotProps.data.title }}</span>
+              <Tag v-if="slotProps.data.hidden" severity="warn" class="ml-2" :value="$t('admin.news_hidden_tag')" />
+            </template>
+          </Column>
           <Column field="created" :header="$t('admin.created_date')" sortable>
             <template #body="slotProps">
               {{ $moment(slotProps.data.created).format('D MMMM YYYY, HH:mm') }}
@@ -149,6 +154,13 @@
                   <label for="news-full-size" class="m-0">{{ $t('admin.news_full_size') }}</label>
                 </div>
                 <small v-if="newsSingle.full_size">{{ $t('admin.full_size_hint') }}</small>
+              </div>
+              <div class="field">
+                <div class="flex align-items-center gap-2">
+                  <Checkbox v-model="newsSingle.hidden" :binary="true" inputId="news-hidden" />
+                  <label for="news-hidden" class="m-0">{{ $t('admin.news_hidden') }}</label>
+                </div>
+                <small>{{ $t('admin.news_hidden_hint') }}</small>
               </div>
             </template>
 
@@ -406,6 +418,7 @@ export default {
         description: null,
         short_description: null,
         full_size: false,
+        hidden: false,
         custom_css: null,
         custom_js: null,
         image: null,
@@ -504,6 +517,7 @@ export default {
           description: null,
           short_description: null,
           full_size: false,
+          hidden: false,
           custom_css: null,
           custom_js: null,
           image: null,
