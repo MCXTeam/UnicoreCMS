@@ -180,7 +180,7 @@
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>ID</label>
+                      <label>ID<span class="p-error"> *</span></label>
                       <InputText
                         :disabled="updateMode"
                         :modelValue="value"
@@ -202,7 +202,7 @@
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>{{ $t('admin.name') }}</label>
+                      <label>{{ $t('admin.name') }}<span class="p-error"> *</span></label>
                       <InputText
                         :modelValue="value"
                         @update:modelValue="handleChange"
@@ -222,7 +222,7 @@
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>{{ $t('admin.version') }}</label>
+                      <label>{{ $t('admin.version') }}<span class="p-error"> *</span></label>
                       <InputText
                         :modelValue="value"
                         @update:modelValue="handleChange"
@@ -235,6 +235,13 @@
                   <div class="field">
                     <label>{{ $t('admin.slogan') }}</label>
                     <InputText v-model="server.slogan" />
+                  </div>
+                  <div class="field-checkbox">
+                    <Checkbox :binary="true" inputId="server_wipe" v-model="server.wipe" />
+                    <label for="server_wipe" class="flex align-items-center gap-1">
+                      {{ $t('admin.server_wipe') }}
+                      <i v-tooltip.right="$t('admin.server_wipe_hint')" class="pi pi-question-circle text-color-secondary" />
+                    </label>
                   </div>
                   <div class="field">
                     <label>{{ $t('admin.menu_mods') }}</label>
@@ -333,7 +340,7 @@
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>{{ $t('admin.query_host') }}</label>
+                      <label>{{ $t('admin.query_host') }}<span class="p-error"> *</span></label>
                       <InputText
                         :modelValue="value"
                         @update:modelValue="handleChange"
@@ -353,7 +360,7 @@
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>{{ $t('admin.query_port') }}</label>
+                      <label>{{ $t('admin.query_port') }}<span class="p-error"> *</span></label>
                       <InputNumber
                         :useGrouping="false"
                         :modelValue="value"
@@ -570,6 +577,7 @@ export default {
           port: null,
         },
         delivery_mode: 0,
+        wipe: false,
         rcon: {
           host: null,
           port: null,
@@ -794,6 +802,7 @@ export default {
         if (!this.server.instances) this.server.instances = []
         if (!this.server.rcon) this.server.rcon = { host: null, port: null, password: null }
         if (this.server.delivery_mode == null) this.server.delivery_mode = 0
+        this.server.wipe = !!this.server.wipe
       } else {
         this.server = {
           id: null,
@@ -811,6 +820,7 @@ export default {
             port: null,
           },
           delivery_mode: 0,
+          wipe: false,
           rcon: {
             host: null,
             port: null,
@@ -870,6 +880,7 @@ export default {
         const payload = {
           ...this.$_(this.server).omitBy(this.$_.isEmpty).omit('id').value(),
           delivery_mode: this.server.delivery_mode,
+          wipe: this.server.wipe,
           table: this.server.table && this.server.table.length ? this.server.table.map((row, priority) => ({ ...row, priority })) : [],
           instances: this.instancesPayload(),
           mods: this.server.mods.map((mod) => mod.id),

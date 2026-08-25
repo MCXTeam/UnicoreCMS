@@ -46,8 +46,9 @@
       rules="required|min:8|max:128"
       v-slot="{ value, errorMessage, handleChange, handleBlur }"
     >
-      <div data-aos="zoom-in-right" data-aos-delay="600" class="w-100 mb-3">
+      <div data-aos="zoom-in-right" data-aos-delay="600" class="w-100 mb-3 d-flex gap-2">
         <Password
+          ref="passwordField"
           :modelValue="value"
           @update:modelValue="handleChange"
           @blur="handleBlur"
@@ -58,6 +59,14 @@
           inputClass="w-100"
           :class="errorMessage && 'p-invalid'"
         />
+        <Button
+          type="button"
+          outlined
+          v-tooltip.bottom="$t('auth.password_generate')"
+          @click="fillGeneratedPassword(handleChange)"
+        >
+          <i class="bx bx-refresh"></i>
+        </Button>
       </div>
       <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
     </Field>
@@ -69,6 +78,7 @@
     >
       <div data-aos="zoom-in-right" data-aos-delay="750" class="w-100">
         <Password
+          ref="passwordConfirmField"
           :modelValue="value"
           @update:modelValue="handleChange"
           @blur="handleBlur"
@@ -106,6 +116,7 @@
 <script setup lang="ts">
 import { Form, Field } from 'vee-validate'
 import { useReCaptcha } from 'vue-recaptcha-v3'
+import { generatePassword } from 'unicore-common/password'
 
 definePageMeta({ layout: 'auth', middleware: 'guest' })
 
@@ -130,6 +141,24 @@ const rules = reactive({
 })
 
 const rulesAccepted = (value: unknown) => value === true || $t('auth.rules_required')
+
+const passwordField = ref<any>(null)
+const passwordConfirmField = ref<any>(null)
+
+function unmask(field: any) {
+  if (field && !field.unmasked) field.onMaskToggle()
+}
+
+function fillGeneratedPassword(handleChange: (value: string) => void) {
+  const password = generatePassword()
+
+  form.password = password
+  form.password_confirm = password
+
+  handleChange(password)
+  unmask(passwordField.value)
+  unmask(passwordConfirmField.value)
+}
 
 onMounted(async () => {
   const page = await pagesApi.rules()

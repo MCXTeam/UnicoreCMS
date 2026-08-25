@@ -1,5 +1,5 @@
-import { Type } from 'class-transformer';
-import { ArrayMaxSize, IsArray, IsDefined, IsEnum, IsInt, IsOptional, IsString, MaxLength, ValidateNested } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { ArrayMaxSize, IsArray, IsBoolean, IsDefined, IsEnum, IsInt, IsOptional, IsString, MaxLength, ValidateNested } from 'class-validator';
 import { DeliveryMode } from 'unicore-common';
 import { QueryInput } from '../online/dto/query.input';
 import { RconInput } from './rcon.input';
@@ -41,6 +41,11 @@ export class ServerUpdateInput {
   @IsOptional()
   @IsEnum(DeliveryMode)
   delivery_mode?: DeliveryMode;
+
+  @IsOptional()
+  @Transform(({ value }) => value === true || value === 'true')
+  @IsBoolean()
+  wipe?: boolean;
 
   @IsOptional()
   @ValidateNested()

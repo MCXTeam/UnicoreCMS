@@ -1,8 +1,14 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException, Inject } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { User } from 'src/admin/users/entities/user.entity';
-import { anyServerPermission, expandPermissionPattern, filterDonateWebPerms, Permission, SERVER_PERMISSION_PLACEHOLDER } from 'unicore-common';
-import * as minimath from 'minimatch';
+import {
+  anyServerPermission,
+  filterDonateWebPerms,
+  Permission,
+  permissionMatches,
+  resolvePermissions,
+  SERVER_PERMISSION_PLACEHOLDER,
+} from 'unicore-common';
 import * as _ from 'lodash';
 import { DONATE_PERMS_CACHE_KEY, PERMISSIONS_KEY } from 'src/common/constants';
 import { Role } from '../entities/role.entity';
@@ -13,32 +19,10 @@ import { UsersDonatePermission } from 'src/game/donate/permissions/entities/user
 import { InjectRepository } from '@nestjs/typeorm';
 import { permissionUniverse } from '../permission-universe';
 
-function matchesPattern(value: string, pattern: string): boolean {
-  return minimath.match([value], pattern).length > 0;
-}
-
-function matchPerms(list: string[], pattern: string): string[] {
-  return expandPermissionPattern(pattern)
-    .map((expanded) => minimath.match(list, expanded))
-    .flat();
-}
-
 export type PermissionOptions = {
   or?: boolean;
 };
 export type PermissionArgs = (Permission | string)[] | [(Permission | string)[], PermissionOptions]; // Or condition
-
-export function resolvePermissions(patterns: string[], universe: string[]): string[] {
-  const allow: string[] = [];
-  const deny: string[] = [];
-
-  for (const pattern of patterns) {
-    if (pattern.charAt(0) === '!') deny.push(...matchPerms(universe, pattern.slice(1)));
-    else allow.push(...matchPerms(universe, pattern));
-  }
-
-  return _.difference(_.union(allow), deny);
-}
 
 export function satisfiesPermission(granted: string[], required: string): string[] {
   const direct = resolvePermissions(granted, [required]);
@@ -48,7 +32,7 @@ export function satisfiesPermission(granted: string[], required: string): string
   const denied = granted.filter((pattern) => pattern.charAt(0) === '!').map((pattern) => pattern.slice(1));
   const covered = granted
     .filter((pattern) => pattern.charAt(0) !== '!')
-    .some((pattern) => matchesPattern(pattern, required) && !denied.some((deny) => matchesPattern(pattern, deny)));
+    .some((pattern) => permissionMatches(pattern, required) && !denied.some((deny) => permissionMatches(pattern, deny)));
 
   return covered ? [required] : [];
 }
@@ -59,7 +43,7 @@ function serverScopedPermissions(patterns: string[]): string[] {
     .map((permission) => anyServerPermission(permission));
 
   return patterns.filter(
-    (pattern) => pattern.charAt(0) !== '!' && !pattern.includes('*') && templates.some((template) => matchesPattern(pattern, template)),
+    (pattern) => pattern.charAt(0) !== '!' && !pattern.includes('*') && templates.some((template) => permissionMatches(pattern, template)),
   );
 }
 

@@ -65,6 +65,9 @@ export class Server {
   @Column({ name: 'delivery_mode', type: 'int', default: DeliveryMode.Plugin })
   delivery_mode: DeliveryMode;
 
+  @Column({ name: 'wipe', default: false })
+  wipe: boolean;
+
   @ManyToOne(() => ServerGroup, (room) => room.servers, { eager: true })
   group: ServerGroup[];
 

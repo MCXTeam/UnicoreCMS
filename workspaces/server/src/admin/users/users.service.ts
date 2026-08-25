@@ -205,7 +205,7 @@ export class UsersService {
 
   @Transactional()
   async getPublicUser(username: string): Promise<UserPublicDto> {
-    const user = await this.getByUsername(username);
+    const user = await this.getByUsername(username, ['roles']);
     if (!user || user.username == KERNEL_USERNAME) throw new NotFoundException();
 
     const playtimes = await this.playtimeService.findOneByUser(user);

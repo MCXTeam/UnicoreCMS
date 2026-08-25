@@ -1,10 +1,9 @@
 import { Command, CommandRunner, Option } from 'nest-commander';
 import * as clc from 'cli-color';
 import { randomUUID } from 'crypto';
-import { resolvePermissions } from 'src/admin/roles/guards/permisson.guard';
 import { RoutePermissions } from 'src/admin/roles/route-permissions.service';
 import { ImportantRoles } from 'src/admin/roles/emums/important-roles.enum';
-import { Permission } from 'unicore-common';
+import { Permission, resolvePermissions } from 'unicore-common';
 import { stdout } from '../stdout';
 
 interface CheckOptions {

@@ -98,7 +98,7 @@
             v-slot="{ value, errorMessage, handleChange, handleBlur }"
           >
             <div class="field">
-              <label>{{ $t('admin.username') }}</label>
+              <label>{{ $t('admin.username') }}<span class="p-error"> *</span></label>
               <InputText :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" type="text" />
               <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
             </div>
@@ -111,7 +111,7 @@
             v-slot="{ value, errorMessage, handleChange, handleBlur }"
           >
             <div class="field">
-              <label>Email</label>
+              <label>Email<span class="p-error"> *</span></label>
               <InputText :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" type="text" />
               <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
             </div>
@@ -128,15 +128,25 @@
             v-slot="{ value, errorMessage, handleChange, handleBlur }"
           >
             <div class="field">
-              <label>{{ $t('auth.password') }}</label>
-              <InputText
-                autocomplete="false"
-                :modelValue="value"
-                @update:modelValue="handleChange"
-                @blur="handleBlur"
-                :placeholder="$t('admin.unchanged')"
-                type="password"
-              />
+              <label>{{ $t('auth.password') }}<span class="p-error"> *</span></label>
+              <div class="flex gap-2">
+                <InputText
+                  autocomplete="false"
+                  class="flex-1"
+                  :modelValue="value"
+                  @update:modelValue="handleChange"
+                  @blur="handleBlur"
+                  :placeholder="$t('admin.unchanged')"
+                  :type="passwordVisible ? 'text' : 'password'"
+                />
+                <Button
+                  type="button"
+                  icon="pi pi-refresh"
+                  class="p-button-secondary"
+                  v-tooltip.bottom="$t('admin.password_generate')"
+                  @click="fillGeneratedPassword(handleChange)"
+                />
+              </div>
               <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
             </div>
           </VeeField>
@@ -148,7 +158,7 @@
             v-slot="{ value, errorMessage, handleChange, handleBlur }"
           >
             <div class="field">
-              <label>{{ $t('auth.password_confirm') }}</label>
+              <label>{{ $t('auth.password_confirm') }}<span class="p-error"> *</span></label>
               <InputText
                 autocomplete="false"
                 :modelValue="value"
@@ -177,20 +187,7 @@
               class="p-column-filter"
             />
           </div>
-          <div class="field">
-            <label>{{ $t('admin.rights') }}</label>
-            <span class="p-fluid">
-              <AutoComplete
-                v-model="user.perms"
-                :multiple="true"
-                :suggestions="autocompleateFilterd"
-                @complete="searchAutocompleate($event)"
-                appendTo="body"
-                :completeOnFocus="true"
-                :placeholder="$t('admin.choose_permissions')"
-              />
-            </span>
-          </div>
+          <PermissionsPicker v-model="user.perms" :universe="autocompleate" :label="$t('admin.rights')" />
           <div class="field-checkbox" v-if="isSuperuser">
             <Checkbox :binary="true" v-model="user.superuser" />
             <label>{{ $t('admin.superuser') }}</label>
@@ -214,6 +211,7 @@
 
 <script>
 import { Permission } from 'unicore-common/enums'
+import { generatePassword } from 'unicore-common/password'
 import { sortTransform } from '~/helpers'
 import { FilterMatchMode } from '@primevue/core/api'
 import { Form, Field } from 'vee-validate'
@@ -265,7 +263,6 @@ export default {
       },
       userDialog: false,
       section: 'main',
-      autocompleateFilterd: null,
       user: {
         username: null,
         email: null,
@@ -276,6 +273,7 @@ export default {
         password: null,
       },
       passwordConfirm: null,
+      passwordVisible: false,
       roles: [],
       autocompleate: [],
       loading: true,
@@ -289,6 +287,16 @@ export default {
     this.load()
   },
   methods: {
+    fillGeneratedPassword(handleChange) {
+      const password = generatePassword()
+
+      this.user.password = password
+      this.passwordConfirm = password
+      this.passwordVisible = true
+
+      handleChange(password)
+    },
+
     async load() {
       this.loading = true
       this.selected = null
@@ -334,22 +342,6 @@ export default {
       }
       this.passwordConfirm = null
       this.userDialog = true
-    },
-    searchAutocompleate(event) {
-      if (!event.query.trim().length) {
-        this.autocompleateFilterd = this.autocompleate
-      } else {
-        this.autocompleateFilterd = [
-          event.query.toLowerCase(),
-          ...this.autocompleate.filter((perm) => {
-            return perm.toLowerCase().includes(event.query.toLowerCase())
-          }),
-        ]
-
-        if (this.autocompleateFilterd.length === 0) {
-          this.autocompleateFilterd = [event.query.toLowerCase()]
-        }
-      }
     },
     async removeUser(id) {
       this.confirm.require({

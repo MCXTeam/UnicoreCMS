@@ -1,5 +1,6 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { isAdminPermission, Permission } from 'unicore-common';
+import { StorageManager } from '@common';
+import { isAdminPermission, Permission, RoleBadgeEffect } from 'unicore-common';
 import { uniq } from 'lodash';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from './entities/role.entity';
@@ -74,6 +75,15 @@ export class RolesService {
     return this.rolesRepository.findOneBy({ id });
   }
 
+  private applyAppearance(role: Role, input: RoleUpdateInput): void {
+    role.color = input.color ?? null;
+    role.badge = !!input.badge;
+    role.badge_color = input.badge_color ?? null;
+    role.badge_background = input.badge_background ?? null;
+    role.badge_background_end = input.badge_background_end ?? null;
+    role.badge_effect = input.badge_effect ?? RoleBadgeEffect.None;
+  }
+
   async create(input: RoleCreateInput): Promise<Role> {
     if (await this.findOne(input.id)) {
       throw new ConflictException();
@@ -85,6 +95,7 @@ export class RolesService {
     role.name = input.name;
     role.perms = input.perms;
     role.priority = input.priority;
+    this.applyAppearance(role, input);
 
     return this.rolesRepository.save(role);
   }
@@ -99,6 +110,7 @@ export class RolesService {
     role.name = input.name;
     role.perms = input.perms;
     role.priority = input.priority;
+    this.applyAppearance(role, input);
 
     return this.rolesRepository.save(role);
   }
@@ -111,5 +123,32 @@ export class RolesService {
     }
 
     return this.rolesRepository.remove(role);
+  }
+
+  async updateBadgeImage(id: string, file: Express.Multer.File): Promise<Role> {
+    const role = await this.findOne(id);
+
+    if (!role) {
+      StorageManager.remove(file.filename);
+      throw new NotFoundException();
+    }
+
+    StorageManager.remove(role.badge_image);
+    role.badge_image = file.filename;
+
+    return this.rolesRepository.save(role);
+  }
+
+  async removeBadgeImage(id: string): Promise<Role> {
+    const role = await this.findOne(id);
+
+    if (!role) {
+      throw new NotFoundException();
+    }
+
+    StorageManager.remove(role.badge_image);
+    role.badge_image = null;
+
+    return this.rolesRepository.save(role);
   }
 }

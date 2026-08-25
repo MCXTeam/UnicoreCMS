@@ -42,7 +42,13 @@ export default defineNuxtConfig({
     storageKey: 'unicore-admin-color-mode',
   },
 
-  css: ['primeicons/primeicons.css', 'primeflex/primeflex.css', '~/assets/fonts/main.scss', '~/assets/styles/layout.scss'],
+  css: [
+    'primeicons/primeicons.css',
+    'primeflex/primeflex.css',
+    'unicore-common/styles/role-badge.css',
+    '~/assets/fonts/main.scss',
+    '~/assets/styles/layout.scss',
+  ],
 
   app: {
     head: {

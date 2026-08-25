@@ -17,7 +17,7 @@
           v-slot="{ value, errorMessage, handleChange }"
         >
           <div class="field">
-            <label>{{ $t('cabinet.server') }}</label>
+            <label>{{ $t('cabinet.server') }}<span class="p-error"> *</span></label>
             <Select :modelValue="value" @update:modelValue="handleChange" :options="giveServers" optionLabel="name" appendTo="body">
               <template #option="slotProps">
                 <div class="flex align-items-center">
@@ -37,7 +37,7 @@
           v-slot="{ value, errorMessage, handleChange }"
         >
           <div class="field">
-            <label>{{ $t('cabinet.product') }}</label>
+            <label>{{ $t('cabinet.product') }}<span class="p-error"> *</span></label>
             <AutoComplete
               :modelValue="value"
               @update:modelValue="handleChange"
@@ -66,7 +66,7 @@
           v-slot="{ value, errorMessage, handleChange, handleBlur }"
         >
           <div class="field">
-            <label>{{ $t('admin.quantity') }}</label>
+            <label>{{ $t('admin.quantity') }}<span class="p-error"> *</span></label>
             <InputNumber :modelValue="value" @update:modelValue="handleChange" @input="handleChange($event.value)" @blur="handleBlur" />
             <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
           </div>
@@ -101,7 +101,7 @@
           v-slot="{ value, errorMessage, handleChange }"
         >
           <div class="field">
-            <label>{{ $t('cabinet.server') }}</label>
+            <label>{{ $t('cabinet.server') }}<span class="p-error"> *</span></label>
             <Select :modelValue="value" @update:modelValue="handleChange" :options="giveServers" optionLabel="name" appendTo="body">
               <template #option="slotProps">
                 <div class="flex align-items-center">
@@ -115,7 +115,7 @@
         </VeeField>
         <VeeField v-model="whItem.kit" name="kit" :label="$t('store.kit')" rules="required" v-slot="{ value, errorMessage, handleChange }">
           <div class="field">
-            <label>{{ $t('store.kit') }}</label>
+            <label>{{ $t('store.kit') }}<span class="p-error"> *</span></label>
             <AutoComplete
               :modelValue="value"
               @update:modelValue="handleChange"
@@ -166,7 +166,7 @@
           v-slot="{ value, errorMessage, handleChange }"
         >
           <div class="field">
-            <label>{{ $t('cabinet.server') }}</label>
+            <label>{{ $t('cabinet.server') }}<span class="p-error"> *</span></label>
             <Select :modelValue="value" @update:modelValue="handleChange" :options="donateServers" optionLabel="name" appendTo="body">
               <template #option="slotProps">
                 <div class="flex align-items-center">
@@ -186,7 +186,7 @@
           v-slot="{ value, errorMessage, handleChange }"
         >
           <div class="field">
-            <label>{{ $t('admin.group') }}</label>
+            <label>{{ $t('admin.group') }}<span class="p-error"> *</span></label>
             <Select
               :modelValue="value"
               @update:modelValue="handleChange"
@@ -214,7 +214,7 @@
           v-slot="{ value, errorMessage, handleChange }"
         >
           <div class="field">
-            <label>{{ $t('cabinet.period') }}</label>
+            <label>{{ $t('cabinet.period') }}<span class="p-error"> *</span></label>
             <Select :modelValue="value" @update:modelValue="handleChange" :options="periods" optionLabel="name" appendTo="body" />
             <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
           </div>
@@ -249,7 +249,7 @@
           v-slot="{ value, errorMessage, handleChange }"
         >
           <div class="field">
-            <label>{{ $t('admin.right') }}</label>
+            <label>{{ $t('admin.right') }}<span class="p-error"> *</span></label>
             <Select :modelValue="value" @update:modelValue="handleChange" :options="donatePermissions" optionLabel="name" appendTo="body">
               <template #option="slotProps">
                 <div class="flex align-items-center">
@@ -269,7 +269,7 @@
           v-slot="{ value, errorMessage, handleChange }"
         >
           <div class="field">
-            <label>{{ $t('cabinet.server') }}</label>
+            <label>{{ $t('cabinet.server') }}<span class="p-error"> *</span></label>
             <Select :modelValue="value" @update:modelValue="handleChange" :options="permissionServers" optionLabel="name" appendTo="body">
               <template #option="slotProps">
                 <div class="flex align-items-center">
@@ -289,7 +289,7 @@
           v-slot="{ value, errorMessage, handleChange }"
         >
           <div class="field">
-            <label>{{ $t('cabinet.period') }}</label>
+            <label>{{ $t('cabinet.period') }}<span class="p-error"> *</span></label>
             <Select :modelValue="value" @update:modelValue="handleChange" :options="periods" optionLabel="name" appendTo="body" />
             <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
           </div>
@@ -372,7 +372,7 @@
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>{{ $t('admin.reason') }}</label>
+                      <label>{{ $t('admin.reason') }}<span class="p-error"> *</span></label>
                       <InputText :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" type="text" />
                       <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
                     </div>
@@ -405,7 +405,7 @@
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>{{ $t('admin.username') }}</label>
+                      <label>{{ $t('admin.username') }}<span class="p-error"> *</span></label>
                       <InputText :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" type="text" />
                       <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
                     </div>
@@ -442,20 +442,7 @@
                       class="p-column-filter"
                     />
                   </div>
-                  <div class="field">
-                    <label>{{ $t('admin.rights') }}</label>
-                    <span class="p-fluid">
-                      <AutoComplete
-                        v-model="user.perms"
-                        :multiple="true"
-                        :suggestions="autocompleateFilterd"
-                        @complete="searchAutocompleate($event)"
-                        appendTo="body"
-                        :completeOnFocus="true"
-                        :placeholder="$t('admin.choose_permissions')"
-                      />
-                    </span>
-                  </div>
+                  <PermissionsPicker v-model="user.perms" :universe="autocompleate" :label="$t('admin.rights')" />
                   <div class="field-checkbox" v-if="isSuperuser">
                     <Checkbox :binary="true" v-model="user.superuser" />
                     <label>{{ $t('admin.superuser') }}</label>
@@ -474,15 +461,25 @@
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>{{ $t('auth.password') }}</label>
-                      <InputText
-                        autocomplete="false"
-                        :modelValue="value"
-                        @update:modelValue="handleChange"
-                        @blur="handleBlur"
-                        :placeholder="$t('admin.unchanged')"
-                        type="password"
-                      />
+                      <label>{{ $t('auth.password') }}<span class="p-error"> *</span></label>
+                      <div class="flex gap-2">
+                        <InputText
+                          autocomplete="false"
+                          class="flex-1"
+                          :modelValue="value"
+                          @update:modelValue="handleChange"
+                          @blur="handleBlur"
+                          :placeholder="$t('admin.unchanged')"
+                          :type="passwordVisible ? 'text' : 'password'"
+                        />
+                        <Button
+                          type="button"
+                          icon="pi pi-refresh"
+                          class="p-button-secondary"
+                          v-tooltip.bottom="$t('admin.password_generate')"
+                          @click="fillGeneratedPassword(handleChange)"
+                        />
+                      </div>
                       <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
                     </div>
                   </VeeField>
@@ -494,7 +491,7 @@
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>{{ $t('auth.password_confirm') }}</label>
+                      <label>{{ $t('auth.password_confirm') }}<span class="p-error"> *</span></label>
                       <InputText
                         autocomplete="false"
                         :modelValue="value"
@@ -718,6 +715,7 @@
 import { Form, Field } from 'vee-validate'
 import { useAuthStore } from '~/stores/auth'
 import { Permission } from 'unicore-common/enums'
+import { generatePassword } from 'unicore-common/password'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 
@@ -754,7 +752,6 @@ export default {
       wh_loading: false,
       money_loading: false,
       autocompleate: null,
-      autocompleateFilterd: null,
       giveProductDialog: false,
       giveKitDialog: false,
       giveUDGDialog: false,
@@ -769,6 +766,7 @@ export default {
         expires: null,
         reason: null,
       },
+      passwordVisible: false,
       passwordForm: {
         password: null,
         password_confirm: null,
@@ -854,6 +852,16 @@ export default {
   },
 
   methods: {
+    fillGeneratedPassword(handleChange) {
+      const password = generatePassword()
+
+      this.passwordForm.password = password
+      this.passwordForm.password_confirm = password
+      this.passwordVisible = true
+
+      handleChange(password)
+    },
+
     hasPermission(permission) {
       return useAuthStore().has(permission)
     },
@@ -986,23 +994,6 @@ export default {
         detail: this.$t('admin.balance_updated'),
         life: 3000,
       })
-    },
-
-    searchAutocompleate(event) {
-      if (!event.query.trim().length) {
-        this.autocompleateFilterd = this.autocompleate
-      } else {
-        this.autocompleateFilterd = [
-          event.query.toLowerCase(),
-          ...this.autocompleate.filter((perm) => {
-            return perm.toLowerCase().includes(event.query.toLowerCase())
-          }),
-        ]
-
-        if (this.autocompleateFilterd.length === 0) {
-          this.autocompleateFilterd = [event.query.toLowerCase()]
-        }
-      }
     },
 
     async updateProfile() {

@@ -81,22 +81,14 @@
               rules="required"
               v-slot="{ value, errorMessage, handleChange }"
             >
-              <div class="field">
-                <label>{{ $t('admin.permissions') }}</label>
-                <span class="p-fluid">
-                  <AutoComplete
-                    :modelValue="value"
-                    @update:modelValue="handleChange"
-                    :multiple="true"
-                    :suggestions="autocompleateFilterd"
-                    @complete="searchAutocompleate($event)"
-                    appendTo="body"
-                    :completeOnFocus="true"
-                    :placeholder="$t('admin.choose_permissions')"
-                  />
-                </span>
-                <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
-              </div>
+              <PermissionsPicker
+                :modelValue="value"
+                @update:modelValue="handleChange"
+                :universe="autocompleate"
+                :label="$t('admin.permissions')"
+                :required="true"
+                :error="errorMessage"
+              />
             </VeeField>
             <div class="field">
               <label class="flex align-items-center gap-1">
@@ -122,7 +114,7 @@
               v-slot="{ value, errorMessage, handleChange }"
             >
               <div class="field">
-                <label>{{ $t('admin.api_trusted_ips') }}</label>
+                <label>{{ $t('admin.api_trusted_ips') }}<span class="p-error"> *</span></label>
                 <InputChips :modelValue="value" @update:modelValue="handleChange" />
                 <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
@@ -168,7 +160,6 @@ export default {
       api: null,
       servers: [],
       autocompleate: null,
-      autocompleateFilterd: null,
       loading: true,
       updateMode: false,
       token: {
@@ -197,22 +188,6 @@ export default {
       this.servers = await this.$api.get('/servers').then((res) => res.data)
       this.api = await this.$api.get('/admin/api').then((res) => res.data)
       this.loading = false
-    },
-    searchAutocompleate(event) {
-      if (!event.query.trim().length) {
-        this.autocompleateFilterd = this.autocompleate
-      } else {
-        this.autocompleateFilterd = [
-          event.query.toLowerCase(),
-          ...this.autocompleate.filter((perm) => {
-            return perm.toLowerCase().includes(event.query.toLowerCase())
-          }),
-        ]
-
-        if (this.autocompleateFilterd.length === 0) {
-          this.autocompleateFilterd = [event.query.toLowerCase()]
-        }
-      }
     },
     hideDialog() {
       this.tokenDialog = false

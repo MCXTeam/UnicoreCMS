@@ -91,7 +91,7 @@ export class UsersController {
   @Public()
   @Get('public/uuid/:uuid')
   async getUserByUUID(@Param('uuid') uuid: string): Promise<UserProtectedDto> {
-    const user = await this.usersService.getById(uuid);
+    const user = await this.usersService.getById(uuid, ['roles']);
 
     if (!user) throw new NotFoundException();
 
@@ -101,7 +101,7 @@ export class UsersController {
   @Public()
   @Get('public/username/:username')
   async getUserByUsername(@Param('username') username: string): Promise<UserProtectedDto> {
-    const user = await this.usersService.getByUsername(username);
+    const user = await this.usersService.getByUsername(username, ['roles']);
 
     if (!user) throw new NotFoundException();
 

@@ -6,7 +6,7 @@
           <ClientOnly>
             <SkinView3D class="rounded" :width="210" :height="300" :skin="user.skin" :cloak="user.cloak" ref="skin" />
           </ClientOnly>
-          <h2 class="mt-2 mb-0" v-text="user.username" />
+          <h2 class="mt-2 mb-0"><PlayerName :username="user.username" :role="user.role" /></h2>
           <h4 v-if="!online" class="m-0">{{ $t('profile.offline') }}</h4>
           <h4 v-else class="m-0">
             {{ $t('profile.playing_on') }} <NuxtLink :to="`/servers/${online.server.id}`" v-text="online.server.name" />

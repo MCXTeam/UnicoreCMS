@@ -44,7 +44,10 @@
             <div class="ms-3">
               <span>{{ $t('panel.version') }}: {{ online.server.version }}</span>
               <NuxtLink :to="`/servers/${online.server.id}`">
-                <h3 class="mb-1 mt-0">{{ online.server.name }}</h3>
+                <h3 class="mb-1 mt-0 d-flex align-items-center gap-2">
+                  {{ online.server.name }}
+                  <WipeBadge v-if="online.server.wipe" />
+                </h3>
               </NuxtLink>
             </div>
           </div>

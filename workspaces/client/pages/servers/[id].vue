@@ -3,7 +3,10 @@
     <div class="mb-4 panel">
       <div class="panel server-block p-5 d-flex align-items-center justify-content-between">
         <div>
-          <h1 class="m-0">{{ server.name }}</h1>
+          <h1 class="m-0 d-flex align-items-center gap-2">
+            {{ server.name }}
+            <WipeBadge v-if="server.wipe" />
+          </h1>
           <h4 class="m-0" v-text="server.slogan" />
         </div>
         <img v-if="server.icon" :src="`${$pub.apiBaseurl}/${server.icon}`" width="96px" />

@@ -4,6 +4,7 @@ import { Playtime } from 'src/game/cabinet/playtime/entities/playtime.entity';
 import { Cloak } from 'src/game/cabinet/skin/entities/cloak.entity';
 import { Skin } from 'src/game/cabinet/skin/entities/skin.entity';
 import { BanDto } from 'src/game/players/banlist/dto/paginated-bans.dto';
+import { RoleAppearanceDto, roleAppearance } from 'src/admin/roles/dto/role-appearance.dto';
 import { User } from '../entities/user.entity';
 
 @Exclude()
@@ -37,6 +38,10 @@ export class UserPublicDto {
   @Expose()
   referals: any;
 
+  @Expose()
+  @Type(() => RoleAppearanceDto)
+  role: RoleAppearanceDto;
+
   constructor(
     partial: Partial<
       User & {
@@ -47,5 +52,6 @@ export class UserPublicDto {
     >,
   ) {
     Object.assign(this, partial);
+    this.role = roleAppearance(partial.roles);
   }
 }

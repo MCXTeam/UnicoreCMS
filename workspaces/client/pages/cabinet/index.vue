@@ -70,7 +70,7 @@
     <CabTile :title="$t('profile.account_info')" icon="bx bx-id-card" :span="5" bodyClass="cab-rows">
       <div class="cab-rows__row">
         <span>{{ $t('profile.login') }}</span>
-        <b v-text="$auth.user.username" />
+        <b><PlayerName :username="$auth.user.username" :roles="$auth.user.roles" /></b>
       </div>
       <div class="cab-rows__row">
         <span>Email</span>

@@ -1,6 +1,7 @@
-import { Exclude, Expose } from 'class-transformer';
+import { Exclude, Expose, Type } from 'class-transformer';
 import { Cloak } from 'src/game/cabinet/skin/entities/cloak.entity';
 import { Skin } from 'src/game/cabinet/skin/entities/skin.entity';
+import { RoleAppearanceDto, roleAppearance } from 'src/admin/roles/dto/role-appearance.dto';
 import { User } from '../entities/user.entity';
 
 @Exclude()
@@ -25,7 +26,12 @@ export class UserProtectedDto {
   @Expose()
   created: Date;
 
+  @Expose()
+  @Type(() => RoleAppearanceDto)
+  role: RoleAppearanceDto;
+
   constructor(partial: Partial<User>) {
     Object.assign(this, partial);
+    this.role = roleAppearance(partial.roles);
   }
 }

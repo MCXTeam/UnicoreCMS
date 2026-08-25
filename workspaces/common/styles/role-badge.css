@@ -1,0 +1,47 @@
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15em 0.6em;
+  border-radius: 0.4em;
+  font-size: 0.75em;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+  background-size: cover;
+  background-position: center;
+}
+
+.role-badge--animated {
+  background-size: 200% 100%;
+  animation: role-badge-shift 4s linear infinite;
+}
+
+.role-badge--neon {
+  animation: role-badge-glow 2s ease-in-out infinite;
+}
+
+@keyframes role-badge-shift {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 200% 50%;
+  }
+}
+
+@keyframes role-badge-glow {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.35);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .role-badge--animated,
+  .role-badge--neon {
+    animation: none;
+  }
+}

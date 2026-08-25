@@ -36,6 +36,12 @@
       "import": "./dist/permissions.mjs",
       "require": "./dist/permissions.js"
     },
+    "./roles": {
+      "types": "./dist/roles.d.ts",
+      "import": "./dist/roles.mjs",
+      "require": "./dist/roles.js"
+    },
+    "./styles/*": "./styles/*",
     "./dashboard": {
       "types": "./dist/dashboard.d.ts",
       "import": "./dist/dashboard.mjs",
@@ -55,6 +61,11 @@
       "types": "./dist/webhooks.d.ts",
       "import": "./dist/webhooks.mjs",
       "require": "./dist/webhooks.js"
+    },
+    "./password": {
+      "types": "./dist/password.d.ts",
+      "import": "./dist/password.mjs",
+      "require": "./dist/password.js"
     },
     "./locales": {
       "types": "./dist/locales.d.ts",
