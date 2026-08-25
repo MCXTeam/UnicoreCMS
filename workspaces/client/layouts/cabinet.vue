@@ -10,7 +10,7 @@
           <span class="d-none d-md-inline">{{ $pub.sitename }}</span>
         </NuxtLink>
         <nav class="cab-top__nav d-none d-xl-flex">
-          <NuxtLink v-for="item in navbar" :key="item.key" :to="item.to" class="cab-top__link">
+          <NuxtLink v-for="item in navbar" :key="item.key" :to="item.to" class="cab-top__link without-underline">
             <i :class="item.icon"></i> {{ $t(item.label) }}
           </NuxtLink>
         </nav>
@@ -36,13 +36,13 @@
         <h3 class="ms-2 my-0">{{ $pub.sitename }}</h3>
       </template>
       <nav class="cab-menu">
-        <NuxtLink v-for="item in navbar" :key="item.key" :to="item.to" class="cab-menu__item">
+        <NuxtLink v-for="item in navbar" :key="item.key" :to="item.to" class="cab-menu__item without-underline">
           <i :class="item.icon"></i> {{ $t(item.label) }}
         </NuxtLink>
       </nav>
       <hr />
       <nav class="cab-menu">
-        <NuxtLink v-for="tab in tabs" :key="tab.key" :to="tab.to" :class="['cab-menu__item', tabClass(tab)]">
+        <NuxtLink v-for="tab in tabs" :key="tab.key" :to="tab.to" :class="['cab-menu__item', 'without-underline', tabClass(tab)]">
           <i :class="tab.icon"></i> {{ $t(tab.label) }}
         </NuxtLink>
       </nav>
@@ -60,7 +60,7 @@
               </div>
             </div>
             <nav class="cab-menu cab-menu--rail">
-              <NuxtLink v-for="tab in tabs" :key="tab.key" :to="tab.to" :class="['cab-menu__item', tabClass(tab)]">
+              <NuxtLink v-for="tab in tabs" :key="tab.key" :to="tab.to" :class="['cab-menu__item', 'without-underline', tabClass(tab)]">
                 <i :class="tab.icon"></i> {{ $t(tab.label) }}
               </NuxtLink>
             </nav>
@@ -77,7 +77,7 @@
           <p v-if="hint" class="m-0">{{ $t(hint) }}</p>
         </div>
         <div class="cab-tabs d-xl-none">
-          <NuxtLink v-for="tab in tabs" :key="tab.key" :to="tab.to" :class="['cab-tabs__item', tabClass(tab)]">
+          <NuxtLink v-for="tab in tabs" :key="tab.key" :to="tab.to" :class="['cab-tabs__item', 'without-underline', tabClass(tab)]">
             <i :class="tab.icon"></i> {{ $t(tab.label) }}
           </NuxtLink>
         </div>

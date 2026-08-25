@@ -125,7 +125,6 @@
   &:hover {
     background: var(--cab-card);
     color: rgba(var(--vs-text), 0.9) !important;
-    text-decoration: none;
   }
 
   &.nuxt-link-exact-active {
@@ -159,7 +158,6 @@
 
   &:hover {
     border-color: rgba(var(--vs-primary), 0.5);
-    text-decoration: none;
   }
 
   i {
@@ -271,7 +269,6 @@
     &:hover {
       background: rgba(var(--vs-text), 0.05);
       color: rgba(var(--vs-text), 0.9) !important;
-      text-decoration: none;
     }
 
     &.nuxt-link-exact-active,
@@ -342,7 +339,6 @@
       background: rgba(var(--vs-primary), 0.14);
       border-color: rgba(var(--vs-primary), 0.35);
       color: rgb(var(--vs-primary)) !important;
-      text-decoration: none;
     }
   }
 }
