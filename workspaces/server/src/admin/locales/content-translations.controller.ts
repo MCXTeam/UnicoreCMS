@@ -1,9 +1,11 @@
 import { Body, Controller, ForbiddenException, Get, Param, Patch, Req } from '@nestjs/common';
 import { contentTranslationPermissions, Permission } from 'unicore-common';
+import { RuntimePermissions } from '../roles/decorators/permission.decorator';
 import { matchPermission } from '../roles/guards/permisson.guard';
 import { ContentTranslationsService } from './content-translations.service';
 import { ContentTranslationsInput } from './dto/content-translations.input';
 
+@RuntimePermissions()
 @Controller('content-translations')
 export class ContentTranslationsController {
   constructor(private contentTranslations: ContentTranslationsService) {}

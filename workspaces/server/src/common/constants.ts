@@ -13,6 +13,7 @@ export const WS_PUBLIC_ROOM = 'public';
 
 export const IS_PUBLIC_KEY = 'isPublic';
 export const PERMISSIONS_KEY = 'permissions';
+export const RUNTIME_PERMISSIONS_KEY = 'runtimePermissions';
 export const DONATE_PERMS_CACHE_KEY = '__donateWebPerms';
 export const ALLOW_INACTIVE_KEY = 'allowInactive';
 

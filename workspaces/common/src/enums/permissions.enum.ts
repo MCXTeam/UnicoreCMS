@@ -22,6 +22,7 @@ export enum Permission {
   AdminUsersUpdatePassword = "admin.users.update.password",
   AdminUsersUpdateActivation = "admin.users.update.activation",
   AdminUsersUpdateRoles = "admin.users.update.roles",
+  AdminUsersUpdateRolesAdmin = "admin.users.update.roles.admin",
   AdminUsersMoney = "admin.users.money",
   AdminUsersMoneyServer = "admin.users.money.%server%",
   AdminUsersGive = "admin.users.give",

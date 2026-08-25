@@ -1,5 +1,5 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { Permission } from 'unicore-common';
+import { isAdminPermission, Permission } from 'unicore-common';
 import { uniq } from 'lodash';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from './entities/role.entity';
@@ -47,7 +47,7 @@ export class RolesService {
       .execute();
   }
 
-  async findAutoCompleate(): Promise<string[]> {
+  async findAutoCompleate(withAdmin = true): Promise<string[]> {
     const servers = await this.serversService.find();
     const autocompleate = permissionAutocomplete().map((perm: any) => {
       if (perm.includes('%server%')) {
@@ -56,7 +56,9 @@ export class RolesService {
       return perm;
     });
 
-    return uniq(autocompleate.flat(2)).sort();
+    const all = uniq(autocompleate.flat(2)).sort();
+
+    return withAdmin ? all : all.filter((perm) => !isAdminPermission(perm));
   }
 
   find(): Promise<Role[]> {

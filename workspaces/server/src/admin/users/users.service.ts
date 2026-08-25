@@ -27,7 +27,7 @@ import {
 import { PublicUsersDto } from './dto/public-users.dto';
 import { UserUpdateInput } from './dto/user-update.input';
 import { matchPermission, transformPermissions } from '../roles/guards/permisson.guard';
-import { Permission, UserField, USER_FIELDS } from 'unicore-common';
+import { isAdminPermission, Permission, UserField, USER_FIELDS } from 'unicore-common';
 import { SettingsService } from 'src/game/cabinet/settings/providers/settings.service';
 import { PasswordChangeInput } from 'src/game/cabinet/settings/dto/password-change.input';
 import { PasswordUpdateInput } from 'src/game/cabinet/settings/dto/password-update.input';
@@ -35,6 +35,16 @@ import { Transactional } from 'typeorm-transactional';
 
 function sameSet(left: string[] = [], right: string[] = []): boolean {
   return _.xor(left, right).length === 0;
+}
+
+function adminPermissions(user: Partial<User>): string[] {
+  const resolved = transformPermissions({ ...user, perms: [...(user.perms || [])], roles: [...(user.roles || [])] });
+
+  return (resolved.perms || []).filter(isAdminPermission);
+}
+
+async function canGrantAdminPermissions(actor: User): Promise<boolean> {
+  return matchPermission([Permission.AdminUsersUpdateRolesAdmin], { user: actor });
 }
 
 export async function userPermissionCheck(user: User, actor: User) {
@@ -276,6 +286,8 @@ export class UsersService {
 
     if (actor) {
       if (!(await userPermissionCheck(user, actor))) throw new ForbiddenException();
+
+      if (adminPermissions(user).length && !(await canGrantAdminPermissions(actor))) throw new ForbiddenException();
     }
 
     return this.usersRepository.save(user);
@@ -334,6 +346,9 @@ export class UsersService {
     }
 
     if (actor && !(await userPermissionCheck(user, actor))) throw new ForbiddenException();
+
+    if (actor && _.difference(adminPermissions(user), adminPermissions(before)).length && !(await canGrantAdminPermissions(actor)))
+      throw new ForbiddenException();
 
     if (actor && user.uuid == actor.uuid) {
       if (actor.superuser != user.superuser) throw new BadRequestException();

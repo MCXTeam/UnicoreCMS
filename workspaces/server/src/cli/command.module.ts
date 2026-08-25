@@ -9,6 +9,7 @@ import { ormconfig } from 'src/ormconfig';
 import { UsersCommandCreate } from './commands/users.commands';
 import { SeedCommand } from './commands/seed.command';
 import { CryptoRewrapCommand } from './commands/crypto.commands';
+import { PermissionsCheckCommand } from './commands/permissions.commands';
 import { User } from 'src/admin/users/entities/user.entity';
 import { RCON } from 'src/game/servers/rcon/entities/rcon.entity';
 
@@ -29,6 +30,6 @@ import { RCON } from 'src/game/servers/rcon/entities/rcon.entity';
     UsersModule,
     TypeOrmModule.forFeature([User, RCON]),
   ],
-  providers: [UsersCommandCreate, SeedCommand, CryptoRewrapCommand],
+  providers: [UsersCommandCreate, SeedCommand, CryptoRewrapCommand, PermissionsCheckCommand],
 })
 export class CommandsModule {}
