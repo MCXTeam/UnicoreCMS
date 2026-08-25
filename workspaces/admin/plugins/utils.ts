@@ -3,7 +3,7 @@ import { formatDuration, type DurationUnit } from 'unicore-common/duration'
 import { useConfigStore } from '~/stores/config'
 import { useLocale } from '~/composables/useLocale'
 
-export default defineNuxtPlugin(async () => {
+export default defineNuxtPlugin(async (nuxtApp) => {
   const parser = new UAParser()
   const rc = useRuntimeConfig()
   const configStore = useConfigStore()
@@ -26,6 +26,15 @@ export default defineNuxtPlugin(async () => {
     },
     formatDuration(value: number, unit: DurationUnit = 'minutes') {
       return formatDuration(value, unit, locale.value)
+    },
+    notifyError(error: any, fallback: string): void {
+      if (error?.response?.status === 403) return
+
+      const message = error?.response?.data?.message
+      const text = Array.isArray(message) ? message.join('. ') : message
+      const detail = text && text !== error?.response?.data?.error ? text : fallback
+
+      nuxtApp.vueApp.config.globalProperties.$toast?.add({ severity: 'error', detail, life: 3000 })
     },
     uaParse(value: string) {
       const res = parser.setUA(value).getResult()

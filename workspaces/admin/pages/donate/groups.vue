@@ -548,11 +548,7 @@ export default {
         await this.load()
       } catch (err) {
         this.loading = false
-        this.$toast.add({
-          severity: 'error',
-          detail: this.$t('admin.invalid_data'),
-          life: 3000,
-        })
+        this.$utils.notifyError(err, this.$t('admin.invalid_data'))
       }
     },
     async updateGroup() {
@@ -576,11 +572,7 @@ export default {
         await this.load()
       } catch (err) {
         this.loading = false
-        this.$toast.add({
-          severity: 'error',
-          detail: this.$t('admin.invalid_data'),
-          life: 3000,
-        })
+        this.$utils.notifyError(err, this.$t('admin.invalid_data'))
       }
     },
     async removeMany() {

@@ -190,6 +190,7 @@ import { FilterMatchMode } from '@primevue/core/api'
 import { Form, Field } from 'vee-validate'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
+import { webhookChannelNeeds } from 'unicore-common/webhooks'
 
 export default {
   components: {
@@ -215,10 +216,16 @@ export default {
       return this.$_.get(this.webhook.type, 'id') === 'news_created'
     },
     needsUrl() {
-      return ['discord', 'json'].includes(this.webhook.request)
+      return webhookChannelNeeds(this.webhook.request, 'url')
     },
     needsTarget() {
-      return ['telegram', 'vk'].includes(this.webhook.request)
+      return webhookChannelNeeds(this.webhook.request, 'target')
+    },
+  },
+  watch: {
+    'webhook.request'() {
+      if (!this.needsUrl) this.webhook.url = null
+      if (!this.needsTarget) this.webhook.target = null
     },
   },
   data() {
@@ -293,11 +300,7 @@ export default {
         await this.load()
       } catch (err) {
         this.loading = false
-        this.toast.add({
-          severity: 'error',
-          detail: this.$t('admin.invalid_data'),
-          life: 3000,
-        })
+        this.$utils.notifyError(err, this.$t('admin.invalid_data'))
       }
     },
     async updateWebhook() {
@@ -315,11 +318,7 @@ export default {
         await this.load()
       } catch (err) {
         this.loading = false
-        this.toast.add({
-          severity: 'error',
-          detail: this.$t('admin.invalid_data'),
-          life: 3000,
-        })
+        this.$utils.notifyError(err, this.$t('admin.invalid_data'))
       }
     },
     async removeMany() {

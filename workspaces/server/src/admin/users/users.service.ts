@@ -33,6 +33,10 @@ import { PasswordChangeInput } from 'src/game/cabinet/settings/dto/password-chan
 import { PasswordUpdateInput } from 'src/game/cabinet/settings/dto/password-update.input';
 import { Transactional } from 'typeorm-transactional';
 
+function sameSet(left: string[] = [], right: string[] = []): boolean {
+  return _.xor(left, right).length === 0;
+}
+
 export async function userPermissionCheck(user: User, actor: User) {
   if (actor.superuser) return true;
   if (!actor.superuser && user.superuser) return false;
@@ -247,6 +251,11 @@ export class UsersService {
     user.uuid = randomUUID();
     if (actor && !actor.superuser && input.superuser) throw new ForbiddenException();
 
+    if (!allowed.has('email') && input.email) throw new ForbiddenException();
+    if (!allowed.has('activated') && input.activated) throw new ForbiddenException();
+    if (!allowed.has('roles') && (input.roles || []).some((id) => id != ImportantRoles.Default)) throw new ForbiddenException();
+    if (!allowed.has('perms') && (input.perms || []).length) throw new ForbiddenException();
+
     user.username = input.username;
     user.superuser = actor && !actor.superuser ? null : input.superuser;
     user.locale = input.locale;
@@ -288,6 +297,23 @@ export class UsersService {
       throw new ForbiddenException();
 
     const superuser = actor && !actor.superuser ? user.superuser : input.superuser;
+
+    if (!allowed.has('email') && input.email !== undefined && (input.email || null) != (user.email || null)) throw new ForbiddenException();
+
+    if (!allowed.has('activated') && input.activated !== undefined && Boolean(input.activated) != Boolean(user.activated))
+      throw new ForbiddenException();
+
+    if (
+      !allowed.has('roles') &&
+      input.roles !== undefined &&
+      !sameSet(
+        input.roles,
+        (user.roles || []).map((role) => role.id),
+      )
+    )
+      throw new ForbiddenException();
+
+    if (!allowed.has('perms') && input.perms !== undefined && !sameSet(input.perms, user.perms || [])) throw new ForbiddenException();
 
     user.username = input.username;
     user.superuser = superuser;

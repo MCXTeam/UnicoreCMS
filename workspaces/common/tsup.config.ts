@@ -11,6 +11,8 @@ export default defineConfig({
     "src/permissions.ts",
     "src/dashboard.ts",
     "src/users.ts",
+    "src/content-translations.ts",
+    "src/webhooks.ts",
     "src/locales.ts",
     "src/enums/index.ts",
     "src/issuance/index.ts",

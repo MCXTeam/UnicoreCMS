@@ -4,6 +4,8 @@ export * from "./duration";
 export * from "./permissions";
 export * from "./dashboard";
 export * from "./users";
+export * from "./content-translations";
+export * from "./webhooks";
 export * from "./locales";
 export * from "./envconfig";
 export * from "./public-config";
