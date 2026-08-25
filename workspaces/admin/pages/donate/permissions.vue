@@ -285,6 +285,10 @@
                   <small>{{ $t('admin.virtual_percent_hint') }}</small>
                 </VeeField>
               </div>
+              <div class="field-checkbox">
+                <Checkbox :binary="true" v-model="permission.giftable" inputId="permission-giftable" />
+                <label for="permission-giftable">{{ $t('admin.giftable') }}</label>
+              </div>
             </template>
 
             <template #translation>
@@ -358,6 +362,7 @@ export default {
         perms: [],
         web_perms: [],
         virtual_percent: null,
+        giftable: true,
       },
       permissionDialog: false,
       section: 'main',
@@ -441,6 +446,7 @@ export default {
           perms: [],
           web_perms: [],
           virtual_percent: null,
+        giftable: true,
         }
       }
       this.translations.attach(this.permission)

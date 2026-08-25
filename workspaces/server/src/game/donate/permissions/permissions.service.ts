@@ -319,6 +319,7 @@ export class DonatePermissionsService {
     perm.price = currencyUtils.roundByType(input.price, SystemCurrency.REAL);
     perm.sale = input.sale;
     perm.virtual_percent = input.virtual_percent;
+    perm.giftable = input.giftable !== false;
 
     perm.periods = await this.periodsRepository.findBy({
       id: In(input.periods),
@@ -366,6 +367,7 @@ export class DonatePermissionsService {
     perm.price = currencyUtils.roundByType(input.price, SystemCurrency.REAL);
     perm.sale = input.sale;
     perm.virtual_percent = input.virtual_percent;
+    perm.giftable = input.giftable !== false;
 
     perm.periods = await this.periodsRepository.findBy({
       id: In(input.periods),

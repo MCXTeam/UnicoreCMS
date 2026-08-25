@@ -68,4 +68,9 @@ export class ProductInput {
   @IsInt()
   @Min(1)
   multiple_of?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  giftable?: boolean;
+
 }

@@ -264,6 +264,7 @@ export class DonateGroupsService {
     group.web_perms = input.web_perms;
     group.features = input.features.map((feature) => Object.assign(new GroupFeature(), feature));
     group.virtual_percent = input.virtual_percent;
+    group.giftable = input.giftable !== false;
 
     group.servers = await this.serversRepository.findBy({
       id: In(input.servers),
@@ -309,6 +310,7 @@ export class DonateGroupsService {
     group.web_perms = input.web_perms;
     group.features = input.features.map((feature) => Object.assign(new GroupFeature(), feature));
     group.virtual_percent = input.virtual_percent;
+    group.giftable = input.giftable !== false;
 
     group.servers = await this.serversRepository.findBy({
       id: In(input.servers),

@@ -14,6 +14,9 @@ export class Kit {
   @Column({ name: 'name' })
   name: string;
 
+  @Column({ name: 'giftable', default: true })
+  giftable: boolean;
+
   @Column('longtext', {
     name: 'description',
     nullable: true,

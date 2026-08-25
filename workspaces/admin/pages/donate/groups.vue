@@ -335,6 +335,10 @@
                   <small>{{ $t('admin.virtual_percent_hint') }}</small>
                 </VeeField>
               </div>
+              <div class="field-checkbox">
+                <Checkbox :binary="true" v-model="group.giftable" inputId="group-giftable" />
+                <label for="group-giftable">{{ $t('admin.giftable') }}</label>
+              </div>
             </template>
 
             <template #translation>
@@ -410,6 +414,7 @@ export default {
         kits: [],
         periods: [],
         virtual_percent: null,
+        giftable: true,
       },
       groupDialog: false,
       section: 'main',
@@ -542,6 +547,7 @@ export default {
           kits: [],
           periods: [],
           virtual_percent: null,
+        giftable: true,
         }
       }
       this.translations.attach(this.group)

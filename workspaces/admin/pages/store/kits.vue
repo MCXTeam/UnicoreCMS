@@ -367,6 +367,10 @@
                   <small>{{ $t('admin.virtual_percent_hint') }}</small>
                 </VeeField>
               </div>
+              <div class="field-checkbox">
+                <Checkbox :binary="true" v-model="kit.giftable" inputId="kit-giftable" />
+                <label for="kit-giftable">{{ $t('admin.giftable') }}</label>
+              </div>
             </template>
 
             <template #translation>
@@ -449,6 +453,7 @@ export default {
         items: [],
         icon: null,
         virtual_percent: null,
+        giftable: true,
       },
       fileDialog: false,
       kitDialog: false,
@@ -609,6 +614,7 @@ export default {
           categories: this.filters?.categories?.value || [],
           items: [],
           virtual_percent: null,
+        giftable: true,
         }
       }
       this.translations.attach(this.kit)

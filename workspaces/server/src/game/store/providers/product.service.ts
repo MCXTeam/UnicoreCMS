@@ -292,6 +292,7 @@ export class ProductsService {
     product.sale = input.sale;
     product.give_method = input.give_method;
     product.virtual_percent = input.virtual_percent;
+    product.giftable = input.giftable !== false;
     product.multiple_of = input.multiple_of;
 
     if (product.give_method == GiveMethod.UnicoreConnect) {
@@ -325,6 +326,7 @@ export class ProductsService {
     product.sale = input.sale;
     product.give_method = input.give_method;
     product.virtual_percent = input.virtual_percent;
+    product.giftable = input.giftable !== false;
     product.multiple_of = input.multiple_of;
 
     if (product.give_method == GiveMethod.UnicoreConnect) {

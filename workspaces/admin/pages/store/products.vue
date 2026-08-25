@@ -590,6 +590,10 @@
                   <small>{{ $t('admin.virtual_percent_hint') }}</small>
                 </VeeField>
               </div>
+              <div class="field-checkbox">
+                <Checkbox :binary="true" v-model="product.giftable" inputId="product-giftable" />
+                <label for="product-giftable">{{ $t('admin.giftable') }}</label>
+              </div>
             </template>
 
             <template #translation>
@@ -676,6 +680,7 @@ export default {
         item_id: null,
         nbt: null,
         virtual_percent: null,
+        giftable: true,
         multiple_of: null,
       },
       productMany: {
@@ -839,6 +844,7 @@ export default {
           icon: null,
           nbt: null,
           virtual_percent: null,
+        giftable: true,
           multiple_of: null,
         }
       }

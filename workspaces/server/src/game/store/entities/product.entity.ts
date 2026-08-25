@@ -16,6 +16,9 @@ export class Product {
   @Column({ name: 'name' })
   name: string;
 
+  @Column({ name: 'giftable', default: true })
+  giftable: boolean;
+
   @Column({ nullable: true, name: 'icon' })
   icon: string;
 

@@ -74,6 +74,7 @@ export class KitsService {
     kit.price = currencyUtils.roundByType(input.price, SystemCurrency.REAL);
     kit.sale = input.sale;
     kit.virtual_percent = input.virtual_percent;
+    kit.giftable = input.giftable !== false;
 
     kit.servers = await this.serversRepository.findBy({
       id: In(input.servers),
@@ -105,6 +106,7 @@ export class KitsService {
     kit.sale = input.sale;
     kit.description = input.description;
     kit.virtual_percent = input.virtual_percent;
+    kit.giftable = input.giftable !== false;
 
     kit.servers = await this.serversRepository.findBy({
       id: In(input.servers),

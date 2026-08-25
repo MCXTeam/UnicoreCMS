@@ -1,5 +1,18 @@
 import { Type } from 'class-transformer';
-import { ArrayMaxSize, IsArray, IsDefined, IsInt, IsNumber, IsOptional, IsString, Max, MaxLength, Min, ValidateNested } from 'class-validator';
+import {
+  ArrayMaxSize,
+  IsArray,
+  IsBoolean,
+  IsDefined,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+  ValidateNested,
+} from 'class-validator';
 import { GroupFeatureInput } from './group-feature.input';
 import { BULK_ITEMS_MAX, IsDonateWebPerm, NAME_MAX_LENGTH, PRICE_MIN, SanitizeHtml, SERVER_ID_MAX_LENGTH } from '@common';
 
@@ -68,4 +81,9 @@ export class GroupInput {
   @Min(0)
   @Max(100)
   virtual_percent?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  giftable?: boolean;
+
 }

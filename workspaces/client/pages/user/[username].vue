@@ -48,8 +48,7 @@
         </table>
         <h2 class="mt-4 mb-3">{{ $t('profile.server_stats') }}</h2>
         <div v-for="pt in user.playtimes" :key="pt.server.id" class="d-flex align-items-center mb-2">
-          <Avatar size="large" v-if="pt.server.icon" :image="`${$pub.apiBaseurl}/${pt.server.icon}`"> </Avatar>
-          <Avatar size="large" v-else> <i class="bx bxs-server"></i> </Avatar>
+          <IconAvatar :path="pt.server.icon" size="large" icon="bx bxs-server" />
           <div class="ms-4">
             <h3 class="text-uppercase m-0" v-text="pt.server.name" />
             <span v-if="pt.time">{{ $utils.formatDuration(pt.time) }}</span>

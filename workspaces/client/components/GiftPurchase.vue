@@ -1,5 +1,5 @@
 <template>
-  <div v-if="modes.length">
+  <div v-if="modes.length && allowed !== false">
     <hr class="my-3" />
     <div class="d-flex align-items-center">
       <h4 class="m-0">{{ $t('cabinet.gift_title') }}</h4>
@@ -32,6 +32,7 @@ const props = defineProps<{
   payload: Record<string, unknown>
   price: number
   disabled?: boolean
+  allowed?: boolean
 }>()
 
 const emit = defineEmits<{ done: [] }>()

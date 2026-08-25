@@ -20,6 +20,9 @@ export class DonateGroup {
   @Column({ name: 'name' })
   name: string;
 
+  @Column({ name: 'giftable', default: true })
+  giftable: boolean;
+
   @Column({ name: 'priority', nullable: true })
   priority?: number;
 

@@ -141,6 +141,8 @@ export class GiftPurchaseService {
       use_virtual: input.use_virtual,
     });
 
+    if (group.giftable === false) throw new BadRequestException('Эту группу дарить нельзя');
+
     await this.charge(user, realCost, virtualCost);
 
     const promocode = recipient
@@ -172,6 +174,8 @@ export class GiftPurchaseService {
       period: input.period,
       use_virtual: input.use_virtual,
     });
+
+    if (permission.giftable === false) throw new BadRequestException('Эту привилегию дарить нельзя');
 
     await this.charge(user, realCost, virtualCost);
 
@@ -213,6 +217,9 @@ export class GiftPurchaseService {
       amount: input.amount,
       use_virtual: input.use_virtual,
     });
+
+    if (kit ? kitEntity.giftable === false : product.giftable === false)
+      throw new BadRequestException(kit ? 'Этот набор дарить нельзя' : 'Этот товар дарить нельзя');
 
     await this.charge(user, realCost, virtualCost);
 

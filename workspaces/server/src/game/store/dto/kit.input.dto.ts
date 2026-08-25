@@ -11,6 +11,7 @@ export class KitItemInput {
   @IsNumber()
   @Min(1)
   amount: number;
+
 }
 
 export class KitInput {
@@ -60,4 +61,8 @@ export class KitInput {
   @Min(0)
   @Max(100)
   virtual_percent?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  giftable?: boolean;
 }
