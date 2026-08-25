@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { instanceToPlain } from 'class-transformer';
 import { User } from 'src/admin/users/entities/user.entity';
@@ -16,9 +16,7 @@ export class ReferalsService {
   async getInviter(user: User) {
     const inviter = await this.referalsRepo.findOne({ where: { user: { uuid: user.uuid } }, relations: ['user', 'inviter'] });
 
-    if (!inviter) throw new NotFoundException();
-
-    return new InviterDto(inviter);
+    return inviter ? new InviterDto(inviter) : null;
   }
 
   async getReferals(inviter: User) {
