@@ -111,7 +111,9 @@ export default {
         .filter((section) => {
           const node = this.$refs.content.querySelector(`[data-section="${section.key}"]`)
 
-          return node ? [...node.querySelectorAll('.p-error')].some((error) => error.textContent.trim()) : false
+          return node
+            ? [...node.querySelectorAll('.p-error')].some((error) => !error.closest('label') && error.textContent.trim())
+            : false
         })
         .map((section) => section.key)
     },

@@ -93,7 +93,7 @@ a:not(.p-button):visited {
   text-decoration: none;
   cursor: pointer;
 
-  &:hover {
+  &:hover:not(:has(h1, h2, h3, h4, h5, h6, p, div, article, section, table)) {
     text-decoration: underline;
     text-decoration-color: rgba(var(--vs-primary), 0.5);
     text-decoration-thickness: 2px;

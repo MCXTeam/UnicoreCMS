@@ -5,6 +5,7 @@
         :modelValue="modelValue"
         @update:modelValue="$emit('update:modelValue', $event || modelValue)"
         :options="locales"
+        optionLabel="name"
         optionValue="code"
         :allowEmpty="false"
         class="locale-bar__tabs"
