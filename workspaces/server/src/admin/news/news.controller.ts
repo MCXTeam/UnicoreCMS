@@ -5,7 +5,6 @@ import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
-import { Permission } from 'unicore-common';
 import { Permissions } from '../roles/decorators/permission.decorator';
 import { matchPermission } from '../roles/guards/permisson.guard';
 import { NewsInput } from './dto/news.input';
@@ -19,7 +18,7 @@ export class NewsController {
   private async seesHidden(request: any): Promise<boolean> {
     if (!request?.user) return false;
 
-    return matchPermission([Permission.EditorNewsHidden], request);
+    return matchPermission(['panel.news.hidden'], request);
   }
 
   @Public()
@@ -35,18 +34,18 @@ export class NewsController {
   }
 
   @Delete('bulk')
-  @Permissions([Permission.AdminDashboard, Permission.EditorNewsDeleteMany])
+  @Permissions(['panel.access', 'panel.news.delete.many'])
   removeMany(@Body() body: DeleteManyInput) {
     return this.newsService.removeMany(body.items);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorNewsPublish])
+  @Permissions(['panel.access', 'panel.news.publish'])
   @Post('deliveries/:id/retry')
   retryDelivery(@Param('id', ParseIntPipe) id: number) {
     return this.newsService.retryDelivery(id);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorNewsPublish])
+  @Permissions(['panel.access', 'panel.news.publish'])
   @Get('publish/targets')
   publishTargets() {
     return this.newsService.publishTargets();
@@ -59,7 +58,7 @@ export class NewsController {
   }
 
   @Post()
-  @Permissions([Permission.AdminDashboard, Permission.EditorNewsCreate])
+  @Permissions(['panel.access', 'panel.news.create'])
   @UseInterceptors(
     FileInterceptor('file', {
       storage: StorageManager.disk(),
@@ -72,30 +71,30 @@ export class NewsController {
   }
 
   @Patch(':id')
-  @Permissions([Permission.AdminDashboard, Permission.EditorNewsUpdate])
+  @Permissions(['panel.access', 'panel.news.update'])
   update(@CurrentUser() user: User, @Param('id', ParseIntPipe) id: number, @Body() body: NewsInput) {
     return this.newsService.update(id, body, Boolean(user.superuser));
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorNewsPublish])
+  @Permissions(['panel.access', 'panel.news.publish'])
   @Post(':id/publish')
   publish(@Param('id', ParseIntPipe) id: number, @Body() body: NewsPublishInput) {
     return this.newsService.publish(id, body.mode, body.webhooks);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorNewsPublish])
+  @Permissions(['panel.access', 'panel.news.publish'])
   @Get(':id/deliveries')
   deliveries(@Param('id', ParseIntPipe) id: number) {
     return this.newsService.deliveries(id);
   }
 
   @Delete(':id')
-  @Permissions([Permission.AdminDashboard, Permission.EditorNewsDelete])
+  @Permissions(['panel.access', 'panel.news.delete'])
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.newsService.remove(id);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorNewsUpdate])
+  @Permissions(['panel.access', 'panel.news.update'])
   @Patch('image/:id')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -108,7 +107,7 @@ export class NewsController {
     return this.newsService.updateMedia(id, file);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorNewsUpdate])
+  @Permissions(['panel.access', 'panel.news.update'])
   @Delete('image/:id')
   removeMedia(@Param('id', ParseIntPipe) id: number) {
     return this.newsService.removeMedia(id);

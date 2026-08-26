@@ -2,7 +2,6 @@ import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, 
 import { Public } from 'src/auth/decorators/public.decorator';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
-import { Permission } from 'unicore-common';
 import { Permissions } from '../roles/decorators/permission.decorator';
 import { PageInput } from './dto/page.input';
 import { PagePathInput } from './dto/page-path.input';
@@ -12,7 +11,7 @@ import { PagesService } from './pages.service';
 export class PagesController {
   constructor(private pagesService: PagesService) {}
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminPagesCreate])
+  @Permissions(['panel.access', 'panel.pages.create'])
   @Post()
   create(@CurrentUser() user: User, @Body() body: PageInput) {
     return this.pagesService.create(body, Boolean(user.superuser));
@@ -54,13 +53,13 @@ export class PagesController {
     return page;
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminPagesUpdate])
+  @Permissions(['panel.access', 'panel.pages.update'])
   @Patch(':id')
   update(@CurrentUser() user: User, @Param('id', ParseIntPipe) id: number, @Body() body: PageInput) {
     return this.pagesService.update(id, body, Boolean(user.superuser));
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminPagesDelete])
+  @Permissions(['panel.access', 'panel.pages.delete'])
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.pagesService.remove(id);

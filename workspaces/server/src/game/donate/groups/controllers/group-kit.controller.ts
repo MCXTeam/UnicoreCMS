@@ -14,7 +14,6 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
-import { anyServerPermission, Permission } from 'unicore-common';
 import { GroupKitInput } from '../dto/group-kit.input';
 import { GroupKitsService } from '../providers/group-kit.service';
 
@@ -22,20 +21,20 @@ import { GroupKitsService } from '../providers/group-kit.service';
 export class GroupKitsController {
   constructor(private groupKitsService: GroupKitsService) {}
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateKitsCreate])
+  @Permissions(['panel.access', 'panel.donate.kits.create'])
   @Post()
   create(@Body() body: GroupKitInput) {
     return this.groupKitsService.create(body);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateKitsUpdate])
+  @Permissions(['panel.access', 'panel.donate.kits.update'])
   @Post('sort')
   sort(@Body() body: NumberSortInput) {
     return this.groupKitsService.sort(body);
   }
 
   @Permissions([
-    [Permission.EditorDonateRead, Permission.AdminUsersDonate, anyServerPermission(Permission.AdminUsersDonateServer)],
+    ['panel.donate.read', 'panel.users.donate', 'panel.users.donate.*'],
     { or: true },
   ])
   @Get()
@@ -43,14 +42,14 @@ export class GroupKitsController {
     return this.groupKitsService.find();
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateKitsDeleteMany])
+  @Permissions(['panel.access', 'panel.donate.kits.delete.many'])
   @Delete('bulk')
   removeMany(@Body() body: DeleteManyInput) {
     return this.groupKitsService.removeMany(body.items);
   }
 
   @Permissions([
-    [Permission.EditorDonateRead, Permission.AdminUsersDonate, anyServerPermission(Permission.AdminUsersDonateServer)],
+    ['panel.donate.read', 'panel.users.donate', 'panel.users.donate.*'],
     { or: true },
   ])
   @Get(':id')
@@ -64,19 +63,19 @@ export class GroupKitsController {
     return server;
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateKitsUpdate])
+  @Permissions(['panel.access', 'panel.donate.kits.update'])
   @Patch(':id')
   update(@Param('id', ParseIntPipe) id: number, @Body() body: GroupKitInput) {
     return this.groupKitsService.update(id, body);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateKitsDelete])
+  @Permissions(['panel.access', 'panel.donate.kits.delete'])
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.groupKitsService.remove(id);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateKitsUpdate])
+  @Permissions(['panel.access', 'panel.donate.kits.update'])
   @Patch('image/:server/:id')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -89,7 +88,7 @@ export class GroupKitsController {
     return this.groupKitsService.updateMedia(server, id, file);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateKitsUpdate])
+  @Permissions(['panel.access', 'panel.donate.kits.update'])
   @Delete('image/:server/:id')
   removeMedia(@Param('server') server: string, @Param('id', ParseIntPipe) id: number) {
     return this.groupKitsService.removeMedia(server, id);

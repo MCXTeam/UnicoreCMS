@@ -5,7 +5,13 @@
         <Toolbar class="mb-4">
           <template v-slot:start>
             <div class="my-2">
-              <Button @click="openDialog()" :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" />
+              <Button
+                v-if="canUpdate"
+                @click="openDialog()"
+                :label="$t('admin.create')"
+                icon="pi pi-plus"
+                class="p-button-success mr-2"
+              />
             </div>
           </template>
         </Toolbar>
@@ -30,9 +36,14 @@
           <Column sortable field="value" :header="$t('admin.value')"></Column>
           <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
-              <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
               <Button
-                v-if="!slotProps.data.important"
+                v-if="canUpdate"
+                @click="openDialog(slotProps.data)"
+                icon="pi pi-pencil"
+                class="p-button-rounded p-button-success mr-2"
+              />
+              <Button
+                v-if="canUpdate && !slotProps.data.important"
                 @click="removeCfg(slotProps.data.key)"
                 icon="pi pi-trash"
                 class="p-button-rounded p-button-warning mt-2"
@@ -121,6 +132,8 @@ export default {
     const { $t } = useNuxtApp()
 
     useHead({ title: computed(() => $t('admin.menu_settings')) })
+
+    return useAccess({ canUpdate: 'panel.config.update' })
   },
 
   data() {

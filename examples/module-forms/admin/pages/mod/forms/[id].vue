@@ -286,7 +286,7 @@ export default {
       const [form, channels, universe] = await Promise.all([
         this.$api.get(`/mod/forms/manage/${id}`).then((res) => res.data).catch(() => null),
         this.$api.get('/mod/forms/manage/channels').then((res) => res.data).catch(() => []),
-        this.$api.get('/admin/roles/autocompleate').then((res) => res.data).catch(() => []),
+        this.$api.get('/admin/permissions/catalog').then((res) => (res.data.permissions || []).map((entry) => entry.key)).catch(() => []),
       ])
 
       if (!form) return this.$router.push('/mod/forms')

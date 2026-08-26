@@ -1,3 +1,4 @@
+import { assertFieldAccess } from 'src/admin/roles/field-permissions';
 import { NumberSortInput, debitUserBalance, MomentWrapper } from '@common';
 import { events } from 'unicore-api';
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
@@ -9,7 +10,6 @@ import { HistoryService } from 'src/game/cabinet/history/history.service';
 import { Server } from 'src/game/servers/entities/server.entity';
 import { IssuanceService } from 'src/game/servers/rcon/issuance.service';
 import { In, Not, Repository } from 'typeorm';
-import { Permission } from 'unicore-common';
 import { Period } from '../entities/period.entity';
 import { GroupKit } from '../groups/entities/group-kit.entity';
 import { GiveDonatePermInput } from './dto/give-donate-perm.input';
@@ -310,7 +310,8 @@ export class DonatePermissionsService {
     );
   }
 
-  async create(input: PermissionInput) {
+  async create(input: PermissionInput, request?: any) {
+    await assertFieldAccess('donate_permission', input, null, request);
     const perm = new DonatePermission();
 
     perm.name = input.name;
@@ -355,12 +356,14 @@ export class DonatePermissionsService {
     return this.donatePermissionsRepository.save(perm);
   }
 
-  async update(id: number, input: PermissionInput) {
+  async update(id: number, input: PermissionInput, request?: any) {
     const perm = await this.findOne(id);
 
     if (!perm) {
       throw new NotFoundException();
     }
+
+    await assertFieldAccess('donate_permission', input, perm, request);
 
     perm.name = input.name;
     perm.description = input.description;

@@ -1,23 +1,20 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { StorageManager } from '@common';
-import { isAdminPermission, Permission, RoleBadgeEffect } from 'unicore-common';
-import { uniq } from 'lodash';
+import { RoleBadgeEffect } from 'unicore-common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from './entities/role.entity';
 import { Repository } from 'typeorm';
 import { RoleUpdateInput } from './dto/role-update.input';
 import { RoleCreateInput } from './dto/role-create.input';
 import { User } from '../users/entities/user.entity';
-import { ServersService } from 'src/game/servers/servers.service';
 import { ImportantRoles } from './emums/important-roles.enum';
-import { permissionAutocomplete } from './mappers/permissions.mapper';
+import { assertGrantable } from './grant';
 
 @Injectable()
 export class RolesService {
   constructor(
     @InjectRepository(Role)
     private rolesRepository: Repository<Role>,
-    private serversService: ServersService,
   ) {}
 
   /**
@@ -32,34 +29,20 @@ export class RolesService {
         {
           id: ImportantRoles.Default,
           name: 'Игрок',
-          perms: ['user.*', '!user.cabinet.*.hd'],
+          perms: ['player.*', '!player.skin.hd', '!player.cloak.hd'],
           important: true,
           priority: 0,
         },
         {
           id: ImportantRoles.Banned,
           name: 'Заблокированный',
-          perms: ['!user.cabinet.transfer'],
+          perms: ['!player.transfer'],
           important: true,
           priority: 5,
         },
       ])
       .orIgnore()
       .execute();
-  }
-
-  async findAutoCompleate(withAdmin = true): Promise<string[]> {
-    const servers = await this.serversService.find();
-    const autocompleate = permissionAutocomplete().map((perm: any) => {
-      if (perm.includes('%server%')) {
-        perm = servers.map((server) => perm.replace('%server%', server.id));
-      }
-      return perm;
-    });
-
-    const all = uniq(autocompleate.flat(2)).sort();
-
-    return withAdmin ? all : all.filter((perm) => !isAdminPermission(perm));
   }
 
   find(): Promise<Role[]> {
@@ -85,10 +68,12 @@ export class RolesService {
     role.badge_effect = input.badge_effect ?? RoleBadgeEffect.None;
   }
 
-  async create(input: RoleCreateInput): Promise<Role> {
+  async create(input: RoleCreateInput, request?: any): Promise<Role> {
     if (await this.findOne(input.id)) {
       throw new ConflictException();
     }
+
+    await assertGrantable(input.perms, request);
 
     const role = new Role();
 
@@ -101,12 +86,14 @@ export class RolesService {
     return this.rolesRepository.save(role);
   }
 
-  async update(id: string, input: RoleUpdateInput): Promise<Role> {
+  async update(id: string, input: RoleUpdateInput, request?: any): Promise<Role> {
     const role = await this.findOne(id);
 
     if (!role) {
       throw new NotFoundException();
     }
+
+    await assertGrantable(input.perms, request);
 
     role.name = input.name;
     role.perms = input.perms;

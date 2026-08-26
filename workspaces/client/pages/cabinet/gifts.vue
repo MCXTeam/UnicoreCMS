@@ -13,7 +13,7 @@
       </div>
     </Dialog>
     <div class="cab-grid">
-      <CabTile :title="$t('cabinet.gift_codes')" icon="bx bx-gift" :span="6">
+      <CabTile v-if="canActivate" :title="$t('cabinet.gift_codes')" icon="bx bx-gift" :span="6">
         <Form v-slot="{ meta }" class="cab-form">
           <Field
             v-model="gift_code"
@@ -117,6 +117,8 @@ const giftsApi = useGifts()
 useHead({ title: computed(() => $t('header.cabinet')) })
 const recaptcha = useReCaptcha()
 const { config } = usePublicConfig()
+
+const { canActivate } = useAccess({ canActivate: 'player.gift.activate' })
 
 const monitorings_map = monitoringsMap
 const monitorings = ref([])

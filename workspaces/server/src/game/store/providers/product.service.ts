@@ -1,3 +1,4 @@
+import { assertFieldAccess } from 'src/admin/roles/field-permissions';
 import { assertUploadedFile, IMPORT_MAX_ENTRIES, IMPORT_MAX_UNPACKED_BYTES, StorageManager } from '@common';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -283,7 +284,8 @@ export class ProductsService {
     return this.productsRepository.save(product);
   }
 
-  async create(input: ProductInput) {
+  async create(input: ProductInput, request?: any) {
+    await assertFieldAccess('store_product', input, null, request);
     const product = new Product();
 
     product.name = input.name;
@@ -313,12 +315,14 @@ export class ProductsService {
     return this.productsRepository.save(product);
   }
 
-  async update(id: number, input: ProductInput) {
+  async update(id: number, input: ProductInput, request?: any) {
     const product = await this.findOne(id);
 
     if (!product) {
       throw new NotFoundException();
     }
+
+    await assertFieldAccess('store_product', input, product, request);
 
     product.name = input.name;
     product.description = input.description;

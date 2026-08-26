@@ -3,7 +3,6 @@ import { instanceToPlain } from 'class-transformer';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
-import { Permission } from 'unicore-common';
 import { PlaytimeDto } from './dto/playtime.dto';
 import { PlaytimeInput } from './dto/playtime.input';
 import { PlaytimeService } from './playtime.service';
@@ -17,19 +16,19 @@ export class PlaytimeController {
     return (await this.playtimeService.findOneByUser(user)).map((pt) => instanceToPlain(new PlaytimeDto(pt)));
   }
 
-  @Permissions([Permission.KernelUnicoreConnect])
+  @Permissions(['kernel.connect'])
   @Patch()
   update(@Body(new ParseArrayPipe({ items: PlaytimeInput, whitelist: true })) body: PlaytimeInput[]) {
     return this.playtimeService.update(body);
   }
 
-  @Permissions([Permission.KernelUnicoreConnect])
+  @Permissions(['kernel.connect'])
   @Get('user/:server/:uuid')
   async findOneByUserAndServer(@Param('server') server: string, @Param('uuid') uuid: string) {
     return this.playtimeService.findOneByUserAndServer(server, uuid);
   }
 
-  @Permissions([Permission.KernelUnicoreConnect])
+  @Permissions(['kernel.connect'])
   @Get('top/:server')
   async findTopByServer(@Param('server') server: string) {
     return this.playtimeService.findTopByServer(server);

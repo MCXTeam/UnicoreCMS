@@ -1,13 +1,13 @@
-import { BadRequestException, Controller, Delete, Param, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Controller, Delete, Param, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { STORAGE_MAX_ZIP_UPLOAD } from '@common';
-import { SuperUserGuard } from 'src/admin/roles/guards/superuser.guard';
+import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { StorageManager } from 'src/common/storage/storage.class';
 import { zipFileFilter } from 'src/common/storage/filters/zip-filter';
 import { InstallService } from './install.service';
 
 @Controller('admin/extensions')
-@UseGuards(SuperUserGuard)
+@Permissions(['panel.extensions.manage'])
 export class InstallController {
   constructor(private readonly service: InstallService) {}
 

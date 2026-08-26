@@ -203,7 +203,6 @@
 </template>
 
 <script>
-import { Permission } from 'unicore-common/enums'
 import { FilterMatchMode } from '@primevue/core/api'
 import { Form, Field } from 'vee-validate'
 import { useToast } from 'primevue/usetoast'
@@ -222,10 +221,10 @@ export default {
     const toast = useToast()
     const confirm = useConfirm()
     const access = useAccess({
-      canCreate: Permission.AdminWebhooksCreate,
-      canUpdate: Permission.AdminWebhooksUpdate,
-      canDelete: Permission.AdminWebhooksDelete,
-      canDeleteMany: Permission.AdminWebhooksDeleteMany,
+      canCreate: 'panel.webhooks.create',
+      canUpdate: 'panel.webhooks.update',
+      canDelete: 'panel.webhooks.delete',
+      canDeleteMany: 'panel.webhooks.delete.many',
     })
 
     return {

@@ -39,7 +39,12 @@
                 icon="pi pi-pencil"
                 class="p-button-rounded p-button-success mr-2"
               />
-              <Button @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary mr-2" />
+              <Button
+                v-if="canUpdate"
+                @click="openFileDialog(slotProps.data)"
+                icon="pi pi-images"
+                class="p-button-rounded p-button-secondary mr-2"
+              />
               <Button
                 v-if="canDelete"
                 @click="removeBonus(slotProps.data.id)"
@@ -135,7 +140,6 @@
   </div>
 </template>
 <script>
-import { Permission } from 'unicore-common/enums'
 import { FilterMatchMode } from '@primevue/core/api'
 import { Form, Field } from 'vee-validate'
 
@@ -149,9 +153,9 @@ export default {
 
     useHead({ title: computed(() => $t('admin.payment_bonuses_title')) })
     const access = useAccess({
-      canCreate: Permission.EditorPaymentBonusesGiftsCreate,
-      canUpdate: Permission.EditorPaymentBonusesUpdate,
-      canDelete: Permission.EditorPaymentBonusesDelete,
+      canCreate: 'panel.payment.bonuses.create',
+      canUpdate: 'panel.payment.bonuses.update',
+      canDelete: 'panel.payment.bonuses.delete',
     })
 
     return {

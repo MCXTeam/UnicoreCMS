@@ -15,7 +15,7 @@ import { DeleteManyUuidInput, THROTTLE_PUBLIC_USERS } from '@common';
 import { PasswordUpdateInput } from 'src/game/cabinet/settings/dto/password-update.input';
 import { Permissions } from '../roles/decorators/permission.decorator';
 import { matchPermission } from '../roles/guards/permisson.guard';
-import { Permission, UserField, USER_FIELDS, USER_FIELD_PERMISSIONS } from 'unicore-common';
+import { UserField, USER_FIELDS, USER_FIELD_PERMISSIONS } from 'unicore-common';
 
 @ApiTags('users')
 @Controller('users')
@@ -30,21 +30,21 @@ export class UsersController {
     return checked.filter(Boolean) as UserField[];
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminUsersCreate])
+  @Permissions(['panel.access', 'panel.users.create'])
   @ApiOperation({ summary: 'Создать одного пользователя' })
   @Post()
   async create(@Req() request: any, @CurrentUser() actor: User, @Body() createUserDto: UserInput) {
     return new UserDto(await this.usersService.create(createUserDto, actor, await this.allowedFields(request)));
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminUsersRead])
+  @Permissions(['panel.access', 'panel.users.read'])
   @ApiOperation({ summary: 'Найти всех пользователей' })
   @Get()
   async findAll(@Paginate() query: PaginateQuery): Promise<PaginatedUsersDto> {
     return new PaginatedUsersDto(await this.usersService.findAll(query));
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminUsersDeleteMany])
+  @Permissions(['panel.access', 'panel.users.delete.many'])
   @ApiOperation({ summary: 'Удалить несколько пользователей' })
   @Delete('bulk')
   removeMany(@CurrentUser() actor: User, @Body() body: DeleteManyUuidInput) {
@@ -58,7 +58,7 @@ export class UsersController {
     return this.usersService.count();
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminUsersRead])
+  @Permissions(['panel.access', 'panel.users.read'])
   @ApiOperation({ summary: 'Найти одного пользователя' })
   @Get(':uuid')
   async findOne(@Param('uuid') uuid: string) {
@@ -68,20 +68,34 @@ export class UsersController {
     return new UserBasicDto(user);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
+  @Permissions(['panel.access', 'panel.users.update'])
   @ApiOperation({ summary: 'Обновить одного пользователя' })
   @Patch(':uuid')
   async update(@Req() request: any, @CurrentUser() actor: User, @Param('uuid') uuid: string, @Body() updateUserDto: UserUpdateInput) {
     return new UserDto(await this.usersService.update(uuid, updateUserDto, actor, await this.allowedFields(request)));
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdatePassword])
+  @Permissions(['panel.access', 'panel.users.field.password'])
   @Patch(':uuid/password')
   async updatePassword(@CurrentUser() actor: User, @Param('uuid') uuid: string, @Body() body: PasswordUpdateInput) {
     return this.usersService.updatePassord(uuid, body, actor);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminUsersDelete])
+  @Permissions(['panel.access', 'panel.users.twofactor.reset'])
+  @ApiOperation({ summary: 'Сбросить двухфакторную проверку' })
+  @Delete(':uuid/2fa')
+  async resetTwoFactor(@CurrentUser() actor: User, @Param('uuid') uuid: string) {
+    return this.usersService.resetTwoFactor(uuid, actor);
+  }
+
+  @Permissions(['panel.access', 'panel.users.sessions.revoke'])
+  @ApiOperation({ summary: 'Завершить все сеансы игрока' })
+  @Delete(':uuid/sessions')
+  async closeSessions(@CurrentUser() actor: User, @Param('uuid') uuid: string) {
+    return this.usersService.closeSessions(uuid, actor);
+  }
+
+  @Permissions(['panel.access', 'panel.users.delete'])
   @ApiOperation({ summary: 'Удалить одного пользователя' })
   @Delete(':uuid')
   async remove(@CurrentUser() actor: User, @Param('uuid') uuid: string) {

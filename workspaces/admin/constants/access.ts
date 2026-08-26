@@ -1,55 +1,41 @@
-import { Permission } from 'unicore-common/enums'
+import type { Permission } from 'unicore-common/permissions'
 import { adminAccess } from 'unicore-api/admin'
 
 export const SUPERUSER_ONLY = 'superuser'
 
-export type RouteAccess = typeof SUPERUSER_ONLY | (Permission | string)[]
+export type RouteAccess = typeof SUPERUSER_ONLY | Permission[]
 
 export const ROUTE_ACCESS: Record<string, RouteAccess> = {
-  '/': [Permission.AdminDashboard],
-  '/users': [Permission.AdminUsersRead],
-  '/revenue': [Permission.AdminDashboardRevenue],
-  '/roles': SUPERUSER_ONLY,
-  '/config': SUPERUSER_ONLY,
-  '/locales': SUPERUSER_ONLY,
-  '/api': SUPERUSER_ONLY,
-  '/modules': SUPERUSER_ONLY,
-  '/themes': SUPERUSER_ONLY,
-  '/news': [
-    Permission.EditorNewsCreate,
-    Permission.EditorNewsUpdate,
-    Permission.EditorNewsDelete,
-    Permission.EditorNewsDeleteMany,
-  ],
-  '/pages': [Permission.AdminPagesRead],
-  '/email': [Permission.AdminEmailRead],
-  '/servers': [
-    Permission.AdminServersRead,
-    Permission.AdminServersCreate,
-    Permission.AdminServersUpdate,
-    Permission.AdminServersDelete,
-  ],
-  '/mods': [
-    Permission.EditorModsCreate,
-    Permission.EditorModsUpdate,
-    Permission.EditorModsDelete,
-    Permission.EditorModsDeleteMany,
-  ],
-  '/webhooks': [Permission.AdminWebhooksRead],
-  '/donate/groups': [Permission.EditorDonateRead],
-  '/donate/permissions': [Permission.EditorDonateRead],
-  '/donate/kits': [Permission.EditorDonateRead],
-  '/donate/periods': [Permission.EditorDonateRead],
-  '/store/products': [Permission.EditorStoreRead],
-  '/store/categories': [Permission.EditorStoreRead],
-  '/store/kits': [Permission.EditorStoreRead],
+  '/': ['panel.access'],
+  '/users': ['panel.users.read'],
+  '/revenue': ['panel.revenue.read'],
+  '/roles': ['panel.roles.read'],
+  '/config': ['panel.config.read'],
+  '/locales': ['panel.locales.read'],
+  '/api': ['panel.api.read'],
+  '/modules': ['panel.extensions.read'],
+  '/themes': ['panel.extensions.read'],
+  '/news': ['panel.news.read', 'panel.news.create', 'panel.news.update', 'panel.news.delete', 'panel.news.delete.many'],
+  '/pages': ['panel.pages.create', 'panel.pages.update', 'panel.pages.delete'],
+  '/email': ['panel.email.read'],
+  '/servers': ['panel.servers.read', 'panel.servers.create', 'panel.servers.update', 'panel.servers.delete'],
+  '/mods': ['panel.mods.read'],
+  '/webhooks': ['panel.webhooks.read'],
+  '/donate/groups': ['panel.donate.read'],
+  '/donate/permissions': ['panel.donate.read'],
+  '/donate/kits': ['panel.donate.read'],
+  '/donate/periods': ['panel.donate.read'],
+  '/store/products': ['panel.store.read'],
+  '/store/categories': ['panel.store.read'],
+  '/store/kits': ['panel.store.read'],
   '/payment': [
-    Permission.EditorPaymentBonusesGiftsCreate,
-    Permission.EditorPaymentBonusesUpdate,
-    Permission.EditorPaymentBonusesDelete,
+    'panel.payment.bonuses.read',
+    'panel.payment.bonuses.create',
+    'panel.payment.bonuses.update',
+    'panel.payment.bonuses.delete',
   ],
-  '/gifts': [Permission.EditorCabinetGiftsRead],
-  '/votes': [Permission.EditorVotesGiftsCreate, Permission.EditorVotesGiftsUpdate, Permission.EditorVotesGiftsDelete],
+  '/gifts': ['panel.gifts.read'],
+  '/votes': ['panel.votes.read', 'panel.votes.create', 'panel.votes.update', 'panel.votes.delete'],
 }
 
 export function routeAccess(path: string): RouteAccess | null {

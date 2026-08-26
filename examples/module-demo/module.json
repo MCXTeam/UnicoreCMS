@@ -9,15 +9,19 @@
     "en": "Example module"
   },
   "version": "1.0.0",
-  "unicoreApi": "^1.0.0",
+  "unicoreApi": "^1.7.0",
   "author": "UnicoreCMS",
   "license": "MIT",
   "server": "./server/index.js",
   "locales": "./locales",
   "componentPrefix": "ModDemo",
   "permissions": [
-    "mod.demo.read",
-    "mod.demo.write"
+    {
+      "key": "mod.demo.read"
+    },
+    {
+      "key": "mod.demo.write"
+    }
   ],
   "config": [
     {

@@ -4,7 +4,6 @@ import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { assertServerPermission } from 'src/admin/roles/guards/permisson.guard';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
-import { Permission } from 'unicore-common';
 import { PayloadType } from '../dto/paginated-store.dto';
 import { CartService } from './cart.service';
 import { CartBuyInput } from './dto/cart-buy.input';
@@ -46,30 +45,30 @@ export class CartController {
     return this.cartService.removeOwn(user, type, id);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
+  @Permissions(['panel.access', 'panel.users.update'])
   @Delete('admin/user/:uuid')
   clear(@Param('uuid') user_uuid: string) {
     return this.cartService.clear(user_uuid);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
+  @Permissions(['panel.access', 'panel.users.update'])
   @Delete('admin/item/:id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.cartService.remove(id);
   }
 
-  @Permissions([Permission.AdminDashboard])
+  @Permissions(['panel.access'])
   @Post('admin/give/product')
   async giveProduct(@Req() request: any, @Body() body: GiveProductInput) {
-    await assertServerPermission(request, Permission.AdminUsersGive, body.server_id);
+    await assertServerPermission(request, 'panel.users.give', body.server_id);
 
     return this.cartService.giveProductByDTO(body);
   }
 
-  @Permissions([Permission.AdminDashboard])
+  @Permissions(['panel.access'])
   @Post('admin/give/kit')
   async giveKit(@Req() request: any, @Body() body: GiveKitInput) {
-    await assertServerPermission(request, Permission.AdminUsersGive, body.server_id);
+    await assertServerPermission(request, 'panel.users.give', body.server_id);
 
     return this.cartService.giveKitByDTO(body);
   }

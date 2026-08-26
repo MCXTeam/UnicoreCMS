@@ -3,7 +3,7 @@ import clc from 'cli-color';
 import { randomUUID } from 'crypto';
 import { RoutePermissions } from 'src/admin/roles/route-permissions.service';
 import { ImportantRoles } from 'src/admin/roles/emums/important-roles.enum';
-import { Permission, resolvePermissions } from 'unicore-common';
+import { resolvePermissions } from 'unicore-common';
 import { stdout } from '../stdout';
 
 interface CheckOptions {
@@ -178,10 +178,8 @@ export class PermissionsCheckCommand extends CommandRunner {
     const defaultRole = (rolesResponse.data || []).find((role: any) => role.id === ImportantRoles.Default);
     const basePerms: string[] = defaultRole?.perms || [];
 
-    const autocomplete = await this.request('GET', '/admin/roles/autocompleate', this.token);
-    const permissions: string[] = (autocomplete.data || []).filter(
-      (permission: string) => !permission.endsWith('*') && !permission.includes('%'),
-    );
+    const catalog = await this.request('GET', '/admin/permissions/catalog', this.token);
+    const permissions: string[] = (catalog.data?.permissions || []).map((entry: { key: string }) => entry.key);
 
     const target = options.permission ? permissions.filter((permission) => permission === options.permission) : permissions;
 
@@ -216,7 +214,7 @@ export class PermissionsCheckCommand extends CommandRunner {
       const declared = new Set(routes.flatMap((route) => route.permissions));
 
       for (const permission of target) {
-        const withDashboard = permission === Permission.AdminDashboard ? [permission] : [Permission.AdminDashboard, permission];
+        const withDashboard = permission === 'panel.access' ? [permission] : ['panel.access', permission];
         const updated = await this.request('PATCH', `/users/${uuid}`, this.token, {
           username,
           email: `${username}@perms.check`,

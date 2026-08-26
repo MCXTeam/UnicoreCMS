@@ -7,8 +7,9 @@
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
               <h5 class="m-0">{{ $t('admin.modules_title') }}</h5>
               <div class="flex align-items-center">
-                <ExtensionInstall @installed="load()" />
+                <ExtensionInstall v-if="canManage" @installed="load()" />
                 <Button
+                  v-if="canManage"
                   :label="$t('admin.rebuild')"
                   icon="pi pi-sync"
                   class="p-button-text"
@@ -49,7 +50,7 @@
           <Column :style="{ width: '14rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <Button
-                v-if="slotProps.data.status !== 'disabled'"
+                v-if="canManage && slotProps.data.status !== 'disabled'"
                 :label="$t('admin.disable')"
                 icon="pi pi-power-off"
                 class="p-button-text p-button-warning"
@@ -57,7 +58,7 @@
                 @click="setEnabled(slotProps.data, false)"
               />
               <Button
-                v-else
+                v-else-if="canManage"
                 :label="$t('admin.enable')"
                 icon="pi pi-check"
                 class="p-button-text p-button-success"
@@ -72,7 +73,7 @@
                 @click="openSettings(slotProps.data)"
               />
               <Button
-                v-if="slotProps.data.status !== 'active'"
+                v-if="canManage && slotProps.data.status !== 'active'"
                 icon="pi pi-trash"
                 class="p-button-rounded p-button-text p-button-danger"
                 :disabled="loading"
@@ -148,7 +149,13 @@
           </div>
           <template #footer>
             <Button :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="settingsDialog = false" />
-            <Button :label="$t('common.save')" icon="pi pi-check" class="p-button-text" :disabled="loading" @click="saveSettings()" />
+            <Button
+              :label="$t('common.save')"
+              icon="pi pi-check"
+              class="p-button-text"
+              :disabled="loading || !canManage"
+              @click="saveSettings()"
+            />
           </template>
         </Dialog>
       </div>
@@ -167,7 +174,9 @@ export default {
 
     useHead({ title: computed(() => $t('admin.menu_modules')) })
 
-    return { toast: useToast(), confirm: useConfirm(), locale: useLocale() }
+    const access = useAccess({ canManage: 'panel.extensions.manage' })
+
+    return { toast: useToast(), confirm: useConfirm(), locale: useLocale(), ...access }
   },
   data() {
     return {

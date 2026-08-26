@@ -4,7 +4,6 @@ import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { assertServerPermission } from 'src/admin/roles/guards/permisson.guard';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
-import { Permission } from 'unicore-common';
 import { MoneyWDInput } from './dto/monet-wd.input';
 import { MoneyExchangeInput } from './dto/money-exchange.input';
 import { MoneyPayCommandInput } from './dto/money-pay-command.input';
@@ -21,58 +20,58 @@ export class MoneyController {
     return this.moneyService.findOneByUser(user);
   }
 
-  @Permissions([Permission.KernelUnicoreConnect])
+  @Permissions(['kernel.connect'])
   @Get('user/:server/:uuid')
   async findOneByUserAndServer(@Param('server') server: string, @Param('uuid') uuid: string) {
     return this.moneyService.findOneByUserUuidAndServer(server, uuid);
   }
 
-  @Permissions([Permission.KernelUnicoreConnect])
+  @Permissions(['kernel.connect'])
   @Post('user')
   async payCommand(@Body() body: MoneyPayCommandInput) {
     return this.moneyService.payCommand(body);
   }
 
-  @Permissions([Permission.KernelUnicoreConnect])
+  @Permissions(['kernel.connect'])
   @Post('user/deposit')
   async deposit(@Body() body: MoneyWDInput) {
     return this.moneyService.deposit(body);
   }
 
-  @Permissions([Permission.KernelUnicoreConnect])
+  @Permissions(['kernel.connect'])
   @Post('user/withdraw')
   async withdraw(@Body() body: MoneyWDInput) {
     return this.moneyService.withdraw(body);
   }
 
-  @Permissions([Permission.KernelUnicoreConnect])
+  @Permissions(['kernel.connect'])
   @Get('top/:server')
   async findTopByServer(@Param('server') server: string) {
     return this.moneyService.findTopByServer(server);
   }
 
-  @Permissions([Permission.UserCabinetTransfer])
+  @Permissions(['player.transfer'])
   @Post('own/transfer')
   async transferOwn(@CurrentUser() user: User, @IpAddress() ip: string, @Body() body: MoneyInput) {
     return this.moneyService.transfer(user, ip, body);
   }
 
-  @Permissions([Permission.UserCabinetExchange])
+  @Permissions(['player.exchange'])
   @Post('own/exchange')
   async exchangeOwn(@CurrentUser() user: User, @IpAddress() ip: string, @Body() body: MoneyExchangeInput) {
     return this.moneyService.exchange(user, ip, body);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminUsersRead])
+  @Permissions(['panel.access', 'panel.users.read'])
   @Get('admin/:uuid')
   async findOneByUser(@Param('uuid') uuid: string) {
     return this.moneyService.findOneByUser(uuid);
   }
 
-  @Permissions([Permission.AdminDashboard])
+  @Permissions(['panel.access'])
   @Patch('admin')
   async update(@Req() request: any, @Body() body: MoneyUpdateInput) {
-    await assertServerPermission(request, Permission.AdminUsersMoney, body.server);
+    await assertServerPermission(request, 'panel.users.money', body.server);
 
     return this.moneyService.update(body);
   }

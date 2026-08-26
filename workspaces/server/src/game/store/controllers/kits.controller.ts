@@ -15,7 +15,6 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
-import { anyServerPermission, Permission } from 'unicore-common';
 import { KitInput } from '../dto/kit.input.dto';
 import { KitsService } from '../providers/kits.service';
 
@@ -24,7 +23,7 @@ export class KitsController {
   constructor(private kitsService: KitsService) {}
 
   @Permissions([
-    [Permission.EditorStoreRead, Permission.AdminUsersGive, anyServerPermission(Permission.AdminUsersGiveServer)],
+    ['panel.store.read', 'panel.users.give', 'panel.users.give.*'],
     { or: true },
   ])
   @Get()
@@ -32,14 +31,14 @@ export class KitsController {
     return this.kitsService.find(query);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorStoreKitsDeleteMany])
+  @Permissions(['panel.access', 'panel.store.kits.delete.many'])
   @Delete('bulk')
   removeMany(@Body() body: DeleteManyInput) {
     return this.kitsService.removeMany(body.items);
   }
 
   @Permissions([
-    [Permission.EditorStoreRead, Permission.AdminUsersGive, anyServerPermission(Permission.AdminUsersGiveServer)],
+    ['panel.store.read', 'panel.users.give', 'panel.users.give.*'],
     { or: true },
   ])
   @Get(':id')
@@ -51,25 +50,25 @@ export class KitsController {
     return kit;
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorStoreKitsCreate])
+  @Permissions(['panel.access', 'panel.store.kits.create'])
   @Post()
   create(@Body() body: KitInput) {
     return this.kitsService.create(body);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorStoreKitsUpdate])
+  @Permissions(['panel.access', 'panel.store.kits.update'])
   @Patch(':id')
   update(@Param('id', ParseIntPipe) id: number, @Body() body: KitInput) {
     return this.kitsService.update(id, body);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorStoreKitsDelete])
+  @Permissions(['panel.access', 'panel.store.kits.delete'])
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.kitsService.remove(id);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorStoreKitsUpdate])
+  @Permissions(['panel.access', 'panel.store.kits.update'])
   @Patch('icon/:id')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -82,7 +81,7 @@ export class KitsController {
     return this.kitsService.updateIcon(id, file);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorStoreKitsUpdate])
+  @Permissions(['panel.access', 'panel.store.kits.update'])
   @Delete('icon/:id')
   removeMedia(@Param('id', ParseIntPipe) id: number) {
     return this.kitsService.removeIcon(id);

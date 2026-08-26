@@ -5,7 +5,6 @@ import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { Public } from 'src/auth/decorators/public.decorator';
-import { Permission } from 'unicore-common';
 import { skinFileFilter } from './filters/skin.filter';
 import { SkinService } from './skin.service';
 
@@ -45,7 +44,7 @@ export class SkinController {
     return file;
   }
 
-  @Permissions([Permission.UserCabinetSkin])
+  @Permissions(['player.skin.upload'])
   @Patch('skin')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -58,7 +57,7 @@ export class SkinController {
     return this.skinsService.updateSkinMe(req, file);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
+  @Permissions(['panel.access', 'panel.users.update'])
   @Patch('skin/:uuid')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -71,7 +70,7 @@ export class SkinController {
     return this.skinsService.updateSkinByUUID(uuid, file);
   }
 
-  @Permissions([Permission.UserCabinetCloak])
+  @Permissions(['player.cloak.upload'])
   @Patch('cloak')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -84,7 +83,7 @@ export class SkinController {
     return this.skinsService.updateCloakMe(req, file);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
+  @Permissions(['panel.access', 'panel.users.update'])
   @Patch('cloak/:uuid')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -97,25 +96,25 @@ export class SkinController {
     return this.skinsService.updateCloakByUUID(uuid, file);
   }
 
-  @Permissions([Permission.UserCabinetSkin])
+  @Permissions(['player.skin.upload'])
   @Delete('skin')
   removeSkinMe(@CurrentUser() user: User) {
     return this.skinsService.removeSkin(user);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
+  @Permissions(['panel.access', 'panel.users.update'])
   @Delete('skin/:uuid')
   removeSkin(@Param('uuid') uuid: string) {
     return this.skinsService.removeSkinByUUID(uuid);
   }
 
-  @Permissions([Permission.UserCabinetCloak])
+  @Permissions(['player.cloak.upload'])
   @Delete('cloak')
   removeCloakMe(@CurrentUser() user: User) {
     return this.skinsService.removeCloak(user);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminUsersUpdate])
+  @Permissions(['panel.access', 'panel.users.update'])
   @Delete('cloak/:uuid')
   removeCloak(@Param('uuid') uuid: string) {
     return this.skinsService.removeCloakByUUID(uuid);

@@ -13,13 +13,25 @@
                 :placeholder="$t('admin.language')"
                 :style="{ width: '14rem' }"
               />
-              <Button :label="$t('admin.add_key')" icon="pi pi-plus" class="p-button-success" @click="openKeyDialog" />
+              <Button
+                v-if="canUpdate"
+                :label="$t('admin.add_key')"
+                icon="pi pi-plus"
+                class="p-button-success"
+                @click="openKeyDialog"
+              />
             </div>
           </template>
           <template v-slot:end>
             <div class="my-2 flex gap-2">
               <Button :label="$t('admin.languages')" icon="pi pi-globe" class="p-button-secondary" @click="localesDialog = true" />
-              <Button :disabled="loading || !changed" :label="$t('common.save')" icon="pi pi-check" @click="save" />
+              <Button
+                v-if="canUpdate"
+                :disabled="loading || !changed"
+                :label="$t('common.save')"
+                icon="pi pi-check"
+                @click="save"
+              />
             </div>
           </template>
         </Toolbar>
@@ -62,7 +74,12 @@
           </Column>
           <Column :style="{ width: '6rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
-              <Button @click="removeKey(slotProps.data.key)" icon="pi pi-trash" class="p-button-rounded p-button-warning" />
+              <Button
+                v-if="canUpdate"
+                @click="removeKey(slotProps.data.key)"
+                icon="pi pi-trash"
+                class="p-button-rounded p-button-warning"
+              />
             </template>
           </Column>
         </DataTable>
@@ -108,7 +125,13 @@
     <Dialog :style="{ width: '760px' }" v-model:visible="localesDialog" :modal="true" :header="$t('admin.languages')">
       <Toolbar class="mb-4">
         <template v-slot:start>
-          <Button :label="$t('admin.add_language')" icon="pi pi-plus" class="p-button-success" @click="openLocaleDialog()" />
+          <Button
+            v-if="canManage"
+            :label="$t('admin.add_language')"
+            icon="pi pi-plus"
+            class="p-button-success"
+            @click="openLocaleDialog()"
+          />
         </template>
       </Toolbar>
       <DataTable :value="locales" dataKey="code" responsiveLayout="scroll">
@@ -126,9 +149,14 @@
         </Column>
         <Column :style="{ width: '9rem' }" :bodyStyle="{ 'text-align': 'right' }">
           <template #body="slotProps">
-            <Button @click="openLocaleDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
             <Button
-              v-if="!slotProps.data.is_default"
+              v-if="canManage"
+              @click="openLocaleDialog(slotProps.data)"
+              icon="pi pi-pencil"
+              class="p-button-rounded p-button-success mr-2"
+            />
+            <Button
+              v-if="canManage && !slotProps.data.is_default"
               @click="removeLocale(slotProps.data.code)"
               icon="pi pi-trash"
               class="p-button-rounded p-button-warning"
@@ -217,6 +245,11 @@ export default {
     const { $t } = useNuxtApp()
 
     useHead({ title: computed(() => $t('admin.menu_locales')) })
+
+    return useAccess({
+      canUpdate: 'panel.locales.update',
+      canManage: 'panel.locales.manage',
+    })
   },
   data() {
     return {

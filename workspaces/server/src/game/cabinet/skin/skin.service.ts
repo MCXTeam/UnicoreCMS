@@ -1,6 +1,5 @@
 import { ForbiddenException, Injectable, NotFoundException, StreamableFile, UnsupportedMediaTypeException } from '@nestjs/common';
 import { matchPermission } from 'src/admin/roles/guards/permisson.guard';
-import { Permission } from 'unicore-common';
 import { imageSize } from 'image-size';
 import { assertUploadedFile, DEFAULT_CLOAK_FILE, DEFAULT_SKIN_FILE, SKIN_MAX_SIZE, STORAGE_MAX_IMAGE_UPLOAD, StorageManager } from '@common';
 import { Repository } from 'typeorm';
@@ -65,9 +64,9 @@ export class SkinService {
   async updateSkinMe(req: any, file: Express.Multer.File) {
     const { width, height } = this.validateImage(file);
 
-    if ((width > 64 || height > 64) && !(await matchPermission([Permission.UserCabinetSkinHd], req))) {
+    if ((width > 64 || height > 64) && !(await matchPermission(['player.skin.hd'], req))) {
       StorageManager.remove(file.filename);
-      throw new ForbiddenException();
+      throw new ForbiddenException('Скин в HD доступен по привилегии, обычный — 64×64 или 64×32');
     }
 
     return this.updateSkin(req.user, file);
@@ -98,9 +97,9 @@ export class SkinService {
   async updateCloakMe(req: any, file: Express.Multer.File) {
     const { width, height } = this.validateImage(file);
 
-    if ((width > 64 || height > 64) && !(await matchPermission([Permission.UserCabinetCloakHd], req))) {
+    if ((width > 64 || height > 64) && !(await matchPermission(['player.cloak.hd'], req))) {
       StorageManager.remove(file.filename);
-      throw new ForbiddenException();
+      throw new ForbiddenException('Плащ в HD доступен по привилегии, обычный — 64×32');
     }
 
     return this.updateCloak(req.user, file);

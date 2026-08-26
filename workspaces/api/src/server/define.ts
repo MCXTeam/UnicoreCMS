@@ -1,4 +1,4 @@
-import { ConfigFieldSchema } from '../manifest'
+import { ConfigFieldSchema, ModulePermission } from '../manifest'
 import { getRegistry, ModuleContribution, registerContribution } from '../registry'
 import { EventBus } from '../events'
 import { Capabilities } from '../capabilities'
@@ -17,7 +17,7 @@ export interface ModuleDefinition {
   id: string
   entities?: unknown[]
   nestModules?: unknown[]
-  permissions?: string[]
+  permissions?: ModulePermission[]
   config?: ConfigFieldSchema[]
   locales?: Record<string, Record<string, string>>
   paymentModules?: unknown[]

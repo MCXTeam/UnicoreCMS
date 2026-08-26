@@ -5,7 +5,6 @@ import { UserDto } from 'src/admin/users/dto/user.dto';
 import { UsersService } from 'src/admin/users/users.service';
 import { User } from 'src/admin/users/entities/user.entity';
 import { ApiToken } from 'src/admin/api/entities/api-token.entity';
-import { Permission } from 'unicore-common';
 import { kernelServerRoom, userRoom } from '../helpers';
 import { ApiKeyRoom } from '../helpers/api-key-room';
 import { AuthSocket } from '../interfaces/auth-socket.interface';
@@ -58,7 +57,7 @@ export class AuthAdapter extends IoAdapter {
     if (!apiToken.servers?.length) return perms;
 
     return [
-      ...perms.filter((perm) => perm !== Permission.KernelUnicoreConnect),
+      ...perms.filter((perm) => perm !== 'kernel.connect'),
       ...apiToken.servers.map((server) => kernelServerRoom(server)),
     ];
   }

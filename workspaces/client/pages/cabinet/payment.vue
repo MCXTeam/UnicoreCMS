@@ -1,6 +1,6 @@
 <template>
   <div class="cab-grid">
-    <CabTile :title="$t('cabinet.topup_title')" icon="bx bx-wallet-alt" :span="12">
+    <CabTile v-if="canPayment" :title="$t('cabinet.topup_title')" icon="bx bx-wallet-alt" :span="12">
       <div v-if="bonuses" class="cab-packs">
         <button
           v-for="bonus in bonuses"
@@ -65,7 +65,7 @@
       </VeeForm>
     </CabTile>
 
-    <CabTile :title="$t('cabinet.transfer_title')" icon="bx bx-transfer" :span="6">
+    <CabTile v-if="canTransfer" :title="$t('cabinet.transfer_title')" icon="bx bx-transfer" :span="6">
       <VeeForm v-slot="{ meta }" class="cab-form">
         <div class="cab-field">
           <label class="cab-label">{{ $t('cabinet.sum') }}</label>
@@ -151,7 +151,7 @@
       </VeeForm>
     </CabTile>
 
-    <CabTile :title="$t('cabinet.exchange_title')" icon="bx bx-coin-stack" :span="6">
+    <CabTile v-if="canExchange" :title="$t('cabinet.exchange_title')" icon="bx bx-coin-stack" :span="6">
       <VeeForm v-slot="{ meta }" class="cab-form">
         <div class="cab-field">
           <label class="cab-label">{{ $t('cabinet.sum') }}</label>
@@ -283,7 +283,13 @@ export default {
 
     useHead({ title: computed(() => $t('header.cabinet')) })
 
-    return { config: usePublicConfig().config, moneyApi: useMoney(), serversApi: useServers() }
+    const access = useAccess({
+      canPayment: 'player.payment',
+      canTransfer: 'player.transfer',
+      canExchange: 'player.exchange',
+    })
+
+    return { config: usePublicConfig().config, moneyApi: useMoney(), serversApi: useServers(), ...access }
   },
 
   data() {

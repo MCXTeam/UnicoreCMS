@@ -49,11 +49,7 @@ export const USERNAME_PATTERN = /^[a-zA-Z0-9_-]{3,16}$/;
 
 export const IS_USERNAME = "isUsername";
 export const IS_USERNAME_OR_EMAIL = "isUsernameOrEmail";
-export const IS_DONATE_WEB_PERM = "isDonateWebPerm";
-
-export const DONATE_WEB_PERM_PREFIXES = ["user."];
-
-export const PERMISSION_WILDCARD_SUFFIX = ".*";
+export const IS_PLAYER_PERM = "isPlayerPerm";
 
 export const DEFAULT_ISSUANCE_PRESET = "luckperms";
 

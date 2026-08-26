@@ -167,20 +167,15 @@
               </div>
               <div class="field" v-if="$_.get(permission.type, 'value') == 'game' || $_.get(permission.type, 'value') == 'kit'">
                 <label>{{ $t('admin.rights') }}</label>
-                <InputChips v-model="permission.perms" :placeholder="$t('admin.choose_permissions')" />
+                <InputChips v-model="permission.perms" :placeholder="$t('admin.choose_permissions')" :disabled="!canEditPerms" />
               </div>
-              <div class="field" v-if="$_.get(permission.type, 'value') == 'web'">
-                <label>{{ $t('admin.web_rights') }}</label>
-                <AutoComplete
-                  v-model="permission.web_perms"
-                  :multiple="true"
-                  :suggestions="autocompleateFilterd"
-                  @complete="searchAutocompleate($event)"
-                  appendTo="body"
-                  :completeOnFocus="true"
-                  :placeholder="$t('admin.choose_permissions')"
-                />
-              </div>
+              <PermissionsPicker
+                v-if="$_.get(permission.type, 'value') == 'web'"
+                v-model="permission.web_perms"
+                only="player"
+                :label="$t('admin.web_rights')"
+                :disabled="!canEditPerms"
+              />
               <div class="field" v-if="$_.get(permission.type, 'value') == 'kit'">
                 <label>{{ $t('admin.linked_kits') }}</label>
                 <MultiSelect
@@ -224,8 +219,9 @@
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>{{ $t('admin.price') }}<span class="p-error"> *</span></label>
+                      <label>{{ $t('admin.price') }}<span class="p-error"> *</span><FieldLock :allowed="canEditPrice" /></label>
                       <InputNumber
+                        :disabled="!canEditPrice"
                         :modelValue="value"
                         @update:modelValue="handleChange"
                         @input="handleChange($event.value)"
@@ -248,8 +244,9 @@
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>{{ $t('admin.sale') }}</label>
+                      <label>{{ $t('admin.sale') }}<FieldLock :allowed="canEditPrice" /></label>
                       <InputNumber
+                        :disabled="!canEditPrice"
                         suffix=" %"
                         :useGrouping="false"
                         :modelValue="value"
@@ -313,10 +310,7 @@
 </template>
 
 <script>
-import { Permission } from 'unicore-common/enums'
 import { Form, Field } from 'vee-validate'
-import { filterDonateWebPerms } from 'unicore-common/validation'
-import { donateWebPermSuggestions } from '~/helpers'
 
 export default {
   components: {
@@ -331,14 +325,20 @@ export default {
     useHead({ title: computed(() => $t('admin.menu_donate_permissions')) })
     const config = useRuntimeConfig()
     const access = useAccess({
-      canCreate: Permission.EditorDonatePermsCreate,
-      canUpdate: Permission.EditorDonatePermsUpdate,
-      canDelete: Permission.EditorDonatePermsDelete,
-      canDeleteMany: Permission.EditorDonatePermsDeleteMany,
+      canCreate: 'panel.donate.permissions.create',
+      canUpdate: 'panel.donate.permissions.update',
+      canDelete: 'panel.donate.permissions.delete',
+      canDeleteMany: 'panel.donate.permissions.delete.many',
+    })
+
+    const fields = useFieldAccess('donate_permission', {
+      canEditPrice: 'price',
+      canEditPerms: 'perms',
     })
 
     return {
       ...access,
+      ...fields,
       translations,
       realDecimals: config.public.realDecimals,
     }
@@ -366,8 +366,6 @@ export default {
       },
       permissionDialog: false,
       section: 'main',
-      autocompleate: null,
-      autocompleateFilterd: null,
       servers: null,
       periods: null,
       kits: null,
@@ -405,7 +403,6 @@ export default {
       this.kits = await this.$api.get('/donates/group-kits').then((res) => res.data)
       this.periods = await this.$api.get('/donates/periods').then((res) => res.data)
       this.servers = await this.$api.get('/servers').then((res) => res.data)
-      this.autocompleate = await this.$api.get('/admin/roles/autocompleate').then((res) => filterDonateWebPerms(res.data))
       this.loading = false
     },
     async onPermsReorder(event) {
@@ -417,9 +414,6 @@ export default {
         })),
       })
       this.load()
-    },
-    searchAutocompleate(event) {
-      this.autocompleateFilterd = donateWebPermSuggestions(this.autocompleate, event.query)
     },
     hideDialog() {
       this.permissionDialog = false

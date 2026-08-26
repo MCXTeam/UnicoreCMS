@@ -1,3 +1,4 @@
+import { assertFieldAccess } from 'src/admin/roles/field-permissions';
 import { encryptField, ENCRYPTED_RCON_PASSWORD, NumberSortInput, SERVER_GALLERY_MAX_IMAGES, StorageManager, StringSortInput } from '@common';
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -51,7 +52,8 @@ export class ServersService {
     );
   }
 
-  async create(input: ServerCreateInput): Promise<Server> {
+  async create(input: ServerCreateInput, request?: any): Promise<Server> {
+    await assertFieldAccess('server', input, null, request);
     if (await this.findOne(input.id)) {
       throw new ConflictException();
     }
@@ -88,12 +90,14 @@ export class ServersService {
     return this.serversRepository.save(server);
   }
 
-  async update(id: string, input: ServerUpdateInput): Promise<Server> {
+  async update(id: string, input: ServerUpdateInput, request?: any): Promise<Server> {
     const server = await this.findOne(id, ['query', 'table', 'rcon', 'instances']);
 
     if (!server) {
       throw new NotFoundException();
     }
+
+    await assertFieldAccess('server', input, server, request);
 
     server.name = input.name;
     server.version = input.version;

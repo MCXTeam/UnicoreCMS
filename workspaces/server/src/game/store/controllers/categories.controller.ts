@@ -3,7 +3,6 @@ import { Body, Controller, Get, Post, Patch, Param, Delete, UseInterceptors, Par
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
-import { anyServerPermission, Permission } from 'unicore-common';
 import { CategoryInput } from '../dto/category.input';
 import { CategoriesService } from '../providers/categories.service';
 
@@ -12,7 +11,7 @@ export class CategoriesController {
   constructor(private categoriesService: CategoriesService) {}
 
   @Permissions([
-    [Permission.EditorStoreRead, Permission.AdminUsersGive, anyServerPermission(Permission.AdminUsersGiveServer)],
+    ['panel.store.read', 'panel.users.give', 'panel.users.give.*'],
     { or: true },
   ])
   @Get()
@@ -20,31 +19,31 @@ export class CategoriesController {
     return this.categoriesService.find(query);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorStoreCategoryCreate])
+  @Permissions(['panel.access', 'panel.store.categories.create'])
   @Post()
   create(@Body() body: CategoryInput) {
     return this.categoriesService.create(body);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorStoreCategoryDeleteMany])
+  @Permissions(['panel.access', 'panel.store.categories.delete.many'])
   @Delete('bulk')
   removeMany(@Body() body: DeleteManyInput) {
     return this.categoriesService.removeMany(body.items);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorStoreCategoryUpdate])
+  @Permissions(['panel.access', 'panel.store.categories.update'])
   @Patch(':id')
   update(@Param('id', ParseIntPipe) id: number, @Body() body: CategoryInput) {
     return this.categoriesService.update(id, body);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorStoreCategoryDelete])
+  @Permissions(['panel.access', 'panel.store.categories.delete'])
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.categoriesService.remove(id);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorStoreCategoryUpdate])
+  @Permissions(['panel.access', 'panel.store.categories.update'])
   @Patch('icon/:id')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -57,7 +56,7 @@ export class CategoriesController {
     return this.categoriesService.updateIcon(id, file);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorStoreCategoryUpdate])
+  @Permissions(['panel.access', 'panel.store.categories.update'])
   @Delete('icon/:id')
   removeMedia(@Param('id', ParseIntPipe) id: number) {
     return this.categoriesService.removeIcon(id);

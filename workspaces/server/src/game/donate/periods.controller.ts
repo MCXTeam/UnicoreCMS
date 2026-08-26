@@ -1,17 +1,16 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
-import { anyServerPermission, Permission } from 'unicore-common';
 import { PeriodInput } from './dto/period.input';
 import { Period } from './entities/period.entity';
 import { PeriodsService } from './periods.service';
 
-@Permissions([Permission.AdminDashboard])
+@Permissions(['panel.access'])
 @Controller('donates/periods')
 export class PeriodsController {
   constructor(private periodsService: PeriodsService) {}
 
   @Permissions([
-    [Permission.EditorDonateRead, Permission.AdminUsersDonate, anyServerPermission(Permission.AdminUsersDonateServer)],
+    ['panel.donate.read', 'panel.users.donate', 'panel.users.donate.*'],
     { or: true },
   ])
   @Get()
@@ -19,19 +18,19 @@ export class PeriodsController {
     return this.periodsService.find();
   }
 
-  @Permissions([Permission.EditorDonatePeriodsCreate])
+  @Permissions(['panel.donate.periods.create'])
   @Post()
   create(@Body() body: PeriodInput) {
     return this.periodsService.create(body);
   }
 
-  @Permissions([Permission.EditorDonatePeriodsUpdate])
+  @Permissions(['panel.donate.periods.update'])
   @Patch(':id')
   update(@Param('id') id: number, @Body() body: PeriodInput) {
     return this.periodsService.update(id, body);
   }
 
-  @Permissions([Permission.EditorDonatePeriodsDelete])
+  @Permissions(['panel.donate.periods.delete'])
   @Delete(':id')
   remove(@Param('id') id: number) {
     return this.periodsService.remove(id);

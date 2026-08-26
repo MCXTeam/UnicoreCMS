@@ -7,7 +7,7 @@
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
               <h5 class="m-0">{{ $t(section.title) }}</h5>
               <div class="flex align-items-center">
-                <ExtensionInstall @installed="load()" />
+                <ExtensionInstall v-if="canManage" @installed="load()" />
                 <Button :label="$t('admin.refresh')" icon="pi pi-refresh" class="p-button-text" @click="load()" />
               </div>
             </div>
@@ -37,7 +37,7 @@
           <Column :style="{ width: '14rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <Button
-                v-if="slotProps.data.status === 'active'"
+                v-if="canManage && slotProps.data.status === 'active'"
                 :label="$t('admin.theme_deactivate')"
                 icon="pi pi-power-off"
                 class="p-button-text p-button-warning"
@@ -45,7 +45,7 @@
                 @click="setActive(null, section.side)"
               />
               <Button
-                v-else
+                v-else-if="canManage"
                 :label="$t('admin.theme_activate')"
                 icon="pi pi-check"
                 class="p-button-text p-button-success"
@@ -53,7 +53,7 @@
                 @click="setActive(slotProps.data.id, section.side)"
               />
               <Button
-                v-if="slotProps.data.status !== 'active'"
+                v-if="canManage && slotProps.data.status !== 'active'"
                 icon="pi pi-trash"
                 class="p-button-rounded p-button-text p-button-danger"
                 :disabled="loading"
@@ -89,7 +89,9 @@ export default {
 
     useHead({ title: computed(() => $t('admin.menu_themes')) })
 
-    return { toast: useToast(), confirm: useConfirm(), locale: useLocale() }
+    const access = useAccess({ canManage: 'panel.extensions.manage' })
+
+    return { toast: useToast(), confirm: useConfirm(), locale: useLocale(), ...access }
   },
   data() {
     return {

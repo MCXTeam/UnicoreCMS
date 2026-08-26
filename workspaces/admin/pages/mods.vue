@@ -172,7 +172,6 @@
 </template>
 
 <script>
-import { Permission } from 'unicore-common/enums'
 import { sortTransform } from '~/helpers'
 import { FilterMatchMode } from '@primevue/core/api'
 import { Form, Field } from 'vee-validate'
@@ -189,10 +188,10 @@ export default {
 
     useHead({ title: computed(() => $t('admin.menu_mods')) })
     const access = useAccess({
-      canCreate: Permission.EditorModsCreate,
-      canUpdate: Permission.EditorModsUpdate,
-      canDelete: Permission.EditorModsDelete,
-      canDeleteMany: Permission.EditorModsDeleteMany,
+      canCreate: 'panel.mods.create',
+      canUpdate: 'panel.mods.update',
+      canDelete: 'panel.mods.delete',
+      canDeleteMany: 'panel.mods.delete.many',
     })
 
     return {

@@ -7,14 +7,19 @@
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
               <h5 class="m-0">{{ $t('admin.email_title') }}</h5>
               <span class="block mt-2 md:mt-0 p-input-icon-left">
-                <Button :label="$t('admin.email_test')" icon="pi pi-send" @click="openTestDialog" />
+                <Button v-if="canTest" :label="$t('admin.email_test')" icon="pi pi-send" @click="openTestDialog" />
               </span>
             </div>
           </template>
           <Column sortable field="title" :header="$t('admin.heading')"></Column>
           <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
-              <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
+              <Button
+                v-if="canUpdate"
+                @click="openDialog(slotProps.data)"
+                icon="pi pi-pencil"
+                class="p-button-rounded p-button-success mr-2"
+              />
             </template>
           </Column>
         </DataTable>
@@ -114,7 +119,12 @@ export default {
 
     useHead({ title: computed(() => $t('admin.menu_email')) })
 
-    return { translations }
+    const access = useAccess({
+      canUpdate: 'panel.email.update',
+      canTest: 'panel.email.test',
+    })
+
+    return { translations, ...access }
   },
   data() {
     return {

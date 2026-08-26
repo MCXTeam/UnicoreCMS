@@ -9,16 +9,22 @@
     "en": "Site forms: staff applications, feedback, reports — from a preset or from scratch"
   },
   "version": "1.0.0",
-  "unicoreApi": "^1.5.0",
+  "unicoreApi": "^1.7.0",
   "author": "UnicoreCMS",
   "license": "MIT",
   "server": "./server/index.js",
   "locales": "./locales",
   "componentPrefix": "ModForms",
   "permissions": [
-    "mod.forms.read",
-    "mod.forms.write",
-    "mod.forms.review"
+    {
+      "key": "mod.forms.read"
+    },
+    {
+      "key": "mod.forms.write"
+    },
+    {
+      "key": "mod.forms.review"
+    }
   ],
   "config": [
     {

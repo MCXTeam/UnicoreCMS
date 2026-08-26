@@ -152,7 +152,6 @@
   </div>
 </template>
 <script>
-import { Permission } from 'unicore-common/enums'
 import { FilterMatchMode } from '@primevue/core/api'
 import { Form, Field } from 'vee-validate'
 
@@ -169,9 +168,9 @@ export default {
     useHead({ title: computed(() => $t('admin.menu_periods')) })
 
     const access = useAccess({
-      canCreate: Permission.EditorDonatePeriodsCreate,
-      canUpdate: Permission.EditorDonatePeriodsUpdate,
-      canDelete: Permission.EditorDonatePeriodsDelete,
+      canCreate: 'panel.donate.periods.create',
+      canUpdate: 'panel.donate.periods.update',
+      canDelete: 'panel.donate.periods.delete',
     })
 
     return {

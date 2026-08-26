@@ -395,7 +395,6 @@
 </template>
 
 <script>
-import { Permission } from 'unicore-common/enums'
 import { sortTransform } from '~/helpers'
 import { FilterMatchMode } from '@primevue/core/api'
 import { Form, Field } from 'vee-validate'
@@ -413,10 +412,10 @@ export default {
 
     useHead({ title: computed(() => $t('admin.menu_kits')) })
     const access = useAccess({
-      canCreate: Permission.EditorStoreKitsCreate,
-      canUpdate: Permission.EditorStoreKitsUpdate,
-      canDelete: Permission.EditorStoreKitsDelete,
-      canDeleteMany: Permission.EditorStoreKitsDeleteMany,
+      canCreate: 'panel.store.kits.create',
+      canUpdate: 'panel.store.kits.update',
+      canDelete: 'panel.store.kits.delete',
+      canDeleteMany: 'panel.store.kits.delete.many',
     })
 
     return {

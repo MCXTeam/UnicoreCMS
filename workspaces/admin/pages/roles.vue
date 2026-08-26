@@ -5,7 +5,13 @@
         <Toolbar class="mb-4">
           <template v-slot:start>
             <div class="my-2">
-              <Button :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
+              <Button
+                v-if="canCreate"
+                :label="$t('admin.create')"
+                icon="pi pi-plus"
+                class="p-button-success mr-2"
+                @click="openDialog()"
+              />
             </div>
           </template>
         </Toolbar>
@@ -47,10 +53,15 @@
           <Column field="priority" :header="$t('admin.priority')"></Column>
           <Column :style="{ width: '8rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
-              <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
+              <Button
+                v-if="canUpdate"
+                @click="openDialog(slotProps.data)"
+                icon="pi pi-pencil"
+                class="p-button-rounded p-button-success mr-2"
+              />
               <Button
                 @click="removeRole(slotProps.data.id)"
-                v-if="!slotProps.data.important"
+                v-if="canDelete && !slotProps.data.important"
                 icon="pi pi-trash"
                 class="p-button-rounded p-button-warning mt-2"
               />
@@ -106,7 +117,6 @@
               <PermissionsPicker
                 :modelValue="value"
                 @update:modelValue="handleChange"
-                :universe="autocompleate"
                 :label="$t('admin.permissions')"
                 :required="true"
                 :error="errorMessage"
@@ -253,13 +263,19 @@ export default {
     const config = useRuntimeConfig()
     const toast = useToast()
     const confirm = useConfirm()
-    return { toast, confirm, apiUrl: config.public.apiBaseurl }
+
+    const access = useAccess({
+      canCreate: 'panel.roles.create',
+      canUpdate: 'panel.roles.update',
+      canDelete: 'panel.roles.delete',
+    })
+
+    return { toast, confirm, apiUrl: config.public.apiBaseurl, ...access }
   },
   data() {
     return {
       roles: null,
       loading: true,
-      autocompleate: null,
       updateMode: false,
       role: {
         id: null,
@@ -310,8 +326,6 @@ export default {
   methods: {
     async load() {
       this.roles = await this.$api.get('/admin/roles').then((res) => res.data)
-
-      this.autocompleate = await this.$api.get('/admin/roles/autocompleate').then((res) => res.data)
 
       this.roleDialog = false
       this.loading = false

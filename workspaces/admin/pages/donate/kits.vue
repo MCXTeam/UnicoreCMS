@@ -150,7 +150,6 @@
 </template>
 
 <script>
-import { Permission } from 'unicore-common/enums'
 import { Form, Field } from 'vee-validate'
 
 export default {
@@ -166,10 +165,10 @@ export default {
     useHead({ title: computed(() => $t('admin.menu_donate_kits')) })
     const config = useRuntimeConfig()
     const access = useAccess({
-      canCreate: Permission.EditorDonateKitsCreate,
-      canUpdate: Permission.EditorDonateKitsUpdate,
-      canDelete: Permission.EditorDonateKitsDelete,
-      canDeleteMany: Permission.EditorDonateKitsDeleteMany,
+      canCreate: 'panel.donate.kits.create',
+      canUpdate: 'panel.donate.kits.update',
+      canDelete: 'panel.donate.kits.delete',
+      canDeleteMany: 'panel.donate.kits.delete.many',
     })
 
     return {

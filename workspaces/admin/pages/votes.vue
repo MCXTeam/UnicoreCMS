@@ -101,7 +101,6 @@
   </div>
 </template>
 <script>
-import { Permission } from 'unicore-common/enums'
 import { FilterMatchMode } from '@primevue/core/api'
 import { Form, Field } from 'vee-validate'
 
@@ -115,9 +114,9 @@ export default {
 
     useHead({ title: computed(() => $t('admin.votes_title')) })
     const access = useAccess({
-      canCreate: Permission.EditorVotesGiftsCreate,
-      canUpdate: Permission.EditorVotesGiftsUpdate,
-      canDelete: Permission.EditorVotesGiftsDelete,
+      canCreate: 'panel.votes.create',
+      canUpdate: 'panel.votes.update',
+      canDelete: 'panel.votes.delete',
     })
 
     return {

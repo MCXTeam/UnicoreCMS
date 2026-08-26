@@ -60,7 +60,12 @@
                 icon="pi pi-pencil"
                 class="p-button-rounded p-button-success mr-2"
               />
-              <Button @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary mr-2" />
+              <Button
+                v-if="canUpdate"
+                @click="openFileDialog(slotProps.data)"
+                icon="pi pi-images"
+                class="p-button-rounded p-button-secondary mr-2"
+              />
               <Button
                 @click="removeCategory(slotProps.data.id)"
                 v-if="canDelete && !slotProps.data.important"
@@ -155,7 +160,6 @@
 </template>
 
 <script>
-import { Permission } from 'unicore-common/enums'
 import { sortTransform } from '~/helpers'
 import { FilterMatchMode } from '@primevue/core/api'
 import { Form, Field } from 'vee-validate'
@@ -172,10 +176,10 @@ export default {
 
     useHead({ title: computed(() => $t('admin.menu_categories')) })
     const access = useAccess({
-      canCreate: Permission.EditorStoreCategoryCreate,
-      canUpdate: Permission.EditorStoreCategoryUpdate,
-      canDelete: Permission.EditorStoreCategoryDelete,
-      canDeleteMany: Permission.EditorStoreCategoryDeleteMany,
+      canCreate: 'panel.store.categories.create',
+      canUpdate: 'panel.store.categories.update',
+      canDelete: 'panel.store.categories.delete',
+      canDeleteMany: 'panel.store.categories.delete.many',
     })
 
     return {

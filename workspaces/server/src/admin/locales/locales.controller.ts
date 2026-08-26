@@ -1,6 +1,6 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { Public } from 'src/auth/decorators/public.decorator';
-import { SuperUserGuard } from '../roles/guards/superuser.guard';
+import { Permissions } from '../roles/decorators/permission.decorator';
 import { LocaleInput } from './dto/locale.input';
 import { TranslationsInput } from './dto/translations.input';
 import { LocalesService } from './locales.service';
@@ -15,13 +15,13 @@ export class LocalesController {
     return this.localesService.findEnabled();
   }
 
-  @UseGuards(SuperUserGuard)
+  @Permissions(['panel.locales.read'])
   @Get('all')
   findAll() {
     return this.localesService.find();
   }
 
-  @UseGuards(SuperUserGuard)
+  @Permissions(['panel.locales.read'])
   @Get('keys')
   keys() {
     return this.localesService.keys();
@@ -33,31 +33,31 @@ export class LocalesController {
     return this.localesService.messages(code);
   }
 
-  @UseGuards(SuperUserGuard)
+  @Permissions(['panel.locales.manage'])
   @Post()
   create(@Body() body: LocaleInput) {
     return this.localesService.create(body);
   }
 
-  @UseGuards(SuperUserGuard)
+  @Permissions(['panel.locales.manage'])
   @Patch(':code')
   update(@Param('code') code: string, @Body() body: LocaleInput) {
     return this.localesService.update(code, body);
   }
 
-  @UseGuards(SuperUserGuard)
+  @Permissions(['panel.locales.update'])
   @Patch(':code/messages')
   saveTranslations(@Param('code') code: string, @Body() body: TranslationsInput) {
     return this.localesService.saveTranslations(code, body);
   }
 
-  @UseGuards(SuperUserGuard)
+  @Permissions(['panel.locales.update'])
   @Delete('keys/:key')
   removeKey(@Param('key') key: string) {
     return this.localesService.removeKey(key);
   }
 
-  @UseGuards(SuperUserGuard)
+  @Permissions(['panel.locales.manage'])
   @Delete(':code')
   remove(@Param('code') code: string) {
     return this.localesService.remove(code);

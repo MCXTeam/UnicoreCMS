@@ -5,7 +5,13 @@
         <Toolbar class="mb-4">
           <template v-slot:start>
             <div class="my-2">
-              <Button :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
+              <Button
+                v-if="canManage"
+                :label="$t('admin.create')"
+                icon="pi pi-plus"
+                class="p-button-success mr-2"
+                @click="openDialog()"
+              />
             </div>
           </template>
         </Toolbar>
@@ -34,8 +40,18 @@
           </Column>
           <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
-              <Button @click="openDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
-              <Button @click="removeToken(slotProps.data.secret)" icon="pi pi-trash" class="p-button-rounded p-button-warning mt-2" />
+              <Button
+                v-if="canManage"
+                @click="openDialog(slotProps.data)"
+                icon="pi pi-pencil"
+                class="p-button-rounded p-button-success mr-2"
+              />
+              <Button
+                v-if="canManage"
+                @click="removeToken(slotProps.data.secret)"
+                icon="pi pi-trash"
+                class="p-button-rounded p-button-warning mt-2"
+              />
             </template>
           </Column>
         </DataTable>
@@ -84,7 +100,6 @@
               <PermissionsPicker
                 :modelValue="value"
                 @update:modelValue="handleChange"
-                :universe="autocompleate"
                 :label="$t('admin.permissions')"
                 :required="true"
                 :error="errorMessage"
@@ -153,13 +168,17 @@ export default {
     useHead({ title: computed(() => $t('admin.menu_api')) })
     const toast = useToast()
     const confirm = useConfirm()
-    return { toast, confirm }
+
+    const access = useAccess({
+      canManage: 'panel.api.manage',
+    })
+
+    return { toast, confirm, ...access }
   },
   data() {
     return {
       api: null,
       servers: [],
-      autocompleate: null,
       loading: true,
       updateMode: false,
       token: {
@@ -184,7 +203,6 @@ export default {
     async load() {
       this.loading = true
       this.tokenDialog = false
-      this.autocompleate = await this.$api.get('/admin/roles/autocompleate').then((res) => res.data)
       this.servers = await this.$api.get('/servers').then((res) => res.data)
       this.api = await this.$api.get('/admin/api').then((res) => res.data)
       this.loading = false

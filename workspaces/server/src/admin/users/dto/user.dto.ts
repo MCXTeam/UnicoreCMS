@@ -2,6 +2,8 @@ import { Exclude, Transform, Type } from 'class-transformer';
 import { Cloak } from 'src/game/cabinet/skin/entities/cloak.entity';
 import { Skin } from 'src/game/cabinet/skin/entities/skin.entity';
 import { User } from '../entities/user.entity';
+import { union } from 'lodash';
+import { resolvePermissions } from 'unicore-common';
 import { transformPermissions } from 'src/admin/roles/guards/permisson.guard';
 import { BanDto } from 'src/game/players/banlist/dto/paginated-bans.dto';
 
@@ -47,8 +49,12 @@ export class UserDto {
 
   updated: Date;
 
-  constructor(partial: Partial<User>) {
-    Object.assign(this, transformPermissions(partial));
+  constructor(partial: Partial<User>, granted: string[] = []) {
+    const user = transformPermissions(partial);
+
+    Object.assign(this, user);
+
+    if (granted.length && !partial.superuser) this.perms = union(user.perms || [], resolvePermissions(granted));
   }
 }
 

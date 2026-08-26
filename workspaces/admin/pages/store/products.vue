@@ -7,18 +7,33 @@
             <div class="my-2">
               <Button v-if="canCreate" :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
               <Button
+                v-if="canUpdateMany"
                 icon="pi pi-pencil"
                 class="p-button-second mr-2"
                 :disabled="!selected || !selected.length"
                 @click="openManyDialog()"
               />
-              <Button icon="pi pi-trash" class="p-button-danger" :disabled="!selected || !selected.length" @click="removeMany()" />
+              <Button
+                v-if="canDeleteMany"
+                icon="pi pi-trash"
+                class="p-button-danger"
+                :disabled="!selected || !selected.length"
+                @click="removeMany()"
+              />
             </div>
           </template>
 
           <template #end>
-            <Button :disabled="loading" :label="$t('admin.import')" icon="pi pi-plus" class="mr-2" @click="openImportDialog()" />
             <Button
+              v-if="canImport"
+              :disabled="loading"
+              :label="$t('admin.import')"
+              icon="pi pi-plus"
+              class="mr-2"
+              @click="openImportDialog()"
+            />
+            <Button
+              v-if="canExport"
               :disabled="!selected || !selected.length || loading"
               :label="$t('admin.export')"
               icon="pi pi-upload"
@@ -215,8 +230,9 @@
                   v-slot="{ value, errorMessage, handleChange, handleBlur }"
                 >
                   <div class="field">
-                    <label>{{ $t('admin.price') }}</label>
+                    <label>{{ $t('admin.price') }}<FieldLock :allowed="canEditPrice" /></label>
                     <InputNumber
+                      :disabled="!canEditPrice"
                       :modelValue="value"
                       @update:modelValue="handleChange"
                       @input="handleChange($event.value)"
@@ -238,8 +254,9 @@
                   v-slot="{ value, errorMessage, handleChange, handleBlur }"
                 >
                   <div class="field">
-                    <label>{{ $t('admin.sale') }}</label>
+                    <label>{{ $t('admin.sale') }}<FieldLock :allowed="canEditPrice" /></label>
                     <InputNumber
+                      :disabled="!canEditPrice"
                       suffix=" %"
                       :placeholder="$t('admin.unchanged')"
                       :useGrouping="false"
@@ -429,8 +446,8 @@
                 v-slot="{ value, errorMessage, handleChange }"
               >
                 <div class="field">
-                  <label>{{ $t('admin.commands') }}<span class="p-error"> *</span></label>
-                  <InputChips :modelValue="value" @update:modelValue="handleChange" />
+                  <label>{{ $t('admin.commands') }}<span class="p-error"> *</span><FieldLock :allowed="canEditCommands" /></label>
+                  <InputChips :modelValue="value" @update:modelValue="handleChange" :disabled="!canEditCommands" />
                   <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
                   <Divider align="left" type="dashed">
                     <b>{{ $t('admin.variables') }}</b>
@@ -532,8 +549,9 @@
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>{{ $t('admin.price') }}<span class="p-error"> *</span></label>
+                      <label>{{ $t('admin.price') }}<span class="p-error"> *</span><FieldLock :allowed="canEditPrice" /></label>
                       <InputNumber
+                        :disabled="!canEditPrice"
                         :modelValue="value"
                         @update:modelValue="handleChange"
                         @input="handleChange($event.value)"
@@ -555,8 +573,9 @@
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>{{ $t('admin.sale') }}</label>
+                      <label>{{ $t('admin.sale') }}<FieldLock :allowed="canEditPrice" /></label>
                       <InputNumber
+                        :disabled="!canEditPrice"
                         suffix=" %"
                         :useGrouping="false"
                         :modelValue="value"
@@ -618,7 +637,6 @@
 </template>
 
 <script>
-import { Permission } from 'unicore-common/enums'
 import { sortTransform } from '~/helpers'
 import { FilterMatchMode } from '@primevue/core/api'
 import { Form, Field } from 'vee-validate'
@@ -636,14 +654,23 @@ export default {
 
     useHead({ title: computed(() => $t('admin.products')) })
     const access = useAccess({
-      canCreate: Permission.EditorStoreProductsCreate,
-      canUpdate: Permission.EditorStoreProductsUpdate,
-      canDelete: Permission.EditorStoreProductsDelete,
-      canDeleteMany: Permission.EditorStoreProductsDeleteMany,
+      canCreate: 'panel.store.products.create',
+      canUpdate: 'panel.store.products.update',
+      canDelete: 'panel.store.products.delete',
+      canDeleteMany: 'panel.store.products.delete.many',
+      canUpdateMany: 'panel.store.products.update.many',
+      canExport: 'panel.store.products.export',
+      canImport: 'panel.store.products.import',
+    })
+
+    const fields = useFieldAccess('store_product', {
+      canEditPrice: 'price',
+      canEditCommands: 'commands',
     })
 
     return {
       ...access,
+      ...fields,
       translations,
       realDecimals: rc.public.realDecimals,
     }

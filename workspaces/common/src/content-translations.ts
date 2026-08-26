@@ -1,4 +1,5 @@
-import { Permission } from "./enums";
+
+import { Permission } from "./permissions/catalog";
 
 export interface ContentTranslationAccess {
   read: Permission[];
@@ -7,52 +8,52 @@ export interface ContentTranslationAccess {
 
 export const CONTENT_TRANSLATION_PERMISSIONS: Record<string, ContentTranslationAccess> = {
   news: {
-    read: [Permission.EditorNewsCreate, Permission.EditorNewsUpdate],
-    write: [Permission.EditorNewsCreate, Permission.EditorNewsUpdate],
+    read: ['panel.news.read', 'panel.news.create', 'panel.news.update'],
+    write: ['panel.news.create', 'panel.news.update'],
   },
   page: {
-    read: [Permission.AdminPagesRead, Permission.AdminPagesCreate, Permission.AdminPagesUpdate],
-    write: [Permission.AdminPagesCreate, Permission.AdminPagesUpdate],
+    read: ['panel.pages.create', 'panel.pages.update'],
+    write: ['panel.pages.create', 'panel.pages.update'],
   },
   email_message: {
-    read: [Permission.AdminEmailRead, Permission.AdminEmailUpdate],
-    write: [Permission.AdminEmailUpdate],
+    read: ['panel.email.read', 'panel.email.update'],
+    write: ['panel.email.update'],
   },
   server: {
-    read: [Permission.AdminServersRead, Permission.AdminServersCreate, Permission.AdminServersUpdate],
-    write: [Permission.AdminServersCreate, Permission.AdminServersUpdate],
+    read: ['panel.servers.read', 'panel.servers.create', 'panel.servers.update'],
+    write: ['panel.servers.create', 'panel.servers.update'],
   },
   mod: {
-    read: [Permission.EditorModsCreate, Permission.EditorModsUpdate],
-    write: [Permission.EditorModsCreate, Permission.EditorModsUpdate],
+    read: ['panel.mods.read', 'panel.mods.create', 'panel.mods.update'],
+    write: ['panel.mods.create', 'panel.mods.update'],
   },
   category: {
-    read: [Permission.EditorStoreRead, Permission.EditorStoreCategoryCreate, Permission.EditorStoreCategoryUpdate],
-    write: [Permission.EditorStoreCategoryCreate, Permission.EditorStoreCategoryUpdate],
+    read: ['panel.store.read', 'panel.store.categories.create', 'panel.store.categories.update'],
+    write: ['panel.store.categories.create', 'panel.store.categories.update'],
   },
   product: {
-    read: [Permission.EditorStoreRead, Permission.EditorStoreProductsCreate, Permission.EditorStoreProductsUpdate],
-    write: [Permission.EditorStoreProductsCreate, Permission.EditorStoreProductsUpdate],
+    read: ['panel.store.read', 'panel.store.products.create', 'panel.store.products.update'],
+    write: ['panel.store.products.create', 'panel.store.products.update'],
   },
   kit: {
-    read: [Permission.EditorStoreRead, Permission.EditorStoreKitsCreate, Permission.EditorStoreKitsUpdate],
-    write: [Permission.EditorStoreKitsCreate, Permission.EditorStoreKitsUpdate],
+    read: ['panel.store.read', 'panel.store.kits.create', 'panel.store.kits.update'],
+    write: ['panel.store.kits.create', 'panel.store.kits.update'],
   },
   donate_group: {
-    read: [Permission.EditorDonateRead, Permission.EditorDonateGroupsCreate, Permission.EditorDonateGroupsUpdate],
-    write: [Permission.EditorDonateGroupsCreate, Permission.EditorDonateGroupsUpdate],
+    read: ['panel.donate.read', 'panel.donate.groups.create', 'panel.donate.groups.update'],
+    write: ['panel.donate.groups.create', 'panel.donate.groups.update'],
   },
   donate_permission: {
-    read: [Permission.EditorDonateRead, Permission.EditorDonatePermsCreate, Permission.EditorDonatePermsUpdate],
-    write: [Permission.EditorDonatePermsCreate, Permission.EditorDonatePermsUpdate],
+    read: ['panel.donate.read', 'panel.donate.permissions.create', 'panel.donate.permissions.update'],
+    write: ['panel.donate.permissions.create', 'panel.donate.permissions.update'],
   },
   group_kit: {
-    read: [Permission.EditorDonateRead, Permission.EditorDonateKitsCreate, Permission.EditorDonateKitsUpdate],
-    write: [Permission.EditorDonateKitsCreate, Permission.EditorDonateKitsUpdate],
+    read: ['panel.donate.read', 'panel.donate.kits.create', 'panel.donate.kits.update'],
+    write: ['panel.donate.kits.create', 'panel.donate.kits.update'],
   },
   period: {
-    read: [Permission.EditorDonateRead, Permission.EditorDonatePeriodsCreate, Permission.EditorDonatePeriodsUpdate],
-    write: [Permission.EditorDonatePeriodsCreate, Permission.EditorDonatePeriodsUpdate],
+    read: ['panel.donate.read', 'panel.donate.periods.create', 'panel.donate.periods.update'],
+    write: ['panel.donate.periods.create', 'panel.donate.periods.update'],
   },
 };
 

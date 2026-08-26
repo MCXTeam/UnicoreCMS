@@ -322,7 +322,7 @@
                 <div class="col-12 flex justify-content-center">
                   <SkinView3D class="rounded" :width="210" :height="300" :skin="user.skin" :cloak="user.cloak" ref="skin" />
                 </div>
-                <div class="col-12 flex justify-content-center">
+                <div class="col-12 flex justify-content-center" v-if="canUpdate">
                   <div class="grid">
                     <div @click="$refs.skinInput.choose()" class="col-12 md:col-6">
                       <Button :label="$t('admin.upload_skin')" class="p-button mr-2 mb-2" />
@@ -360,7 +360,7 @@
                 </div>
               </div>
             </div>
-            <div class="p-4">
+            <div class="p-4" v-if="canBan">
               <VeeForm as="div" v-slot="{ meta }">
                 <h4>{{ $t('admin.ban_block') }} ({{ user.ban ? $t('admin.yes') : $t('admin.no') }})</h4>
                 <div class="p-fluid">
@@ -394,7 +394,7 @@
           </div>
           <div class="col-12 md:col-6">
             <div class="p-4">
-              <VeeForm as="div" v-slot="{ meta }">
+              <VeeForm v-if="canUpdate" as="div" v-slot="{ meta }">
                 <div class="p-fluid">
                   <h4>{{ $t('admin.profile_of', { username: user.username }) }}</h4>
                   <VeeField
@@ -405,8 +405,14 @@
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>{{ $t('admin.username') }}<span class="p-error"> *</span></label>
-                      <InputText :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" type="text" />
+                      <label>{{ $t('admin.username') }}<span class="p-error"> *</span><FieldLock :allowed="canEditUsername" /></label>
+                      <InputText
+                        :modelValue="value"
+                        :disabled="!canEditUsername"
+                        @update:modelValue="handleChange"
+                        @blur="handleBlur"
+                        type="text"
+                      />
                       <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
                     </div>
                   </VeeField>
@@ -418,21 +424,28 @@
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>Email</label>
-                      <InputText :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" type="text" />
+                      <label>Email<FieldLock :allowed="canEditEmail" /></label>
+                      <InputText
+                        :modelValue="value"
+                        :disabled="!canEditEmail"
+                        @update:modelValue="handleChange"
+                        @blur="handleBlur"
+                        type="text"
+                      />
                       <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
                     </div>
                   </VeeField>
                   <div class="field-checkbox">
-                    <Checkbox :binary="true" v-model="user.activated" />
-                    <label>{{ $t('admin.activated_email') }}</label>
+                    <Checkbox :binary="true" v-model="user.activated" :disabled="!canEditActivated" />
+                    <label>{{ $t('admin.activated_email') }}<FieldLock :allowed="canEditActivated" /></label>
                   </div>
                   <h4>{{ $t('admin.roles_and_rights') }}</h4>
                   <div class="field">
-                    <label>{{ $t('admin.roles') }}</label>
+                    <label>{{ $t('admin.roles') }}<FieldLock :allowed="canEditRoles" /></label>
                     <MultiSelect
                       display="chip"
                       :filter="true"
+                      :disabled="!canEditRoles"
                       v-model="rolesUser"
                       :options="roles"
                       optionLabel="name"
@@ -442,16 +455,21 @@
                       class="p-column-filter"
                     />
                   </div>
-                  <PermissionsPicker v-model="user.perms" :universe="autocompleate" :label="$t('admin.rights')" />
-                  <div class="field-checkbox" v-if="isSuperuser">
+                  <PermissionsPicker v-model="user.perms" :label="$t('admin.rights')" :disabled="!canEditRoles" />
+                  <div class="field-checkbox" v-if="canEditSuperuser">
                     <Checkbox :binary="true" v-model="user.superuser" />
                     <label>{{ $t('admin.superuser') }}</label>
                   </div>
                 </div>
-                <Button :disabled="!meta.valid" @click="updateProfile()" :label="$t('common.save')" class="p-button mr-2 mb-4" />
+                <Button
+                  :disabled="!meta.valid || !canUpdate"
+                  @click="updateProfile()"
+                  :label="$t('common.save')"
+                  class="p-button mr-2 mb-4"
+                />
               </VeeForm>
-              <VeeForm as="div" v-slot="{ meta }">
-                <div class="p-fluid">
+              <VeeForm v-if="canEditPassword || canResetTwoFactor || canCloseSessions" as="div" v-slot="{ meta }">
+                <div class="p-fluid" v-if="canEditPassword">
                   <h4>{{ $t('admin.change_password') }}</h4>
                   <VeeField
                     v-model="passwordForm.password"
@@ -505,8 +523,26 @@
                   </VeeField>
                   <Message severity="info" :closable="false">{{ $t('auth.sessions_closed_hint') }}</Message>
                 </div>
-                <Button :disabled="!meta.valid" @click="updatePassword()" :label="$t('common.save')" class="p-button mr-2 mb-2" />
-                <Button :label="$t('admin.reset_2fa')" class="p-button-danger p-button mr-2 mb-2" />
+                <Button
+                  v-if="canEditPassword"
+                  :disabled="!meta.valid"
+                  @click="updatePassword()"
+                  :label="$t('common.save')"
+                  class="p-button mr-2 mb-2"
+                />
+                <Button
+                  v-if="canResetTwoFactor"
+                  :disabled="!user.two_factor_enabled"
+                  @click="resetTwoFactor()"
+                  :label="$t('admin.reset_2fa')"
+                  class="p-button-danger p-button mr-2 mb-2"
+                />
+                <Button
+                  v-if="canCloseSessions"
+                  @click="closeSessions()"
+                  :label="$t('admin.close_sessions')"
+                  class="p-button-danger p-button mr-2 mb-2"
+                />
               </VeeForm>
             </div>
           </div>
@@ -612,7 +648,12 @@
               </Column>
               <Column :style="{ width: '4rem' }" :bodyStyle="{ 'text-align': 'right' }">
                 <template #body="slotProps">
-                  <Button @click="takeDonateGroup(slotProps.data.id)" icon="pi pi-trash" class="p-button-rounded p-button-danger mt-2" />
+                  <Button
+                    v-if="canDonate"
+                    @click="takeDonateGroup(slotProps.data.id)"
+                    icon="pi pi-trash"
+                    class="p-button-rounded p-button-danger mt-2"
+                  />
                 </template>
               </Column>
             </DataTable>
@@ -643,6 +684,7 @@
               <Column :style="{ width: '4rem' }" :bodyStyle="{ 'text-align': 'right' }">
                 <template #body="slotProps">
                   <Button
+                    v-if="canDonate"
                     @click="takeDonatePermission(slotProps.data.id)"
                     icon="pi pi-trash"
                     class="p-button-rounded p-button-danger mt-2"
@@ -697,7 +739,12 @@
               </Column>
               <Column :style="{ width: '4rem' }" :bodyStyle="{ 'text-align': 'right' }">
                 <template #body="slotProps">
-                  <Button @click="removeWHItem(slotProps.data.id)" icon="pi pi-trash" class="p-button-rounded p-button-warning mt-2" />
+                  <Button
+                    v-if="canGive"
+                    @click="removeWHItem(slotProps.data.id)"
+                    icon="pi pi-trash"
+                    class="p-button-rounded p-button-warning mt-2"
+                  />
                 </template>
               </Column>
             </DataTable>
@@ -714,7 +761,6 @@
 <script>
 import { Form, Field } from 'vee-validate'
 import { useAuthStore } from '~/stores/auth'
-import { Permission } from 'unicore-common/enums'
 import { generatePassword } from 'unicore-common/password'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
@@ -729,7 +775,24 @@ export default {
     const route = useRoute()
     const toast = useToast()
     const confirm = useConfirm()
-    return { rc: rc.public, route, toast, confirm }
+
+    const access = useAccess({
+      canUpdate: 'panel.users.update',
+      canBan: 'panel.users.ban',
+      canResetTwoFactor: 'panel.users.twofactor.reset',
+      canCloseSessions: 'panel.users.sessions.revoke',
+    })
+
+    const fields = useFieldAccess('user', {
+      canEditUsername: 'username',
+      canEditEmail: 'email',
+      canEditPassword: 'password',
+      canEditActivated: 'activated',
+      canEditRoles: 'roles',
+      canEditSuperuser: 'superuser',
+    })
+
+    return { rc: rc.public, route, toast, confirm, ...access, ...fields }
   },
   data() {
     return {
@@ -751,7 +814,6 @@ export default {
       udp_loading: false,
       wh_loading: false,
       money_loading: false,
-      autocompleate: null,
       giveProductDialog: false,
       giveKitDialog: false,
       giveUDGDialog: false,
@@ -786,20 +848,16 @@ export default {
   },
 
   computed: {
-    isSuperuser() {
-      return Boolean(useAuthStore().user?.superuser)
-    },
-
     canMoney() {
-      return this.hasPermission(Permission.AdminUsersMoney)
+      return this.hasPermission('panel.users.money')
     },
 
     canGive() {
-      return this.hasPermission(Permission.AdminUsersGive)
+      return this.hasPermission('panel.users.give')
     },
 
     canDonate() {
-      return this.hasPermission(Permission.AdminUsersDonate)
+      return this.hasPermission('panel.users.donate')
     },
 
     serverDonateGroups() {
@@ -818,15 +876,15 @@ export default {
     },
 
     donateServers() {
-      return this.servers.filter((server) => this.hasServerPermission(Permission.AdminUsersDonate, server.id))
+      return this.servers.filter((server) => this.hasServerPermission('panel.users.donate', server.id))
     },
 
     giveServers() {
-      return this.servers.filter((server) => this.hasServerPermission(Permission.AdminUsersGive, server.id))
+      return this.servers.filter((server) => this.hasServerPermission('panel.users.give', server.id))
     },
 
     moneyRows() {
-      return this.money.filter((row) => this.hasServerPermission(Permission.AdminUsersMoney, row.server?.id))
+      return this.money.filter((row) => this.hasServerPermission('panel.users.money', row.server?.id))
     },
   },
 
@@ -867,22 +925,15 @@ export default {
     },
 
     hasServerPermission(permission, serverId) {
-      const auth = useAuthStore()
-
-      if (auth.user?.superuser) return true
-
-      const perms = auth.user?.perms || []
-
-      return perms.includes(permission) || (Boolean(serverId) && perms.includes(`${permission}.${serverId}`))
+      return useAuthStore().has(serverId ? `${permission}.${serverId}` : permission)
     },
 
     async load() {
       const optional = (url) => this.$api.get(url, { silent: true }).then((res) => res.data).catch(() => [])
 
-      const [roles, servers, autocompleate, periods, donatePermissions, donateGroups] = await Promise.all([
+      const [roles, servers, periods, donatePermissions, donateGroups] = await Promise.all([
         optional('/admin/roles'),
         optional('/servers'),
-        optional('/admin/roles/autocompleate'),
         optional('/donates/periods'),
         optional('/donates/permissions'),
         optional('/donates/groups'),
@@ -890,7 +941,6 @@ export default {
 
       this.roles = roles
       this.servers = servers
-      this.autocompleate = autocompleate
       this.periods = periods
       this.donatePermissions = donatePermissions
       this.donateGroups = donateGroups
@@ -1037,6 +1087,45 @@ export default {
           life: 3000,
         })
       }
+    },
+
+    resetTwoFactor() {
+      this.confirm.require({
+        message: this.$t('admin.reset_2fa_confirm'),
+        header: this.$t('admin.reset_2fa'),
+        icon: 'pi pi-exclamation-triangle',
+        acceptClass: 'p-button-danger',
+        acceptLabel: this.$t('admin.reset_2fa'),
+        rejectLabel: this.$t('common.cancel'),
+        accept: async () => {
+          try {
+            await this.$api.delete('/users/' + this.user.uuid + '/2fa')
+            await this.fetchUser()
+            this.toast.add({ severity: 'success', detail: this.$t('admin.reset_2fa_done'), life: 3000 })
+          } catch {
+            this.toast.add({ severity: 'error', detail: this.$t('admin.invalid_data_short'), life: 3000 })
+          }
+        },
+      })
+    },
+
+    closeSessions() {
+      this.confirm.require({
+        message: this.$t('admin.close_sessions_confirm'),
+        header: this.$t('admin.close_sessions'),
+        icon: 'pi pi-exclamation-triangle',
+        acceptClass: 'p-button-danger',
+        acceptLabel: this.$t('admin.close_sessions'),
+        rejectLabel: this.$t('common.cancel'),
+        accept: async () => {
+          try {
+            await this.$api.delete('/users/' + this.user.uuid + '/sessions')
+            this.toast.add({ severity: 'success', detail: this.$t('admin.close_sessions_done'), life: 3000 })
+          } catch {
+            this.toast.add({ severity: 'error', detail: this.$t('admin.invalid_data_short'), life: 3000 })
+          }
+        },
+      })
     },
 
     async uploadSkin(event, type) {

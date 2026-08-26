@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { satisfiesPermission } from 'unicore-common/permissions'
 
 export interface AuthUser {
   uuid: string
@@ -19,6 +20,14 @@ export const useAuthStore = defineStore('auth', {
   }),
   getters: {
     loggedIn: (state) => !!state.user,
+    has:
+      (state) =>
+      (permission: string): boolean => {
+        if (!state.user) return false
+        if (state.user.superuser) return true
+
+        return satisfiesPermission(state.user.perms || [], permission)
+      },
   },
   actions: {
     loadTokens() {

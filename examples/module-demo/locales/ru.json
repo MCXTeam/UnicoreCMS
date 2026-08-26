@@ -12,5 +12,8 @@
   "mod.demo.server_widget": "Виджет модуля встроен в страницу сервера через слот",
   "mod.demo.title": "Демо-модуль",
   "mod.demo.user_notes": "Заметки демо-модуля",
-  "mod.demo.user_notes_text": "Блок в карточке игрока {username}"
+  "mod.demo.user_notes_text": "Блок в карточке игрока {username}",
+  "perm.group.mod.demo": "Демо-модуль",
+  "perm.mod.demo.read": "Смотреть заметки",
+  "perm.mod.demo.write": "Править заметки"
 }

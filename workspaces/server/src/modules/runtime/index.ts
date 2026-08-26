@@ -1,4 +1,6 @@
 import { resolve } from 'path';
+import { PermissionMeta, registerPermissions } from 'unicore-common';
+import { modulePermissionKey, modulePermissionMeta } from 'unicore-api';
 import { discover, DiscoveredModule } from './discovery';
 import { readLocaleFiles } from './locales';
 import { checkRequirements, load, LoadedModule, LoadFailure } from './loader';
@@ -11,14 +13,28 @@ export interface ModuleRuntimeState {
 
 let state: ModuleRuntimeState | null = null;
 
+const permissionsOf = (modules: LoadedModule[]): Record<string, PermissionMeta> =>
+  Object.fromEntries(
+    modules.flatMap((item) =>
+      (item.contribution?.permissions || []).map((permission) => [
+        modulePermissionKey(permission),
+        modulePermissionMeta(item.id, permission) as PermissionMeta,
+      ]),
+    ),
+  );
+
 const initialize = (): ModuleRuntimeState => {
   const { modules, broken } = discover();
   const { loaded, failures } = load(modules);
   const requirementFailures = checkRequirements(loaded);
   const rejected = new Set(requirementFailures.map((item) => item.id));
 
+  const active = loaded.filter((item) => !rejected.has(item.id));
+
+  registerPermissions(permissionsOf(active));
+
   return {
-    loaded: loaded.filter((item) => !rejected.has(item.id)),
+    loaded: active,
     failures: [...broken.map((item) => ({ id: item.id, reason: item.reason })), ...failures, ...requirementFailures],
     disabled: modules.filter((item) => !item.enabled),
   };
@@ -40,7 +56,7 @@ export const modulePaymentModules = (): any[] => moduleRuntime().loaded.flatMap(
 
 export const moduleWebhookChannels = (): any[] => moduleRuntime().loaded.flatMap((item) => item.contribution?.webhookChannels || []);
 
-export const modulePermissions = (): string[] => moduleRuntime().loaded.flatMap((item) => item.contribution?.permissions || []);
+export const modulePermissions = (): Record<string, PermissionMeta> => permissionsOf(moduleRuntime().loaded);
 
 export const moduleConfigSchema = (): { id: string; fields: NonNullable<LoadedModule['contribution']>['config'] }[] =>
   moduleRuntime()

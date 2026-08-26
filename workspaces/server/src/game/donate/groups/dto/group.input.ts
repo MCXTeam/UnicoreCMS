@@ -15,7 +15,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { GroupFeatureInput } from './group-feature.input';
-import { BULK_ITEMS_MAX, IsDonateWebPerm, NAME_MAX_LENGTH, PRICE_MIN, SanitizeHtml, SERVER_ID_MAX_LENGTH } from '@common';
+import { BULK_ITEMS_MAX, IsPlayerPerm, NAME_MAX_LENGTH, PRICE_MIN, SanitizeHtml, SERVER_ID_MAX_LENGTH } from '@common';
 
 export class GroupInput {
   @IsDefined()
@@ -62,7 +62,7 @@ export class GroupInput {
   @IsArray()
   @ArrayMaxSize(BULK_ITEMS_MAX)
   @IsString({ each: true })
-  @IsDonateWebPerm({ each: true })
+  @IsPlayerPerm({ each: true })
   web_perms: string[];
 
   @IsDefined()

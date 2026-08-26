@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, QueryRunner, Repository } from 'typeorm';
-import { modulePrefixes } from 'unicore-api';
+import { modulePrefixes, modulePermissionKey } from 'unicore-api';
 import { ModuleDto, ModuleStatus } from './dto/module.dto';
 import { ModuleRecord } from './entities/module.entity';
 import { discover, readState, writeState } from './runtime/discovery';
@@ -65,7 +65,7 @@ export class ModulesService implements OnModuleInit {
         hasServer: Boolean(module.manifest.server),
         hasClient: Boolean(module.manifest.client),
         hasAdmin: Boolean(module.manifest.admin),
-        permissions: module.manifest.permissions || [],
+        permissions: (module.manifest.permissions || []).map(modulePermissionKey),
         config: module.manifest.config || [],
       });
     });

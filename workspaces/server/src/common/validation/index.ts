@@ -1,6 +1,6 @@
 import { IsUsername } from './isUsername';
 import { IsUsernameOrEmail } from './isUsernameOrEmail';
-import { IsDonateWebPerm } from './isDonateWebPerm';
+import { IsPlayerPerm } from './isPlayerPerm';
 import { IsIpPattern } from './isIpPattern';
 
-export { IsUsername, IsUsernameOrEmail, IsDonateWebPerm, IsIpPattern };
+export { IsUsername, IsUsernameOrEmail, IsPlayerPerm, IsIpPattern };

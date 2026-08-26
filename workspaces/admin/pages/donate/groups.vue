@@ -199,15 +199,11 @@
                 ></MultiSelect>
               </div>
               <div class="field">
-                <label>{{ $t('admin.inject_web_rights') }}</label>
-                <AutoComplete
+                <PermissionsPicker
                   v-model="group.web_perms"
-                  :multiple="true"
-                  :suggestions="autocompleateFilterd"
-                  @complete="searchAutocompleate($event)"
-                  appendTo="body"
-                  :completeOnFocus="true"
-                  :placeholder="$t('admin.choose_permissions')"
+                  only="player"
+                  :label="$t('admin.inject_web_rights')"
+                  :disabled="!canEditPerms"
                 />
               </div>
             </template>
@@ -274,8 +270,9 @@
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>{{ $t('admin.price') }}<span class="p-error"> *</span></label>
+                      <label>{{ $t('admin.price') }}<span class="p-error"> *</span><FieldLock :allowed="canEditPrice" /></label>
                       <InputNumber
+                        :disabled="!canEditPrice"
                         :modelValue="value"
                         @update:modelValue="handleChange"
                         @input="handleChange($event.value)"
@@ -298,8 +295,9 @@
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>{{ $t('admin.sale') }}</label>
+                      <label>{{ $t('admin.sale') }}<FieldLock :allowed="canEditPrice" /></label>
                       <InputNumber
+                        :disabled="!canEditPrice"
                         suffix=" %"
                         :useGrouping="false"
                         :modelValue="value"
@@ -377,10 +375,7 @@
 </template>
 
 <script>
-import { Permission } from 'unicore-common/enums'
 import { Form, Field } from 'vee-validate'
-import { filterDonateWebPerms } from 'unicore-common/validation'
-import { donateWebPermSuggestions } from '~/helpers'
 
 export default {
   components: {
@@ -395,14 +390,20 @@ export default {
     useHead({ title: computed(() => $t('admin.menu_donate_groups')) })
     const config = useRuntimeConfig()
     const access = useAccess({
-      canCreate: Permission.EditorDonateGroupsCreate,
-      canUpdate: Permission.EditorDonateGroupsUpdate,
-      canDelete: Permission.EditorDonateGroupsDelete,
-      canDeleteMany: Permission.EditorDonateGroupsDeleteMany,
+      canCreate: 'panel.donate.groups.create',
+      canUpdate: 'panel.donate.groups.update',
+      canDelete: 'panel.donate.groups.delete',
+      canDeleteMany: 'panel.donate.groups.delete.many',
+    })
+
+    const fields = useFieldAccess('donate_group', {
+      canEditPrice: 'price',
+      canEditPerms: 'web_perms',
     })
 
     return {
       ...access,
+      ...fields,
       translations,
       realDecimals: config.public.realDecimals,
     }
@@ -434,8 +435,6 @@ export default {
       },
       groupDialog: false,
       section: 'main',
-      autocompleate: null,
-      autocompleateFilterd: null,
       servers: null,
       periods: null,
       kits: null,
@@ -466,7 +465,6 @@ export default {
       this.kits = await this.$api.get('/donates/group-kits').then((res) => res.data)
       this.periods = await this.$api.get('/donates/periods').then((res) => res.data)
       this.servers = await this.$api.get('/servers').then((res) => res.data)
-      this.autocompleate = await this.$api.get('/admin/roles/autocompleate').then((res) => filterDonateWebPerms(res.data))
       this.loading = false
     },
     async onGroupReorder(event) {
@@ -495,9 +493,6 @@ export default {
     removeFeature(index) {
       this.group.features.splice(index, 1)
       this.features = []
-    },
-    searchAutocompleate(event) {
-      this.autocompleateFilterd = donateWebPermSuggestions(this.autocompleate, event.query)
     },
     hideDialog() {
       this.groupDialog = false

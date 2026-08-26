@@ -4,8 +4,8 @@ import { join } from 'path';
 import { satisfies } from 'semver';
 import { getMetadataArgsStorage } from 'typeorm';
 import { PATH_METADATA } from '@nestjs/common/constants';
-import { modulesPath } from 'unicore-common';
-import { API_VERSION, contribution, ModuleContribution, modulePrefixes } from 'unicore-api';
+import { modulesPath, PERMISSION_LOCALE_PREFIX, permissionGroupKey } from 'unicore-common';
+import { API_VERSION, contribution, ModuleContribution, modulePermissionKey, modulePrefixes } from 'unicore-api';
 import { DiscoveredModule } from './discovery';
 
 const requireFromModules = createRequire(join(modulesPath, 'loader.js'));
@@ -35,12 +35,16 @@ const validateNamespaces = (module: DiscoveredModule, contributed: ModuleContrib
     else if (!name.startsWith(prefixes.table)) problems.push(`таблица «${name}» должна начинаться с «${prefixes.table}»`);
   }
 
-  for (const permission of contributed.permissions)
+  for (const permission of contributed.permissions.map(modulePermissionKey))
     if (!permission.startsWith(prefixes.permission)) problems.push(`право «${permission}» должно начинаться с «${prefixes.permission}»`);
+
+  const permissionLocale = `${PERMISSION_LOCALE_PREFIX}${prefixes.permission}`;
+  const permissionGroupLocale = permissionGroupKey(`mod.${module.id}`);
 
   for (const [locale, messages] of Object.entries(contributed.locales))
     for (const key of Object.keys(messages))
-      if (!key.startsWith(prefixes.locale)) problems.push(`ключ локали «${key}» (${locale}) должен начинаться с «${prefixes.locale}»`);
+      if (!key.startsWith(prefixes.locale) && !key.startsWith(permissionLocale) && key !== permissionGroupLocale)
+        problems.push(`ключ локали «${key}» (${locale}) должен начинаться с «${prefixes.locale}»`);
 
   for (const field of contributed.config)
     if (!/^[a-z][a-z0-9_]*$/.test(field.key)) problems.push(`ключ настройки «${field.key}» должен быть в нижнем регистре`);

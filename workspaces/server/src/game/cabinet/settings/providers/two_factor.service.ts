@@ -100,6 +100,10 @@ export class TwoFactorService {
 
     if (!(await this.verify(user, input.code))) throw new BadRequestException();
 
+    return this.reset(user);
+  }
+
+  async reset(user: User) {
     user.two_factor_enabled = null;
     user.two_factor_secret = null;
     user.two_factor_secret_temp = null;

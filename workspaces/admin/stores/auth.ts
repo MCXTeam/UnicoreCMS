@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { satisfiesPermission } from 'unicore-common/permissions'
 import { SUPERUSER_ONLY, type RouteAccess } from '~/constants/access'
 
 export interface AuthUser {
@@ -19,14 +20,14 @@ export const useAuthStore = defineStore('auth', {
   }),
   getters: {
     loggedIn: (state) => !!state.user,
-    isAdmin: (state) => !!state.user?.perms?.includes('admin.dashboard') || !!state.user?.superuser,
+    isAdmin: (state) => !!state.user?.perms?.includes('panel.access') || !!state.user?.superuser,
     has:
       (state) =>
       (permission: string): boolean => {
         if (!state.user) return false
         if (state.user.superuser) return true
 
-        return Boolean(state.user.perms?.some((perm) => perm === permission || perm.startsWith(`${permission}.`)))
+        return satisfiesPermission(state.user.perms || [], permission)
       },
     can(): (access: RouteAccess | null) => boolean {
       return (access: RouteAccess | null): boolean => {

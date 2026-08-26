@@ -32,9 +32,9 @@
       "require": "./dist/timezone.js"
     },
     "./permissions": {
-      "types": "./dist/permissions.d.ts",
-      "import": "./dist/permissions.mjs",
-      "require": "./dist/permissions.js"
+      "types": "./dist/permissions/index.d.ts",
+      "import": "./dist/permissions/index.mjs",
+      "require": "./dist/permissions/index.js"
     },
     "./roles": {
       "types": "./dist/roles.d.ts",
@@ -76,11 +76,6 @@
       "types": "./dist/envconfig.d.ts",
       "import": "./dist/envconfig.mjs",
       "require": "./dist/envconfig.js"
-    },
-    "./enums": {
-      "types": "./dist/enums/index.d.ts",
-      "import": "./dist/enums/index.mjs",
-      "require": "./dist/enums/index.js"
     },
     "./issuance": {
       "types": "./dist/issuance/index.d.ts",

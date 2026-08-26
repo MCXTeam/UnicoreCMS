@@ -12,11 +12,11 @@ import {
   Post,
   UploadedFile,
   UseInterceptors,
+  Req,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { Public } from 'src/auth/decorators/public.decorator';
-import { Permission } from 'unicore-common';
 import { GalleryImageInput } from './dto/gallery.input';
 import { ServerCreateInput } from './dto/server-create.input';
 import { ServerUpdateInput } from './dto/server-update.input';
@@ -27,10 +27,10 @@ import { ServersService } from './servers.service';
 export class ServersController {
   constructor(private serversService: ServersService) {}
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminServersCreate])
+  @Permissions(['panel.access', 'panel.servers.create'])
   @Post()
-  create(@Body() body: ServerCreateInput) {
-    return this.serversService.create(body);
+  create(@Req() request: any, @Body() body: ServerCreateInput) {
+    return this.serversService.create(body, request);
   }
 
   @Public()
@@ -51,7 +51,7 @@ export class ServersController {
     return server;
   }
 
-  @Permissions([[Permission.AdminServersRead, Permission.AdminServersUpdate], { or: true }])
+  @Permissions([['panel.servers.read', 'panel.servers.update'], { or: true }])
   @Get(':id/admin')
   async findOneAdmin(@Param('id') id: string) {
     const server = await this.serversService.findOne(id, ['mods', 'query', 'table', 'rcon', 'instances']);
@@ -63,19 +63,19 @@ export class ServersController {
     return server;
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminServersUpdate])
+  @Permissions(['panel.access', 'panel.servers.update'])
   @Patch(':id')
-  update(@Param('id') id: string, @Body() body: ServerUpdateInput) {
-    return this.serversService.update(id, body);
+  update(@Req() request: any, @Param('id') id: string, @Body() body: ServerUpdateInput) {
+    return this.serversService.update(id, body, request);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminServersUpdate])
+  @Permissions(['panel.access', 'panel.servers.update'])
   @Post('sort')
   sort(@Body() body: StringSortInput) {
     return this.serversService.sort(body);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminServersDelete])
+  @Permissions(['panel.access', 'panel.servers.delete'])
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.serversService.remove(id);
@@ -87,7 +87,7 @@ export class ServersController {
     return this.serversService.gallery(id);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminServersUpdate])
+  @Permissions(['panel.access', 'panel.servers.update'])
   @Post(':id/gallery')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -100,19 +100,19 @@ export class ServersController {
     return this.serversService.addGalleryImage(id, body, file);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminServersUpdate])
+  @Permissions(['panel.access', 'panel.servers.update'])
   @Post(':id/gallery/sort')
   sortGallery(@Param('id') id: string, @Body() body: NumberSortInput) {
     return this.serversService.sortGallery(id, body);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminServersUpdate])
+  @Permissions(['panel.access', 'panel.servers.update'])
   @Delete(':id/gallery/:imageId')
   removeGalleryImage(@Param('id') id: string, @Param('imageId', ParseIntPipe) imageId: number) {
     return this.serversService.removeGalleryImage(id, imageId);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminServersUpdate])
+  @Permissions(['panel.access', 'panel.servers.update'])
   @Patch(':type/:id')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -129,7 +129,7 @@ export class ServersController {
     return this.serversService.updateMedia(id, type, file);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminServersUpdate])
+  @Permissions(['panel.access', 'panel.servers.update'])
   @Delete(':type/:id')
   removeMedia(@Param('id') id: string, @Param('type', new ParseEnumPipe(ServerMedia)) type: ServerMedia) {
     return this.serversService.removeMedia(id, type);

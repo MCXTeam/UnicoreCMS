@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Req,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -18,7 +19,6 @@ import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { matchPermission } from 'src/admin/roles/guards/permisson.guard';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
-import { anyServerPermission, Permission } from 'unicore-common';
 import { ProductFromGameInput } from '../dto/product-fromgame.dto';
 import { ProductsManyInput } from '../dto/product-many.input';
 import { ProductInput } from '../dto/product.dto';
@@ -30,7 +30,7 @@ export class ProductsController {
   constructor(private productsService: ProductsService) {}
 
   @Permissions([
-    [Permission.EditorStoreRead, Permission.AdminUsersGive, anyServerPermission(Permission.AdminUsersGiveServer)],
+    ['panel.store.read', 'panel.users.give', 'panel.users.give.*'],
     { or: true },
   ])
   @Get()
@@ -38,20 +38,20 @@ export class ProductsController {
     return this.productsService.find(query);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorStoreProductsDeleteMany])
+  @Permissions(['panel.access', 'panel.store.products.delete.many'])
   @Delete('bulk')
   removeMany(@Body() body: DeleteManyInput) {
     return this.productsService.removeMany(body.items);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorStoreProductsUpdateMany])
+  @Permissions(['panel.access', 'panel.store.products.update.many'])
   @Patch('bulk')
   updateMany(@Body() body: ProductsManyInput) {
     return this.productsService.updateMany(body);
   }
 
   @Permissions([
-    [Permission.EditorStoreRead, Permission.AdminUsersGive, anyServerPermission(Permission.AdminUsersGiveServer)],
+    ['panel.store.read', 'panel.users.give', 'panel.users.give.*'],
     { or: true },
   ])
   @Get(':id')
@@ -79,26 +79,26 @@ export class ProductsController {
     return this.productsService.store(query);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorStoreProductsCreate])
+  @Permissions(['panel.access', 'panel.store.products.create'])
   @Post()
-  create(@Body() body: ProductInput) {
-    return this.productsService.create(body);
+  create(@Req() request: any, @Body() body: ProductInput) {
+    return this.productsService.create(body, request);
   }
 
-  @Permissions([Permission.KernelUnicoreConnect])
+  @Permissions(['kernel.connect'])
   @Post('from_game')
   createFromGame(@Body() body: ProductFromGameInput) {
     return this.productsService.createFromGame(body);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorStoreProductsExport])
+  @Permissions(['panel.access', 'panel.store.products.export'])
   @Post('export')
   async exportItems(@Body() body: DeleteManyInput) {
     const file = await this.productsService.exportItems(body.items);
     return file;
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorStoreProductsImport])
+  @Permissions(['panel.access', 'panel.store.products.import'])
   @Post('import')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -110,24 +110,24 @@ export class ProductsController {
   async importItems(@CurrentUser() user: User, @Body() body: ProductsImportInput, @UploadedFile() file: Express.Multer.File) {
     if (!file) throw new BadRequestException();
 
-    const allowCommands = await matchPermission([Permission.AdminDashboard, Permission.AdminServersUpdate], { user });
+    const allowCommands = await matchPermission(['panel.access', 'panel.servers.update'], { user });
 
     return this.productsService.importItems(body, file.filename, allowCommands);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorStoreProductsUpdate])
+  @Permissions(['panel.access', 'panel.store.products.update'])
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() body: ProductInput) {
-    return this.productsService.update(id, body);
+  update(@Req() request: any, @Param('id', ParseIntPipe) id: number, @Body() body: ProductInput) {
+    return this.productsService.update(id, body, request);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorStoreProductsDelete])
+  @Permissions(['panel.access', 'panel.store.products.delete'])
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.productsService.remove(id);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorStoreProductsUpdate])
+  @Permissions(['panel.access', 'panel.store.products.update'])
   @Patch('icon/:id')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -140,7 +140,7 @@ export class ProductsController {
     return this.productsService.updateIcon(id, file);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorStoreProductsUpdate])
+  @Permissions(['panel.access', 'panel.store.products.update'])
   @Delete('icon/:id')
   removeMedia(@Param('id', ParseIntPipe) id: number) {
     return this.productsService.removeIcon(id);

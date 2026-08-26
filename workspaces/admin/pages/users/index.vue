@@ -107,18 +107,24 @@
             v-model="user.email"
             name="email"
             label="Email"
-            rules="required|email"
+            :rules="canEditEmail ? 'required|email' : ''"
             v-slot="{ value, errorMessage, handleChange, handleBlur }"
           >
             <div class="field">
-              <label>Email<span class="p-error"> *</span></label>
-              <InputText :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" type="text" />
+              <label>Email<span v-if="canEditEmail" class="p-error"> *</span><FieldLock :allowed="canEditEmail" /></label>
+              <InputText
+                :modelValue="value"
+                :disabled="!canEditEmail"
+                @update:modelValue="handleChange"
+                @blur="handleBlur"
+                type="text"
+              />
               <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
             </div>
           </VeeField>
           <div class="field-checkbox">
-            <Checkbox :binary="true" v-model="user.activated" />
-            <label>{{ $t('admin.activated_email') }}</label>
+            <Checkbox :binary="true" v-model="user.activated" :disabled="!canEditActivated" />
+            <label>{{ $t('admin.activated_email') }}<FieldLock :allowed="canEditActivated" /></label>
           </div>
           <VeeField
             v-model="user.password"
@@ -174,10 +180,11 @@
 
         <template #access>
           <div class="field">
-            <label>{{ $t('admin.roles') }}</label>
+            <label>{{ $t('admin.roles') }}<FieldLock :allowed="canEditRoles" /></label>
             <MultiSelect
               display="chip"
               :filter="true"
+              :disabled="!canEditRoles"
               v-model="user.roles"
               optionDisabled="important"
               :options="roles"
@@ -187,8 +194,8 @@
               class="p-column-filter"
             />
           </div>
-          <PermissionsPicker v-model="user.perms" :universe="autocompleate" :label="$t('admin.rights')" />
-          <div class="field-checkbox" v-if="isSuperuser">
+          <PermissionsPicker v-model="user.perms" :label="$t('admin.rights')" :disabled="!canEditRoles" />
+          <div class="field-checkbox" v-if="canEditSuperuser">
             <Checkbox :binary="true" v-model="user.superuser" />
             <label>{{ $t('admin.superuser') }}</label>
           </div>
@@ -210,12 +217,10 @@
 </template>
 
 <script>
-import { Permission } from 'unicore-common/enums'
 import { generatePassword } from 'unicore-common/password'
 import { sortTransform } from '~/helpers'
 import { FilterMatchMode } from '@primevue/core/api'
 import { Form, Field } from 'vee-validate'
-import { useAuthStore } from '~/stores/auth'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 
@@ -231,12 +236,20 @@ export default {
     const toast = useToast()
     const confirm = useConfirm()
     const access = useAccess({
-      canCreate: Permission.AdminUsersCreate,
-      canDelete: Permission.AdminUsersDelete,
-      canDeleteMany: Permission.AdminUsersDeleteMany,
+      canCreate: 'panel.users.create',
+      canDelete: 'panel.users.delete',
+      canDeleteMany: 'panel.users.delete.many',
     })
 
-    return { toast, confirm, ...access }
+    const fields = useFieldAccess('user', {
+      canEditUsername: 'username',
+      canEditEmail: 'email',
+      canEditActivated: 'activated',
+      canEditRoles: 'roles',
+      canEditSuperuser: 'superuser',
+    })
+
+    return { toast, confirm, ...access, ...fields }
   },
   computed: {
     sections() {
@@ -244,9 +257,6 @@ export default {
         { key: 'main', label: 'admin.section_main', icon: 'pi pi-info-circle' },
         { key: 'access', label: 'admin.roles_and_rights', icon: 'pi pi-key' },
       ]
-    },
-    isSuperuser() {
-      return Boolean(useAuthStore().user?.superuser)
     },
   },
   data() {
@@ -275,7 +285,6 @@ export default {
       passwordConfirm: null,
       passwordVisible: false,
       roles: [],
-      autocompleate: [],
       loading: true,
       selected: null,
       filters: {
@@ -301,7 +310,6 @@ export default {
       this.loading = true
       this.selected = null
       this.roles = (await this.$api.get('/admin/roles').then((res) => res.data)).filter((role) => role.id != 'banned')
-      this.autocompleate = await this.$api.get('/admin/roles/autocompleate').then((res) => res.data)
       this.users = await this.$api
         .get('/users', {
           params: {

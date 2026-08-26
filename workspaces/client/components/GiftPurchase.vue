@@ -1,5 +1,5 @@
 <template>
-  <div v-if="modes.length && allowed !== false">
+  <div v-if="canGift && modes.length && allowed !== false">
     <hr class="my-3" />
     <div class="d-flex align-items-center">
       <h4 class="m-0">{{ $t('cabinet.gift_title') }}</h4>
@@ -39,6 +39,8 @@ const emit = defineEmits<{ done: [] }>()
 
 const { $auth, $unicore, $t } = useNuxtApp()
 const giftsApi = useGifts()
+
+const { canGift } = useAccess({ canGift: 'player.gift.buy' })
 
 const mode = ref<'direct' | 'code'>('direct')
 const username = ref('')

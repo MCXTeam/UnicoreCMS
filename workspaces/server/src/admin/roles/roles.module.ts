@@ -6,20 +6,22 @@ import { Role } from './entities/role.entity';
 import { PermissionGuard } from './guards/permisson.guard';
 import { RolesController } from './roles.controller';
 import { RolesService } from './roles.service';
-import { RoutePermissionsController } from './route-permissions.controller';
+import { PermissionsController } from './permissions.controller';
+import { PermissionsService } from './permissions.service';
 import { RoutePermissionsService } from './route-permissions.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Role]), ServersModule, DiscoveryModule],
   providers: [
     RolesService,
+    PermissionsService,
     RoutePermissionsService,
     {
       provide: APP_GUARD,
       useClass: PermissionGuard,
     },
   ],
-  controllers: [RolesController, RoutePermissionsController],
+  controllers: [RolesController, PermissionsController],
 })
 export class RolesModule implements OnModuleInit {
   constructor(private rolesService: RolesService) {}

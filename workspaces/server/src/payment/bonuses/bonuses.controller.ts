@@ -2,7 +2,6 @@ import { imageFileFilter, STORAGE_MAX_IMAGE_UPLOAD, StorageManager } from '@comm
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
-import { Permission } from 'unicore-common';
 import { BonusesService } from './bonuses.service';
 import { BonusInput } from './dto/bonus.dto';
 import { Bonus } from './entities/bonus.entity';
@@ -17,24 +16,24 @@ export class BonusesController {
   }
 
   @Post()
-  @Permissions([Permission.AdminDashboard, Permission.EditorPaymentBonusesGiftsCreate])
+  @Permissions(['panel.access', 'panel.payment.bonuses.create'])
   create(@Body() body: BonusInput) {
     return this.bonusesService.create(body);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorPaymentBonusesUpdate])
+  @Permissions(['panel.access', 'panel.payment.bonuses.update'])
   @Patch(':id')
   update(@Param('id', ParseIntPipe) id: number, @Body() body: BonusInput) {
     return this.bonusesService.update(id, body);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorPaymentBonusesDelete])
+  @Permissions(['panel.access', 'panel.payment.bonuses.delete'])
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.bonusesService.remove(id);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorPaymentBonusesUpdate])
+  @Permissions(['panel.access', 'panel.payment.bonuses.update'])
   @Patch('icon/:id')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -47,7 +46,7 @@ export class BonusesController {
     return this.bonusesService.updateIcon(id, file);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorPaymentBonusesUpdate])
+  @Permissions(['panel.access', 'panel.payment.bonuses.update'])
   @Delete('icon/:id')
   removeMedia(@Param('id', ParseIntPipe) id: number) {
     return this.bonusesService.removeIcon(id);

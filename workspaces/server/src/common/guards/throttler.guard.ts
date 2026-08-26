@@ -2,7 +2,6 @@ import { ThrottlerGuard } from '@nestjs/throttler';
 import { ExecutionContext, Injectable } from '@nestjs/common';
 import { User } from 'src/admin/users/entities/user.entity';
 import { matchPermission } from 'src/admin/roles/guards/permisson.guard';
-import { Permission } from 'unicore-common';
 import { clientIp } from '../utils/ip';
 
 @Injectable()
@@ -18,7 +17,7 @@ export class ThrottlerCoreGuard extends ThrottlerGuard {
     if (
       user &&
       (await matchPermission(
-        [[Permission.KernelUnicoreConnect, Permission.KernelUnicoreProvider, Permission.AdminDashboard], { or: true }],
+        [['kernel.connect', 'kernel.provider', 'panel.access'], { or: true }],
         { user },
       ))
     )

@@ -156,7 +156,6 @@
 </template>
 
 <script>
-import { Permission } from 'unicore-common/enums'
 import { fullSizeTemplate } from '~/constants'
 import { FilterMatchMode } from '@primevue/core/api'
 import { Form, Field } from 'vee-validate'
@@ -174,9 +173,9 @@ export default {
     useHead({ title: computed(() => $t('admin.menu_pages')) })
     const auth = useAuthStore()
     const access = useAccess({
-      canCreate: Permission.AdminPagesCreate,
-      canUpdate: Permission.AdminPagesUpdate,
-      canDelete: Permission.AdminPagesDelete,
+      canCreate: 'panel.pages.create',
+      canUpdate: 'panel.pages.update',
+      canDelete: 'panel.pages.delete',
     })
 
     return { translations, auth, ...access }

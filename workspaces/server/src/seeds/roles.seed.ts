@@ -9,13 +9,22 @@ export default class CreateRoles {
         id: 'admin',
         name: 'Администратор',
         priority: 10,
-        perms: ['admin.*'],
+        perms: ['panel.*'],
       },
       {
         id: 'editor',
         name: 'Редактор',
         priority: 7,
-        perms: ['editor.*'],
+        perms: [
+          'panel.access',
+          'panel.news.*',
+          'panel.pages.*',
+          'panel.mods.*',
+          'panel.store.*',
+          'panel.donate.*',
+          'panel.gifts.*',
+          'panel.votes.*',
+        ],
       },
     ]);
   }

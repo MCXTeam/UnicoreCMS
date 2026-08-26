@@ -70,8 +70,8 @@ declare const clientSlots: (slot: ClientSlotName) => ClientSlotEntry[];
 export { CLIENT_NAV_PLACES, CLIENT_SLOTS, type ClientModuleDefinition, type ClientNavItem, type ClientNavPlace, type ClientNavSource, type ClientSlotEntry, type ClientSlotName, type SlotComponent, clientModules, clientNav, clientSlots, defineClientModule, moduleActive, setActiveModules };
 
 === index.d.ts ===
-export { A as ACTIVE_MODULES_KEY, a as ALLOW_INACTIVE_KEY, b as API_MAJOR, c as API_VERSION, C as CORE_API, d as CacheApi, e as Capabilities, f as ConfigApi, g as CoreApi, h as CoreEventMap, i as CoreEventName, E as EVENT_BUS, j as EventBus, k as EventErrorReporter, l as EventHandler, I as IS_PUBLIC_KEY, m as IssuanceApi, n as IssuanceGroupRef, o as IssuancePermissionRef, p as IssuanceProductRef, q as IssuanceServerRef, r as IssuanceTarget, L as LocalesApi, s as LoggerApi, M as MODULE_CONFIG, t as MODULE_ID, u as MODULE_ID_PATTERN, v as MailApi, w as ModuleContext, x as ModuleContribution, y as ModuleDefinition, z as MoneyApi, P as PERMISSIONS_KEY, B as PaymentCoreModule, D as PaymentCoreService, F as PaymentCreateInput, G as PaymentLink, H as PaymentsApi, R as REGISTRY_SYMBOL, J as Registry, S as ServerOnline, K as ServerRecord, N as ServersApi, O as SkinRecord, Q as StaffApi, T as StaffMember, U as StorageApi, V as THEME_ID_PATTERN, W as Translatable, X as TranslatableAccess, Y as TranslatableMeta, Z as UnicoreApiNotReadyError, _ as UserRecord, $ as UsersApi, a0 as WebhookChannel, a1 as WebhookDeliveryResult, a2 as WebhookPost, a3 as WebhookTarget, a4 as WebhooksApi, a5 as capabilities, a6 as contribution, a7 as contributions, a8 as core, a9 as coreReady, aa as defineModule, ab as events, ac as getRegistry, ad as moduleContext, ae as modulePrefixes, af as registerContribution, ag as setCore, ah as translatableByEntity, ai as translatableEntities, aj as translatableOf } from './translatable-DhmAMfvX.js';
-export { ConfigFieldSchema, ConfigFieldType, LocalizedText, ModuleManifest, PRIMEVUE_PRESETS, PrimeVuePreset, ThemeManifest, ValidationResult, localizedText, validateModuleManifest, validateThemeManifest } from './manifest.js';
+export { A as ACTIVE_MODULES_KEY, a as ALLOW_INACTIVE_KEY, b as API_MAJOR, c as API_VERSION, C as CORE_API, d as CacheApi, e as Capabilities, f as ConfigApi, g as CoreApi, h as CoreEventMap, i as CoreEventName, E as EVENT_BUS, j as EventBus, k as EventErrorReporter, l as EventHandler, I as IS_PUBLIC_KEY, m as IssuanceApi, n as IssuanceGroupRef, o as IssuancePermissionRef, p as IssuanceProductRef, q as IssuanceServerRef, r as IssuanceTarget, L as LocalesApi, s as LoggerApi, M as MODULE_CONFIG, t as MODULE_ID, u as MODULE_ID_PATTERN, v as MailApi, w as ModuleContext, x as ModuleContribution, y as ModuleDefinition, z as MoneyApi, P as PERMISSIONS_KEY, B as PaymentCoreModule, D as PaymentCoreService, F as PaymentCreateInput, G as PaymentLink, H as PaymentsApi, R as REGISTRY_SYMBOL, J as Registry, S as ServerOnline, K as ServerRecord, N as ServersApi, O as SkinRecord, Q as StaffApi, T as StaffMember, U as StorageApi, V as THEME_ID_PATTERN, W as Translatable, X as TranslatableAccess, Y as TranslatableMeta, Z as UnicoreApiNotReadyError, _ as UserRecord, $ as UsersApi, a0 as WebhookChannel, a1 as WebhookDeliveryResult, a2 as WebhookPost, a3 as WebhookTarget, a4 as WebhooksApi, a5 as capabilities, a6 as contribution, a7 as contributions, a8 as core, a9 as coreReady, aa as defineModule, ab as events, ac as getRegistry, ad as moduleContext, ae as modulePrefixes, af as registerContribution, ag as setCore, ah as translatableByEntity, ai as translatableEntities, aj as translatableOf } from './translatable-BFpHdrXC.js';
+export { ConfigFieldSchema, ConfigFieldType, LocalizedText, ModuleManifest, ModulePermission, ModulePermissionSchema, PRIMEVUE_PRESETS, PrimeVuePreset, ThemeManifest, ValidationResult, localizedText, modulePermissionKey, modulePermissionMeta, validateModuleManifest, validateThemeManifest } from './manifest.js';
 import 'typeorm';
 import 'unicore-common';
 declare const MODULE_EXTERNALS: string[];
@@ -94,6 +94,13 @@ interface ConfigFieldSchema {
     hint?: string;
 }
 type LocalizedText = string | Record<string, string>;
+interface ModulePermissionSchema {
+    key: string;
+    group?: string;
+    scope?: 'server';
+    danger?: boolean;
+}
+type ModulePermission = string | ModulePermissionSchema;
 interface ModuleManifest {
     id: string;
     name: LocalizedText;
@@ -108,7 +115,7 @@ interface ModuleManifest {
     admin?: string;
     componentPrefix?: string;
     locales?: string;
-    permissions?: string[];
+    permissions?: ModulePermission[];
     config?: ConfigFieldSchema[];
     requires?: {
         modules?: Record<string, string>;
@@ -140,7 +147,13 @@ interface ValidationResult<T> {
 declare const validateModuleManifest: (raw: unknown) => ValidationResult<ModuleManifest>;
 declare const validateThemeManifest: (raw: unknown) => ValidationResult<ThemeManifest>;
 declare const localizedText: (value: LocalizedText | undefined, locale: string, fallback?: string) => string;
-export { type ConfigFieldSchema, type ConfigFieldType, type LocalizedText, type ModuleManifest, PRIMEVUE_PRESETS, type PrimeVuePreset, type ThemeManifest, type ValidationResult, localizedText, validateModuleManifest, validateThemeManifest };
+declare const modulePermissionKey: (permission: ModulePermission) => string;
+declare const modulePermissionMeta: (id: string, permission: ModulePermission) => {
+    group: string;
+    scope?: "server";
+    danger?: boolean;
+};
+export { type ConfigFieldSchema, type ConfigFieldType, type LocalizedText, type ModuleManifest, type ModulePermission, type ModulePermissionSchema, PRIMEVUE_PRESETS, type PrimeVuePreset, type ThemeManifest, type ValidationResult, localizedText, modulePermissionKey, modulePermissionMeta, validateModuleManifest, validateThemeManifest };
 
 === nuxt/index.d.ts ===
 import { ModuleManifest, ThemeManifest } from '../manifest.js';
@@ -182,8 +195,8 @@ declare const resolveLayers: (options: ResolveLayersOptions) => ResolvedLayers;
 export { type LayerSide, type ResolveLayersOptions, type ResolvedLayers, type ResolvedModuleLayer, type ResolvedThemeLayer, guardLayers, resolveLayers };
 
 === server/index.d.ts ===
-export { A as ACTIVE_MODULES_KEY, a as ALLOW_INACTIVE_KEY, b as API_MAJOR, c as API_VERSION, C as CORE_API, d as CacheApi, e as Capabilities, f as ConfigApi, g as CoreApi, h as CoreEventMap, i as CoreEventName, E as EVENT_BUS, j as EventBus, k as EventErrorReporter, l as EventHandler, I as IS_PUBLIC_KEY, m as IssuanceApi, n as IssuanceGroupRef, o as IssuancePermissionRef, p as IssuanceProductRef, q as IssuanceServerRef, r as IssuanceTarget, L as LocalesApi, s as LoggerApi, M as MODULE_CONFIG, t as MODULE_ID, u as MODULE_ID_PATTERN, v as MailApi, w as ModuleContext, x as ModuleContribution, y as ModuleDefinition, z as MoneyApi, P as PERMISSIONS_KEY, B as PaymentCoreModule, D as PaymentCoreService, F as PaymentCreateInput, G as PaymentLink, H as PaymentsApi, R as REGISTRY_SYMBOL, J as Registry, S as ServerOnline, K as ServerRecord, N as ServersApi, O as SkinRecord, Q as StaffApi, T as StaffMember, U as StorageApi, V as THEME_ID_PATTERN, W as Translatable, X as TranslatableAccess, Y as TranslatableMeta, Z as UnicoreApiNotReadyError, _ as UserRecord, $ as UsersApi, a0 as WebhookChannel, a1 as WebhookDeliveryResult, a2 as WebhookPost, a3 as WebhookTarget, a4 as WebhooksApi, a5 as capabilities, a6 as contribution, a7 as contributions, a8 as core, a9 as coreReady, aa as defineModule, ab as events, ac as getRegistry, ad as moduleContext, ae as modulePrefixes, af as registerContribution, ag as setCore, ah as translatableByEntity, ai as translatableEntities, aj as translatableOf } from '../translatable-DhmAMfvX.js';
-export { ConfigFieldSchema, ConfigFieldType, LocalizedText, ModuleManifest, PRIMEVUE_PRESETS, PrimeVuePreset, ThemeManifest, ValidationResult, localizedText, validateModuleManifest, validateThemeManifest } from '../manifest.js';
+export { A as ACTIVE_MODULES_KEY, a as ALLOW_INACTIVE_KEY, b as API_MAJOR, c as API_VERSION, C as CORE_API, d as CacheApi, e as Capabilities, f as ConfigApi, g as CoreApi, h as CoreEventMap, i as CoreEventName, E as EVENT_BUS, j as EventBus, k as EventErrorReporter, l as EventHandler, I as IS_PUBLIC_KEY, m as IssuanceApi, n as IssuanceGroupRef, o as IssuancePermissionRef, p as IssuanceProductRef, q as IssuanceServerRef, r as IssuanceTarget, L as LocalesApi, s as LoggerApi, M as MODULE_CONFIG, t as MODULE_ID, u as MODULE_ID_PATTERN, v as MailApi, w as ModuleContext, x as ModuleContribution, y as ModuleDefinition, z as MoneyApi, P as PERMISSIONS_KEY, B as PaymentCoreModule, D as PaymentCoreService, F as PaymentCreateInput, G as PaymentLink, H as PaymentsApi, R as REGISTRY_SYMBOL, J as Registry, S as ServerOnline, K as ServerRecord, N as ServersApi, O as SkinRecord, Q as StaffApi, T as StaffMember, U as StorageApi, V as THEME_ID_PATTERN, W as Translatable, X as TranslatableAccess, Y as TranslatableMeta, Z as UnicoreApiNotReadyError, _ as UserRecord, $ as UsersApi, a0 as WebhookChannel, a1 as WebhookDeliveryResult, a2 as WebhookPost, a3 as WebhookTarget, a4 as WebhooksApi, a5 as capabilities, a6 as contribution, a7 as contributions, a8 as core, a9 as coreReady, aa as defineModule, ab as events, ac as getRegistry, ad as moduleContext, ae as modulePrefixes, af as registerContribution, ag as setCore, ah as translatableByEntity, ai as translatableEntities, aj as translatableOf } from '../translatable-BFpHdrXC.js';
+export { ConfigFieldSchema, ConfigFieldType, LocalizedText, ModuleManifest, ModulePermission, ModulePermissionSchema, PRIMEVUE_PRESETS, PrimeVuePreset, ThemeManifest, ValidationResult, localizedText, modulePermissionKey, modulePermissionMeta, validateModuleManifest, validateThemeManifest } from '../manifest.js';
 import * as _nestjs_common from '@nestjs/common';
 import { CronOptions } from '@nestjs/schedule';
 import 'typeorm';
@@ -200,11 +213,11 @@ declare const UserAgent: (...dataOrPipes: unknown[]) => ParameterDecorator;
 declare function SafeCron(expression: string, task: string, options?: CronOptions): MethodDecorator;
 export { AllowInactive, CurrentUser, IpAddress, type PermissionOptions, Permissions, Public, SafeCron, UserAgent };
 
-=== translatable-DhmAMfvX.d.ts ===
-import { ConfigFieldSchema } from './manifest.js';
+=== translatable-BFpHdrXC.d.ts ===
+import { ModulePermission, ConfigFieldSchema } from './manifest.js';
 import { DataSource } from 'typeorm';
 import { RoleAppearance } from 'unicore-common';
-declare const API_VERSION = "1.6.0";
+declare const API_VERSION = "1.7.0";
 declare const API_MAJOR: number;
 declare const IS_PUBLIC_KEY = "isPublic";
 declare const PERMISSIONS_KEY = "permissions";
@@ -336,7 +349,7 @@ interface ModuleContribution {
     id: string;
     entities: unknown[];
     nestModules: unknown[];
-    permissions: string[];
+    permissions: ModulePermission[];
     config: ConfigFieldSchema[];
     locales: Record<string, Record<string, string>>;
     paymentModules: unknown[];
@@ -559,7 +572,7 @@ interface ModuleDefinition {
     id: string;
     entities?: unknown[];
     nestModules?: unknown[];
-    permissions?: string[];
+    permissions?: ModulePermission[];
     config?: ConfigFieldSchema[];
     locales?: Record<string, Record<string, string>>;
     paymentModules?: unknown[];

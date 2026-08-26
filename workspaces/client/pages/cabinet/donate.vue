@@ -53,7 +53,7 @@
         @done="afterGift()"
       />
       <template #footer>
-        <div class="d-flex justify-content-center" v-if="donate.period && !donate.gift_only">
+        <div class="d-flex justify-content-center" v-if="canBuyGroup && donate.period && !donate.gift_only">
           <Button v-if="donate.use_virtual" size="large" @click="buyGroup()">
             {{ $t('cabinet.buy_for') }} &nbsp;<small
               ><strike>{{ $utils.formatCurrency('real', calcGroupPrice()) }}</strike></small
@@ -142,7 +142,7 @@
         @done="afterGift()"
       />
       <template #footer>
-        <div class="d-flex justify-content-center" v-if="permission.period && !permission.gift_only">
+        <div class="d-flex justify-content-center" v-if="canBuyPermission && permission.period && !permission.gift_only">
           <Button v-if="permission.use_virtual" size="large" @click="buyPermission()">
             {{ $t('cabinet.buy_for') }} &nbsp;<small
               ><strike>{{ $utils.formatCurrency('real', calcPermissionPrice()) }}</strike></small
@@ -317,6 +317,11 @@ const giftsApi = useGifts()
 
 useHead({ title: computed(() => $t('header.cabinet')) })
 const { config } = usePublicConfig()
+
+const { canBuyGroup, canBuyPermission } = useAccess({
+  canBuyGroup: 'player.donate.group.buy',
+  canBuyPermission: 'player.donate.permission.buy',
+})
 
 const donate = reactive({
   server_id: '',

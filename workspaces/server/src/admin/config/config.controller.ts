@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, ForbiddenException, Get, Param, Patch, Post, Req } from '@nestjs/common';
-import { isRconConfigKey, Permission } from 'unicore-common';
+import { isRconConfigKey } from 'unicore-common';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { RuntimePermissions } from '../roles/decorators/permission.decorator';
 import { matchPermission } from '../roles/guards/permisson.guard';
@@ -11,16 +11,16 @@ import { ConfigInput } from './dto/config.input';
 export class ConfigController {
   constructor(private configService: ConfigService) {}
 
-  private superuser(request: any): boolean {
-    return Boolean(request?.user?.superuser);
-  }
+  private async rconOnly(request: any, permission: 'panel.config.read' | 'panel.config.update'): Promise<boolean> {
+    if (await matchPermission([permission], request)) return false;
 
-  private async rconOnly(request: any): Promise<boolean> {
-    if (this.superuser(request)) return false;
-
-    if (await matchPermission([Permission.AdminServersRcon], request)) return true;
+    if (await matchPermission(['panel.servers.rcon.*'], request)) return true;
 
     throw new ForbiddenException();
+  }
+
+  private async assertConfigUpdate(request: any): Promise<void> {
+    if (!(await matchPermission(['panel.config.update'], request))) throw new ForbiddenException();
   }
 
   @Public()
@@ -31,7 +31,7 @@ export class ConfigController {
 
   @Get()
   async find(@Req() request: any) {
-    const limited = await this.rconOnly(request);
+    const limited = await this.rconOnly(request, 'panel.config.read');
     const config = await this.configService.find();
 
     return limited ? config.filter((item) => isRconConfigKey(item.key)) : config;
@@ -39,21 +39,21 @@ export class ConfigController {
 
   @Patch()
   async update(@Req() request: any, @Body() body: ConfigInput) {
-    if ((await this.rconOnly(request)) && !isRconConfigKey(body.key)) throw new ForbiddenException();
+    if ((await this.rconOnly(request, 'panel.config.update')) && !isRconConfigKey(body.key)) throw new ForbiddenException();
 
     return this.configService.update(body);
   }
 
   @Delete(':key')
   async delete(@Req() request: any, @Param('key') key: string) {
-    if (!this.superuser(request)) throw new ForbiddenException();
+    await this.assertConfigUpdate(request);
 
     return this.configService.delate(key);
   }
 
   @Post()
   async create(@Req() request: any, @Body() body: ConfigInput) {
-    if (!this.superuser(request)) throw new ForbiddenException();
+    await this.assertConfigUpdate(request);
 
     return this.configService.create(body);
   }

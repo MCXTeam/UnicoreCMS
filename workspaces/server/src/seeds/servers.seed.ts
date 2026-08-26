@@ -18,7 +18,6 @@ import { Kit } from 'src/game/store/entities/kit.entity';
 import { Product } from 'src/game/store/entities/product.entity';
 import { ProductMap } from 'src/game/store/providers/product.service';
 import { DataSource } from 'typeorm';
-import { Permission } from 'unicore-common';
 
 export default class CreateServers {
   public async run(dataSource: DataSource): Promise<any> {
@@ -402,7 +401,7 @@ export default class CreateServers {
         kits: groupKits.filter((kit) => kit.name == 'Elite'),
         servers: servers_,
         periods: periods,
-        web_perms: [Permission.UserCabinetSkinHd, Permission.UserCabinetCloakHd],
+        web_perms: ['player.skin.hd', 'player.cloak.hd'],
         features: [
           {
             title: 'Всё включено!',
@@ -450,7 +449,7 @@ export default class CreateServers {
         type: PermissionType.Web,
         price: 5,
         sale: 5,
-        web_perms: [Permission.UserCabinetSkinHd],
+        web_perms: ['player.skin.hd'],
         periods: periods.filter((p) => p.expire == 0),
       },
       {
@@ -458,7 +457,7 @@ export default class CreateServers {
         type: PermissionType.Web,
         price: 5,
         sale: 5,
-        web_perms: [Permission.UserCabinetCloakHd],
+        web_perms: ['player.cloak.hd'],
         periods: periods.filter((p) => p.expire == 0),
       },
       {

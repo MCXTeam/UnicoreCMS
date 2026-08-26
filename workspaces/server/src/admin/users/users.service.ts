@@ -29,8 +29,9 @@ import {
 import { PublicUsersDto } from './dto/public-users.dto';
 import { UserUpdateInput } from './dto/user-update.input';
 import { matchPermission, transformPermissions } from '../roles/guards/permisson.guard';
-import { isAdminPermission, Permission, UserField, USER_FIELDS } from 'unicore-common';
+import { isPanelPermission, UserField, USER_FIELDS } from 'unicore-common';
 import { SettingsService } from 'src/game/cabinet/settings/providers/settings.service';
+import { TwoFactorService } from 'src/game/cabinet/settings/providers/two_factor.service';
 import { PasswordChangeInput } from 'src/game/cabinet/settings/dto/password-change.input';
 import { PasswordUpdateInput } from 'src/game/cabinet/settings/dto/password-update.input';
 import { Transactional } from 'typeorm-transactional';
@@ -42,16 +43,20 @@ function sameSet(left: string[] = [], right: string[] = []): boolean {
 function adminPermissions(user: Partial<User>): string[] {
   const resolved = transformPermissions({ ...user, perms: [...(user.perms || [])], roles: [...(user.roles || [])] });
 
-  return (resolved.perms || []).filter(isAdminPermission);
+  return (resolved.perms || []).filter(isPanelPermission);
 }
 
 async function canGrantAdminPermissions(actor: User): Promise<boolean> {
-  return matchPermission([Permission.AdminUsersUpdateRolesAdmin], { user: actor });
+  return matchPermission(['panel.users.grant.panel'], { user: actor });
+}
+
+async function canManageSuperuser(actor: User): Promise<boolean> {
+  return matchPermission(['panel.users.field.superuser'], { user: actor });
 }
 
 export async function userPermissionCheck(user: User, actor: User) {
   if (actor.superuser) return true;
-  if (!actor.superuser && user.superuser) return false;
+  if (user.superuser && !(await canManageSuperuser(actor))) return false;
   const actorPerms = transformPermissions({ ...actor, perms: [...(actor.perms || [])] }).perms;
   const targetPerms = transformPermissions({ ...user, perms: [...(user.perms || [])] }).perms;
   for (const perm of targetPerms) {
@@ -76,6 +81,7 @@ export class UsersService {
     private referalsService: ReferalsService,
     private passwordService: PasswordService,
     private settingsService: SettingsService,
+    private twoFactorService: TwoFactorService,
   ) {}
 
   private async requiredRole(id: ImportantRoles): Promise<Role> {
@@ -279,7 +285,10 @@ export class UsersService {
     const allowed = new Set(allowedFields);
 
     user.uuid = randomUUID();
-    if (actor && !actor.superuser && input.superuser) throw new ForbiddenException();
+
+    const manageSuperuser = !actor || actor.superuser || (await canManageSuperuser(actor));
+
+    if (input.superuser && !manageSuperuser) throw new ForbiddenException();
 
     if (!allowed.has('email') && input.email) throw new ForbiddenException();
     if (!allowed.has('activated') && input.activated) throw new ForbiddenException();
@@ -287,7 +296,7 @@ export class UsersService {
     if (!allowed.has('perms') && (input.perms || []).length) throw new ForbiddenException();
 
     user.username = input.username;
-    user.superuser = actor && !actor.superuser ? null : input.superuser;
+    user.superuser = manageSuperuser ? input.superuser : null;
     user.locale = input.locale;
     user.password = await this.passwordService.hash(input.password, passwordAad(user.uuid));
 
@@ -325,10 +334,14 @@ export class UsersService {
 
     if (actor && !(await userPermissionCheck(before, actor))) throw new ForbiddenException();
 
-    if (actor && !actor.superuser && input.superuser !== undefined && Boolean(input.superuser) !== Boolean(user.superuser))
+    const manageSuperuser = !actor || actor.superuser || (await canManageSuperuser(actor));
+
+    if (input.superuser !== undefined && Boolean(input.superuser) !== Boolean(user.superuser) && !manageSuperuser)
       throw new ForbiddenException();
 
-    const superuser = actor && !actor.superuser ? user.superuser : input.superuser;
+    const superuser = manageSuperuser ? input.superuser : user.superuser;
+
+    if (!allowed.has('username') && input.username !== undefined && input.username !== user.username) throw new ForbiddenException();
 
     if (!allowed.has('email') && input.email !== undefined && (input.email || null) != (user.email || null)) throw new ForbiddenException();
 
@@ -373,10 +386,32 @@ export class UsersService {
     if (actor && user.uuid == actor.uuid) {
       if (actor.superuser != user.superuser) throw new BadRequestException();
 
-      if (!(await matchPermission([Permission.AdminDashboard, Permission.AdminUsersUpdate], { user }))) throw new BadRequestException();
+      if (!(await matchPermission(['panel.access', 'panel.users.update'], { user }))) throw new BadRequestException();
     }
 
     return this.usersRepository.save(user);
+  }
+
+  @Transactional()
+  async resetTwoFactor(uuid: string, actor: User = null): Promise<void> {
+    const user = await this.getById(uuid);
+
+    if (!user) throw new NotFoundException();
+
+    if (actor && !(await userPermissionCheck(user, actor))) throw new ForbiddenException();
+
+    await this.twoFactorService.reset(user);
+  }
+
+  @Transactional()
+  async closeSessions(uuid: string, actor: User = null): Promise<void> {
+    const user = await this.getById(uuid);
+
+    if (!user) throw new NotFoundException();
+
+    if (actor && !(await userPermissionCheck(user, actor))) throw new ForbiddenException();
+
+    await this.settingsService.closeSessions(user);
   }
 
   @Transactional()

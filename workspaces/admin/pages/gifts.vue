@@ -320,7 +320,6 @@
 </template>
 
 <script>
-import { Permission } from 'unicore-common/enums'
 import { FilterMatchMode } from '@primevue/core/api'
 import { Form, Field } from 'vee-validate'
 
@@ -336,10 +335,10 @@ export default {
   },
   data() {
     const access = useAccess({
-      canCreate: Permission.EditorCabinetGiftsCreate,
-      canUpdate: Permission.EditorCabinetGiftsUpdate,
-      canDelete: Permission.EditorCabinetGiftsDelete,
-      canDeleteMany: Permission.EditorCabinetGiftsDeleteMany,
+      canCreate: 'panel.gifts.create',
+      canUpdate: 'panel.gifts.update',
+      canDelete: 'panel.gifts.delete',
+      canDeleteMany: 'panel.gifts.delete.many',
     })
 
     return {

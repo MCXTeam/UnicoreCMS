@@ -1,6 +1,6 @@
 <template>
   <div class="cab-grid">
-    <CabTile :title="$t('auth.change_password')" icon="bx bx-lock-alt" :span="6">
+    <CabTile v-if="canPassword" :title="$t('auth.change_password')" icon="bx bx-lock-alt" :span="6">
       <p class="cab-sub mt-0 mb-3">{{ $t('cabinet.password_hint') }}</p>
       <Form v-slot="{ meta }" class="cab-form">
         <label class="cab-label">{{ $t('cabinet.current_password') }}</label>
@@ -71,7 +71,7 @@
       </Form>
     </CabTile>
 
-    <CabTile :title="$t('cabinet.two_factor')" icon="bx bx-shield-quarter" :span="6">
+    <CabTile v-if="canTwoFactorOn || canTwoFactorOff" :title="$t('cabinet.two_factor')" icon="bx bx-shield-quarter" :span="6">
       <div v-if="!$auth.user.two_factor_enabled" v-show="two_factor && !$auth.user.two_factor_enabled">
         <div class="cab-note mb-3">
           <p class="m-0">{{ $t('cabinet.two_factor_text1') }}</p>
@@ -104,7 +104,13 @@
                 />
                 <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
               </Field>
-              <Button :disabled="!meta.valid" class="w-100" :label="$t('cabinet.two_factor_enable')" @click="TwoFactorEnable()" />
+              <Button
+                v-if="canTwoFactorOn"
+                :disabled="!meta.valid"
+                class="w-100"
+                :label="$t('cabinet.two_factor_enable')"
+                @click="TwoFactorEnable()"
+              />
             </Form>
           </div>
         </div>
@@ -133,7 +139,13 @@
             />
             <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
           </Field>
-          <Button :disabled="!meta.valid" class="w-100" :label="$t('cabinet.two_factor_disable')" @click="TwoFactorDisable()" />
+          <Button
+            v-if="canTwoFactorOff"
+            :disabled="!meta.valid"
+            class="w-100"
+            :label="$t('cabinet.two_factor_disable')"
+            @click="TwoFactorDisable()"
+          />
         </Form>
       </div>
       <div v-if="!two_factor && !$auth.user.two_factor_enabled">
@@ -165,6 +177,12 @@ const { $auth, $unicore, $t } = useNuxtApp()
 
 const cabinet = useCabinet()
 const twoFactor = useTwoFactor()
+
+const { canPassword, canTwoFactorOn, canTwoFactorOff } = useAccess({
+  canPassword: 'player.password.change',
+  canTwoFactorOn: 'player.twofactor.on',
+  canTwoFactorOff: 'player.twofactor.off',
+})
 
 useHead({ title: computed(() => $t('header.cabinet')) })
 

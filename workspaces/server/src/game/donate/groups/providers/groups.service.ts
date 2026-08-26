@@ -1,3 +1,4 @@
+import { assertFieldAccess } from 'src/admin/roles/field-permissions';
 import { assertUploadedFile, debitUserBalance, MomentWrapper, NumberSortInput, StorageManager } from '@common';
 import { events } from 'unicore-api';
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
@@ -253,7 +254,8 @@ export class DonateGroupsService {
     return this.donateGroupsRepository.findOne({ where: { id }, relations });
   }
 
-  async create(input: GroupInput) {
+  async create(input: GroupInput, request?: any) {
+    await assertFieldAccess('donate_group', input, null, request);
     const group = new DonateGroup();
 
     group.name = input.name;
@@ -297,12 +299,14 @@ export class DonateGroupsService {
     );
   }
 
-  async update(id: number, input: GroupInput) {
+  async update(id: number, input: GroupInput, request?: any) {
     const group = await this.findOne(id);
 
     if (!group) {
       throw new NotFoundException();
     }
+
+    await assertFieldAccess('donate_group', input, group, request);
 
     group.name = input.name;
     group.description = input.description;

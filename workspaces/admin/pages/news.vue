@@ -336,7 +336,6 @@
 </template>
 
 <script>
-import { Permission } from 'unicore-common/enums'
 import { sortTransform } from '~/helpers'
 import { fullSizeTemplate } from '~/constants'
 import { FilterMatchMode } from '@primevue/core/api'
@@ -355,11 +354,11 @@ export default {
     useHead({ title: computed(() => $t('admin.menu_news')) })
     const auth = useAuthStore()
     const access = useAccess({
-      canCreate: Permission.EditorNewsCreate,
-      canUpdate: Permission.EditorNewsUpdate,
-      canDelete: Permission.EditorNewsDelete,
-      canDeleteMany: Permission.EditorNewsDeleteMany,
-      canPublish: Permission.EditorNewsPublish,
+      canCreate: 'panel.news.create',
+      canUpdate: 'panel.news.update',
+      canDelete: 'panel.news.delete',
+      canDeleteMany: 'panel.news.delete.many',
+      canPublish: 'panel.news.publish',
     })
 
     return {

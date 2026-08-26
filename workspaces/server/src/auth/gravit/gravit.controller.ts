@@ -2,7 +2,6 @@ import { Body, Controller, Get, Headers, Param, Post } from '@nestjs/common';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { UserDto } from 'src/admin/users/dto/user.dto';
 import { User } from 'src/admin/users/entities/user.entity';
-import { Permission } from 'unicore-common';
 import { CurrentUser } from '../decorators/current-user.decorator';
 import { GravitGetAuthDetails } from './dto/gravit-auth-details.dto';
 import { GravitAuthorize } from './dto/inputs/gravit-authorize.input';
@@ -12,7 +11,7 @@ import { GravitRefreshToken } from './dto/inputs/gravit-refresh-token.input';
 import { GravitDeleteSession, GravitExitUser } from './dto/inputs/gravit-session.input';
 import { GravitService } from './gravit.service';
 
-@Permissions([Permission.KernelUnicoreProvider])
+@Permissions(['kernel.provider'])
 @Controller('auth/gravit')
 export class GravitController {
   constructor(private gravitService: GravitService) {}

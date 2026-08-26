@@ -25,7 +25,7 @@ export class SettingsService {
     await events().emit('user.password.changed', { uuid: user.uuid, username: user.username });
   }
 
-  private async closeSessions(user: User) {
+  async closeSessions(user: User) {
     await this.tokensRepo.delete({ user: { uuid: user.uuid } });
   }
 

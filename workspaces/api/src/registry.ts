@@ -1,13 +1,13 @@
 import { API_VERSION } from './version'
 import { Capabilities } from './capabilities'
 import { EventBus } from './events'
-import { ConfigFieldSchema } from './manifest'
+import { ConfigFieldSchema, ModulePermission } from './manifest'
 
 export interface ModuleContribution {
   id: string
   entities: unknown[]
   nestModules: unknown[]
-  permissions: string[]
+  permissions: ModulePermission[]
   config: ConfigFieldSchema[]
   locales: Record<string, Record<string, string>>
   paymentModules: unknown[]

@@ -9,7 +9,7 @@ import {
   ThrottlerCoreGuard,
   UserAgent,
 } from '@common';
-import { Body, Controller, Delete, Get, Header, Headers, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Header, Headers, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { Recaptcha } from '@nestlab/google-recaptcha';
 import { EmailService } from 'src/admin/email/email.service';
@@ -23,6 +23,7 @@ import { AuthenticatedDto } from './dto/authenticated.dto';
 import { LoginInput } from './dto/login.input';
 import { PasswordLinkInput } from './dto/password-link.input';
 import { PasswordResetInput } from './dto/password-reset.input';
+import { playerPermissions } from 'src/admin/roles/guards/permisson.guard';
 import { RefreshTokenInput } from './dto/refresh-token.input';
 import { RegisterInput } from './dto/register.input';
 import { TokenInput } from './dto/token.input';
@@ -103,8 +104,8 @@ export class AuthController {
   @AllowInactive()
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  me(@CurrentUser() user: User): { user: UserDto } {
-    return { user: new UserDto(user) };
+  async me(@Req() request: any, @CurrentUser() user: User): Promise<{ user: UserDto }> {
+    return { user: new UserDto(user, await playerPermissions(request)) };
   }
 
   @UseGuards(JwtAuthGuard)

@@ -4,7 +4,6 @@ import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { Public } from 'src/auth/decorators/public.decorator';
-import { Permission } from 'unicore-common';
 import { PaymentCreateDto } from '../core/dto/payment-create.dto';
 import { CentappService } from './centapp.service';
 
@@ -12,7 +11,7 @@ import { CentappService } from './centapp.service';
 export class CentappController {
   constructor(private centappService: CentappService) {}
 
-  @Permissions([Permission.UserPayment])
+  @Permissions(['player.payment'])
   @Post('link')
   link(@IpAddress() ip: string, @CurrentUser() user: User, @Body() body: PaymentCreateDto) {
     return this.centappService.createLink(user, body, ip);

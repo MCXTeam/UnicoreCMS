@@ -16,6 +16,15 @@ export interface ConfigFieldSchema {
 
 export type LocalizedText = string | Record<string, string>
 
+export interface ModulePermissionSchema {
+  key: string
+  group?: string
+  scope?: 'server'
+  danger?: boolean
+}
+
+export type ModulePermission = string | ModulePermissionSchema
+
 export interface ModuleManifest {
   id: string
   name: LocalizedText
@@ -30,7 +39,7 @@ export interface ModuleManifest {
   admin?: string
   componentPrefix?: string
   locales?: string
-  permissions?: string[]
+  permissions?: ModulePermission[]
   config?: ConfigFieldSchema[]
   requires?: { modules?: Record<string, string> }
 }
@@ -103,6 +112,30 @@ const validateConfigField = (field: unknown, index: number, errors: string[]): v
   if (field.type === 'select' && !Array.isArray(field.options)) errors.push(`config[${index}].options обязателен для типа select`)
 }
 
+const validatePermission = (permission: unknown, index: number, errors: string[]): void => {
+  if (typeof permission === 'string') {
+    if (!permission.trim()) errors.push(`permissions[${index}] не должен быть пустым`)
+
+    return
+  }
+
+  if (!isRecord(permission)) {
+    errors.push(`permissions[${index}] должен быть строкой или объектом`)
+    return
+  }
+
+  if (typeof permission.key !== 'string' || !permission.key.trim()) errors.push(`permissions[${index}].key обязателен`)
+
+  if (permission.group !== undefined && typeof permission.group !== 'string')
+    errors.push(`permissions[${index}].group должен быть строкой`)
+
+  if (permission.scope !== undefined && permission.scope !== 'server')
+    errors.push(`permissions[${index}].scope поддерживает только значение server`)
+
+  if (permission.danger !== undefined && typeof permission.danger !== 'boolean')
+    errors.push(`permissions[${index}].danger должен быть true или false`)
+}
+
 export const validateModuleManifest = (raw: unknown): ValidationResult<ModuleManifest> => {
   const errors: string[] = []
 
@@ -122,11 +155,8 @@ export const validateModuleManifest = (raw: unknown): ValidationResult<ModuleMan
   for (const key of ['server', 'client', 'admin', 'locales'] as const) validateRelativePath(raw[key], key, errors)
 
   if (raw.permissions !== undefined) {
-    if (!Array.isArray(raw.permissions)) errors.push('поле permissions должно быть массивом строк')
-    else
-      raw.permissions.forEach((item, index) => {
-        if (typeof item !== 'string') errors.push(`permissions[${index}] должен быть строкой`)
-      })
+    if (!Array.isArray(raw.permissions)) errors.push('поле permissions должно быть массивом')
+    else raw.permissions.forEach((item, index) => validatePermission(item, index, errors))
   }
 
   if (raw.config !== undefined) {
@@ -189,4 +219,20 @@ export const localizedText = (value: LocalizedText | undefined, locale: string, 
   if (typeof value === 'string') return value
 
   return value[locale] || value.ru || value.en || Object.values(value)[0] || fallback
+}
+
+export const modulePermissionKey = (permission: ModulePermission): string =>
+  typeof permission === 'string' ? permission : permission.key
+
+export const modulePermissionMeta = (
+  id: string,
+  permission: ModulePermission,
+): { group: string; scope?: 'server'; danger?: boolean } => {
+  if (typeof permission === 'string') return { group: `mod.${id}` }
+
+  return {
+    group: permission.group || `mod.${id}`,
+    ...(permission.scope ? { scope: permission.scope } : {}),
+    ...(permission.danger ? { danger: permission.danger } : {}),
+  }
 }

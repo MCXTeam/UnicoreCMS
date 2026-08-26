@@ -441,14 +441,20 @@
                 <template v-if="server.delivery_mode === 1">
                   <div class="col-12 md:col-6">
                     <div class="field">
-                      <label>{{ $t('admin.rcon_host') }}</label>
-                      <InputText v-model="server.rcon.host" placeholder="127.0.0.1" @update:modelValue="rconTest.ok = null" />
+                      <label>{{ $t('admin.rcon_host') }}<FieldLock :allowed="canEditRcon" /></label>
+                      <InputText
+                        v-model="server.rcon.host"
+                        placeholder="127.0.0.1"
+                        :disabled="!canEditRcon"
+                        @update:modelValue="rconTest.ok = null"
+                      />
                     </div>
                   </div>
                   <div class="col-12 md:col-6">
                     <div class="field">
-                      <label>{{ $t('admin.rcon_port') }}</label>
+                      <label>{{ $t('admin.rcon_port') }}<FieldLock :allowed="canEditRcon" /></label>
                       <InputNumber
+                        :disabled="!canEditRcon"
                         v-model="server.rcon.port"
                         :useGrouping="false"
                         placeholder="25575"
@@ -458,9 +464,10 @@
                   </div>
                   <div class="col-12 md:col-6">
                     <div class="field">
-                      <label>{{ $t('admin.rcon_password') }}</label>
+                      <label>{{ $t('admin.rcon_password') }}<FieldLock :allowed="canEditRcon" /></label>
                       <Password
                         v-model="server.rcon.password"
+                        :disabled="!canEditRcon"
                         :feedback="false"
                         toggleMask
                         inputClass="w-full"
@@ -523,7 +530,6 @@
 </template>
 
 <script>
-import { Permission } from 'unicore-common/enums'
 import { FilterMatchMode } from '@primevue/core/api'
 import { Form, Field } from 'vee-validate'
 
@@ -540,13 +546,17 @@ export default {
     useHead({ title: computed(() => $t('admin.menu_servers')) })
     const config = useRuntimeConfig()
     const access = useAccess({
-      canCreate: Permission.AdminServersCreate,
-      canUpdate: Permission.AdminServersUpdate,
-      canDelete: Permission.AdminServersDelete,
-      canRcon: Permission.AdminServersRcon,
+      canCreate: 'panel.servers.create',
+      canUpdate: 'panel.servers.update',
+      canDelete: 'panel.servers.delete',
+      canRcon: 'panel.servers.rcon',
     })
 
-    return { translations, apiUrl: config.public.apiBaseurl, ...access }
+    const fields = useFieldAccess('server', {
+      canEditRcon: 'rcon',
+    })
+
+    return { translations, apiUrl: config.public.apiBaseurl, ...access, ...fields }
   },
   data() {
     return {

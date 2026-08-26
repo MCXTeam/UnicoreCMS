@@ -141,6 +141,7 @@
         <p class="cab-sub mt-3 mb-0">{{ $t('cabinet.bans_hint') }}</p>
         <template #footer>
           <Button
+            v-if="canUnban"
             class="w-100"
             outlined
             :disabled="!$auth.user.ban"
@@ -195,6 +196,8 @@ const donateApi = useDonate()
 
 useHead({ title: computed(() => $t('header.cabinet')) })
 const { config } = usePublicConfig()
+
+const { canUnban } = useAccess({ canUnban: 'player.unban.buy' })
 
 const Skin3D = ref(null)
 const skin = ref(null)

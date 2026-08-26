@@ -19,7 +19,6 @@ import { assertServerPermission } from 'src/admin/roles/guards/permisson.guard';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { Public } from 'src/auth/decorators/public.decorator';
-import { anyServerPermission, Permission } from 'unicore-common';
 import { GiveDonateGroupInput } from '../dto/give-donate-group.input';
 import { GroupBuyInput } from '../dto/group-buy.input';
 import { GroupInput } from '../dto/group.input';
@@ -29,20 +28,20 @@ import { DonateGroupsService } from '../providers/groups.service';
 export class DonateGroupsController {
   constructor(private donateGroupsService: DonateGroupsService) {}
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsCreate])
+  @Permissions(['panel.access', 'panel.donate.groups.create'])
   @Post()
-  create(@Body() body: GroupInput) {
-    return this.donateGroupsService.create(body);
+  create(@Req() request: any, @Body() body: GroupInput) {
+    return this.donateGroupsService.create(body, request);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsUpdate])
+  @Permissions(['panel.access', 'panel.donate.groups.update'])
   @Post('sort')
   sort(@Body() body: NumberSortInput) {
     return this.donateGroupsService.sort(body);
   }
 
   @Permissions([
-    [Permission.EditorDonateRead, Permission.AdminUsersDonate, anyServerPermission(Permission.AdminUsersDonateServer)],
+    ['panel.donate.read', 'panel.users.donate', 'panel.users.donate.*'],
     { or: true },
   ])
   @Get()
@@ -55,7 +54,7 @@ export class DonateGroupsController {
     return this.donateGroupsService.me(user);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsDeleteMany])
+  @Permissions(['panel.access', 'panel.donate.groups.delete.many'])
   @Delete('bulk')
   removeMany(@Body() body: DeleteManyInput) {
     return this.donateGroupsService.removeMany(body.items);
@@ -67,20 +66,20 @@ export class DonateGroupsController {
     return this.donateGroupsService.findByServer(id);
   }
 
-  @Permissions([Permission.KernelUnicoreConnect])
+  @Permissions(['kernel.connect'])
   @Get('user/:server/:uuid')
   findOneByUserAndServer(@Param('server') server: string, @Param('uuid') uuid: string) {
     return this.donateGroupsService.findByUserAndServer(server, uuid);
   }
 
-  @Permissions([Permission.UserDonateGroupBuy])
+  @Permissions(['player.donate.group.buy'])
   @Post('buy')
   buy(@CurrentUser() user: User, @IpAddress() ip: string, @Body() body: GroupBuyInput) {
     return this.donateGroupsService.buy(user, ip, body);
   }
 
   @Permissions([
-    [Permission.EditorDonateRead, Permission.AdminUsersDonate, anyServerPermission(Permission.AdminUsersDonateServer)],
+    ['panel.donate.read', 'panel.users.donate', 'panel.users.donate.*'],
     { or: true },
   ])
   @Get(':id')
@@ -94,19 +93,19 @@ export class DonateGroupsController {
     return server;
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsUpdate])
+  @Permissions(['panel.access', 'panel.donate.groups.update'])
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() body: GroupInput) {
-    return this.donateGroupsService.update(id, body);
+  update(@Req() request: any, @Param('id', ParseIntPipe) id: number, @Body() body: GroupInput) {
+    return this.donateGroupsService.update(id, body, request);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsDelete])
+  @Permissions(['panel.access', 'panel.donate.groups.delete'])
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.donateGroupsService.remove(id);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsUpdate])
+  @Permissions(['panel.access', 'panel.donate.groups.update'])
   @Patch('icon/:id')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -119,27 +118,27 @@ export class DonateGroupsController {
     return this.donateGroupsService.updateIcon(id, file);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.EditorDonateGroupsUpdate])
+  @Permissions(['panel.access', 'panel.donate.groups.update'])
   @Delete('icon/:id')
   removeMedia(@Param('id', ParseIntPipe) id: number) {
     return this.donateGroupsService.removeIcon(id);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminUsersRead])
+  @Permissions(['panel.access', 'panel.users.read'])
   @Get('admin/:uuid')
   udgByUUID(@CurrentUser() user: User, @Param('uuid') uuid: string) {
     return this.donateGroupsService.udgByUUID(uuid);
   }
 
-  @Permissions([Permission.AdminDashboard])
+  @Permissions(['panel.access'])
   @Post('admin/give')
   async give(@Req() request: any, @Body() body: GiveDonateGroupInput) {
-    await assertServerPermission(request, Permission.AdminUsersDonate, body.server_id);
+    await assertServerPermission(request, 'panel.users.donate', body.server_id);
 
     return this.donateGroupsService.giveByDTO(body);
   }
 
-  @Permissions([Permission.AdminDashboard, Permission.AdminUsersDonate])
+  @Permissions(['panel.access', 'panel.users.donate'])
   @Delete('admin/:id')
   take(@Param('id', ParseIntPipe) id: number) {
     return this.donateGroupsService.take(id);

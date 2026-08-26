@@ -12,5 +12,8 @@
   "mod.demo.server_widget": "Module widget injected into the server page via a slot",
   "mod.demo.title": "Demo module",
   "mod.demo.user_notes": "Demo module notes",
-  "mod.demo.user_notes_text": "A block in the profile of {username}"
+  "mod.demo.user_notes_text": "A block in the profile of {username}",
+  "perm.group.mod.demo": "Demo module",
+  "perm.mod.demo.read": "View notes",
+  "perm.mod.demo.write": "Edit notes"
 }
