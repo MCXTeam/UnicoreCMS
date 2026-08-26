@@ -1,4 +1,4 @@
-import * as bcrypt from 'bcrypt';
+import bcrypt from 'bcrypt';
 import { envConfig } from 'unicore-common';
 import { PASSWORD_ALGORITHM_BCRYPT, PASSWORD_BCRYPT_PREFIXES } from '@common';
 import { PasswordAlgorithm } from './password-algorithm.interface';

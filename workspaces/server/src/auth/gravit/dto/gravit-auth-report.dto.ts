@@ -2,7 +2,7 @@ import { instanceToPlain } from 'class-transformer';
 import { User } from 'src/admin/users/entities/user.entity';
 import { envConfig } from 'unicore-common';
 import { GravitSessionDto } from './gravit-session.dto';
-import * as ms from 'ms';
+import ms from 'ms';
 
 export class GravitAuthReportDto {
   minecraftAccessToken: string;

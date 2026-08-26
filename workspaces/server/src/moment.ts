@@ -1,9 +1,9 @@
 import { Global, Module } from '@nestjs/common';
-import * as Moment from 'moment-timezone';
+import Moment from 'moment-timezone';
 import { extendMoment } from 'moment-range';
 import { envConfig } from 'unicore-common';
 
-const moment = extendMoment(Moment);
+const moment = extendMoment(Moment as any);
 
 moment.tz.setDefault(envConfig.timezone);
 

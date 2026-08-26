@@ -3,7 +3,7 @@ import { In, Not, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { PaginateQuery, Paginated, paginate, FilterOperator } from 'nestjs-paginate';
 import { UserInput } from './dto/user.input';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { Role } from '../roles/entities/role.entity';
 import { BadRequestException, ConflictException, ForbiddenException, forwardRef, Inject, Logger, NotFoundException } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';

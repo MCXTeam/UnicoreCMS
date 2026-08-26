@@ -1,4 +1,4 @@
-import * as proxyaddr from 'proxy-addr';
+import proxyaddr from 'proxy-addr';
 import { envConfig } from 'unicore-common';
 import { IP_ANY_PATTERN, IPV4_MAPPED_PREFIX } from '../constants';
 

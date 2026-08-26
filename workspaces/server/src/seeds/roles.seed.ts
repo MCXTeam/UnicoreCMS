@@ -1,5 +1,5 @@
 import { DataSource } from 'typeorm';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { Role } from 'src/admin/roles/entities/role.entity';
 
 export default class CreateRoles {

@@ -2,7 +2,7 @@ import { SafeCron } from '@common';
 import { Injectable } from '@nestjs/common';
 import { CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import * as moment from 'moment';
+import moment from 'moment';
 import { EventsService } from 'src/events/events.service';
 import { UsersDonateGroup } from 'src/game/donate/groups/entities/user-donate.entity';
 import { UsersDonatePermission } from 'src/game/donate/permissions/entities/user-permission.entity';

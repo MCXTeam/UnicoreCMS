@@ -17,7 +17,7 @@ import { DonateGroup } from '../entities/donate-group.entity';
 import { GroupFeature } from '../entities/group-feature.entity';
 import { GroupKit } from '../entities/group-kit.entity';
 import { UsersDonateGroup } from '../entities/user-donate.entity';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { ConfigService } from 'src/admin/config/config.service';
 import { ConfigField } from 'src/admin/config/config.enum';
 import { configFieldNumber } from 'src/admin/config/config.utils';

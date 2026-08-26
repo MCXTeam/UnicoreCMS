@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, In, Not, Repository } from 'typeorm';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { User } from '../users/entities/user.entity';
 import { StatGroup } from './interfaces/stat.interface';
 import { StatType } from './enums/stat-type.enum';

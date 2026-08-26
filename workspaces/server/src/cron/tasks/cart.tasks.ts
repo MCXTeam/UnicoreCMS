@@ -1,7 +1,7 @@
 import { SafeCron } from '@common';
 import { CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import * as moment from 'moment';
+import moment from 'moment';
 import { CartItemKit } from 'src/game/store/cart/entities/cart-item-kit.entity';
 import { CartItem } from 'src/game/store/cart/entities/cart-item.entity';
 import { LessThan, Repository } from 'typeorm';

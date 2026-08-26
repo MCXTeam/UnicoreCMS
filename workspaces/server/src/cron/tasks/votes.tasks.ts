@@ -5,7 +5,7 @@ import { VoteGift } from 'src/game/cabinet/votes/entities/vote-gift.entity';
 import { Vote } from 'src/game/cabinet/votes/entities/vote.entity';
 import { VotesGroupped } from 'src/game/players/votes-list/votes-groupped.interface';
 import { Repository } from 'typeorm';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { MomentWrapper, SafeCron } from '@common';
 import { User } from 'src/admin/users/entities/user.entity';
 import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';

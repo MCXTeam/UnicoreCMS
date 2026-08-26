@@ -1,7 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { dirname, join } from 'path';
-import * as JSZip from 'jszip';
+import JSZip from 'jszip';
 import { EXTENSION_MAX_FILES, EXTENSION_MAX_PATH_LENGTH, EXTENSION_MAX_UNPACKED_BYTES } from '@common';
 import { readCentralDirectory } from './zip-directory';
 

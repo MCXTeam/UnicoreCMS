@@ -6,7 +6,7 @@ import { Cache } from 'cache-manager';
 import { Vote } from 'src/game/cabinet/votes/entities/vote.entity';
 import { Repository } from 'typeorm';
 import { VotesGroupped } from './votes-groupped.interface';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { GrouppedPaginate } from '../groupped.dto';
 import { paginate, PaginateQuery } from 'nestjs-paginate';
 

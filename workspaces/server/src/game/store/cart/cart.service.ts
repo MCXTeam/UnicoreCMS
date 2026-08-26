@@ -10,7 +10,7 @@ import { Repository } from 'typeorm';
 import { Product } from '../entities/product.entity';
 import { WarehouseItem } from '../warehouse/entities/warehouse-item.entity';
 import { CartItem } from './entities/cart-item.entity';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { CartItemKit } from './entities/cart-item-kit.entity';
 import { CartInput } from './dto/cart.input.dto';
 import { PayloadType } from '../dto/paginated-store.dto';

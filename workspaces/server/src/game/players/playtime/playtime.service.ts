@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Cache } from 'cache-manager';
 import { Playtime } from 'src/game/cabinet/playtime/entities/playtime.entity';
 import { Not, Repository } from 'typeorm';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { PlaytimeGroupped } from './playtime-groupped.interface';
 import { CacheKey, KERNEL_USERNAME } from '@common';
 import { GrouppedPaginate } from '../groupped.dto';

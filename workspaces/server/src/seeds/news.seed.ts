@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 import { News } from 'src/admin/news/entities/news.entity';
 import { DataSource } from 'typeorm';
-import * as _ from 'lodash';
+import _ from 'lodash';
 
 export default class CreateNews {
   public async run(dataSource: DataSource): Promise<any> {

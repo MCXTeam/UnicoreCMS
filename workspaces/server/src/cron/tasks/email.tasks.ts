@@ -1,7 +1,7 @@
 import { EMAIL_ACTIVATION_TTL_MINUTES, PASSWORD_RESET_TTL_MINUTES, SafeCron } from '@common';
 import { CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import * as moment from 'moment';
+import moment from 'moment';
 import { EmailActivation } from 'src/admin/email/entities/email-activation.entity';
 import { PasswordReset } from 'src/admin/email/entities/password-reset.entity';
 import { LessThan, Repository } from 'typeorm';

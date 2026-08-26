@@ -8,7 +8,7 @@ import { AuthAdapter } from './auth/adapters/auth.adapter';
 import { EntityNotFoundFilter } from './common/filters/entity-not-found.filter';
 import { ASCII_NAME, formatError, STATIC_CONTENT_SECURITY_POLICY, stderr, stdout } from '@common';
 import helmet from 'helmet';
-import * as clc from 'cli-color';
+import clc from 'cli-color';
 import { initializeTransactionalContext } from 'typeorm-transactional';
 import { ContentLocaleInterceptor } from './admin/locales/content-locale.interceptor';
 import { ContentTranslationsService } from './admin/locales/content-translations.service';

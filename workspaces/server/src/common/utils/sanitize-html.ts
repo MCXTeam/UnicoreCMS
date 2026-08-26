@@ -1,4 +1,4 @@
-import * as sanitize from 'sanitize-html';
+import sanitize from 'sanitize-html';
 import { SANITIZE_HTML_OPTIONS } from 'unicore-common';
 import { Transform } from 'class-transformer';
 

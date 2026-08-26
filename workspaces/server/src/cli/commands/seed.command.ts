@@ -1,7 +1,7 @@
 import { Command, CommandRunner } from 'nest-commander';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import * as clc from 'cli-color';
+import clc from 'cli-color';
 import CreateRoles from '../../seeds/roles.seed';
 import CreateServers from '../../seeds/servers.seed';
 import CreateBonuses from '../../seeds/bonuses.seed';

@@ -6,7 +6,7 @@ import { userPermissionCheck, UsersService } from 'src/admin/users/users.service
 import { Repository } from 'typeorm';
 import { BanInput } from './dto/ban.input';
 import { Ban } from './entities/ban.entity';
-import * as moment from 'moment';
+import moment from 'moment';
 import { User } from 'src/admin/users/entities/user.entity';
 import { BanFromAdminInput } from './dto/ban-from-admin.input';
 import { debitUserBalance, MomentWrapper } from '@common';

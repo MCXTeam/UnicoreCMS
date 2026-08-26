@@ -1,5 +1,5 @@
 import { Command, CommandRunner } from 'nest-commander';
-import * as clc from 'cli-color';
+import clc from 'cli-color';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {

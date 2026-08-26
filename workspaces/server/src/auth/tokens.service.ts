@@ -10,7 +10,7 @@ import { JWTMinecraftPayload, JWTPayload, JWTRefreshPayload } from './interfaces
 import { v4 as uuidv4 } from 'uuid';
 import { AuthenticatedDto } from './dto/authenticated.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import * as ms from 'ms';
+import ms from 'ms';
 import { MomentWrapper, REFRESH_ROTATION_LEEWAY_MS } from '@common';
 
 @Injectable()

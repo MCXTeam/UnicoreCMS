@@ -3,8 +3,8 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import * as JSZip from 'jszip';
-import * as _ from 'lodash';
+import JSZip from 'jszip';
+import _ from 'lodash';
 import { FilterOperator, paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
 import { Server } from 'src/game/servers/entities/server.entity';

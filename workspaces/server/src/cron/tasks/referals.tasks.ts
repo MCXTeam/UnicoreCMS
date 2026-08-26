@@ -5,7 +5,7 @@ import { ConfigService } from 'src/admin/config/config.service';
 import { PlaytimeService } from 'src/game/cabinet/playtime/playtime.service';
 import { Referal } from 'src/game/cabinet/referals/entities/referal.entity';
 import { IsNull, Repository } from 'typeorm';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { ConfigField } from 'src/admin/config/config.enum';
 import { User } from 'src/admin/users/entities/user.entity';
 

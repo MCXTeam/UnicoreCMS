@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import * as speakeasy from 'speakeasy';
+import speakeasy from 'speakeasy';
 import { User } from 'src/admin/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { envConfig } from 'unicore-common';

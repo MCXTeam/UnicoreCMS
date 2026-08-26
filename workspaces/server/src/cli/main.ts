@@ -2,7 +2,7 @@ import { ASCII_NAME } from '@common';
 import { CommandFactory } from 'nest-commander';
 import { CommandsModule } from './command.module';
 import { stdout } from './stdout';
-import * as clc from 'cli-color';
+import clc from 'cli-color';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { initializeTransactionalContext } from 'typeorm-transactional';

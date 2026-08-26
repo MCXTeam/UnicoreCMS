@@ -1,6 +1,6 @@
 import { Exclude, Expose, instanceToPlain, Transform } from 'class-transformer';
 import { User } from 'src/admin/users/entities/user.entity';
-import * as _ from 'lodash';
+import _ from 'lodash';
 
 import { SkinDto } from 'src/game/cabinet/skin/dto/skin.dto';
 import { CloakDto } from 'src/game/cabinet/skin/dto/cloak.dto';

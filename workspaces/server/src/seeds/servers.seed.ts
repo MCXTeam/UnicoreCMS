@@ -1,8 +1,8 @@
 import { StorageManager } from '@common';
 import { faker } from '@faker-js/faker';
 import { readFileSync } from 'fs';
-import * as JSZip from 'jszip';
-import * as _ from 'lodash';
+import JSZip from 'jszip';
+import _ from 'lodash';
 import { Period } from 'src/game/donate/entities/period.entity';
 import { DonateGroup } from 'src/game/donate/groups/entities/donate-group.entity';
 import { GroupKit } from 'src/game/donate/groups/entities/group-kit.entity';

@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { DataSource } from 'typeorm';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { randomUUID } from 'crypto';
 import { User } from 'src/admin/users/entities/user.entity';
 import { envConfig } from 'unicore-common';

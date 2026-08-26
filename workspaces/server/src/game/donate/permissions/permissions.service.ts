@@ -18,7 +18,7 @@ import { PermissionInput } from './dto/permission.input';
 import { DonatePermission } from './entities/donate-permission.entity';
 import { UsersDonatePermission } from './entities/user-permission.entity';
 import { PermissionType } from './enums/permission-type.enum';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { ConfigField } from 'src/admin/config/config.enum';
 import { ConfigService } from 'src/admin/config/config.service';
 import { configFieldNumber } from 'src/admin/config/config.utils';

@@ -7,7 +7,7 @@ import { In, Not, Repository } from 'typeorm';
 import { CartItemProtected } from '../cart/dto/cart.dto';
 import { WarehouseGivedInput } from './dto/warehouse-gived.input';
 import { WarehouseItem } from './entities/warehouse-item.entity';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { Transactional } from 'typeorm-transactional';
 
 @Injectable()

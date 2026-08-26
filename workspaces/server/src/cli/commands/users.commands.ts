@@ -1,5 +1,5 @@
 import { Command, CommandRunner } from 'nest-commander';
-import * as clc from 'cli-color';
+import clc from 'cli-color';
 import { UserInput } from 'src/admin/users/dto/user.input';
 import { UsersService } from 'src/admin/users/users.service';
 import { validateOrReject } from 'class-validator';

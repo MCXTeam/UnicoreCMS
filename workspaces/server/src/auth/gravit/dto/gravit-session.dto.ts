@@ -3,7 +3,7 @@ import { nanoid } from 'nanoid';
 import { User } from 'src/admin/users/entities/user.entity';
 import { instanceToPlain } from 'class-transformer';
 import { envConfig } from 'unicore-common';
-import * as ms from 'ms';
+import ms from 'ms';
 
 export class GravitSessionDto {
   id: string;

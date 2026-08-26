@@ -1,6 +1,6 @@
 import { CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import * as moment from 'moment';
+import moment from 'moment';
 import { ConfigService } from 'src/admin/config/config.service';
 import { ConfigField } from 'src/admin/config/config.enum';
 import { KEEP_FOREVER, KEEP_PAID_PAYMENTS_DAYS, KEEP_PENDING_PAYMENTS_DAYS, SafeCron } from '@common';

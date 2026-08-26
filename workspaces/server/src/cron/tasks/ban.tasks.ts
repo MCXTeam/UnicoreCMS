@@ -2,7 +2,7 @@ import { SafeCron } from '@common';
 import { Injectable } from '@nestjs/common';
 import { CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import * as moment from 'moment';
+import moment from 'moment';
 import { Ban } from 'src/game/cabinet/bans/entities/ban.entity';
 import { IsNull, Not, Repository } from 'typeorm';
 

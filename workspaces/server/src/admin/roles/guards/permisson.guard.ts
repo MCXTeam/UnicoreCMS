@@ -9,7 +9,7 @@ import {
   resolvePermissions,
   SERVER_PERMISSION_PLACEHOLDER,
 } from 'unicore-common';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { DONATE_PERMS_CACHE_KEY, PERMISSIONS_KEY } from 'src/common/constants';
 import { Role } from '../entities/role.entity';
 import { Repository } from 'typeorm';

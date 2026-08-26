@@ -7,7 +7,7 @@ import { PlaytimeService } from '../playtime/playtime.service';
 import { InviterDto } from './dto/inviter.dto';
 import { ReferalDto } from './dto/referals.dto';
 import { Referal } from './entities/referal.entity';
-import * as _ from 'lodash';
+import _ from 'lodash';
 
 @Injectable()
 export class ReferalsService {

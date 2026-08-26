@@ -19,7 +19,7 @@ import { CONFIG_CACHE_TTL_MS } from './config.constants';
 import { isValidConfigNumber } from './config.utils';
 import { ConfigInput } from './dto/config.input';
 import { Config } from './entities/config.entity';
-import * as _ from 'lodash';
+import _ from 'lodash';
 
 export type LoadedConfig = Record<string, string | number | boolean>;
 
