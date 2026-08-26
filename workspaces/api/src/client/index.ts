@@ -1,5 +1,7 @@
 import { warnUnknown } from '../warn'
 
+export { LOCALE_HEADER } from 'unicore-common/locales'
+
 export const CLIENT_NAV_PLACES = [
   'navbar',
   'footer',
@@ -48,9 +50,11 @@ export interface ClientSlotEntry {
   when?: 'always' | 'auth' | 'guest'
 }
 
+export type ClientNavSource = ClientNavItem[] | (() => ClientNavItem[])
+
 export interface ClientModuleDefinition {
   id: string
-  nav?: ClientNavItem[]
+  nav?: ClientNavSource
   slots?: ClientSlotEntry[]
 }
 
@@ -64,10 +68,22 @@ const store = (): Map<string, ClientModuleDefinition> => {
   return holder[KEY] as Map<string, ClientModuleDefinition>
 }
 
-export const defineClientModule = (definition: ClientModuleDefinition): ClientModuleDefinition => {
-  for (const item of definition.nav || [])
+const navItems = (definition: ClientModuleDefinition): ClientNavItem[] => {
+  const source = definition.nav
+
+  if (!source) return []
+
+  const items = typeof source === 'function' ? source() || [] : source
+
+  for (const item of items)
     for (const place of item.places || [])
       warnUnknown(CLIENT_NAV_PLACES, place, `[unicore] модуль «${definition.id}» указал неизвестное место навигации «${place}»`)
+
+  return items
+}
+
+export const defineClientModule = (definition: ClientModuleDefinition): ClientModuleDefinition => {
+  if (Array.isArray(definition.nav)) navItems(definition)
 
   for (const entry of definition.slots || [])
     warnUnknown(CLIENT_SLOTS, entry.slot, `[unicore] модуль «${definition.id}» указал неизвестный слот «${entry.slot}»`)
@@ -81,7 +97,7 @@ export const clientModules = (): ClientModuleDefinition[] => [...store().values(
 
 export const clientNav = (place: ClientNavPlace): ClientNavItem[] =>
   clientModules()
-    .flatMap((item) => item.nav || [])
+    .flatMap(navItems)
     .filter((item) => !item.places || item.places.includes(place))
     .sort((a, b) => (a.order || 100) - (b.order || 100))
 

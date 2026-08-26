@@ -1,5 +1,6 @@
 export * from './version'
 export * from './keys'
+export * from './build'
 export * from './manifest'
 export * from './events'
 export * from './capabilities'

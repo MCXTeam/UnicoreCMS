@@ -1,4 +1,5 @@
 import { defineConfig } from 'tsup'
+import { MODULE_EXTERNALS } from 'unicore-api'
 
 export default defineConfig({
   entry: ['server-src/index.ts'],
@@ -9,14 +10,5 @@ export default defineConfig({
   sourcemap: true,
   splitting: false,
   target: 'es2021',
-  external: [
-    'unicore-api',
-    '@nestjs/common',
-    '@nestjs/core',
-    '@nestjs/typeorm',
-    '@nestjs/schedule',
-    '@nestjs/platform-express',
-    'typeorm',
-    'reflect-metadata',
-  ],
+  external: MODULE_EXTERNALS,
 })

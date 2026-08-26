@@ -55,6 +55,7 @@ export interface UsersApi {
   getByEmail(email: string): Promise<UserRecord | null>
   search(query: string, limit?: number): Promise<UserRecord[]>
   perms(uuid: string): Promise<string[]>
+  can(uuid: string, permission: string): Promise<boolean>
 }
 
 export interface ConfigApi {

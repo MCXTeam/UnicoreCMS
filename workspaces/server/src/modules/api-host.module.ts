@@ -12,6 +12,7 @@ import { LocalesService } from 'src/admin/locales/locales.service';
 import { UsersService } from 'src/admin/users/users.service';
 import { User } from 'src/admin/users/entities/user.entity';
 import { roleAppearanceRecord } from 'src/admin/roles/dto/role-appearance.dto';
+import { matchPermission, transformPermissions } from 'src/admin/roles/guards/permisson.guard';
 import { IssuanceService } from 'src/game/servers/rcon/issuance.service';
 import { RconService } from 'src/game/servers/rcon/rcon.service';
 import { RconModule } from 'src/game/servers/rcon/rcon.module';
@@ -184,9 +185,18 @@ export class ApiHostService implements OnApplicationBootstrap, OnApplicationShut
         search: async (query, limit) =>
           (await this.usersService.search(String(query || ''), limit).catch(() => [])).map((user) => this.userRecord(user)),
         perms: async (uuid) => {
-          const user = (await this.usersService.getById(uuid, ['roles']).catch(() => null)) as { perms?: string[] } | null;
+          const user = await this.usersService.getById(uuid, ['roles']).catch(() => null);
 
-          return user?.perms || [];
+          if (!user) return [];
+
+          return transformPermissions({ ...user, perms: [...(user.perms || [])], roles: [...(user.roles || [])] }).perms || [];
+        },
+        can: async (uuid, permission) => {
+          const user = await this.usersService.getById(uuid, ['roles']).catch(() => null);
+
+          if (!user) return false;
+
+          return matchPermission([permission], { user });
         },
       },
       config: {

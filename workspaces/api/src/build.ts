@@ -1,0 +1,16 @@
+export const MODULE_EXTERNALS = [
+  'unicore-api',
+  '@nestjs/common',
+  '@nestjs/core',
+  '@nestjs/typeorm',
+  '@nestjs/schedule',
+  '@nestjs/platform-express',
+  '@nestjs/cache-manager',
+  '@nestjs/swagger',
+  '@nestjs/throttler',
+  'typeorm',
+  'class-validator',
+  'class-transformer',
+  'reflect-metadata',
+  'rxjs',
+]
