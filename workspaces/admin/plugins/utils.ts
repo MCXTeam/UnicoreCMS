@@ -1,5 +1,7 @@
 import { UAParser } from 'ua-parser-js'
 import { formatDuration, type DurationUnit } from 'unicore-common/duration'
+import { ACTIVE_MODULES_KEY } from 'unicore-api'
+import { setActiveModules } from 'unicore-api/admin'
 import { useConfigStore } from '~/stores/config'
 import { useLocale } from '~/composables/useLocale'
 
@@ -9,7 +11,9 @@ export default defineNuxtPlugin(async (nuxtApp) => {
   const configStore = useConfigStore()
   const locale = useLocale()
 
-  await configStore.fetch().catch(() => {})
+  const config = await configStore.fetch().catch(() => null)
+
+  setActiveModules(config ? String(config[ACTIVE_MODULES_KEY] || '').split(',').filter(Boolean) : null)
 
   const utils = {
     formatCurrency(type: string, value: number, sale?: number) {

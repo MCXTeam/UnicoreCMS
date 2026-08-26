@@ -18,7 +18,7 @@ import { DataSource } from 'typeorm';
 import { ExtensionKind, extractArchive, readExtensionArchive } from './archive';
 import { InstallResultDto } from '../dto/install-result.dto';
 import { ModulesService } from '../modules.service';
-import { activeThemeId, readThemesState, ThemeSide, writeThemesState } from '../runtime/themes';
+import { activeThemeId, readThemesState, themeDir, ThemeSide, writeThemesState } from '../runtime/themes';
 import { discover, readState, writeState } from '../runtime/discovery';
 
 @Injectable()
@@ -181,14 +181,12 @@ export class InstallService {
   async remove(kind: ExtensionKind, id: string): Promise<{ removed: boolean }> {
     if (!MODULE_ID_PATTERN.test(id)) throw new BadRequestException('Некорректный идентификатор расширения');
 
-    const root = kind === 'module' ? modulesPath : themesPath;
-    const target = join(root, id);
+    const module = kind === 'module' ? discover().modules.find((item) => item.id === id) : null;
+    const target = kind === 'module' ? module?.dir : themeDir(id);
 
-    if (!existsSync(target)) throw new NotFoundException();
+    if (!target || !existsSync(target)) throw new NotFoundException();
 
     if (kind === 'module') {
-      const module = discover().modules.find((item) => item.id === id);
-
       if (module?.enabled) throw new BadRequestException('Сначала выключите модуль');
 
       await this.modules.purge(id);

@@ -34,6 +34,7 @@ export interface AdminModuleDefinition {
 }
 
 const KEY = Symbol.for('unicore.api.admin.registry.v1')
+const ACTIVE_KEY = Symbol.for('unicore.api.admin.active.v1')
 
 const store = (): Map<string, AdminModuleDefinition> => {
   const holder = globalThis as unknown as Record<symbol, Map<string, AdminModuleDefinition> | undefined>
@@ -41,6 +42,24 @@ const store = (): Map<string, AdminModuleDefinition> => {
   if (!holder[KEY]) holder[KEY] = new Map()
 
   return holder[KEY] as Map<string, AdminModuleDefinition>
+}
+
+const activeHolder = (): { ids: Set<string> | null } => {
+  const holder = globalThis as unknown as Record<symbol, { ids: Set<string> | null } | undefined>
+
+  if (!holder[ACTIVE_KEY]) holder[ACTIVE_KEY] = { ids: null }
+
+  return holder[ACTIVE_KEY] as { ids: Set<string> | null }
+}
+
+export const setActiveModules = (ids: string[] | null): void => {
+  activeHolder().ids = ids ? new Set(ids) : null
+}
+
+export const moduleActive = (id: string): boolean => {
+  const active = activeHolder().ids
+
+  return !active || active.has(id)
 }
 
 export const defineAdminModule = (definition: AdminModuleDefinition): AdminModuleDefinition => {
@@ -52,7 +71,7 @@ export const defineAdminModule = (definition: AdminModuleDefinition): AdminModul
   return definition
 }
 
-export const adminModules = (): AdminModuleDefinition[] => [...store().values()]
+export const adminModules = (): AdminModuleDefinition[] => [...store().values()].filter((item) => moduleActive(item.id))
 
 export const adminMenu = (): AdminMenuItem[] => adminModules().flatMap((item) => item.menu || [])
 

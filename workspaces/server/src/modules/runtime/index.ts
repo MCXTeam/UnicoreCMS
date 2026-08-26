@@ -30,6 +30,8 @@ export const moduleRuntime = (): ModuleRuntimeState => {
   return state;
 };
 
+export const enabledModuleIds = (): string[] => discover().modules.filter((item) => item.enabled).map((item) => item.id);
+
 export const moduleEntities = (): unknown[] => moduleRuntime().loaded.flatMap((item) => item.contribution?.entities || []);
 
 export const moduleNestImports = (): any[] => moduleRuntime().loaded.flatMap((item) => item.contribution?.nestModules || []);

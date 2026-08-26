@@ -1,5 +1,5 @@
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
-import { join } from 'path';
+import { basename, join } from 'path';
 import { themesPath } from 'unicore-common';
 import { ThemeManifest, validateThemeManifest } from 'unicore-api';
 import { readLocaleFiles } from './locales';
@@ -52,7 +52,13 @@ export const activeThemeId = (side: ThemeSide): string | null => process.env[ENV
 
 export const themeLockedByEnv = (side: ThemeSide): boolean => Boolean(process.env[ENV_KEY[side]]);
 
-export const themeLocales = (id: string): Record<string, Record<string, string>> => readLocaleFiles(join(themesPath, id, 'locales'));
+export const themeDir = (id: string): string | null => discoverThemes().themes.find((theme) => theme.id === id)?.dir || null;
+
+export const themeLocales = (id: string): Record<string, Record<string, string>> => {
+  const dir = themeDir(id);
+
+  return dir ? readLocaleFiles(join(dir, 'locales')) : {};
+};
 
 export const activeThemeLocales = (): Record<string, Record<string, string>> => {
   const locales: Record<string, Record<string, string>> = {};
@@ -99,8 +105,10 @@ export const discoverThemes = (): ThemeDiscoveryResult => {
       continue;
     }
 
-    if (manifest.id !== name) {
-      broken.push({ id: name, reason: `id «${manifest.id}» не совпадает с именем папки «${name}»` });
+    const twin = themes.find((item) => item.id === manifest.id);
+
+    if (twin) {
+      broken.push({ id: name, reason: `тема с id «${manifest.id}» уже загружена из папки «${basename(twin.dir)}»` });
       continue;
     }
 

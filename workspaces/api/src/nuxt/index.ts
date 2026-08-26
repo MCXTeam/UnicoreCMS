@@ -76,6 +76,21 @@ const directories = (path: string): string[] => {
     .filter((item) => statSync(item).isDirectory())
 }
 
+const themeDirectory = (root: string, id: string): { dir: string; raw: unknown } | null => {
+  const exact = join(root, 'themes', id)
+  const direct = readJson(join(exact, 'theme.json'))
+
+  if (direct) return { dir: exact, raw: direct }
+
+  for (const dir of directories(join(root, 'themes'))) {
+    const raw = readJson(join(dir, 'theme.json'))
+
+    if (raw && (raw as { id?: string }).id === id) return { dir, raw }
+  }
+
+  return null
+}
+
 export const resolveLayers = (options: ResolveLayersOptions): ResolvedLayers => {
   const root = options.root || process.cwd()
   const state = readState(root)
@@ -118,18 +133,17 @@ export const resolveLayers = (options: ResolveLayersOptions): ResolvedLayers => 
   let themeLayer: ResolvedThemeLayer | null = null
 
   if (requestedTheme) {
-    const dir = join(root, 'themes', requestedTheme)
-    const raw = readJson(join(dir, 'theme.json'))
+    const found = themeDirectory(root, requestedTheme)
 
-    if (!raw) problems.push(`Тема «${requestedTheme}» не найдена в themes/`)
+    if (!found) problems.push(`Тема «${requestedTheme}» не найдена в themes/`)
     else {
-      const { manifest, errors } = validateThemeManifest(raw)
+      const { manifest, errors } = validateThemeManifest(found.raw)
 
       if (!manifest) problems.push(`themes/${requestedTheme}: ${errors.join('; ')}`)
       else if (!satisfies(API_VERSION, manifest.unicoreApi))
         problems.push(`Тема «${manifest.id}» требует API ${manifest.unicoreApi}, установлен ${API_VERSION}`)
       else if ((manifest.side || 'client') !== options.side) themeLayer = null
-      else themeLayer = { id: manifest.id, path: dir, componentPrefix: manifest.componentPrefix || 'Theme', manifest }
+      else themeLayer = { id: manifest.id, path: found.dir, componentPrefix: manifest.componentPrefix || 'Theme', manifest }
     }
   }
 

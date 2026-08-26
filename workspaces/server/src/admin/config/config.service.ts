@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { DEFAULT_ISSUANCE_PRESET, RCON_PRESETS } from 'unicore-common';
+import { ACTIVE_MODULES_KEY } from 'unicore-api';
 import {
   CacheKey,
   GIFTS_CODE_EXPIRE_DAYS,
@@ -13,7 +14,7 @@ import {
 } from '@common';
 import { IsNull, Repository } from 'typeorm';
 import { ConfigField, ConfigType } from './config.enum';
-import { moduleConfigSchema } from 'src/modules/runtime';
+import { enabledModuleIds, moduleConfigSchema } from 'src/modules/runtime';
 import { configTypeOf, moduleConfigKey } from './module-config';
 import { CONFIG_CACHE_TTL_MS } from './config.constants';
 import { isValidConfigNumber } from './config.utils';
@@ -151,10 +152,12 @@ export class ConfigService {
   }
 
   async findPublic() {
-    return _.chain((await this.find()).filter((c) => c.key.startsWith('public_')))
+    const values = _.chain((await this.find()).filter((c) => c.key.startsWith('public_')))
       .keyBy('key')
       .mapValues('value')
       .value();
+
+    return { ...values, [ACTIVE_MODULES_KEY]: enabledModuleIds().join(',') };
   }
 
   private assertValue(input: ConfigInput) {

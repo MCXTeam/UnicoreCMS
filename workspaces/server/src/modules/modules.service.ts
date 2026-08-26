@@ -90,7 +90,7 @@ export class ModulesService implements OnModuleInit {
       .orUpdate(['version', 'enabled'], ['id'])
       .execute();
 
-    return { restartRequired: true, rebuildRequired: Boolean(module.manifest.client || module.manifest.admin) };
+    return { restartRequired: true, rebuildRequired: enabled && Boolean(module.manifest.client || module.manifest.admin) };
   }
 
   async purge(id: string): Promise<void> {

@@ -59,6 +59,7 @@ export interface ClientModuleDefinition {
 }
 
 const KEY = Symbol.for('unicore.api.client.registry.v1')
+const ACTIVE_KEY = Symbol.for('unicore.api.client.active.v1')
 
 const store = (): Map<string, ClientModuleDefinition> => {
   const holder = globalThis as unknown as Record<symbol, Map<string, ClientModuleDefinition> | undefined>
@@ -82,6 +83,24 @@ const navItems = (definition: ClientModuleDefinition): ClientNavItem[] => {
   return items
 }
 
+const activeHolder = (): { ids: Set<string> | null } => {
+  const holder = globalThis as unknown as Record<symbol, { ids: Set<string> | null } | undefined>
+
+  if (!holder[ACTIVE_KEY]) holder[ACTIVE_KEY] = { ids: null }
+
+  return holder[ACTIVE_KEY] as { ids: Set<string> | null }
+}
+
+export const setActiveModules = (ids: string[] | null): void => {
+  activeHolder().ids = ids ? new Set(ids) : null
+}
+
+export const moduleActive = (id: string): boolean => {
+  const active = activeHolder().ids
+
+  return !active || active.has(id)
+}
+
 export const defineClientModule = (definition: ClientModuleDefinition): ClientModuleDefinition => {
   if (Array.isArray(definition.nav)) navItems(definition)
 
@@ -93,7 +112,7 @@ export const defineClientModule = (definition: ClientModuleDefinition): ClientMo
   return definition
 }
 
-export const clientModules = (): ClientModuleDefinition[] => [...store().values()]
+export const clientModules = (): ClientModuleDefinition[] => [...store().values()].filter((item) => moduleActive(item.id))
 
 export const clientNav = (place: ClientNavPlace): ClientNavItem[] =>
   clientModules()

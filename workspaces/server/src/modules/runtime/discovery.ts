@@ -1,5 +1,5 @@
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
-import { join, resolve } from 'path';
+import { basename, join, resolve } from 'path';
 import { modulesPath } from 'unicore-common';
 import { ModuleManifest, validateModuleManifest } from 'unicore-api';
 
@@ -73,8 +73,10 @@ export const discover = (): DiscoveryResult => {
       continue;
     }
 
-    if (manifest.id !== name) {
-      broken.push({ id: name, reason: `id «${manifest.id}» не совпадает с именем папки «${name}»` });
+    const twin = modules.find((item) => item.id === manifest.id);
+
+    if (twin) {
+      broken.push({ id: name, reason: `модуль с id «${manifest.id}» уже загружен из папки «${basename(twin.dir)}»` });
       continue;
     }
 
