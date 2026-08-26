@@ -123,7 +123,6 @@
   "admin.extension_installed_theme": "Тема установлена",
   "admin.extension_keep": "Оставить",
   "admin.extension_remove": "Удалить",
-  "admin.extension_step_dependencies": "установить зависимости расширения",
   "admin.extension_step_enable": "включить модуль в списке",
   "admin.extension_step_rebuild": "пересобрать фронты",
   "admin.extension_step_restart": "перезапустить сервер",

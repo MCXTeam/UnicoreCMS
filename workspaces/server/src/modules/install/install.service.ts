@@ -68,7 +68,7 @@ export class InstallService {
       name: manifest.name as LocalizedText,
       version: manifest.version,
       previousVersion: previous,
-      steps: this.steps(content.kind, manifest, target, fresh),
+      steps: this.steps(content.kind, manifest, fresh),
     });
   }
 
@@ -168,11 +168,10 @@ export class InstallService {
     writeState(state);
   }
 
-  private steps(kind: ExtensionKind, manifest: ModuleManifest | ThemeManifest, target: string, fresh: boolean) {
+  private steps(kind: ExtensionKind, manifest: ModuleManifest | ThemeManifest, fresh: boolean) {
     const module = kind === 'module' ? (manifest as ModuleManifest) : null;
 
     return {
-      dependencies: this.hasDependencies(target),
       rebuild: kind === 'theme' || Boolean(module?.client || module?.admin),
       restart: kind === 'module',
       enable: fresh,
@@ -216,19 +215,5 @@ export class InstallService {
       client: state.client === id ? null : state.client,
       admin: state.admin === id ? null : state.admin,
     });
-  }
-
-  private hasDependencies(target: string): boolean {
-    const path = join(target, 'package.json');
-
-    if (!existsSync(path)) return false;
-
-    try {
-      const parsed = JSON.parse(readFileSync(path, 'utf-8'));
-
-      return Boolean(Object.keys(parsed.dependencies || {}).length);
-    } catch {
-      return false;
-    }
   }
 }

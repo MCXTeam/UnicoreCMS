@@ -1,7 +1,5 @@
 packages:
   - 'workspaces/*'
-  - 'modules/*'
-  - 'themes/*'
   - 'examples/*'
 
 nodeLinker: hoisted

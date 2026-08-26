@@ -123,7 +123,6 @@
   "admin.extension_installed_theme": "Theme installed",
   "admin.extension_keep": "Keep",
   "admin.extension_remove": "Remove",
-  "admin.extension_step_dependencies": "install the extension dependencies",
   "admin.extension_step_enable": "enable the module in the list",
   "admin.extension_step_rebuild": "rebuild the frontends",
   "admin.extension_step_restart": "restart the server",
