@@ -17,6 +17,7 @@ export function usePermissionCatalog() {
   const permissions = useState<PermissionEntry[]>('permission-catalog', () => [])
   const servers = useState<PermissionScopeOption[]>('permission-scopes', () => [])
   const loaded = useState<boolean>('permission-catalog-loaded', () => false)
+  const failed = useState<boolean>('permission-catalog-failed', () => false)
   const messages = useMessages()
 
   const { $api, $t } = useNuxtApp() as any
@@ -24,11 +25,17 @@ export function usePermissionCatalog() {
   async function load(force = false) {
     if (loaded.value && !force) return
 
-    const { data } = await $api.get('/admin/permissions/catalog')
+    failed.value = false
 
-    permissions.value = data.permissions || []
-    servers.value = data.servers || []
-    loaded.value = true
+    try {
+      const { data } = await $api.get('/admin/permissions/catalog')
+
+      permissions.value = data.permissions || []
+      servers.value = data.servers || []
+      loaded.value = true
+    } catch {
+      failed.value = true
+    }
   }
 
   const label = (key: string): string => {
@@ -65,5 +72,5 @@ export function usePermissionCatalog() {
     return order.map((group) => ({ group, label: groupLabel(group), permissions: buckets.get(group)! }))
   })
 
-  return { permissions, servers, groups, load, label, hint, groupLabel, t: $t }
+  return { permissions, servers, groups, loaded, failed, load, label, hint, groupLabel, t: $t }
 }

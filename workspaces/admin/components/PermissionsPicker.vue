@@ -51,23 +51,12 @@
         </div>
       </div>
 
-      <p v-if="!visibleGroups.length" class="permissions__empty">{{ $t('admin.permissions_empty') }}</p>
-    </div>
-
-    <div class="permissions__masks">
-      <label class="flex align-items-center gap-1">
-        <span>{{ $t('admin.permission_masks') }}</span>
-        <i v-tooltip.right="$t('admin.permission_mask_hint')" class="pi pi-question-circle text-color-secondary" />
-      </label>
-      <div class="permissions__mask-row">
-        <Chip v-for="item in masks" :key="item" :label="item" :removable="!disabled" @remove="removeMask(item)" />
-        <InputText
-          v-if="!disabled"
-          v-model="mask"
-          :placeholder="$t('admin.permission_mask_add')"
-          @keydown.enter.prevent="addMask"
-        />
-      </div>
+      <p v-if="failed" class="permissions__empty">
+        {{ $t('admin.permissions_failed') }}
+        <Button :label="$t('admin.retry')" link size="small" @click="load(true)" />
+      </p>
+      <p v-else-if="!loaded" class="permissions__empty">{{ $t('admin.permissions_loading') }}</p>
+      <p v-else-if="!visibleGroups.length" class="permissions__empty">{{ $t('admin.permissions_empty') }}</p>
     </div>
 
     <small v-show="error" class="p-error">{{ error }}</small>
@@ -93,14 +82,20 @@ const props = withDefaults(
 const emit = defineEmits<{ 'update:modelValue': [string[]] }>()
 
 const { $t } = useNuxtApp() as any
-const { groups, servers, load, label: label_, hint: hint_ } = usePermissionCatalog()
+const { groups, servers, loaded, failed, load, label: label_, hint: hint_ } = usePermissionCatalog()
 
 const query = ref('')
-const mask = ref('')
 
 onMounted(() => {
   load()
 })
+
+watch(
+  () => props.modelValue,
+  () => {
+    if (failed.value) load(true)
+  },
+)
 
 const patterns = computed<string[]>(() => props.modelValue || [])
 
@@ -131,8 +126,6 @@ const visibleGroups = computed<PermissionGroupView[]>(() => {
     }))
     .filter((group) => group.permissions.length)
 })
-
-const masks = computed(() => patterns.value.filter((pattern) => pattern.includes('*') || pattern.startsWith('!')))
 
 function scopeBase(key: string): string | null {
   for (const entry of scoped.value) if (key.startsWith(`${entry.key}.`)) return entry.key
@@ -218,18 +211,6 @@ function setScope(key: string, ids: string[]) {
   apply(next)
 }
 
-function addMask() {
-  const value = mask.value.trim()
-
-  if (!value || patterns.value.includes(value)) return
-
-  apply([...patterns.value, value])
-  mask.value = ''
-}
-
-function removeMask(value: string) {
-  apply(patterns.value.filter((pattern) => pattern !== value))
-}
 </script>
 
 <style scoped>
@@ -286,18 +267,5 @@ function removeMask(value: string) {
 .permissions__empty {
   margin: 0;
   color: var(--p-text-muted-color);
-}
-.permissions__masks {
-  margin-top: 0.75rem;
-}
-.permissions__mask-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.4rem;
-}
-.permissions__mask-row :deep(input) {
-  flex: 1;
-  min-width: 12rem;
 }
 </style>
