@@ -2,6 +2,7 @@ import { IpAddress } from '@common';
 import { Body, Controller, Get, Param, Patch, Post, Req } from '@nestjs/common';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { assertServerPermission } from 'src/admin/roles/guards/permisson.guard';
+import { allowedServers } from 'src/admin/roles/server-scope';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { MoneyWDInput } from './dto/monet-wd.input';
@@ -64,8 +65,11 @@ export class MoneyController {
 
   @Permissions(['panel.access', 'panel.users.read'])
   @Get('admin/:uuid')
-  async findOneByUser(@Param('uuid') uuid: string) {
-    return this.moneyService.findOneByUser(uuid);
+  async findOneByUser(@Req() request: any, @Param('uuid') uuid: string) {
+    const rows = await this.moneyService.findOneByUser(uuid);
+    const allowed = await allowedServers(request, 'panel.users.money');
+
+    return allowed ? rows.filter((row) => allowed.includes(row.server?.id)) : rows;
   }
 
   @Permissions(['panel.access'])

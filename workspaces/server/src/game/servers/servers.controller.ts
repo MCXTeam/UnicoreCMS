@@ -16,6 +16,8 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
+import { matchPermission } from 'src/admin/roles/guards/permisson.guard';
+import { assertServerScope } from 'src/admin/roles/server-scope';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { GalleryImageInput } from './dto/gallery.input';
 import { ServerCreateInput } from './dto/server-create.input';
@@ -51,9 +53,11 @@ export class ServersController {
     return server;
   }
 
-  @Permissions([['panel.servers.read', 'panel.servers.update'], { or: true }])
+  @Permissions([['panel.servers.read', 'panel.servers.update.*'], { or: true }])
   @Get(':id/admin')
-  async findOneAdmin(@Param('id') id: string) {
+  async findOneAdmin(@Req() request: any, @Param('id') id: string) {
+    if (!(await matchPermission(['panel.servers.read'], request))) await assertServerScope(request, 'panel.servers.update', [id]);
+
     const server = await this.serversService.findOne(id, ['mods', 'query', 'table', 'rcon', 'instances']);
 
     if (!server) {
@@ -63,9 +67,11 @@ export class ServersController {
     return server;
   }
 
-  @Permissions(['panel.access', 'panel.servers.update'])
+  @Permissions(['panel.access', 'panel.servers.update.*'])
   @Patch(':id')
-  update(@Req() request: any, @Param('id') id: string, @Body() body: ServerUpdateInput) {
+  async update(@Req() request: any, @Param('id') id: string, @Body() body: ServerUpdateInput) {
+    await assertServerScope(request, 'panel.servers.update', [id]);
+
     return this.serversService.update(id, body, request);
   }
 
@@ -87,7 +93,7 @@ export class ServersController {
     return this.serversService.gallery(id);
   }
 
-  @Permissions(['panel.access', 'panel.servers.update'])
+  @Permissions(['panel.access', 'panel.servers.update.*'])
   @Post(':id/gallery')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -96,23 +102,34 @@ export class ServersController {
       limits: { fileSize: STORAGE_MAX_IMAGE_UPLOAD, files: 1 },
     }),
   )
-  addGalleryImage(@Param('id') id: string, @Body() body: GalleryImageInput, @UploadedFile() file: Express.Multer.File) {
+  async addGalleryImage(
+    @Req() request: any,
+    @Param('id') id: string,
+    @Body() body: GalleryImageInput,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    await assertServerScope(request, 'panel.servers.update', [id]);
+
     return this.serversService.addGalleryImage(id, body, file);
   }
 
-  @Permissions(['panel.access', 'panel.servers.update'])
+  @Permissions(['panel.access', 'panel.servers.update.*'])
   @Post(':id/gallery/sort')
-  sortGallery(@Param('id') id: string, @Body() body: NumberSortInput) {
+  async sortGallery(@Req() request: any, @Param('id') id: string, @Body() body: NumberSortInput) {
+    await assertServerScope(request, 'panel.servers.update', [id]);
+
     return this.serversService.sortGallery(id, body);
   }
 
-  @Permissions(['panel.access', 'panel.servers.update'])
+  @Permissions(['panel.access', 'panel.servers.update.*'])
   @Delete(':id/gallery/:imageId')
-  removeGalleryImage(@Param('id') id: string, @Param('imageId', ParseIntPipe) imageId: number) {
+  async removeGalleryImage(@Req() request: any, @Param('id') id: string, @Param('imageId', ParseIntPipe) imageId: number) {
+    await assertServerScope(request, 'panel.servers.update', [id]);
+
     return this.serversService.removeGalleryImage(id, imageId);
   }
 
-  @Permissions(['panel.access', 'panel.servers.update'])
+  @Permissions(['panel.access', 'panel.servers.update.*'])
   @Patch(':type/:id')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -121,17 +138,22 @@ export class ServersController {
       limits: { fileSize: STORAGE_MAX_IMAGE_UPLOAD, files: 1 },
     }),
   )
-  updateMedia(
+  async updateMedia(
+    @Req() request: any,
     @Param('id') id: string,
     @Param('type', new ParseEnumPipe(ServerMedia)) type: ServerMedia,
     @UploadedFile() file: Express.Multer.File,
   ) {
+    await assertServerScope(request, 'panel.servers.update', [id]);
+
     return this.serversService.updateMedia(id, type, file);
   }
 
-  @Permissions(['panel.access', 'panel.servers.update'])
+  @Permissions(['panel.access', 'panel.servers.update.*'])
   @Delete(':type/:id')
-  removeMedia(@Param('id') id: string, @Param('type', new ParseEnumPipe(ServerMedia)) type: ServerMedia) {
+  async removeMedia(@Req() request: any, @Param('id') id: string, @Param('type', new ParseEnumPipe(ServerMedia)) type: ServerMedia) {
+    await assertServerScope(request, 'panel.servers.update', [id]);
+
     return this.serversService.removeMedia(id, type);
   }
 }

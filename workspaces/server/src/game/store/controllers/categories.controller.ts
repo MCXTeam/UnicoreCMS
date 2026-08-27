@@ -11,7 +11,7 @@ export class CategoriesController {
   constructor(private categoriesService: CategoriesService) {}
 
   @Permissions([
-    ['panel.store.read', 'panel.users.give', 'panel.users.give.*'],
+    ['panel.store.read.*', 'panel.users.give.*'],
     { or: true },
   ])
   @Get()

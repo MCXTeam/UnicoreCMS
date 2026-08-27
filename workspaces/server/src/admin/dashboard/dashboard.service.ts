@@ -34,7 +34,7 @@ export class DashboardService {
   ) {}
 
 
-  async revenue(query: RevenueQuery): Promise<RevenueReport> {
+  async revenue(query: RevenueQuery, allowed: string[] | null = null): Promise<RevenueReport> {
     const from = query.from ? this.moment(query.from).utc().startOf('day') : this.moment().utc().subtract(DASHBOARD_MONTH_DAYS - 1, 'day').startOf('day');
     const to = query.to ? this.moment(query.to).utc().endOf('day') : this.moment().utc().endOf('day');
 
@@ -52,6 +52,7 @@ export class DashboardService {
       .addSelect(`SUM(CASE WHEN history.type = :permission THEN 1 ELSE 0 END)`, 'permissions')
       .where('history.type IN (:...types)', { types: HistoryGroupType.Purchase })
       .andWhere('history.created BETWEEN :from AND :to', { from: from.toDate(), to: to.toDate() })
+      .andWhere(allowed ? 'history.server_id IN(:...allowed)' : '1 = 1', { allowed: allowed?.length ? allowed : [null] })
       .setParameters({
         product: HistoryType.ProductPurchase,
         kit: HistoryType.KitPurchase,
@@ -92,7 +93,7 @@ export class DashboardService {
     };
   }
 
-  private async daysStatBuilder(type: StatType, days: number = DASHBOARD_WEEK_DAYS): Promise<StatGroup[]> {
+  private async daysStatBuilder(type: StatType, days: number = DASHBOARD_WEEK_DAYS, allowed: string[] | null = null): Promise<StatGroup[]> {
     var result: StatGroup[] = new Array();
     const range = Array.from(
       this.moment
@@ -142,6 +143,7 @@ export class DashboardService {
             count: await this.historyRepository.countBy({
               type: In(HistoryGroupType.Purchase),
               created: Between(this.moment(date).toDate(), this.moment(date).endOf('day').toDate()),
+              ...(allowed ? { server: { id: In(allowed.length ? allowed : ['']) } } : {}),
             }),
             amount: Number(
               (
@@ -154,6 +156,7 @@ export class DashboardService {
                     start: this.moment(date).toDate(),
                     end: this.moment(date).endOf('day').toDate(),
                   })
+                  .andWhere(allowed ? 'server_id IN(:...allowed)' : '1 = 1', { allowed: allowed?.length ? allowed : [null] })
                   .select('COALESCE(SUM(real_spent), 0)', 'amount')
                   .getRawOne()
               )?.amount || 0,
@@ -190,7 +193,7 @@ export class DashboardService {
     return result;
   }
 
-  private async monthsStatBuilder(type: StatType): Promise<StatGroup[]> {
+  private async monthsStatBuilder(type: StatType, allowed: string[] | null = null): Promise<StatGroup[]> {
     var result: StatGroup[] = new Array();
     const range = Array.from(this.moment.range(this.moment().subtract(11, 'months').startOf('month'), this.moment()).by('month'));
 
@@ -231,6 +234,7 @@ export class DashboardService {
             count: await this.historyRepository.countBy({
               type: In(HistoryGroupType.Purchase),
               created: Between(this.moment(date).toDate(), this.moment(date).endOf('month').toDate()),
+              ...(allowed ? { server: { id: In(allowed.length ? allowed : ['']) } } : {}),
             }),
             amount: Number(
               (
@@ -243,6 +247,7 @@ export class DashboardService {
                     start: this.moment(date).toDate(),
                     end: this.moment(date).endOf('month').toDate(),
                   })
+                  .andWhere(allowed ? 'server_id IN(:...allowed)' : '1 = 1', { allowed: allowed?.length ? allowed : [null] })
                   .select('COALESCE(SUM(real_spent), 0)', 'amount')
                   .getRawOne()
               )?.amount || 0,
@@ -279,7 +284,7 @@ export class DashboardService {
     return result;
   }
 
-  async stats(sections: DashboardStatSection[] = DASHBOARD_STAT_SECTIONS): Promise<StatsInterface> {
+  async stats(sections: DashboardStatSection[] = DASHBOARD_STAT_SECTIONS, purchaseServers: string[] | null = null): Promise<StatsInterface> {
     const online = await this.onlineService.find();
     const allowed = new Set(sections);
 
@@ -306,17 +311,21 @@ export class DashboardService {
 
     if (allowed.has('purchases'))
       stats.purchases = {
-        days: await this.daysStatBuilder(StatType.Purchase),
-        month: await this.daysStatBuilder(StatType.Purchase, DASHBOARD_MONTH_DAYS),
-        months: await this.monthsStatBuilder(StatType.Purchase),
+        days: await this.daysStatBuilder(StatType.Purchase, DASHBOARD_WEEK_DAYS, purchaseServers),
+        month: await this.daysStatBuilder(StatType.Purchase, DASHBOARD_MONTH_DAYS, purchaseServers),
+        months: await this.monthsStatBuilder(StatType.Purchase, purchaseServers),
         count: await this.historyRepository.countBy({
           type: In(HistoryGroupType.Purchase),
+          ...(purchaseServers ? { server: { id: In(purchaseServers.length ? purchaseServers : ['']) } } : {}),
         }),
         amount: Number(
           (
             await this.historyRepository
               .createQueryBuilder()
               .where('type IN(:...types)', { types: HistoryGroupType.Purchase })
+              .andWhere(purchaseServers ? 'server_id IN(:...allowed)' : '1 = 1', {
+                allowed: purchaseServers?.length ? purchaseServers : [null],
+              })
               .select('COALESCE(SUM(real_spent), 0)', 'amount')
               .getRawOne()
           )?.amount || 0,

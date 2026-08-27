@@ -33,23 +33,34 @@
             <i v-if="hint_(entry.key)" v-tooltip.right="hint_(entry.key)" class="pi pi-question-circle text-color-secondary" />
             <Tag v-if="entry.danger" severity="warn" :value="$t('admin.permission_danger')" v-tooltip.top="$t('admin.permission_danger_hint')" />
             <Tag v-else-if="isCovered(entry.key)" severity="secondary" :value="$t('admin.permission_covered')" />
-            <MultiSelect
+            <button
               v-if="entry.scope === 'server' && isOn(entry.key)"
+              type="button"
               class="permissions__scope"
-              :modelValue="scopeValue(entry.key)"
-              :options="servers"
-              optionLabel="name"
-              optionValue="id"
-              display="chip"
-              :maxSelectedLabels="2"
               :disabled="disabled"
-              :placeholder="$t('admin.permission_servers_all')"
-              appendTo="body"
-              @update:modelValue="setScope(entry.key, $event)"
-            />
+              v-tooltip.top="scopeHint(entry.key)"
+              @click="openScope($event, entry.key)"
+            >
+              <Tag v-if="scopeValue(entry.key).length" severity="info" icon="pi pi-server" :value="scopeLabel(entry.key)" />
+              <i v-else class="pi pi-server permissions__scope-icon" />
+            </button>
           </div>
         </div>
       </div>
+
+      <Popover ref="scopePanel">
+        <div class="permissions__servers">
+          <span class="permissions__servers-title">{{ $t('admin.permission_servers') }}</span>
+          <label class="permissions__servers-row">
+            <Checkbox :binary="true" :modelValue="!scopeValue(active).length" @update:modelValue="setScope(active, [])" />
+            <span>{{ $t('admin.permission_servers_all') }}</span>
+          </label>
+          <label v-for="server in servers" :key="server.id" class="permissions__servers-row">
+            <Checkbox :binary="true" :modelValue="scopeChecked(active, server.id)" @update:modelValue="toggleScope(server.id)" />
+            <span>{{ server.name }}</span>
+          </label>
+        </div>
+      </Popover>
 
       <p v-if="failed" class="permissions__empty">
         {{ $t('admin.permissions_failed') }}
@@ -85,6 +96,8 @@ const { $t } = useNuxtApp() as any
 const { groups, servers, loaded, failed, load, label: label_, hint: hint_ } = usePermissionCatalog()
 
 const query = ref('')
+const active = ref('')
+const scopePanel = ref()
 
 onMounted(() => {
   load()
@@ -127,7 +140,11 @@ const visibleGroups = computed<PermissionGroupView[]>(() => {
     .filter((group) => group.permissions.length)
 })
 
+const known = computed(() => new Set(groups.value.flatMap((group) => group.permissions).map((entry) => entry.key)))
+
 function scopeBase(key: string): string | null {
+  if (known.value.has(key)) return null
+
   for (const entry of scoped.value) if (key.startsWith(`${entry.key}.`)) return entry.key
 
   return null
@@ -202,6 +219,51 @@ function scopeValue(key: string): string[] {
   return patterns.value.filter((pattern) => scopeBase(pattern) === key).map((pattern) => pattern.slice(key.length + 1))
 }
 
+function scopeLabel(key: string): string {
+  const ids = scopeValue(key)
+
+  if (ids.length === 1) return servers.value.find((server) => server.id === ids[0])?.name || ids[0]
+
+  return `${ids.length} / ${servers.value.length}`
+}
+
+function scopeHint(key: string): string {
+  const ids = scopeValue(key)
+
+  if (!ids.length) return $t('admin.permission_servers_all')
+
+  return ids.map((id) => servers.value.find((server) => server.id === id)?.name || id).join(', ')
+}
+
+function scopeChecked(key: string, id: string): boolean {
+  const ids = scopeValue(key)
+
+  return !ids.length || ids.includes(id)
+}
+
+function openScope(event: Event, key: string) {
+  if (props.disabled) return
+
+  active.value = key
+  scopePanel.value?.toggle(event)
+}
+
+function toggleScope(id: string) {
+  const key = active.value
+  const all = servers.value.map((server) => server.id)
+  const current = scopeValue(key).length ? scopeValue(key) : all
+  const next = current.includes(id) ? current.filter((item) => item !== id) : [...current, id]
+
+  if (!next.length) {
+    toggle(key)
+    scopePanel.value?.hide()
+
+    return
+  }
+
+  setScope(key, next.length === all.length ? [] : next)
+}
+
 function setScope(key: string, ids: string[]) {
   const next = patterns.value.filter((pattern) => pattern !== key && scopeBase(pattern) !== key)
 
@@ -261,8 +323,45 @@ function setScope(key: string, ids: string[]) {
   color: var(--p-text-muted-color);
 }
 .permissions__scope {
+  display: inline-flex;
+  align-items: center;
   margin-left: auto;
-  max-width: 18rem;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
+.permissions__scope:disabled {
+  cursor: default;
+}
+.permissions__scope :deep(.p-tag) {
+  cursor: inherit;
+}
+.permissions__scope-icon {
+  color: var(--p-text-muted-color);
+  transition: color 0.15s;
+}
+.permissions__scope:hover:not(:disabled) .permissions__scope-icon {
+  color: var(--p-primary-color);
+}
+.permissions__servers {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 13rem;
+}
+.permissions__servers-title {
+  color: var(--p-text-muted-color);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.permissions__servers-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
 }
 .permissions__empty {
   margin: 0;

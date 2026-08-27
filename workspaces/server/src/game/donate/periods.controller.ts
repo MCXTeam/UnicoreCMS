@@ -10,7 +10,7 @@ export class PeriodsController {
   constructor(private periodsService: PeriodsService) {}
 
   @Permissions([
-    ['panel.donate.read', 'panel.users.donate', 'panel.users.donate.*'],
+    ['panel.donate.read.*', 'panel.users.donate.*'],
     { or: true },
   ])
   @Get()

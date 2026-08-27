@@ -16,6 +16,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { assertServerPermission } from 'src/admin/roles/guards/permisson.guard';
+import { allowedServers } from 'src/admin/roles/server-scope';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { Public } from 'src/auth/decorators/public.decorator';
@@ -28,25 +29,28 @@ import { DonateGroupsService } from '../providers/groups.service';
 export class DonateGroupsController {
   constructor(private donateGroupsService: DonateGroupsService) {}
 
-  @Permissions(['panel.access', 'panel.donate.groups.create'])
+  @Permissions(['panel.access', 'panel.donate.groups.create.*'])
   @Post()
   create(@Req() request: any, @Body() body: GroupInput) {
     return this.donateGroupsService.create(body, request);
   }
 
-  @Permissions(['panel.access', 'panel.donate.groups.update'])
+  @Permissions(['panel.access', 'panel.donate.groups.update.*'])
   @Post('sort')
   sort(@Body() body: NumberSortInput) {
     return this.donateGroupsService.sort(body);
   }
 
   @Permissions([
-    ['panel.donate.read', 'panel.users.donate', 'panel.users.donate.*'],
+    ['panel.donate.read.*', 'panel.users.donate.*'],
     { or: true },
   ])
   @Get()
-  find() {
-    return this.donateGroupsService.find(['servers', 'kits', 'periods', 'features']);
+  async find(@Req() request: any) {
+    return this.donateGroupsService.find(
+      ['servers', 'kits', 'periods', 'features'],
+      await allowedServers(request, 'panel.donate.read'),
+    );
   }
 
   @Get('me')
@@ -54,10 +58,10 @@ export class DonateGroupsController {
     return this.donateGroupsService.me(user);
   }
 
-  @Permissions(['panel.access', 'panel.donate.groups.delete.many'])
+  @Permissions(['panel.access', 'panel.donate.groups.delete.many.*'])
   @Delete('bulk')
-  removeMany(@Body() body: DeleteManyInput) {
-    return this.donateGroupsService.removeMany(body.items);
+  removeMany(@Req() request: any, @Body() body: DeleteManyInput) {
+    return this.donateGroupsService.removeMany(body.items, request);
   }
 
   @Public()
@@ -79,7 +83,7 @@ export class DonateGroupsController {
   }
 
   @Permissions([
-    ['panel.donate.read', 'panel.users.donate', 'panel.users.donate.*'],
+    ['panel.donate.read.*', 'panel.users.donate.*'],
     { or: true },
   ])
   @Get(':id')
@@ -93,19 +97,19 @@ export class DonateGroupsController {
     return server;
   }
 
-  @Permissions(['panel.access', 'panel.donate.groups.update'])
+  @Permissions(['panel.access', 'panel.donate.groups.update.*'])
   @Patch(':id')
   update(@Req() request: any, @Param('id', ParseIntPipe) id: number, @Body() body: GroupInput) {
     return this.donateGroupsService.update(id, body, request);
   }
 
-  @Permissions(['panel.access', 'panel.donate.groups.delete'])
+  @Permissions(['panel.access', 'panel.donate.groups.delete.*'])
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.donateGroupsService.remove(id);
+  remove(@Req() request: any, @Param('id', ParseIntPipe) id: number) {
+    return this.donateGroupsService.remove(id, request);
   }
 
-  @Permissions(['panel.access', 'panel.donate.groups.update'])
+  @Permissions(['panel.access', 'panel.donate.groups.update.*'])
   @Patch('icon/:id')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -118,7 +122,7 @@ export class DonateGroupsController {
     return this.donateGroupsService.updateIcon(id, file);
   }
 
-  @Permissions(['panel.access', 'panel.donate.groups.update'])
+  @Permissions(['panel.access', 'panel.donate.groups.update.*'])
   @Delete('icon/:id')
   removeMedia(@Param('id', ParseIntPipe) id: number) {
     return this.donateGroupsService.removeIcon(id);
@@ -126,8 +130,11 @@ export class DonateGroupsController {
 
   @Permissions(['panel.access', 'panel.users.read'])
   @Get('admin/:uuid')
-  udgByUUID(@CurrentUser() user: User, @Param('uuid') uuid: string) {
-    return this.donateGroupsService.udgByUUID(uuid);
+  async udgByUUID(@Req() request: any, @CurrentUser() user: User, @Param('uuid') uuid: string) {
+    const rows = await this.donateGroupsService.udgByUUID(uuid);
+    const allowed = await allowedServers(request, 'panel.users.donate');
+
+    return allowed ? rows.filter((row) => allowed.includes(row.server?.id)) : rows;
   }
 
   @Permissions(['panel.access'])

@@ -11,10 +11,12 @@ import {
   ParseIntPipe,
   UploadedFile,
   NotFoundException,
+  Req,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
+import { allowedServers } from 'src/admin/roles/server-scope';
 import { KitInput } from '../dto/kit.input.dto';
 import { KitsService } from '../providers/kits.service';
 
@@ -23,22 +25,22 @@ export class KitsController {
   constructor(private kitsService: KitsService) {}
 
   @Permissions([
-    ['panel.store.read', 'panel.users.give', 'panel.users.give.*'],
+    ['panel.store.read.*', 'panel.users.give.*'],
     { or: true },
   ])
   @Get()
-  find(@Paginate() query: PaginateQuery) {
-    return this.kitsService.find(query);
+  async find(@Req() request: any, @Paginate() query: PaginateQuery) {
+    return this.kitsService.find(query, await allowedServers(request, 'panel.store.read'));
   }
 
-  @Permissions(['panel.access', 'panel.store.kits.delete.many'])
+  @Permissions(['panel.access', 'panel.store.kits.delete.many.*'])
   @Delete('bulk')
-  removeMany(@Body() body: DeleteManyInput) {
-    return this.kitsService.removeMany(body.items);
+  removeMany(@Req() request: any, @Body() body: DeleteManyInput) {
+    return this.kitsService.removeMany(body.items, request);
   }
 
   @Permissions([
-    ['panel.store.read', 'panel.users.give', 'panel.users.give.*'],
+    ['panel.store.read.*', 'panel.users.give.*'],
     { or: true },
   ])
   @Get(':id')
@@ -50,25 +52,25 @@ export class KitsController {
     return kit;
   }
 
-  @Permissions(['panel.access', 'panel.store.kits.create'])
+  @Permissions(['panel.access', 'panel.store.kits.create.*'])
   @Post()
-  create(@Body() body: KitInput) {
-    return this.kitsService.create(body);
+  create(@Req() request: any, @Body() body: KitInput) {
+    return this.kitsService.create(body, request);
   }
 
-  @Permissions(['panel.access', 'panel.store.kits.update'])
+  @Permissions(['panel.access', 'panel.store.kits.update.*'])
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() body: KitInput) {
-    return this.kitsService.update(id, body);
+  update(@Req() request: any, @Param('id', ParseIntPipe) id: number, @Body() body: KitInput) {
+    return this.kitsService.update(id, body, request);
   }
 
-  @Permissions(['panel.access', 'panel.store.kits.delete'])
+  @Permissions(['panel.access', 'panel.store.kits.delete.*'])
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.kitsService.remove(id);
+  remove(@Req() request: any, @Param('id', ParseIntPipe) id: number) {
+    return this.kitsService.remove(id, request);
   }
 
-  @Permissions(['panel.access', 'panel.store.kits.update'])
+  @Permissions(['panel.access', 'panel.store.kits.update.*'])
   @Patch('icon/:id')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -81,7 +83,7 @@ export class KitsController {
     return this.kitsService.updateIcon(id, file);
   }
 
-  @Permissions(['panel.access', 'panel.store.kits.update'])
+  @Permissions(['panel.access', 'panel.store.kits.update.*'])
   @Delete('icon/:id')
   removeMedia(@Param('id', ParseIntPipe) id: number) {
     return this.kitsService.removeIcon(id);

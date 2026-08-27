@@ -34,7 +34,7 @@ export class GroupKitsController {
   }
 
   @Permissions([
-    ['panel.donate.read', 'panel.users.donate', 'panel.users.donate.*'],
+    ['panel.donate.read.*', 'panel.users.donate.*'],
     { or: true },
   ])
   @Get()
@@ -49,7 +49,7 @@ export class GroupKitsController {
   }
 
   @Permissions([
-    ['panel.donate.read', 'panel.users.donate', 'panel.users.donate.*'],
+    ['panel.donate.read.*', 'panel.users.donate.*'],
     { or: true },
   ])
   @Get(':id')

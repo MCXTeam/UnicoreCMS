@@ -345,6 +345,7 @@
   "admin.permission_revoke": "Снятие донат-права",
   "admin.permission_revoked": "Донат-право снято",
   "admin.permission_selected": "Выбранное право",
+  "admin.permission_servers": "Серверы",
   "admin.permission_servers_all": "Все серверы",
   "admin.permission_updated": "Право сохранено",
   "admin.permissions": "Права",

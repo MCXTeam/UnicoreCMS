@@ -2,6 +2,7 @@ import { NumberSortInput, DeleteManyInput, IpAddress } from '@common';
 import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Post, Req } from '@nestjs/common';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { assertServerPermission } from 'src/admin/roles/guards/permisson.guard';
+import { allowedServers } from 'src/admin/roles/server-scope';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { GiveDonatePermInput } from './dto/give-donate-perm.input';
@@ -13,25 +14,25 @@ import { DonatePermissionsService } from './permissions.service';
 export class PermissionsController {
   constructor(private donatePermissionsService: DonatePermissionsService) {}
 
-  @Permissions(['panel.access', 'panel.donate.permissions.create'])
+  @Permissions(['panel.access', 'panel.donate.permissions.create.*'])
   @Post()
   create(@Req() request: any, @Body() body: PermissionInput) {
     return this.donatePermissionsService.create(body, request);
   }
 
-  @Permissions(['panel.access', 'panel.donate.permissions.update'])
+  @Permissions(['panel.access', 'panel.donate.permissions.update.*'])
   @Post('sort')
   sort(@Body() body: NumberSortInput) {
     return this.donatePermissionsService.sort(body);
   }
 
   @Permissions([
-    ['panel.donate.read', 'panel.users.donate', 'panel.users.donate.*'],
+    ['panel.donate.read.*', 'panel.users.donate.*'],
     { or: true },
   ])
   @Get()
-  find() {
-    return this.donatePermissionsService.find(['servers', 'kits', 'periods']);
+  async find(@Req() request: any) {
+    return this.donatePermissionsService.find(['servers', 'kits', 'periods'], await allowedServers(request, 'panel.donate.read'));
   }
 
   @Get('me')
@@ -39,10 +40,10 @@ export class PermissionsController {
     return this.donatePermissionsService.me(user);
   }
 
-  @Permissions(['panel.access', 'panel.donate.permissions.delete.many'])
+  @Permissions(['panel.access', 'panel.donate.permissions.delete.many.*'])
   @Delete('bulk')
-  removeMany(@Body() body: DeleteManyInput) {
-    return this.donatePermissionsService.removeMany(body.items);
+  removeMany(@Req() request: any, @Body() body: DeleteManyInput) {
+    return this.donatePermissionsService.removeMany(body.items, request);
   }
 
   @Permissions(['kernel.connect'])
@@ -68,7 +69,7 @@ export class PermissionsController {
   }
 
   @Permissions([
-    ['panel.donate.read', 'panel.users.donate', 'panel.users.donate.*'],
+    ['panel.donate.read.*', 'panel.users.donate.*'],
     { or: true },
   ])
   @Get(':id')
@@ -82,22 +83,25 @@ export class PermissionsController {
     return server;
   }
 
-  @Permissions(['panel.access', 'panel.donate.permissions.update'])
+  @Permissions(['panel.access', 'panel.donate.permissions.update.*'])
   @Patch(':id')
   update(@Req() request: any, @Param('id', ParseIntPipe) id: number, @Body() body: PermissionInput) {
     return this.donatePermissionsService.update(id, body, request);
   }
 
-  @Permissions(['panel.access', 'panel.donate.permissions.delete'])
+  @Permissions(['panel.access', 'panel.donate.permissions.delete.*'])
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.donatePermissionsService.remove(id);
+  remove(@Req() request: any, @Param('id', ParseIntPipe) id: number) {
+    return this.donatePermissionsService.remove(id, request);
   }
 
   @Permissions(['panel.access', 'panel.users.read'])
   @Get('admin/:uuid')
-  udgByUUID(@Param('uuid') uuid: string) {
-    return this.donatePermissionsService.udpByUUID(uuid);
+  async udgByUUID(@Req() request: any, @Param('uuid') uuid: string) {
+    const rows = await this.donatePermissionsService.udpByUUID(uuid);
+    const allowed = await allowedServers(request, 'panel.users.donate');
+
+    return allowed ? rows.filter((row) => allowed.includes(row.server?.id)) : rows;
   }
 
   @Permissions(['panel.access'])

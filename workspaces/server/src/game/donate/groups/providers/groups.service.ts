@@ -1,4 +1,5 @@
 import { assertFieldAccess } from 'src/admin/roles/field-permissions';
+import { assertServerEntities, assertServerList } from 'src/admin/roles/server-scope';
 import { assertUploadedFile, debitUserBalance, MomentWrapper, NumberSortInput, StorageManager } from '@common';
 import { events } from 'unicore-api';
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
@@ -57,8 +58,12 @@ export class DonateGroupsService {
     private groupKitsRepository: Repository<GroupKit>,
   ) {}
 
-  find(relations: string[] = new Array()): Promise<DonateGroup[]> {
-    return this.donateGroupsRepository.find({ relations });
+  async find(relations: string[] = new Array(), allowed: string[] | null = null): Promise<DonateGroup[]> {
+    const groups = await this.donateGroupsRepository.find({ relations });
+
+    if (!allowed) return groups;
+
+    return groups.filter((group) => (group.servers || []).some((server) => allowed.includes(server.id)));
   }
 
   async findByServer(id: string) {
@@ -256,6 +261,7 @@ export class DonateGroupsService {
 
   async create(input: GroupInput, request?: any) {
     await assertFieldAccess('donate_group', input, null, request);
+    await assertServerList(request, 'panel.donate.groups.create', input.servers);
     const group = new DonateGroup();
 
     group.name = input.name;
@@ -300,13 +306,19 @@ export class DonateGroupsService {
   }
 
   async update(id: number, input: GroupInput, request?: any) {
-    const group = await this.findOne(id);
+    const group = await this.findOne(id, ['servers']);
 
     if (!group) {
       throw new NotFoundException();
     }
 
     await assertFieldAccess('donate_group', input, group, request);
+    await assertServerList(
+      request,
+      'panel.donate.groups.update',
+      input.servers,
+      (group.servers || []).map((server) => server.id),
+    );
 
     group.name = input.name;
     group.description = input.description;
@@ -335,22 +347,27 @@ export class DonateGroupsService {
     return this.donateGroupsRepository.save(group);
   }
 
-  async remove(id: number) {
-    const group = await this.findOne(id);
+  async remove(id: number, request?: any) {
+    const group = await this.findOne(id, ['servers']);
 
     if (!group) {
       throw new NotFoundException();
     }
 
+    await assertServerEntities(request, 'panel.donate.groups.delete', [group]);
+
     return this.donateGroupsRepository.remove(group);
   }
 
-  async removeMany(ids: number[]) {
+  async removeMany(ids: number[], request?: any) {
     const groups = await this.donateGroupsRepository.find({
       where: {
         id: In(ids),
       },
+      relations: ['servers'],
     });
+
+    await assertServerEntities(request, 'panel.donate.groups.delete.many', groups);
 
     return this.donateGroupsRepository.remove(groups);
   }

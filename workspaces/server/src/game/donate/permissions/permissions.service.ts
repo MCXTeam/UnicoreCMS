@@ -1,4 +1,5 @@
 import { assertFieldAccess } from 'src/admin/roles/field-permissions';
+import { assertServerEntities, assertServerList } from 'src/admin/roles/server-scope';
 import { NumberSortInput, debitUserBalance, MomentWrapper } from '@common';
 import { events } from 'unicore-api';
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
@@ -57,8 +58,12 @@ export class DonatePermissionsService {
     private groupKitsRepository: Repository<GroupKit>,
   ) {}
 
-  find(relations: string[] = new Array()): Promise<DonatePermission[]> {
-    return this.donatePermissionsRepository.find({ relations });
+  async find(relations: string[] = new Array(), allowed: string[] | null = null): Promise<DonatePermission[]> {
+    const permissions = await this.donatePermissionsRepository.find({ relations });
+
+    if (!allowed) return permissions;
+
+    return permissions.filter((permission) => (permission.servers || []).some((server) => allowed.includes(server.id)));
   }
 
   me(user: User): Promise<UsersDonatePermission[]> {
@@ -312,6 +317,7 @@ export class DonatePermissionsService {
 
   async create(input: PermissionInput, request?: any) {
     await assertFieldAccess('donate_permission', input, null, request);
+    await assertServerList(request, 'panel.donate.permissions.create', input.servers);
     const perm = new DonatePermission();
 
     perm.name = input.name;
@@ -357,13 +363,19 @@ export class DonatePermissionsService {
   }
 
   async update(id: number, input: PermissionInput, request?: any) {
-    const perm = await this.findOne(id);
+    const perm = await this.findOne(id, ['servers']);
 
     if (!perm) {
       throw new NotFoundException();
     }
 
     await assertFieldAccess('donate_permission', input, perm, request);
+    await assertServerList(
+      request,
+      'panel.donate.permissions.update',
+      input.servers,
+      (perm.servers || []).map((server) => server.id),
+    );
 
     perm.name = input.name;
     perm.description = input.description;
@@ -406,22 +418,27 @@ export class DonatePermissionsService {
     return this.donatePermissionsRepository.save(perm);
   }
 
-  async remove(id: number) {
-    const perm = await this.findOne(id);
+  async remove(id: number, request?: any) {
+    const perm = await this.findOne(id, ['servers']);
 
     if (!perm) {
       throw new NotFoundException();
     }
 
+    await assertServerEntities(request, 'panel.donate.permissions.delete', [perm]);
+
     return this.donatePermissionsRepository.remove(perm);
   }
 
-  async removeMany(ids: number[]) {
+  async removeMany(ids: number[], request?: any) {
     const perms = await this.donatePermissionsRepository.find({
       where: {
         id: In(ids),
       },
+      relations: ['servers'],
     });
+
+    await assertServerEntities(request, 'panel.donate.permissions.delete.many', perms);
 
     return this.donatePermissionsRepository.remove(perms);
   }

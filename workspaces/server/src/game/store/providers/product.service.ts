@@ -1,4 +1,5 @@
 import { assertFieldAccess } from 'src/admin/roles/field-permissions';
+import { assertServerEntities, assertServerList } from 'src/admin/roles/server-scope';
 import { assertUploadedFile, IMPORT_MAX_ENTRIES, IMPORT_MAX_UNPACKED_BYTES, StorageManager } from '@common';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -54,11 +55,13 @@ export class ProductsService {
     private kitsRepository: Repository<Kit>,
   ) {}
 
-  async find(query: PaginateQuery): Promise<Paginated<Product>> {
+  async find(query: PaginateQuery, allowed: string[] | null = null): Promise<Paginated<Product>> {
     const queryBuilder = this.productsRepository
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.servers', 'servers')
       .leftJoinAndSelect('product.categories', 'categories');
+
+    if (allowed) queryBuilder.andWhere('servers.id IN(:...allowed)', { allowed: allowed.length ? allowed : [null] });
 
     if (query?.filter?.servers && !Array.isArray(query.filter.servers)) query.filter.servers = query.filter.servers.split(',');
 
@@ -286,6 +289,7 @@ export class ProductsService {
 
   async create(input: ProductInput, request?: any) {
     await assertFieldAccess('store_product', input, null, request);
+    await assertServerList(request, 'panel.store.products.create', input.servers);
     const product = new Product();
 
     product.name = input.name;
@@ -316,13 +320,19 @@ export class ProductsService {
   }
 
   async update(id: number, input: ProductInput, request?: any) {
-    const product = await this.findOne(id);
+    const product = await this.findOne(id, ['servers']);
 
     if (!product) {
       throw new NotFoundException();
     }
 
     await assertFieldAccess('store_product', input, product, request);
+    await assertServerList(
+      request,
+      'panel.store.products.update',
+      input.servers,
+      (product.servers || []).map((server) => server.id),
+    );
 
     product.name = input.name;
     product.description = input.description;
@@ -354,22 +364,27 @@ export class ProductsService {
     return this.productsRepository.save(product);
   }
 
-  async remove(id: number) {
-    const product = await this.findOne(id);
+  async remove(id: number, request?: any) {
+    const product = await this.findOne(id, ['servers']);
 
     if (!product) {
       throw new NotFoundException();
     }
 
+    await assertServerEntities(request, 'panel.store.products.delete', [product]);
+
     return this.productsRepository.remove(product);
   }
 
-  async removeMany(ids: number[]) {
+  async removeMany(ids: number[], request?: any) {
     const products = await this.productsRepository.find({
       where: {
         id: In(ids),
       },
+      relations: ['servers'],
     });
+
+    await assertServerEntities(request, 'panel.store.products.delete.many', products);
 
     return this.productsRepository.remove(products);
   }
@@ -485,13 +500,15 @@ export class ProductsService {
     return this.productsRepository.save(products);
   }
 
-  async updateMany(input: ProductsManyInput) {
+  async updateMany(input: ProductsManyInput, request?: any) {
     const products = await this.productsRepository.find({
       where: {
         id: In(input.products.map((entity) => entity.id)),
       },
       relations: ['servers', 'categories'],
     });
+
+    await assertServerEntities(request, 'panel.store.products.update.many', products);
     let servers_: Server[] = [];
     let categories_: Category[] = [];
 

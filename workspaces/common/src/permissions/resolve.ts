@@ -69,8 +69,9 @@ export function filterPanelPermissions(values: unknown): string[] {
 }
 
 export function scopeOf(permission: string): string | null {
-  for (const key of scopedPermissions())
-    if (permission.startsWith(`${key}.`)) return key;
+  if (permissionMeta(permission)) return null;
+
+  for (const key of scopedPermissions()) if (permission.startsWith(`${key}.`)) return key;
 
   return null;
 }
@@ -83,6 +84,10 @@ function requiredVariants(required: string): string[] {
   const base = scopeOf(required);
 
   return base ? [required, base] : [required];
+}
+
+export function anyScope(permission: string): string {
+  return isScopedPermission(permission) ? `${permission}${PERMISSION_WILDCARD_SUFFIX}` : permission;
 }
 
 export function matchPermissions(

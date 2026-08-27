@@ -389,6 +389,8 @@ export default {
 
     useHead({ title: computed(() => $t('admin.menu_donate_groups')) })
     const config = useRuntimeConfig()
+    const serverScope = useServerScope('panel.donate.read')
+
     const access = useAccess({
       canCreate: 'panel.donate.groups.create',
       canUpdate: 'panel.donate.groups.update',
@@ -404,6 +406,7 @@ export default {
     return {
       ...access,
       ...fields,
+      serverScope,
       translations,
       realDecimals: config.public.realDecimals,
     }
@@ -445,6 +448,14 @@ export default {
     this.load()
   },
   computed: {
+    serverOptions() {
+      if (!this.serverScope) return this.servers
+
+      const attached = (this.group?.servers || []).map((server) => server.id || server)
+
+      return this.servers.filter((server) => this.serverScope.includes(server.id) || attached.includes(server.id))
+    },
+
     sections() {
       const isDefault = this.translations.isDefault
 

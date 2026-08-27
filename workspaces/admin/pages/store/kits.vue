@@ -193,7 +193,7 @@
                   display="chip"
                   :filter="true"
                   v-model="kit.servers"
-                  :options="servers"
+                  :options="serverOptions"
                   optionLabel="name"
                   :placeholder="$t('admin.choose_servers')"
                   class="p-column-filter"
@@ -411,6 +411,8 @@ export default {
     const { $t } = useNuxtApp()
 
     useHead({ title: computed(() => $t('admin.menu_kits')) })
+    const serverScope = useServerScope('panel.store.read')
+
     const access = useAccess({
       canCreate: 'panel.store.kits.create',
       canUpdate: 'panel.store.kits.update',
@@ -420,6 +422,7 @@ export default {
 
     return {
       ...access,
+      serverScope,
       translations,
       realDecimals: rc.public.realDecimals,
     }
@@ -466,6 +469,14 @@ export default {
     }
   },
   computed: {
+    serverOptions() {
+      if (!this.serverScope) return this.servers
+
+      const attached = (this.kit?.servers || []).map((server) => server.id || server)
+
+      return this.servers.filter((server) => this.serverScope.includes(server.id) || attached.includes(server.id))
+    },
+
     sections() {
       const isDefault = this.translations.isDefault
 

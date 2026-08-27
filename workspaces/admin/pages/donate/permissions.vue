@@ -324,6 +324,8 @@ export default {
 
     useHead({ title: computed(() => $t('admin.menu_donate_permissions')) })
     const config = useRuntimeConfig()
+    const serverScope = useServerScope('panel.donate.read')
+
     const access = useAccess({
       canCreate: 'panel.donate.permissions.create',
       canUpdate: 'panel.donate.permissions.update',
@@ -339,6 +341,7 @@ export default {
     return {
       ...access,
       ...fields,
+      serverScope,
       translations,
       realDecimals: config.public.realDecimals,
     }
@@ -373,6 +376,14 @@ export default {
     }
   },
   computed: {
+    serverOptions() {
+      if (!this.serverScope) return this.servers
+
+      const attached = (this.permission?.servers || []).map((server) => server.id || server)
+
+      return this.servers.filter((server) => this.serverScope.includes(server.id) || attached.includes(server.id))
+    },
+
     sections() {
       const isDefault = this.translations.isDefault
 

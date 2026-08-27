@@ -345,6 +345,7 @@
   "admin.permission_revoke": "Revoking a donate permission",
   "admin.permission_revoked": "The donate permission is revoked",
   "admin.permission_selected": "Selected permission",
+  "admin.permission_servers": "Servers",
   "admin.permission_servers_all": "Every server",
   "admin.permission_updated": "Permission saved",
   "admin.permissions": "Permissions",

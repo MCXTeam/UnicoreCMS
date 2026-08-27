@@ -1,3 +1,4 @@
+import { assertServerEntities, assertServerList } from 'src/admin/roles/server-scope';
 import { assertUploadedFile, StorageManager } from '@common';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -23,11 +24,13 @@ export class KitsService {
     private categoriesRepository: Repository<Category>,
   ) {}
 
-  async find(query: PaginateQuery): Promise<Paginated<Kit>> {
+  async find(query: PaginateQuery, allowed: string[] | null = null): Promise<Paginated<Kit>> {
     const queryBuilder = this.kitsRepository
       .createQueryBuilder('kit')
       .leftJoinAndSelect('kit.servers', 'servers')
       .leftJoinAndSelect('kit.categories', 'categories');
+
+    if (allowed) queryBuilder.andWhere('servers.id IN(:...allowed)', { allowed: allowed.length ? allowed : [null] });
 
     if (query?.filter?.servers && !Array.isArray(query.filter.servers)) query.filter.servers = query.filter.servers.split(',');
 
@@ -66,7 +69,9 @@ export class KitsService {
     return this.kitsRepository.findOne({ where: { id }, relations });
   }
 
-  async create(input: KitInput) {
+  async create(input: KitInput, request?: any) {
+    await assertServerList(request, 'panel.store.kits.create', input.servers);
+
     const kit = new Kit();
 
     kit.name = input.name;
@@ -94,12 +99,14 @@ export class KitsService {
     return this.kitsRepository.save(kit);
   }
 
-  async update(id: number, input: KitInput) {
-    const kit = await this.findOne(id);
+  async update(id: number, input: KitInput, request?: any) {
+    const kit = await this.findOne(id, ['servers']);
 
     if (!kit) {
       throw new NotFoundException();
     }
+
+    await assertServerList(request, 'panel.store.kits.update', input.servers, (kit.servers || []).map((server) => server.id));
 
     kit.name = input.name;
     kit.price = currencyUtils.roundByType(input.price, SystemCurrency.REAL);
@@ -126,22 +133,27 @@ export class KitsService {
     return this.kitsRepository.save(kit);
   }
 
-  async remove(id: number) {
-    const category = await this.findOne(id);
+  async remove(id: number, request?: any) {
+    const category = await this.findOne(id, ['servers']);
 
     if (!category) {
       throw new NotFoundException();
     }
 
+    await assertServerEntities(request, 'panel.store.kits.delete', [category]);
+
     return this.kitsRepository.remove(category);
   }
 
-  async removeMany(ids: number[]) {
+  async removeMany(ids: number[], request?: any) {
     const products = await this.kitsRepository.find({
       where: {
         id: In(ids),
       },
+      relations: ['servers'],
     });
+
+    await assertServerEntities(request, 'panel.store.kits.delete.many', products);
 
     return this.kitsRepository.remove(products);
   }
