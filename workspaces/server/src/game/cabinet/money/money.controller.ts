@@ -1,7 +1,7 @@
 import { IpAddress } from '@common';
-import { Body, Controller, Get, Param, Patch, Post, Req } from '@nestjs/common';
+import { Body, Controller, ForbiddenException, Get, Param, Patch, Post, Req } from '@nestjs/common';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
-import { assertServerPermission } from 'src/admin/roles/guards/permisson.guard';
+import { assertServerPermission, matchPermission } from 'src/admin/roles/guards/permisson.guard';
 import { allowedServers } from 'src/admin/roles/server-scope';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
@@ -9,7 +9,7 @@ import { MoneyWDInput } from './dto/monet-wd.input';
 import { MoneyExchangeInput } from './dto/money-exchange.input';
 import { MoneyPayCommandInput } from './dto/money-pay-command.input';
 import { MoneyUpdateInput } from './dto/money-update.input';
-import { MoneyInput } from './dto/money.input';
+import { MoneyInput, MoneyTransferType } from './dto/money.input';
 import { MoneyService } from './money.service';
 
 @Controller('cabinet/money')
@@ -75,7 +75,8 @@ export class MoneyController {
   @Permissions(['panel.access'])
   @Patch('admin')
   async update(@Req() request: any, @Body() body: MoneyUpdateInput) {
-    await assertServerPermission(request, 'panel.users.money', body.server);
+    if (body.type === MoneyTransferType.Money) await assertServerPermission(request, 'panel.users.money', body.server);
+    else if (!(await matchPermission(['panel.users.balance.real'], request))) throw new ForbiddenException();
 
     return this.moneyService.update(body);
   }

@@ -1,3 +1,4 @@
+import { assertServerPermission } from 'src/admin/roles/guards/permisson.guard';
 import { assertFieldAccess } from 'src/admin/roles/field-permissions';
 import { assertServerEntities, assertServerList } from 'src/admin/roles/server-scope';
 import { NumberSortInput, debitUserBalance, MomentWrapper } from '@common';
@@ -154,9 +155,11 @@ export class DonatePermissionsService {
     await this.give(user, server, permission, period);
   }
 
-  async take(id: number) {
+  async take(id: number, request?: any) {
     const udp = await this.userPermissionsRepository.findOne({ where: { id }, relations: ['user', 'server'] });
     if (!udp) throw new NotFoundException();
+
+    if (request) await assertServerPermission(request, 'panel.users.donate', udp.server?.id);
 
     await this.userPermissionsRepository.remove(udp);
 

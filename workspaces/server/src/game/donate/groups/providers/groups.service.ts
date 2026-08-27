@@ -1,3 +1,4 @@
+import { assertServerPermission } from 'src/admin/roles/guards/permisson.guard';
 import { assertFieldAccess } from 'src/admin/roles/field-permissions';
 import { assertServerEntities, assertServerList } from 'src/admin/roles/server-scope';
 import { assertUploadedFile, debitUserBalance, MomentWrapper, NumberSortInput, StorageManager } from '@common';
@@ -194,9 +195,11 @@ export class DonateGroupsService {
     await this.give(user, server, group, period);
   }
 
-  async take(id: number) {
+  async take(id: number, request?: any) {
     const udg = await this.userDonatesRepository.findOne({ where: { id }, relations: ['user', 'server', 'group'] });
     if (!udg) throw new NotFoundException();
+
+    if (request) await assertServerPermission(request, 'panel.users.donate', udg.server?.id);
 
     await this.userDonatesRepository.remove(udg);
     runAfterCommit(() => this.eventsService.emitKernel('take_group', udg, udg.server?.id));

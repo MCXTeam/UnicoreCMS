@@ -310,7 +310,7 @@
     <Tabs v-if="user" value="main">
       <TabList>
         <Tab value="main">{{ $t('admin.tab_main') }}</Tab>
-        <Tab v-if="canMoney || canDonate || canGive" value="commerce">E-Commerce</Tab>
+        <Tab v-if="canBalanceReal || canBalanceBonus || canMoneyServers || canDonate || canGive" value="commerce">E-Commerce</Tab>
       </TabList>
       <TabPanels>
         <TabPanel value="main">
@@ -548,13 +548,13 @@
           </div>
         </div>
         </TabPanel>
-        <TabPanel v-if="canMoney || canDonate || canGive" value="commerce">
+        <TabPanel v-if="canBalanceReal || canBalanceBonus || canMoneyServers || canDonate || canGive" value="commerce">
         <div class="grid">
-          <div class="col-12" v-if="canMoney">
+          <div class="col-12" v-if="canBalanceReal || canBalanceBonus || canMoneyServers">
             <div class="p-4">
               <h4>{{ $t('admin.economy') }}</h4>
-              <div class="p-fluid grid">
-                <div class="col-12 md:col-6">
+              <div class="p-fluid grid" v-if="canBalanceReal || canBalanceBonus">
+                <div class="col-12 md:col-6" v-if="canBalanceReal">
                   <div class="field">
                     <label>{{ $t('admin.balance_real') }}</label>
                     <div class="grid">
@@ -572,7 +572,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="col-12 md:col-6">
+                <div class="col-12 md:col-6" v-if="canBalanceBonus">
                   <div class="field">
                     <label>{{ $t('admin.balance_virtual') }}</label>
                     <div class="grid">
@@ -591,7 +591,7 @@
                   </div>
                 </div>
               </div>
-              <DataTable :value="moneyRows" :loading="money_loading" responsiveLayout="scroll" dataKey="m.id">
+              <DataTable v-if="canMoneyServers" :value="moneyRows" :loading="money_loading" responsiveLayout="scroll" dataKey="m.id">
                 <Column field="m.server.name" :header="$t('cabinet.server')" sortable>
                   <template #body="slotProps">
                     <div class="flex align-items-center">
@@ -848,8 +848,16 @@ export default {
   },
 
   computed: {
-    canMoney() {
-      return this.hasPermission('panel.users.money')
+    canBalanceReal() {
+      return this.hasPermission('panel.users.balance.real')
+    },
+
+    canBalanceBonus() {
+      return this.hasPermission('panel.users.balance.bonus')
+    },
+
+    canMoneyServers() {
+      return this.hasPermission('panel.users.money.*')
     },
 
     canGive() {

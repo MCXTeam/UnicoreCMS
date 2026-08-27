@@ -39,7 +39,7 @@ export class VotesController {
     return this.votesService.remove(id);
   }
 
-  @Permissions(['panel.access', 'panel.users.money'])
+  @Permissions(['panel.access', 'panel.users.balance.bonus'])
   @Patch('admin')
   updateVirtual(@Body() body: VirtualCurrencyUserUpdate) {
     return this.votesService.updateVirtual(body);

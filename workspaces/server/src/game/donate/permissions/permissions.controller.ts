@@ -112,9 +112,9 @@ export class PermissionsController {
     return this.donatePermissionsService.giveByDTO(body);
   }
 
-  @Permissions(['panel.access', 'panel.users.donate'])
+  @Permissions(['panel.access', 'panel.users.donate.*'])
   @Delete('admin/:id')
-  take(@Param('id', ParseIntPipe) id: number) {
-    return this.donatePermissionsService.take(id);
+  take(@Req() request: any, @Param('id', ParseIntPipe) id: number) {
+    return this.donatePermissionsService.take(id, request);
   }
 }

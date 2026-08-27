@@ -84,6 +84,8 @@ export const PERMISSIONS = define({
   "panel.users.grant.panel": { group: "users", danger: true },
   "panel.users.twofactor.reset": { group: "users", danger: true },
   "panel.users.sessions.revoke": { group: "users" },
+  "panel.users.balance.real": { group: "users" },
+  "panel.users.balance.bonus": { group: "users" },
   "panel.users.money": { group: "users", scope: "server" },
   "panel.users.give": { group: "users", scope: "server" },
   "panel.users.donate": { group: "users", scope: "server" },

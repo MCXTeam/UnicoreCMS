@@ -145,9 +145,9 @@ export class DonateGroupsController {
     return this.donateGroupsService.giveByDTO(body);
   }
 
-  @Permissions(['panel.access', 'panel.users.donate'])
+  @Permissions(['panel.access', 'panel.users.donate.*'])
   @Delete('admin/:id')
-  take(@Param('id', ParseIntPipe) id: number) {
-    return this.donateGroupsService.take(id);
+  take(@Req() request: any, @Param('id', ParseIntPipe) id: number) {
+    return this.donateGroupsService.take(id, request);
   }
 }
