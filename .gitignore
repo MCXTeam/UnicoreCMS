@@ -59,4 +59,3 @@ license.pem
 !/modules/.gitkeep
 /themes/*
 !/themes/.gitkeep
-/examples/*/server/

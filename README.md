@@ -62,3 +62,6 @@
 ### Внешние компоненты
 - **UnicoreConnect** - **Sponge/Spigot-плагин** для двухнаправленной интеграции экономики, прав, групп, склада-покупок, банов и сбора статистики между сайтом и серверами. [Подробнее](https://docs.unicorecms.ru/docs/api/connect).
 - **UnicoreProvider** - серверный модуль **GravitLauncher** для интеграции сервисов авторизации. [Подробнее](https://docs.unicorecms.ru/docs/api/launcher).
+### Расширения
+- **Модули** - готовые модули: [формы](https://github.com/MCXTeam/UnicoreCMS-modules/tree/main/forms) (заявки в команду, жалобы, обратная связь), [страница команды](https://github.com/MCXTeam/UnicoreCMS-modules/tree/main/team) и [демо-модуль](https://github.com/MCXTeam/UnicoreCMS-modules/tree/main/demo) с примерами. Ставятся папкой в `modules/`, править код CMS не нужно. Все они лежат в отдельном репозитории [UnicoreCMS-modules](https://github.com/MCXTeam/UnicoreCMS-modules).
+- **Темы** - полноценный слой вёрстки сайта или панели: своя разметка, компоненты, палитра и подмена страниц ядра. Ставятся папкой в `themes/`, лежат в отдельном репозитории [UnicoreCMS-themes](https://github.com/MCXTeam/UnicoreCMS-themes). [Подробнее](https://docs.unicorecms.ru/docs/extensions).

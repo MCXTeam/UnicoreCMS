@@ -117,7 +117,6 @@ export class InstallService {
       const theme = manifest as ThemeManifest;
 
       if (theme.tokens) required.push({ relative: theme.tokens, directory: false });
-      if (theme.primevue) required.push({ relative: theme.primevue, directory: false });
 
       for (const file of Object.values(theme.pages?.replace || {})) required.push({ relative: file, directory: false });
     }

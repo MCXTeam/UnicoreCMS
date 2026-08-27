@@ -1,6 +1,5 @@
 packages:
   - 'workspaces/*'
-  - 'examples/*'
 
 nodeLinker: hoisted
 engineStrict: true
