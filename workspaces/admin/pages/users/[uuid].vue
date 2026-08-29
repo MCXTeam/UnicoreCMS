@@ -861,11 +861,11 @@ export default {
     },
 
     canGive() {
-      return this.hasPermission('panel.users.give')
+      return this.hasPermission('panel.users.give.*')
     },
 
     canDonate() {
-      return this.hasPermission('panel.users.donate')
+      return this.hasPermission('panel.users.donate.*')
     },
 
     serverDonateGroups() {
