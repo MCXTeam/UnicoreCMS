@@ -10,11 +10,9 @@ import { SettingsModule } from 'src/game/cabinet/settings/settings.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/admin/users/entities/user.entity';
 import { RefreshToken } from '../entities/refresh-token.entity';
-import { ConfigModule } from 'src/admin/config/config.module';
 
 @Module({
   imports: [
-    ConfigModule,
     UsersModule,
     AuthModule,
     SettingsModule,

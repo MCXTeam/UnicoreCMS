@@ -20,8 +20,6 @@ import { Repository } from 'typeorm';
 import { GravitJoinServer } from './dto/inputs/gravit-join-server.input';
 import { GravitCheckServer } from './dto/inputs/gravit-check-server.input';
 import { RefreshToken } from '../entities/refresh-token.entity';
-import { ConfigService } from 'src/admin/config/config.service';
-import { ConfigField } from 'src/admin/config/config.enum';
 
 @Injectable()
 export class GravitService {
@@ -30,7 +28,6 @@ export class GravitService {
     private authService: AuthService,
     private tokensService: TokensService,
     private twoFactorService: TwoFactorService,
-    private configService: ConfigService,
     private jwt: JwtService,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
@@ -75,22 +72,10 @@ export class GravitService {
     return new GravitSessionDto(user);
   }
 
-  private async activated(user: User): Promise<boolean> {
-    if (user.activated || user.superuser) return true;
-
-    const cfg = await this.configService.load();
-
-    return !cfg[ConfigField.EmailActivationRequired];
-  }
-
-  private assertPlayable(user: User) {
-    if (isBanActive(user.ban)) throw new HttpException({ error: GravitError.UserBlocked }, HttpStatus.FORBIDDEN);
-  }
-
   private async assertAllowed(user: User) {
-    if (!(await this.activated(user))) throw new HttpException({ error: GravitError.UserNotActivated }, HttpStatus.FORBIDDEN);
+    if (!(await this.authService.isActivated(user))) throw new HttpException({ error: GravitError.UserNotActivated }, HttpStatus.FORBIDDEN);
 
-    this.assertPlayable(user);
+    if (isBanActive(user.ban)) throw new HttpException({ error: GravitError.UserBlocked }, HttpStatus.FORBIDDEN);
   }
 
   async authorize(input: GravitAuthorize) {

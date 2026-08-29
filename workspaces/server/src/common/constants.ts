@@ -4,6 +4,7 @@ export const ASCII_NAME =
 export const TOTP_WINDOW = 1;
 export const TOTP_CODE_MAX_LENGTH = 10;
 export const TOTP_STEP_SECONDS = 30;
+export const REQUIRE_2FA = 'require2fa';
 
 export const REFRESH_ROTATION_LEEWAY_MS = 30_000;
 

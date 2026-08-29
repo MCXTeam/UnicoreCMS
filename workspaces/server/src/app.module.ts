@@ -17,6 +17,7 @@ import { EventsModule } from './events/events.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ormconfig } from './ormconfig';
 import { GravitModule } from './auth/gravit/gravit.module';
+import { GmlModule } from './auth/gml/gml.module';
 import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { CronModule } from './cron/cron.module';
@@ -90,6 +91,7 @@ export class AppLoggerMiddleware implements NestMiddleware {
     ScheduleModule.forRoot(),
     AuthModule,
     GravitModule,
+    GmlModule,
     AdminModule,
     EventsModule,
     GameModule,

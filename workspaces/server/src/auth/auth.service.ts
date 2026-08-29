@@ -1,4 +1,5 @@
 import { ConflictException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { REQUIRE_2FA } from '@common';
 import { events } from 'unicore-api';
 import { User } from 'src/admin/users/entities/user.entity';
 import { UsersService } from 'src/admin/users/users.service';
@@ -44,6 +45,14 @@ export class AuthService {
     return valid;
   }
 
+  async isActivated(user: User): Promise<boolean> {
+    if (user.activated || user.superuser) return true;
+
+    const cfg = await this.configService.load();
+
+    return !cfg[ConfigField.EmailActivationRequired];
+  }
+
   async login(body: LoginInput, agent?: string, ip?: string): Promise<AuthenticatedDto> {
     const { username_or_email, password } = body;
     const user = await this.usersService.getByUsernameOrEmail(username_or_email, ['skin', 'cloak', 'roles']);
@@ -59,7 +68,7 @@ export class AuthService {
     }
 
     if (user.two_factor_enabled) {
-      if (!body.totp) throw new UnauthorizedException('require2fa');
+      if (!body.totp) throw new UnauthorizedException(REQUIRE_2FA);
 
       if (!(await this.twoFactorService.verify(user, body.totp))) throw new UnauthorizedException();
     }
