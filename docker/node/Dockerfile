@@ -34,7 +34,7 @@ RUN corepack enable \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /usr/local/app
-COPY --from=builder /usr/local/app .
+COPY --from=builder --chown=node:node /usr/local/app .
 
 RUN mkdir -p storage logs && chown -R node:node storage logs
 
