@@ -66,6 +66,7 @@ export class ServersService {
     server.slogan = input.slogan;
     server.description = input.description;
     server.content = input.content;
+    server.wipe = input.wipe ?? false;
     server.table = (input.table ?? []).map((row, index) => ({ ...row, priority: index } as ServerTable));
     server.instances = (input.instances ?? []).map((instance, index) => ({ ...instance, priority: index } as ServerInstance));
 
@@ -104,6 +105,7 @@ export class ServersService {
     server.slogan = input.slogan;
     server.description = input.description;
     server.content = input.content;
+    server.wipe = input.wipe ?? false;
     server.table = (input.table ?? []).map((row, index) => ({ ...row, priority: index } as ServerTable));
     server.instances = (input.instances ?? []).map((instance, index) => ({ ...instance, priority: index } as ServerInstance));
 
