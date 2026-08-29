@@ -9,7 +9,7 @@ export const useNavigation = (place: NavPlace) => {
   const config = computed(() => configStore.config)
 
   return computed<NavItem[]>(() =>
-    [...CORE_NAVIGATION, ...((clientNav(place) || []) as unknown as NavItem[])]
+    [...CORE_NAVIGATION, ...((clientNav(place) || []) as unknown as NavItem[]).map((item) => ({ ...item, module: true }))]
       .filter((item) => item.places.includes(place))
       .filter((item) => {
         if (item.when === 'auth') return auth.loggedIn

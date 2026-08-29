@@ -12,13 +12,39 @@
               <h2 class="ms-3 my-0 d-none d-md-block">{{ $pub.sitename }}</h2>
             </NuxtLink>
             <template v-for="item in navbar" :key="item.key">
-              <a v-if="item.href" :href="item.href" target="_blank" class="vs-navbar__item d-none d-lg-block">
+              <a v-if="!item.module && item.href" :href="item.href" target="_blank" class="vs-navbar__item d-none d-lg-block">
                 <i :class="item.icon"></i> {{ $t(item.label) }}
               </a>
-              <NuxtLink v-else :to="item.to" class="vs-navbar__item d-none d-lg-block">
+              <NuxtLink
+                v-else-if="!item.module"
+                :to="item.to"
+                class="vs-navbar__item d-none d-lg-block"
+                :class="{ 'router-link-active': isActive(item) }"
+              >
                 <i :class="item.icon"></i> {{ $t(item.label) }}
               </NuxtLink>
             </template>
+
+            <div v-if="moduleNav.length" ref="moreWrap" class="navbar-more d-none d-lg-block">
+              <button class="vs-navbar__item navbar-more__btn" :aria-expanded="moreOpen" @click.stop="moreOpen = !moreOpen">
+                <i class="bx bx-dots-horizontal-rounded"></i> {{ $t('header.more') }}
+                <i class="bx bx-chevron-down navbar-more__chevron" :class="{ open: moreOpen }"></i>
+              </button>
+              <Transition name="more-fade">
+                <div v-if="moreOpen" class="navbar-more__menu">
+                  <template v-for="item in moduleNav" :key="item.key">
+                    <a v-if="item.href" :href="item.href" target="_blank" class="navbar-more__item" @click="moreOpen = false">
+                      <i :class="item.icon"></i>
+                      <span>{{ $t(item.label) }}</span>
+                    </a>
+                    <NuxtLink v-else :to="item.to" class="navbar-more__item" @click="moreOpen = false">
+                      <i :class="item.icon"></i>
+                      <span>{{ $t(item.label) }}</span>
+                    </NuxtLink>
+                  </template>
+                </div>
+              </Transition>
+            </div>
           </div>
           <div class="d-flex align-items-center">
             <div class="d-flex align-items-center" v-if="$auth.loggedIn">
@@ -133,21 +159,44 @@ const navbar = useNavigation('navbar')
 const cabinetNav = useNavigation('cabinet')
 const sidebarNav = computed(() => [...navbar.value, ...cabinetNav.value])
 
+const moduleNav = computed(() => navbar.value.filter((item) => item.module))
+
+const moreWrap = ref(null)
+const moreOpen = ref(false)
 const activeSidebar = ref(false)
 const scrolled = ref(false)
 
+function isActive(item) {
+  return item.to && (item.to === '/' ? route.path === '/' : route.path.startsWith(item.to))
+}
+
 function onScroll() {
   scrolled.value = window.scrollY > 0
+}
+
+function onGlobalClick(event) {
+  if (!moreOpen.value) return
+  if (moreWrap.value?.contains(event.target)) return
+
+  moreOpen.value = false
+}
+
+function onKeydown(event) {
+  if (event.key === 'Escape') moreOpen.value = false
 }
 
 onMounted(() => {
   $socket?.emit('servers/online', {}, (res) => ioStore.setServersOnline(res))
   onScroll()
   window.addEventListener('scroll', onScroll, { passive: true })
+  document.addEventListener('click', onGlobalClick)
+  document.addEventListener('keydown', onKeydown)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', onScroll)
+  document.removeEventListener('click', onGlobalClick)
+  document.removeEventListener('keydown', onKeydown)
 })
 
 watch(
@@ -162,6 +211,82 @@ watch(
 </script>
 
 <style scoped lang="scss">
+.navbar-more {
+  position: relative;
+  display: none;
+
+  @media (min-width: 992px) {
+    display: block;
+  }
+}
+
+.navbar-more__btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+}
+
+.navbar-more__chevron {
+  font-size: 0.9rem;
+  transition: transform 0.15s;
+
+  &.open {
+    transform: rotate(180deg);
+  }
+}
+
+.navbar-more__menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 220px;
+  padding: 0.4rem;
+  border: 1px solid var(--p-content-border-color);
+  border-radius: 14px;
+  background: var(--vs-theme-layout);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
+  z-index: 300;
+}
+
+.navbar-more__item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 10px;
+  white-space: nowrap;
+  color: var(--vs-text);
+  text-decoration: none !important;
+  transition: background 0.15s;
+
+  i {
+    font-size: 1.1rem;
+    color: var(--p-primary-color);
+  }
+
+  &:hover {
+    background: rgba(var(--vs-text), 0.06);
+  }
+}
+
+.more-fade-enter-active,
+.more-fade-leave-active {
+  transition:
+    opacity 0.15s,
+    transform 0.15s;
+}
+
+.more-fade-enter-from,
+.more-fade-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -4px);
+}
+
 .locale-select.p-select {
   background: transparent;
   border-color: transparent;
