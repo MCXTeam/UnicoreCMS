@@ -248,20 +248,28 @@ function onPage(event: { page: number }) {
   products.meta.currentPage = event.page + 1
 }
 
+const lastFilters = ref<StoreFilters>({})
+
 watch(
   () => products.meta.currentPage,
   () => {
-    catalog()
+    catalog(lastFilters.value)
   },
 )
 
 watch(
   () => ui.storeFilters,
-  async (filters) => {
+  (filters) => {
     if (!filters) return
-    try {
-      await catalog(filters)
-    } catch {}
+
+    lastFilters.value = filters
+
+    if (products.meta.currentPage === 1) {
+      catalog(filters)
+      return
+    }
+
+    products.meta.currentPage = 1
   },
 )
 

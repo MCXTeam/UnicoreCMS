@@ -6,7 +6,7 @@
 
     <h3 class="text-uppercase">{{ $t('store.filters') }}</h3>
     <div class="store-filters">
-      <InputText :disabled="loading" class="mw-100 mt-3" :placeholder="$t('store.search')" v-model="searchLocal" />
+      <InputText :disabled="loading" class="mw-100 mt-3" :placeholder="$t('store.search')" v-model="searchLocal" @keyup.enter="update()" />
       <h5 class="text-uppercase mt-3 mb-0">{{ $t('store.category') }}</h5>
       <Select :disabled="loading" v-model="categoryLocal" :options="categoryOptions" optionLabel="label" optionValue="value" class="mt-1" />
       <h5 class="text-uppercase mt-3 mb-0">{{ $t('store.sorting') }}</h5>
