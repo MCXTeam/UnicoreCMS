@@ -160,3 +160,26 @@ watch(
   },
 )
 </script>
+
+<style scoped lang="scss">
+.locale-select.p-select {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.locale-select.p-select:not(.p-disabled):hover,
+.locale-select.p-select.p-focus {
+  border-color: var(--p-content-border-color);
+}
+
+.locale-select :deep(.p-select-label) {
+  padding: 0.3rem 0.4rem;
+  color: var(--p-text-muted-color);
+}
+
+.locale-select :deep(.p-select-dropdown) {
+  width: 1.75rem;
+  color: var(--p-text-muted-color);
+}
+</style>
