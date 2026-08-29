@@ -34,10 +34,7 @@ export interface PublicConfig {
 }
 
 export const publicConfig: PublicConfig = {
-  baseurl: env
-    .get(PUBLIC_ENV_KEY.baseurl)
-    .default("http://127.0.0.1:3000")
-    .asString(),
+  baseurl: env.get(PUBLIC_ENV_KEY.baseurl).default("").asString(),
   timezone: env
     .get(PUBLIC_ENV_KEY.timezone)
     .default(DEFAULT_TIMEZONE)
