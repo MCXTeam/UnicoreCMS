@@ -153,7 +153,7 @@ export class GiftsService {
     gift.promocode = input.promocode;
     gift.type = input.type;
     gift.max_activations = input.max_activations;
-    gift.expires = this.moment(input.expires).utc().toDate();
+    gift.expires = input.expires ? this.moment(input.expires).utc().toDate() : null;
 
     gift.product = null;
     gift.kit = null;
@@ -205,7 +205,7 @@ export class GiftsService {
     gift.promocode = input.promocode;
     gift.type = input.type;
     gift.max_activations = input.max_activations;
-    gift.expires = this.moment(input.expires).utc().toDate();
+    gift.expires = input.expires ? this.moment(input.expires).utc().toDate() : null;
 
     gift.product = null;
     gift.kit = null;
