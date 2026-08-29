@@ -42,6 +42,13 @@
           <Column selectionMode="multiple" :style="{ width: '3rem' }"></Column>
           <Column sortable field="id" header="ID" :style="{ width: '8rem' }"></Column>
           <Column field="promocode" :header="$t('admin.promocode')" sortable></Column>
+          <Column field="issued_by" :header="$t('admin.gift_source')" sortable>
+            <template #body="slotProps">
+              {{
+                slotProps.data.issued_by ? `${$t('admin.gift_source_player')} ${slotProps.data.issued_by}` : $t('admin.gift_source_panel')
+              }}
+            </template>
+          </Column>
           <Column field="type" :header="$t('admin.type')" sortable>
             <template #body="slotProps">
               {{ types.find((type) => type.value == slotProps.data.type).name }}

@@ -54,10 +54,15 @@ export class GiftsService {
     private cartService: CartService,
   ) {}
 
-  find(): Promise<Gift[]> {
-    const qb = this.giftsRepository.createQueryBuilder('gift').loadRelationCountAndMap('gift.activations', 'gift.activations').getMany();
+  async find(): Promise<unknown[]> {
+    const gifts = await this.giftsRepository
+      .createQueryBuilder('gift')
+      .loadRelationCountAndMap('gift.activations', 'gift.activations')
+      .leftJoin('gift.issued_by', 'issuer')
+      .addSelect(['issuer.uuid', 'issuer.username'])
+      .getMany();
 
-    return qb;
+    return gifts.map(({ issued_by, ...gift }) => ({ ...gift, issued_by: issued_by?.username ?? null }));
   }
 
   findOne(id: number, relations?: string[]): Promise<Gift> {
