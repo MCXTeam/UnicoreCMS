@@ -42,7 +42,8 @@ export class DiscordChannel implements WebhookChannel {
   }
 
   async publish(webhook: Webhook, post: NewsPost): Promise<DeliveryResult> {
-    const message = await this.client(webhook).send({ embeds: [this.embed(post)] });
+    const content = webhook.target ? `<@&${webhook.target}>` : undefined;
+    const message = await this.client(webhook).send({ content, embeds: [this.embed(post)] });
 
     return { messageId: message.id };
   }

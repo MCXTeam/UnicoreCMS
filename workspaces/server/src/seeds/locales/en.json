@@ -621,6 +621,8 @@
   "admin.webhook_request_telegram": "Telegram",
   "admin.webhook_request_vk": "VK",
   "admin.webhook_target": "Publishing channel",
+  "admin.webhook_target_discord": "Role mention",
+  "admin.webhook_target_discord_hint": "Discord role ID: the role gets pinged when news is published. Editing a news post does not ping again.",
   "admin.webhook_target_telegram": "@channel name or numeric ID. The bot must be a channel admin.",
   "admin.webhook_target_vk": "Community ID. The VK_APIKEY token needs the wall permission.",
   "admin.webhook_update_on_edit": "Update the post when the news is edited",

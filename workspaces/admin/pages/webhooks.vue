@@ -166,6 +166,15 @@
                   <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
                 </div>
               </VeeField>
+              <VeeField v-if="isDiscord" v-model="webhook.target" name="target" v-slot="{ value, handleChange, handleBlur }">
+                <div class="field">
+                  <label class="flex align-items-center gap-1">
+                    <span>{{ $t('admin.webhook_target_discord') }}</span>
+                    <i v-tooltip.right="$t('admin.webhook_target_discord_hint')" class="pi pi-question-circle text-color-secondary" />
+                  </label>
+                  <InputText :modelValue="value" @update:modelValue="handleChange" @blur="handleBlur" placeholder="1234567890123456789" />
+                </div>
+              </VeeField>
             </template>
 
             <template #publish>
@@ -249,11 +258,15 @@ export default {
     needsTarget() {
       return webhookChannelNeeds(this.webhook.request, 'target')
     },
+
+    isDiscord() {
+      return this.webhook.request === 'discord'
+    },
   },
   watch: {
     'webhook.request'() {
       if (!this.needsUrl) this.webhook.url = null
-      if (!this.needsTarget) this.webhook.target = null
+      if (!this.needsTarget && !this.isDiscord) this.webhook.target = null
     },
   },
   data() {

@@ -89,14 +89,17 @@ export class WebhooksService {
     wh.name = input.name;
     wh.request = input.request;
     wh.type = input.type;
-    wh.url = keeps('url') ? input.url ?? null : null;
-    wh.target = keeps('target') ? input.target ?? null : null;
+    wh.url = keeps('url') ? (input.url ?? null) : null;
+    wh.target = keeps('target') || input.request === WebhookRequestType.Discord ? (input.target ?? null) : null;
     wh.auto_publish = input.auto_publish ?? true;
     wh.update_on_edit = input.update_on_edit ?? true;
 
     if (fields.includes('url') && !wh.url) throw new BadRequestException(`Каналу «${input.request}» нужен адрес вебхука`);
 
     if (fields.includes('target') && !wh.target) throw new BadRequestException(`Каналу «${input.request}» нужен канал публикации`);
+
+    if (input.request === WebhookRequestType.Discord && wh.target && !/^\d{17,25}$/.test(wh.target))
+      throw new BadRequestException('Для упоминания роли нужен числовой ID роли Discord');
   }
 
   create(input: WebhookInput): Promise<Webhook> {
