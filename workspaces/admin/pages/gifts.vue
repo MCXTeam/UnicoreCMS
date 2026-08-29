@@ -49,11 +49,23 @@
           </Column>
           <Column field="type" :header="$t('admin.uses')" sortable>
             <template #body="slotProps">
-              {{
-                slotProps.data.max_activations
-                  ? `${slotProps.data.activations}/${slotProps.data.max_activations}`
-                  : `${slotProps.data.activations}/∞`
-              }}
+              <Button
+                v-if="slotProps.data.activations"
+                :label="
+                  slotProps.data.max_activations
+                    ? `${slotProps.data.activations}/${slotProps.data.max_activations}`
+                    : `${slotProps.data.activations}/∞`
+                "
+                class="p-button-text p-button-sm"
+                @click="openStats(slotProps.data)"
+              />
+              <span v-else>
+                {{
+                  slotProps.data.max_activations
+                    ? `${slotProps.data.activations}/${slotProps.data.max_activations}`
+                    : `${slotProps.data.activations}/∞`
+                }}
+              </span>
             </template>
           </Column>
           <Column field="type" :header="$t('admin.active_until')" sortable>
@@ -314,6 +326,20 @@
             </template>
           </SectionedDialog>
         </VeeForm>
+
+        <Dialog v-model:visible="statsDialog" modal :header="$t('admin.gift_stats')" :style="{ width: '420px' }">
+          <DataTable :value="stats" :loading="statsLoading" responsiveLayout="scroll" dataKey="userUuid">
+            <Column field="username" :header="$t('admin.user')"></Column>
+            <Column field="created" :header="$t('admin.date')">
+              <template #body="slotProps">
+                {{ $moment(slotProps.data.created).format('DD.MM.YYYY, HH:mm') }}
+              </template>
+            </Column>
+            <template #empty>
+              <p class="m-0 text-center">{{ $t('admin.gift_stats_empty') }}</p>
+            </template>
+          </DataTable>
+        </Dialog>
       </div>
     </div>
   </div>
@@ -347,6 +373,9 @@ export default {
       loading: true,
       selected: null,
       updateMode: false,
+      statsDialog: false,
+      statsLoading: false,
+      stats: null,
       gift: {
         id: null,
         promocode: null,
@@ -407,6 +436,13 @@ export default {
       this.periods = await this.$api.get('/donates/periods').then((res) => res.data)
       this.servers = await this.$api.get('/servers').then((res) => res.data)
       this.loading = false
+    },
+
+    async openStats(gift) {
+      this.statsDialog = true
+      this.statsLoading = true
+      this.stats = await this.$api.get(`/cabinet/gifts/${gift.id}/activations`).then((res) => res.data)
+      this.statsLoading = false
     },
     async searchProduct(event) {
       this.products = await this.$api

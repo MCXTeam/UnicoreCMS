@@ -66,6 +66,12 @@ export class GiftsController {
     return server;
   }
 
+  @Permissions(['panel.access', 'panel.gifts.read'])
+  @Get(':id/activations')
+  activations(@Param('id', ParseIntPipe) id: number) {
+    return this.giftsService.activations(id);
+  }
+
   @Permissions(['panel.access', 'panel.gifts.update'])
   @Patch(':id')
   update(@Param('id', ParseIntPipe) id: number, @Body() body: GiftInput) {

@@ -64,6 +64,16 @@ export class GiftsService {
     return this.giftsRepository.findOne({ where: { id }, relations });
   }
 
+  async activations(id: number) {
+    const rows = await this.giftsActivationsRepository.find({
+      where: { gift: { id } },
+      relations: ['user'],
+      order: { created: 'DESC' },
+    });
+
+    return rows.map((row) => ({ username: row.user?.username ?? row.userUuid, created: row.created }));
+  }
+
   @Transactional()
   async activate(user: User, promocode: string) {
     const gift = await this.giftsRepository.findOne({ where: { promocode }, relations: ['activations'] });
