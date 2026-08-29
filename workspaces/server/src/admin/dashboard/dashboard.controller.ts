@@ -30,4 +30,10 @@ export class DashboardController {
   async revenue(@Req() request: any, @Query() query: RevenueQuery) {
     return this.dahboardService.revenue(query, await allowedServers(request, 'panel.revenue.read'));
   }
+
+  @Permissions(['panel.access', 'panel.revenue.read.*'])
+  @Get('revenue/items')
+  async revenueItems(@Req() request: any, @Query() query: RevenueQuery) {
+    return this.dahboardService.revenueItems(query, await allowedServers(request, 'panel.revenue.read'));
+  }
 }

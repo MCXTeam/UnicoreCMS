@@ -28,3 +28,12 @@ export interface RevenueReport {
   rows: RevenueRow[];
   total: Omit<RevenueRow, 'server' | 'name'>;
 }
+
+export interface RevenueItem {
+  name: string;
+  type: string;
+  server: string | null;
+  count: number;
+  real: number;
+  virtual: number;
+}

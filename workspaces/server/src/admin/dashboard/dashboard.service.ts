@@ -12,6 +12,7 @@ import { History } from 'src/game/cabinet/history/entities/history.entity';
 import { HistoryGroupType, HistoryType } from 'src/game/cabinet/history/enums/history-type.enum';
 import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
 import { RevenueQuery, RevenueReport, RevenueRow } from './dto/revenue.dto';
+import { RevenueItem } from './dto/revenue.dto';
 import { Payment } from 'src/payment/entities/payment.entity';
 import { PaymentStatuses } from 'src/payment/enums/payment-statuses.enum';
 import { StatsInterface } from './interfaces/stats.inteface';
@@ -33,9 +34,60 @@ export class DashboardService {
     private onlineService: OnlineService,
   ) {}
 
+  async revenueItems(query: RevenueQuery, allowed: string[] | null = null): Promise<RevenueItem[]> {
+    const from = query.from
+      ? this.moment(query.from).utc().startOf('day')
+      : this.moment()
+          .utc()
+          .subtract(DASHBOARD_MONTH_DAYS - 1, 'day')
+          .startOf('day');
+    const to = query.to ? this.moment(query.to).utc().endOf('day') : this.moment().utc().endOf('day');
+
+    const rows = await this.historyRepository
+      .createQueryBuilder('history')
+      .leftJoin('history.product', 'product')
+      .leftJoin('history.kit', 'kit')
+      .leftJoin('history.donate_group', 'donateGroup')
+      .leftJoin('history.donate_permission', 'donatePermission')
+      .leftJoin('history.server', 'server')
+      .select('COALESCE(product.name, kit.name, donateGroup.name, donatePermission.name)', 'name')
+      .addSelect('history.type', 'type')
+      .addSelect('MAX(server.name)', 'server')
+      .addSelect('COUNT(*)', 'count')
+      .addSelect('COALESCE(SUM(history.real_spent), 0)', 'real')
+      .addSelect('COALESCE(SUM(history.virtual_spent), 0)', 'virtual')
+      .where('history.type IN (:...types)', { types: HistoryGroupType.Purchase })
+      .andWhere('history.created BETWEEN :from AND :to', { from: from.toDate(), to: to.toDate() })
+      .andWhere(allowed ? 'history.server_id IN(:...allowed)' : '1 = 1', { allowed: allowed?.length ? allowed : [null] })
+      .setParameters({
+        product: HistoryType.ProductPurchase,
+        kit: HistoryType.KitPurchase,
+        group: HistoryType.DonateGroupPurchase,
+        permission: HistoryType.DonatePermissionPurchase,
+      })
+      .groupBy('name')
+      .addGroupBy('history.type')
+      .orderBy('count', 'DESC')
+      .limit(20)
+      .getRawMany();
+
+    return rows.map((row) => ({
+      name: row.name ?? '—',
+      type: row.type,
+      server: row.server ?? null,
+      count: Number(row.count),
+      real: currencyUtils.roundByType(Number(row.real), SystemCurrency.REAL),
+      virtual: currencyUtils.roundByType(Number(row.virtual), SystemCurrency.VIRTAUL),
+    }));
+  }
 
   async revenue(query: RevenueQuery, allowed: string[] | null = null): Promise<RevenueReport> {
-    const from = query.from ? this.moment(query.from).utc().startOf('day') : this.moment().utc().subtract(DASHBOARD_MONTH_DAYS - 1, 'day').startOf('day');
+    const from = query.from
+      ? this.moment(query.from).utc().startOf('day')
+      : this.moment()
+          .utc()
+          .subtract(DASHBOARD_MONTH_DAYS - 1, 'day')
+          .startOf('day');
     const to = query.to ? this.moment(query.to).utc().endOf('day') : this.moment().utc().endOf('day');
 
     const rows = await this.historyRepository
@@ -284,7 +336,10 @@ export class DashboardService {
     return result;
   }
 
-  async stats(sections: DashboardStatSection[] = DASHBOARD_STAT_SECTIONS, purchaseServers: string[] | null = null): Promise<StatsInterface> {
+  async stats(
+    sections: DashboardStatSection[] = DASHBOARD_STAT_SECTIONS,
+    purchaseServers: string[] | null = null,
+  ): Promise<StatsInterface> {
     const online = await this.onlineService.find();
     const allowed = new Set(sections);
 
