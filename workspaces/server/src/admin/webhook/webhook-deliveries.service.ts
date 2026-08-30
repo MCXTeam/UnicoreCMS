@@ -121,7 +121,7 @@ export class WebhookDeliveriesService {
 
     const response = await channel.publish(webhook, { ...post, text: htmlToSocial(post.text, channel.format) });
 
-    return response.status;
+    return response.code ?? 0;
   }
 
   async enqueueNews(news: News, mode: PublishMode = PublishMode.Auto, selected?: number[]): Promise<WebhookDelivery[]> {
