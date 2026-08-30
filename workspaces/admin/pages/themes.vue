@@ -1,5 +1,6 @@
 <template>
   <div class="grid">
+    <RebuildDialog v-model:visible="rebuildDialog" />
     <div v-for="section in sections" :key="section.side" class="col-12">
       <div class="card">
         <DataTable :value="section.themes" :loading="loading" responsiveLayout="scroll" dataKey="id">
@@ -8,6 +9,7 @@
               <h5 class="m-0">{{ $t(section.title) }}</h5>
               <div class="flex align-items-center">
                 <ExtensionInstall v-if="canManage" @installed="load()" />
+                <Button :label="$t('admin.rebuild')" icon="pi pi-sync" class="p-button-text" @click="rebuildDialog = true" />
                 <Button :label="$t('admin.refresh')" icon="pi pi-refresh" class="p-button-text" @click="load()" />
               </div>
             </div>
@@ -97,6 +99,7 @@ export default {
     return {
       themes: [],
       locked: { client: false, admin: false },
+      rebuildDialog: false,
       loading: true,
     }
   },
