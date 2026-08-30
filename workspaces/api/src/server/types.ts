@@ -140,7 +140,9 @@ export interface WebhookTarget {
 export interface WebhooksApi {
   channels(): string[]
   targets(channel?: string): Promise<WebhookTarget[]>
+  list(): Promise<WebhookTarget[]>
   send(channel: string, post: WebhookPost): Promise<number>
+  sendTo(id: number, post: WebhookPost): Promise<number>
 }
 
 export interface MailApi {

@@ -300,8 +300,20 @@ export class ApiHostService implements OnApplicationBootstrap, OnApplicationShut
             .filter((target) => !channel || target.request === channel)
             .map((target) => ({ id: target.id, name: target.name, channel: String(target.request) }));
         },
+        list: async () => {
+          const targets = await this.webhookDeliveries.allTargets();
+
+          return targets.map((target) => ({ id: target.id, name: target.name, channel: String(target.request) }));
+        },
         send: (channel, post) =>
           this.webhookDeliveries.broadcast(channel, {
+            title: post.title,
+            text: post.description,
+            url: post.url,
+            image: post.image || undefined,
+          }),
+        sendTo: (id, post) =>
+          this.webhookDeliveries.deliverById(id, {
             title: post.title,
             text: post.description,
             url: post.url,

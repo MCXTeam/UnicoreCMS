@@ -13,6 +13,12 @@ export const WebhookMapper = [
     description: 'admin.webhook_event_vknews_created',
     supports: [WebhookRequestType.Discord, WebhookRequestType.JSON],
   },
+
+  {
+    id: WebhookType.Manual,
+    description: 'admin.webhook_event_manual',
+    supports: [WebhookRequestType.Discord, WebhookRequestType.Telegram, WebhookRequestType.VK, WebhookRequestType.JSON],
+  },
 ];
 
 export const WEBHOOK_URL_REQUESTS = [WebhookRequestType.Discord, WebhookRequestType.JSON];

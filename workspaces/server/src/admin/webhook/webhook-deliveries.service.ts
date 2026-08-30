@@ -106,6 +106,24 @@ export class WebhookDeliveriesService {
     return this.webhooksRepository.find({ where: { type: WebhookType.NewsCreated }, order: { id: 'ASC' } });
   }
 
+  allTargets(): Promise<Webhook[]> {
+    return this.webhooksRepository.find({ order: { id: 'ASC' } });
+  }
+
+  async deliverById(id: number, post: NewsPost): Promise<number> {
+    const webhook = await this.webhooksRepository.findOneBy({ id });
+
+    if (!webhook) throw new Error(`Вебхук ${id} не найден`);
+
+    const channel = this.channel(webhook.request as WebhookRequestType);
+
+    if (!channel) throw new Error(`Канал ${webhook.request} недоступен`);
+
+    const response = await channel.publish(webhook, { ...post, text: htmlToSocial(post.text, channel.format) });
+
+    return response.status;
+  }
+
   async enqueueNews(news: News, mode: PublishMode = PublishMode.Auto, selected?: number[]): Promise<WebhookDelivery[]> {
     const webhooks = await this.targets();
     const queued: WebhookDelivery[] = [];
