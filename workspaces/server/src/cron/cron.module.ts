@@ -19,6 +19,10 @@ import { CartItem } from 'src/game/store/cart/entities/cart-item.entity';
 import { Payment } from 'src/payment/entities/payment.entity';
 import { CartTasks } from './tasks/cart.tasks';
 import { DonateTasks } from './tasks/donate.tasks';
+import { DonateGroup } from 'src/game/donate/groups/entities/donate-group.entity';
+import { DonatePermission } from 'src/game/donate/permissions/entities/donate-permission.entity';
+import { Role } from 'src/admin/roles/entities/role.entity';
+import { DonateWebRoleService } from 'src/game/donate/web-role.service';
 import { EmailTasks } from './tasks/email.tasks';
 import { HistoryTasks } from './tasks/history.tasks';
 import { OnlineTasks } from './tasks/online.tasks';
@@ -42,6 +46,9 @@ import { VoteGift } from 'src/game/cabinet/votes/entities/vote-gift.entity';
       CartItemKit,
       UsersDonateGroup,
       UsersDonatePermission,
+      DonateGroup,
+      DonatePermission,
+      Role,
       Payment,
       Referal,
       User,
@@ -59,6 +66,7 @@ import { VoteGift } from 'src/game/cabinet/votes/entities/vote-gift.entity';
     WebhooksModule,
   ],
   providers: [
+    DonateWebRoleService,
     TokenTasks,
     HistoryTasks,
     OnlineTasks,

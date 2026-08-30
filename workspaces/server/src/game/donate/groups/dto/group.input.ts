@@ -65,6 +65,11 @@ export class GroupInput {
   @IsPlayerPerm({ each: true })
   web_perms: string[];
 
+  @IsOptional()
+  @IsString()
+  @MaxLength(64)
+  web_role_id?: string;
+
   @IsDefined()
   @IsArray()
   @ArrayMaxSize(BULK_ITEMS_MAX)

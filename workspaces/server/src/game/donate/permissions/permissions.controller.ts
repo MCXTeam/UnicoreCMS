@@ -26,10 +26,7 @@ export class PermissionsController {
     return this.donatePermissionsService.sort(body);
   }
 
-  @Permissions([
-    ['panel.donate.read.*', 'panel.users.donate.*'],
-    { or: true },
-  ])
+  @Permissions([['panel.donate.read.*', 'panel.users.donate.*'], { or: true }])
   @Get()
   async find(@Req() request: any) {
     return this.donatePermissionsService.find(['servers', 'kits', 'periods'], await allowedServers(request, 'panel.donate.read'));
@@ -68,10 +65,7 @@ export class PermissionsController {
     return this.donatePermissionsService.buy(user, ip, body);
   }
 
-  @Permissions([
-    ['panel.donate.read.*', 'panel.users.donate.*'],
-    { or: true },
-  ])
+  @Permissions([['panel.donate.read.*', 'panel.users.donate.*'], { or: true }])
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
     const server = await this.donatePermissionsService.findOne(id, ['periods', 'servers', 'kits']);

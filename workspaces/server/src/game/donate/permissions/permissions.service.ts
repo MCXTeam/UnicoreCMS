@@ -18,6 +18,7 @@ import { GiveDonatePermInput } from './dto/give-donate-perm.input';
 import { PermissionBuyInput } from './dto/permission-buy.input';
 import { PermissionInput } from './dto/permission.input';
 import { DonatePermission } from './entities/donate-permission.entity';
+import { DonateWebRoleService } from '../web-role.service';
 import { UsersDonatePermission } from './entities/user-permission.entity';
 import { PermissionType } from './enums/permission-type.enum';
 import _ from 'lodash';
@@ -51,6 +52,7 @@ export class DonatePermissionsService {
     private userPermissionsRepository: Repository<UsersDonatePermission>,
     @InjectRepository(DonatePermission)
     private donatePermissionsRepository: Repository<DonatePermission>,
+    private webRoles: DonateWebRoleService,
     @InjectRepository(Server)
     private serversRepository: Repository<Server>,
     @InjectRepository(Period)
@@ -134,6 +136,8 @@ export class DonatePermissionsService {
       }),
     );
 
+    runAfterCommit(() => this.webRoles.grantForPermission(user.uuid, permission.id));
+
     return saved;
   }
 
@@ -162,6 +166,7 @@ export class DonatePermissionsService {
     if (request) await assertServerPermission(request, 'panel.users.donate', udp.server?.id);
 
     await this.userPermissionsRepository.remove(udp);
+    await this.webRoles.revokePermissionRole(udp.user.uuid, udp.permission.id);
 
     runAfterCommit(() =>
       events().emit('donate.permission.revoked', {
@@ -338,6 +343,7 @@ export class DonatePermissionsService {
     perm.perms = [];
     perm.servers = [];
     perm.web_perms = [];
+    perm.web_role = (await this.webRoles.resolveWebRole(input.web_role_id)) ?? null;
     perm.kits = [];
     perm.servers = [];
 
@@ -350,6 +356,7 @@ export class DonatePermissionsService {
         break;
       case PermissionType.Web:
         perm.web_perms = input.web_perms;
+        perm.web_role = (await this.webRoles.resolveWebRole(input.web_role_id)) ?? null;
         break;
       case PermissionType.Kit:
         perm.perms = input.perms;
@@ -394,6 +401,7 @@ export class DonatePermissionsService {
     perm.perms = [];
     perm.servers = [];
     perm.web_perms = [];
+    perm.web_role = (await this.webRoles.resolveWebRole(input.web_role_id)) ?? null;
     perm.kits = [];
     perm.servers = [];
 
@@ -406,6 +414,7 @@ export class DonatePermissionsService {
         break;
       case PermissionType.Web:
         perm.web_perms = input.web_perms;
+        perm.web_role = (await this.webRoles.resolveWebRole(input.web_role_id)) ?? null;
         break;
       case PermissionType.Kit:
         perm.perms = input.perms;

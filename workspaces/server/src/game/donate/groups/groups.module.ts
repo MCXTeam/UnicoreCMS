@@ -9,19 +9,21 @@ import { Period } from '../entities/period.entity';
 import { Server } from 'src/game/servers/entities/server.entity';
 import { DonateGroupsController } from './controllers/group.controller';
 import { User } from 'src/admin/users/entities/user.entity';
+import { Role } from 'src/admin/roles/entities/role.entity';
 import { UsersDonateGroup } from './entities/user-donate.entity';
+import { DonateWebRoleService } from '../web-role.service';
 import { HistoryModule } from 'src/game/cabinet/history/history.module';
 import { ConfigModule } from 'src/admin/config/config.module';
 import { RconModule } from 'src/game/servers/rcon/rcon.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([GroupKit, DonateGroup, Period, Server, User, UsersDonateGroup]),
+    TypeOrmModule.forFeature([Role, GroupKit, DonateGroup, Period, Server, User, UsersDonateGroup]),
     HistoryModule,
     ConfigModule,
     RconModule,
   ],
-  providers: [DonateGroupsService, GroupKitsService],
+  providers: [DonateGroupsService, DonateWebRoleService, GroupKitsService],
   exports: [DonateGroupsService],
   controllers: [GroupKitsController, DonateGroupsController],
 })

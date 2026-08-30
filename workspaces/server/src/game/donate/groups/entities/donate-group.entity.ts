@@ -1,7 +1,8 @@
 import { MONEY_PRECISION, MONEY_SCALE, StorageManager, decimalColumn } from '@common';
 import { ROLE_COLOR_MAX_LENGTH } from 'unicore-common';
+import { Role } from 'src/admin/roles/entities/role.entity';
 import { Server } from 'src/game/servers/entities/server.entity';
-import { AfterRemove, Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { AfterRemove, Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, JoinColumn, ManyToOne } from 'typeorm';
 import { Period } from '../../entities/period.entity';
 import { GroupFeature } from './group-feature.entity';
 import { GroupKit } from './group-kit.entity';
@@ -96,6 +97,10 @@ export class DonateGroup {
 
   @ManyToMany(() => Server, (server) => server.donate_groups)
   servers: Server[];
+
+  @ManyToOne(() => Role, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'web_role_id' })
+  web_role?: Role;
 
   @AfterRemove()
   removeFile() {

@@ -1,4 +1,4 @@
-import { IsArray, IsBoolean, IsDefined, IsEnum, IsInt, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsArray, IsBoolean, IsDefined, IsEnum, IsInt, IsNumber, IsOptional, IsString, Max, Min, MaxLength } from 'class-validator';
 import { PermissionType } from '../enums/permission-type.enum';
 import { IsPlayerPerm, PRICE_MIN, SanitizeHtml } from '@common';
 
@@ -54,6 +54,11 @@ export class PermissionInput {
   web_perms?: string[];
 
   @IsOptional()
+  @IsString()
+  @MaxLength(64)
+  web_role_id?: string;
+
+  @IsOptional()
   @IsInt()
   @Min(0)
   @Max(100)
@@ -62,5 +67,4 @@ export class PermissionInput {
   @IsOptional()
   @IsBoolean()
   giftable?: boolean;
-
 }

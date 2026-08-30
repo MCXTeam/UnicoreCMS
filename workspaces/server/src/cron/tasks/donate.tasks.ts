@@ -8,6 +8,7 @@ import { UsersDonateGroup } from 'src/game/donate/groups/entities/user-donate.en
 import { UsersDonatePermission } from 'src/game/donate/permissions/entities/user-permission.entity';
 import { PermissionType } from 'src/game/donate/permissions/enums/permission-type.enum';
 import { IssuanceService } from 'src/game/servers/rcon/issuance.service';
+import { DonateWebRoleService } from 'src/game/donate/web-role.service';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -19,6 +20,7 @@ export class DonateTasks {
     private upRepository: Repository<UsersDonatePermission>,
     private eventsService: EventsService,
     private issuanceService: IssuanceService,
+    private webRoles: DonateWebRoleService,
   ) {}
 
   @SafeCron(CronExpression.EVERY_10_MINUTES, 'donate-expire')
@@ -44,6 +46,8 @@ export class DonateTasks {
       .getMany();
 
     for (const udg of await this.udRepository.remove(expiresUD)) {
+      await this.webRoles.revokeGroupRole(udg.user?.uuid, udg.group?.id);
+
       this.eventsService.emitKernel('take_group', udg, udg.server?.id);
 
       if (this.issuanceService.isRcon(udg.server)) {
@@ -55,6 +59,8 @@ export class DonateTasks {
     }
 
     for (const udp of await this.upRepository.remove(expiresUP)) {
+      await this.webRoles.revokePermissionRole(udp.user?.uuid, udp.permission?.id);
+
       if (udp.permission?.type != PermissionType.Web) {
         this.eventsService.emitKernel('take_permission', udp, udp.server?.id);
 

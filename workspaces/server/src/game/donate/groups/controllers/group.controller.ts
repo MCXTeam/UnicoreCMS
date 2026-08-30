@@ -41,16 +41,10 @@ export class DonateGroupsController {
     return this.donateGroupsService.sort(body);
   }
 
-  @Permissions([
-    ['panel.donate.read.*', 'panel.users.donate.*'],
-    { or: true },
-  ])
+  @Permissions([['panel.donate.read.*', 'panel.users.donate.*'], { or: true }])
   @Get()
   async find(@Req() request: any) {
-    return this.donateGroupsService.find(
-      ['servers', 'kits', 'periods', 'features'],
-      await allowedServers(request, 'panel.donate.read'),
-    );
+    return this.donateGroupsService.find(['servers', 'kits', 'periods', 'features'], await allowedServers(request, 'panel.donate.read'));
   }
 
   @Get('me')
@@ -82,10 +76,7 @@ export class DonateGroupsController {
     return this.donateGroupsService.buy(user, ip, body);
   }
 
-  @Permissions([
-    ['panel.donate.read.*', 'panel.users.donate.*'],
-    { or: true },
-  ])
+  @Permissions([['panel.donate.read.*', 'panel.users.donate.*'], { or: true }])
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
     const server = await this.donateGroupsService.findOne(id, ['periods', 'servers', 'kits']);

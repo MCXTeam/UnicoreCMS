@@ -11,7 +11,11 @@ export class OnlineTasks {
   private readonly logger = new Logger('OnlineTasks');
   private running = false;
 
-  constructor(private eventsService: EventsService, private onlineService: OnlineService, private serversService: ServersService) {}
+  constructor(
+    private eventsService: EventsService,
+    private onlineService: OnlineService,
+    private serversService: ServersService,
+  ) {}
 
   @SafeCron(CronExpression.EVERY_5_SECONDS, 'online-update')
   async updateOnline() {

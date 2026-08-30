@@ -9,10 +9,7 @@ import { PeriodsService } from './periods.service';
 export class PeriodsController {
   constructor(private periodsService: PeriodsService) {}
 
-  @Permissions([
-    ['panel.donate.read.*', 'panel.users.donate.*'],
-    { or: true },
-  ])
+  @Permissions([['panel.donate.read.*', 'panel.users.donate.*'], { or: true }])
   @Get()
   findAll(): Promise<Period[]> {
     return this.periodsService.find();

@@ -64,7 +64,11 @@
                 class="p-button-rounded p-button-success mr-2"
               />
               <Button
-                  v-if="canUpdate" @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary mr-2" />
+                v-if="canUpdate"
+                @click="openFileDialog(slotProps.data)"
+                icon="pi pi-images"
+                class="p-button-rounded p-button-secondary mr-2"
+              />
               <Button
                 v-if="canDelete"
                 @click="removeGroup(slotProps.data.id)"
@@ -204,6 +208,22 @@
                   only="player"
                   :label="$t('admin.inject_web_rights')"
                   :disabled="!canEditPerms"
+                />
+              </div>
+              <div class="field">
+                <label class="flex align-items-center gap-1">
+                  {{ $t('admin.donate_web_role') }}
+                  <i v-tooltip.right="$t('admin.donate_web_role_hint')" class="pi pi-question-circle text-color-secondary" />
+                </label>
+                <Select
+                  v-model="group.web_role_id"
+                  :options="roleOptions"
+                  optionLabel="name"
+                  optionValue="id"
+                  :placeholder="$t('admin.choose_role')"
+                  appendTo="body"
+                  :disabled="!canEditPerms"
+                  showClear
                 />
               </div>
             </template>
@@ -414,6 +434,7 @@ export default {
   data() {
     return {
       groups: null,
+      roles: [],
       loading: true,
       selected: null,
       updateMode: false,
@@ -448,6 +469,10 @@ export default {
     this.load()
   },
   computed: {
+    roleOptions() {
+      return [{ id: null, name: '—' }, ...(this.roles || [])]
+    },
+
     serverOptions() {
       if (!this.serverScope) return this.servers
 
@@ -476,6 +501,10 @@ export default {
       this.kits = await this.$api.get('/donates/group-kits').then((res) => res.data)
       this.periods = await this.$api.get('/donates/periods').then((res) => res.data)
       this.servers = await this.$api.get('/servers').then((res) => res.data)
+      this.roles = await this.$api
+        .get('/admin/roles', { silent: true })
+        .then((res) => res.data)
+        .catch(() => [])
       this.loading = false
     },
     async onGroupReorder(event) {
@@ -569,9 +598,9 @@ export default {
           kits: [],
           periods: [],
           virtual_percent: null,
-        giftable: true,
-        staff: false,
-        color: null,
+          giftable: true,
+          staff: false,
+          color: null,
         }
       }
       this.translations.attach(this.group)

@@ -176,6 +176,22 @@
                 :label="$t('admin.web_rights')"
                 :disabled="!canEditPerms"
               />
+              <div class="field">
+                <label class="flex align-items-center gap-1">
+                  {{ $t('admin.donate_web_role') }}
+                  <i v-tooltip.right="$t('admin.donate_web_role_hint')" class="pi pi-question-circle text-color-secondary" />
+                </label>
+                <Select
+                  v-model="permission.web_role_id"
+                  :options="roleOptions"
+                  optionLabel="name"
+                  optionValue="id"
+                  :placeholder="$t('admin.choose_role')"
+                  appendTo="body"
+                  :disabled="!canEditPerms"
+                  showClear
+                />
+              </div>
               <div class="field" v-if="$_.get(permission.type, 'value') == 'kit'">
                 <label>{{ $t('admin.linked_kits') }}</label>
                 <MultiSelect
@@ -349,6 +365,7 @@ export default {
   data() {
     return {
       permissions: null,
+      roles: [],
       loading: true,
       selected: null,
       updateMode: false,
@@ -376,6 +393,10 @@ export default {
     }
   },
   computed: {
+    roleOptions() {
+      return [{ id: null, name: '—' }, ...(this.roles || [])]
+    },
+
     serverOptions() {
       if (!this.serverScope) return this.servers
 
@@ -414,6 +435,10 @@ export default {
       this.kits = await this.$api.get('/donates/group-kits').then((res) => res.data)
       this.periods = await this.$api.get('/donates/periods').then((res) => res.data)
       this.servers = await this.$api.get('/servers').then((res) => res.data)
+      this.roles = await this.$api
+        .get('/admin/roles', { silent: true })
+        .then((res) => res.data)
+        .catch(() => [])
       this.loading = false
     },
     async onPermsReorder(event) {
@@ -451,7 +476,7 @@ export default {
           perms: [],
           web_perms: [],
           virtual_percent: null,
-        giftable: true,
+          giftable: true,
         }
       }
       this.translations.attach(this.permission)

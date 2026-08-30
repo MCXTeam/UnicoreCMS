@@ -1,6 +1,7 @@
 import { decimalColumn, MONEY_PRECISION, MONEY_SCALE } from '@common';
+import { Role } from 'src/admin/roles/entities/role.entity';
 import { Server } from 'src/game/servers/entities/server.entity';
-import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, JoinTable, ManyToOne, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Period } from '../../entities/period.entity';
 import { GroupKit } from '../../groups/entities/group-kit.entity';
 import { PermissionType } from '../enums/permission-type.enum';
@@ -89,4 +90,8 @@ export class DonatePermission {
     },
   })
   periods: Period[];
+
+  @ManyToOne(() => Role, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'web_role_id' })
+  web_role?: Role;
 }

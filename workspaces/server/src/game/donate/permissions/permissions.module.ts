@@ -3,6 +3,8 @@ import { DonatePermissionsService } from './permissions.service';
 import { PermissionsController } from './permissions.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DonatePermission } from './entities/donate-permission.entity';
+import { DonateWebRoleService } from '../web-role.service';
+import { Role } from 'src/admin/roles/entities/role.entity';
 import { UsersDonatePermission } from './entities/user-permission.entity';
 import { Server } from 'src/game/servers/entities/server.entity';
 import { Period } from '../entities/period.entity';
@@ -14,12 +16,12 @@ import { RconModule } from 'src/game/servers/rcon/rcon.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([DonatePermission, UsersDonatePermission, Server, Period, GroupKit, User]),
+    TypeOrmModule.forFeature([Role, DonatePermission, UsersDonatePermission, Server, Period, GroupKit, User]),
     HistoryModule,
     ConfigModule,
     RconModule,
   ],
-  providers: [DonatePermissionsService],
+  providers: [DonateWebRoleService, DonatePermissionsService],
   exports: [DonatePermissionsService],
   controllers: [PermissionsController],
 })

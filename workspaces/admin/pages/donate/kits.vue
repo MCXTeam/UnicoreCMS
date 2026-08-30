@@ -45,7 +45,11 @@
                 class="p-button-rounded p-button-success mr-2"
               />
               <Button
-                  v-if="canUpdate" @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary mr-2" />
+                v-if="canUpdate"
+                @click="openFileDialog(slotProps.data)"
+                icon="pi pi-images"
+                class="p-button-rounded p-button-secondary mr-2"
+              />
               <Button
                 v-if="canDelete"
                 @click="removeKit(slotProps.data.id)"

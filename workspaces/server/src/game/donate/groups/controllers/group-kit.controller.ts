@@ -33,10 +33,7 @@ export class GroupKitsController {
     return this.groupKitsService.sort(body);
   }
 
-  @Permissions([
-    ['panel.donate.read.*', 'panel.users.donate.*'],
-    { or: true },
-  ])
+  @Permissions([['panel.donate.read.*', 'panel.users.donate.*'], { or: true }])
   @Get()
   find() {
     return this.groupKitsService.find();
@@ -48,10 +45,7 @@ export class GroupKitsController {
     return this.groupKitsService.removeMany(body.items);
   }
 
-  @Permissions([
-    ['panel.donate.read.*', 'panel.users.donate.*'],
-    { or: true },
-  ])
+  @Permissions([['panel.donate.read.*', 'panel.users.donate.*'], { or: true }])
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
     const server = await this.groupKitsService.findOne(id);

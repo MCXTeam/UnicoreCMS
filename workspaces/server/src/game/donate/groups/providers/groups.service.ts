@@ -10,6 +10,7 @@ import { EventsService } from 'src/events/events.service';
 import { HistoryType } from 'src/game/cabinet/history/enums/history-type.enum';
 import { HistoryService } from 'src/game/cabinet/history/history.service';
 import { Server } from 'src/game/servers/entities/server.entity';
+import { DonateWebRoleService } from '../../web-role.service';
 import { IssuanceService } from 'src/game/servers/rcon/issuance.service';
 import { In, Repository } from 'typeorm';
 import { Period } from '../../entities/period.entity';
@@ -49,6 +50,7 @@ export class DonateGroupsService {
     private usersRepository: Repository<User>,
     @InjectRepository(UsersDonateGroup)
     private userDonatesRepository: Repository<UsersDonateGroup>,
+    private webRoles: DonateWebRoleService,
     @InjectRepository(DonateGroup)
     private donateGroupsRepository: Repository<DonateGroup>,
     @InjectRepository(Server)
@@ -181,6 +183,8 @@ export class DonateGroupsService {
       }),
     );
 
+    runAfterCommit(() => this.webRoles.grantForGroup(user.uuid, group.id));
+
     return saved;
   }
 
@@ -202,6 +206,7 @@ export class DonateGroupsService {
     if (request) await assertServerPermission(request, 'panel.users.donate', udg.server?.id);
 
     await this.userDonatesRepository.remove(udg);
+    await this.webRoles.revokeGroupRole(udg.user.uuid, udg.group.id);
     runAfterCommit(() => this.eventsService.emitKernel('take_group', udg, udg.server?.id));
     runAfterCommit(() =>
       events().emit('donate.group.revoked', { uuid: udg.user.uuid, serverId: Number(udg.server.id), groupId: udg.group.id }),
@@ -223,10 +228,7 @@ export class DonateGroupsService {
 
     if (!group || !server || !period) throw new NotFoundException();
 
-    const price = currencyUtils.roundByType(
-      currencyUtils.saleApply(group.price, group.sale) * period.multiplier,
-      SystemCurrency.REAL,
-    );
+    const price = currencyUtils.roundByType(currencyUtils.saleApply(group.price, group.sale) * period.multiplier, SystemCurrency.REAL);
     let virtual_sale = currencyUtils.roundByType(
       input.use_virtual && cfg[ConfigField.DonateGroupsVirtualUse] && group.virtual_percent !== 0
         ? (price / 100) * (group.virtual_percent ?? configFieldNumber(cfg, ConfigField.VirtualPercent))
@@ -255,7 +257,10 @@ export class DonateGroupsService {
     user.virtual = currencyUtils.roundByType(user.virtual - virtualCost, SystemCurrency.VIRTAUL);
 
     await this.give(user, server, group, period);
-    await this.historyService.create(HistoryType.DonateGroupPurchase, ip, user, group, server, period, { real: realCost, virtual: virtualCost });
+    await this.historyService.create(HistoryType.DonateGroupPurchase, ip, user, group, server, period, {
+      real: realCost,
+      virtual: virtualCost,
+    });
   }
 
   findOne(id: number, relations?: string[]): Promise<DonateGroup> {
@@ -273,6 +278,7 @@ export class DonateGroupsService {
     group.sale = input.sale;
     group.ingame_id = input.ingame_id;
     group.web_perms = input.web_perms;
+    group.web_role = (await this.webRoles.resolveWebRole(input.web_role_id)) ?? null;
     group.features = input.features.map((feature) => Object.assign(new GroupFeature(), feature));
     group.virtual_percent = input.virtual_percent;
     group.giftable = input.giftable !== false;
@@ -329,6 +335,7 @@ export class DonateGroupsService {
     group.sale = input.sale;
     group.ingame_id = input.ingame_id;
     group.web_perms = input.web_perms;
+    group.web_role = (await this.webRoles.resolveWebRole(input.web_role_id)) ?? null;
     group.features = input.features.map((feature) => Object.assign(new GroupFeature(), feature));
     group.virtual_percent = input.virtual_percent;
     group.giftable = input.giftable !== false;
