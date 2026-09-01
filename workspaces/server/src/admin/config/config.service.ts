@@ -86,6 +86,7 @@ export class ConfigService {
         { key: ConfigField.GiftsDirectEnabled, important: true, type: ConfigType.boolean, value: 'true' },
         { key: ConfigField.GiftsDailyLimit, important: true, type: ConfigType.number, value: String(GIFTS_DAILY_LIMIT) },
         { key: ConfigField.GiftsCodeExpireDays, important: true, type: ConfigType.number, value: String(GIFTS_CODE_EXPIRE_DAYS) },
+        { key: ConfigField.GiftsRegiftPercent, important: true, type: ConfigType.number, value: '0' },
         { key: ConfigField.EmailActivationRequired, important: true, type: ConfigType.boolean, value: 'true' },
         { key: ConfigField.OrdinaryRegister, important: true, type: ConfigType.boolean, value: 'false' },
         { key: ConfigField.RoleBadgeBefore, important: true, type: ConfigType.boolean, value: 'false' },

@@ -26,6 +26,7 @@ export enum ConfigField {
   GiftsDirectEnabled = 'public_gifts_direct_enabled',
   GiftsDailyLimit = 'gifts_daily_limit',
   GiftsCodeExpireDays = 'gifts_code_expire_days',
+  GiftsRegiftPercent = 'public_gifts_regift_percent',
   EmailActivationRequired = 'public_email_activation_required',
   OrdinaryRegister = 'public_ordinary_register',
   RoleBadgeBefore = 'public_role_badge_before',

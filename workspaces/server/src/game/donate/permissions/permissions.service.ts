@@ -1,7 +1,7 @@
 import { assertServerPermission } from 'src/admin/roles/guards/permisson.guard';
 import { assertFieldAccess } from 'src/admin/roles/field-permissions';
 import { assertServerEntities, assertServerList } from 'src/admin/roles/server-scope';
-import { NumberSortInput, debitUserBalance, MomentWrapper } from '@common';
+import { NumberSortInput, debitUserBalance, MomentWrapper, remainingSeconds } from '@common';
 import { events } from 'unicore-api';
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -77,40 +77,59 @@ export class DonatePermissionsService {
     return this.userPermissionsRepository.findBy({ user: { uuid } });
   }
 
-  async give(user: User, server: Server, permission: DonatePermission, period: Period) {
-    let userPermission = await this.userPermissionsRepository.findOne({
+  grantOf(id: number, user: User): Promise<UsersDonatePermission | null> {
+    return this.userPermissionsRepository.findOne({
+      where: { id, user: { uuid: user.uuid } },
+      relations: ['user', 'server', 'permission'],
+    });
+  }
+
+  private findGrant(user: User, server: Server, permission: DonatePermission): Promise<UsersDonatePermission | null> {
+    return this.userPermissionsRepository.findOne({
       where: {
-        user: {
-          uuid: user.uuid,
-        },
-        server:
-          permission.type == PermissionType.Web
-            ? null
-            : {
-                id: server.id,
-              },
-        permission: {
-          id: permission.id,
-        },
+        user: { uuid: user.uuid },
+        server: permission.type == PermissionType.Web ? null : { id: server.id },
+        permission: { id: permission.id },
       },
       relations: ['user'],
     });
+  }
 
-    if (userPermission) {
-      if (!userPermission.expired) throw new BadRequestException();
+  async give(user: User, server: Server, permission: DonatePermission, period: Period) {
+    const userPermission = await this.findGrant(user, server, permission);
 
-      userPermission.expired = period.expire ? this.moment(userPermission.expired).utc().add(period.expire, 'seconds').toDate() : null;
-    } else {
-      userPermission = new UsersDonatePermission();
-      userPermission.expired = period.expire ? this.moment().utc().add(period.expire, 'seconds').toDate() : null;
+    if (userPermission && !userPermission.expired) throw new BadRequestException();
 
-      if (permission.type != PermissionType.Web) userPermission.server = server;
+    const from = userPermission ? this.moment(userPermission.expired) : this.moment();
+    const expired = period.expire ? from.utc().add(period.expire, 'seconds').toDate() : null;
 
-      userPermission.permission = permission;
-      userPermission.user = user;
-    }
+    return this.grant(userPermission, user, server, permission, expired, period.expire || 0);
+  }
 
+  async giveUntil(user: User, server: Server, permission: DonatePermission, until: Date | null) {
+    const userPermission = await this.findGrant(user, server, permission);
+
+    if (userPermission && (!userPermission.expired || userPermission.expired > new Date()))
+      throw new BadRequestException('У получателя уже есть эта привилегия');
+
+    return this.grant(userPermission, user, server, permission, until, remainingSeconds(until));
+  }
+
+  private async grant(
+    existing: UsersDonatePermission | null,
+    user: User,
+    server: Server,
+    permission: DonatePermission,
+    expired: Date | null,
+    seconds: number,
+  ) {
+    const userPermission = existing || new UsersDonatePermission();
+
+    userPermission.expired = expired;
+    userPermission.permission = permission;
     userPermission.user = { uuid: user.uuid } as User;
+
+    if (permission.type != PermissionType.Web) userPermission.server = server;
 
     const saved = await this.userPermissionsRepository.save(userPermission);
 
@@ -120,7 +139,7 @@ export class DonatePermissionsService {
           { username: user.username, uuid: user.uuid },
           server,
           { name: permission.name, perms: permission.perms },
-          period.expire || 0,
+          seconds,
         );
       }
 
@@ -132,7 +151,7 @@ export class DonatePermissionsService {
         uuid: user.uuid,
         serverId: Number(server?.id || 0),
         permissionId: permission.id,
-        seconds: period.expire || 0,
+        seconds,
       }),
     );
 
@@ -336,6 +355,7 @@ export class DonatePermissionsService {
     perm.virtual_percent = input.virtual_percent;
     perm.referal_percent = input.referal_percent ?? null;
     perm.giftable = input.giftable !== false;
+    perm.regiftable = input.regiftable !== false;
 
     perm.periods = await this.periodsRepository.findBy({
       id: In(input.periods),
@@ -395,6 +415,7 @@ export class DonatePermissionsService {
     perm.virtual_percent = input.virtual_percent;
     perm.referal_percent = input.referal_percent ?? null;
     perm.giftable = input.giftable !== false;
+    perm.regiftable = input.regiftable !== false;
 
     perm.periods = await this.periodsRepository.findBy({
       id: In(input.periods),

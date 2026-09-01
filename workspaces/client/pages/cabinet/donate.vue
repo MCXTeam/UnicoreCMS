@@ -67,6 +67,25 @@
       </template>
     </Dialog>
 
+    <Dialog class="buy-dialog" v-model:visible="regiftDialog" modal v-if="regift">
+      <template #header>
+        <div class="d-flex flex-column align-items-center">
+          <h4 class="mt-2 mb-0">
+            {{
+              regift.item.server
+                ? $t('cabinet.gift_regift_title', { name: regiftName, server: regift.item.server.name })
+                : $t('cabinet.gift_regift_title_web', { name: regiftName })
+            }}
+          </h4>
+          <h3 class="m-0">
+            {{ regift.item.expired ? `${$t('cabinet.until')} ${$moment(regift.item.expired).format('D MMMM YYYY')}` : $t('players.never') }}
+          </h3>
+        </div>
+      </template>
+      <p class="cab-sub mt-0 mb-0">{{ $t(regiftPrice > 0 ? 'cabinet.gift_regift_hint_paid' : 'cabinet.gift_regift_hint') }}</p>
+      <GiftPurchase :payload="regiftPayload" :price="regiftPrice" :allowed="regiftAllowed" @done="afterGift()" />
+    </Dialog>
+
     <Dialog
       class="buy-dialog"
       v-model:visible="permissionDialog"
@@ -180,12 +199,12 @@
                 <span>{{ item.expired ? $moment(item.expired).format('D MMMM YYYY, HH:mm') : $t('players.never') }}</span>
               </div>
               <Button
-                v-if="giftsAvailable && item.group.giftable !== false"
-                v-tooltip.left="$t('cabinet.gift_give')"
+                v-if="giftsAvailable && item.group.giftable !== false && item.group.regiftable !== false"
+                v-tooltip.left="$t('cabinet.gift_regift')"
                 class="ms-auto"
                 text
                 size="small"
-                @click="openGroupDialog(item.group.id, true)"
+                @click="openRegift('donate', item)"
               >
                 <i class="bx bxs-gift"></i>
               </Button>
@@ -254,12 +273,12 @@
                 <span>{{ item.expired ? $moment(item.expired).format('D MMMM YYYY, HH:mm') : $t('players.never') }}</span>
               </div>
               <Button
-                v-if="giftsAvailable && item.permission.giftable !== false"
-                v-tooltip.left="$t('cabinet.gift_give')"
+                v-if="giftsAvailable && item.permission.giftable !== false && item.permission.regiftable !== false"
+                v-tooltip.left="$t('cabinet.gift_regift')"
                 class="ms-auto"
                 text
                 size="small"
-                @click="openPermissionDialog(item.permission.id, true)"
+                @click="openRegift('permission', item)"
               >
                 <i class="bx bxs-gift"></i>
               </Button>
@@ -344,6 +363,8 @@ const donateGroupsMe = ref(null)
 const donatePermissionsMe = ref(null)
 const groupDialog = ref(false)
 const permissionDialog = ref(false)
+const regiftDialog = ref(false)
+const regift = ref(null)
 const loading = ref(false)
 
 const serverOptions = computed(() => servers.value.map((server, index) => ({ label: server.name, value: String(index) })))
@@ -384,6 +405,20 @@ function isPermissionRenew(id) {
   return !!activePermissions.value.find((item) => item.permission.id == id && item.expired)
 }
 
+const regiftEntity = computed(() => (regift.value ? regift.value.item.group || regift.value.item.permission : null))
+const regiftName = computed(() => regiftEntity.value?.name || '')
+const regiftAllowed = computed(() => regiftEntity.value?.giftable !== false && regiftEntity.value?.regiftable !== false)
+const regiftPayload = computed(() => ({ type: regift.value?.type, server: regift.value?.item.server?.id, grant: regift.value?.item.id }))
+const regiftPrice = computed(() => {
+  const entity = regiftEntity.value
+
+  if (!entity) return 0
+
+  const percent = Number(config.value.public_gifts_regift_percent) || 0
+  const base = entity.price - (entity.price / 100) * (entity.sale || 0)
+
+  return (base * percent) / 100
+})
 const giftGroupPrice = computed(() => calcGroupPrice() - (donate.use_virtual ? calcGroupVirtSale() : 0))
 const giftPermissionPrice = computed(() => calcPermissionPrice() - (permission.use_virtual ? calcPermissionVirtSale() : 0))
 
@@ -431,9 +466,16 @@ function openPermissionDialog(id, giftOnly = false) {
   permission.gift_only = giftOnly
   permissionDialog.value = true
 }
-function afterGift() {
+function openRegift(type, item) {
+  regift.value = { type, item }
+  regiftDialog.value = true
+}
+async function afterGift() {
   groupDialog.value = false
   permissionDialog.value = false
+  regiftDialog.value = false
+
+  if (regift.value) await Promise.all([fetchDonatesMe(), fetchPermissionsMe()])
 }
 async function buyGroup() {
   loading.value = true

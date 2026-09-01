@@ -73,4 +73,8 @@ export class PermissionInput {
   @IsOptional()
   @IsBoolean()
   giftable?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  regiftable?: boolean;
 }

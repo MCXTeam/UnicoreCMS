@@ -164,6 +164,10 @@ export const CONFIG_HINTS: Record<string, ConfigHint> = {
     title: 'cfg.gifts_code_expire_days_title',
     hint: 'cfg.gifts_code_expire_days_hint',
   },
+  public_gifts_regift_percent: {
+    title: 'cfg.public_gifts_regift_percent_title',
+    hint: 'cfg.public_gifts_regift_percent_hint',
+  },
   public_role_badge_before: {
     title: 'cfg.public_role_badge_before_title',
     hint: 'cfg.public_role_badge_before_hint',

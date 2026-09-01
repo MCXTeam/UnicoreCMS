@@ -100,6 +100,10 @@ export class GroupInput {
 
   @IsOptional()
   @IsBoolean()
+  regiftable?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
   staff?: boolean;
 
   @IsOptional()

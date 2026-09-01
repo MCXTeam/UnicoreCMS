@@ -14,6 +14,7 @@ import { DonatePermissionsService } from 'src/game/donate/permissions/permission
 import { PermissionType } from 'src/game/donate/permissions/enums/permission-type.enum';
 import { CartService } from 'src/game/store/cart/cart.service';
 import { debitUserBalance, fillPlaceholders, GIFT_CODE_ALPHABET, GIFT_CODE_LENGTH } from '@common';
+import { envConfig } from 'unicore-common';
 import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
 import { GiftHistoryInput, HistoryService } from '../history/history.service';
 import { HistoryType } from '../history/enums/history-type.enum';
@@ -30,7 +31,7 @@ const generateCode = customAlphabet(GIFT_CODE_ALPHABET, GIFT_CODE_LENGTH);
 
 type GiftConfig = Record<string, unknown>;
 
-type GiftPayload = Omit<GiftHistoryInput, 'type' | 'ip' | 'user' | 'target'>;
+type GiftPayload = Omit<GiftHistoryInput, 'type' | 'ip' | 'user' | 'target'> & { until?: Date | null };
 
 @Injectable()
 export class GiftPurchaseService {
@@ -64,6 +65,8 @@ export class GiftPurchaseService {
 
     const recipient = direct ? await this.findRecipient(user, input.recipient) : null;
 
+    if (input.grant) return this.regift(user, ip, input, recipient, cfg);
+
     switch (input.type) {
       case GiftType.Donate:
         return this.purchaseDonate(user, ip, input, recipient, cfg);
@@ -89,8 +92,7 @@ export class GiftPurchaseService {
 
     const since = new Date(Date.now() - DAY_MS);
 
-    if ((await this.historyService.countGifts(user, since)) >= limit)
-      throw new BadRequestException('На сегодня лимит подарков исчерпан');
+    if ((await this.historyService.countGifts(user, since)) >= limit) throw new BadRequestException('На сегодня лимит подарков исчерпан');
   }
 
   private async findRecipient(user: User, username: string): Promise<User> {
@@ -121,10 +123,108 @@ export class GiftPurchaseService {
     created.issued_by = user;
 
     if (days) created.expires = new Date(Date.now() + days * DAY_MS);
+    if (gift.until && (!created.expires || gift.until < created.expires)) created.expires = gift.until;
 
     await this.giftsRepository.save(created);
 
     return created.promocode;
+  }
+
+  private async regift(
+    user: User,
+    ip: string,
+    input: GiftPurchaseInput,
+    recipient: User | null,
+    cfg: GiftConfig,
+  ): Promise<GiftPurchaseResultDto> {
+    if (input.type === GiftType.Donate) return this.regiftDonate(user, ip, input.grant, recipient, cfg);
+    if (input.type === GiftType.Permission) return this.regiftPermission(user, ip, input.grant, recipient, cfg);
+
+    throw new BadRequestException('Передарить можно только группу или привилегию');
+  }
+
+  private regiftCost(price: number, sale: number | null | undefined, cfg: GiftConfig): number {
+    const percent = configFieldNumber(cfg, ConfigField.GiftsRegiftPercent);
+
+    return currencyUtils.roundByType((currencyUtils.saleApply(price, sale) * percent) / 100, SystemCurrency.REAL);
+  }
+
+  private assertActive(expired: Date | null | undefined): void {
+    if (expired && expired <= new Date()) throw new BadRequestException('Срок этой привилегии уже истёк');
+  }
+
+  private async regiftDonate(user: User, ip: string, id: number, recipient: User | null, cfg: GiftConfig): Promise<GiftPurchaseResultDto> {
+    const grant = await this.groupsService.grantOf(id, user);
+
+    if (!grant) throw new NotFoundException('Группа не найдена');
+
+    this.assertActive(grant.expired);
+
+    if (grant.group.giftable === false) throw new BadRequestException('Эту группу дарить нельзя');
+    if (grant.group.regiftable === false) throw new BadRequestException('Эту группу передаривать нельзя');
+
+    const cost = this.regiftCost(grant.group.price, grant.group.sale, cfg);
+
+    if (cost > 0) await this.charge(user, cost, 0);
+
+    await this.groupsService.take(grant.id);
+
+    const promocode = recipient
+      ? null
+      : await this.issueCode({ type: GiftType.Donate, donate_group: grant.group, server: grant.server, until: grant.expired }, user, cfg);
+
+    if (recipient) await this.groupsService.giveUntil(recipient, grant.server, grant.group, grant.expired);
+
+    await this.register(ip, user, recipient, {
+      server: grant.server,
+      donateGroup: grant.group,
+      until: grant.expired,
+      cost: { real: cost, virtual: 0 },
+    });
+
+    return new GiftPurchaseResultDto({ promocode, recipient: recipient?.username });
+  }
+
+  private async regiftPermission(
+    user: User,
+    ip: string,
+    id: number,
+    recipient: User | null,
+    cfg: GiftConfig,
+  ): Promise<GiftPurchaseResultDto> {
+    const grant = await this.permissionsService.grantOf(id, user);
+
+    if (!grant) throw new NotFoundException('Привилегия не найдена');
+
+    this.assertActive(grant.expired);
+
+    if (grant.permission.giftable === false) throw new BadRequestException('Эту привилегию дарить нельзя');
+    if (grant.permission.regiftable === false) throw new BadRequestException('Эту привилегию передаривать нельзя');
+
+    const cost = this.regiftCost(grant.permission.price, grant.permission.sale, cfg);
+
+    if (cost > 0) await this.charge(user, cost, 0);
+
+    await this.permissionsService.take(grant.id);
+
+    const promocode = recipient
+      ? null
+      : await this.issueCode(
+          { type: GiftType.Permission, donate_permission: grant.permission, server: grant.server, until: grant.expired },
+          user,
+          cfg,
+        );
+
+    if (recipient) await this.permissionsService.giveUntil(recipient, grant.server, grant.permission, grant.expired);
+
+    await this.register(ip, user, recipient, {
+      server: grant.server,
+      donatePermission: grant.permission,
+      until: grant.expired,
+      cost: { real: cost, virtual: 0 },
+    });
+
+    return new GiftPurchaseResultDto({ promocode, recipient: recipient?.username });
   }
 
   private async purchaseDonate(
@@ -145,9 +245,7 @@ export class GiftPurchaseService {
 
     await this.charge(user, realCost, virtualCost);
 
-    const promocode = recipient
-      ? null
-      : await this.issueCode({ type: GiftType.Donate, donate_group: group, server, period }, user, cfg);
+    const promocode = recipient ? null : await this.issueCode({ type: GiftType.Donate, donate_group: group, server, period }, user, cfg);
 
     if (recipient) await this.groupsService.give(recipient, server, group, period);
 
@@ -248,7 +346,9 @@ export class GiftPurchaseService {
   }
 
   private async register(ip: string, user: User, recipient: User | null, payload: GiftPayload) {
-    await this.historyService.gift({ type: HistoryType.GiftPurchase, ip, user, target: recipient ?? undefined, ...payload });
+    const { until, ...history } = payload;
+
+    await this.historyService.gift({ type: HistoryType.GiftPurchase, ip, user, target: recipient ?? undefined, ...history });
 
     if (!recipient) return;
 
@@ -257,7 +357,7 @@ export class GiftPurchaseService {
       ip,
       user: recipient,
       target: user,
-      ...payload,
+      ...history,
       cost: undefined,
     });
 
@@ -274,11 +374,17 @@ export class GiftPurchaseService {
     }
   }
 
+  private formatDate(date: Date, locale: string | null): string {
+    return new Intl.DateTimeFormat(locale || undefined, { dateStyle: 'long', timeZone: envConfig.timezone }).format(date);
+  }
+
   private async describe(locale: string | null, payload: GiftPayload): Promise<string> {
     const messages = await this.localesService.messages(locale || (await this.localesService.defaultCode()));
     const text = (key: string, values: Record<string, string | number>) => fillPlaceholders(messages[key] || '', values);
     const server = payload.server?.name ?? '';
-    const period = payload.period?.name ?? '';
+    const period =
+      payload.period?.name ??
+      (payload.until ? text('cabinet.gift_until', { date: this.formatDate(payload.until, locale) }) : text('cabinet.gift_forever', {}));
 
     if (payload.donateGroup) return text('cabinet.gift_donate', { name: payload.donateGroup.name, period, server });
 

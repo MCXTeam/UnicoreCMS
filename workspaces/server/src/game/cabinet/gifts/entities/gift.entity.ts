@@ -31,6 +31,9 @@ export class Gift {
   @Column({ nullable: true, name: 'expires' })
   expires: Date;
 
+  @Column({ nullable: true, name: 'until' })
+  until?: Date;
+
   @ManyToOne(() => Product, {
     cascade: true,
     onDelete: 'CASCADE',

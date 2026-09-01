@@ -1,7 +1,7 @@
 import { assertServerPermission } from 'src/admin/roles/guards/permisson.guard';
 import { assertFieldAccess } from 'src/admin/roles/field-permissions';
 import { assertServerEntities, assertServerList } from 'src/admin/roles/server-scope';
-import { assertUploadedFile, debitUserBalance, MomentWrapper, NumberSortInput, StorageManager } from '@common';
+import { assertUploadedFile, debitUserBalance, MomentWrapper, NumberSortInput, remainingSeconds, StorageManager } from '@common';
 import { events } from 'unicore-api';
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -132,34 +132,50 @@ export class DonateGroupsService {
     return this.userDonatesRepository.findBy({ user: { uuid } });
   }
 
-  async give(user: User, server: Server, group: DonateGroup, period: Period) {
-    let userDonate = await this.userDonatesRepository.findOne({
-      where: {
-        user: {
-          uuid: user.uuid,
-        },
-        server: {
-          id: server.id,
-        },
-        group: {
-          id: group.id,
-        },
-      },
+  grantOf(id: number, user: User): Promise<UsersDonateGroup | null> {
+    return this.userDonatesRepository.findOne({ where: { id, user: { uuid: user.uuid } }, relations: ['user', 'server', 'group'] });
+  }
+
+  private findGrant(user: User, server: Server, group: DonateGroup): Promise<UsersDonateGroup | null> {
+    return this.userDonatesRepository.findOne({
+      where: { user: { uuid: user.uuid }, server: { id: server.id }, group: { id: group.id } },
       relations: ['user'],
     });
+  }
 
-    if (userDonate) {
-      if (!userDonate.expired) throw new BadRequestException();
+  async give(user: User, server: Server, group: DonateGroup, period: Period) {
+    const userDonate = await this.findGrant(user, server, group);
 
-      userDonate.expired = period.expire ? this.moment(userDonate.expired).utc().add(period.expire, 'seconds').toDate() : null;
-    } else {
-      userDonate = new UsersDonateGroup();
-      userDonate.expired = period.expire ? this.moment().utc().add(period.expire, 'seconds').toDate() : null;
-      userDonate.server = server;
-      userDonate.group = group;
-      userDonate.user = user;
-    }
+    if (userDonate && !userDonate.expired) throw new BadRequestException();
 
+    const from = userDonate ? this.moment(userDonate.expired) : this.moment();
+    const expired = period.expire ? from.utc().add(period.expire, 'seconds').toDate() : null;
+
+    return this.grant(userDonate, user, server, group, expired, period.expire || 0);
+  }
+
+  async giveUntil(user: User, server: Server, group: DonateGroup, until: Date | null) {
+    const userDonate = await this.findGrant(user, server, group);
+
+    if (userDonate && (!userDonate.expired || userDonate.expired > new Date()))
+      throw new BadRequestException('У получателя уже есть эта группа');
+
+    return this.grant(userDonate, user, server, group, until, remainingSeconds(until));
+  }
+
+  private async grant(
+    existing: UsersDonateGroup | null,
+    user: User,
+    server: Server,
+    group: DonateGroup,
+    expired: Date | null,
+    seconds: number,
+  ) {
+    const userDonate = existing || new UsersDonateGroup();
+
+    userDonate.expired = expired;
+    userDonate.server = server;
+    userDonate.group = group;
     userDonate.user = { uuid: user.uuid } as User;
 
     const saved = await this.userDonatesRepository.save(userDonate);
@@ -169,7 +185,7 @@ export class DonateGroupsService {
         { username: user.username, uuid: user.uuid },
         server,
         { ingame_id: group.ingame_id, name: group.name },
-        period.expire || 0,
+        seconds,
       );
     }
 
@@ -179,7 +195,7 @@ export class DonateGroupsService {
         uuid: user.uuid,
         serverId: Number(server.id),
         groupId: group.id,
-        seconds: period.expire || 0,
+        seconds,
       }),
     );
 
@@ -283,6 +299,7 @@ export class DonateGroupsService {
     group.virtual_percent = input.virtual_percent;
     group.referal_percent = input.referal_percent ?? null;
     group.giftable = input.giftable !== false;
+    group.regiftable = input.regiftable !== false;
     group.staff = Boolean(input.staff);
     group.color = input.color ?? null;
 
@@ -341,6 +358,7 @@ export class DonateGroupsService {
     group.virtual_percent = input.virtual_percent;
     group.referal_percent = input.referal_percent ?? null;
     group.giftable = input.giftable !== false;
+    group.regiftable = input.regiftable !== false;
     group.staff = Boolean(input.staff);
     group.color = input.color ?? null;
 

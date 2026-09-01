@@ -1,4 +1,4 @@
-import { IsBoolean, IsDefined, IsEnum, IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
+import { IsBoolean, IsDefined, IsEnum, IsInt, IsOptional, IsString, Max, MaxLength, Min, ValidateIf } from 'class-validator';
 import { CART_AMOUNT_MAX, CART_AMOUNT_MIN, IsUsername, SERVER_ID_MAX_LENGTH } from '@common';
 import { GiftType } from '../enums/gift-type.enum';
 
@@ -7,6 +7,7 @@ export class GiftPurchaseInput {
   @IsEnum(GiftType)
   type: GiftType;
 
+  @ValidateIf((input: GiftPurchaseInput) => !input.grant)
   @IsDefined()
   @IsString()
   @MaxLength(SERVER_ID_MAX_LENGTH)
@@ -31,6 +32,10 @@ export class GiftPurchaseInput {
   @IsOptional()
   @IsInt()
   period?: number;
+
+  @IsOptional()
+  @IsInt()
+  grant?: number;
 
   @IsOptional()
   @IsInt()

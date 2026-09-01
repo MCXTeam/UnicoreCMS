@@ -324,6 +324,13 @@
                 <Checkbox :binary="true" v-model="permission.giftable" inputId="permission-giftable" />
                 <label for="permission-giftable">{{ $t('admin.giftable') }}</label>
               </div>
+              <div class="field-checkbox">
+                <Checkbox :binary="true" v-model="permission.regiftable" inputId="permission-regiftable" :disabled="!permission.giftable" />
+                <label for="permission-regiftable" class="flex align-items-center gap-1">
+                  {{ $t('admin.regiftable') }}
+                  <i v-tooltip.right="$t('admin.regiftable_hint')" class="pi pi-question-circle text-color-secondary" />
+                </label>
+              </div>
             </template>
 
             <template #translation>
@@ -406,6 +413,7 @@ export default {
         virtual_percent: null,
         referal_percent: null,
         giftable: true,
+        regiftable: true,
       },
       permissionDialog: false,
       section: 'main',
@@ -501,6 +509,7 @@ export default {
           virtual_percent: null,
           referal_percent: null,
           giftable: true,
+          regiftable: true,
         }
       }
       this.translations.attach(this.permission)

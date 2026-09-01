@@ -25,6 +25,9 @@ export class DonateGroup {
   @Column({ name: 'giftable', default: true })
   giftable: boolean;
 
+  @Column({ name: 'regiftable', default: true })
+  regiftable: boolean;
+
   @Column({ name: 'staff', default: false })
   staff: boolean;
 

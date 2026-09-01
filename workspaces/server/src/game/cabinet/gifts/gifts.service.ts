@@ -127,10 +127,12 @@ export class GiftsService {
           await this.cartService.giveKit(user, gift.server, gift.kit.id);
           break;
         case GiftType.Donate:
-          await this.donateGroupsService.give(user, gift.server, gift.donate_group, gift.period);
+          if (gift.period) await this.donateGroupsService.give(user, gift.server, gift.donate_group, gift.period);
+          else await this.donateGroupsService.giveUntil(user, gift.server, gift.donate_group, gift.until ?? null);
           break;
         case GiftType.Permission:
-          await this.donatePermissionsService.give(user, gift.server, gift.donate_permission, gift.period);
+          if (gift.period) await this.donatePermissionsService.give(user, gift.server, gift.donate_permission, gift.period);
+          else await this.donatePermissionsService.giveUntil(user, gift.server, gift.donate_permission, gift.until ?? null);
           break;
         case GiftType.Money:
           await this.moneyService.findOneByUserAndServer(gift.server.id, user);

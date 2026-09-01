@@ -380,6 +380,13 @@
                 <label for="group-giftable">{{ $t('admin.giftable') }}</label>
               </div>
               <div class="field-checkbox">
+                <Checkbox :binary="true" v-model="group.regiftable" inputId="group-regiftable" :disabled="!group.giftable" />
+                <label for="group-regiftable" class="flex align-items-center gap-1">
+                  {{ $t('admin.regiftable') }}
+                  <i v-tooltip.right="$t('admin.regiftable_hint')" class="pi pi-question-circle text-color-secondary" />
+                </label>
+              </div>
+              <div class="field-checkbox">
                 <Checkbox :binary="true" v-model="group.staff" inputId="group-staff" />
                 <label for="group-staff" class="flex align-items-center gap-1">
                   {{ $t('admin.staff') }}
@@ -477,6 +484,7 @@ export default {
         virtual_percent: null,
         referal_percent: null,
         giftable: true,
+        regiftable: true,
         staff: false,
         color: null,
       },
@@ -623,6 +631,7 @@ export default {
           virtual_percent: null,
           referal_percent: null,
           giftable: true,
+          regiftable: true,
           staff: false,
           color: null,
         }

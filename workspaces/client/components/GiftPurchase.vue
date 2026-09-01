@@ -22,7 +22,8 @@
       @keyup.enter="give()"
     />
     <Button :loading="loading" :disabled="disabled || !ready" outlined class="mt-3 w-100" @click="give()">
-      <i class="bx bxs-gift me-1"></i> {{ $t('cabinet.gift_give_for', { price: $utils.formatCurrency('real', price) }) }}
+      <i class="bx bxs-gift me-1"></i>
+      {{ price > 0 ? $t('cabinet.gift_give_for', { price: $utils.formatCurrency('real', price) }) : $t('cabinet.gift_give_free') }}
     </Button>
   </div>
 </template>

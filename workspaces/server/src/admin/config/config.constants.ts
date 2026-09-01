@@ -21,6 +21,7 @@ export const CONFIG_NUMBER_RULES: Partial<Record<ConfigField, ConfigNumberRule>>
   [ConfigField.MonitoringReward]: { fallback: 2, min: 0, max: CONFIG_AMOUNT_MAX },
   [ConfigField.UnbanPrice]: { fallback: 150, min: 0, max: CONFIG_AMOUNT_MAX },
   [ConfigField.VirtualPercent]: { fallback: 75, min: 0, max: CONFIG_PERCENT_MAX },
+  [ConfigField.GiftsRegiftPercent]: { fallback: 0, min: 0, max: CONFIG_PERCENT_MAX },
   [ConfigField.KeepPaidPaymentsDays]: { fallback: KEEP_PAID_PAYMENTS_DAYS, min: 0, max: CONFIG_DAYS_MAX },
   [ConfigField.KeepPendingPaymentsDays]: { fallback: KEEP_PENDING_PAYMENTS_DAYS, min: 0, max: CONFIG_DAYS_MAX },
   [ConfigField.KeepHistoryDays]: { fallback: KEEP_HISTORY_DAYS, min: 0, max: CONFIG_DAYS_MAX },
