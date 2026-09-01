@@ -41,7 +41,9 @@
           <Column selectionMode="multiple" :style="{ width: '3rem' }"></Column>
           <Column sortable field="id" header="ID" :style="{ width: '8rem' }"></Column>
           <Column field="name" :header="$t('admin.name')" sortable></Column>
-          <Column field="type" :header="$t('admin.event')" sortable></Column>
+          <Column field="type" :header="$t('admin.event')" sortable>
+            <template #body="slotProps">{{ $t(`admin.webhook_type_${slotProps.data.type}`) }}</template>
+          </Column>
           <Column field="request" :header="$t('admin.format')" sortable></Column>
           <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
@@ -94,8 +96,11 @@
                 <div class="field">
                   <label>{{ $t('admin.event') }}<span class="p-error"> *</span></label>
                   <Select :modelValue="value" @update:modelValue="handleChange" :options="list" optionLabel="id" appendTo="body">
+                    <template #value="slotProps">
+                      <span v-if="slotProps.value">{{ $t(`admin.webhook_type_${slotProps.value.id}`) }}</span>
+                    </template>
                     <template #option="slotProps">
-                      <p class="mb-1">{{ slotProps.option.id }}</p>
+                      <p class="mb-1">{{ $t(`admin.webhook_type_${slotProps.option.id}`) }}</p>
                       <span class="text-gray-200">{{ $t(slotProps.option.description) }}</span>
                     </template>
                   </Select>
