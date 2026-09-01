@@ -5,6 +5,7 @@ export enum ConfigField {
   ReferalTrigger = 'public_referal_trigger',
   ReferalReward = 'public_referal_reward',
   ReferalRewardPlayer = 'public_referal_reward_player',
+  ReferalPaymentPercent = 'public_referal_payment_percent',
   LinkForum = 'public_link_forum',
   LinkDiscord = 'public_link_discord',
   LinkVk = 'public_link_vk',

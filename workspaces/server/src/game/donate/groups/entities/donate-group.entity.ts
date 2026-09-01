@@ -43,6 +43,9 @@ export class DonateGroup {
   @Column({ nullable: true, name: 'virtual_percent' })
   virtual_percent?: number;
 
+  @Column({ nullable: true, name: 'referal_percent' })
+  referal_percent?: number;
+
   @Column({ nullable: true, name: 'sale' })
   sale: number;
 

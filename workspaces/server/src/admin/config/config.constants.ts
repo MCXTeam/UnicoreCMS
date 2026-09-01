@@ -17,6 +17,7 @@ export const CONFIG_NUMBER_RULES: Partial<Record<ConfigField, ConfigNumberRule>>
   [ConfigField.ReferalTrigger]: { fallback: 600, min: 0, max: CONFIG_AMOUNT_MAX },
   [ConfigField.ReferalReward]: { fallback: 20, min: 0, max: CONFIG_AMOUNT_MAX },
   [ConfigField.ReferalRewardPlayer]: { fallback: 20, min: 0, max: CONFIG_AMOUNT_MAX },
+  [ConfigField.ReferalPaymentPercent]: { fallback: 0, min: 0, max: CONFIG_PERCENT_MAX },
   [ConfigField.MonitoringReward]: { fallback: 2, min: 0, max: CONFIG_AMOUNT_MAX },
   [ConfigField.UnbanPrice]: { fallback: 150, min: 0, max: CONFIG_AMOUNT_MAX },
   [ConfigField.VirtualPercent]: { fallback: 75, min: 0, max: CONFIG_PERCENT_MAX },

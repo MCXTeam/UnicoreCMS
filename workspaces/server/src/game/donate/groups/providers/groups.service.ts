@@ -281,6 +281,7 @@ export class DonateGroupsService {
     group.web_role = (await this.webRoles.resolveWebRole(input.web_role_id)) ?? null;
     group.features = input.features.map((feature) => Object.assign(new GroupFeature(), feature));
     group.virtual_percent = input.virtual_percent;
+    group.referal_percent = input.referal_percent ?? null;
     group.giftable = input.giftable !== false;
     group.staff = Boolean(input.staff);
     group.color = input.color ?? null;
@@ -338,6 +339,7 @@ export class DonateGroupsService {
     group.web_role = (await this.webRoles.resolveWebRole(input.web_role_id)) ?? null;
     group.features = input.features.map((feature) => Object.assign(new GroupFeature(), feature));
     group.virtual_percent = input.virtual_percent;
+    group.referal_percent = input.referal_percent ?? null;
     group.giftable = input.giftable !== false;
     group.staff = Boolean(input.staff);
     group.color = input.color ?? null;

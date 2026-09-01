@@ -70,6 +70,7 @@ export class ConfigService {
         { key: ConfigField.ReferalTrigger, important: true, type: ConfigType.number, value: '600' },
         { key: ConfigField.ReferalReward, important: true, type: ConfigType.number, value: '20' },
         { key: ConfigField.ReferalRewardPlayer, important: true, type: ConfigType.number, value: '20' },
+        { key: ConfigField.ReferalPaymentPercent, important: true, type: ConfigType.number, value: '0' },
         { key: ConfigField.MonitoringReward, important: true, type: ConfigType.number, value: '2' },
         { key: ConfigField.LinkMctop, important: true, type: ConfigType.string, value: 'https://unicorecms.ru' },
         { key: ConfigField.LinkMinecraftraiting, important: true, type: ConfigType.string, value: 'https://unicorecms.ru' },

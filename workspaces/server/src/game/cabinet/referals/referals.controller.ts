@@ -16,4 +16,9 @@ export class ReferalsController {
   meReferals(@CurrentUser() user: User) {
     return this.referalsService.getReferals(user);
   }
+
+  @Get('me/percent')
+  async mePercent(@CurrentUser() user: User) {
+    return { percent: await this.referalsService.paymentPercent(user) };
+  }
 }

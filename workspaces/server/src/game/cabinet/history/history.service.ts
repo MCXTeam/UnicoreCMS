@@ -131,6 +131,7 @@ export class HistoryService {
   );
   create(type: HistoryType.UnabnPurchase, ip: string, user: User, cost: PurchaseCost);
   create(type: HistoryType.Payment, ip: string, user: User, payment: Payment);
+  create(type: HistoryType.ReferalReward, ip: string, user: User, target: User, payment: Payment, amount: number);
   create(type: HistoryType.MoneyServerTransfer, ip: string, user: User, server: Server, amount: number);
   create(type: HistoryType.MoneyExchange, ip: string, user: User, server: Server, amount: number);
   create(type: HistoryType.RealTransfer, ip: string, user: User, target: User, amount: number);
@@ -176,6 +177,12 @@ export class HistoryService {
         return this.historyRepository.insert(history);
       case HistoryType.Payment:
         history.payment = payload;
+
+        return this.historyRepository.insert(history);
+      case HistoryType.ReferalReward:
+        history.target = payload;
+        history.payment = secondPayload;
+        history.amount = thirdPayload;
 
         return this.historyRepository.insert(history);
       case HistoryType.RealTransfer:

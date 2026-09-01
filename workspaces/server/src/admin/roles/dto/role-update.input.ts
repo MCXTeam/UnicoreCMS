@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsArray, IsBoolean, IsDefined, IsEnum, IsHexColor, IsInt, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsDefined, IsEnum, IsHexColor, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 import { RoleBadgeEffect } from 'unicore-common';
 
 export class RoleUpdateInput {
@@ -14,6 +14,12 @@ export class RoleUpdateInput {
   @IsDefined()
   @IsInt()
   priority: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(100)
+  referal_percent?: number;
 
   @IsOptional()
   @IsHexColor()

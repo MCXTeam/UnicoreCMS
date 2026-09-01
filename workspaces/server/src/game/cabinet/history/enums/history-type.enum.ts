@@ -13,6 +13,7 @@ export enum HistoryType {
   RealTransfer = 'real_transfer',
 
   Payment = 'payment',
+  ReferalReward = 'referal_reward',
 
   PasswordChange = 'password_change',
 }

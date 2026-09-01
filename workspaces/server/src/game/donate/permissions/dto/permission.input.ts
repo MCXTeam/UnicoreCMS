@@ -65,6 +65,12 @@ export class PermissionInput {
   virtual_percent?: number;
 
   @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(100)
+  referal_percent?: number;
+
+  @IsOptional()
   @IsBoolean()
   giftable?: boolean;
 }

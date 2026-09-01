@@ -135,6 +135,28 @@
                 <small v-show="errorMessage" class="p-error">{{ errorMessage }}</small>
               </div>
             </VeeField>
+            <VeeField
+              v-model="role.referal_percent"
+              name="referal_percent"
+              :label="$t('admin.referal_percent')"
+              rules="min_value:0|max_value:100"
+              v-slot="{ value, errorMessage, handleChange, handleBlur }"
+            >
+              <div class="field">
+                <label>{{ $t('admin.referal_percent') }}</label>
+                <InputNumber
+                  suffix=" %"
+                  :useGrouping="false"
+                  :modelValue="value"
+                  @update:modelValue="handleChange"
+                  @input="handleChange($event.value)"
+                  @blur="handleBlur"
+                  :class="errorMessage && 'p-invalid'"
+                />
+                <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+                <small>{{ $t('admin.referal_percent_hint') }}</small>
+              </div>
+            </VeeField>
             <Divider align="left"
               ><span class="font-medium">{{ $t('admin.role_appearance') }}</span></Divider
             >
@@ -281,6 +303,7 @@ export default {
         id: null,
         name: null,
         priority: 0,
+        referal_percent: null,
         perms: [],
         color: null,
         staff: false,
@@ -342,6 +365,7 @@ export default {
           id: null,
           name: null,
           priority: 0,
+          referal_percent: null,
           perms: [],
           color: null,
           staff: false,

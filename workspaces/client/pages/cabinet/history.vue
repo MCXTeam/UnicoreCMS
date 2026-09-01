@@ -155,6 +155,22 @@
           >
         </Column>
 
+        <Column v-if="history_type == 'referal_reward'" :header="$t('players.player')">
+          <template #body="{ data }">
+            <NuxtLink v-if="data.target" :to="`/user/${data.target.username}`">{{ data.target.username }}</NuxtLink>
+          </template>
+        </Column>
+        <Column v-if="history_type == 'referal_reward'" :header="$t('cabinet.payment_id')">
+          <template #body="{ data }"
+            ><span v-if="data.payment"> #{{ data.payment.id }} </span></template
+          >
+        </Column>
+        <Column v-if="history_type == 'referal_reward'" :header="$t('cabinet.amount')">
+          <template #body="{ data }"
+            ><span v-if="data.amount"> {{ $utils.formatCurrency('real', data.amount) }} </span></template
+          >
+        </Column>
+
         <Column v-if="history_type.startsWith('gift_')" :header="$t('cabinet.gift_my_what')">
           <template #body="{ data }">{{ gifts.describe(data) }}</template>
         </Column>
@@ -223,6 +239,7 @@ export default {
         { label: this.$t('cabinet.type_money_exchange'), value: 'money_exchange' },
         { label: this.$t('cabinet.type_money_transfer'), value: 'money_transfer' },
         { label: this.$t('cabinet.type_real_transfer'), value: 'real_transfer' },
+        { label: this.$t('cabinet.type_referal_reward'), value: 'referal_reward' },
         { label: this.$t('cabinet.type_gift_purchase'), value: 'gift_purchase' },
         { label: this.$t('cabinet.type_gift_received'), value: 'gift_received' },
       ]

@@ -298,6 +298,28 @@
                   <small>{{ $t('admin.virtual_percent_hint') }}</small>
                 </VeeField>
               </div>
+              <div class="field">
+                <VeeField
+                  v-model="permission.referal_percent"
+                  name="referal_percent"
+                  :label="$t('admin.referal_percent')"
+                  rules="min_value:0|max_value:100"
+                  v-slot="{ value, errorMessage, handleChange, handleBlur }"
+                >
+                  <label>{{ $t('admin.referal_percent') }}</label>
+                  <InputNumber
+                    suffix=" %"
+                    :useGrouping="false"
+                    :modelValue="value"
+                    @update:modelValue="handleChange"
+                    @input="handleChange($event.value)"
+                    @blur="handleBlur"
+                    :class="errorMessage && 'p-invalid'"
+                  />
+                  <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+                  <small>{{ $t('admin.referal_percent_hint') }}</small>
+                </VeeField>
+              </div>
               <div class="field-checkbox">
                 <Checkbox :binary="true" v-model="permission.giftable" inputId="permission-giftable" />
                 <label for="permission-giftable">{{ $t('admin.giftable') }}</label>
@@ -382,6 +404,7 @@ export default {
         perms: [],
         web_perms: [],
         virtual_percent: null,
+        referal_percent: null,
         giftable: true,
       },
       permissionDialog: false,
@@ -476,6 +499,7 @@ export default {
           perms: [],
           web_perms: [],
           virtual_percent: null,
+          referal_percent: null,
           giftable: true,
         }
       }

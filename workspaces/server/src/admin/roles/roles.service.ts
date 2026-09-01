@@ -81,6 +81,7 @@ export class RolesService {
     role.name = input.name;
     role.perms = input.perms;
     role.priority = input.priority;
+    role.referal_percent = input.referal_percent ?? null;
     this.applyAppearance(role, input);
 
     return this.rolesRepository.save(role);
@@ -98,6 +99,7 @@ export class RolesService {
     role.name = input.name;
     role.perms = input.perms;
     role.priority = input.priority;
+    role.referal_percent = input.referal_percent ?? null;
     this.applyAppearance(role, input);
 
     return this.rolesRepository.save(role);

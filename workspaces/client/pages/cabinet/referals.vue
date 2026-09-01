@@ -18,6 +18,11 @@
       </p>
     </CabTile>
 
+    <CabTile v-if="percent > 0" :title="$t('cabinet.referal_percent')" icon="bx bx-wallet" :span="12">
+      <div class="cab-metric">{{ percent }}%</div>
+      <p class="cab-sub mt-2 mb-0">{{ $t('cabinet.referal_percent_hint') }}</p>
+    </CabTile>
+
     <CabTile :title="$t('cabinet.referal_link')" icon="bx bx-link" :span="12">
       <p class="cab-sub mt-0 mb-3">{{ $t('cabinet.referal_intro') }}</p>
       <div class="cab-copy">
@@ -75,6 +80,7 @@ export default {
     return {
       link: '',
       referals: [],
+      percent: 0,
     }
   },
 
@@ -85,7 +91,10 @@ export default {
 
   methods: {
     async load() {
-      this.referals = await this.cabinet.referals()
+      const [referals, reward] = await Promise.all([this.cabinet.referals(), this.cabinet.referalPercent().catch(() => ({ percent: 0 }))])
+
+      this.referals = referals
+      this.percent = Number(reward?.percent) || 0
     },
 
     async copyLink() {

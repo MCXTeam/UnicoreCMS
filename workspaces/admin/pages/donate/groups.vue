@@ -353,6 +353,28 @@
                   <small>{{ $t('admin.virtual_percent_hint') }}</small>
                 </VeeField>
               </div>
+              <div class="field">
+                <VeeField
+                  v-model="group.referal_percent"
+                  name="referal_percent"
+                  :label="$t('admin.referal_percent')"
+                  rules="min_value:0|max_value:100"
+                  v-slot="{ value, errorMessage, handleChange, handleBlur }"
+                >
+                  <label>{{ $t('admin.referal_percent') }}</label>
+                  <InputNumber
+                    suffix=" %"
+                    :useGrouping="false"
+                    :modelValue="value"
+                    @update:modelValue="handleChange"
+                    @input="handleChange($event.value)"
+                    @blur="handleBlur"
+                    :class="errorMessage && 'p-invalid'"
+                  />
+                  <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+                  <small>{{ $t('admin.referal_percent_hint') }}</small>
+                </VeeField>
+              </div>
               <div class="field-checkbox">
                 <Checkbox :binary="true" v-model="group.giftable" inputId="group-giftable" />
                 <label for="group-giftable">{{ $t('admin.giftable') }}</label>
@@ -453,6 +475,7 @@ export default {
         kits: [],
         periods: [],
         virtual_percent: null,
+        referal_percent: null,
         giftable: true,
         staff: false,
         color: null,
@@ -598,6 +621,7 @@ export default {
           kits: [],
           periods: [],
           virtual_percent: null,
+          referal_percent: null,
           giftable: true,
           staff: false,
           color: null,

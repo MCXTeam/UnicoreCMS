@@ -23,6 +23,9 @@ export class Role {
   @Column({ default: 0, name: 'priority' })
   priority: number;
 
+  @Column({ nullable: true, name: 'referal_percent' })
+  referal_percent?: number;
+
   @Column({ name: 'color', length: ROLE_COLOR_MAX_LENGTH, nullable: true })
   color: string;
 

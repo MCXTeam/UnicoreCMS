@@ -4,6 +4,7 @@ import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
 import { User } from 'src/admin/users/entities/user.entity';
 import { HistoryType } from 'src/game/cabinet/history/enums/history-type.enum';
 import { HistoryService } from 'src/game/cabinet/history/history.service';
+import { ReferalsService } from 'src/game/cabinet/referals/referals.service';
 import { Bonus } from 'src/payment/bonuses/entities/bonus.entity';
 import { Payment } from 'src/payment/entities/payment.entity';
 import { PaymentStatuses } from 'src/payment/enums/payment-statuses.enum';
@@ -17,6 +18,7 @@ export class PaymentHandlerService {
 
   constructor(
     private historyService: HistoryService,
+    private referalsService: ReferalsService,
     @InjectRepository(Payment) private paymentsRepo: Repository<Payment>,
     @InjectRepository(Bonus) private bonusesRepo: Repository<Bonus>,
     @InjectRepository(User) private usersRepo: Repository<User>,
@@ -73,6 +75,13 @@ export class PaymentHandlerService {
 
     await this.usersRepo.increment({ uuid: payment.user.uuid }, 'real', credit);
     await this.historyService.create(HistoryType.Payment, payment.ip, payment.user, payment);
+
+    const reward = await this.referalsService.paymentReward(payment.user, paid);
+
+    if (reward) {
+      await this.usersRepo.increment({ uuid: reward.inviter.uuid }, 'real', reward.amount);
+      await this.historyService.create(HistoryType.ReferalReward, payment.ip, reward.inviter, payment.user, payment, reward.amount);
+    }
 
     runAfterCommit(() => events().emit('payment.paid', { id, uuid: payment.user.uuid, amount: credit, method: payment.method }));
 
