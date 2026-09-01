@@ -1,5 +1,8 @@
 export const DEFAULT_TIMEZONE = "UTC";
 
+export const ENV_FILE_NAME = ".env";
+export const WORKSPACE_MARKER = "pnpm-workspace.yaml";
+
 export const DEFAULT_CLIENT_PORT = 3000;
 export const DEFAULT_ADMIN_PORT = 4000;
 export const DEFAULT_BACKEND_PORT = 5000;

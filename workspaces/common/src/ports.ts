@@ -8,9 +8,11 @@ import {
   DEFAULT_ADMIN_PORT,
   DEFAULT_BACKEND_PORT,
   DEFAULT_CLIENT_PORT,
+  ENV_FILE_NAME,
   MAX_PORT,
   MIN_PORT,
   PUBLIC_ENV_KEYS,
+  WORKSPACE_MARKER,
 } from "./constants";
 
 const processEnv: NodeJS.ProcessEnv =
@@ -19,18 +21,26 @@ const processEnv: NodeJS.ProcessEnv =
 const isNodeRuntime =
   typeof process !== "undefined" && Boolean(process.versions?.node);
 
-const locateEnvFile = (): string => {
-  const fallback = resolve(".env");
-  if (!isNodeRuntime) return fallback;
-
+const findUp = (name: string): string | undefined => {
   let dir = process.cwd();
   for (;;) {
-    const candidate = resolve(dir, ".env");
+    const candidate = resolve(dir, name);
     if (existsSync(candidate)) return candidate;
     const parent = dirname(dir);
-    if (parent === dir) return fallback;
+    if (parent === dir) return undefined;
     dir = parent;
   }
+};
+
+const locateEnvFile = (): string => {
+  const fallback = resolve(ENV_FILE_NAME);
+  if (!isNodeRuntime) return fallback;
+
+  const envFile = findUp(ENV_FILE_NAME);
+  if (envFile) return envFile;
+
+  const workspace = findUp(WORKSPACE_MARKER);
+  return workspace ? resolve(dirname(workspace), ENV_FILE_NAME) : fallback;
 };
 
 export const envFilePath = locateEnvFile();

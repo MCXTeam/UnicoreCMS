@@ -2,7 +2,7 @@ services:
   nginx:
     image: nginx:1.21.6
     container_name: unicorecms-nginx
-    profiles: 
+    profiles:
       - nginx
     restart: unless-stopped
     environment:
@@ -54,6 +54,8 @@ services:
     volumes:
       - ./storage:/usr/local/app/storage
       - ./logs:/usr/local/app/logs
+      - ./modules:/usr/local/app/modules
+      - ./themes:/usr/local/app/themes
     ports:
       - "127.0.0.1:${CLIENT_PORT:-3000}:${CLIENT_PORT:-3000}"
       - "127.0.0.1:${ADMIN_PORT:-4000}:${ADMIN_PORT:-4000}"
@@ -68,10 +70,11 @@ services:
     image: phpmyadmin/phpmyadmin
     container_name: unicorecms-pma
     restart: unless-stopped
-    profiles: 
+    profiles:
       - dev
-    links:
-      - mariadb
+    depends_on:
+      mariadb:
+        condition: service_healthy
     environment:
       PMA_HOST: mariadb
       PMA_PORT: 3306
