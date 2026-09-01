@@ -43,6 +43,7 @@ export class ModulesController {
     return this.service.setEnabled(id, input.enabled);
   }
 
+  @Permissions(['panel.extensions.manage'])
   @Delete(':id')
   purge(@Param('id') id: string, @Query('purge') purge?: string) {
     if (purge !== '1') return { purged: false };

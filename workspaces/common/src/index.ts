@@ -15,3 +15,4 @@ export * from "./console";
 export * from "./validation";
 export * from "./sanitize";
 export * from "./issuance";
+export * from "./extensions";

@@ -33,6 +33,14 @@ export const IMPORT_MAX_ENTRIES = 1000;
 export const EXTENSION_MAX_FILES = 3000;
 export const EXTENSION_MAX_UNPACKED_BYTES = 128 * 1024 * 1024;
 export const EXTENSION_MAX_PATH_LENGTH = 200;
+export const EXTENSION_CATALOG_CACHE_TTL_MS = 10 * 60_000;
+export const EXTENSION_DOWNLOAD_TIMEOUT_MS = 60_000;
+export const EXTENSION_DOWNLOAD_MAX_REDIRECTS = 5;
+export const EXTENSION_CATALOG_MAX_BYTES = 2 * 1024 * 1024;
+export const GITHUB_API_BASEURL = 'https://api.github.com';
+export const GITHUB_API_VERSION = '2022-11-28';
+export const GITHUB_RELEASES_PER_PAGE = 100;
+export const GITHUB_TOKEN_HOSTS = ['api.github.com', 'github.com', 'codeload.github.com'];
 export const IMPORT_MAX_UNPACKED_BYTES = 100 * 1024 * 1024;
 
 export const RCON_COMMAND_MAX_LENGTH = 1000;
@@ -88,6 +96,7 @@ export const CRYPTO_PURPOSE_FIELD = 'field';
 export const ENCRYPTED_RCON_PASSWORD = 'rcon.password';
 export const ENCRYPTED_TWO_FACTOR_SECRET = 'user.two_factor_secret';
 export const ENCRYPTED_TWO_FACTOR_SECRET_TEMP = 'user.two_factor_secret_temp';
+export const ENCRYPTED_SOURCE_TOKEN = 'extension_source.token';
 
 export const PASSWORD_ALGORITHM_ARGON2ID = 'argon2id';
 export const PASSWORD_ALGORITHM_BCRYPT = 'bcrypt';

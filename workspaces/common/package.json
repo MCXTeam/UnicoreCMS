@@ -62,6 +62,11 @@
       "import": "./dist/webhooks.mjs",
       "require": "./dist/webhooks.js"
     },
+    "./extensions": {
+      "types": "./dist/extensions.d.ts",
+      "import": "./dist/extensions.mjs",
+      "require": "./dist/extensions.js"
+    },
     "./password": {
       "types": "./dist/password.d.ts",
       "import": "./dist/password.mjs",

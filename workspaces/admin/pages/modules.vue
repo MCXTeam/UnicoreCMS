@@ -160,6 +160,9 @@
         </Dialog>
       </div>
     </div>
+    <div class="col-12">
+      <ExtensionCatalog kind="module" :canManage="canManage" @installed="load()" />
+    </div>
   </div>
 </template>
 

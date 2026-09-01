@@ -73,6 +73,9 @@
         </Message>
       </div>
     </div>
+    <div class="col-12">
+      <ExtensionCatalog kind="theme" :canManage="canManage" @installed="load()" />
+    </div>
   </div>
 </template>
 

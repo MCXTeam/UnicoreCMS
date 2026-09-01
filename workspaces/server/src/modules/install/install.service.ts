@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, statSync } from 'fs';
-import { join, resolve } from 'path';
+import { join, resolve, sep } from 'path';
 import { satisfies } from 'semver';
 import { modulesPath, themesPath } from 'unicore-common';
 import {
@@ -27,7 +27,7 @@ export class InstallService {
 
   constructor(private readonly modules: ModulesService, private readonly dataSource: DataSource) {}
 
-  async install(filename: string): Promise<InstallResultDto> {
+  async install(filename: string, expected?: { kind: ExtensionKind; id: string }): Promise<InstallResultDto> {
     const buffer = StorageManager.read(filename);
 
     StorageManager.remove(filename);
@@ -36,6 +36,12 @@ export class InstallService {
 
     const content = await readExtensionArchive(buffer);
     const manifest = this.validate(content.kind, content.raw);
+
+    if (expected && (expected.kind !== content.kind || expected.id !== manifest.id))
+      throw new BadRequestException(
+        `В архиве оказалось расширение ${content.kind} «${manifest.id}», ожидалось ${expected.kind} «${expected.id}»`,
+      );
+
     const root = content.kind === 'module' ? modulesPath : themesPath;
 
     if (!existsSync(root)) mkdirSync(root, { recursive: true });
@@ -56,7 +62,7 @@ export class InstallService {
 
     const fresh = content.kind === 'module' && !previous;
 
-    if (fresh) this.installDisabled(manifest.id, manifest.version);
+    if (content.kind === 'module') this.recordInstall(manifest.id, manifest.version, fresh);
 
     this.logger.log(
       `${content.kind === 'module' ? 'Модуль' : 'Тема'} ${manifest.id} ${manifest.version} ${previous ? 'обновлён' : 'установлен'}`,
@@ -99,7 +105,7 @@ export class InstallService {
     const inside = (relative: string): string => {
       const path = resolve(dir, relative);
 
-      if (path !== dir && !path.startsWith(`${dir}/`)) throw new BadRequestException(`Путь «${relative}» выходит за папку расширения`);
+      if (path !== dir && !path.startsWith(`${dir}${sep}`)) throw new BadRequestException(`Путь «${relative}» выходит за папку расширения`);
 
       return path;
     };
@@ -159,10 +165,10 @@ export class InstallService {
     rmSync(backup, { recursive: true, force: true });
   }
 
-  private installDisabled(id: string, version: string): void {
+  private recordInstall(id: string, version: string, fresh: boolean): void {
     const state = readState();
 
-    state[id] = { ...(state[id] || {}), enabled: false, installedVersion: version };
+    state[id] = { ...(state[id] || {}), enabled: fresh ? false : state[id]?.enabled, installedVersion: version };
 
     writeState(state);
   }

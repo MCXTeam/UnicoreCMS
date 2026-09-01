@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { dirname, join } from 'path';
 import JSZip from 'jszip';
 import { EXTENSION_MAX_FILES, EXTENSION_MAX_PATH_LENGTH, EXTENSION_MAX_UNPACKED_BYTES } from '@common';
+import type { ExtensionKind } from 'unicore-common';
 import { readCentralDirectory } from './zip-directory';
 
 const IGNORED_SEGMENTS = ['__MACOSX', '.git', '.svn'];
@@ -10,7 +11,7 @@ const IGNORED_NAMES = ['.DS_Store', 'Thumbs.db', 'desktop.ini'];
 const SYMLINK_MODE = 0xa000;
 const FILE_TYPE_MASK = 0xf000;
 
-export type ExtensionKind = 'module' | 'theme';
+export type { ExtensionKind };
 
 type EntryStatus = 'ok' | 'skip' | 'unsafe';
 
@@ -147,20 +148,30 @@ export const readExtensionArchive = async (buffer: Buffer): Promise<ArchiveConte
   return { kind: name === 'module.json' ? 'module' : 'theme', raw, zip, root: parts.slice(0, -1).join('/') };
 };
 
+const directoryNames = (items: ClassifiedEntry[]): Set<string> => {
+  const names = new Set<string>();
+
+  for (const { parts } of items) for (let depth = 1; depth < parts.length; depth++) names.add(parts.slice(0, depth).join('/'));
+
+  return names;
+};
+
 export const extractArchive = async (content: ArchiveContent, target: string): Promise<number> => {
+  const items = classified(content.zip);
+  const directories = directoryNames(items);
   let written = 0;
   let total = 0;
 
   mkdirSync(target, { recursive: true });
 
-  for (const item of classified(content.zip)) {
+  for (const item of items) {
     const parts = inside(item.parts, content.root);
 
     if (!parts) continue;
 
     const destination = join(target, ...parts);
 
-    if (item.entry.dir) {
+    if (item.entry.dir || directories.has(item.parts.join('/'))) {
       mkdirSync(destination, { recursive: true });
       continue;
     }

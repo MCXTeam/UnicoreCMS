@@ -9,6 +9,7 @@ import {
   encrypt,
   encryptField,
   ENCRYPTED_RCON_PASSWORD,
+  ENCRYPTED_SOURCE_TOKEN,
   ENCRYPTED_TWO_FACTOR_SECRET,
   ENCRYPTED_TWO_FACTOR_SECRET_TEMP,
   isCurrentKey,
@@ -16,6 +17,7 @@ import {
 import { passwordAad } from 'src/auth/password/password-aad';
 import { User } from 'src/admin/users/entities/user.entity';
 import { RCON } from 'src/game/servers/rcon/entities/rcon.entity';
+import { ExtensionSource } from 'src/modules/catalog/entities/extension-source.entity';
 import { stdout } from '../stdout';
 
 @Command({
@@ -28,6 +30,8 @@ export class CryptoRewrapCommand extends CommandRunner {
     private usersRepository: Repository<User>,
     @InjectRepository(RCON)
     private rconRepository: Repository<RCON>,
+    @InjectRepository(ExtensionSource)
+    private sourcesRepository: Repository<ExtensionSource>,
   ) {
     super();
   }
@@ -81,10 +85,19 @@ export class CryptoRewrapCommand extends CommandRunner {
       );
     }
 
+    const sources = (await this.sourcesRepository.find()).filter((source) => source.token);
+
+    for (const source of sources)
+      await this.sourcesRepository.update(
+        { id: source.id },
+        { token: this.rewrapField(source.token, ENCRYPTED_SOURCE_TOKEN, String(source.id)) },
+      );
+
     stdout(clc.magenta('Secrets re-encrypted with the current key'));
     stdout(`Passwords: ${clc.magenta(String(passwords))}`);
     stdout(`Two-factor secrets: ${clc.magenta(String(secrets))}`);
     stdout(`RCON passwords: ${clc.magenta(String(rcons.length))}`);
+    stdout(`Extension source tokens: ${clc.magenta(String(sources.length))}`);
 
     if (failed) stdout(clc.red(`Failed to decrypt: ${failed} (wrong ENCRYPTION_KEY_PREVIOUS?)`));
   }

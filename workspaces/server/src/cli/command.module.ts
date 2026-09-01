@@ -12,6 +12,7 @@ import { CryptoRewrapCommand } from './commands/crypto.commands';
 import { PermissionsCheckCommand } from './commands/permissions.commands';
 import { User } from 'src/admin/users/entities/user.entity';
 import { RCON } from 'src/game/servers/rcon/entities/rcon.entity';
+import { ExtensionSource } from 'src/modules/catalog/entities/extension-source.entity';
 
 @Module({
   imports: [
@@ -28,7 +29,7 @@ import { RCON } from 'src/game/servers/rcon/entities/rcon.entity';
       isGlobal: true,
     }),
     UsersModule,
-    TypeOrmModule.forFeature([User, RCON]),
+    TypeOrmModule.forFeature([User, RCON, ExtensionSource]),
   ],
   providers: [UsersCommandCreate, SeedCommand, CryptoRewrapCommand, PermissionsCheckCommand],
 })
