@@ -1,6 +1,20 @@
-import { STORAGE_MAX_IMAGE_UPLOAD, StorageManager } from '@common';
-import { Controller, Delete, Get, Param, Patch, Req, Response, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { STORAGE_MAX_IMAGE_UPLOAD, StorageManager, TEXTURE_CACHE_CONTROL } from '@common';
+import {
+  Controller,
+  Delete,
+  Get,
+  HttpStatus,
+  NotFoundException,
+  Param,
+  Patch,
+  Req,
+  Response,
+  StreamableFile,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Request, Response as ExpressResponse } from 'express';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
@@ -12,36 +26,53 @@ import { SkinService } from './skin.service';
 export class SkinController {
   constructor(private skinsService: SkinService) {}
 
+  private texture(req: Request, res: ExpressResponse, file: string): StreamableFile | undefined {
+    const etag = `"${file}"`;
+
+    res.set({ 'Content-Type': 'image/png', 'Cache-Control': TEXTURE_CACHE_CONTROL, ETag: etag });
+
+    if (req.headers['if-none-match'] === etag) {
+      res.status(HttpStatus.NOT_MODIFIED);
+      return;
+    }
+
+    const stream = StorageManager.readStream(file);
+
+    if (!stream) throw new NotFoundException();
+
+    return new StreamableFile(stream);
+  }
+
   @Public()
   @Get('public/skin/username/:username')
-  async streamSkinByUsername(@Response({ passthrough: true }) res, @Param('username') username: string) {
-    const file = await this.skinsService.streamSkinByUsername(username);
-    res.set({ 'Content-Type': 'image/png' });
-    return file;
+  async streamSkinByUsername(
+    @Req() req: Request,
+    @Response({ passthrough: true }) res: ExpressResponse,
+    @Param('username') username: string,
+  ) {
+    return this.texture(req, res, await this.skinsService.skinFileByUsername(username));
   }
 
   @Public()
   @Get('public/skin/uuid/:uuid')
-  async streamSkinByUUID(@Response({ passthrough: true }) res, @Param('uuid') uuid: string) {
-    const file = await this.skinsService.streamSkinByUUID(uuid);
-    res.set({ 'Content-Type': 'image/png' });
-    return file;
+  async streamSkinByUUID(@Req() req: Request, @Response({ passthrough: true }) res: ExpressResponse, @Param('uuid') uuid: string) {
+    return this.texture(req, res, await this.skinsService.skinFileByUUID(uuid));
   }
 
   @Public()
   @Get('public/cloak/username/:username')
-  async streamCloakByUsername(@Response({ passthrough: true }) res, @Param('username') username: string) {
-    const file = await this.skinsService.streamCloakByUsername(username);
-    res.set({ 'Content-Type': 'image/png' });
-    return file;
+  async streamCloakByUsername(
+    @Req() req: Request,
+    @Response({ passthrough: true }) res: ExpressResponse,
+    @Param('username') username: string,
+  ) {
+    return this.texture(req, res, await this.skinsService.cloakFileByUsername(username));
   }
 
   @Public()
   @Get('public/cloak/uuid/:uuid')
-  async streamCloakByUUID(@Response({ passthrough: true }) res, @Param('uuid') uuid: string) {
-    const file = await this.skinsService.streamCloakByUUID(uuid);
-    res.set({ 'Content-Type': 'image/png' });
-    return file;
+  async streamCloakByUUID(@Req() req: Request, @Response({ passthrough: true }) res: ExpressResponse, @Param('uuid') uuid: string) {
+    return this.texture(req, res, await this.skinsService.cloakFileByUUID(uuid));
   }
 
   @Permissions(['player.skin.upload'])

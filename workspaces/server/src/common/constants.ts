@@ -128,6 +128,7 @@ export const SERVER_MODS_MAX = 5000;
 
 export const DEFAULT_SKIN_FILE = 'default/skin.png';
 export const DEFAULT_CLOAK_FILE = 'default/cloak.png';
+export const TEXTURE_CACHE_CONTROL = 'no-cache';
 
 export const KERNEL_USERNAME = 'Kernel';
 

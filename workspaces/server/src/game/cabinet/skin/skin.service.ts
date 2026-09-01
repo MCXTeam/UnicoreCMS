@@ -1,7 +1,15 @@
-import { ForbiddenException, Injectable, NotFoundException, StreamableFile, UnsupportedMediaTypeException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException, UnsupportedMediaTypeException } from '@nestjs/common';
 import { matchPermission } from 'src/admin/roles/guards/permisson.guard';
 import { imageSize } from 'image-size';
-import { assertUploadedFile, DEFAULT_CLOAK_FILE, DEFAULT_SKIN_FILE, SKIN_MAX_SIZE, STORAGE_MAX_IMAGE_UPLOAD, StorageManager } from '@common';
+import {
+  assertUploadedFile,
+  DEFAULT_CLOAK_FILE,
+  DEFAULT_SKIN_FILE,
+  PNG_EXTENSION_PATTERN,
+  SKIN_MAX_SIZE,
+  STORAGE_MAX_IMAGE_UPLOAD,
+  StorageManager,
+} from '@common';
 import { Repository } from 'typeorm';
 import { Skin } from './entities/skin.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -148,47 +156,39 @@ export class SkinService {
     return this.removeSkin(user);
   }
 
-  async streamSkinByUsername(username: string): Promise<StreamableFile> {
-    const user = await this.usersService.getByUsername(username);
-    if (user?.skin) var file = StorageManager.readStream(user.skin.file);
+  private textureFile(file: string | undefined, fallback: string): string {
+    const found = [file, fallback].find((candidate) => StorageManager.exists(candidate));
 
-    if (!file) var default_file = StorageManager.readStream(DEFAULT_SKIN_FILE);
+    if (!found) throw new NotFoundException();
 
-    if (!file && !default_file) throw new NotFoundException();
-
-    return new StreamableFile(file || default_file);
+    return found;
   }
 
-  async streamSkinByUUID(uuid: string): Promise<StreamableFile> {
-    const user = await this.usersService.getById(uuid);
-    if (user?.skin) var file = StorageManager.readStream(user.skin.file);
-
-    if (!file) var default_file = StorageManager.readStream(DEFAULT_SKIN_FILE);
-
-    if (!file && !default_file) throw new NotFoundException();
-
-    return new StreamableFile(file || default_file);
+  private textureKey(param: string): string {
+    return param.replace(PNG_EXTENSION_PATTERN, '');
   }
 
-  async streamCloakByUsername(username: string): Promise<StreamableFile> {
-    const user = await this.usersService.getByUsername(username);
-    if (user?.cloak) var file = StorageManager.readStream(user.cloak.file);
+  async skinFileByUsername(username: string): Promise<string> {
+    const user = await this.usersService.getByUsername(this.textureKey(username));
 
-    if (!file) var default_file = StorageManager.readStream(DEFAULT_CLOAK_FILE);
-
-    if (!file && !default_file) throw new NotFoundException();
-
-    return new StreamableFile(file || default_file);
+    return this.textureFile(user?.skin?.file, DEFAULT_SKIN_FILE);
   }
 
-  async streamCloakByUUID(uuid: string): Promise<StreamableFile> {
-    const user = await this.usersService.getById(uuid);
-    if (user?.cloak) var file = StorageManager.readStream(user.cloak.file);
+  async skinFileByUUID(uuid: string): Promise<string> {
+    const user = await this.usersService.getById(this.textureKey(uuid));
 
-    if (!file) var default_file = StorageManager.readStream(DEFAULT_CLOAK_FILE);
+    return this.textureFile(user?.skin?.file, DEFAULT_SKIN_FILE);
+  }
 
-    if (!file && !default_file) throw new NotFoundException();
+  async cloakFileByUsername(username: string): Promise<string> {
+    const user = await this.usersService.getByUsername(this.textureKey(username));
 
-    return new StreamableFile(file || default_file);
+    return this.textureFile(user?.cloak?.file, DEFAULT_CLOAK_FILE);
+  }
+
+  async cloakFileByUUID(uuid: string): Promise<string> {
+    const user = await this.usersService.getById(this.textureKey(uuid));
+
+    return this.textureFile(user?.cloak?.file, DEFAULT_CLOAK_FILE);
   }
 }

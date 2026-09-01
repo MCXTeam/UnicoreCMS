@@ -221,23 +221,25 @@ export class StorageManager {
     return false;
   }
 
-  static read(filename?: string, maxBytes?: number): Buffer | null {
-    if (!filename) return null;
+  static exists(filename?: string): boolean {
+    if (!filename) return false;
 
     const path = destination + '/' + filename;
 
-    if (existsSync(path) && lstatSync(path).isFile()) {
-      if (typeof maxBytes === 'number' && lstatSync(path).size > maxBytes) return null;
-      return readFileSync(path);
-    } else return null;
+    return existsSync(path) && lstatSync(path).isFile();
+  }
+
+  static read(filename?: string, maxBytes?: number): Buffer | null {
+    if (!StorageManager.exists(filename)) return null;
+
+    const path = destination + '/' + filename;
+
+    if (typeof maxBytes === 'number' && lstatSync(path).size > maxBytes) return null;
+
+    return readFileSync(path);
   }
 
   static readStream(filename?: string): ReadStream | null {
-    if (!filename) return null;
-
-    const path = destination + '/' + filename;
-
-    if (existsSync(path) && lstatSync(path).isFile()) return createReadStream(path);
-    else return null;
+    return StorageManager.exists(filename) ? createReadStream(destination + '/' + filename) : null;
   }
 }
