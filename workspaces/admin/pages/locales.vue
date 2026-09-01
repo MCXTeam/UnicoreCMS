@@ -281,7 +281,7 @@ export default {
   },
   computed: {
     rows() {
-      return this.keys.map((key) => ({ key, value: this.messages[key] || '' }))
+      return this.keys.map((key) => ({ key, value: this.original[key] || '' }))
     },
     changed() {
       return this.keys.some((key) => (this.messages[key] || '') !== (this.original[key] || ''))
