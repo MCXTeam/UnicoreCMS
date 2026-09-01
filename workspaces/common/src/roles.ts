@@ -23,7 +23,15 @@ export const ROLE_COLOR_MAX_LENGTH = 32;
 
 export const ROLE_BADGE_DEFAULT_COLOR = "#ffffff";
 
+export const ROLE_BADGE_DARK_COLOR = "#111111";
+
 export const ROLE_BADGE_DEFAULT_BACKGROUND = "#1f9d70";
+
+const HEX_COLOR_PATTERN = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
+
+const SRGB_LINEAR_THRESHOLD = 0.04045;
+
+const CONTRAST_LUMINANCE_THRESHOLD = 0.4;
 
 export interface RoleAppearance {
   name?: string;
@@ -53,6 +61,48 @@ export function roleNameStyle(
   role?: RoleAppearance | null,
 ): Record<string, string> {
   return role?.color ? { color: role.color } : {};
+}
+
+export function roleContrastColor(background?: string | null): string {
+  if (!background || !HEX_COLOR_PATTERN.test(background))
+    return ROLE_BADGE_DEFAULT_COLOR;
+
+  const digits =
+    background.length === 4
+      ? [...background.slice(1)].map((char) => char + char).join("")
+      : background.slice(1);
+  const [red, green, blue] = [0, 2, 4].map((offset) => {
+    const channel = parseInt(digits.slice(offset, offset + 2), 16) / 255;
+
+    return channel <= SRGB_LINEAR_THRESHOLD
+      ? channel / 12.92
+      : ((channel + 0.055) / 1.055) ** 2.4;
+  });
+  const luminance = 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+
+  return luminance > CONTRAST_LUMINANCE_THRESHOLD
+    ? ROLE_BADGE_DARK_COLOR
+    : ROLE_BADGE_DEFAULT_COLOR;
+}
+
+export function staffRoleAppearance(role: RoleAppearance): RoleAppearance {
+  return { ...role, badge: true };
+}
+
+export function staffGroupAppearance(
+  name: string,
+  color?: string | null,
+): RoleAppearance {
+  return {
+    name,
+    color: color ?? null,
+    badge: true,
+    badge_color: roleContrastColor(color),
+    badge_background: color ?? null,
+    badge_background_end: null,
+    badge_image: null,
+    badge_effect: RoleBadgeEffect.None,
+  };
 }
 
 export function roleBadgeStyle(

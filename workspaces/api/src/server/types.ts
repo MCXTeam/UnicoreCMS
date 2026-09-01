@@ -2,6 +2,8 @@ import type { DataSource } from 'typeorm'
 import type { RoleAppearance } from 'unicore-common'
 import type { WebhookPost } from './webhook'
 
+export type { RoleAppearance }
+
 export interface SkinRecord {
   file: string
   slim?: boolean
@@ -106,6 +108,7 @@ export interface StaffMember {
   username: string
   label: string
   color: string | null
+  role: RoleAppearance
   serverId: string | null
   priority: number
   skin?: SkinRecord | null

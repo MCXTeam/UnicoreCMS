@@ -1,6 +1,7 @@
 import { warnUnknown } from '../warn'
 
 export { LOCALE_HEADER } from 'unicore-common/locales'
+export type { RoleAppearance } from 'unicore-common/roles'
 
 export const CLIENT_NAV_PLACES = [
   'navbar',

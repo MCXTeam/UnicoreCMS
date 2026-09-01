@@ -52,11 +52,7 @@ export class RoleAppearanceDto implements RoleAppearanceRecord {
   }
 }
 
-export function roleAppearanceRecord(roles?: Role[] | null): RoleAppearanceRecord {
-  const role = displayRole(roles as (Role & { priority?: number })[]);
-
-  if (!role) return null;
-
+export function roleAppearanceOf(role: Role): RoleAppearanceRecord {
   return {
     id: role.id,
     name: role.name,
@@ -69,6 +65,12 @@ export function roleAppearanceRecord(roles?: Role[] | null): RoleAppearanceRecor
     badge_image: role.badge_image ?? null,
     badge_effect: role.badge_effect ?? RoleBadgeEffect.None,
   };
+}
+
+export function roleAppearanceRecord(roles?: Role[] | null): RoleAppearanceRecord {
+  const role = displayRole(roles as (Role & { priority?: number })[]);
+
+  return role ? roleAppearanceOf(role) : null;
 }
 
 export function roleAppearance(roles?: Role[] | null): RoleAppearanceDto {

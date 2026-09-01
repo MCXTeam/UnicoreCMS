@@ -6,12 +6,13 @@ import { DataSource } from 'typeorm';
 import { API_VERSION, capabilities, events, setCore } from 'unicore-api';
 import type { CoreApi, LoggerApi, StaffMember, UserRecord } from 'unicore-api';
 import { formatError, stdout } from '@common';
+import { staffGroupAppearance, staffRoleAppearance } from 'unicore-common';
 import { StorageManager } from 'src/common/storage/storage.class';
 import { ConfigService } from 'src/admin/config/config.service';
 import { LocalesService } from 'src/admin/locales/locales.service';
 import { UsersService } from 'src/admin/users/users.service';
 import { User } from 'src/admin/users/entities/user.entity';
-import { roleAppearanceRecord } from 'src/admin/roles/dto/role-appearance.dto';
+import { roleAppearanceOf, roleAppearanceRecord } from 'src/admin/roles/dto/role-appearance.dto';
 import { matchPermission, transformPermissions } from 'src/admin/roles/guards/permisson.guard';
 import { IssuanceService } from 'src/game/servers/rcon/issuance.service';
 import { RconService } from 'src/game/servers/rcon/rcon.service';
@@ -136,6 +137,7 @@ export class ApiHostService implements OnApplicationBootstrap, OnApplicationShut
           username: user.username,
           label: role.name,
           color: role.color ?? null,
+          role: staffRoleAppearance(roleAppearanceOf(role)),
           serverId: null,
           priority: role.priority ?? 0,
           skin: user.skin ? { file: user.skin.file, slim: Boolean(user.skin.slim) } : null,
@@ -149,6 +151,7 @@ export class ApiHostService implements OnApplicationBootstrap, OnApplicationShut
           username: row.user.username,
           label: row.group.name,
           color: row.group.color ?? null,
+          role: staffGroupAppearance(row.group.name, row.group.color),
           serverId: row.server.id,
           priority: row.group.priority ?? 0,
           skin: row.user.skin ? { file: row.user.skin.file, slim: Boolean(row.user.skin.slim) } : null,

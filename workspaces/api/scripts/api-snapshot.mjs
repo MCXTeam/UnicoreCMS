@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync, statSync, writeFileSync } from 'fs'
-import { join, relative, resolve } from 'path'
+import { join, relative, resolve, sep } from 'path'
 
 const root = resolve(import.meta.dirname, '..')
 const dist = join(root, 'dist')
@@ -25,7 +25,7 @@ const snapshot = files
       .filter((line) => !line.startsWith('//') && !line.startsWith('/*') && line.trim())
       .join('\n')
 
-    return `=== ${relative(dist, file)} ===\n${body}`
+    return `=== ${relative(dist, file).split(sep).join('/')} ===\n${body}`
   })
   .join('\n\n')
 
