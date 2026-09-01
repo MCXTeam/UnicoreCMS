@@ -113,6 +113,7 @@ const { $auth, $unicore, $t, $moment } = useNuxtApp()
 const cabinet = useCabinet()
 const votesApi = useVotes()
 const giftsApi = useGifts()
+const { copy } = useClipboard({ legacy: true })
 
 useHead({ title: computed(() => $t('header.cabinet')) })
 const recaptcha = useReCaptcha()
@@ -141,7 +142,7 @@ function giftStatus(item) {
 }
 
 async function copyCode(code) {
-  await navigator.clipboard.writeText(code)
+  await copy(code)
   $unicore.successNotification($t('cabinet.gift_code_copied'))
 }
 

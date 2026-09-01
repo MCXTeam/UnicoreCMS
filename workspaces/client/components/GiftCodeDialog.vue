@@ -14,6 +14,7 @@
 <script setup lang="ts">
 const { $unicore, $t } = useNuxtApp()
 const giftsApi = useGifts()
+const { copy } = useClipboard({ legacy: true })
 
 const visible = computed({
   get: () => !!giftsApi.code.value,
@@ -23,7 +24,7 @@ const visible = computed({
 })
 
 async function copyCode() {
-  await navigator.clipboard.writeText(giftsApi.code.value)
+  await copy(giftsApi.code.value)
   $unicore.successNotification($t('cabinet.gift_code_copied'))
 }
 </script>

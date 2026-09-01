@@ -73,7 +73,7 @@ export default {
 
     useHead({ title: computed(() => $t('header.cabinet')) })
 
-    return { config: usePublicConfig().config, cabinet: useCabinet() }
+    return { config: usePublicConfig().config, cabinet: useCabinet(), clipboard: useClipboard({ legacy: true }) }
   },
 
   data() {
@@ -98,7 +98,7 @@ export default {
     },
 
     async copyLink() {
-      await navigator.clipboard.writeText(this.link)
+      await this.clipboard.copy(this.link)
       this.$unicore.successNotification(this.$t('cabinet.link_copied'))
     },
   },
