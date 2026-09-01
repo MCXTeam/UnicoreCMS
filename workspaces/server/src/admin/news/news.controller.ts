@@ -1,5 +1,19 @@
-import { DeleteManyInput, imageFileFilter, STORAGE_MAX_IMAGE_UPLOAD, StorageManager } from '@common';
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { DeleteManyInput, GML_NEWS_LIMIT, imageFileFilter, STORAGE_MAX_IMAGE_UPLOAD, StorageManager } from '@common';
+import {
+  Body,
+  Controller,
+  DefaultValuePipe,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+  Req,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { Public } from 'src/auth/decorators/public.decorator';
@@ -31,6 +45,12 @@ export class NewsController {
   @Get('helper/sitemap')
   findForMap() {
     return this.newsService.findForMap();
+  }
+
+  @Public()
+  @Get('gml')
+  findForGml(@Query('limit', new DefaultValuePipe(GML_NEWS_LIMIT), ParseIntPipe) limit: number) {
+    return this.newsService.findForGml(limit);
   }
 
   @Delete('bulk')

@@ -5,10 +5,11 @@ import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { In, IsNull, Repository } from 'typeorm';
 import { PublishMode, WebhookDeliveriesService } from '../webhook/webhook-deliveries.service';
 import { WebhookDeliveryDto, WebhookTargetDto } from '../webhook/dto/webhook-target.dto';
+import { GmlNewsDto } from './dto/gml-news.dto';
 import { NewsInput } from './dto/news.input';
 import { News } from './entities/news.entity';
 import { HtmlSlice } from 'htmlslice';
-import { applyCustomCode, assertUploadedFile, NEWS_PREVIEW_LENGTH, StorageManager } from '@common';
+import { applyCustomCode, assertUploadedFile, GML_NEWS_MAX_LIMIT, NEWS_PREVIEW_LENGTH, StorageManager } from '@common';
 
 @Injectable()
 export class NewsService {
@@ -76,6 +77,16 @@ export class NewsService {
     const sliced = new HtmlSlice(content);
 
     return sliced.length > NEWS_PREVIEW_LENGTH ? sliced.slice(0, NEWS_PREVIEW_LENGTH) + '...' : content;
+  }
+
+  async findForGml(limit: number): Promise<GmlNewsDto[]> {
+    const news = await this.newsRepository.find({
+      where: { hidden: false },
+      order: { published_at: 'DESC' },
+      take: Math.min(Math.max(limit, 1), GML_NEWS_MAX_LIMIT),
+    });
+
+    return news.map((item) => new GmlNewsDto(item));
   }
 
   async findForMap(): Promise<number[]> {
