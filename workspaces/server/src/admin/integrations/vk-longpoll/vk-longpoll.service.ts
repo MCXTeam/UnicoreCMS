@@ -9,8 +9,9 @@ import { IResolvedOwnerResource, IResolvedTargetResource, ISharedAttachmentPaylo
 import { getById, getPostLink } from './utils';
 import { replaceAsync, StorageManager } from '@common';
 import { WebhookType } from 'src/admin/webhook/enums/webhook-type.enum';
-import { VK_LINK_PREFIX } from 'src/common/constants';
-import { EmbedBuilder, WebhookClient } from 'discord.js';
+import { DISCORD_EMBED_DESCRIPTION_LIMIT, VK_LINK_PREFIX } from 'src/common/constants';
+import { truncate } from 'src/common/social/html-to-social';
+import { discordEmbed, discordSend } from 'src/common/social/discord-webhook';
 
 @Injectable()
 export class VkLongpollService {
@@ -106,33 +107,19 @@ export class VkLongpollService {
   }
 
   async DiscordParse(url: string, payload: any) {
-    const webhookClient = new WebhookClient({ url });
     let { text, attachments } = payload;
-    const embed = new EmbedBuilder();
     const postAuthor = await getById(this.VK.api, payload.from_id);
     const imageurl = attachments?.find((att) => att.type == 'photo')?.photo?.sizes?.at(-1)?.url;
 
-    if (postAuthor) {
-      embed.setAuthor({
-        name: postAuthor.name,
-        iconURL: postAuthor.photo_50,
-        url: getPostLink(payload),
-      });
-    }
+    if (text && text.length > DISCORD_EMBED_DESCRIPTION_LIMIT) text = truncate(text, DISCORD_EMBED_DESCRIPTION_LIMIT);
 
-    if (text) {
-      if (text.length > 4096) text = text.slice(0, 4096) + '...';
-
-      embed.setDescription(await this.toMarkdown(text));
-    }
-
-    if (imageurl) {
-      embed.setImage(imageurl);
-    }
-
-    webhookClient.send({
-      embeds: [embed],
+    const embed = discordEmbed({
+      description: text ? await this.toMarkdown(text) : undefined,
+      image: imageurl,
+      author: postAuthor && { name: postAuthor.name, icon_url: postAuthor.photo_50, url: getPostLink(payload) },
     });
+
+    await discordSend(url, { embeds: [embed] });
   }
 
   async init() {

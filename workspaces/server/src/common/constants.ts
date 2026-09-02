@@ -228,6 +228,9 @@ export const VK_LINK_PREFIX = 'https://vk.com/';
 
 export const WEBHOOK_TIMEOUT_MS = 5000;
 export const DISCORD_WEBHOOK_HOSTS = ['discord.com', 'discordapp.com'];
+export const DISCORD_HTTPS_PROTOCOL = 'https:';
+export const DISCORD_MESSAGES_PATH = '/messages/';
+export const DISCORD_WAIT_PARAM = 'wait';
 
 export const TELEGRAM_API_BASEURL = 'https://api.telegram.org';
 export const TELEGRAM_ALLOWED_TAGS = ['b', 'i', 'u', 's', 'a', 'code', 'pre', 'blockquote'];

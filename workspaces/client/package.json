@@ -14,14 +14,14 @@
   },
   "dependencies": {
     "@nuxtjs/color-mode": "^4.0.1",
-    "@nuxtjs/sitemap": "^8.3.3",
+    "@nuxtjs/sitemap": "^8.5.0",
     "@primevue/themes": "^4.5.4",
     "@vee-validate/i18n": "^4.15.1",
     "@vee-validate/rules": "^4.15.1",
     "@vueuse/core": "^14.4.0",
     "@vueuse/motion": "^3.0.3",
     "aos": "^2.3.4",
-    "axios": "^1.19.0",
+    "axios": "^1.20.0",
     "bootstrap": "^5.3.8",
     "boxicons": "^2.1.4",
     "isomorphic-dompurify": "^2.36.0",
@@ -44,7 +44,7 @@
     "unicore-api": "workspace:*",
     "unicore-common": "workspace:*",
     "vee-validate": "^4.15.1",
-    "vue": "^3.5.41",
+    "vue": "^3.5.42",
     "vue-recaptcha-v3": "^2.0.1",
     "vue3-count-to": "^1.1.2"
   },
@@ -60,8 +60,8 @@
     "@vueuse/nuxt": "^14.4.0",
     "nuxt": "^3.21.11",
     "prettier": "^3.9.6",
-    "sass": "^1.102.0",
+    "sass": "^1.103.1",
     "typescript": "~5.9.3",
-    "vue-tsc": "^3.3.9"
+    "vue-tsc": "^3.3.11"
   }
 }
