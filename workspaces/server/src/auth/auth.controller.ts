@@ -36,7 +36,6 @@ import { VerifyInput } from './dto/verify.input';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { TokensService } from './tokens.service';
 
-@AllowPasswordPending()
 @UseGuards(ThrottlerCoreGuard)
 @Controller('auth')
 export class AuthController {
@@ -106,6 +105,7 @@ export class AuthController {
   @AllowInactive()
   @Recaptcha({ action: 'verify' })
   @Throttle({ default: THROTTLE_VERIFY })
+  @AllowPasswordPending()
   @Post('verify')
   verify(@CurrentUser() user: User, @Body() input: VerifyInput): Promise<UserDto> {
     return this.emailService.checkCode(user, input);
@@ -129,6 +129,7 @@ export class AuthController {
 
   @AllowInactive()
   @Throttle({ default: THROTTLE_SESSION })
+  @AllowPasswordPending()
   @Post('logout')
   async logout(
     @Req() request: Request,
@@ -143,6 +144,7 @@ export class AuthController {
   @AllowInactive()
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: THROTTLE_RESEND })
+  @AllowPasswordPending()
   @Get('resend')
   resend(@CurrentUser() user: User) {
     return this.emailService.sendActivation(user);
@@ -151,6 +153,7 @@ export class AuthController {
   @AllowInactive()
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: THROTTLE_SESSION })
+  @AllowPasswordPending()
   @Get('me')
   async me(@Req() request: any, @CurrentUser() user: User): Promise<{ user: UserDto; cookieAuth: boolean }> {
     return { user: new UserDto(user, await playerPermissions(request)), cookieAuth: this.cookies.present(request) };
@@ -158,6 +161,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: THROTTLE_SESSION })
+  @AllowPasswordPending()
   @Post('sessions/me')
   sessionsMe(@Req() request: Request, @CurrentUser() user: User, @Body() input: TokenInput) {
     return this.tokensService.sessions(user, this.cookies.resolve(request, input.token));
@@ -165,6 +169,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: THROTTLE_SESSION })
+  @AllowPasswordPending()
   @Delete('sessions_all')
   async closeMeSessions(@CurrentUser() user: User, @Res({ passthrough: true }) response: Response) {
     await this.tokensService.revokeRefreshTokensByUser(user);
@@ -174,6 +179,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: THROTTLE_SESSION })
+  @AllowPasswordPending()
   @Delete('sessions_other')
   closeMeOtherSessions(@Req() request: Request, @CurrentUser() user: User, @Body() input: TokenInput) {
     return this.tokensService.revokeRefreshTokensByUserOther(user, this.cookies.resolve(request, input.token));
@@ -181,6 +187,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: THROTTLE_SESSION })
+  @AllowPasswordPending()
   @Delete('sessions/:uuid')
   closeMeSession(@CurrentUser() user: User, @Param('uuid') id: number) {
     return this.tokensService.revokeRefreshTokenBySessionAndUser(user, id);

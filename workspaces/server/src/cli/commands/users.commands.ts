@@ -4,12 +4,12 @@ import { UserInput } from 'src/admin/users/dto/user.input';
 import { UsersService } from 'src/admin/users/users.service';
 import { PasswordPolicyService } from 'src/auth/password/password-policy.service';
 import { validateOrReject } from 'class-validator';
-import { CLI_PASSWORD_PROMPT, CLI_PASSWORD_QUESTIONS } from '../constants';
+import { CLI_PASSWORD_QUESTIONS } from '../constants';
 import { stdout } from '../stdout';
 
 @QuestionSet({ name: CLI_PASSWORD_QUESTIONS })
 export class UsersPasswordQuestions {
-  @Question({ name: 'password', type: 'password', mask: '*', message: CLI_PASSWORD_PROMPT })
+  @Question({ name: 'password', type: 'password', mask: '*', message: 'Password for the new user (they will be asked to change it on first sign-in):' })
   parsePassword(value: string): string {
     return value;
   }

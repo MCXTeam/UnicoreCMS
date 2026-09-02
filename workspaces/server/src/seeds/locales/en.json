@@ -1098,6 +1098,7 @@
   "error.no_permission": "You do not have the rights for this",
   "error.not_found": "Page not found",
   "error.occurred": "Something went wrong — {code}",
+  "error.storage_path": "The file name escapes the storage directory",
   "error.title": "Error",
   "error.to_home": "Home page",
   "error.too_many_requests": "Too many requests from this address, wait a couple of minutes.",

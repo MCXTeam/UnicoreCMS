@@ -18,7 +18,7 @@ import axios from 'axios';
 import { parse as urlParse } from 'url';
 import { promises as dns } from 'dns';
 import { isIP } from 'net';
-import { Logger } from '@nestjs/common';
+import { Logger, UnsupportedMediaTypeException } from '@nestjs/common';
 import { envConfig, storagePath } from 'unicore-common';
 import { STORAGE_MAX_REMOTE_DOWNLOAD } from '../constants';
 import { containedPath } from '../utils/path';
@@ -29,6 +29,14 @@ const destination = storagePath;
 export class StorageManager {
   private static locate(filename?: string): string | null {
     return containedPath(destination, filename);
+  }
+
+  private static target(filename: string): string {
+    const path = StorageManager.locate(filename);
+
+    if (!path) throw new UnsupportedMediaTypeException('error.storage_path');
+
+    return path;
   }
 
   static fileName(req: Request, file: Express.Multer.File, callback) {
@@ -62,7 +70,7 @@ export class StorageManager {
     const safeExt = ['.png', '.jpg', '.jpeg', '.gif', '.webp'].includes(ext) ? ext : '.png';
     const name = randomId() + safeExt;
 
-    writeFileSync(StorageManager.locate(name), buffer);
+    writeFileSync(StorageManager.target(name), buffer);
 
     return name;
   }
@@ -74,7 +82,7 @@ export class StorageManager {
 
     const newname = randomId() + extname(filename);
 
-    renameSync(path, StorageManager.locate(newname));
+    renameSync(path, StorageManager.target(newname));
 
     return newname;
   }
@@ -87,7 +95,7 @@ export class StorageManager {
 
     try {
       const filename = randomId() + extname(urlParse(url).pathname);
-      const save_path = StorageManager.locate(filename);
+      const save_path = StorageManager.target(filename);
 
       const response = await axios.get(url, {
         responseType: 'stream',

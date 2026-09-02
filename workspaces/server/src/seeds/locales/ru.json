@@ -1098,6 +1098,7 @@
   "error.no_permission": "Недостаточно прав для этого действия",
   "error.not_found": "Страница не найдена",
   "error.occurred": "Произошла ошибка — {code}",
+  "error.storage_path": "Имя файла выходит за папку хранилища",
   "error.title": "Ошибка",
   "error.to_home": "На главную",
   "error.too_many_requests": "Слишком много запросов с этого адреса, подождите пару минут.",
