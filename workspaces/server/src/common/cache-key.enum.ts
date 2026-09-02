@@ -5,4 +5,5 @@ export enum CacheKey {
   Config = 'config',
   PwnedRange = 'pwned_range',
   LoginAttempts = 'login_attempts',
+  Throttle = 'throttle',
 }

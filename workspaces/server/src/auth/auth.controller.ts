@@ -5,15 +5,15 @@ import {
   THROTTLE_PASSWORD_RESET,
   THROTTLE_REFRESH,
   THROTTLE_REGISTER,
-  THROTTLE_SESSION,
   THROTTLE_RESEND,
+  THROTTLE_SESSION,
   THROTTLE_VERIFY,
+  Throttle,
   ThrottlerCoreGuard,
   UserAgent,
 } from '@common';
 import { Body, Controller, Delete, Get, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { Throttle } from '@nestjs/throttler';
 import { Recaptcha } from '@nestlab/google-recaptcha';
 import { EmailService } from 'src/admin/email/email.service';
 import { UserDto } from 'src/admin/users/dto/user.dto';
@@ -48,7 +48,7 @@ export class AuthController {
 
   @Public()
   @Recaptcha({ action: 'login' })
-  @Throttle({ default: THROTTLE_LOGIN })
+  @Throttle(THROTTLE_LOGIN)
   @Post('login')
   async login(
     @Body() input: LoginInput,
@@ -65,7 +65,7 @@ export class AuthController {
 
   @Public()
   @Recaptcha({ action: 'register' })
-  @Throttle({ default: THROTTLE_REGISTER })
+  @Throttle(THROTTLE_REGISTER)
   @Post('register')
   async register(
     @Body() input: RegisterInput,
@@ -82,7 +82,7 @@ export class AuthController {
   }
 
   @Public()
-  @Throttle({ default: THROTTLE_REFRESH })
+  @Throttle(THROTTLE_REFRESH)
   @Post('refresh')
   async refresh(
     @Req() request: Request,
@@ -104,7 +104,7 @@ export class AuthController {
 
   @AllowInactive()
   @Recaptcha({ action: 'verify' })
-  @Throttle({ default: THROTTLE_VERIFY })
+  @Throttle(THROTTLE_VERIFY)
   @AllowPasswordPending()
   @Post('verify')
   verify(@CurrentUser() user: User, @Body() input: VerifyInput): Promise<UserDto> {
@@ -113,7 +113,7 @@ export class AuthController {
 
   @Public()
   @Recaptcha({ action: 'reset' })
-  @Throttle({ default: THROTTLE_PASSWORD_RESET })
+  @Throttle(THROTTLE_PASSWORD_RESET)
   @Post('reset')
   resetReq(@IpAddress() ip: string, @Body() input: PasswordLinkInput) {
     return this.emailService.sendPasswordLink(ip, input);
@@ -121,14 +121,14 @@ export class AuthController {
 
   @Public()
   @Recaptcha({ action: 'reset' })
-  @Throttle({ default: THROTTLE_PASSWORD_RESET })
+  @Throttle(THROTTLE_PASSWORD_RESET)
   @Post('password')
   reset(@Body() input: PasswordResetInput): Promise<UserDto> {
     return this.emailService.checkHash(input);
   }
 
   @AllowInactive()
-  @Throttle({ default: THROTTLE_SESSION })
+  @Throttle(THROTTLE_SESSION)
   @AllowPasswordPending()
   @Post('logout')
   async logout(
@@ -143,7 +143,7 @@ export class AuthController {
 
   @AllowInactive()
   @UseGuards(JwtAuthGuard)
-  @Throttle({ default: THROTTLE_RESEND })
+  @Throttle(THROTTLE_RESEND)
   @AllowPasswordPending()
   @Get('resend')
   resend(@CurrentUser() user: User) {
@@ -152,7 +152,7 @@ export class AuthController {
 
   @AllowInactive()
   @UseGuards(JwtAuthGuard)
-  @Throttle({ default: THROTTLE_SESSION })
+  @Throttle(THROTTLE_SESSION)
   @AllowPasswordPending()
   @Get('me')
   async me(@Req() request: any, @CurrentUser() user: User): Promise<{ user: UserDto; cookieAuth: boolean }> {
@@ -160,7 +160,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Throttle({ default: THROTTLE_SESSION })
+  @Throttle(THROTTLE_SESSION)
   @AllowPasswordPending()
   @Post('sessions/me')
   sessionsMe(@Req() request: Request, @CurrentUser() user: User, @Body() input: TokenInput) {
@@ -168,7 +168,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Throttle({ default: THROTTLE_SESSION })
+  @Throttle(THROTTLE_SESSION)
   @AllowPasswordPending()
   @Delete('sessions_all')
   async closeMeSessions(@CurrentUser() user: User, @Res({ passthrough: true }) response: Response) {
@@ -178,7 +178,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Throttle({ default: THROTTLE_SESSION })
+  @Throttle(THROTTLE_SESSION)
   @AllowPasswordPending()
   @Delete('sessions_other')
   closeMeOtherSessions(@Req() request: Request, @CurrentUser() user: User, @Body() input: TokenInput) {
@@ -186,7 +186,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Throttle({ default: THROTTLE_SESSION })
+  @Throttle(THROTTLE_SESSION)
   @AllowPasswordPending()
   @Delete('sessions/:uuid')
   closeMeSession(@CurrentUser() user: User, @Param('uuid') id: number) {

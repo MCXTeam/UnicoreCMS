@@ -17,6 +17,7 @@ import {
   clientIp,
   requestBodyString,
   requestPath,
+  SerialQueue,
 } from '@common';
 import { LoginAttemptState } from './login-attempt-state';
 
@@ -26,7 +27,7 @@ export interface LoginAttemptOwner {
 
 @Injectable()
 export class LoginAttemptsService {
-  private queue: Promise<unknown> = Promise.resolve();
+  private readonly queue = new SerialQueue();
 
   constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
@@ -54,17 +55,6 @@ export class LoginAttemptsService {
     if (over < 0) return 0;
 
     return Math.min(LOGIN_ATTEMPT_COOLDOWN_BASE_MS * 2 ** over, LOGIN_ATTEMPT_COOLDOWN_MAX_MS);
-  }
-
-  private serial<T>(task: () => Promise<T>): Promise<T> {
-    const next = this.queue.then(task, task);
-
-    this.queue = next.then(
-      () => undefined,
-      () => undefined,
-    );
-
-    return next;
   }
 
   private async bump(key: string): Promise<void> {
@@ -96,7 +86,7 @@ export class LoginAttemptsService {
   async fail(account: string, source: string, owner?: LoginAttemptOwner): Promise<void> {
     const keys = this.keys(account, source, owner);
 
-    await this.serial(async () => {
+    await this.queue.run(async () => {
       for (const key of keys) await this.bump(key);
     });
   }
@@ -104,7 +94,7 @@ export class LoginAttemptsService {
   async succeed(account: string, source: string, owner?: LoginAttemptOwner): Promise<void> {
     const keys = this.keys(account, source, owner);
 
-    await this.serial(async () => {
+    await this.queue.run(async () => {
       for (const key of keys) await this.cacheManager.del(key);
     });
   }

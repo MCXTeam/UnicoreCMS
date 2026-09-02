@@ -7,7 +7,6 @@ export const MODULE_EXTERNALS = [
   '@nestjs/platform-express',
   '@nestjs/cache-manager',
   '@nestjs/swagger',
-  '@nestjs/throttler',
   'typeorm',
   'class-validator',
   'class-transformer',

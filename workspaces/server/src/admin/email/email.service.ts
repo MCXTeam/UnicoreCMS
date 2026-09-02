@@ -11,7 +11,6 @@ import { EmailActivation } from './entities/email-activation.entity';
 import { EmailMessage } from './entities/email-message.entity';
 import { EmailMessageType } from './enums/email-message-type.enum';
 
-import { ThrottlerException } from '@nestjs/throttler';
 import {
   EMAIL_ACTIVATION_MAX_ATTEMPTS,
   EMAIL_ACTIVATION_RESEND_MAX,
@@ -24,6 +23,7 @@ import {
   PASSWORD_RESET_MAX,
   PASSWORD_RESET_TTL_MINUTES,
   PASSWORD_RESET_WINDOW_MINUTES,
+  TooManyAttemptsException,
   randomFromAlphabet,
   randomId,
   safeEqual,
@@ -105,7 +105,7 @@ export class EmailService {
         user: { uuid: user.uuid },
       })) >= EMAIL_ACTIVATION_RESEND_MAX
     ) {
-      throw new ThrottlerException();
+      throw new TooManyAttemptsException(EMAIL_ACTIVATION_RESEND_WINDOW_MINUTES * 60);
     }
 
     const { content, title } = await this.contentTranslations.localize(
@@ -203,7 +203,7 @@ export class EmailService {
         ],
       })) >= PASSWORD_RESET_MAX
     ) {
-      throw new ThrottlerException();
+      throw new TooManyAttemptsException(PASSWORD_RESET_WINDOW_MINUTES * 60);
     }
 
     const { content, title } = await this.contentTranslations.localize(

@@ -12,7 +12,7 @@ import { AdminModule } from './admin/admin.module';
 import { GameModule } from './game/game.module';
 import { PaymentModule } from './payment/payment.module';
 import { GoogleRecaptchaModule, GoogleRecaptchaNetwork } from '@nestlab/google-recaptcha';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule } from './common/throttler/throttler.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MomentModule } from './moment';
 import { EventsModule } from './events/events.module';
@@ -73,12 +73,7 @@ export class AppLoggerMiddleware implements NestMiddleware {
         skipIf: (request) => loginAttempts.skipCaptcha(request),
       }),
     }),
-    ThrottlerModule.forRoot([
-      {
-        ttl: 120000,
-        limit: 10,
-      },
-    ]),
+    ThrottlerModule,
     MailerModule.forRoot({
       defaults: {
         from: envConfig.mailFrom,

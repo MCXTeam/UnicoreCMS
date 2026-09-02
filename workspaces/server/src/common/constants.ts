@@ -85,6 +85,9 @@ export const THROTTLE_LAUNCHER_LOGIN = { ttl: 5 * 60_000, limit: 30 };
 export const THROTTLE_SESSION = { ttl: 60_000, limit: 120 };
 export const THROTTLE_PASSWORD_CHANGE = { ttl: 60 * 60_000, limit: 20 };
 export const THROTTLE_UNSKIPPABLE_PREFIX = '/auth/';
+export const THROTTLE_KEY = 'throttle';
+export const THROTTLE_SKIP_KEY = 'throttleSkip';
+export const THROTTLE_DEFAULT = { ttl: 120_000, limit: 10 };
 export const AUTH_LOGIN_PATH = '/auth/login';
 
 export const COOKIE_PAIR_SEPARATOR = ';';

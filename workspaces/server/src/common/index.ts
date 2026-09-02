@@ -7,6 +7,7 @@ export * from './storage';
 export * from './decorators';
 export * from './exceptions';
 export * from './guards';
+export * from './throttler';
 export * from './types';
 export * from './dto';
 export * from './utils';

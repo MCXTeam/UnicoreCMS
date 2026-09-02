@@ -11,6 +11,7 @@ export * from './path';
 export * from './png';
 export * from './random-id';
 export * from './request';
+export * from './serial';
 export * from './placeholders';
 export * from './replace-async';
 export * from './sanitize-html';
