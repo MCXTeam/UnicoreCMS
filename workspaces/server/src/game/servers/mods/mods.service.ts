@@ -1,8 +1,7 @@
 import { assertServerEntities, assertServerList } from 'src/admin/roles/server-scope';
-import { StorageManager } from '@common';
+import { PaginateQuery, Paginated, StorageManager, paginate } from '@common';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { In, Repository } from 'typeorm';
 import { ModInput } from './dto/mod.input';
 import { Mod } from './entities/mod.entity';

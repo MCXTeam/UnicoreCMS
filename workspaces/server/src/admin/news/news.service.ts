@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { events } from 'unicore-api';
 import { InjectRepository } from '@nestjs/typeorm';
-import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { In, IsNull, Repository } from 'typeorm';
 import { PublishMode, WebhookDeliveriesService } from '../webhook/webhook-deliveries.service';
 import { WebhookDeliveryDto, WebhookTargetDto } from '../webhook/dto/webhook-target.dto';
@@ -9,7 +8,7 @@ import { GmlNewsDto } from './dto/gml-news.dto';
 import { NewsInput } from './dto/news.input';
 import { News } from './entities/news.entity';
 import { HtmlSlice } from 'htmlslice';
-import { applyCustomCode, assertUploadedFile, LAUNCHER_NEWS_MAX_LIMIT, NEWS_PREVIEW_LENGTH, StorageManager } from '@common';
+import { LAUNCHER_NEWS_MAX_LIMIT, NEWS_PREVIEW_LENGTH, PaginateQuery, Paginated, StorageManager, applyCustomCode, assertUploadedFile, paginate } from '@common';
 
 @Injectable()
 export class NewsService {

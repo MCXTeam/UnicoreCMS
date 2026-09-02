@@ -1,7 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Not, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-import { PaginateQuery, Paginated, paginate, FilterOperator } from 'nestjs-paginate';
 import { UserInput } from './dto/user.input';
 import _ from 'lodash';
 import { Role } from '../roles/entities/role.entity';
@@ -20,12 +19,16 @@ import { Cache } from 'cache-manager';
 import {
   CacheKey,
   DeleteManyUuidInput,
-  isBanActive,
+  FilterOperator,
   KERNEL_USERNAME,
   PUBLIC_USERS_CACHE_TTL_MS,
   PUBLIC_USERS_PAGE_SIZE,
+  PaginateQuery,
+  Paginated,
   USER_SEARCH_LIMIT,
   USER_SEARCH_MAX_LIMIT,
+  isBanActive,
+  paginate,
 } from '@common';
 import { PublicUsersDto } from './dto/public-users.dto';
 import { UserUpdateInput } from './dto/user-update.input';

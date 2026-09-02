@@ -1,6 +1,6 @@
+import { paginate, PaginateQuery } from '@common';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { paginate, PaginateQuery } from 'nestjs-paginate';
 import { Ban } from 'src/game/cabinet/bans/entities/ban.entity';
 import { Repository } from 'typeorm';
 import { PaginatedBansDto } from './dto/paginated-bans.dto';

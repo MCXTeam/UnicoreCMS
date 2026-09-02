@@ -1,4 +1,4 @@
-import { DeleteManyInput, imageFileFilter, STORAGE_MAX_IMAGE_UPLOAD, STORAGE_MAX_ZIP_UPLOAD, StorageManager, zipFileFilter } from '@common';
+import { DeleteManyInput, Paginate, PaginateQuery, STORAGE_MAX_IMAGE_UPLOAD, STORAGE_MAX_ZIP_UPLOAD, StorageManager, imageFileFilter, zipFileFilter } from '@common';
 import {
   BadRequestException,
   Body,
@@ -14,7 +14,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { matchPermission } from 'src/admin/roles/guards/permisson.guard';
 import { allowedServers } from 'src/admin/roles/server-scope';

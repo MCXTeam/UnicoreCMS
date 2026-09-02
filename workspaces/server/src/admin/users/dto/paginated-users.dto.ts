@@ -1,5 +1,5 @@
+import { Paginated } from '@common';
 import { UserDto } from './user.dto';
-import { Paginated } from 'nestjs-paginate';
 import { Type } from 'class-transformer';
 import { User } from '../entities/user.entity';
 

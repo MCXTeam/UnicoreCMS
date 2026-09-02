@@ -1,4 +1,4 @@
-import { DeleteManyInput, imageFileFilter, STORAGE_MAX_IMAGE_UPLOAD, StorageManager } from '@common';
+import { DeleteManyInput, Paginate, PaginateQuery, STORAGE_MAX_IMAGE_UPLOAD, StorageManager, imageFileFilter } from '@common';
 import {
   Body,
   Controller,
@@ -14,7 +14,6 @@ import {
   Req,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { allowedServers } from 'src/admin/roles/server-scope';
 import { KitInput } from '../dto/kit.input.dto';

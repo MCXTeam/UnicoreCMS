@@ -1,5 +1,5 @@
+import { Paginate, PaginateQuery } from '@common';
 import { Controller, Get, Param } from '@nestjs/common';
-import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';

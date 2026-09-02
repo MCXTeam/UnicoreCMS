@@ -1,4 +1,4 @@
-import { CacheKey, VOTES_RECENT_MAX } from '@common';
+import { CacheKey, PaginateQuery, VOTES_RECENT_MAX, paginate } from '@common';
 import { Inject, Injectable } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -8,7 +8,6 @@ import { Repository } from 'typeorm';
 import { VotesGroupped } from './votes-groupped.interface';
 import _ from 'lodash';
 import { GrouppedPaginate } from '../groupped.dto';
-import { paginate, PaginateQuery } from 'nestjs-paginate';
 
 @Injectable()
 export class VotesListService {

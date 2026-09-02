@@ -1,5 +1,5 @@
+import { Paginated } from '@common';
 import { Exclude, Expose, instanceToPlain, Transform, Type } from 'class-transformer';
-import { Paginated } from 'nestjs-paginate';
 import { KitItem } from '../entities/kit-item.entity';
 import { Kit } from '../entities/kit.entity';
 import { Product } from '../entities/product.entity';

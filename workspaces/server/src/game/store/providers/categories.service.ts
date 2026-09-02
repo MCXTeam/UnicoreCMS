@@ -1,7 +1,6 @@
-import { assertUploadedFile, StorageManager } from '@common';
+import { PaginateQuery, Paginated, StorageManager, assertUploadedFile, paginate } from '@common';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { In, Repository } from 'typeorm';
 import { CategoryInput } from './../dto/category.input';
 import { Category } from './../entities/category.entity';

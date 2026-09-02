@@ -1,5 +1,4 @@
 import { Body, Controller, DefaultValuePipe, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Post, Query, Req } from '@nestjs/common';
-import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { PasswordPolicyService } from 'src/auth/password/password-policy.service';
@@ -11,7 +10,7 @@ import { UserBasicDto, UserDto } from './dto/user.dto';
 import { UserUpdateInput } from './dto/user-update.input';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { User } from './entities/user.entity';
-import { DeleteManyUuidInput, THROTTLE_PUBLIC_USERS, Throttle } from '@common';
+import { DeleteManyUuidInput, Paginate, PaginateQuery, THROTTLE_PUBLIC_USERS, Throttle } from '@common';
 import { PasswordUpdateInput } from 'src/game/cabinet/settings/dto/password-update.input';
 import { Permissions } from '../roles/decorators/permission.decorator';
 import { matchPermission } from '../roles/guards/permisson.guard';
