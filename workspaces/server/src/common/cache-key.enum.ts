@@ -4,4 +4,5 @@ export enum CacheKey {
   Users = 'users',
   Config = 'config',
   PwnedRange = 'pwned_range',
+  LoginAttempts = 'login_attempts',
 }

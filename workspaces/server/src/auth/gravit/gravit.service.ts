@@ -9,11 +9,12 @@ import { TokenExpiredError } from 'jsonwebtoken';
 import { GravitSessionDto } from './dto/gravit-session.dto';
 import { GravitAuthorize } from './dto/inputs/gravit-authorize.input';
 import { AuthService } from '../auth.service';
+import { LoginAttemptsService } from '../attempts/login-attempts.service';
 import { TwoFactorService } from 'src/game/cabinet/settings/providers/two_factor.service';
 import { JWTMinecraftPayload, JWTPayload, JWTRefreshPayload } from '../interfaces/jwt-payload';
 import { GravitRefreshToken } from './dto/inputs/gravit-refresh-token.input';
 import { GravitDeleteSession, GravitExitUser } from './dto/inputs/gravit-session.input';
-import { isBanActive, safeEqual } from '@common';
+import { isBanActive, normalizeIp, safeEqual } from '@common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/admin/users/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -28,6 +29,7 @@ export class GravitService {
     private authService: AuthService,
     private tokensService: TokensService,
     private twoFactorService: TwoFactorService,
+    private loginAttemptsService: LoginAttemptsService,
     private jwt: JwtService,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
@@ -78,24 +80,37 @@ export class GravitService {
     if (isBanActive(user.ban)) throw new HttpException({ error: GravitError.UserBlocked }, HttpStatus.FORBIDDEN);
   }
 
-  async authorize(input: GravitAuthorize) {
+  async authorize(input: GravitAuthorize, ip?: string) {
     const password = input.password?.password ?? input.password?.firstPassword?.password;
     const totp = input.password?.secondPassword?.totp;
+    const source = normalizeIp(input.context?.ip) || ip;
+
+    await this.loginAttemptsService.assert(input.login, source);
 
     const user = await this.usersService.getByUsernameOrEmail(input.login);
-    if (!user) throw new HttpException({ error: GravitError.UserNotFound }, HttpStatus.NOT_FOUND);
+    if (!user) {
+      await this.loginAttemptsService.fail(input.login, source);
+      throw new HttpException({ error: GravitError.UserNotFound }, HttpStatus.NOT_FOUND);
+    }
 
     if (!password) throw new HttpException({ error: GravitError.WrongPassword }, HttpStatus.UNAUTHORIZED);
 
     const valid = await this.authService.validateCredentials(user, password);
-    if (!valid) throw new HttpException({ error: GravitError.WrongPassword }, HttpStatus.UNAUTHORIZED);
+    if (!valid) {
+      await this.loginAttemptsService.fail(input.login, source);
+      throw new HttpException({ error: GravitError.WrongPassword }, HttpStatus.UNAUTHORIZED);
+    }
 
     if (user.two_factor_enabled) {
       if (!totp) throw new HttpException({ error: GravitError.Require2FA }, HttpStatus.UNAUTHORIZED);
 
-      if (!(await this.twoFactorService.verify(user, totp)))
+      if (!(await this.twoFactorService.verify(user, totp))) {
+        await this.loginAttemptsService.fail(input.login, source);
         throw new HttpException({ error: GravitError.WrongPassword }, HttpStatus.UNAUTHORIZED);
+      }
     }
+
+    await this.loginAttemptsService.succeed(input.login, source);
 
     await this.assertAllowed(user);
 

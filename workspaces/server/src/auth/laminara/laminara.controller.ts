@@ -10,7 +10,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { LAUNCHER_NEWS_LIMIT } from '@common';
+import { IpAddress, LAUNCHER_NEWS_LIMIT } from '@common';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { LaminaraAuthenticateInput } from './dto/laminara-authenticate.input';
 import { LaminaraService } from './laminara.service';
@@ -27,8 +27,8 @@ export class LaminaraController {
 
   @Post('authenticate')
   @HttpCode(HttpStatus.OK)
-  authenticate(@Body() input: LaminaraAuthenticateInput) {
-    return this.laminaraService.authenticate(input);
+  authenticate(@Body() input: LaminaraAuthenticateInput, @IpAddress() ip: string) {
+    return this.laminaraService.authenticate(input, ip);
   }
 
   @Get('user')

@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Headers, Param, Post, UseGuards } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
-import { LauncherThrottlerGuard, THROTTLE_LAUNCHER_LOGIN } from '@common';
+import { IpAddress, LauncherThrottlerGuard, THROTTLE_LAUNCHER_LOGIN } from '@common';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { UserDto } from 'src/admin/users/dto/user.dto';
 import { User } from 'src/admin/users/entities/user.entity';
@@ -48,8 +48,8 @@ export class GravitController {
   @UseGuards(LauncherThrottlerGuard)
   @Throttle({ default: THROTTLE_LAUNCHER_LOGIN })
   @Post('authorize')
-  authorize(@Body() body: GravitAuthorize) {
-    return this.gravitService.authorize(body);
+  authorize(@Body() body: GravitAuthorize, @IpAddress() ip: string) {
+    return this.gravitService.authorize(body, ip);
   }
 
   @Post('refreshToken')

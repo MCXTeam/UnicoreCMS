@@ -71,6 +71,7 @@ export const THROTTLE_PASSWORD_RESET = { ttl: 60 * 60_000, limit: 5 };
 export const THROTTLE_REFRESH = { ttl: 5 * 60_000, limit: 60 };
 export const THROTTLE_LAUNCHER_LOGIN = { ttl: 5 * 60_000, limit: 30 };
 export const THROTTLE_UNSKIPPABLE_PREFIX = '/auth/';
+export const AUTH_LOGIN_PATH = '/auth/login';
 export const THROTTLE_LOGIN_TRACKER_PREFIX = 'login:';
 export const THROTTLE_LOGIN_FIELD = 'login';
 
@@ -111,6 +112,17 @@ export const PASSWORD_ARGON2_PREFIXES = ['$argon2id$', '$argon2i$', '$argon2d$']
 export const PASSWORD_BCRYPT_PREFIXES = ['$2a$', '$2b$', '$2y$'];
 
 export { PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH } from 'unicore-common';
+
+export const LOGIN_ATTEMPT_WINDOW_MS = 15 * 60_000;
+export const LOGIN_ATTEMPT_CAPTCHA_AFTER = 3;
+export const LOGIN_ATTEMPT_BLOCK_AFTER = 10;
+export const LOGIN_ATTEMPT_BLOCK_AFTER_CAPTCHA = 25;
+export const LOGIN_ATTEMPT_COOLDOWN_BASE_MS = 5_000;
+export const LOGIN_ATTEMPT_COOLDOWN_MAX_MS = 5 * 60_000;
+export const LOGIN_ATTEMPT_ANONYMOUS_SOURCE = 'unknown';
+export const LOGIN_ATTEMPT_FIELD = 'username_or_email';
+export const RETRY_AFTER_HEADER = 'Retry-After';
+export const TOO_MANY_ATTEMPTS_MESSAGE = 'Too Many Requests';
 
 export const PWNED_RANGE_URL = 'https://api.pwnedpasswords.com/range/';
 export const PWNED_HASH = 'sha1';

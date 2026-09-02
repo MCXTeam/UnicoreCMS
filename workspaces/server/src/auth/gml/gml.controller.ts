@@ -1,5 +1,5 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
-import { THROTTLE_LOGIN, ThrottlerCoreGuard } from '@common';
+import { IpAddress, THROTTLE_LOGIN, ThrottlerCoreGuard } from '@common';
 import { Throttle } from '@nestjs/throttler';
 import { Public } from '../decorators/public.decorator';
 import { GmlAuthResultDto } from './dto/gml-auth-result.dto';
@@ -14,7 +14,7 @@ export class GmlController {
 
   @Throttle({ default: THROTTLE_LOGIN })
   @Post('login')
-  login(@Body() input: GmlLoginInput): Promise<GmlAuthResultDto> {
-    return this.gmlService.login(input);
+  login(@Body() input: GmlLoginInput, @IpAddress() ip: string): Promise<GmlAuthResultDto> {
+    return this.gmlService.login(input, ip);
   }
 }

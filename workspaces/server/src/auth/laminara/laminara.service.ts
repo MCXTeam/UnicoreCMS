@@ -10,6 +10,7 @@ import { TwoFactorService } from 'src/game/cabinet/settings/providers/two_factor
 import { UsersDonateGroup } from 'src/game/donate/groups/entities/user-donate.entity';
 import { UsersDonatePermission } from 'src/game/donate/permissions/entities/user-permission.entity';
 import { AuthService } from '../auth.service';
+import { LoginAttemptsService } from '../attempts/login-attempts.service';
 import { GravitError } from '../gravit/enums/gravit-error.enum';
 import { PasswordService } from '../password/password.service';
 import { LaminaraAuthenticateInput } from './dto/laminara-authenticate.input';
@@ -25,6 +26,7 @@ export class LaminaraService {
     private authService: AuthService,
     private passwordService: PasswordService,
     private twoFactorService: TwoFactorService,
+    private loginAttemptsService: LoginAttemptsService,
     private newsService: NewsService,
   ) {}
 
@@ -32,21 +34,32 @@ export class LaminaraService {
     return new LaminaraPingDto({ name: envConfig.sitename, version: cmsVersion() });
   }
 
-  async authenticate(input: LaminaraAuthenticateInput): Promise<LaminaraProfileDto> {
+  async authenticate(input: LaminaraAuthenticateInput, ip?: string): Promise<LaminaraProfileDto> {
+    await this.loginAttemptsService.assert(input.login, ip);
+
     const user = await this.usersService.getByUsernameOrEmail(input.login);
 
     if (!user) {
       await this.passwordService.fakeVerify(input.password);
+      await this.loginAttemptsService.fail(input.login, ip);
       throw this.error(GravitError.UserNotFound, HttpStatus.NOT_FOUND);
     }
 
-    if (!(await this.authService.validateCredentials(user, input.password)))
+    if (!(await this.authService.validateCredentials(user, input.password))) {
+      await this.loginAttemptsService.fail(input.login, ip);
       throw this.error(GravitError.WrongPassword, HttpStatus.UNAUTHORIZED);
+    }
 
     if (user.two_factor_enabled) {
       if (!input.totp) throw this.error(GravitError.Require2FA, HttpStatus.UNAUTHORIZED);
-      if (!(await this.twoFactorService.verify(user, input.totp))) throw this.error(GravitError.Wrong2FA, HttpStatus.UNAUTHORIZED);
+
+      if (!(await this.twoFactorService.verify(user, input.totp))) {
+        await this.loginAttemptsService.fail(input.login, ip);
+        throw this.error(GravitError.Wrong2FA, HttpStatus.UNAUTHORIZED);
+      }
     }
+
+    await this.loginAttemptsService.succeed(input.login, ip);
 
     if (!(await this.authService.isActivated(user))) throw this.error(GravitError.UserNotActivated, HttpStatus.FORBIDDEN);
 

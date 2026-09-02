@@ -6,6 +6,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { AuthAdapter } from './auth/adapters/auth.adapter';
 import { EntityNotFoundFilter } from './common/filters/entity-not-found.filter';
+import { TooManyAttemptsFilter } from './common/filters/too-many-attempts.filter';
 import { ASCII_NAME, formatError, STATIC_CONTENT_SECURITY_POLICY, stderr, stdout } from '@common';
 import helmet from 'helmet';
 import clc from 'cli-color';
@@ -69,7 +70,7 @@ async function bootstrap() {
     new ClassSerializerInterceptor(app.get(Reflector)),
     new ContentLocaleInterceptor(app.get(ContentTranslationsService), app.get(LocalesService)),
   );
-  app.useGlobalFilters(new EntityNotFoundFilter());
+  app.useGlobalFilters(new EntityNotFoundFilter(), new TooManyAttemptsFilter());
 
   await app.listen(envConfig.backendPort, '0.0.0.0');
 }
