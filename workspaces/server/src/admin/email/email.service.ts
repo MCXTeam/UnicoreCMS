@@ -34,6 +34,7 @@ import { renderEmailTemplate } from './email.utils';
 import { PasswordLinkInput } from 'src/auth/dto/password-link.input';
 import { RefreshToken } from 'src/auth/entities/refresh-token.entity';
 import { PasswordService } from 'src/auth/password/password.service';
+import { PasswordPolicyService } from 'src/auth/password/password-policy.service';
 import { passwordAad } from 'src/auth/password/password-aad';
 import { ContentTranslationsService } from '../locales/content-translations.service';
 
@@ -56,6 +57,7 @@ export class EmailService {
     private usersRepository: Repository<User>,
     private mailerService: MailerService,
     private passwordService: PasswordService,
+    private passwordPolicyService: PasswordPolicyService,
     private contentTranslations: ContentTranslationsService,
   ) {}
 
@@ -247,6 +249,8 @@ export class EmailService {
 
     if (input.password) {
       await this.passwordResetRepository.delete({ user: { uuid: exist.user.uuid } });
+
+      await this.passwordPolicyService.assert(input.password, { username: exist.user.username, email: exist.user.email });
 
       exist.user.password = await this.passwordService.hash(input.password, passwordAad(exist.user.uuid));
 

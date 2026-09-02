@@ -27,7 +27,7 @@
         <Field
           v-model="password_form.password"
           name="password"
-          rules="required|min:8|max:128"
+          rules="required|isStrongPassword"
           v-slot="{ value, errorMessage, handleChange, handleBlur }"
         >
           <Password
@@ -210,8 +210,8 @@ async function changePassword() {
     await cabinet.changePassword(password_form)
     $unicore.successNotification($t('cabinet.password_changed'))
     if (password_form.close) $unicore.logout()
-  } catch {
-    $unicore.errorNotification($t('cabinet.password_wrong'))
+  } catch (err) {
+    $unicore.errorNotification($t('cabinet.password_wrong'), err)
   }
   loading.close()
 }

@@ -110,8 +110,16 @@ export const PASSWORD_ALGORITHM_BCRYPT = 'bcrypt';
 export const PASSWORD_ARGON2_PREFIXES = ['$argon2id$', '$argon2i$', '$argon2d$'];
 export const PASSWORD_BCRYPT_PREFIXES = ['$2a$', '$2b$', '$2y$'];
 
-export const PASSWORD_MIN_LENGTH = 8;
-export const PASSWORD_MAX_LENGTH = 128;
+export { PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH } from 'unicore-common';
+
+export const PWNED_RANGE_URL = 'https://api.pwnedpasswords.com/range/';
+export const PWNED_HASH = 'sha1';
+export const PWNED_PREFIX_LENGTH = 5;
+export const PWNED_TIMEOUT_MS = 3000;
+export const PWNED_CACHE_TTL_MS = 24 * 60 * 60_000;
+export const PWNED_PADDING_HEADER = 'Add-Padding';
+export const PWNED_LINE_SEPARATOR = /\r?\n/;
+export const PWNED_FIELD_SEPARATOR = ':';
 
 export const TOKEN_MAX_LENGTH = 4096;
 export const SERVER_ID_MAX_LENGTH = 128;

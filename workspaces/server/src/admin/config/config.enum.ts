@@ -28,6 +28,7 @@ export enum ConfigField {
   GiftsCodeExpireDays = 'gifts_code_expire_days',
   GiftsRegiftPercent = 'public_gifts_regift_percent',
   EmailActivationRequired = 'public_email_activation_required',
+  PasswordBreachCheck = 'password_breach_check',
   OrdinaryRegister = 'public_ordinary_register',
   RoleBadgeBefore = 'public_role_badge_before',
   KeepPaidPaymentsDays = 'cleanup_payments_paid_days',

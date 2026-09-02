@@ -53,6 +53,41 @@ export const USERNAME_PATTERN = /^[a-zA-Z0-9_-]{3,16}$/;
 export const IS_USERNAME = "isUsername";
 export const IS_USERNAME_OR_EMAIL = "isUsernameOrEmail";
 export const IS_PLAYER_PERM = "isPlayerPerm";
+export const IS_STRONG_PASSWORD = "isStrongPassword";
+
+export const PASSWORD_MIN_LENGTH = 10;
+export const PASSWORD_MAX_LENGTH = 128;
+export const PASSWORD_CONTEXT_MIN_LENGTH = 4;
+export const PASSWORD_REPEAT_UNIT_MAX = 3;
+export const PASSWORD_RUN_MIN_LENGTH = 4;
+export const PASSWORD_EDGE_NOISE_PATTERN = /^[^a-zа-я]+|[^a-zа-я]+$/g;
+export const PASSWORD_EMAIL_SEPARATOR = "@";
+
+export const PASSWORD_LEET_MAP: Record<string, string> = {
+  "0": "o",
+  "1": "i",
+  "3": "e",
+  "4": "a",
+  "5": "s",
+  "7": "t",
+  "8": "b",
+  "@": "a",
+  $: "s",
+  "!": "i",
+  "+": "t",
+};
+
+export const PASSWORD_ISSUES = [
+  "short",
+  "long",
+  "context",
+  "common",
+  "sequence",
+  "repeat",
+  "breached",
+] as const;
+
+export const PASSWORD_ISSUE_PREFIX = "password.";
 
 export const DEFAULT_ISSUANCE_PRESET = "luckperms";
 

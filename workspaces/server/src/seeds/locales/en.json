@@ -995,6 +995,8 @@
   "cfg.gifts_daily_limit_title": "Daily gift limit",
   "cfg.laminara_builds_hint": "Build ids separated by commas, e.g. survival, skyblock. Each one gets a laminara.build.<id> permission: grant it to a role or a player and the build shows up in the launcher.",
   "cfg.laminara_builds_title": "Laminara launcher builds",
+  "cfg.password_breach_check_hint": "On — passwords are checked against the public Have I Been Pwned breach corpus on registration and change. Only the first five characters of the hash leave the server, never the password itself. If the service is unreachable the password is accepted.",
+  "cfg.password_breach_check_title": "Check passwords against breach data",
   "cfg.public_donate_groups_virtual_use_hint": "Let bonuses cover part of the price of donate groups.",
   "cfg.public_donate_groups_virtual_use_title": "Bonuses for donate groups",
   "cfg.public_donate_perms_virtual_use_hint": "Let bonuses cover part of the price of individual permissions.",
@@ -1608,6 +1610,13 @@
   "store.warehouse_how_or": "or",
   "store.warehouse_how_title": "How to get your items",
   "store.warehouse_title": "Your storage",
+  "validation.password.breached": "This password appears in known breaches, pick another one",
+  "validation.password.common": "This password is too common",
+  "validation.password.context": "The password must not contain your username, email or the site name",
+  "validation.password.long": "This password is too long",
+  "validation.password.repeat": "The password must not be the same fragment repeated",
+  "validation.password.sequence": "The password must not be a run of keyboard characters",
+  "validation.password.short": "This password is too short",
   "validation.username": "This username is not valid",
   "validation.username_or_email": "This username or email is not valid"
 }

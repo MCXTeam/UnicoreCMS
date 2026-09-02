@@ -14,6 +14,7 @@ import { UserPublicDto } from './dto/user-public.dto';
 import { ReferalsService } from 'src/game/cabinet/referals/referals.service';
 import { randomUUID } from 'crypto';
 import { PasswordService } from 'src/auth/password/password.service';
+import { PasswordPolicyService } from 'src/auth/password/password-policy.service';
 import { passwordAad } from 'src/auth/password/password-aad';
 import { Cache } from 'cache-manager';
 import {
@@ -80,6 +81,7 @@ export class UsersService {
     private playtimeService: PlaytimeService,
     private referalsService: ReferalsService,
     private passwordService: PasswordService,
+    private passwordPolicyService: PasswordPolicyService,
     private settingsService: SettingsService,
     private twoFactorService: TwoFactorService,
   ) {}
@@ -298,6 +300,8 @@ export class UsersService {
     user.username = input.username;
     user.superuser = manageSuperuser ? input.superuser : null;
     user.locale = input.locale;
+    await this.passwordPolicyService.assert(input.password, { username: input.username, email: input.email });
+
     user.password = await this.passwordService.hash(input.password, passwordAad(user.uuid));
 
     if (allowed.has('email')) user.email = input.email;

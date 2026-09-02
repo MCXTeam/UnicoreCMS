@@ -1,5 +1,5 @@
-import { IsUsername, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '@common';
-import { IsDefined, IsEmail, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { IsStrongPassword, IsUsername } from '@common';
+import { IsDefined, IsEmail, IsOptional, IsString } from 'class-validator';
 
 export class RegisterInput {
   @IsDefined()
@@ -12,8 +12,7 @@ export class RegisterInput {
 
   @IsDefined()
   @IsString()
-  @MinLength(PASSWORD_MIN_LENGTH)
-  @MaxLength(PASSWORD_MAX_LENGTH)
+  @IsStrongPassword()
   password: string;
 
   @IsOptional()

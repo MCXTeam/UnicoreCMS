@@ -1,5 +1,6 @@
 import { UAParser } from 'ua-parser-js'
 import { formatDuration, type DurationUnit } from 'unicore-common/duration'
+import { PASSWORD_ISSUE_PREFIX, passwordIssueFrom } from 'unicore-common/validation'
 import { ACTIVE_MODULES_KEY } from 'unicore-api'
 import { setActiveModules } from 'unicore-api/admin'
 import { useConfigStore } from '~/stores/config'
@@ -34,9 +35,14 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     notifyError(error: any, fallback: string): void {
       if (error?.response?.status === 403) return
 
+      const issue = passwordIssueFrom(error)
       const message = error?.response?.data?.message
       const text = Array.isArray(message) ? message.join('. ') : message
-      const detail = text && text !== error?.response?.data?.error ? text : fallback
+      const detail = issue
+        ? String((nuxtApp as any).$t?.(`validation.${PASSWORD_ISSUE_PREFIX}${issue}`) ?? fallback)
+        : text && text !== error?.response?.data?.error
+          ? text
+          : fallback
 
       nuxtApp.vueApp.config.globalProperties.$toast?.add({ severity: 'error', detail, life: 3000 })
     },

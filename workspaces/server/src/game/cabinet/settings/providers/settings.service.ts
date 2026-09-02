@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { RefreshToken } from 'src/auth/entities/refresh-token.entity';
 import { PasswordUpdateInput } from '../dto/password-update.input';
 import { PasswordService } from 'src/auth/password/password.service';
+import { PasswordPolicyService } from 'src/auth/password/password-policy.service';
 import { passwordAad } from 'src/auth/password/password-aad';
 import { events } from 'unicore-api';
 
@@ -15,9 +16,12 @@ export class SettingsService {
     @InjectRepository(User) private usersRepo: Repository<User>,
     @InjectRepository(RefreshToken) private tokensRepo: Repository<RefreshToken>,
     private passwordService: PasswordService,
+    private passwordPolicyService: PasswordPolicyService,
   ) {}
 
   private async setPassword(user: User, password: string) {
+    await this.passwordPolicyService.assert(password, { username: user.username, email: user.email });
+
     user.password = await this.passwordService.hash(password, passwordAad(user.uuid));
 
     await this.usersRepo.update({ uuid: user.uuid }, { password: user.password });

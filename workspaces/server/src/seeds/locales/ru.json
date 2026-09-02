@@ -995,6 +995,8 @@
   "cfg.gifts_daily_limit_title": "Лимит подарков в сутки",
   "cfg.laminara_builds_hint": "Идентификаторы сборок через запятую, например survival, skyblock. На каждую появляется право laminara.build.<id>: выдайте его роли или игроку — и сборка откроется в лаунчере.",
   "cfg.laminara_builds_title": "Сборки лаунчера Laminara",
+  "cfg.password_breach_check_hint": "Включено — при регистрации и смене пароль сверяется с публичной базой утечек Have I Been Pwned. Наружу уходят только первые пять символов хэша, сам пароль не передаётся. Если сервис недоступен, пароль принимается.",
+  "cfg.password_breach_check_title": "Проверять пароли по базе утечек",
   "cfg.public_donate_groups_virtual_use_hint": "Разрешить гасить бонусами часть цены донат-групп.",
   "cfg.public_donate_groups_virtual_use_title": "Бонусы за донат-группы",
   "cfg.public_donate_perms_virtual_use_hint": "Разрешить гасить бонусами часть цены отдельных прав.",
@@ -1608,6 +1610,13 @@
   "store.warehouse_how_or": "или",
   "store.warehouse_how_title": "Как забрать предметы",
   "store.warehouse_title": "Склад покупок",
+  "validation.password.breached": "Этот пароль встречается в утечках, выберите другой",
+  "validation.password.common": "Такой пароль слишком распространён",
+  "validation.password.context": "Пароль не должен содержать ник, почту или название сайта",
+  "validation.password.long": "Пароль слишком длинный",
+  "validation.password.repeat": "Пароль не должен быть повторением одного и того же",
+  "validation.password.sequence": "Пароль не должен быть рядом символов на клавиатуре",
+  "validation.password.short": "Пароль слишком короткий",
   "validation.username": "Имя пользователя указано неверно",
   "validation.username_or_email": "Имя пользователя или email указаны неверно"
 }

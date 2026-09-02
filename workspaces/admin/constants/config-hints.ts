@@ -104,6 +104,10 @@ export const CONFIG_HINTS: Record<string, ConfigHint> = {
     title: 'cfg.public_ordinary_register_title',
     hint: 'cfg.public_ordinary_register_hint',
   },
+  password_breach_check: {
+    title: 'cfg.password_breach_check_title',
+    hint: 'cfg.password_breach_check_hint',
+  },
   cleanup_payments_paid_days: {
     title: 'cfg.cleanup_payments_paid_days_title',
     hint: 'cfg.cleanup_payments_paid_days_hint',

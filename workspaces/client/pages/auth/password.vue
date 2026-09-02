@@ -4,7 +4,7 @@
     <Field
       v-model="form.password"
       name="password"
-      rules="required|min:8|max:128"
+      rules="required|isStrongPassword"
       v-slot="{ value, errorMessage, handleChange, handleBlur }"
     >
       <div data-aos="zoom-in-right" data-aos-delay="300" class="w-100 mb-3">
@@ -57,6 +57,7 @@
 
 <script setup lang="ts">
 import { Form, Field } from 'vee-validate'
+import { passwordIssueFrom } from 'unicore-common/validation'
 
 definePageMeta({ layout: 'auth', middleware: 'guest' })
 
@@ -85,9 +86,10 @@ async function reset() {
     await authFlow.password({ ...form, hash: route.query.hash })
     $unicore.successNotification($t('auth.password_changed'))
     await navigateTo('/auth')
-  } catch {
-    $unicore.errorNotification($t('auth.reset_link_invalid'))
-    await navigateTo('/auth')
+  } catch (err: any) {
+    $unicore.errorNotification($t('auth.reset_link_invalid'), err)
+
+    if (!passwordIssueFrom(err)) await navigateTo('/auth')
   } finally {
     loading.close()
   }

@@ -3,4 +3,5 @@ export enum CacheKey {
   Votes = 'votes_list',
   Users = 'users',
   Config = 'config',
+  PwnedRange = 'pwned_range',
 }

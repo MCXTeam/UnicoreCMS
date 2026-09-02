@@ -130,7 +130,7 @@
             v-model="user.password"
             name="password"
             :label="$t('auth.password')"
-            rules="required|min:8|max:128"
+            rules="required|isStrongPassword"
             v-slot="{ value, errorMessage, handleChange, handleBlur }"
           >
             <div class="field">

@@ -1,3 +1,4 @@
+import { PASSWORD_ISSUE_PREFIX, passwordIssueFrom } from 'unicore-common/validation'
 import { useAuthStore } from '~/stores/auth'
 import { useUiStore } from '~/stores/ui'
 
@@ -14,7 +15,7 @@ export interface UnicoreApi {
   logout: () => Promise<void>
   authErrorNotification: (error: any, text: string) => void
   successNotification: (text: string) => void
-  errorNotification: (text: string) => void
+  errorNotification: (text: string, error?: any) => void
   switchTheme: () => void
 }
 
@@ -26,6 +27,12 @@ export default defineNuxtPlugin((nuxtApp) => {
   const toast = (): ToastLike | undefined => nuxtApp.vueApp.config.globalProperties.$toast as ToastLike | undefined
 
   const notify = (severity: string, summary: string, detail: string) => toast()?.add({ severity, summary, detail, life: 4000 })
+
+  const passwordText = (error: any): string | null => {
+    const issue = passwordIssueFrom(error)
+
+    return issue ? t(`validation.${PASSWORD_ISSUE_PREFIX}${issue}`) : null
+  }
 
   const unicore: UnicoreApi = {
     loading(text?: string) {
@@ -51,14 +58,17 @@ export default defineNuxtPlugin((nuxtApp) => {
       await navigateTo('/')
     },
     authErrorNotification(error: any, text: string) {
-      if (error?.response?.status === 429) notify('error', t('error.auth_title'), t('error.too_many_requests'))
+      const password = passwordText(error)
+
+      if (password) notify('error', t('error.auth_title'), password)
+      else if (error?.response?.status === 429) notify('error', t('error.auth_title'), t('error.too_many_requests'))
       else notify('error', t('error.auth_title'), text)
     },
     successNotification(text: string) {
       notify('success', t('common.success'), text)
     },
-    errorNotification(text: string) {
-      notify('error', t('error.title'), text)
+    errorNotification(text: string, error?: any) {
+      notify('error', t('error.title'), passwordText(error) ?? text)
     },
     switchTheme() {
       colorMode.preference = colorMode.value === 'light' ? 'dark' : 'light'

@@ -43,7 +43,7 @@
     <Field
       v-model="form.password"
       name="password"
-      rules="required|min:8|max:128"
+      rules="required|isStrongPassword"
       v-slot="{ value, errorMessage, handleChange, handleBlur }"
     >
       <div data-aos="zoom-in-right" data-aos-delay="600" class="w-100 mb-3 d-flex gap-2">
