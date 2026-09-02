@@ -1,6 +1,6 @@
-import { WinstonModule } from "nest-winston";
 import { transports } from "./transports";
+import { WinstonLogger } from "./logger";
 import * as winston from "winston";
 
-export const NestLogger = WinstonModule.createLogger({ transports });
 export const Logger = winston.createLogger({ transports });
+export const NestLogger = new WinstonLogger(Logger);

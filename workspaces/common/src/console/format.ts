@@ -3,9 +3,12 @@ import * as os from "os";
 import bare from "cli-color/bare";
 import safeStringify from "fast-safe-stringify";
 import { Format } from "logform";
-import { NestLikeConsoleFormatOptions } from "nest-winston";
 import { inspect } from "util";
 import { format } from "winston";
+
+export interface ConsoleFormatOptions {
+  prettyPrint?: boolean;
+}
 
 const ColorScheme: Record<string, bare.Format> = {
   info: clc.green,
@@ -15,10 +18,7 @@ const ColorScheme: Record<string, bare.Format> = {
   verbose: clc.cyanBright,
 };
 
-export const ConsoleFormat = (
-  appName = "NestWinston",
-  options?: NestLikeConsoleFormatOptions,
-): Format =>
+export const ConsoleFormat = (options?: ConsoleFormatOptions): Format =>
   format.printf(({ context, level, timestamp, message, ms, ...meta }) => {
     if (typeof timestamp !== "undefined") {
       // Only format the timestamp to a locale representation if it's ISO 8601 format. Any format

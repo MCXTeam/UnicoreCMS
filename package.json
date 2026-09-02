@@ -4,7 +4,7 @@
   "private": true,
   "packageManager": "pnpm@11.20.0",
   "engines": {
-    "node": ">=22 <25"
+    "node": ">=22.12 <25"
   },
   "scripts": {
     "dev": "pnpm --filter unicore-common run build && pnpm --filter unicore-api run build && pnpm -r --parallel run dev",

@@ -19,7 +19,7 @@ const consoleFormat = winston.format.combine(
   redactFormat(),
   winston.format.timestamp(),
   winston.format.ms(),
-  ConsoleFormat("UnicoreServer", { prettyPrint: true }),
+  ConsoleFormat({ prettyPrint: true }),
 );
 
 const fileFormat = winston.format.combine(
