@@ -47,6 +47,7 @@ lerna-debug.log*
 !/storage/default
 
 docker/mysql-data
+docker/certbot
 license.pem
 # Playwright MCP
 .playwright-mcp/

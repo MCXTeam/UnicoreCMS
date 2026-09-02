@@ -7,7 +7,7 @@ import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { AuthAdapter } from './auth/adapters/auth.adapter';
 import { EntityNotFoundFilter } from './common/filters/entity-not-found.filter';
 import { TooManyAttemptsFilter } from './common/filters/too-many-attempts.filter';
-import { ASCII_NAME, formatError, STATIC_CONTENT_SECURITY_POLICY, stderr, stdout } from '@common';
+import { ASCII_NAME, formatError, HSTS_MAX_AGE_SECONDS, STATIC_CONTENT_SECURITY_POLICY, stderr, stdout, SWAGGER_PATH } from '@common';
 import helmet from 'helmet';
 import clc from 'cli-color';
 import { initializeTransactionalContext } from 'typeorm-transactional';
@@ -41,10 +41,10 @@ async function bootstrap() {
   app.set('trust proxy', envConfig.trustProxy);
   app.enableShutdownHooks();
 
-  if (process.env.NODE_ENV !== 'production') {
+  if (envConfig.swagger) {
     const config = new DocumentBuilder().setTitle('UnicoreAPI').setDescription('The cats API description').setVersion('1.0').build();
     const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('docs', app, document);
+    SwaggerModule.setup(SWAGGER_PATH, app, document);
   }
 
   app.use(
@@ -52,6 +52,7 @@ async function bootstrap() {
       contentSecurityPolicy: false,
       crossOriginResourcePolicy: { policy: 'cross-origin' },
       crossOriginEmbedderPolicy: false,
+      strictTransportSecurity: envConfig.apiHttps && { maxAge: HSTS_MAX_AGE_SECONDS, includeSubDomains: true },
     }),
   );
   app.enableCors({

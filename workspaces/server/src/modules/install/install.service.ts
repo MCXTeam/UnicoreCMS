@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, statSync } from 'fs';
-import { join, resolve, sep } from 'path';
+import { join } from 'path';
 import { satisfies } from 'semver';
 import { modulesPath, themesPath } from 'unicore-common';
 import {
@@ -13,7 +13,7 @@ import {
   validateThemeManifest,
 } from 'unicore-api';
 import { StorageManager } from 'src/common/storage/storage.class';
-import { formatError } from '@common';
+import { containedPath, formatError } from '@common';
 import { DataSource } from 'typeorm';
 import { ExtensionKind, extractArchive, readExtensionArchive } from './archive';
 import { InstallResultDto } from '../dto/install-result.dto';
@@ -103,9 +103,9 @@ export class InstallService {
 
   private assertParts(kind: ExtensionKind, manifest: ModuleManifest | ThemeManifest, dir: string): void {
     const inside = (relative: string): string => {
-      const path = resolve(dir, relative);
+      const path = containedPath(dir, relative);
 
-      if (path !== dir && !path.startsWith(`${dir}${sep}`)) throw new BadRequestException(`Путь «${relative}» выходит за папку расширения`);
+      if (!path) throw new BadRequestException(`Путь «${relative}» выходит за папку расширения`);
 
       return path;
     };

@@ -20,6 +20,9 @@ export const ALLOW_INACTIVE_KEY = 'allowInactive';
 
 export const STATIC_CONTENT_SECURITY_POLICY = "default-src 'none'; img-src 'self'; style-src 'none'; script-src 'none'; sandbox";
 
+export const HSTS_MAX_AGE_SECONDS = 15552000;
+export const SWAGGER_PATH = 'docs';
+
 export const STORAGE_MAX_IMAGE_UPLOAD = 2 * 1024 * 1024;
 export const STORAGE_MAX_ZIP_UPLOAD = 50 * 1024 * 1024;
 

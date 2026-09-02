@@ -21,13 +21,15 @@ import { isIP } from 'net';
 import { Logger } from '@nestjs/common';
 import { envConfig, storagePath } from 'unicore-common';
 import { STORAGE_MAX_REMOTE_DOWNLOAD } from '../constants';
+import { containedPath } from '../utils/path';
 
 const destination = storagePath;
 
 export class StorageManager {
-  /**
-   * Сгенерировать уникальное имя файла
-   */
+  private static locate(filename?: string): string | null {
+    return containedPath(destination, filename);
+  }
+
   static fileName(req: Request, file: Express.Multer.File, callback) {
     callback(null, nanoid() + extname(file.originalname));
   }
@@ -40,47 +42,40 @@ export class StorageManager {
     });
   }
 
-  /**
-   * Получить url файла
-   */
   static url(filename: string) {
     return envConfig.apiBaseurl + '/' + filename;
   }
 
-  static path(filename: string) {
-    return destination + '/' + filename;
+  static path(filename: string): string | null {
+    return StorageManager.locate(filename);
   }
 
-  /**
-   * Удалить файл
-   */
   static remove(filename?: string): void {
-    if (!filename) return;
+    const path = StorageManager.locate(filename);
 
-    const path = destination + '/' + filename;
-
-    if (existsSync(path) && lstatSync(path).isFile()) unlinkSync(path);
+    if (path && existsSync(path) && lstatSync(path).isFile()) unlinkSync(path);
   }
 
   static save(origin: string, buffer: Buffer): string {
     const ext = extname(origin).toLowerCase();
     const safeExt = ['.png', '.jpg', '.jpeg', '.gif', '.webp'].includes(ext) ? ext : '.png';
     const name = nanoid() + safeExt;
-    const path = destination + '/' + name;
 
-    writeFileSync(path, buffer);
+    writeFileSync(StorageManager.locate(name), buffer);
+
     return name;
   }
 
   static rename(filename: string): string {
-    const path = destination + '/' + filename;
-    const newname = nanoid() + extname(filename);
-    const newpath = destination + '/' + newname;
+    const path = StorageManager.locate(filename);
 
-    if (existsSync(path) && lstatSync(path).isFile()) {
-      renameSync(path, newpath);
-      return newname;
-    } else return null;
+    if (!path || !existsSync(path) || !lstatSync(path).isFile()) return null;
+
+    const newname = nanoid() + extname(filename);
+
+    renameSync(path, StorageManager.locate(newname));
+
+    return newname;
   }
 
   static async saveFromUrl(url: string): Promise<string> {
@@ -91,7 +86,7 @@ export class StorageManager {
 
     try {
       const filename = nanoid() + extname(urlParse(url).pathname);
-      const save_path = destination + '/' + filename;
+      const save_path = StorageManager.locate(filename);
 
       const response = await axios.get(url, {
         responseType: 'stream',
@@ -222,17 +217,15 @@ export class StorageManager {
   }
 
   static exists(filename?: string): boolean {
-    if (!filename) return false;
+    const path = StorageManager.locate(filename);
 
-    const path = destination + '/' + filename;
-
-    return existsSync(path) && lstatSync(path).isFile();
+    return Boolean(path) && existsSync(path) && lstatSync(path).isFile();
   }
 
   static read(filename?: string, maxBytes?: number): Buffer | null {
     if (!StorageManager.exists(filename)) return null;
 
-    const path = destination + '/' + filename;
+    const path = StorageManager.locate(filename);
 
     if (typeof maxBytes === 'number' && lstatSync(path).size > maxBytes) return null;
 
@@ -240,6 +233,6 @@ export class StorageManager {
   }
 
   static readStream(filename?: string): ReadStream | null {
-    return StorageManager.exists(filename) ? createReadStream(destination + '/' + filename) : null;
+    return StorageManager.exists(filename) ? createReadStream(StorageManager.locate(filename)) : null;
   }
 }

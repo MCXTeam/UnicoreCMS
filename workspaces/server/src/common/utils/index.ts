@@ -6,6 +6,7 @@ export * from './config-value';
 export * from './escape-html';
 export * from './getDigest';
 export * from './ip';
+export * from './path';
 export * from './request';
 export * from './placeholders';
 export * from './replace-async';

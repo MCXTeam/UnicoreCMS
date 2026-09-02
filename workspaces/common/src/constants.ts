@@ -16,6 +16,8 @@ export const MAX_PORT = 65535;
 
 export const RUNTIME_ENV_PREFIX = "NUXT_PUBLIC_";
 
+export const HTTPS_PROTOCOL = "https:";
+
 export const PUBLIC_ENV_KEY = {
   baseurl: "BASEURL",
   apiBaseurl: "API_BASEURL",

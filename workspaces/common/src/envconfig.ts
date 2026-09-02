@@ -8,6 +8,7 @@ import {
   DEFAULT_BCRYPT_COST,
   DEFAULT_PASSWORD_ALGORITHM,
   DEFAULT_TIMEZONE,
+  HTTPS_PROTOCOL,
   PASSWORD_ALGORITHMS,
   PUBLIC_ENV_KEY,
 } from "./constants";
@@ -36,6 +37,8 @@ export interface EnvConfig {
   jwtRefreshExpires: string;
   trustProxy: boolean | number | string;
   migrationsSkip: boolean;
+  swagger: boolean;
+  apiHttps: boolean;
   corsOrigins: string[];
   apiBaseurl: string;
   recaptchaSecret: string;
@@ -127,6 +130,8 @@ const adminBaseurl =
   env.get(PUBLIC_ENV_KEY.adminBaseurl).asString() ||
   originWithPort(baseurl, ports.adminPort);
 
+const apiBaseurl = env.get(PUBLIC_ENV_KEY.apiBaseurl).required().asString();
+
 const encryptionKey =
   env.get("ENCRYPTION_KEY").asString() ||
   env.get("JWT_KEY").required().asString();
@@ -165,7 +170,8 @@ export const envConfig: EnvConfig = {
   backendPort: ports.backendPort,
 
   // URL REWRITES
-  apiBaseurl: env.get(PUBLIC_ENV_KEY.apiBaseurl).required().asString(),
+  apiBaseurl,
+  apiHttps: apiBaseurl.startsWith(HTTPS_PROTOCOL),
 
   // Настройки подключения к БД
   databaseType: env.get("DATABASE_TYPE").default("mysql").asString(),
@@ -211,6 +217,7 @@ export const envConfig: EnvConfig = {
     .asString(),
 
   migrationsSkip: env.get("MIGRATIONS_SKIP").default("false").asBool(),
+  swagger: env.get("SWAGGER").default("false").asBool(),
 
   trustProxy: (() => {
     const raw = env.get("TRUST_PROXY").asString();

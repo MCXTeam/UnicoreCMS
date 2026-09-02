@@ -1,0 +1,39 @@
+# Client (TLS)
+server {
+  listen 80 default_server;
+
+  server_name ${CLIENT_HOST} www.${CLIENT_HOST};
+
+  location ^~ /.well-known/acme-challenge/ {
+    root /var/www/certbot;
+  }
+
+  location / {
+    return 301 https://$host$request_uri;
+  }
+}
+
+server {
+  listen 443 ssl default_server;
+  http2 on;
+
+  server_name ${CLIENT_HOST} www.${CLIENT_HOST};
+
+  ssl_certificate /etc/letsencrypt/live/${CLIENT_HOST}/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/${CLIENT_HOST}/privkey.pem;
+  ssl_trusted_certificate /etc/letsencrypt/live/${CLIENT_HOST}/chain.pem;
+
+  include /etc/nginx/tls.conf;
+
+  set $app http://app:${CLIENT_PORT};
+
+  location / {
+    proxy_pass $app;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Forwarded-Host $host;
+  }
+}
