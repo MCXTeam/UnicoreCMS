@@ -5,11 +5,6 @@ import { PermissionsCheckCommand } from './permissions.commands';
 import { SeedCommand } from './seed.command';
 import { UsersCommandCreate } from './users.commands';
 
-export const CLI_COMMANDS: Type<CommandDefinition>[] = [
-  UsersCommandCreate,
-  SeedCommand,
-  CryptoRewrapCommand,
-  PermissionsCheckCommand,
-];
+export const CLI_COMMANDS: Type<CommandDefinition>[] = [UsersCommandCreate, SeedCommand, CryptoRewrapCommand, PermissionsCheckCommand];
 
 export { CryptoRewrapCommand, PermissionsCheckCommand, SeedCommand, UsersCommandCreate };
