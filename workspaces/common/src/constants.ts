@@ -18,6 +18,19 @@ export const RUNTIME_ENV_PREFIX = "NUXT_PUBLIC_";
 
 export const HTTPS_PROTOCOL = "https:";
 
+export const CSP_NONCE_BYTES = 16;
+export const CSP_SCRIPT_TAG_PATTERN = /<script(?=[\s>])(?![^>]*\snonce=)/gi;
+export const CSP_WEBSOCKET_PROTOCOL = "ws";
+export const CONTENT_SECURITY_POLICY_HEADER = "Content-Security-Policy";
+
+export const SECURITY_STATIC_HEADERS: Record<string, string> = {
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  "Cross-Origin-Opener-Policy": "same-origin",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=()",
+};
+
 export const PUBLIC_ENV_KEY = {
   baseurl: "BASEURL",
   apiBaseurl: "API_BASEURL",

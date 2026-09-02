@@ -97,6 +97,11 @@
       "import": "./dist/sanitize.mjs",
       "require": "./dist/sanitize.js"
     },
+    "./security": {
+      "types": "./dist/security.d.ts",
+      "import": "./dist/security.mjs",
+      "require": "./dist/security.js"
+    },
     "./build": {
       "types": "./dist/build.d.ts",
       "import": "./dist/build.mjs",

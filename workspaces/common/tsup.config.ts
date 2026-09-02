@@ -20,6 +20,7 @@ export default defineConfig({
     "src/issuance/index.ts",
     "src/validation/index.ts",
     "src/sanitize.ts",
+    "src/security.ts",
     "src/console/index.ts",
     "src/build.ts",
     "src/vite.ts",
