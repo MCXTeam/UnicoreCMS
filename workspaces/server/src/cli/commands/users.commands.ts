@@ -1,30 +1,41 @@
-import { Command, CommandRunner } from 'nest-commander';
+import { Command, CommandRunner, InquirerService, Question, QuestionSet } from 'nest-commander';
 import clc from 'cli-color';
 import { UserInput } from 'src/admin/users/dto/user.input';
 import { UsersService } from 'src/admin/users/users.service';
 import { validateOrReject } from 'class-validator';
+import { CLI_PASSWORD_PROMPT, CLI_PASSWORD_QUESTIONS } from '../constants';
 import { stdout } from '../stdout';
+
+@QuestionSet({ name: CLI_PASSWORD_QUESTIONS })
+export class UsersPasswordQuestions {
+  @Question({ name: 'password', type: 'password', mask: '*', message: CLI_PASSWORD_PROMPT })
+  parsePassword(value: string): string {
+    return value;
+  }
+}
 
 @Command({
   name: 'user-create',
-  arguments: '<username> <email> <password> [superuser]',
+  arguments: '<username> <email> [superuser]',
   description: 'Create a new user',
   argsDescription: {
     superuser: 'Grant superuser permissions (boolean, default: false)',
   },
 })
 export class UsersCommandCreate extends CommandRunner {
-  constructor(private usersService: UsersService) {
+  constructor(private usersService: UsersService, private inquirer: InquirerService) {
     super();
   }
 
-  async run(inputs: string[], options?: Record<string, any>): Promise<void> {
+  async run(inputs: string[]): Promise<void> {
+    const { password } = await this.inquirer.ask<{ password: string }>(CLI_PASSWORD_QUESTIONS, undefined);
+
     const input = new UserInput();
 
     input.username = inputs[0];
     input.email = inputs[1];
-    input.password = inputs[2];
-    input.superuser = inputs[3] && inputs[3] == 'true' ? true : null;
+    input.password = password;
+    input.superuser = inputs[2] && inputs[2] == 'true' ? true : null;
     input.activated = true;
 
     await validateOrReject(input).catch((errors) => {

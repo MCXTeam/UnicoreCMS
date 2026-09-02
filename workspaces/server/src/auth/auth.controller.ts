@@ -20,6 +20,7 @@ import { AuthService } from './auth.service';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { Public } from './decorators/public.decorator';
 import { AllowInactive } from './decorators/allow-inactive.decorator';
+import { AllowPasswordPending } from './decorators/allow-password-pending.decorator';
 import { AuthenticatedDto } from './dto/authenticated.dto';
 import { LoginInput } from './dto/login.input';
 import { PasswordLinkInput } from './dto/password-link.input';
@@ -32,6 +33,7 @@ import { VerifyInput } from './dto/verify.input';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { TokensService } from './tokens.service';
 
+@AllowPasswordPending()
 @UseGuards(ThrottlerCoreGuard)
 @Controller('auth')
 export class AuthController {

@@ -273,7 +273,7 @@ export class UsersService {
   }
 
   @Transactional()
-  async create(input: UserInput, actor: User = null, allowedFields: UserField[] = USER_FIELDS): Promise<User> {
+  async create(input: UserInput, actor: User = null, allowedFields: UserField[] = USER_FIELDS, selfService = false): Promise<User> {
     const userExist = await this.usersRepository.findOne({
       where: [{ username: input.username }, ...(input.email ? [{ email: input.email }] : [])],
     });
@@ -303,6 +303,7 @@ export class UsersService {
     await this.passwordPolicyService.assert(input.password, { username: input.username, email: input.email });
 
     user.password = await this.passwordService.hash(input.password, passwordAad(user.uuid));
+    user.password_change_required = !selfService;
 
     if (allowed.has('email')) user.email = input.email;
     if (allowed.has('activated')) user.activated = input.activated;

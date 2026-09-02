@@ -17,6 +17,8 @@ export const PERMISSIONS_KEY = 'permissions';
 export const RUNTIME_PERMISSIONS_KEY = 'runtimePermissions';
 export const DONATE_PERMS_CACHE_KEY = '__donateWebPerms';
 export const ALLOW_INACTIVE_KEY = 'allowInactive';
+export const ALLOW_PASSWORD_PENDING_KEY = 'allowPasswordPending';
+export const PASSWORD_CHANGE_REQUIRED = 'password_change_required';
 
 export const STATIC_CONTENT_SECURITY_POLICY = "default-src 'none'; img-src 'self'; style-src 'none'; script-src 'none'; sandbox";
 

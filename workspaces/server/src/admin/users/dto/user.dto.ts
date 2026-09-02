@@ -24,6 +24,8 @@ export class UserDto {
   @Exclude()
   accessToken: string;
 
+  password_change_required?: boolean;
+
   two_factor_enabled?: boolean;
 
   @Exclude()
@@ -74,6 +76,8 @@ export class UserBasicDto {
 
   @Exclude()
   accessToken: string;
+
+  password_change_required?: boolean;
 
   two_factor_enabled?: boolean;
 

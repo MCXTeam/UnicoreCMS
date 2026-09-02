@@ -19,12 +19,16 @@ export class SettingsService {
     private passwordPolicyService: PasswordPolicyService,
   ) {}
 
-  private async setPassword(user: User, password: string) {
+  private async setPassword(user: User, password: string, byOwner: boolean) {
     await this.passwordPolicyService.assert(password, { username: user.username, email: user.email });
 
     user.password = await this.passwordService.hash(password, passwordAad(user.uuid));
+    user.password_change_required = !byOwner;
 
-    await this.usersRepo.update({ uuid: user.uuid }, { password: user.password });
+    await this.usersRepo.update(
+      { uuid: user.uuid },
+      { password: user.password, password_change_required: user.password_change_required },
+    );
 
     await events().emit('user.password.changed', { uuid: user.uuid, username: user.username });
   }
@@ -34,7 +38,7 @@ export class SettingsService {
   }
 
   async updatePassword(user: User, input: PasswordUpdateInput) {
-    await this.setPassword(user, input.password);
+    await this.setPassword(user, input.password, false);
     await this.closeSessions(user);
   }
 
@@ -42,7 +46,7 @@ export class SettingsService {
     const { valid } = await this.passwordService.verify(input.password_old, user.password, passwordAad(user.uuid));
     if (!valid) throw new BadRequestException();
 
-    await this.setPassword(user, input.password);
+    await this.setPassword(user, input.password, true);
 
     if (input.close) await this.closeSessions(user);
   }

@@ -61,6 +61,8 @@ export class LaminaraService {
 
     await this.loginAttemptsService.succeed(input.login, ip);
 
+    if (user.password_change_required) throw this.error(GravitError.PasswordChangeRequired, HttpStatus.FORBIDDEN);
+
     if (!(await this.authService.isActivated(user))) throw this.error(GravitError.UserNotActivated, HttpStatus.FORBIDDEN);
 
     if (isBanActive(user.ban)) throw this.error(GravitError.UserBlocked, HttpStatus.FORBIDDEN, user.ban?.reason);

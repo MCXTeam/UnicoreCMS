@@ -7,4 +7,5 @@ export enum GravitError {
   Wrong2FA = 'auth.wrong2fa',
   UserBlocked = 'auth.userblocked',
   UserNotActivated = 'auth.usernotactivated',
+  PasswordChangeRequired = 'auth.passwordchangerequired',
 }

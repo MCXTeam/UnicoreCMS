@@ -254,7 +254,12 @@ export class EmailService {
 
       exist.user.password = await this.passwordService.hash(input.password, passwordAad(exist.user.uuid));
 
-      await this.usersRepository.update({ uuid: exist.user.uuid }, { password: exist.user.password });
+      exist.user.password_change_required = false;
+
+      await this.usersRepository.update(
+        { uuid: exist.user.uuid },
+        { password: exist.user.password, password_change_required: false },
+      );
       await this.tokensRepo.delete({ user: { uuid: exist.user.uuid } });
 
       await events().emit('user.password.changed', { uuid: exist.user.uuid, username: exist.user.username });

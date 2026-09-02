@@ -1,6 +1,7 @@
 import { ConflictException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { REQUIRE_2FA } from '@common';
 import { events } from 'unicore-api';
+import { USER_FIELDS } from 'unicore-common';
 import { User } from 'src/admin/users/entities/user.entity';
 import { UsersService } from 'src/admin/users/users.service';
 import { TokensService } from './tokens.service';
@@ -117,7 +118,7 @@ export class AuthService {
     let user: User;
 
     try {
-      user = await this.usersService.create({ username, email, password, activated: !activationRequired, locale });
+      user = await this.usersService.create({ username, email, password, activated: !activationRequired, locale }, null, USER_FIELDS, true);
     } catch (e) {
       if (e instanceof QueryFailedError && (e.driverError?.code === 'ER_DUP_ENTRY' || e.driverError?.code === '23505'))
         throw new ConflictException();

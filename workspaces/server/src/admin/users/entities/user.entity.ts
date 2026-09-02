@@ -45,6 +45,9 @@ export class User {
   @Column({ name: 'server_id', nullable: true })
   serverId: string;
 
+  @Column({ name: 'password_change_required', nullable: true })
+  password_change_required?: boolean;
+
   @Column({ name: 'two_factor_enabled', nullable: true })
   two_factor_enabled?: boolean;
 

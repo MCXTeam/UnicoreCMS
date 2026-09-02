@@ -21,6 +21,7 @@ import { Referal } from 'src/game/cabinet/referals/entities/referal.entity';
 import { PasswordModule } from './password/password.module';
 import { ConfigModule } from 'src/admin/config/config.module';
 import { ActivatedGuard } from './guards/activated.guard';
+import { PasswordChangeGuard } from './guards/password-change.guard';
 import { ApiServerGuard } from './guards/api-server.guard';
 
 @Module({
@@ -50,6 +51,10 @@ import { ApiServerGuard } from './guards/api-server.guard';
     {
       provide: APP_GUARD,
       useClass: ActivatedGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: PasswordChangeGuard,
     },
     {
       provide: APP_GUARD,

@@ -75,6 +75,9 @@ export class GravitService {
   }
 
   private async assertAllowed(user: User) {
+    if (user.password_change_required)
+      throw new HttpException({ error: GravitError.PasswordChangeRequired }, HttpStatus.FORBIDDEN);
+
     if (!(await this.authService.isActivated(user))) throw new HttpException({ error: GravitError.UserNotActivated }, HttpStatus.FORBIDDEN);
 
     if (isBanActive(user.ban)) throw new HttpException({ error: GravitError.UserBlocked }, HttpStatus.FORBIDDEN);

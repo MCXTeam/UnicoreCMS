@@ -1,7 +1,7 @@
 <template>
   <div class="cab-grid">
     <CabTile v-if="canPassword" :title="$t('auth.change_password')" icon="bx bx-lock-alt" :span="6">
-      <p class="cab-sub mt-0 mb-3">{{ $t('cabinet.password_hint') }}</p>
+      <p class="cab-sub mt-0 mb-3">{{ $t(forcedPassword ? 'cabinet.password_change_required' : 'cabinet.password_hint') }}</p>
       <Form v-slot="{ meta }" class="cab-form">
         <label class="cab-label">{{ $t('cabinet.current_password') }}</label>
         <Field
@@ -186,6 +186,8 @@ const { canPassword, canTwoFactorOn, canTwoFactorOff } = useAccess({
 
 useHead({ title: computed(() => $t('header.cabinet')) })
 
+const forcedPassword = computed(() => Boolean($auth.user?.password_change_required))
+
 const qrcode = ref(null)
 const password_form = reactive({
   password_old: '',
@@ -210,6 +212,7 @@ async function changePassword() {
     await cabinet.changePassword(password_form)
     $unicore.successNotification($t('cabinet.password_changed'))
     if (password_form.close) $unicore.logout()
+    else await $auth.fetchUser()
   } catch (err) {
     $unicore.errorNotification($t('cabinet.password_wrong'), err)
   }

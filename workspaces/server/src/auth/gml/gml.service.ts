@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
-import { isBanActive, REQUIRE_2FA } from '@common';
+import { isBanActive, PASSWORD_CHANGE_REQUIRED, REQUIRE_2FA } from '@common';
 import { UsersService } from 'src/admin/users/users.service';
 import { TwoFactorService } from 'src/game/cabinet/settings/providers/two_factor.service';
 import { AuthService } from '../auth.service';
@@ -44,6 +44,8 @@ export class GmlService {
     }
 
     await this.loginAttemptsService.succeed(input.Login, ip);
+
+    if (user.password_change_required) throw new ForbiddenException(PASSWORD_CHANGE_REQUIRED);
 
     if (!(await this.authService.isActivated(user))) throw new ForbiddenException('User is not activated');
 
