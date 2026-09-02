@@ -23,6 +23,8 @@ export const CSP_SCRIPT_TAG_PATTERN = /<script(?=[\s>])(?![^>]*\snonce=)/gi;
 export const CSP_WEBSOCKET_PROTOCOL = "ws";
 export const CONTENT_SECURITY_POLICY_HEADER = "Content-Security-Policy";
 
+export const SECURITY_STRIPPED_HEADERS = ["X-Powered-By"];
+
 export const SECURITY_STATIC_HEADERS: Record<string, string> = {
   "X-Content-Type-Options": "nosniff",
   "X-Frame-Options": "DENY",

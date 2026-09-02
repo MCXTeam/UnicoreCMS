@@ -4,6 +4,7 @@ import {
   generateNonce,
   securityHeaders,
   CONTENT_SECURITY_POLICY_HEADER,
+  SECURITY_STRIPPED_HEADERS,
 } from 'unicore-common/security'
 
 const HTML_PARTS = ['head', 'bodyPrepend', 'body', 'bodyAppend'] as const
@@ -11,6 +12,7 @@ const HTML_PARTS = ['head', 'bodyPrepend', 'body', 'bodyAppend'] as const
 export default defineNitroPlugin((nitro) => {
   nitro.hooks.hook('beforeResponse', (event) => {
     for (const [name, value] of Object.entries(securityHeaders())) setResponseHeader(event, name, value)
+    for (const name of SECURITY_STRIPPED_HEADERS) removeResponseHeader(event, name)
   })
 
   nitro.hooks.hook('render:html', (html, { event }) => {

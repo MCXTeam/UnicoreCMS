@@ -7,7 +7,10 @@ import {
   SECURITY_STATIC_HEADERS,
 } from "./constants";
 
-export { CONTENT_SECURITY_POLICY_HEADER } from "./constants";
+export {
+  CONTENT_SECURITY_POLICY_HEADER,
+  SECURITY_STRIPPED_HEADERS,
+} from "./constants";
 
 export interface SecurityOptions {
   nonce: string;

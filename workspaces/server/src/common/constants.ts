@@ -22,7 +22,19 @@ export const ALLOW_INACTIVE_KEY = 'allowInactive';
 export const ALLOW_PASSWORD_PENDING_KEY = 'allowPasswordPending';
 export const PASSWORD_CHANGE_REQUIRED = 'password_change_required';
 
+export { CONTENT_SECURITY_POLICY_HEADER } from 'unicore-common/security';
+
 export const STATIC_CONTENT_SECURITY_POLICY = "default-src 'none'; img-src 'self'; style-src 'none'; script-src 'none'; sandbox";
+
+export const API_CONTENT_SECURITY_POLICY: Record<string, string[]> = {
+  'default-src': ["'none'"],
+  'frame-ancestors': ["'none'"],
+  'base-uri': ["'none'"],
+  'form-action': ["'none'"],
+};
+
+export const SWAGGER_CONTENT_SECURITY_POLICY =
+  "default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'";
 
 export const HSTS_MAX_AGE_SECONDS = 15552000;
 export const SWAGGER_PATH = 'docs';

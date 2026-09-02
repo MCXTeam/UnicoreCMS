@@ -8,15 +8,19 @@ import { AuthAdapter } from './auth/adapters/auth.adapter';
 import { EntityNotFoundFilter } from './common/filters/entity-not-found.filter';
 import { TooManyAttemptsFilter } from './common/filters/too-many-attempts.filter';
 import {
+  API_CONTENT_SECURITY_POLICY,
   ASCII_NAME,
+  CONTENT_SECURITY_POLICY_HEADER,
   formatError,
   HSTS_MAX_AGE_SECONDS,
   RETRY_AFTER_HEADER,
   STATIC_CONTENT_SECURITY_POLICY,
   stderr,
   stdout,
+  SWAGGER_CONTENT_SECURITY_POLICY,
   SWAGGER_PATH,
 } from '@common';
+import { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
 import clc from 'cli-color';
 import { initializeTransactionalContext } from 'typeorm-transactional';
@@ -48,22 +52,29 @@ async function bootstrap() {
   });
 
   app.set('trust proxy', envConfig.trustProxy);
+  app.disable('x-powered-by');
   app.enableShutdownHooks();
-
-  if (envConfig.swagger) {
-    const config = new DocumentBuilder().setTitle('UnicoreAPI').setDescription('The cats API description').setVersion('1.0').build();
-    const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup(SWAGGER_PATH, app, document);
-  }
 
   app.use(
     helmet({
-      contentSecurityPolicy: false,
+      contentSecurityPolicy: { useDefaults: false, directives: API_CONTENT_SECURITY_POLICY },
       crossOriginResourcePolicy: { policy: 'cross-origin' },
       crossOriginEmbedderPolicy: false,
       strictTransportSecurity: envConfig.apiHttps && { maxAge: HSTS_MAX_AGE_SECONDS, includeSubDomains: true },
     }),
   );
+
+  if (envConfig.swagger) {
+    const config = new DocumentBuilder().setTitle('UnicoreAPI').setDescription('The cats API description').setVersion('1.0').build();
+    const document = SwaggerModule.createDocument(app, config);
+
+    app.use(`/${SWAGGER_PATH}`, (_request: Request, response: Response, next: NextFunction) => {
+      response.setHeader(CONTENT_SECURITY_POLICY_HEADER, SWAGGER_CONTENT_SECURITY_POLICY);
+      next();
+    });
+
+    SwaggerModule.setup(SWAGGER_PATH, app, document);
+  }
   app.enableCors({
     origin: envConfig.corsOrigins,
     credentials: true,
@@ -72,7 +83,7 @@ async function bootstrap() {
   app.useStaticAssets(storagePath, {
     setHeaders: (res) => {
       res.setHeader('X-Content-Type-Options', 'nosniff');
-      res.setHeader('Content-Security-Policy', STATIC_CONTENT_SECURITY_POLICY);
+      res.setHeader(CONTENT_SECURITY_POLICY_HEADER, STATIC_CONTENT_SECURITY_POLICY);
     },
   });
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
