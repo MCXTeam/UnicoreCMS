@@ -59,7 +59,7 @@ jobs:
         rm -rf ./workspaces/admin/dist
         rm -rf ./workspaces/server/src
         rm -rf ./logs
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       if: matrix.node == 22
       with:
         name: UnicoreCMS
