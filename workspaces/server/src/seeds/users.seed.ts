@@ -1,4 +1,4 @@
-import { faker } from '@faker-js/faker';
+import { fakeBoolean, fakeEmail, fakePassword, fakeUsername } from './fake';
 import { DataSource } from 'typeorm';
 import _ from 'lodash';
 import { randomUUID } from 'crypto';
@@ -16,12 +16,14 @@ export default class CreateUsers {
         _.range(250).map(async () => {
           const uuid = randomUUID();
 
+          const username = fakeUsername();
+
           return {
             uuid,
-            email: faker.internet.email(),
-            username: faker.internet.userName(),
-            password: await passwordService.hash(faker.internet.password(), passwordAad(uuid)),
-            activated: faker.datatype.boolean(),
+            email: fakeEmail(username),
+            username,
+            password: await passwordService.hash(fakePassword(), passwordAad(uuid)),
+            activated: fakeBoolean(),
           };
         }),
       );

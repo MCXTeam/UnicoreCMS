@@ -8,6 +8,7 @@ export * from './getDigest';
 export * from './cookie';
 export * from './ip';
 export * from './path';
+export * from './random-id';
 export * from './request';
 export * from './placeholders';
 export * from './replace-async';

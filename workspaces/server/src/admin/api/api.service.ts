@@ -3,10 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ApiInput } from './dto/api.input';
 import { ApiToken } from './entities/api-token.entity';
-import { nanoid } from 'nanoid';
+
 import { EventsService } from 'src/events/events.service';
 import { ApiKeyRoom } from 'src/auth/helpers';
-import { API_KEY_HASH, API_KEY_LENGTH } from '@common';
+import { API_KEY_HASH, API_KEY_LENGTH, randomId } from '@common';
 import { createHash } from 'crypto';
 
 @Injectable()
@@ -34,7 +34,7 @@ export class ApiService {
   }
 
   async create(input: ApiInput) {
-    const key = nanoid(API_KEY_LENGTH);
+    const key = randomId(API_KEY_LENGTH);
     const apikey = new ApiToken();
 
     apikey.secret = ApiService.digest(key);

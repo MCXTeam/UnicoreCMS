@@ -1,0 +1,35 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      nest:
+        patterns:
+          - "@nestjs/*"
+          - "@nestjs-modules/*"
+      nuxt:
+        patterns:
+          - nuxt
+          - "@nuxtjs/*"
+          - "@primevue/*"
+          - primevue
+      types:
+        patterns:
+          - "@types/*"
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: docker
+    directory: /docker/node
+    schedule:
+      interval: weekly

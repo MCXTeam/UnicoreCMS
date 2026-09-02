@@ -7,6 +7,7 @@ strictPeerDependencies: false
 autoInstallPeers: true
 
 overrides:
+  nanoid: ^3.3.18
   canvas: ^3.1.0
   discord-api-types: 0.38.49
   fastify: ^5.8.5
@@ -15,6 +16,12 @@ overrides:
   mailparser>linkify-it: ^5.0.2
   tsup>esbuild: ^0.28.1
   bundle-require>esbuild: ^0.28.1
+
+# Разбор ICNS, JXL и HEIF у нас недостижим: перед image-size буфер проверяется на PNG-сигнатуру
+auditConfig:
+  ignoreGhsas:
+    - GHSA-w3rx-r6r6-pgpr
+    - GHSA-5p2g-fcmc-qvqq
 
 peerDependencyRules:
   ignoreMissing:

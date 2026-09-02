@@ -1,5 +1,5 @@
 import { GravitUserDto } from './gravit-user.dto';
-import { nanoid } from 'nanoid';
+import { randomId } from '@common';
 import { User } from 'src/admin/users/entities/user.entity';
 import { instanceToPlain } from 'class-transformer';
 import { envConfig } from 'unicore-common';
@@ -12,7 +12,7 @@ export class GravitSessionDto {
   expireIn: number;
 
   constructor(user: User) {
-    this.id = nanoid();
+    this.id = randomId();
     this.expireIn = 0;
     this.user = instanceToPlain(new GravitUserDto(user)) as GravitUserDto;
     this.accessToken=this.user.accessToken;

@@ -10,7 +10,7 @@ import { TestEmailInput } from './dto/test-email.input';
 import { EmailActivation } from './entities/email-activation.entity';
 import { EmailMessage } from './entities/email-message.entity';
 import { EmailMessageType } from './enums/email-message-type.enum';
-import { nanoid, customAlphabet } from 'nanoid';
+
 import { ThrottlerException } from '@nestjs/throttler';
 import {
   EMAIL_ACTIVATION_MAX_ATTEMPTS,
@@ -24,6 +24,8 @@ import {
   PASSWORD_RESET_MAX,
   PASSWORD_RESET_TTL_MINUTES,
   PASSWORD_RESET_WINDOW_MINUTES,
+  randomFromAlphabet,
+  randomId,
   safeEqual,
 } from '@common';
 import { UserDto } from '../users/dto/user.dto';
@@ -114,7 +116,7 @@ export class EmailService {
     );
 
     const activation = new EmailActivation();
-    const code = customAlphabet(EMAIL_CODE_ALPHABET, EMAIL_CODE_LENGTH)();
+    const code = randomFromAlphabet(EMAIL_CODE_ALPHABET, EMAIL_CODE_LENGTH);
 
     const html = renderEmailTemplate(content, { USERNAME: user.username, SITENAME: envConfig.sitename, CODE: code });
 
@@ -212,7 +214,7 @@ export class EmailService {
     );
 
     const activation = new PasswordReset();
-    const hash = nanoid(PASSWORD_RESET_HASH_LENGTH);
+    const hash = randomId(PASSWORD_RESET_HASH_LENGTH);
 
     const link = new URL(envConfig.baseurl);
     link.pathname = '/auth/password';

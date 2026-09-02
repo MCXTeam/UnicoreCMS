@@ -1,5 +1,5 @@
 import { StorageManager } from '@common';
-import { faker } from '@faker-js/faker';
+import { fakeText } from './fake';
 import { readFileSync } from 'fs';
 import JSZip from 'jszip';
 import _ from 'lodash';
@@ -24,46 +24,46 @@ export default class CreateServers {
     const hitechMods = await dataSource.getRepository(Mod).save([
       {
         name: 'Applied Energistics 2',
-        description: faker.lorem.text(),
+        description: fakeText(),
         icon: 'default/mods/ae2.gif',
       },
       {
         name: 'Ender IO',
-        description: faker.lorem.text(),
+        description: fakeText(),
         icon: 'default/mods/enderio.png',
       },
       {
         name: 'Mekanism',
-        description: faker.lorem.text(),
+        description: fakeText(),
         icon: 'default/mods/mekanism.jpeg',
       },
       {
         name: 'Industrial Foregoing',
-        description: faker.lorem.text(),
+        description: fakeText(),
         icon: 'default/mods/industrial-foregoing.png',
       },
     ]);
     const technomagicMods = await dataSource.getRepository(Mod).save([
       {
         name: 'Avarita',
-        description: faker.lorem.text(),
+        description: fakeText(),
         icon: 'default/mods/avarita.png',
       },
       {
         name: 'Botania',
-        description: faker.lorem.text(),
+        description: fakeText(),
         icon: 'default/mods/botania.png',
       },
       {
         name: 'Draconic Evolution',
-        description: faker.lorem.text(),
+        description: fakeText(),
         icon: 'default/mods/draconic-evolution.png',
       },
     ]);
     const skytechMods = await dataSource.getRepository(Mod).save([
       {
         name: 'ExNihilo',
-        description: faker.lorem.text(),
+        description: fakeText(),
         icon: 'default/mods/exnihilo.png',
       },
     ]);
@@ -75,7 +75,7 @@ export default class CreateServers {
         image: 'default/hitech-image.png',
         name: 'HiTech',
         slogan: 'Мир в котором можно всё',
-        content: faker.lorem.text(),
+        content: fakeText(),
         version: '1.12.2',
         table: [
           {
@@ -103,7 +103,7 @@ export default class CreateServers {
         image: 'default/technomagic-image.jpg',
         name: 'TechnoMagic',
         slogan: 'Мир в котором можно всё',
-        content: faker.lorem.text(),
+        content: fakeText(),
         version: '1.12.2',
         table: [
           {
@@ -131,7 +131,7 @@ export default class CreateServers {
         image: 'default/skytech-image.png',
         name: 'SkyTech',
         slogan: 'Мир в котором можно всё',
-        content: faker.lorem.text(),
+        content: fakeText(),
         version: '1.12.2',
         table: [
           {

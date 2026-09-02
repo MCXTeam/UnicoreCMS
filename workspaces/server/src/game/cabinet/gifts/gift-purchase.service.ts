@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { customAlphabet } from 'nanoid';
+
 import { Repository } from 'typeorm';
 import { Transactional } from 'typeorm-transactional';
 import { User } from 'src/admin/users/entities/user.entity';
@@ -13,7 +13,7 @@ import { DonateGroupsService } from 'src/game/donate/groups/providers/groups.ser
 import { DonatePermissionsService } from 'src/game/donate/permissions/permissions.service';
 import { PermissionType } from 'src/game/donate/permissions/enums/permission-type.enum';
 import { CartService } from 'src/game/store/cart/cart.service';
-import { debitUserBalance, fillPlaceholders, GIFT_CODE_ALPHABET, GIFT_CODE_LENGTH } from '@common';
+import { GIFT_CODE_ALPHABET, GIFT_CODE_LENGTH, debitUserBalance, fillPlaceholders, randomFromAlphabet } from '@common';
 import { envConfig } from 'unicore-common';
 import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
 import { GiftHistoryInput, HistoryService } from '../history/history.service';
@@ -27,7 +27,7 @@ const GIFTABLE = [GiftType.Donate, GiftType.Permission, GiftType.Product, GiftTy
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-const generateCode = customAlphabet(GIFT_CODE_ALPHABET, GIFT_CODE_LENGTH);
+const generateCode = () => randomFromAlphabet(GIFT_CODE_ALPHABET, GIFT_CODE_LENGTH);
 
 type GiftConfig = Record<string, unknown>;
 

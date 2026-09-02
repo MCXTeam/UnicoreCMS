@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import speakeasy from 'speakeasy';
+import { Secret, TOTP } from 'otpauth';
 import { User } from 'src/admin/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { envConfig } from 'unicore-common';
@@ -10,6 +10,8 @@ import {
   encryptField,
   ENCRYPTED_TWO_FACTOR_SECRET,
   ENCRYPTED_TWO_FACTOR_SECRET_TEMP,
+  TOTP_DIGITS,
+  TOTP_SECRET_BYTES,
   TOTP_STEP_SECONDS,
   TOTP_WINDOW,
 } from '@common';
@@ -17,6 +19,16 @@ import {
 @Injectable()
 export class TwoFactorService {
   constructor(@InjectRepository(User) private usersService: Repository<User>) {}
+
+  private totp(user: User, base32: string): TOTP {
+    return new TOTP({
+      issuer: envConfig.sitename,
+      label: user.username,
+      digits: TOTP_DIGITS,
+      period: TOTP_STEP_SECONDS,
+      secret: Secret.fromBase32(base32),
+    });
+  }
 
   private secret(user: User): string {
     return decryptField(user.two_factor_secret, ENCRYPTED_TWO_FACTOR_SECRET, user.uuid);
@@ -33,16 +45,11 @@ export class TwoFactorService {
   async verify(user: User, totp: string): Promise<boolean> {
     if (!user.two_factor_enabled || !user.two_factor_secret) return true;
 
-    const delta = speakeasy.totp.verifyDelta({
-      secret: this.secret(user),
-      encoding: 'base32',
-      token: totp,
-      window: TOTP_WINDOW,
-    });
+    const delta = this.totp(user, this.secret(user)).validate({ token: totp, window: TOTP_WINDOW });
 
-    if (!delta) return false;
+    if (delta === null) return false;
 
-    const counter = this.counterOf(delta.delta);
+    const counter = this.counterOf(delta);
 
     if (user.two_factor_counter != null && counter <= user.two_factor_counter) return false;
 
@@ -63,30 +70,24 @@ export class TwoFactorService {
   async generate(user: User) {
     if (user.two_factor_enabled && user.two_factor_secret) throw new BadRequestException();
 
-    const secret = speakeasy.generateSecret({ length: 12 });
-    const otpauth_url = speakeasy.otpauthURL({ secret: secret.ascii, label: user.username, issuer: envConfig.sitename });
+    const base32 = new Secret({ size: TOTP_SECRET_BYTES }).base32;
 
-    user.two_factor_secret_temp = encryptField(secret.base32, ENCRYPTED_TWO_FACTOR_SECRET_TEMP, user.uuid);
+    user.two_factor_secret_temp = encryptField(base32, ENCRYPTED_TWO_FACTOR_SECRET_TEMP, user.uuid);
 
     await this.usersService.update({ uuid: user.uuid }, { two_factor_secret_temp: user.two_factor_secret_temp });
 
-    return { ...secret, otpauth_url };
+    return { base32, otpauth_url: this.totp(user, base32).toString() };
   }
 
   async enable(user: User, input: TwoFactorInput) {
     if (user.two_factor_enabled && user.two_factor_secret) throw new BadRequestException();
 
-    const tokenValidates = speakeasy.totp.verify({
-      secret: this.secretTemp(user),
-      encoding: 'base32',
-      token: input.code,
-      window: TOTP_WINDOW,
-    });
+    const base32 = this.secretTemp(user);
 
-    if (!tokenValidates) throw new BadRequestException();
+    if (this.totp(user, base32).validate({ token: input.code, window: TOTP_WINDOW }) === null) throw new BadRequestException();
 
     user.two_factor_enabled = true;
-    user.two_factor_secret = encryptField(this.secretTemp(user), ENCRYPTED_TWO_FACTOR_SECRET, user.uuid);
+    user.two_factor_secret = encryptField(base32, ENCRYPTED_TWO_FACTOR_SECRET, user.uuid);
     user.two_factor_secret_temp = null;
 
     await this.usersService.update(

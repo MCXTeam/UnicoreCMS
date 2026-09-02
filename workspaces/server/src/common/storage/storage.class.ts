@@ -9,7 +9,7 @@ import {
   unlinkSync,
   writeFileSync,
 } from 'fs';
-import { nanoid } from 'nanoid';
+
 import { extname } from 'path';
 import { DiskStorageOptions } from 'multer';
 import { diskStorage } from 'multer';
@@ -22,6 +22,7 @@ import { Logger } from '@nestjs/common';
 import { envConfig, storagePath } from 'unicore-common';
 import { STORAGE_MAX_REMOTE_DOWNLOAD } from '../constants';
 import { containedPath } from '../utils/path';
+import { randomId } from '../utils/random-id';
 
 const destination = storagePath;
 
@@ -31,7 +32,7 @@ export class StorageManager {
   }
 
   static fileName(req: Request, file: Express.Multer.File, callback) {
-    callback(null, nanoid() + extname(file.originalname));
+    callback(null, randomId() + extname(file.originalname));
   }
 
   static disk(options?: DiskStorageOptions) {
@@ -59,7 +60,7 @@ export class StorageManager {
   static save(origin: string, buffer: Buffer): string {
     const ext = extname(origin).toLowerCase();
     const safeExt = ['.png', '.jpg', '.jpeg', '.gif', '.webp'].includes(ext) ? ext : '.png';
-    const name = nanoid() + safeExt;
+    const name = randomId() + safeExt;
 
     writeFileSync(StorageManager.locate(name), buffer);
 
@@ -71,7 +72,7 @@ export class StorageManager {
 
     if (!path || !existsSync(path) || !lstatSync(path).isFile()) return null;
 
-    const newname = nanoid() + extname(filename);
+    const newname = randomId() + extname(filename);
 
     renameSync(path, StorageManager.locate(newname));
 
@@ -85,7 +86,7 @@ export class StorageManager {
     }
 
     try {
-      const filename = nanoid() + extname(urlParse(url).pathname);
+      const filename = randomId() + extname(urlParse(url).pathname);
       const save_path = StorageManager.locate(filename);
 
       const response = await axios.get(url, {

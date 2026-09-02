@@ -2,15 +2,16 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import axios, { AxiosResponse } from 'axios';
 import { createHash } from 'crypto';
 import { createWriteStream } from 'fs';
-import { nanoid } from 'nanoid';
+
 import { Readable } from 'stream';
 import { API_VERSION } from 'unicore-api';
 import {
   EXTENSION_DOWNLOAD_MAX_REDIRECTS,
   EXTENSION_DOWNLOAD_TIMEOUT_MS,
-  formatError,
   GITHUB_TOKEN_HOSTS,
   STORAGE_MAX_ZIP_UPLOAD,
+  formatError,
+  randomId,
 } from '@common';
 import { StorageManager } from 'src/common/storage/storage.class';
 
@@ -40,7 +41,7 @@ export class ExtensionDownloadService {
       throw new BadRequestException(`Архив больше допустимых ${Math.round(STORAGE_MAX_ZIP_UPLOAD / 1024 / 1024)} МБ`);
     }
 
-    const filename = `${nanoid()}.zip`;
+    const filename = `${randomId()}.zip`;
     const hash = createHash('sha256');
     const writer = createWriteStream(StorageManager.path(filename));
     let size = 0;

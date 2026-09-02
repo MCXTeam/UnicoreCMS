@@ -4,6 +4,8 @@ export const ASCII_NAME =
 export const TOTP_WINDOW = 1;
 export const TOTP_CODE_MAX_LENGTH = 10;
 export const TOTP_STEP_SECONDS = 30;
+export const TOTP_DIGITS = 6;
+export const TOTP_SECRET_BYTES = 20;
 export const REQUIRE_2FA = 'require2fa';
 
 export const REFRESH_ROTATION_LEEWAY_MS = 30_000;
@@ -159,6 +161,9 @@ export const PATH_PATTERN = /^[a-zA-Z0-9_-]+$/;
 export const IS_IP_PATTERN = 'isIpPattern';
 export const IP_ANY_PATTERN = '*';
 export const IPV4_MAPPED_PREFIX = '::ffff:';
+
+export const RANDOM_ID_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-';
+export const RANDOM_ID_LENGTH = 21;
 
 export const API_KEY_LENGTH = 64;
 export const API_KEY_COMMENT_MAX_LENGTH = 120;
