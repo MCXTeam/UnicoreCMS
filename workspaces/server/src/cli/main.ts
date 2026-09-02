@@ -1,6 +1,8 @@
 import { ASCII_NAME } from '@common';
-import { CommandFactory } from 'nest-commander';
+import { NestFactory } from '@nestjs/core';
 import { CommandsModule } from './command.module';
+import { CLI_COMMANDS } from './commands';
+import { runCommand } from './runner';
 import { stdout } from './stdout';
 import clc from 'cli-color';
 import { readFileSync } from 'fs';
@@ -17,7 +19,16 @@ async function bootstrap() {
 
   initializeTransactionalContext();
 
-  await CommandFactory.run(CommandsModule, { logger: ['error', 'warn'] });
+  const app = await NestFactory.createApplicationContext(CommandsModule, { logger: ['error', 'warn'] });
+
+  try {
+    await runCommand(
+      CLI_COMMANDS.map((command) => app.get(command)),
+      process.argv.slice(2),
+    );
+  } finally {
+    await app.close();
+  }
 }
 
 bootstrap()

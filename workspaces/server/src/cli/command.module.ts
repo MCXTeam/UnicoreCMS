@@ -6,11 +6,10 @@ import { addTransactionalDataSource } from 'typeorm-transactional';
 import { enforceSessionTimezone } from 'src/common/database';
 import UsersModule from 'src/admin/users/users.module';
 import { PasswordModule } from 'src/auth/password/password.module';
+import { RecaptchaModule } from 'src/auth/recaptcha/recaptcha.module';
+import { ThrottlerModule } from 'src/common/throttler/throttler.module';
 import { ormconfig } from 'src/ormconfig';
-import { UsersCommandCreate, UsersPasswordQuestions } from './commands/users.commands';
-import { SeedCommand } from './commands/seed.command';
-import { CryptoRewrapCommand } from './commands/crypto.commands';
-import { PermissionsCheckCommand } from './commands/permissions.commands';
+import { CLI_COMMANDS } from './commands';
 import { User } from 'src/admin/users/entities/user.entity';
 import { RCON } from 'src/game/servers/rcon/entities/rcon.entity';
 import { ExtensionSource } from 'src/modules/catalog/entities/extension-source.entity';
@@ -31,8 +30,10 @@ import { ExtensionSource } from 'src/modules/catalog/entities/extension-source.e
     }),
     UsersModule,
     PasswordModule,
+    RecaptchaModule,
+    ThrottlerModule,
     TypeOrmModule.forFeature([User, RCON, ExtensionSource]),
   ],
-  providers: [UsersCommandCreate, UsersPasswordQuestions, SeedCommand, CryptoRewrapCommand, PermissionsCheckCommand],
+  providers: [...CLI_COMMANDS],
 })
 export class CommandsModule {}

@@ -1,4 +1,4 @@
-import { Command, CommandRunner } from 'nest-commander';
+import { Injectable } from '@nestjs/common';
 import clc from 'cli-color';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -18,13 +18,14 @@ import { passwordAad } from 'src/auth/password/password-aad';
 import { User } from 'src/admin/users/entities/user.entity';
 import { RCON } from 'src/game/servers/rcon/entities/rcon.entity';
 import { ExtensionSource } from 'src/modules/catalog/entities/extension-source.entity';
+import { CommandDefinition } from '../command';
 import { stdout } from '../stdout';
 
-@Command({
-  name: 'crypto-rewrap',
-  description: 'Re-encrypt stored secrets with the current ENCRYPTION_KEY',
-})
-export class CryptoRewrapCommand extends CommandRunner {
+@Injectable()
+export class CryptoRewrapCommand implements CommandDefinition {
+  readonly name = 'crypto-rewrap';
+  readonly description = 'Re-encrypt stored secrets with the current ENCRYPTION_KEY';
+
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
@@ -32,9 +33,7 @@ export class CryptoRewrapCommand extends CommandRunner {
     private rconRepository: Repository<RCON>,
     @InjectRepository(ExtensionSource)
     private sourcesRepository: Repository<ExtensionSource>,
-  ) {
-    super();
-  }
+  ) {}
 
   private rewrapField(value: string, field: string, id: string): string {
     if (!value) return value;

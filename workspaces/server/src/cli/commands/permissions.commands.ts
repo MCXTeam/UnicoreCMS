@@ -1,9 +1,10 @@
-import { Command, CommandRunner, Option } from 'nest-commander';
+import { Injectable } from '@nestjs/common';
 import clc from 'cli-color';
 import { randomUUID } from 'crypto';
 import { RoutePermissions } from 'src/admin/roles/route-permissions.service';
 import { ImportantRoles } from 'src/admin/roles/emums/important-roles.enum';
 import { resolvePermissions } from 'unicore-common';
+import { CommandDefinition, CommandOption } from '../command';
 import { stdout } from '../stdout';
 
 interface CheckOptions {
@@ -46,38 +47,20 @@ function expectAllowed(route: RoutePermissions, granted: string[]): boolean {
   return route.any ? matched.length > 0 : matched.length === route.permissions.length;
 }
 
-@Command({
-  name: 'perms-check',
-  arguments: '<username> <password>',
-  description: 'Проверить права: выдать пользователю по одному праву и обойти маршруты сервера',
-  argsDescription: {
-    username: 'логин суперпользователя, от имени которого создаётся временный аккаунт',
-    password: 'его пароль',
-  },
-})
-export class PermissionsCheckCommand extends CommandRunner {
+@Injectable()
+export class PermissionsCheckCommand implements CommandDefinition {
+  readonly name = 'perms-check';
+  readonly description = 'Check permissions by granting them one at a time and walking the server routes';
+  readonly arguments = '<username> <password>';
+  readonly options: CommandOption[] = [
+    { flags: '-u, --url <url>', description: 'server address, defaults to http://127.0.0.1:5000' },
+    { flags: '-p, --permission <permission>', description: 'check a single permission only' },
+    { flags: '-f, --full', description: 'full sweep: every permission against every route' },
+    { flags: '-r, --routes', description: 'print the route map and exit' },
+  ];
+
   private url = 'http://127.0.0.1:5000';
   private token = '';
-
-  @Option({ flags: '-u, --url <url>', description: 'адрес сервера, по умолчанию http://127.0.0.1:5000' })
-  parseUrl(value: string): string {
-    return value;
-  }
-
-  @Option({ flags: '-p, --permission <permission>', description: 'проверить только одно право' })
-  parsePermission(value: string): string {
-    return value;
-  }
-
-  @Option({ flags: '-f, --full', description: 'полный обход: каждое право против всех маршрутов' })
-  parseFull(): boolean {
-    return true;
-  }
-
-  @Option({ flags: '-r, --routes', description: 'только напечатать карту маршрутов и выйти' })
-  parseRoutes(): boolean {
-    return true;
-  }
 
   private async request(method: string, path: string, token: string, body?: unknown): Promise<{ status: number; data: any }> {
     const response = await fetch(`${this.url}${path}`, {
