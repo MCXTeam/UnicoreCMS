@@ -7,10 +7,10 @@ import {
   isUsername,
   passwordContextOf,
   passwordIssue,
+  passwordIssueKey,
   IS_STRONG_PASSWORD,
   IS_USERNAME,
   IS_USERNAME_OR_EMAIL,
-  PASSWORD_ISSUE_PREFIX,
 } from 'unicore-common/validation'
 import { useLocale } from '~/composables/useLocale'
 
@@ -24,10 +24,11 @@ export default defineNuxtPlugin((nuxtApp) => {
   })
 
   defineRule(IS_USERNAME, (value: any) => isUsername(value) || t('validation.username'))
-  defineRule(IS_STRONG_PASSWORD, (value: any, _params: any, ctx: any) => {
-    const issue = passwordIssue(value, passwordContextOf(ctx?.form, sitename))
+  defineRule(IS_STRONG_PASSWORD, (value: any, params: any, ctx: any) => {
+    const [username, email] = Array.isArray(params) ? params : []
+    const issue = passwordIssue(value, passwordContextOf({ ...ctx?.form, username, email }, sitename))
 
-    return issue ? t(`validation.${PASSWORD_ISSUE_PREFIX}${issue}`) : true
+    return issue ? t(passwordIssueKey(issue)) : true
   })
   defineRule(
     IS_USERNAME_OR_EMAIL,

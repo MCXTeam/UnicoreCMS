@@ -2,6 +2,7 @@ import { Command, CommandRunner, InquirerService, Question, QuestionSet } from '
 import clc from 'cli-color';
 import { UserInput } from 'src/admin/users/dto/user.input';
 import { UsersService } from 'src/admin/users/users.service';
+import { PasswordPolicyService } from 'src/auth/password/password-policy.service';
 import { validateOrReject } from 'class-validator';
 import { CLI_PASSWORD_PROMPT, CLI_PASSWORD_QUESTIONS } from '../constants';
 import { stdout } from '../stdout';
@@ -23,7 +24,11 @@ export class UsersPasswordQuestions {
   },
 })
 export class UsersCommandCreate extends CommandRunner {
-  constructor(private usersService: UsersService, private inquirer: InquirerService) {
+  constructor(
+    private usersService: UsersService,
+    private passwordPolicy: PasswordPolicyService,
+    private inquirer: InquirerService,
+  ) {
     super();
   }
 
@@ -45,6 +50,8 @@ export class UsersCommandCreate extends CommandRunner {
     if (await this.usersService.getByUsername(input.username)) throw new Error('User already exists!');
 
     if (await this.usersService.getByEmail(input.email)) throw new Error('User already exists!');
+
+    await this.passwordPolicy.assert(input.password, { username: input.username, email: input.email });
 
     const user = await this.usersService.create(input);
 

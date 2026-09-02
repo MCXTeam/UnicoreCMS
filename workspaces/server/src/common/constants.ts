@@ -82,6 +82,8 @@ export const THROTTLE_RESEND = { ttl: 10 * 60_000, limit: 3 };
 export const THROTTLE_PASSWORD_RESET = { ttl: 60 * 60_000, limit: 5 };
 export const THROTTLE_REFRESH = { ttl: 5 * 60_000, limit: 60 };
 export const THROTTLE_LAUNCHER_LOGIN = { ttl: 5 * 60_000, limit: 30 };
+export const THROTTLE_SESSION = { ttl: 60_000, limit: 120 };
+export const THROTTLE_PASSWORD_CHANGE = { ttl: 60 * 60_000, limit: 20 };
 export const THROTTLE_UNSKIPPABLE_PREFIX = '/auth/';
 export const AUTH_LOGIN_PATH = '/auth/login';
 
@@ -94,6 +96,8 @@ export const COOKIE_SAMESITE_CROSS_SITE = 'none';
 export const COOKIE_PATH = '/';
 export const THROTTLE_LOGIN_TRACKER_PREFIX = 'login:';
 export const THROTTLE_LOGIN_FIELD = 'login';
+export const LAUNCHER_CONTEXT_FIELD = 'context';
+export const LAUNCHER_IP_FIELD = 'ip';
 
 export const QUERY_SEPARATOR = '?';
 
@@ -152,6 +156,7 @@ export const PWNED_CACHE_TTL_MS = 24 * 60 * 60_000;
 export const PWNED_PADDING_HEADER = 'Add-Padding';
 export const PWNED_LINE_SEPARATOR = /\r?\n/;
 export const PWNED_FIELD_SEPARATOR = ':';
+export const PWNED_RANGE_PATTERN = /^[0-9a-f]{35}:\d+$/im;
 
 export const TOKEN_MAX_LENGTH = 4096;
 export const SERVER_ID_MAX_LENGTH = 128;

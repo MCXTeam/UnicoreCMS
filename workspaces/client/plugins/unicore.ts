@@ -1,4 +1,4 @@
-import { PASSWORD_ISSUE_PREFIX, passwordIssueFrom } from 'unicore-common/validation'
+import { passwordIssueFrom, passwordIssueKey } from 'unicore-common/validation'
 import { useAuthStore } from '~/stores/auth'
 import { useUiStore } from '~/stores/ui'
 
@@ -31,7 +31,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   const passwordText = (error: any): string | null => {
     const issue = passwordIssueFrom(error)
 
-    return issue ? t(`validation.${PASSWORD_ISSUE_PREFIX}${issue}`) : null
+    return issue ? t(passwordIssueKey(issue)) : null
   }
 
   const unicore: UnicoreApi = {

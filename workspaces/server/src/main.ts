@@ -7,7 +7,16 @@ import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { AuthAdapter } from './auth/adapters/auth.adapter';
 import { EntityNotFoundFilter } from './common/filters/entity-not-found.filter';
 import { TooManyAttemptsFilter } from './common/filters/too-many-attempts.filter';
-import { ASCII_NAME, formatError, HSTS_MAX_AGE_SECONDS, STATIC_CONTENT_SECURITY_POLICY, stderr, stdout, SWAGGER_PATH } from '@common';
+import {
+  ASCII_NAME,
+  formatError,
+  HSTS_MAX_AGE_SECONDS,
+  RETRY_AFTER_HEADER,
+  STATIC_CONTENT_SECURITY_POLICY,
+  stderr,
+  stdout,
+  SWAGGER_PATH,
+} from '@common';
 import helmet from 'helmet';
 import clc from 'cli-color';
 import { initializeTransactionalContext } from 'typeorm-transactional';
@@ -58,6 +67,7 @@ async function bootstrap() {
   app.enableCors({
     origin: envConfig.corsOrigins,
     credentials: true,
+    exposedHeaders: [RETRY_AFTER_HEADER],
   });
   app.useStaticAssets(storagePath, {
     setHeaders: (res) => {

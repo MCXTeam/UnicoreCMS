@@ -10,8 +10,8 @@ export function requestPath(request: RequestLike): string {
   return String(request.originalUrl || request.url || '').split(QUERY_SEPARATOR)[0];
 }
 
-export function requestBodyString(request: RequestLike, field: string): string {
-  const value = request.body?.[field];
+export function requestBodyString(source: unknown, field: string): string {
+  const value = (source as Record<string, unknown> | null | undefined)?.[field];
 
   return typeof value === 'string' ? value.trim() : '';
 }

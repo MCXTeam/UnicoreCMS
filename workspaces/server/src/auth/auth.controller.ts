@@ -5,6 +5,7 @@ import {
   THROTTLE_PASSWORD_RESET,
   THROTTLE_REFRESH,
   THROTTLE_REGISTER,
+  THROTTLE_SESSION,
   THROTTLE_RESEND,
   THROTTLE_VERIFY,
   ThrottlerCoreGuard,
@@ -127,6 +128,7 @@ export class AuthController {
   }
 
   @AllowInactive()
+  @Throttle({ default: THROTTLE_SESSION })
   @Post('logout')
   async logout(
     @Req() request: Request,
@@ -148,18 +150,21 @@ export class AuthController {
 
   @AllowInactive()
   @UseGuards(JwtAuthGuard)
+  @Throttle({ default: THROTTLE_SESSION })
   @Get('me')
   async me(@Req() request: any, @CurrentUser() user: User): Promise<{ user: UserDto; cookieAuth: boolean }> {
     return { user: new UserDto(user, await playerPermissions(request)), cookieAuth: this.cookies.present(request) };
   }
 
   @UseGuards(JwtAuthGuard)
+  @Throttle({ default: THROTTLE_SESSION })
   @Post('sessions/me')
   sessionsMe(@Req() request: Request, @CurrentUser() user: User, @Body() input: TokenInput) {
     return this.tokensService.sessions(user, this.cookies.resolve(request, input.token));
   }
 
   @UseGuards(JwtAuthGuard)
+  @Throttle({ default: THROTTLE_SESSION })
   @Delete('sessions_all')
   async closeMeSessions(@CurrentUser() user: User, @Res({ passthrough: true }) response: Response) {
     await this.tokensService.revokeRefreshTokensByUser(user);
@@ -168,12 +173,14 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Throttle({ default: THROTTLE_SESSION })
   @Delete('sessions_other')
   closeMeOtherSessions(@Req() request: Request, @CurrentUser() user: User, @Body() input: TokenInput) {
     return this.tokensService.revokeRefreshTokensByUserOther(user, this.cookies.resolve(request, input.token));
   }
 
   @UseGuards(JwtAuthGuard)
+  @Throttle({ default: THROTTLE_SESSION })
   @Delete('sessions/:uuid')
   closeMeSession(@CurrentUser() user: User, @Param('uuid') id: number) {
     return this.tokensService.revokeRefreshTokenBySessionAndUser(user, id);

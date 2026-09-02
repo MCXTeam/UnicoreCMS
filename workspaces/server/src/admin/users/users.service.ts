@@ -300,8 +300,6 @@ export class UsersService {
     user.username = input.username;
     user.superuser = manageSuperuser ? input.superuser : null;
     user.locale = input.locale;
-    await this.passwordPolicyService.assert(input.password, { username: input.username, email: input.email });
-
     user.password = await this.passwordService.hash(input.password, passwordAad(user.uuid));
     user.password_change_required = !selfService;
 
@@ -419,7 +417,6 @@ export class UsersService {
     await this.settingsService.closeSessions(user);
   }
 
-  @Transactional()
   async updatePassord(uuid: string, input: PasswordUpdateInput, actor: User = null) {
     const user = await this.getById(uuid);
     if (!user) throw new NotFoundException();
@@ -428,7 +425,7 @@ export class UsersService {
       if (!(await userPermissionCheck(user, actor))) throw new ForbiddenException();
     }
 
-    return this.settingsService.updatePassword(user, input);
+    return this.settingsService.updatePassword(user, input, actor?.uuid === user.uuid);
   }
 
   @Transactional()

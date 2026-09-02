@@ -88,9 +88,10 @@ export class GravitService {
     const totp = input.password?.secondPassword?.totp;
     const source = normalizeIp(input.context?.ip) || ip;
 
-    await this.loginAttemptsService.assert(input.login, source);
-
     const user = await this.usersService.getByUsernameOrEmail(input.login);
+
+    await this.loginAttemptsService.assert(input.login, source, user);
+
     if (!user) {
       await this.loginAttemptsService.fail(input.login, source);
       throw new HttpException({ error: GravitError.UserNotFound }, HttpStatus.NOT_FOUND);
@@ -100,7 +101,7 @@ export class GravitService {
 
     const valid = await this.authService.validateCredentials(user, password);
     if (!valid) {
-      await this.loginAttemptsService.fail(input.login, source);
+      await this.loginAttemptsService.fail(input.login, source, user);
       throw new HttpException({ error: GravitError.WrongPassword }, HttpStatus.UNAUTHORIZED);
     }
 
@@ -108,12 +109,12 @@ export class GravitService {
       if (!totp) throw new HttpException({ error: GravitError.Require2FA }, HttpStatus.UNAUTHORIZED);
 
       if (!(await this.twoFactorService.verify(user, totp))) {
-        await this.loginAttemptsService.fail(input.login, source);
+        await this.loginAttemptsService.fail(input.login, source, user);
         throw new HttpException({ error: GravitError.WrongPassword }, HttpStatus.UNAUTHORIZED);
       }
     }
 
-    await this.loginAttemptsService.succeed(input.login, source);
+    await this.loginAttemptsService.succeed(input.login, source, user);
 
     await this.assertAllowed(user);
 

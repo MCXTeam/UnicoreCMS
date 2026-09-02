@@ -3,7 +3,7 @@ import { ExecutionContext, Injectable } from '@nestjs/common';
 import { KERNEL_PERMISSIONS } from 'unicore-common';
 import { User } from 'src/admin/users/entities/user.entity';
 import { matchPermission } from 'src/admin/roles/guards/permisson.guard';
-import { THROTTLE_LOGIN_FIELD, THROTTLE_LOGIN_TRACKER_PREFIX, THROTTLE_UNSKIPPABLE_PREFIX } from '../constants';
+import { LAUNCHER_CONTEXT_FIELD, LAUNCHER_IP_FIELD, THROTTLE_LOGIN_FIELD, THROTTLE_LOGIN_TRACKER_PREFIX, THROTTLE_UNSKIPPABLE_PREFIX } from '../constants';
 import { clientIp, normalizeIp } from '../utils/ip';
 import { requestBodyString, requestPath } from '../utils/request';
 
@@ -18,7 +18,7 @@ export class ThrottlerCoreGuard extends ThrottlerGuard {
     const user = req.user as User;
 
     if (!user) return false;
-    if (requestPath(req).startsWith(THROTTLE_UNSKIPPABLE_PREFIX)) return false;
+    if (requestPath(req).toLowerCase().startsWith(THROTTLE_UNSKIPPABLE_PREFIX)) return false;
 
     return matchPermission([KERNEL_PERMISSIONS, { or: true }], { user });
   }
@@ -27,12 +27,11 @@ export class ThrottlerCoreGuard extends ThrottlerGuard {
 @Injectable()
 export class LauncherThrottlerGuard extends ThrottlerCoreGuard {
   protected async getTracker(req: Record<string, any>): Promise<string> {
-    const forwarded = normalizeIp(req.body?.context?.ip);
+    const forwarded = normalizeIp(requestBodyString(req.body?.[LAUNCHER_CONTEXT_FIELD], LAUNCHER_IP_FIELD));
+    const login = requestBodyString(req.body, THROTTLE_LOGIN_FIELD).toLowerCase();
 
-    if (forwarded) return forwarded;
+    if (login) return `${THROTTLE_LOGIN_TRACKER_PREFIX}${login}:${forwarded || clientIp(req)}`;
 
-    const login = requestBodyString(req, THROTTLE_LOGIN_FIELD).toLowerCase();
-
-    return login ? `${THROTTLE_LOGIN_TRACKER_PREFIX}${login}` : clientIp(req);
+    return forwarded || clientIp(req);
   }
 }

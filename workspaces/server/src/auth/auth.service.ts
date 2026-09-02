@@ -18,6 +18,7 @@ import { passwordAad } from './password/password-aad';
 import { ConfigField } from 'src/admin/config/config.enum';
 import { ConfigService } from 'src/admin/config/config.service';
 import { LoginAttemptsService } from './attempts/login-attempts.service';
+import { PasswordPolicyService } from './password/password-policy.service';
 
 @Injectable()
 export class AuthService {
@@ -26,6 +27,7 @@ export class AuthService {
   constructor(
     private tokensService: TokensService,
     private passwordService: PasswordService,
+    private passwordPolicyService: PasswordPolicyService,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
     private usersService: UsersService,
@@ -59,9 +61,10 @@ export class AuthService {
   async login(body: LoginInput, agent?: string, ip?: string): Promise<AuthenticatedDto> {
     const { username_or_email, password } = body;
 
-    await this.loginAttemptsService.assert(username_or_email, ip);
-
     const user = await this.usersService.getByUsernameOrEmail(username_or_email, ['skin', 'cloak', 'roles']);
+
+    await this.loginAttemptsService.assert(username_or_email, ip, user);
+
     if (!user) {
       await this.passwordService.fakeVerify(password);
       await this.loginAttemptsService.fail(username_or_email, ip);
@@ -71,7 +74,7 @@ export class AuthService {
     const valid = await this.validateCredentials(user, password);
 
     if (!valid) {
-      await this.loginAttemptsService.fail(username_or_email, ip);
+      await this.loginAttemptsService.fail(username_or_email, ip, user);
       throw new UnauthorizedException();
     }
 
@@ -79,12 +82,12 @@ export class AuthService {
       if (!body.totp) throw new UnauthorizedException(REQUIRE_2FA);
 
       if (!(await this.twoFactorService.verify(user, body.totp))) {
-        await this.loginAttemptsService.fail(username_or_email, ip);
+        await this.loginAttemptsService.fail(username_or_email, ip, user);
         throw new UnauthorizedException();
       }
     }
 
-    await this.loginAttemptsService.succeed(username_or_email, ip);
+    await this.loginAttemptsService.succeed(username_or_email, ip, user);
 
     const accessToken = await this.tokensService.generateAccessToken(user);
     const refreshToken = await this.tokensService.generateRefreshToken(user, agent, ip);
@@ -114,6 +117,8 @@ export class AuthService {
     const { username, email, password } = input;
     const cfg = await this.configService.load();
     const activationRequired = Boolean(cfg[ConfigField.EmailActivationRequired]) && !cfg[ConfigField.OrdinaryRegister];
+
+    await this.passwordPolicyService.assert(password, { username, email });
 
     let user: User;
 

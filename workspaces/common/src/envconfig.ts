@@ -346,6 +346,14 @@ if (!env.get("ENCRYPTION_KEY").asString()) {
   else console.warn("[SECURITY WARNING] " + message);
 }
 
+if (envConfig.trustProxy === true) {
+  const message =
+    'TRUST_PROXY=true trusts the X-Forwarded-For header from every source, so any client can claim any IP. ' +
+    'Set it to the number of reverse proxies in front of the app (1 for the bundled nginx profile).';
+  if (isProd) throw new Error(message);
+  else console.warn('[SECURITY WARNING] ' + message);
+}
+
 if (!envConfig.recaptchaSecret && !envConfig.recaptchaDisabled) {
   const message =
     "RECAPTCHA_SECRET is empty, captcha on login, register and password reset is disabled. " +

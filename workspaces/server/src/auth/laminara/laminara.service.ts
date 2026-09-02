@@ -35,9 +35,9 @@ export class LaminaraService {
   }
 
   async authenticate(input: LaminaraAuthenticateInput, ip?: string): Promise<LaminaraProfileDto> {
-    await this.loginAttemptsService.assert(input.login, ip);
-
     const user = await this.usersService.getByUsernameOrEmail(input.login);
+
+    await this.loginAttemptsService.assert(input.login, ip, user);
 
     if (!user) {
       await this.passwordService.fakeVerify(input.password);
@@ -46,7 +46,7 @@ export class LaminaraService {
     }
 
     if (!(await this.authService.validateCredentials(user, input.password))) {
-      await this.loginAttemptsService.fail(input.login, ip);
+      await this.loginAttemptsService.fail(input.login, ip, user);
       throw this.error(GravitError.WrongPassword, HttpStatus.UNAUTHORIZED);
     }
 
@@ -54,12 +54,12 @@ export class LaminaraService {
       if (!input.totp) throw this.error(GravitError.Require2FA, HttpStatus.UNAUTHORIZED);
 
       if (!(await this.twoFactorService.verify(user, input.totp))) {
-        await this.loginAttemptsService.fail(input.login, ip);
+        await this.loginAttemptsService.fail(input.login, ip, user);
         throw this.error(GravitError.Wrong2FA, HttpStatus.UNAUTHORIZED);
       }
     }
 
-    await this.loginAttemptsService.succeed(input.login, ip);
+    await this.loginAttemptsService.succeed(input.login, ip, user);
 
     if (user.password_change_required) throw this.error(GravitError.PasswordChangeRequired, HttpStatus.FORBIDDEN);
 

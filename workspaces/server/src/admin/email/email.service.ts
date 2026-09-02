@@ -250,9 +250,9 @@ export class EmailService {
     if (!exist) throw new NotFoundException();
 
     if (input.password) {
-      await this.passwordResetRepository.delete({ user: { uuid: exist.user.uuid } });
-
       await this.passwordPolicyService.assert(input.password, { username: exist.user.username, email: exist.user.email });
+
+      await this.passwordResetRepository.delete({ user: { uuid: exist.user.uuid } });
 
       exist.user.password = await this.passwordService.hash(input.password, passwordAad(exist.user.uuid));
 

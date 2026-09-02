@@ -4,7 +4,7 @@ import { HttpService } from '@nestjs/axios';
 import { Cache } from 'cache-manager';
 import { firstValueFrom } from 'rxjs';
 import { envConfig, PasswordContext, passwordIssue, passwordIssueCode } from 'unicore-common';
-import { CacheKey, PWNED_CACHE_TTL_MS, PWNED_PADDING_HEADER, PWNED_TIMEOUT_MS } from '@common';
+import { CacheKey, PWNED_CACHE_TTL_MS, PWNED_PADDING_HEADER, PWNED_RANGE_PATTERN, PWNED_TIMEOUT_MS } from '@common';
 import { ConfigField } from 'src/admin/config/config.enum';
 import { ConfigService } from 'src/admin/config/config.service';
 import { pwnedCount, pwnedRange } from './pwned';
@@ -33,7 +33,7 @@ export class PasswordPolicyService {
     return Boolean(config[ConfigField.PasswordBreachCheck]);
   }
 
-  private async range(prefix: string, url: string): Promise<string | null> {
+  private async range(prefix: string, url: string): Promise<string> {
     const key = `${CacheKey.PwnedRange}:${prefix}`;
     const cached = await this.cacheManager.get<string>(key);
 
@@ -49,12 +49,14 @@ export class PasswordPolicyService {
 
     const body = String(response.data ?? '');
 
+    if (!PWNED_RANGE_PATTERN.test(body)) return body;
+
     await this.cacheManager.set(key, body, PWNED_CACHE_TTL_MS);
 
     return body;
   }
 
-  async breached(password: string): Promise<boolean> {
+  private async breached(password: string): Promise<boolean> {
     if (!(await this.enabled())) return false;
 
     const { prefix, suffix, url } = pwnedRange(password);

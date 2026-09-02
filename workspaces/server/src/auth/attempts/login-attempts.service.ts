@@ -20,16 +20,28 @@ import {
 } from '@common';
 import { LoginAttemptState } from './login-attempt-state';
 
+export interface LoginAttemptOwner {
+  uuid?: string;
+}
+
 @Injectable()
 export class LoginAttemptsService {
+  private queue: Promise<unknown> = Promise.resolve();
+
   constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
-  private key(account: string, source: string): string {
-    const owner = String(account ?? '')
+  private normalize(account: string): string {
+    return String(account ?? '')
       .trim()
       .toLowerCase();
+  }
 
-    return `${CacheKey.LoginAttempts}:${owner}:${source || LOGIN_ATTEMPT_ANONYMOUS_SOURCE}`;
+  private keys(account: string, source: string, owner?: LoginAttemptOwner): string[] {
+    const scope = source || LOGIN_ATTEMPT_ANONYMOUS_SOURCE;
+
+    return Array.from(new Set([this.normalize(account), owner?.uuid].filter(Boolean))).map(
+      (identifier) => `${CacheKey.LoginAttempts}:${identifier}:${scope}`,
+    );
   }
 
   private get blockAfter(): number {
@@ -44,31 +56,57 @@ export class LoginAttemptsService {
     return Math.min(LOGIN_ATTEMPT_COOLDOWN_BASE_MS * 2 ** over, LOGIN_ATTEMPT_COOLDOWN_MAX_MS);
   }
 
-  private async state(account: string, source: string): Promise<LoginAttemptState | null> {
-    return (await this.cacheManager.get<LoginAttemptState>(this.key(account, source))) ?? null;
+  private serial<T>(task: () => Promise<T>): Promise<T> {
+    const next = this.queue.then(task, task);
+
+    this.queue = next.then(
+      () => undefined,
+      () => undefined,
+    );
+
+    return next;
   }
 
-  async count(account: string, source: string): Promise<number> {
-    return (await this.state(account, source))?.count ?? 0;
+  private async bump(key: string): Promise<void> {
+    const count = ((await this.cacheManager.get<LoginAttemptState>(key))?.count ?? 0) + 1;
+    const cooldown = this.cooldown(count);
+    const state: LoginAttemptState = { count, until: Date.now() + cooldown };
+
+    await this.cacheManager.set(key, state, Math.max(LOGIN_ATTEMPT_WINDOW_MS, cooldown));
   }
 
-  async assert(account: string, source: string): Promise<void> {
-    const state = await this.state(account, source);
-    const remaining = state ? state.until - Date.now() : 0;
+  async count(account: string, source: string, owner?: LoginAttemptOwner): Promise<number> {
+    const states = await Promise.all(
+      this.keys(account, source, owner).map((key) => this.cacheManager.get<LoginAttemptState>(key)),
+    );
+
+    return Math.max(0, ...states.map((state) => state?.count ?? 0));
+  }
+
+  async assert(account: string, source: string, owner?: LoginAttemptOwner): Promise<void> {
+    const states = await Promise.all(
+      this.keys(account, source, owner).map((key) => this.cacheManager.get<LoginAttemptState>(key)),
+    );
+    const until = Math.max(0, ...states.map((state) => state?.until ?? 0));
+    const remaining = until - Date.now();
 
     if (remaining > 0) throw new TooManyAttemptsException(Math.ceil(remaining / 1000));
   }
 
-  async fail(account: string, source: string): Promise<void> {
-    const count = (await this.count(account, source)) + 1;
-    const cooldown = this.cooldown(count);
-    const state: LoginAttemptState = { count, until: Date.now() + cooldown };
+  async fail(account: string, source: string, owner?: LoginAttemptOwner): Promise<void> {
+    const keys = this.keys(account, source, owner);
 
-    await this.cacheManager.set(this.key(account, source), state, Math.max(LOGIN_ATTEMPT_WINDOW_MS, cooldown));
+    await this.serial(async () => {
+      for (const key of keys) await this.bump(key);
+    });
   }
 
-  async succeed(account: string, source: string): Promise<void> {
-    await this.cacheManager.del(this.key(account, source));
+  async succeed(account: string, source: string, owner?: LoginAttemptOwner): Promise<void> {
+    const keys = this.keys(account, source, owner);
+
+    await this.serial(async () => {
+      for (const key of keys) await this.cacheManager.del(key);
+    });
   }
 
   async skipCaptcha(request: unknown): Promise<boolean> {
@@ -76,8 +114,8 @@ export class LoginAttemptsService {
 
     const req = (request ?? {}) as Record<string, any>;
 
-    if (requestPath(req) !== AUTH_LOGIN_PATH) return false;
+    if (requestPath(req).toLowerCase() !== AUTH_LOGIN_PATH) return false;
 
-    return (await this.count(requestBodyString(req, LOGIN_ATTEMPT_FIELD), clientIp(req))) < LOGIN_ATTEMPT_CAPTCHA_AFTER;
+    return (await this.count(requestBodyString(req.body, LOGIN_ATTEMPT_FIELD), clientIp(req))) < LOGIN_ATTEMPT_CAPTCHA_AFTER;
   }
 }

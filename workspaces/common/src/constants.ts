@@ -72,10 +72,10 @@ export const IS_STRONG_PASSWORD = "isStrongPassword";
 
 export const PASSWORD_MIN_LENGTH = 10;
 export const PASSWORD_MAX_LENGTH = 128;
-export const PASSWORD_CONTEXT_MIN_LENGTH = 4;
-export const PASSWORD_REPEAT_UNIT_MAX = 3;
-export const PASSWORD_RUN_MIN_LENGTH = 4;
-export const PASSWORD_EDGE_NOISE_PATTERN = /^[^a-zа-я]+|[^a-zа-я]+$/g;
+export const PASSWORD_CONTEXT_MIN_LENGTH = USERNAME_MIN_LENGTH;
+export const PASSWORD_NESTED_MIN_LENGTH = 6;
+export const PASSWORD_EDGE_NOISE_PATTERN = /^[^a-zа-яё]+|[^a-zа-яё]+$/g;
+export const PASSWORD_NON_LETTER_PATTERN = /[^a-zа-яё]/g;
 export const PASSWORD_EMAIL_SEPARATOR = "@";
 
 export const PASSWORD_LEET_MAP: Record<string, string> = {
@@ -103,6 +103,7 @@ export const PASSWORD_ISSUES = [
 ] as const;
 
 export const PASSWORD_ISSUE_PREFIX = "password.";
+export const PASSWORD_LOCALE_PREFIX = "validation.";
 
 export const DEFAULT_ISSUANCE_PRESET = "luckperms";
 

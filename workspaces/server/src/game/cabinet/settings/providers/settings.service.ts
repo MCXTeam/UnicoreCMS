@@ -37,8 +37,8 @@ export class SettingsService {
     await this.tokensRepo.delete({ user: { uuid: user.uuid } });
   }
 
-  async updatePassword(user: User, input: PasswordUpdateInput) {
-    await this.setPassword(user, input.password, false);
+  async updatePassword(user: User, input: PasswordUpdateInput, byOwner = false) {
+    await this.setPassword(user, input.password, byOwner);
     await this.closeSessions(user);
   }
 

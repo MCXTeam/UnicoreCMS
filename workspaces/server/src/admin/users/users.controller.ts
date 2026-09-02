@@ -3,6 +3,7 @@ import { Throttle } from '@nestjs/throttler';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
+import { PasswordPolicyService } from 'src/auth/password/password-policy.service';
 import { PaginatedUsersDto } from './dto/paginated-users.dto';
 import { UserInput } from './dto/user.input';
 import { Public } from 'src/auth/decorators/public.decorator';
@@ -20,7 +21,7 @@ import { UserField, USER_FIELDS, USER_FIELD_PERMISSIONS } from 'unicore-common';
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+  constructor(private usersService: UsersService, private passwordPolicy: PasswordPolicyService) {}
 
   private async allowedFields(request: any): Promise<UserField[]> {
     const checked = await Promise.all(
@@ -34,6 +35,8 @@ export class UsersController {
   @ApiOperation({ summary: 'Создать одного пользователя' })
   @Post()
   async create(@Req() request: any, @CurrentUser() actor: User, @Body() createUserDto: UserInput) {
+    await this.passwordPolicy.assert(createUserDto.password, { username: createUserDto.username, email: createUserDto.email });
+
     return new UserDto(await this.usersService.create(createUserDto, actor, await this.allowedFields(request)));
   }
 

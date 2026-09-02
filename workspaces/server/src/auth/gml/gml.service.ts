@@ -19,9 +19,9 @@ export class GmlService {
   ) {}
 
   async login(input: GmlLoginInput, ip?: string): Promise<GmlAuthResultDto> {
-    await this.loginAttemptsService.assert(input.Login, ip);
-
     const user = await this.usersService.getByUsernameOrEmail(input.Login, ['skin', 'ban']);
+
+    await this.loginAttemptsService.assert(input.Login, ip, user);
 
     if (!user) {
       await this.passwordService.fakeVerify(input.Password);
@@ -30,7 +30,7 @@ export class GmlService {
     }
 
     if (!(await this.authService.validateCredentials(user, input.Password))) {
-      await this.loginAttemptsService.fail(input.Login, ip);
+      await this.loginAttemptsService.fail(input.Login, ip, user);
       throw new UnauthorizedException();
     }
 
@@ -38,12 +38,12 @@ export class GmlService {
       if (!input.Totp) throw new UnauthorizedException(REQUIRE_2FA);
 
       if (!(await this.twoFactorService.verify(user, input.Totp))) {
-        await this.loginAttemptsService.fail(input.Login, ip);
+        await this.loginAttemptsService.fail(input.Login, ip, user);
         throw new UnauthorizedException();
       }
     }
 
-    await this.loginAttemptsService.succeed(input.Login, ip);
+    await this.loginAttemptsService.succeed(input.Login, ip, user);
 
     if (user.password_change_required) throw new ForbiddenException(PASSWORD_CHANGE_REQUIRED);
 

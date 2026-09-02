@@ -5,10 +5,11 @@ import {
   PASSWORD_ISSUE_PREFIX,
   PASSWORD_ISSUES,
   PASSWORD_LEET_MAP,
+  PASSWORD_LOCALE_PREFIX,
   PASSWORD_MAX_LENGTH,
   PASSWORD_MIN_LENGTH,
-  PASSWORD_REPEAT_UNIT_MAX,
-  PASSWORD_RUN_MIN_LENGTH,
+  PASSWORD_NESTED_MIN_LENGTH,
+  PASSWORD_NON_LETTER_PATTERN,
 } from "../constants";
 import {
   PASSWORD_BLOCKLIST,
@@ -17,6 +18,7 @@ import {
 
 export {
   IS_STRONG_PASSWORD,
+  PASSWORD_LOCALE_PREFIX,
   PASSWORD_ISSUE_PREFIX,
   PASSWORD_ISSUES,
   PASSWORD_MAX_LENGTH,
@@ -32,6 +34,10 @@ export interface PasswordContext {
 }
 
 const blocked = new Set(PASSWORD_BLOCKLIST);
+
+const nested = PASSWORD_BLOCKLIST.filter(
+  (entry) => entry.length >= PASSWORD_NESTED_MIN_LENGTH && !/[^a-zа-яё]/.test(entry),
+);
 
 const runs = PASSWORD_KEYBOARD_RUNS.flatMap((run) => [
   run,
@@ -50,8 +56,8 @@ function trimEdges(value: string): string {
 }
 
 function isPeriodic(value: string): boolean {
-  for (let size = 1; size <= PASSWORD_REPEAT_UNIT_MAX; size++) {
-    if (value.length <= size) continue;
+  for (let size = 1; size <= Math.floor(value.length / 2); size++) {
+    if (value.length % size) continue;
 
     let periodic = true;
 
@@ -68,8 +74,6 @@ function isPeriodic(value: string): boolean {
 }
 
 function isRun(value: string): boolean {
-  if (value.length < PASSWORD_RUN_MIN_LENGTH) return false;
-
   const step = value.charCodeAt(1) - value.charCodeAt(0);
 
   if (step !== 1 && step !== -1) return false;
@@ -101,6 +105,10 @@ export function passwordIssue(
   const trimmed = trimEdges(plain);
   const relaxed = leet(plain);
   const variants = [plain, trimmed, relaxed, leet(trimmed), trimEdges(relaxed)];
+  const letters = [
+    plain.replace(PASSWORD_NON_LETTER_PATTERN, ""),
+    relaxed.replace(PASSWORD_NON_LETTER_PATTERN, ""),
+  ];
 
   if (
     contextTokens(context).some(
@@ -110,6 +118,11 @@ export function passwordIssue(
     return "context";
 
   if (variants.some((variant) => variant.length > 0 && blocked.has(variant)))
+    return "common";
+
+  if (
+    letters.some((value) => nested.some((entry) => value.includes(entry)))
+  )
     return "common";
 
   if (isPeriodic(plain)) return "repeat";
@@ -142,6 +155,10 @@ export function passwordContextOf(
 
 export function passwordIssueCode(issue: PasswordIssue): string {
   return `${PASSWORD_ISSUE_PREFIX}${issue}`;
+}
+
+export function passwordIssueKey(issue: PasswordIssue): string {
+  return `${PASSWORD_LOCALE_PREFIX}${passwordIssueCode(issue)}`;
 }
 
 export function passwordIssueFrom(payload: unknown): PasswordIssue | null {

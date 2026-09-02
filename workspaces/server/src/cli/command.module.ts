@@ -5,6 +5,7 @@ import { DataSource } from 'typeorm';
 import { addTransactionalDataSource } from 'typeorm-transactional';
 import { enforceSessionTimezone } from 'src/common/database';
 import UsersModule from 'src/admin/users/users.module';
+import { PasswordModule } from 'src/auth/password/password.module';
 import { ormconfig } from 'src/ormconfig';
 import { UsersCommandCreate, UsersPasswordQuestions } from './commands/users.commands';
 import { SeedCommand } from './commands/seed.command';
@@ -29,6 +30,7 @@ import { ExtensionSource } from 'src/modules/catalog/entities/extension-source.e
       isGlobal: true,
     }),
     UsersModule,
+    PasswordModule,
     TypeOrmModule.forFeature([User, RCON, ExtensionSource]),
   ],
   providers: [UsersCommandCreate, UsersPasswordQuestions, SeedCommand, CryptoRewrapCommand, PermissionsCheckCommand],
