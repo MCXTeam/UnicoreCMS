@@ -33,6 +33,11 @@ export const STORAGE_MAX_ZIP_UPLOAD = 50 * 1024 * 1024;
 export const IMAGE_EXTENSION_PATTERN = /\.(jpg|jpeg|png|gif|webp)$/i;
 export const ZIP_EXTENSION_PATTERN = /\.zip$/i;
 export const PNG_EXTENSION_PATTERN = /\.png$/i;
+export const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+export const PNG_IHDR_TYPE = 'IHDR';
+export const PNG_IHDR_OFFSET = 12;
+export const PNG_SIZE_OFFSET = 16;
+export const PNG_HEADER_LENGTH = 24;
 export const STORAGE_MAX_REMOTE_DOWNLOAD = 10 * 1024 * 1024;
 
 export const IMPORT_MAX_ENTRIES = 1000;

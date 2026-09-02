@@ -36,7 +36,6 @@
     "pinia": "^3.0.4",
     "primeicons": "^7.0.0",
     "primevue": "^4.5.5",
-    "qrcode": "^1.5.4",
     "qrcode-with-logos": "^1.2.1",
     "skinview3d": "^3.4.2",
     "socket.io-client": "^4.8.3",

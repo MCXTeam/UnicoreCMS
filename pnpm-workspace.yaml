@@ -7,20 +7,15 @@ strictPeerDependencies: false
 autoInstallPeers: true
 
 overrides:
-  nanoid: ^3.3.18
   canvas: ^3.1.0
+  fast-uri@3: ^3.1.6
+  fast-uri@4: ^4.1.3
   fastify: ^5.8.5
   '@nestjs/swagger>js-yaml': ^5.2.2
   mailparser>nodemailer: ^9.0.4
   mailparser>linkify-it: ^5.0.2
   tsup>esbuild: ^0.28.1
   bundle-require>esbuild: ^0.28.1
-
-# Разбор ICNS, JXL и HEIF у нас недостижим: перед image-size буфер проверяется на PNG-сигнатуру
-auditConfig:
-  ignoreGhsas:
-    - GHSA-w3rx-r6r6-pgpr
-    - GHSA-5p2g-fcmc-qvqq
 
 peerDependencyRules:
   ignoreMissing:

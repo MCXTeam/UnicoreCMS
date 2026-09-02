@@ -1,11 +1,13 @@
 import { ForbiddenException, Injectable, NotFoundException, UnsupportedMediaTypeException } from '@nestjs/common';
 import { matchPermission } from 'src/admin/roles/guards/permisson.guard';
-import { imageSize } from 'image-size';
+
 import {
   assertUploadedFile,
   DEFAULT_CLOAK_FILE,
   DEFAULT_SKIN_FILE,
   PNG_EXTENSION_PATTERN,
+  PngSize,
+  pngSize,
   SKIN_MAX_SIZE,
   STORAGE_MAX_IMAGE_UPLOAD,
   StorageManager,
@@ -28,26 +30,17 @@ export class SkinService {
     private usersService: UsersService,
   ) {}
 
-  private isPng(buffer: Buffer): boolean {
-    return buffer.length >= 4 && buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e && buffer[3] === 0x47;
-  }
-
-  private validateImage(file: Express.Multer.File): { width: number; height: number } {
+  private validateImage(file: Express.Multer.File): PngSize {
     let valid = false;
 
     try {
-      const buffer = StorageManager.read(file.filename, STORAGE_MAX_IMAGE_UPLOAD);
+      const size = pngSize(StorageManager.read(file.filename, STORAGE_MAX_IMAGE_UPLOAD));
 
-      if (!buffer || !this.isPng(buffer)) throw new UnsupportedMediaTypeException();
-
-      const { width, height, type } = imageSize(buffer);
-
-      if (type !== 'png' || !width || !height || width > SKIN_MAX_SIZE || height > SKIN_MAX_SIZE)
-        throw new UnsupportedMediaTypeException();
+      if (!size || size.width > SKIN_MAX_SIZE || size.height > SKIN_MAX_SIZE) throw new UnsupportedMediaTypeException();
 
       valid = true;
 
-      return { width, height };
+      return size;
     } catch (e) {
       throw e instanceof UnsupportedMediaTypeException ? e : new UnsupportedMediaTypeException();
     } finally {
