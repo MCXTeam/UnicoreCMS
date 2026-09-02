@@ -90,6 +90,12 @@ export const THROTTLE_SKIP_KEY = 'throttleSkip';
 export const THROTTLE_DEFAULT = { ttl: 120_000, limit: 10 };
 export const AUTH_LOGIN_PATH = '/auth/login';
 
+export const RECAPTCHA_VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify';
+export const RECAPTCHA_TIMEOUT_MS = 5000;
+export const RECAPTCHA_KEY = 'recaptcha';
+export const RECAPTCHA_HEADER = 'recaptcha';
+export const RECAPTCHA_FAILED = 'error.recaptcha';
+
 export const COOKIE_PAIR_SEPARATOR = ';';
 export const COOKIE_VALUE_SEPARATOR = '=';
 export { REFRESH_COOKIE, CSRF_COOKIE, CSRF_HEADER } from 'unicore-common/auth';

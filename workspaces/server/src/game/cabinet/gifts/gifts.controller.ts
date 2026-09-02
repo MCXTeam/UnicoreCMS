@@ -1,6 +1,6 @@
 import { DeleteManyInput, ThrottlerCoreGuard } from '@common';
 import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
-import { Recaptcha } from '@nestlab/google-recaptcha';
+import { Recaptcha } from 'src/auth/recaptcha';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';

@@ -35,7 +35,6 @@
     "@nestjs/swagger": "^11.4.6",
     "@nestjs/typeorm": "^11.0.3",
     "@nestjs/websockets": "^11.1.28",
-    "@nestlab/google-recaptcha": "^3.11.3",
     "@node-rs/argon2": "^2.2.0",
     "@unicorecms/minecraft-skin-type": "^0.1.6",
     "bcrypt": "^6.0.0",

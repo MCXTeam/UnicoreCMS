@@ -1098,6 +1098,7 @@
   "error.no_permission": "You do not have the rights for this",
   "error.not_found": "Page not found",
   "error.occurred": "Something went wrong — {code}",
+  "error.recaptcha": "The anti-bot check did not pass, please try again",
   "error.storage_path": "The file name escapes the storage directory",
   "error.title": "Error",
   "error.to_home": "Home page",

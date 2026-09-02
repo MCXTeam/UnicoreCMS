@@ -7,11 +7,10 @@ import { envConfig } from 'unicore-common';
 import { enforceSessionTimezone } from './common/database';
 import { AuthModule } from './auth/auth.module';
 import { LoginAttemptsModule } from './auth/attempts/login-attempts.module';
-import { LoginAttemptsService } from './auth/attempts/login-attempts.service';
 import { AdminModule } from './admin/admin.module';
 import { GameModule } from './game/game.module';
 import { PaymentModule } from './payment/payment.module';
-import { GoogleRecaptchaModule, GoogleRecaptchaNetwork } from '@nestlab/google-recaptcha';
+import { RecaptchaModule } from './auth/recaptcha/recaptcha.module';
 import { ThrottlerModule } from './common/throttler/throttler.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MomentModule } from './moment';
@@ -62,17 +61,7 @@ export class AppLoggerMiddleware implements NestMiddleware {
       isGlobal: true,
     }),
     LoginAttemptsModule,
-    GoogleRecaptchaModule.forRootAsync({
-      imports: [LoginAttemptsModule],
-      inject: [LoginAttemptsService],
-      useFactory: (loginAttempts: LoginAttemptsService) => ({
-        secretKey: envConfig.recaptchaSecret || 'disabled',
-        response: (req) => req.headers.recaptcha,
-        actions: ['login', 'register', 'reset', 'verify', 'gift'],
-        network: GoogleRecaptchaNetwork.Recaptcha,
-        skipIf: (request) => loginAttempts.skipCaptcha(request),
-      }),
-    }),
+    RecaptchaModule,
     ThrottlerModule,
     MailerModule.forRoot({
       defaults: {

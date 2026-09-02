@@ -1,4 +1,5 @@
 import { passwordIssueFrom, passwordIssueKey } from 'unicore-common/validation'
+import { serverMessageKey } from 'unicore-common/messages'
 import { useAuthStore } from '~/stores/auth'
 import { useUiStore } from '~/stores/ui'
 
@@ -28,10 +29,14 @@ export default defineNuxtPlugin((nuxtApp) => {
 
   const notify = (severity: string, summary: string, detail: string) => toast()?.add({ severity, summary, detail, life: 4000 })
 
-  const passwordText = (error: any): string | null => {
+  const serverText = (error: any): string | null => {
     const issue = passwordIssueFrom(error)
 
-    return issue ? t(passwordIssueKey(issue)) : null
+    if (issue) return t(passwordIssueKey(issue))
+
+    const key = serverMessageKey(error)
+
+    return key ? t(key) : null
   }
 
   const unicore: UnicoreApi = {
@@ -58,7 +63,7 @@ export default defineNuxtPlugin((nuxtApp) => {
       await navigateTo('/')
     },
     authErrorNotification(error: any, text: string) {
-      const password = passwordText(error)
+      const password = serverText(error)
 
       if (password) notify('error', t('error.auth_title'), password)
       else if (error?.response?.status === 429) notify('error', t('error.auth_title'), t('error.too_many_requests'))
@@ -68,7 +73,7 @@ export default defineNuxtPlugin((nuxtApp) => {
       notify('success', t('common.success'), text)
     },
     errorNotification(text: string, error?: any) {
-      notify('error', t('error.title'), passwordText(error) ?? text)
+      notify('error', t('error.title'), serverText(error) ?? text)
     },
     switchTheme() {
       colorMode.preference = colorMode.value === 'light' ? 'dark' : 'light'

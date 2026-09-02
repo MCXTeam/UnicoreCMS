@@ -14,7 +14,7 @@ import {
 } from '@common';
 import { Body, Controller, Delete, Get, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { Recaptcha } from '@nestlab/google-recaptcha';
+import { Recaptcha } from './recaptcha';
 import { EmailService } from 'src/admin/email/email.service';
 import { UserDto } from 'src/admin/users/dto/user.dto';
 import { User } from 'src/admin/users/entities/user.entity';

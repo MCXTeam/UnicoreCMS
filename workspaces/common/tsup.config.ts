@@ -22,6 +22,7 @@ export default defineConfig({
     "src/sanitize.ts",
     "src/security.ts",
     "src/auth.ts",
+    "src/messages.ts",
     "src/console/index.ts",
     "src/build.ts",
     "src/vite.ts",
