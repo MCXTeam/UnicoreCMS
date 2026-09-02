@@ -245,6 +245,7 @@ export const PERMISSIONS = define({
 
   "kernel.provider": { group: "kernel" },
   "kernel.connect": { group: "kernel" },
+  "kernel.laminara.provider": { group: "kernel" },
 });
 
 export type PermissionKey = Extract<keyof typeof PERMISSIONS, string>;
@@ -254,6 +255,25 @@ export type Permission = PermissionKey | (string & {});
 export const PERMISSION_KEYS = Object.keys(PERMISSIONS) as PermissionKey[];
 
 export const PLAYER_PERMISSION_PREFIX = "player.";
+
+export const LAUNCHER_PERMISSION_GROUP = "launcher";
+
+export const LAUNCHER_BUILD_PERMISSION_PREFIX = "laminara.build.";
+
+export const LAUNCHER_BUILD_ID_PATTERN = /^[a-z0-9][a-z0-9_-]{0,63}$/i;
+
+export const launcherBuildPermission = (build: string): string =>
+  `${LAUNCHER_BUILD_PERMISSION_PREFIX}${build.toLowerCase()}`;
+
+export const parseLauncherBuilds = (value: unknown): string[] =>
+  Array.from(
+    new Set(
+      String(value ?? "")
+        .split(/[\s,;]+/)
+        .map((build) => build.trim().toLowerCase())
+        .filter((build) => LAUNCHER_BUILD_ID_PATTERN.test(build)),
+    ),
+  );
 
 export const PERMISSION_LOCALE_PREFIX = "perm.";
 

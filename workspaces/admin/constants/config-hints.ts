@@ -168,6 +168,10 @@ export const CONFIG_HINTS: Record<string, ConfigHint> = {
     title: 'cfg.public_gifts_regift_percent_title',
     hint: 'cfg.public_gifts_regift_percent_hint',
   },
+  laminara_builds: {
+    title: 'cfg.laminara_builds_title',
+    hint: 'cfg.laminara_builds_hint',
+  },
   public_role_badge_before: {
     title: 'cfg.public_role_badge_before_title',
     hint: 'cfg.public_role_badge_before_hint',

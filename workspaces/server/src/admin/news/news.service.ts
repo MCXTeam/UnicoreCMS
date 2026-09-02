@@ -9,7 +9,7 @@ import { GmlNewsDto } from './dto/gml-news.dto';
 import { NewsInput } from './dto/news.input';
 import { News } from './entities/news.entity';
 import { HtmlSlice } from 'htmlslice';
-import { applyCustomCode, assertUploadedFile, GML_NEWS_MAX_LIMIT, NEWS_PREVIEW_LENGTH, StorageManager } from '@common';
+import { applyCustomCode, assertUploadedFile, LAUNCHER_NEWS_MAX_LIMIT, NEWS_PREVIEW_LENGTH, StorageManager } from '@common';
 
 @Injectable()
 export class NewsService {
@@ -79,14 +79,16 @@ export class NewsService {
     return sliced.length > NEWS_PREVIEW_LENGTH ? sliced.slice(0, NEWS_PREVIEW_LENGTH) + '...' : content;
   }
 
-  async findForGml(limit: number): Promise<GmlNewsDto[]> {
-    const news = await this.newsRepository.find({
+  latest(limit: number): Promise<News[]> {
+    return this.newsRepository.find({
       where: { hidden: false },
       order: { published_at: 'DESC' },
-      take: Math.min(Math.max(limit, 1), GML_NEWS_MAX_LIMIT),
+      take: Math.min(Math.max(limit, 1), LAUNCHER_NEWS_MAX_LIMIT),
     });
+  }
 
-    return news.map((item) => new GmlNewsDto(item));
+  async findForGml(limit: number): Promise<GmlNewsDto[]> {
+    return (await this.latest(limit)).map((item) => new GmlNewsDto(item));
   }
 
   async findForMap(): Promise<number[]> {

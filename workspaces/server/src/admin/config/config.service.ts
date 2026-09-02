@@ -19,6 +19,7 @@ import { configTypeOf, moduleConfigKey } from './module-config';
 import { CONFIG_CACHE_TTL_MS } from './config.constants';
 import { isValidConfigNumber } from './config.utils';
 import { ConfigInput } from './dto/config.input';
+import { syncLauncherBuilds } from 'src/auth/laminara/builds';
 import { Config } from './entities/config.entity';
 import _ from 'lodash';
 
@@ -98,6 +99,7 @@ export class ConfigService {
           value: String(KEEP_PENDING_PAYMENTS_DAYS),
         },
         { key: ConfigField.KeepHistoryDays, important: true, type: ConfigType.number, value: String(KEEP_HISTORY_DAYS) },
+        { key: ConfigField.LaminaraBuilds, important: true, type: ConfigType.string, value: '' },
         { key: ConfigField.RconPreset, important: true, type: ConfigType.string, value: DEFAULT_ISSUANCE_PRESET },
         {
           key: ConfigField.RconTplGiveItem,
@@ -116,6 +118,7 @@ export class ConfigService {
       .execute();
 
     await this.initModules();
+    await this.load();
   }
 
   private async initModules(): Promise<void> {
@@ -145,12 +148,14 @@ export class ConfigService {
     const config = _.chain(await this.find()).keyBy('key').mapValues('value').value() as LoadedConfig;
 
     await this.cacheManager.set(CacheKey.Config, config, CONFIG_CACHE_TTL_MS);
+    syncLauncherBuilds(config[ConfigField.LaminaraBuilds]);
 
     return config;
   }
 
   private async invalidate() {
     await this.cacheManager.del(CacheKey.Config);
+    await this.load();
   }
 
   async findPublic() {

@@ -26,6 +26,13 @@ export function registerPermissions(
   revision += 1;
 }
 
+export function unregisterPermissions(keys: string[]): void {
+  for (const key of keys) extra.delete(key);
+
+  cache = null;
+  revision += 1;
+}
+
 export function resetPermissionRegistry(): void {
   extra.clear();
   cache = null;

@@ -1,4 +1,4 @@
-import { DeleteManyInput, GML_NEWS_LIMIT, imageFileFilter, STORAGE_MAX_IMAGE_UPLOAD, StorageManager } from '@common';
+import { DeleteManyInput, LAUNCHER_NEWS_LIMIT, imageFileFilter, STORAGE_MAX_IMAGE_UPLOAD, StorageManager } from '@common';
 import {
   Body,
   Controller,
@@ -49,7 +49,7 @@ export class NewsController {
 
   @Public()
   @Get('gml')
-  findForGml(@Query('limit', new DefaultValuePipe(GML_NEWS_LIMIT), ParseIntPipe) limit: number) {
+  findForGml(@Query('limit', new DefaultValuePipe(LAUNCHER_NEWS_LIMIT), ParseIntPipe) limit: number) {
     return this.newsService.findForGml(limit);
   }
 

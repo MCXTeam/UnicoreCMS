@@ -9,5 +9,6 @@ import { WebhooksModule } from '../webhook/webhooks.module';
   imports: [TypeOrmModule.forFeature([News]), WebhooksModule],
   providers: [NewsService],
   controllers: [NewsController],
+  exports: [NewsService],
 })
 export class NewsModule {}

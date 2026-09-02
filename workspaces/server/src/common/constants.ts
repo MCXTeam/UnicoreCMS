@@ -159,8 +159,8 @@ export const DEFAULT_MINECRAFT_PORT = 25565;
 export const PING_TIMEOUT_MS = 3000;
 
 export const NEWS_PREVIEW_LENGTH = 300;
-export const GML_NEWS_LIMIT = 20;
-export const GML_NEWS_MAX_LIMIT = 100;
+export const LAUNCHER_NEWS_LIMIT = 20;
+export const LAUNCHER_NEWS_MAX_LIMIT = 100;
 
 export const DASHBOARD_WEEK_DAYS = 7;
 export const DASHBOARD_MONTH_DAYS = 30;

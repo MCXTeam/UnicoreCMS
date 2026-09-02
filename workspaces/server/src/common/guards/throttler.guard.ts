@@ -16,10 +16,7 @@ export class ThrottlerCoreGuard extends ThrottlerGuard {
 
     if (
       user &&
-      (await matchPermission(
-        [['kernel.connect', 'kernel.provider', 'panel.access'], { or: true }],
-        { user },
-      ))
+      (await matchPermission([['kernel.connect', 'kernel.provider', 'kernel.laminara.provider', 'panel.access'], { or: true }], { user }))
     )
       return true;
 

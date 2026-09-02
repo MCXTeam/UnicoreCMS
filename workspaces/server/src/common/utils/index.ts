@@ -12,3 +12,4 @@ export * from './sanitize-html';
 export * from './transaction';
 export * from './upload';
 export * from './remaining-seconds';
+export * from './cms-version';

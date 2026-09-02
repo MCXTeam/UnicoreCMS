@@ -33,6 +33,7 @@ export enum ConfigField {
   KeepPaidPaymentsDays = 'cleanup_payments_paid_days',
   KeepPendingPaymentsDays = 'cleanup_payments_pending_days',
   KeepHistoryDays = 'cleanup_history_days',
+  LaminaraBuilds = 'laminara_builds',
   RconPreset = 'rcon_preset',
   RconTplGiveItem = 'rcon_tpl_give_item',
   RconTplGroupAdd = 'rcon_tpl_group_add',
