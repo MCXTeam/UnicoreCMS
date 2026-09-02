@@ -1,7 +1,9 @@
-import { IsDefined, IsString } from 'class-validator';
+import { IsOptional, IsString, MaxLength } from 'class-validator';
+import { TOKEN_MAX_LENGTH } from '@common';
 
 export class TokenInput {
-  @IsDefined()
+  @IsOptional()
   @IsString()
-  token: string;
+  @MaxLength(TOKEN_MAX_LENGTH)
+  token?: string;
 }

@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { satisfiesPermission } from 'unicore-common/permissions'
+import { csrfToken, ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from 'unicore-common/auth'
 
 export interface AuthUser {
   uuid: string
@@ -17,9 +18,11 @@ export const useAuthStore = defineStore('auth', {
     user: null as AuthUser | null,
     accessToken: null as string | null,
     refreshToken: null as string | null,
+    cookieAuth: false,
   }),
   getters: {
     loggedIn: (state) => !!state.user,
+    hasSession: (state) => Boolean(state.refreshToken) || state.cookieAuth,
     has:
       (state) =>
       (permission: string): boolean => {
@@ -31,24 +34,30 @@ export const useAuthStore = defineStore('auth', {
   },
   actions: {
     loadTokens() {
-      if (import.meta.client) {
-        this.accessToken = localStorage.getItem('access_token')
-        this.refreshToken = localStorage.getItem('refresh_token')
-      }
+      if (!import.meta.client) return
+
+      localStorage.removeItem(ACCESS_TOKEN_KEY)
+
+      this.refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY)
+      this.cookieAuth = Boolean(csrfToken())
     },
     setTokens(access: string | null, refresh?: string | null) {
       this.accessToken = access
-      if (refresh !== undefined) this.refreshToken = refresh
 
-      if (import.meta.client) {
-        if (access) localStorage.setItem('access_token', access)
-        else localStorage.removeItem('access_token')
+      if (refresh === undefined) return
 
-        if (refresh !== undefined) {
-          if (refresh) localStorage.setItem('refresh_token', refresh)
-          else localStorage.removeItem('refresh_token')
-        }
-      }
+      this.refreshToken = this.cookieAuth ? null : refresh
+
+      if (!import.meta.client) return
+
+      if (this.refreshToken) localStorage.setItem(REFRESH_TOKEN_KEY, this.refreshToken)
+      else localStorage.removeItem(REFRESH_TOKEN_KEY)
+    },
+    adopt(data: { accessToken: string; refreshToken?: string | null; user?: AuthUser }) {
+      this.cookieAuth = Boolean(csrfToken())
+      this.setTokens(data.accessToken, data.refreshToken ?? null)
+
+      if (data.user) this.setUser(data.user)
     },
     setUser(user: AuthUser | null) {
       this.user = user
@@ -56,30 +65,42 @@ export const useAuthStore = defineStore('auth', {
     async login(payload: Record<string, any>, config?: Record<string, any>) {
       const { $api } = useNuxtApp()
       const { data } = await $api.post('/auth/login', payload, config)
-      this.setTokens(data.accessToken, data.refreshToken)
-      this.setUser(data.user)
+
+      this.adopt(data)
+
       return data
     },
     async fetchUser() {
       const { $api } = useNuxtApp()
       const { data } = await $api.get('/auth/me')
+
+      if (data.cookieAuth && !this.cookieAuth) {
+        this.cookieAuth = true
+        this.setTokens(this.accessToken, null)
+      }
+
       this.setUser(data.user)
+
       return data.user
     },
     async refresh() {
       const { $api } = useNuxtApp()
-      const { data } = await $api.post('/auth/refresh', { refresh_token: this.refreshToken })
+      const { data } = await $api.post('/auth/refresh', this.cookieAuth ? {} : { refresh_token: this.refreshToken })
+
       this.setTokens(data.accessToken, data.refreshToken)
+
       return data.accessToken as string
     },
     async logout() {
       const { $api } = useNuxtApp()
       const token = this.refreshToken
+      const cookie = this.cookieAuth
 
       this.setUser(null)
       this.setTokens(null, null)
+      this.cookieAuth = false
 
-      if (token) await $api.post('/auth/logout', { refresh_token: token }).catch(() => {})
+      if (token || cookie) await $api.post('/auth/logout', token ? { refresh_token: token } : {}).catch(() => {})
     },
   },
 })

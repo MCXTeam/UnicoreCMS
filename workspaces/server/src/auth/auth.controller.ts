@@ -10,13 +10,15 @@ import {
   ThrottlerCoreGuard,
   UserAgent,
 } from '@common';
-import { Body, Controller, Delete, Get, Header, Headers, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Request, Response } from 'express';
 import { Throttle } from '@nestjs/throttler';
 import { Recaptcha } from '@nestlab/google-recaptcha';
 import { EmailService } from 'src/admin/email/email.service';
 import { UserDto } from 'src/admin/users/dto/user.dto';
 import { User } from 'src/admin/users/entities/user.entity';
 import { AuthService } from './auth.service';
+import { AuthCookiesService } from './cookies/auth-cookies.service';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { Public } from './decorators/public.decorator';
 import { AllowInactive } from './decorators/allow-inactive.decorator';
@@ -37,34 +39,67 @@ import { TokensService } from './tokens.service';
 @UseGuards(ThrottlerCoreGuard)
 @Controller('auth')
 export class AuthController {
-  constructor(private tokensService: TokensService, private authService: AuthService, private emailService: EmailService) {}
+  constructor(
+    private tokensService: TokensService,
+    private authService: AuthService,
+    private emailService: EmailService,
+    private cookies: AuthCookiesService,
+  ) {}
 
   @Public()
   @Recaptcha({ action: 'login' })
   @Throttle({ default: THROTTLE_LOGIN })
   @Post('login')
-  login(@Body() input: LoginInput, @UserAgent() agent: string, @IpAddress() ip: string): Promise<AuthenticatedDto> {
-    return this.authService.login(input, agent, ip);
+  async login(
+    @Body() input: LoginInput,
+    @UserAgent() agent: string,
+    @IpAddress() ip: string,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<AuthenticatedDto> {
+    const authenticated = await this.authService.login(input, agent, ip);
+
+    this.cookies.issue(response, authenticated.refreshToken);
+
+    return authenticated;
   }
 
   @Public()
   @Recaptcha({ action: 'register' })
   @Throttle({ default: THROTTLE_REGISTER })
   @Post('register')
-  register(
+  async register(
     @Body() input: RegisterInput,
     @UserAgent() agent: string,
     @IpAddress() ip: string,
     @Locale() locale: string,
+    @Res({ passthrough: true }) response: Response,
   ): Promise<AuthenticatedDto> {
-    return this.authService.register(input, agent, ip, locale);
+    const authenticated = await this.authService.register(input, agent, ip, locale);
+
+    this.cookies.issue(response, authenticated.refreshToken);
+
+    return authenticated;
   }
 
   @Public()
   @Throttle({ default: THROTTLE_REFRESH })
   @Post('refresh')
-  refresh(@Body() input: RefreshTokenInput, @UserAgent() agent: string, @IpAddress() ip: string): Promise<Omit<AuthenticatedDto, 'user'>> {
-    return this.tokensService.createTokensFromRefreshToken(input.refresh_token, { agent, ip });
+  async refresh(
+    @Req() request: Request,
+    @Body() input: RefreshTokenInput,
+    @UserAgent() agent: string,
+    @IpAddress() ip: string,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<Omit<AuthenticatedDto, 'user'>> {
+    const fromCookie = this.cookies.present(request);
+    const tokens = await this.tokensService.createTokensFromRefreshToken(this.cookies.resolve(request, input.refresh_token), {
+      agent,
+      ip,
+    });
+
+    if (fromCookie) this.cookies.issue(response, tokens.refreshToken);
+
+    return tokens;
   }
 
   @AllowInactive()
@@ -93,8 +128,14 @@ export class AuthController {
 
   @AllowInactive()
   @Post('logout')
-  logout(@Body() input: RefreshTokenInput): Promise<void> {
-    return this.tokensService.revokeRefreshToken(input.refresh_token);
+  async logout(
+    @Req() request: Request,
+    @Body() input: RefreshTokenInput,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<void> {
+    await this.tokensService.revokeRefreshToken(this.cookies.resolve(request, input.refresh_token));
+
+    this.cookies.clear(response);
   }
 
   @AllowInactive()
@@ -108,26 +149,28 @@ export class AuthController {
   @AllowInactive()
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  async me(@Req() request: any, @CurrentUser() user: User): Promise<{ user: UserDto }> {
-    return { user: new UserDto(user, await playerPermissions(request)) };
+  async me(@Req() request: any, @CurrentUser() user: User): Promise<{ user: UserDto; cookieAuth: boolean }> {
+    return { user: new UserDto(user, await playerPermissions(request)), cookieAuth: this.cookies.present(request) };
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('sessions/me')
-  sessionsMe(@CurrentUser() user: User, @Body() input: TokenInput) {
-    return this.tokensService.sessions(user, input.token);
+  sessionsMe(@Req() request: Request, @CurrentUser() user: User, @Body() input: TokenInput) {
+    return this.tokensService.sessions(user, this.cookies.resolve(request, input.token));
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete('sessions_all')
-  closeMeSessions(@CurrentUser() user: User) {
-    return this.tokensService.revokeRefreshTokensByUser(user);
+  async closeMeSessions(@CurrentUser() user: User, @Res({ passthrough: true }) response: Response) {
+    await this.tokensService.revokeRefreshTokensByUser(user);
+
+    this.cookies.clear(response);
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete('sessions_other')
-  closeMeOtherSessions(@CurrentUser() user: User, @Body() input: TokenInput) {
-    return this.tokensService.revokeRefreshTokensByUserOther(user, input.token);
+  closeMeOtherSessions(@Req() request: Request, @CurrentUser() user: User, @Body() input: TokenInput) {
+    return this.tokensService.revokeRefreshTokensByUserOther(user, this.cookies.resolve(request, input.token));
   }
 
   @UseGuards(JwtAuthGuard)

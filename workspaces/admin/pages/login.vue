@@ -121,8 +121,7 @@ async function Login() {
     await recaptcha?.recaptchaLoaded?.()
     const token = await recaptcha?.executeRecaptcha?.('login')
     const { data } = await $api.post('/auth/login', login, { headers: { recaptcha: token } })
-    authStore.setTokens(data.accessToken, data.refreshToken)
-    authStore.setUser(data.user)
+    authStore.adopt(data)
     await navigateTo('/')
   } catch (err) {
     if (err?.response?.data?.message === 'require2fa') {

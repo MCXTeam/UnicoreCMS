@@ -7,6 +7,7 @@ import { User } from 'src/admin/users/entities/user.entity';
 import UsersModule from 'src/admin/users/users.module';
 import { envConfig } from 'unicore-common';
 import { AuthService } from './auth.service';
+import { AuthCookiesService } from './cookies/auth-cookies.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { AuthController } from './auth.controller';
 import { RefreshToken } from './entities/refresh-token.entity';
@@ -41,6 +42,7 @@ import { ApiServerGuard } from './guards/api-server.guard';
   ],
   providers: [
     AuthService,
+    AuthCookiesService,
     TokensService,
     ApiKeyStrategy,
     JwtStrategy,
@@ -61,7 +63,7 @@ import { ApiServerGuard } from './guards/api-server.guard';
       useClass: ApiServerGuard,
     },
   ],
-  exports: [AuthService, TokensService],
+  exports: [AuthService, AuthCookiesService, TokensService],
   controllers: [AuthController],
 })
 export class AuthModule {}

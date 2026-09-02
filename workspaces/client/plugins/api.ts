@@ -1,18 +1,24 @@
 import axios, { type AxiosInstance } from 'axios'
 import { LOCALE_HEADER } from 'unicore-common/locales'
+import { csrfToken, CSRF_HEADER } from 'unicore-common/auth'
 import { useAuthStore } from '~/stores/auth'
 import { useLocale } from '~/composables/useLocale'
 
 export default defineNuxtPlugin((nuxtApp) => {
   const config = useRuntimeConfig()
   const locale = useLocale()
-  const api: AxiosInstance = axios.create({ baseURL: config.public.apiBaseurl })
+  const api: AxiosInstance = axios.create({ baseURL: config.public.apiBaseurl, withCredentials: true })
 
   api.interceptors.request.use((cfg) => {
     const auth = useAuthStore()
     if (auth.accessToken) cfg.headers.Authorization = `Bearer ${auth.accessToken}`
     cfg.headers['Timezone'] = Intl.DateTimeFormat().resolvedOptions().timeZone
     cfg.headers[LOCALE_HEADER] = locale.value
+
+    const csrf = csrfToken()
+
+    if (csrf) cfg.headers[CSRF_HEADER] = csrf
+
     return cfg
   })
 
@@ -27,7 +33,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
       const isAuthEndpoint = /\/auth\/(refresh|logout)/.test(original?.url || '')
 
-      if (status === 401 && auth.refreshToken && original && !original._retry && !isAuthEndpoint) {
+      if (status === 401 && auth.hasSession && original && !original._retry && !isAuthEndpoint) {
         original._retry = true
         try {
           if (!refreshing)

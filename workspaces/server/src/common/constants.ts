@@ -77,6 +77,14 @@ export const THROTTLE_REFRESH = { ttl: 5 * 60_000, limit: 60 };
 export const THROTTLE_LAUNCHER_LOGIN = { ttl: 5 * 60_000, limit: 30 };
 export const THROTTLE_UNSKIPPABLE_PREFIX = '/auth/';
 export const AUTH_LOGIN_PATH = '/auth/login';
+
+export const COOKIE_PAIR_SEPARATOR = ';';
+export const COOKIE_VALUE_SEPARATOR = '=';
+export { REFRESH_COOKIE, CSRF_COOKIE, CSRF_HEADER } from 'unicore-common/auth';
+export const CSRF_TOKEN_BYTES = 32;
+export const COOKIE_SAMESITE_SAME_ORIGIN = 'lax';
+export const COOKIE_SAMESITE_CROSS_SITE = 'none';
+export const COOKIE_PATH = '/';
 export const THROTTLE_LOGIN_TRACKER_PREFIX = 'login:';
 export const THROTTLE_LOGIN_FIELD = 'login';
 

@@ -102,6 +102,11 @@
       "import": "./dist/security.mjs",
       "require": "./dist/security.js"
     },
+    "./auth": {
+      "types": "./dist/auth.d.ts",
+      "import": "./dist/auth.mjs",
+      "require": "./dist/auth.js"
+    },
     "./build": {
       "types": "./dist/build.d.ts",
       "import": "./dist/build.mjs",
