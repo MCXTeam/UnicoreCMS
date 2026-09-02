@@ -256,6 +256,12 @@ export const PERMISSION_KEYS = Object.keys(PERMISSIONS) as PermissionKey[];
 
 export const PLAYER_PERMISSION_PREFIX = "player.";
 
+export const KERNEL_PERMISSION_GROUP = "kernel";
+
+export const KERNEL_PERMISSIONS = PERMISSION_KEYS.filter(
+  (key) => PERMISSIONS[key].group === KERNEL_PERMISSION_GROUP,
+);
+
 export const LAUNCHER_PERMISSION_GROUP = "launcher";
 
 export const LAUNCHER_BUILD_PERMISSION_PREFIX = "laminara.build.";

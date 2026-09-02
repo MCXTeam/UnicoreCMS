@@ -68,6 +68,13 @@ export const THROTTLE_REGISTER = { ttl: 60 * 60_000, limit: 5 };
 export const THROTTLE_VERIFY = { ttl: 10 * 60_000, limit: 10 };
 export const THROTTLE_RESEND = { ttl: 10 * 60_000, limit: 3 };
 export const THROTTLE_PASSWORD_RESET = { ttl: 60 * 60_000, limit: 5 };
+export const THROTTLE_REFRESH = { ttl: 5 * 60_000, limit: 60 };
+export const THROTTLE_LAUNCHER_LOGIN = { ttl: 5 * 60_000, limit: 30 };
+export const THROTTLE_UNSKIPPABLE_PREFIX = '/auth/';
+export const THROTTLE_LOGIN_TRACKER_PREFIX = 'login:';
+export const THROTTLE_LOGIN_FIELD = 'login';
+
+export const QUERY_SEPARATOR = '?';
 
 export const CRYPTO_PREFIX = 'enc';
 export const CRYPTO_VERSION = 1;

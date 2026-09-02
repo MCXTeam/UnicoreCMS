@@ -3,6 +3,7 @@ import {
   Locale,
   THROTTLE_LOGIN,
   THROTTLE_PASSWORD_RESET,
+  THROTTLE_REFRESH,
   THROTTLE_REGISTER,
   THROTTLE_RESEND,
   THROTTLE_VERIFY,
@@ -58,6 +59,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: THROTTLE_REFRESH })
   @Post('refresh')
   refresh(@Body() input: RefreshTokenInput, @UserAgent() agent: string, @IpAddress() ip: string): Promise<Omit<AuthenticatedDto, 'user'>> {
     return this.tokensService.createTokensFromRefreshToken(input.refresh_token, { agent, ip });
