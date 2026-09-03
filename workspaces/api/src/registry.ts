@@ -1,6 +1,7 @@
 import { API_VERSION } from './version'
 import { Capabilities } from './capabilities'
 import { EventBus } from './events'
+import { AuditSink, ModuleAuditAction } from './audit'
 import { ConfigFieldSchema, ModulePermission } from './manifest'
 
 export interface ModuleContribution {
@@ -8,6 +9,7 @@ export interface ModuleContribution {
   entities: unknown[]
   nestModules: unknown[]
   permissions: ModulePermission[]
+  auditActions?: ModuleAuditAction[]
   config: ConfigFieldSchema[]
   locales: Record<string, Record<string, string>>
   paymentModules: unknown[]
@@ -20,6 +22,7 @@ export interface Registry {
   events: EventBus
   capabilities: Capabilities
   core: unknown | null
+  audit: AuditSink | null
   modules: Map<string, ModuleContribution>
 }
 
@@ -30,6 +33,7 @@ const create = (): Registry => ({
   events: new EventBus(),
   capabilities: new Capabilities(),
   core: null,
+  audit: null,
   modules: new Map(),
 })
 
@@ -67,3 +71,11 @@ export const contribution = (id: string): ModuleContribution | undefined => getR
 export const events = (): EventBus => getRegistry().events
 
 export const capabilities = (): Capabilities => getRegistry().capabilities
+
+export const setAuditSink = (sink: AuditSink | null): void => {
+  getRegistry().audit = sink
+}
+
+const noopAudit: AuditSink = { record: () => undefined }
+
+export const audit = (): AuditSink => getRegistry().audit ?? noopAudit

@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Patch, Param, Delete, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { imageFileFilter, STORAGE_MAX_IMAGE_UPLOAD, StorageManager } from '@common';
+import { Audit, imageFileFilter, STORAGE_MAX_IMAGE_UPLOAD, StorageManager } from '@common';
 import { Permissions } from './decorators/permission.decorator';
 import { matchPermission } from './guards/permisson.guard';
 import { RoleCreateInput } from './dto/role-create.input';
@@ -23,6 +23,7 @@ export class RolesController {
   }
 
   @Permissions(['panel.roles.create'])
+  @Audit({ action: 'role.create', target: 'role', bodyParam: 'id' })
   @Post()
   create(@Req() request: any, @Body() body: RoleCreateInput) {
     return this.rolesService.create(body, request);
@@ -35,12 +36,14 @@ export class RolesController {
   }
 
   @Permissions(['panel.roles.delete'])
+  @Audit({ action: 'role.delete', target: 'role', param: 'id' })
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.rolesService.remove(id);
   }
 
   @Permissions(['panel.roles.update'])
+  @Audit({ action: 'role.update', target: 'role', param: 'id' })
   @Patch(':id/badge')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -54,6 +57,7 @@ export class RolesController {
   }
 
   @Permissions(['panel.roles.update'])
+  @Audit({ action: 'role.update', target: 'role', param: 'id' })
   @Delete(':id/badge')
   removeBadgeImage(@Param('id') id: string) {
     return this.rolesService.removeBadgeImage(id);

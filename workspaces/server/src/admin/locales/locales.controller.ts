@@ -1,3 +1,4 @@
+import { Audit } from '@common';
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { Permissions } from '../roles/decorators/permission.decorator';
@@ -34,30 +35,35 @@ export class LocalesController {
   }
 
   @Permissions(['panel.locales.manage'])
+  @Audit({ action: 'content.create', target: 'locale' })
   @Post()
   create(@Body() body: LocaleInput) {
     return this.localesService.create(body);
   }
 
   @Permissions(['panel.locales.manage'])
+  @Audit({ action: 'content.update', target: 'locale', param: 'code' })
   @Patch(':code')
   update(@Param('code') code: string, @Body() body: LocaleInput) {
     return this.localesService.update(code, body);
   }
 
   @Permissions(['panel.locales.update'])
+  @Audit({ action: 'content.update', target: 'locale', param: 'code' })
   @Patch(':code/messages')
   saveTranslations(@Param('code') code: string, @Body() body: TranslationsInput) {
     return this.localesService.saveTranslations(code, body);
   }
 
   @Permissions(['panel.locales.update'])
+  @Audit({ action: 'content.delete', target: 'locale', param: 'key' })
   @Delete('keys/:key')
   removeKey(@Param('key') key: string) {
     return this.localesService.removeKey(key);
   }
 
   @Permissions(['panel.locales.manage'])
+  @Audit({ action: 'content.delete', target: 'locale', param: 'code' })
   @Delete(':code')
   remove(@Param('code') code: string) {
     return this.localesService.remove(code);

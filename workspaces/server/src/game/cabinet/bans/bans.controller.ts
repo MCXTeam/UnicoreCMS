@@ -1,4 +1,4 @@
-import { IpAddress } from '@common';
+import { Audit, IpAddress } from '@common';
 import { Body, Controller, Delete, Get, NotFoundException, Param, Post } from '@nestjs/common';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { User } from 'src/admin/users/entities/user.entity';
@@ -13,6 +13,7 @@ export class BansController {
   constructor(private bansService: BansService) {}
 
   @Permissions(['player.unban.buy'])
+  @Audit({ action: 'unban.purchase' })
   @Post('unban')
   unban(@CurrentUser() user: User, @IpAddress() ip: string) {
     return this.bansService.unban(user, ip);
@@ -29,24 +30,28 @@ export class BansController {
   }
 
   @Permissions(['kernel.connect'])
+  @Audit({ action: 'ban.create', target: 'user', bodyParam: 'user_uuid', meta: ['reason', 'expires'] })
   @Post()
   create(@CurrentUser() user: User, @Body() body: BanInput) {
     return this.bansService.create(user, body);
   }
 
   @Permissions(['kernel.connect'])
+  @Audit({ action: 'ban.remove', target: 'user', param: 'uuid' })
   @Delete(':uuid')
   delete(@Param('uuid') uuid: string) {
     return this.bansService.remove(uuid);
   }
 
   @Permissions(['panel.access', 'panel.users.ban'])
+  @Audit({ action: 'ban.create', target: 'user', bodyParam: 'user_uuid', meta: ['reason', 'expires'] })
   @Post('admin')
   createFromAdmin(@CurrentUser() user: User, @Body() body: BanFromAdminInput) {
     return this.bansService.createFromAdmin(user, body);
   }
 
   @Permissions(['panel.access', 'panel.users.ban'])
+  @Audit({ action: 'ban.remove', target: 'user', param: 'uuid' })
   @Delete('admin/:uuid')
   deleteFromAdmin(@Param('uuid') uuid: string) {
     return this.bansService.remove(uuid);

@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { AuditActorType, AuditClass, AuditStatus, auditActionClass } from 'unicore-common';
+import { AuditActorType, AuditChanges, AuditClass, AuditStatus, auditActionClass } from 'unicore-common';
 import {
   AUDIT_CLIENT_MAX_LENGTH,
   AUDIT_IDENTIFIER_MAX_LENGTH,
@@ -13,7 +13,7 @@ import {
 import { clientName, launcherClient } from '../utils/client';
 import { clientIp } from '../utils/ip';
 import { runAfterCommit } from '../utils/transaction';
-import { AuditChanges, AuditLog } from './audit.entity';
+import { AuditLog } from './audit.entity';
 
 export const AUDIT_FALLBACK_CLASS: AuditClass = 'admin';
 
@@ -69,13 +69,24 @@ export class AuditService {
 
   context(request: unknown): AuditRequestContext {
     const req = (request ?? {}) as Record<string, any>;
-    const user = req.user as { uuid?: string; username?: string } | undefined;
 
     return {
-      actor: user?.uuid ? { type: 'user', id: user.uuid, name: user.username } : { type: 'system' },
+      actor: this.actor(req),
       ip: clientIp(req) || null,
       client: clientName(req.headers?.['user-agent']),
     };
+  }
+
+  private actor(req: Record<string, any>): AuditActor {
+    const token = req.apiToken as { hint?: string; comment?: string } | undefined;
+
+    if (token) return { type: 'integration', id: token.hint, name: token.comment ?? token.hint };
+
+    const user = req.user as { uuid?: string; username?: string } | undefined;
+
+    if (user?.uuid) return { type: 'user', id: user.uuid, name: user.username };
+
+    return { type: 'system' };
   }
 
   login(options: AuditLoginOptions): void {

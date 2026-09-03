@@ -1,6 +1,7 @@
-import { Global, Module } from '@nestjs/common';
+import { Global, Module, OnModuleInit } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { setAuditSink } from 'unicore-api';
 import { AuditLog } from './audit.entity';
 import { AuditInterceptor } from './audit.interceptor';
 import { AuditService } from './audit.service';
@@ -11,4 +12,10 @@ import { AuditService } from './audit.service';
   providers: [AuditService, { provide: APP_INTERCEPTOR, useClass: AuditInterceptor }],
   exports: [AuditService],
 })
-export class AuditModule {}
+export class AuditModule implements OnModuleInit {
+  constructor(private auditService: AuditService) {}
+
+  onModuleInit(): void {
+    setAuditSink({ record: (entry) => this.auditService.record(entry) });
+  }
+}

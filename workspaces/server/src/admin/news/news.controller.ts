@@ -1,4 +1,13 @@
-import { DeleteManyInput, LAUNCHER_NEWS_LIMIT, Paginate, PaginateQuery, STORAGE_MAX_IMAGE_UPLOAD, StorageManager, imageFileFilter } from '@common';
+import {
+  Audit,
+  DeleteManyInput,
+  LAUNCHER_NEWS_LIMIT,
+  Paginate,
+  PaginateQuery,
+  STORAGE_MAX_IMAGE_UPLOAD,
+  StorageManager,
+  imageFileFilter,
+} from '@common';
 import {
   Body,
   Controller,
@@ -52,6 +61,7 @@ export class NewsController {
     return this.newsService.findForGml(limit);
   }
 
+  @Audit({ action: 'content.delete', target: 'news' })
   @Delete('bulk')
   @Permissions(['panel.access', 'panel.news.delete.many'])
   removeMany(@Body() body: DeleteManyInput) {
@@ -76,6 +86,7 @@ export class NewsController {
     return this.newsService.findOne(id, await this.seesHidden(request));
   }
 
+  @Audit({ action: 'content.create', target: 'news' })
   @Post()
   @Permissions(['panel.access', 'panel.news.create'])
   @UseInterceptors(
@@ -89,6 +100,7 @@ export class NewsController {
     return this.newsService.create(body, file, Boolean(user.superuser));
   }
 
+  @Audit({ action: 'content.update', target: 'news', param: 'id' })
   @Patch(':id')
   @Permissions(['panel.access', 'panel.news.update'])
   update(@CurrentUser() user: User, @Param('id', ParseIntPipe) id: number, @Body() body: NewsInput) {
@@ -96,6 +108,7 @@ export class NewsController {
   }
 
   @Permissions(['panel.access', 'panel.news.publish'])
+  @Audit({ action: 'content.update', target: 'news', param: 'id', meta: ['event'] })
   @Post(':id/publish')
   publish(@Param('id', ParseIntPipe) id: number, @Body() body: NewsPublishInput) {
     return this.newsService.publish(id, body.mode, body.webhooks);
@@ -107,6 +120,7 @@ export class NewsController {
     return this.newsService.deliveries(id);
   }
 
+  @Audit({ action: 'content.delete', target: 'news', param: 'id' })
   @Delete(':id')
   @Permissions(['panel.access', 'panel.news.delete'])
   remove(@Param('id', ParseIntPipe) id: number) {

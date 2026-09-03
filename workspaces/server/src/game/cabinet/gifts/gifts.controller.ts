@@ -1,4 +1,4 @@
-import { DeleteManyInput, ThrottlerCoreGuard } from '@common';
+import { Audit, DeleteManyInput, ThrottlerCoreGuard } from '@common';
 import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { Recaptcha } from 'src/auth/recaptcha';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
@@ -13,11 +13,15 @@ import { IpAddress } from 'src/common/decorators/IpAddress.decorator';
 
 @Controller('cabinet/gifts')
 export class GiftsController {
-  constructor(private giftsService: GiftsService, private giftPurchaseService: GiftPurchaseService) {}
+  constructor(
+    private giftsService: GiftsService,
+    private giftPurchaseService: GiftPurchaseService,
+  ) {}
 
   @Permissions(['player.gift.activate'])
   @UseGuards(ThrottlerCoreGuard)
   @Recaptcha({ action: 'gift' })
+  @Audit({ action: 'gift.activate' })
   @Post('activate')
   giftActivate(@CurrentUser() user: User, @Body() input: GiftActivateInput) {
     return this.giftsService.activate(user, input.gift_code);
@@ -25,6 +29,7 @@ export class GiftsController {
 
   @Permissions(['player.gift.buy'])
   @UseGuards(ThrottlerCoreGuard)
+  @Audit({ action: 'gift.send', target: 'user', bodyParam: 'username', meta: ['type', 'server_id'] })
   @Post('purchase')
   purchase(@CurrentUser() user: User, @IpAddress() ip: string, @Body() input: GiftPurchaseInput) {
     return this.giftPurchaseService.purchase(user, ip, input);
@@ -37,6 +42,7 @@ export class GiftsController {
   }
 
   @Permissions(['panel.access', 'panel.gifts.create'])
+  @Audit({ action: 'gift.create', meta: ['type', 'amount'] })
   @Post()
   create(@Body() body: GiftInput) {
     return this.giftsService.create(body);
@@ -49,6 +55,7 @@ export class GiftsController {
   }
 
   @Permissions(['panel.access', 'panel.gifts.delete.many'])
+  @Audit({ action: 'gift.delete' })
   @Delete('bulk')
   removeMany(@Body() body: DeleteManyInput) {
     return this.giftsService.removeMany(body.items);
@@ -79,6 +86,7 @@ export class GiftsController {
   }
 
   @Permissions(['panel.access', 'panel.gifts.delete'])
+  @Audit({ action: 'gift.delete', target: 'gift', param: 'id' })
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.giftsService.remove(id);

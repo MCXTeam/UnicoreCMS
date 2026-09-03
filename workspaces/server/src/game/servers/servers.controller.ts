@@ -1,4 +1,4 @@
-import { imageFileFilter, NumberSortInput, STORAGE_MAX_IMAGE_UPLOAD, StorageManager, StringSortInput } from '@common';
+import { Audit, imageFileFilter, NumberSortInput, STORAGE_MAX_IMAGE_UPLOAD, StorageManager, StringSortInput } from '@common';
 import {
   Body,
   Controller,
@@ -30,6 +30,7 @@ export class ServersController {
   constructor(private serversService: ServersService) {}
 
   @Permissions(['panel.access', 'panel.servers.create'])
+  @Audit({ action: 'content.create', target: 'server', bodyParam: 'id' })
   @Post()
   create(@Req() request: any, @Body() body: ServerCreateInput) {
     return this.serversService.create(body, request);
@@ -68,6 +69,7 @@ export class ServersController {
   }
 
   @Permissions(['panel.access', 'panel.servers.update.*'])
+  @Audit({ action: 'content.update', target: 'server', param: 'id' })
   @Patch(':id')
   async update(@Req() request: any, @Param('id') id: string, @Body() body: ServerUpdateInput) {
     await assertServerScope(request, 'panel.servers.update', [id]);
@@ -82,6 +84,7 @@ export class ServersController {
   }
 
   @Permissions(['panel.access', 'panel.servers.delete'])
+  @Audit({ action: 'content.delete', target: 'server', param: 'id' })
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.serversService.remove(id);

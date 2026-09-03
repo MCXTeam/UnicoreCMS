@@ -5,6 +5,7 @@ export interface AuditRouteOptions {
   action: string;
   target?: string;
   param?: string;
+  bodyParam?: string;
   meta?: string[];
 }
 

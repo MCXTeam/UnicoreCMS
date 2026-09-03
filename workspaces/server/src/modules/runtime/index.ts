@@ -1,6 +1,6 @@
 import { resolve } from 'path';
-import { PermissionMeta, registerPermissions } from 'unicore-common';
-import { modulePermissionKey, modulePermissionMeta } from 'unicore-api';
+import { AuditActionMeta, PermissionMeta, registerAuditActions, registerPermissions } from 'unicore-common';
+import { moduleAuditActionKey, modulePermissionKey, modulePermissionMeta } from 'unicore-api';
 import { discover, DiscoveredModule } from './discovery';
 import { readLocaleFiles } from './locales';
 import { checkRequirements, load, LoadedModule, LoadFailure } from './loader';
@@ -23,6 +23,16 @@ const permissionsOf = (modules: LoadedModule[]): Record<string, PermissionMeta> 
     ),
   );
 
+const auditActionsOf = (modules: LoadedModule[]): Record<string, AuditActionMeta> =>
+  Object.fromEntries(
+    modules.flatMap((item) =>
+      (item.contribution?.auditActions || []).map((action) => [
+        moduleAuditActionKey(item.id, action),
+        { class: action.class, danger: action.danger } as AuditActionMeta,
+      ]),
+    ),
+  );
+
 const initialize = (): ModuleRuntimeState => {
   const { modules, broken } = discover();
   const { loaded, failures } = load(modules);
@@ -32,6 +42,7 @@ const initialize = (): ModuleRuntimeState => {
   const active = loaded.filter((item) => !rejected.has(item.id));
 
   registerPermissions(permissionsOf(active));
+  registerAuditActions(auditActionsOf(active));
 
   return {
     loaded: active,

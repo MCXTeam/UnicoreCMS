@@ -1,4 +1,17 @@
-import { Body, Controller, DefaultValuePipe, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Post, Query, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  DefaultValuePipe,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+  Req,
+} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { PasswordPolicyService } from 'src/auth/password/password-policy.service';
@@ -19,7 +32,10 @@ import { UserField, USER_FIELDS, USER_FIELD_PERMISSIONS } from 'unicore-common';
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
-  constructor(private usersService: UsersService, private passwordPolicy: PasswordPolicyService) {}
+  constructor(
+    private usersService: UsersService,
+    private passwordPolicy: PasswordPolicyService,
+  ) {}
 
   private async allowedFields(request: any): Promise<UserField[]> {
     const checked = await Promise.all(
@@ -35,7 +51,7 @@ export class UsersController {
   async create(@Req() request: any, @CurrentUser() actor: User, @Body() createUserDto: UserInput) {
     await this.passwordPolicy.assert(createUserDto.password, { username: createUserDto.username, email: createUserDto.email });
 
-    return new UserDto(await this.usersService.create(createUserDto, actor, await this.allowedFields(request)));
+    return new UserDto(await this.usersService.create(createUserDto, actor, await this.allowedFields(request), false, request));
   }
 
   @Permissions(['panel.access', 'panel.users.read'])
@@ -48,8 +64,8 @@ export class UsersController {
   @Permissions(['panel.access', 'panel.users.delete.many'])
   @ApiOperation({ summary: 'Удалить несколько пользователей' })
   @Delete('bulk')
-  removeMany(@CurrentUser() actor: User, @Body() body: DeleteManyUuidInput) {
-    return this.usersService.deleteMany(body, actor);
+  removeMany(@Req() request: any, @CurrentUser() actor: User, @Body() body: DeleteManyUuidInput) {
+    return this.usersService.deleteMany(body, actor, request);
   }
 
   @Public()
@@ -73,7 +89,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Обновить одного пользователя' })
   @Patch(':uuid')
   async update(@Req() request: any, @CurrentUser() actor: User, @Param('uuid') uuid: string, @Body() updateUserDto: UserUpdateInput) {
-    return new UserDto(await this.usersService.update(uuid, updateUserDto, actor, await this.allowedFields(request)));
+    return new UserDto(await this.usersService.update(uuid, updateUserDto, actor, await this.allowedFields(request), request));
   }
 
   @Permissions(['panel.access', 'panel.users.field.password'])
@@ -102,8 +118,8 @@ export class UsersController {
   @Permissions(['panel.access', 'panel.users.delete'])
   @ApiOperation({ summary: 'Удалить одного пользователя' })
   @Delete(':uuid')
-  async remove(@CurrentUser() actor: User, @Param('uuid') uuid: string) {
-    return new UserDto(await this.usersService.delete(uuid, actor));
+  async remove(@Req() request: any, @CurrentUser() actor: User, @Param('uuid') uuid: string) {
+    return new UserDto(await this.usersService.delete(uuid, actor, request));
   }
 
   @Public()

@@ -1,6 +1,6 @@
 import { BadRequestException, Controller, Delete, Param, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { STORAGE_MAX_ZIP_UPLOAD } from '@common';
+import { Audit, STORAGE_MAX_ZIP_UPLOAD } from '@common';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { StorageManager } from 'src/common/storage/storage.class';
 import { zipFileFilter } from 'src/common/storage/filters/zip-filter';
@@ -11,6 +11,7 @@ import { InstallService } from './install.service';
 export class InstallController {
   constructor(private readonly service: InstallService) {}
 
+  @Audit({ action: 'module.install' })
   @Post()
   @UseInterceptors(
     FileInterceptor('file', {
@@ -25,6 +26,7 @@ export class InstallController {
     return this.service.install(file.filename);
   }
 
+  @Audit({ action: 'module.remove', target: 'module', param: 'id' })
   @Delete(':kind/:id')
   remove(@Param('kind') kind: string, @Param('id') id: string) {
     if (kind !== 'module' && kind !== 'theme') throw new BadRequestException('Неизвестный тип расширения');

@@ -1,6 +1,6 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { StorageManager } from '@common';
-import { RoleBadgeEffect } from 'unicore-common';
+import { AuditService, StorageManager } from '@common';
+import { auditChanges, RoleBadgeEffect } from 'unicore-common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from './entities/role.entity';
 import { Repository } from 'typeorm';
@@ -10,11 +10,21 @@ import { User } from '../users/entities/user.entity';
 import { ImportantRoles } from './emums/important-roles.enum';
 import { assertGrantable } from './grant';
 
+export function roleSnapshot(role: Partial<Role>): Record<string, unknown> {
+  return {
+    name: role.name,
+    priority: role.priority,
+    perms: role.perms || [],
+    referal_percent: role.referal_percent ?? null,
+  };
+}
+
 @Injectable()
 export class RolesService {
   constructor(
     @InjectRepository(Role)
     private rolesRepository: Repository<Role>,
+    private auditService: AuditService,
   ) {}
 
   /**
@@ -96,13 +106,27 @@ export class RolesService {
 
     await assertGrantable(input.perms, request);
 
+    const before = roleSnapshot(role);
+
     role.name = input.name;
     role.perms = input.perms;
     role.priority = input.priority;
     role.referal_percent = input.referal_percent ?? null;
     this.applyAppearance(role, input);
 
-    return this.rolesRepository.save(role);
+    const saved = await this.rolesRepository.save(role);
+    const { actor, ip, client } = this.auditService.context(request);
+
+    this.auditService.record({
+      action: 'role.update',
+      actor,
+      ip,
+      client,
+      target: { type: 'role', id: saved.id, name: saved.name },
+      changes: auditChanges(before, roleSnapshot(saved)),
+    });
+
+    return saved;
   }
 
   async remove(id: string): Promise<Role> {

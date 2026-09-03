@@ -88,9 +88,10 @@
           </Column>
           <Column field="targetName" :header="$t('admin.logs_target')">
             <template #body="slotProps">
-              <span v-if="slotProps.data.targetType">
-                {{ slotProps.data.targetName || slotProps.data.targetId }}
-              </span>
+              <div v-if="slotProps.data.targetType" class="flex flex-column">
+                <span>{{ slotProps.data.targetName || slotProps.data.targetId }}</span>
+                <small class="text-color-secondary">{{ targetLabel(slotProps.data.targetType) }}</small>
+              </div>
             </template>
           </Column>
           <Column field="client" :header="$t('admin.logs_client')" :style="{ width: '12rem' }"></Column>
@@ -117,7 +118,7 @@
             <div v-if="selected.changes">
               <h6 class="mb-2">{{ $t('admin.logs_changes') }}</h6>
               <DataTable :value="changeRows(selected.changes)" size="small">
-                <Column field="field" :header="$t('admin.logs_action')"></Column>
+                <Column field="field" :header="$t('admin.logs_field')"></Column>
                 <Column field="before" :header="$t('admin.logs_before')"></Column>
                 <Column field="after" :header="$t('admin.logs_after')"></Column>
               </DataTable>
@@ -235,6 +236,9 @@ export default {
     },
     metaLabel(key) {
       return this.translated(`audit.meta.${key}`, key)
+    },
+    targetLabel(type) {
+      return this.translated(`audit.target.${type}`, type)
     },
     metaValue(key, value) {
       if (key === 'reason') return this.translated(`audit.reason.${value}`, value)

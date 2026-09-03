@@ -18,13 +18,13 @@ export class AuditInterceptor implements NestInterceptor {
     const { actor, ip, client } = this.audit.context(request);
 
     return next.handle().pipe(
-      tap(() =>
+      tap((result) =>
         this.audit.record({
           action: options.action,
           actor,
           ip,
           client,
-          target: this.target(options, request),
+          target: this.target(options, request, result),
           meta: this.meta(options, request),
         }),
       ),
@@ -45,12 +45,22 @@ export class AuditInterceptor implements NestInterceptor {
     );
   }
 
-  private target(options: AuditRouteOptions, request: Record<string, any>): AuditTarget | null {
+  private target(options: AuditRouteOptions, request: Record<string, any>, result?: unknown): AuditTarget | null {
     if (!options.target) return null;
 
-    const id = options.param ? request.params?.[options.param] : null;
+    const id = options.param ? request.params?.[options.param] : options.bodyParam ? request.body?.[options.bodyParam] : null;
 
-    return { type: options.target, id: id ?? null };
+    return { type: options.target, id: id ?? this.createdId(result) };
+  }
+
+  private createdId(result: unknown): string | null {
+    const created = result as Record<string, unknown> | null;
+
+    if (!created || typeof created !== 'object') return null;
+
+    const id = created.id ?? created.uuid ?? created.secret ?? created.code;
+
+    return id === undefined || id === null ? null : String(id);
   }
 
   private meta(options: AuditRouteOptions, request: Record<string, any>): Record<string, unknown> | null {

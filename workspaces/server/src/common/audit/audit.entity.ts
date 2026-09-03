@@ -1,4 +1,4 @@
-import { AuditActorType, AuditClass, AuditStatus } from 'unicore-common';
+import { AuditActorType, AuditChanges, AuditClass, AuditStatus } from 'unicore-common';
 import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 import {
   AUDIT_ACTION_MAX_LENGTH,
@@ -10,8 +10,6 @@ import {
   AUDIT_STATUS_MAX_LENGTH,
   AUDIT_TARGET_TYPE_MAX_LENGTH,
 } from '../constants';
-
-export type AuditChanges = Record<string, [unknown, unknown]>;
 
 @Entity({ name: 'unicore_audit_logs' })
 @Index(['class', 'created'])

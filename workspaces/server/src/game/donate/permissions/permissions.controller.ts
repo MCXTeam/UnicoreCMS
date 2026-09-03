@@ -1,4 +1,4 @@
-import { NumberSortInput, DeleteManyInput, IpAddress } from '@common';
+import { Audit, NumberSortInput, DeleteManyInput, IpAddress } from '@common';
 import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Post, Req } from '@nestjs/common';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { assertServerPermission } from 'src/admin/roles/guards/permisson.guard';
@@ -99,6 +99,7 @@ export class PermissionsController {
   }
 
   @Permissions(['panel.access'])
+  @Audit({ action: 'donate.permission.grant', target: 'user', bodyParam: 'user_uuid', meta: ['server_id', 'permission_id', 'period_id'] })
   @Post('admin/give')
   async give(@Req() request: any, @Body() body: GiveDonatePermInput) {
     await assertServerPermission(request, 'panel.users.donate', body.server_id);
@@ -107,6 +108,7 @@ export class PermissionsController {
   }
 
   @Permissions(['panel.access', 'panel.users.donate.*'])
+  @Audit({ action: 'donate.permission.revoke', target: 'donate_permission', param: 'id' })
   @Delete('admin/:id')
   take(@Req() request: any, @Param('id', ParseIntPipe) id: number) {
     return this.donatePermissionsService.take(id, request);

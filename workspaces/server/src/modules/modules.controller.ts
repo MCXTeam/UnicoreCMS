@@ -1,3 +1,4 @@
+import { Audit } from '@common';
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { ModuleStateInput } from './dto/module-state.input';
@@ -8,7 +9,10 @@ import { REBUILD_SIDES, RebuildService } from './rebuild.service';
 @Controller('admin/modules')
 @Permissions(['panel.extensions.read'])
 export class ModulesController {
-  constructor(private readonly service: ModulesService, private readonly rebuild: RebuildService) {}
+  constructor(
+    private readonly service: ModulesService,
+    private readonly rebuild: RebuildService,
+  ) {}
 
   @Get()
   find() {
@@ -21,6 +25,7 @@ export class ModulesController {
   }
 
   @Permissions(['panel.extensions.manage'])
+  @Audit({ action: 'theme.rebuild', meta: ['sides'] })
   @Post('rebuild')
   rebuildStart(@Body() input: RebuildInput) {
     return this.rebuild.start(input.sides?.length ? input.sides : REBUILD_SIDES);
@@ -38,12 +43,14 @@ export class ModulesController {
   }
 
   @Permissions(['panel.extensions.manage'])
+  @Audit({ action: 'module.enable', target: 'module', param: 'id', meta: ['enabled'] })
   @Patch(':id')
   setEnabled(@Param('id') id: string, @Body() input: ModuleStateInput) {
     return this.service.setEnabled(id, input.enabled);
   }
 
   @Permissions(['panel.extensions.manage'])
+  @Audit({ action: 'module.remove', target: 'module', param: 'id' })
   @Delete(':id')
   purge(@Param('id') id: string, @Query('purge') purge?: string) {
     if (purge !== '1') return { purged: false };

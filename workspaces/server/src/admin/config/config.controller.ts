@@ -1,3 +1,4 @@
+import { Audit } from '@common';
 import { Body, Controller, Delete, ForbiddenException, Get, Param, Patch, Post, Req } from '@nestjs/common';
 import { isRconConfigKey } from 'unicore-common';
 import { Public } from 'src/auth/decorators/public.decorator';
@@ -37,6 +38,7 @@ export class ConfigController {
     return limited ? config.filter((item) => isRconConfigKey(item.key)) : config;
   }
 
+  @Audit({ action: 'config.update' })
   @Patch()
   async update(@Req() request: any, @Body() body: ConfigInput) {
     if ((await this.rconOnly(request, 'panel.config.update')) && !isRconConfigKey(body.key)) throw new ForbiddenException();
@@ -44,6 +46,7 @@ export class ConfigController {
     return this.configService.update(body);
   }
 
+  @Audit({ action: 'config.delete', target: 'config', param: 'key' })
   @Delete(':key')
   async delete(@Req() request: any, @Param('key') key: string) {
     await this.assertConfigUpdate(request);
@@ -51,6 +54,7 @@ export class ConfigController {
     return this.configService.delate(key);
   }
 
+  @Audit({ action: 'config.create', target: 'config', bodyParam: 'key' })
   @Post()
   async create(@Req() request: any, @Body() body: ConfigInput) {
     await this.assertConfigUpdate(request);

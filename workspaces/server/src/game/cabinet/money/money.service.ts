@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
+import { AuditService } from '@common';
 import { User } from 'src/admin/users/entities/user.entity';
 import { ServersService } from 'src/game/servers/servers.service';
 import { Connection, Repository } from 'typeorm';
@@ -30,6 +31,7 @@ export class MoneyService {
     private usersService: UsersService,
     private historyService: HistoryService,
     private configService: ConfigService,
+    private auditService: AuditService,
   ) {}
 
   private async generate(server: Server, user: User) {
@@ -117,8 +119,22 @@ export class MoneyService {
     });
   }
 
+  private adjusted(request: unknown, user: User, field: string, before: number, after: number, server?: string): void {
+    const { actor, ip, client } = this.auditService.context(request);
+
+    this.auditService.record({
+      action: 'money.balance.adjust',
+      actor,
+      ip,
+      client,
+      target: { type: 'user', id: user.uuid, name: user.username },
+      changes: { [field]: [before, after] },
+      meta: { server },
+    });
+  }
+
   @Transactional()
-  async update(input: MoneyUpdateInput) {
+  async update(input: MoneyUpdateInput, request?: unknown) {
     const user = await this.usersRepo.findOneBy({ uuid: input.uuid });
     if (!user) throw new NotFoundException();
 
@@ -133,11 +149,15 @@ export class MoneyService {
 
       await this.moneyRepository.update({ userUuid: user.uuid, serverId: user_money.serverId }, { money });
 
+      this.adjusted(request, user, 'money', user_money.money, money, user_money.serverId);
+
       return true;
     } else {
       const real = currencyUtils.roundByType(input.amount, SystemCurrency.REAL);
 
       await this.usersRepo.update({ uuid: user.uuid }, { real });
+
+      this.adjusted(request, user, 'real', user.real, real);
 
       return true;
     }

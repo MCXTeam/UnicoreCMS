@@ -1,4 +1,14 @@
-import { DeleteManyInput, Paginate, PaginateQuery, STORAGE_MAX_IMAGE_UPLOAD, STORAGE_MAX_ZIP_UPLOAD, StorageManager, imageFileFilter, zipFileFilter } from '@common';
+import {
+  Audit,
+  DeleteManyInput,
+  Paginate,
+  PaginateQuery,
+  STORAGE_MAX_IMAGE_UPLOAD,
+  STORAGE_MAX_ZIP_UPLOAD,
+  StorageManager,
+  imageFileFilter,
+  zipFileFilter,
+} from '@common';
 import {
   BadRequestException,
   Body,
@@ -29,16 +39,14 @@ import { ProductsService } from '../providers/product.service';
 export class ProductsController {
   constructor(private productsService: ProductsService) {}
 
-  @Permissions([
-    ['panel.store.read.*', 'panel.users.give.*'],
-    { or: true },
-  ])
+  @Permissions([['panel.store.read.*', 'panel.users.give.*'], { or: true }])
   @Get()
   async find(@Req() request: any, @Paginate() query: PaginateQuery) {
     return this.productsService.find(query, await allowedServers(request, 'panel.store.read'));
   }
 
   @Permissions(['panel.access', 'panel.store.products.delete.many.*'])
+  @Audit({ action: 'content.delete', target: 'product' })
   @Delete('bulk')
   removeMany(@Req() request: any, @Body() body: DeleteManyInput) {
     return this.productsService.removeMany(body.items, request);
@@ -50,10 +58,7 @@ export class ProductsController {
     return this.productsService.updateMany(body, request);
   }
 
-  @Permissions([
-    ['panel.store.read.*', 'panel.users.give.*'],
-    { or: true },
-  ])
+  @Permissions([['panel.store.read.*', 'panel.users.give.*'], { or: true }])
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.productsService.findOne(id, ['categories', 'servers']);
@@ -80,6 +85,7 @@ export class ProductsController {
   }
 
   @Permissions(['panel.access', 'panel.store.products.create.*'])
+  @Audit({ action: 'content.create', target: 'product' })
   @Post()
   create(@Req() request: any, @Body() body: ProductInput) {
     return this.productsService.create(body, request);
@@ -116,12 +122,14 @@ export class ProductsController {
   }
 
   @Permissions(['panel.access', 'panel.store.products.update.*'])
+  @Audit({ action: 'content.update', target: 'product', param: 'id' })
   @Patch(':id')
   update(@Req() request: any, @Param('id', ParseIntPipe) id: number, @Body() body: ProductInput) {
     return this.productsService.update(id, body, request);
   }
 
   @Permissions(['panel.access', 'panel.store.products.delete.*'])
+  @Audit({ action: 'content.delete', target: 'product', param: 'id' })
   @Delete(':id')
   remove(@Req() request: any, @Param('id', ParseIntPipe) id: number) {
     return this.productsService.remove(id, request);

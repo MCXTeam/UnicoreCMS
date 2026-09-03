@@ -1,4 +1,4 @@
-import { IpAddress } from '@common';
+import { Audit, IpAddress } from '@common';
 import { Body, Controller, ForbiddenException, Get, Param, Patch, Post, Req } from '@nestjs/common';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { assertServerPermission, matchPermission } from 'src/admin/roles/guards/permisson.guard';
@@ -28,18 +28,21 @@ export class MoneyController {
   }
 
   @Permissions(['kernel.connect'])
+  @Audit({ action: 'money.pay', target: 'user', bodyParam: 'target_uuid', meta: ['server_id', 'amount'] })
   @Post('user')
   async payCommand(@Body() body: MoneyPayCommandInput) {
     return this.moneyService.payCommand(body);
   }
 
   @Permissions(['kernel.connect'])
+  @Audit({ action: 'money.deposit', target: 'user', bodyParam: 'user_uuid', meta: ['server_id', 'amount'] })
   @Post('user/deposit')
   async deposit(@Body() body: MoneyWDInput) {
     return this.moneyService.deposit(body);
   }
 
   @Permissions(['kernel.connect'])
+  @Audit({ action: 'money.withdraw', target: 'user', bodyParam: 'user_uuid', meta: ['server_id', 'amount'] })
   @Post('user/withdraw')
   async withdraw(@Body() body: MoneyWDInput) {
     return this.moneyService.withdraw(body);
@@ -52,12 +55,14 @@ export class MoneyController {
   }
 
   @Permissions(['player.transfer'])
+  @Audit({ action: 'money.transfer', target: 'user', bodyParam: 'username', meta: ['server', 'amount', 'type'] })
   @Post('own/transfer')
   async transferOwn(@CurrentUser() user: User, @IpAddress() ip: string, @Body() body: MoneyInput) {
     return this.moneyService.transfer(user, ip, body);
   }
 
   @Permissions(['player.exchange'])
+  @Audit({ action: 'money.exchange', meta: ['server', 'from_server', 'amount', 'type'] })
   @Post('own/exchange')
   async exchangeOwn(@CurrentUser() user: User, @IpAddress() ip: string, @Body() body: MoneyExchangeInput) {
     return this.moneyService.exchange(user, ip, body);
@@ -78,6 +83,6 @@ export class MoneyController {
     if (body.type === MoneyTransferType.Money) await assertServerPermission(request, 'panel.users.money', body.server);
     else if (!(await matchPermission(['panel.users.balance.real'], request))) throw new ForbiddenException();
 
-    return this.moneyService.update(body);
+    return this.moneyService.update(body, request);
   }
 }

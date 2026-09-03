@@ -1,4 +1,4 @@
-import { DeleteManyInput, imageFileFilter, IpAddress, NumberSortInput, STORAGE_MAX_IMAGE_UPLOAD, StorageManager } from '@common';
+import { Audit, DeleteManyInput, imageFileFilter, IpAddress, NumberSortInput, STORAGE_MAX_IMAGE_UPLOAD, StorageManager } from '@common';
 import {
   Body,
   Controller,
@@ -129,6 +129,7 @@ export class DonateGroupsController {
   }
 
   @Permissions(['panel.access'])
+  @Audit({ action: 'donate.group.grant', target: 'user', bodyParam: 'user_uuid', meta: ['server_id', 'group_id', 'period_id'] })
   @Post('admin/give')
   async give(@Req() request: any, @Body() body: GiveDonateGroupInput) {
     await assertServerPermission(request, 'panel.users.donate', body.server_id);
@@ -137,6 +138,7 @@ export class DonateGroupsController {
   }
 
   @Permissions(['panel.access', 'panel.users.donate.*'])
+  @Audit({ action: 'donate.group.revoke', target: 'donate_group', param: 'id' })
   @Delete('admin/:id')
   take(@Req() request: any, @Param('id', ParseIntPipe) id: number) {
     return this.donateGroupsService.take(id, request);

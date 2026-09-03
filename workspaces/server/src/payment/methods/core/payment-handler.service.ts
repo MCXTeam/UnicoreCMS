@@ -11,6 +11,7 @@ import { PaymentStatuses } from 'src/payment/enums/payment-statuses.enum';
 import { LessThanOrEqual, Repository } from 'typeorm';
 import { Transactional } from 'typeorm-transactional';
 import { events } from 'unicore-api';
+import { AuditService } from 'src/common/audit';
 import { runAfterCommit } from 'src/common/utils/transaction';
 
 export class PaymentHandlerService {
@@ -19,6 +20,7 @@ export class PaymentHandlerService {
   constructor(
     private historyService: HistoryService,
     private referalsService: ReferalsService,
+    private auditService: AuditService,
     @InjectRepository(Payment) private paymentsRepo: Repository<Payment>,
     @InjectRepository(Bonus) private bonusesRepo: Repository<Bonus>,
     @InjectRepository(User) private usersRepo: Repository<User>,
@@ -36,6 +38,14 @@ export class PaymentHandlerService {
     const saved = await this.paymentsRepo.save(payment);
 
     await events().emit('payment.created', { id: saved.id, uuid: user.uuid, amount: Number(saved.amount), method });
+
+    this.auditService.record({
+      action: 'payment.created',
+      actor: { type: 'user', id: user.uuid, name: user.username },
+      ip,
+      target: { type: 'payment', id: String(saved.id) },
+      meta: { method, amount: Number(saved.amount) },
+    });
 
     return saved;
   }
@@ -81,9 +91,24 @@ export class PaymentHandlerService {
     if (reward) {
       await this.usersRepo.increment({ uuid: reward.inviter.uuid }, 'real', reward.amount);
       await this.historyService.create(HistoryType.ReferalReward, payment.ip, reward.inviter, payment.user, payment, reward.amount);
+
+      this.auditService.record({
+        action: 'payment.referal',
+        actor: { type: 'payment', id: payment.method },
+        target: { type: 'user', id: reward.inviter.uuid, name: reward.inviter.username },
+        meta: { payment: id, amount: reward.amount, from: payment.user.username },
+      });
     }
 
     runAfterCommit(() => events().emit('payment.paid', { id, uuid: payment.user.uuid, amount: credit, method: payment.method }));
+
+    this.auditService.record({
+      action: 'payment.paid',
+      actor: { type: 'payment', id: payment.method },
+      ip: payment.ip,
+      target: { type: 'user', id: payment.user.uuid, name: payment.user.username },
+      meta: { payment: id, method: payment.method, paid, credit, bonus: bonus?.bonus },
+    });
 
     return true;
   }

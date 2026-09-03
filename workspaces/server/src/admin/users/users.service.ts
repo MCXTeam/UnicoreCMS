@@ -17,6 +17,7 @@ import { PasswordPolicyService } from 'src/auth/password/password-policy.service
 import { passwordAad } from 'src/auth/password/password-aad';
 import { Cache } from 'cache-manager';
 import {
+  AuditService,
   CacheKey,
   DeleteManyUuidInput,
   FilterOperator,
@@ -33,12 +34,24 @@ import {
 import { PublicUsersDto } from './dto/public-users.dto';
 import { UserUpdateInput } from './dto/user-update.input';
 import { matchPermission, transformPermissions } from '../roles/guards/permisson.guard';
-import { isPanelPermission, UserField, USER_FIELDS } from 'unicore-common';
+import { AuditChanges, auditChanges, isPanelPermission, UserField, USER_FIELDS } from 'unicore-common';
 import { SettingsService } from 'src/game/cabinet/settings/providers/settings.service';
 import { TwoFactorService } from 'src/game/cabinet/settings/providers/two_factor.service';
 import { PasswordChangeInput } from 'src/game/cabinet/settings/dto/password-change.input';
 import { PasswordUpdateInput } from 'src/game/cabinet/settings/dto/password-update.input';
 import { Transactional } from 'typeorm-transactional';
+
+export function userSnapshot(user: Partial<User>): Record<string, unknown> {
+  return {
+    username: user.username,
+    email: user.email,
+    activated: user.activated,
+    superuser: user.superuser,
+    locale: user.locale,
+    roles: (user.roles || []).map((role) => role.id),
+    perms: user.perms || [],
+  };
+}
 
 function sameSet(left: string[] = [], right: string[] = []): boolean {
   return _.xor(left, right).length === 0;
@@ -87,7 +100,29 @@ export class UsersService {
     private passwordPolicyService: PasswordPolicyService,
     private settingsService: SettingsService,
     private twoFactorService: TwoFactorService,
+    private auditService: AuditService,
   ) {}
+
+  private audit(
+    action: string,
+    user: User,
+    actor: User | null,
+    request?: unknown,
+    changes?: AuditChanges | null,
+    meta?: Record<string, unknown>,
+  ): void {
+    const context = request ? this.auditService.context(request) : null;
+
+    this.auditService.record({
+      action,
+      actor: actor ? { type: 'user', id: actor.uuid, name: actor.username } : (context?.actor ?? { type: 'system' }),
+      ip: context?.ip,
+      client: context?.client,
+      target: { type: 'user', id: user.uuid, name: user.username },
+      changes,
+      meta,
+    });
+  }
 
   private async requiredRole(id: ImportantRoles): Promise<Role> {
     const role = await this.rolesRepository.findOneBy({ id });
@@ -276,7 +311,13 @@ export class UsersService {
   }
 
   @Transactional()
-  async create(input: UserInput, actor: User = null, allowedFields: UserField[] = USER_FIELDS, selfService = false): Promise<User> {
+  async create(
+    input: UserInput,
+    actor: User = null,
+    allowedFields: UserField[] = USER_FIELDS,
+    selfService = false,
+    request?: unknown,
+  ): Promise<User> {
     const userExist = await this.usersRepository.findOne({
       where: [{ username: input.username }, ...(input.email ? [{ email: input.email }] : [])],
     });
@@ -325,11 +366,21 @@ export class UsersService {
       if (adminPermissions(user).length && !(await canGrantAdminPermissions(actor))) throw new ForbiddenException();
     }
 
-    return this.usersRepository.save(user);
+    const saved = await this.usersRepository.save(user);
+
+    this.audit('user.create', saved, actor, request, null, { selfService });
+
+    return saved;
   }
 
   @Transactional()
-  async update(uuid: string, input: UserUpdateInput, actor: User = null, allowedFields: UserField[] = USER_FIELDS): Promise<User> {
+  async update(
+    uuid: string,
+    input: UserUpdateInput,
+    actor: User = null,
+    allowedFields: UserField[] = USER_FIELDS,
+    request?: unknown,
+  ): Promise<User> {
     const user = await this.getById(uuid);
 
     if (!user) throw new NotFoundException();
@@ -395,7 +446,11 @@ export class UsersService {
       if (!(await matchPermission(['panel.access', 'panel.users.update'], { user }))) throw new BadRequestException();
     }
 
-    return this.usersRepository.save(user);
+    const saved = await this.usersRepository.save(user);
+
+    this.audit('user.update', saved, actor, request, auditChanges(userSnapshot(before), userSnapshot(saved)));
+
+    return saved;
   }
 
   @Transactional()
@@ -432,7 +487,7 @@ export class UsersService {
   }
 
   @Transactional()
-  async delete(uuid: string, actor: User = null) {
+  async delete(uuid: string, actor: User = null, request?: unknown) {
     const user = await this.getById(uuid);
 
     if (!user) throw new NotFoundException();
@@ -441,11 +496,13 @@ export class UsersService {
       if (!(await userPermissionCheck(user, actor))) throw new ForbiddenException();
     }
 
+    this.audit('user.delete', user, actor, request);
+
     return this.usersRepository.remove(user);
   }
 
   @Transactional()
-  async deleteMany(input: DeleteManyUuidInput, actor: User = null) {
+  async deleteMany(input: DeleteManyUuidInput, actor: User = null, request?: unknown) {
     const users = await this.usersRepository.findBy({ uuid: In(input.items) });
 
     if (actor) {
@@ -453,6 +510,9 @@ export class UsersService {
     }
 
     await this.usersRepository.remove(users);
+
+    for (const user of users) this.audit('user.delete.many', user, actor, request);
+
     return true;
   }
 }

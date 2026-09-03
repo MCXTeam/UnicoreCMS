@@ -1,4 +1,4 @@
-import { DeleteManyInput, Paginate, PaginateQuery, STORAGE_MAX_IMAGE_UPLOAD, StorageManager, imageFileFilter } from '@common';
+import { Audit, DeleteManyInput, Paginate, PaginateQuery, STORAGE_MAX_IMAGE_UPLOAD, StorageManager, imageFileFilter } from '@common';
 import { Body, Controller, Get, Post, Patch, Param, Delete, UseInterceptors, ParseIntPipe, UploadedFile } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
@@ -9,34 +9,35 @@ import { CategoriesService } from '../providers/categories.service';
 export class CategoriesController {
   constructor(private categoriesService: CategoriesService) {}
 
-  @Permissions([
-    ['panel.store.read.*', 'panel.users.give.*'],
-    { or: true },
-  ])
+  @Permissions([['panel.store.read.*', 'panel.users.give.*'], { or: true }])
   @Get()
   find(@Paginate() query: PaginateQuery) {
     return this.categoriesService.find(query);
   }
 
   @Permissions(['panel.access', 'panel.store.categories.create'])
+  @Audit({ action: 'content.create', target: 'category' })
   @Post()
   create(@Body() body: CategoryInput) {
     return this.categoriesService.create(body);
   }
 
   @Permissions(['panel.access', 'panel.store.categories.delete.many'])
+  @Audit({ action: 'content.delete', target: 'category' })
   @Delete('bulk')
   removeMany(@Body() body: DeleteManyInput) {
     return this.categoriesService.removeMany(body.items);
   }
 
   @Permissions(['panel.access', 'panel.store.categories.update'])
+  @Audit({ action: 'content.update', target: 'category', param: 'id' })
   @Patch(':id')
   update(@Param('id', ParseIntPipe) id: number, @Body() body: CategoryInput) {
     return this.categoriesService.update(id, body);
   }
 
   @Permissions(['panel.access', 'panel.store.categories.delete'])
+  @Audit({ action: 'content.delete', target: 'category', param: 'id' })
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.categoriesService.remove(id);

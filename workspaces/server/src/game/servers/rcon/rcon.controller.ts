@@ -1,3 +1,4 @@
+import { Audit } from '@common';
 import { Body, Controller, Get, Param, Post, Req } from '@nestjs/common';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { assertServerPermission } from 'src/admin/roles/guards/permisson.guard';
@@ -7,7 +8,10 @@ import { RconService } from './rcon.service';
 
 @Controller('rcon')
 export class RconController {
-  constructor(private rconService: RconService, private rconQueueService: RconQueueService) {}
+  constructor(
+    private rconService: RconService,
+    private rconQueueService: RconQueueService,
+  ) {}
 
   @Permissions(['panel.access', 'panel.servers.rcon.*'])
   @Post(':server/test')
@@ -18,6 +22,7 @@ export class RconController {
   }
 
   @Permissions(['panel.access', 'panel.servers.rcon.*'])
+  @Audit({ action: 'rcon.command', target: 'server', param: 'server', meta: ['command'] })
   @Post(':server/run')
   async run(@Req() request: any, @Param('server') server: string, @Body() body: RconRunInput) {
     await assertServerPermission(request, 'panel.servers.rcon', server);
