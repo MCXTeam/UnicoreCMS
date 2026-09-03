@@ -1,6 +1,7 @@
 import './load-env'
 import { publicConfig } from 'unicore-common/public-config'
 import { projectRoot } from 'unicore-common/ports'
+import { buildParallelism } from 'unicore-common/build'
 import { resolveLayers } from 'unicore-api/nuxt'
 import { SITEMAP_EXCLUDE } from './constants'
 import { CHUNK_SIZE_WARNING_LIMIT, vendorChunks, woff2Only } from 'unicore-common/vite'
@@ -144,6 +145,9 @@ export default defineNuxtConfig({
   },
 
   nitro: {
+    sourceMap: false,
+    externals: { trace: false },
+    rollupConfig: { maxParallelFileOps: buildParallelism() },
     compressPublicAssets: { gzip: true, brotli: true },
   },
 

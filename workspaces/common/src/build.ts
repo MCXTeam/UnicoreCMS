@@ -1,4 +1,5 @@
 import { spawn } from "child_process";
+import { cpus, totalmem } from "os";
 import {
   appendFileSync,
   mkdirSync,
@@ -9,9 +10,12 @@ import {
 import { dirname, resolve } from "path";
 
 import {
+  BUILD_CPU_SHARE,
   BUILD_HEAP_MIN_MB,
   BUILD_HEAP_SHARE,
   BUILD_KILL_SIGNALS,
+  BUILD_PARALLELISM_MAX,
+  BUILD_PARALLELISM_MIN,
   BUILD_LOG_FILE_NAME,
   BUILD_LOG_MAX_BYTES,
   CGROUP_LIMIT_FILES,
@@ -22,7 +26,7 @@ import {
 } from "./constants";
 import { envFilePath } from "./ports";
 
-export function heapOptions(): string[] {
+function memoryLimit(): number | null {
   for (const file of CGROUP_LIMIT_FILES) {
     let limit: number;
 
@@ -35,13 +39,33 @@ export function heapOptions(): string[] {
     if (!Number.isFinite(limit) || limit <= 0 || limit > CGROUP_LIMIT_MAX)
       continue;
 
-    const megabytes = Math.floor((limit / 1024 / 1024) * BUILD_HEAP_SHARE);
-
-    if (megabytes >= BUILD_HEAP_MIN_MB)
-      return [`--max-old-space-size=${megabytes}`];
+    return limit;
   }
 
-  return [];
+  const total = totalmem();
+
+  return Number.isFinite(total) && total > 0 ? total : null;
+}
+
+export function heapOptions(): string[] {
+  const limit = memoryLimit();
+
+  if (!limit) return [];
+
+  const megabytes = Math.floor((limit / 1024 / 1024) * BUILD_HEAP_SHARE);
+
+  return megabytes >= BUILD_HEAP_MIN_MB
+    ? [`--max-old-space-size=${megabytes}`]
+    : [];
+}
+
+export function buildParallelism(): number {
+  const available = cpus()?.length || BUILD_PARALLELISM_MIN;
+
+  return Math.min(
+    BUILD_PARALLELISM_MAX,
+    Math.max(BUILD_PARALLELISM_MIN, Math.floor(available * BUILD_CPU_SHARE)),
+  );
 }
 
 export function buildLogPath(): string {

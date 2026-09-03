@@ -157,6 +157,9 @@ export const CGROUP_LIMIT_MAX = 64 * 1024 * 1024 * 1024;
 export const BUILD_HEAP_SHARE = 0.75;
 export const BUILD_HEAP_MIN_MB = 512;
 export const BUILD_KILL_SIGNALS: string[] = ["SIGKILL", "SIGABRT"];
+export const BUILD_CPU_SHARE = 0.5;
+export const BUILD_PARALLELISM_MIN = 1;
+export const BUILD_PARALLELISM_MAX = 4;
 export const BUILD_LOG_FILE_NAME = "build.log";
 export const BUILD_LOG_MAX_BYTES = 5 * 1024 * 1024;
 

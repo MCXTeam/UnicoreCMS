@@ -1,6 +1,7 @@
 import './load-env'
 import { publicConfig } from 'unicore-common/public-config'
 import { projectRoot } from 'unicore-common/ports'
+import { buildParallelism } from 'unicore-common/build'
 import { CHUNK_SIZE_WARNING_LIMIT, vendorChunks, woff2Only } from 'unicore-common/vite'
 import { FRONTEND_TEMPLATE_ROOTS, usedPrimevueComponents } from 'unicore-common/primevue'
 import { components as primevueComponents } from '@primevue/metadata'
@@ -127,6 +128,12 @@ export default defineNuxtConfig({
     optimizeDeps: {
       include: ['quill', 'quill-delta'],
     },
+  },
+
+  nitro: {
+    sourceMap: false,
+    externals: { trace: false },
+    rollupConfig: { maxParallelFileOps: buildParallelism() },
   },
 
   compatibilityDate: '2025-01-01',

@@ -2,7 +2,7 @@ const fs = require('fs');
 const { obfuscate } = require('javascript-obfuscator');
 
 const OBFUSCATOR_OPTIONS = {
-  optionsPreset: 'high-obfuscation',
+  optionsPreset: 'medium-obfuscation',
   target: 'node',
 };
 

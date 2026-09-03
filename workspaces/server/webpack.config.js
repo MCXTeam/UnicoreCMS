@@ -2,10 +2,12 @@ const path = require('path');
 const webpack = require('webpack');
 const nodeExternals = require('webpack-node-externals');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+const { buildParallelism } = require('unicore-common/build');
 
 const base = {
   target: 'node',
   mode: 'production',
+  parallelism: buildParallelism(),
   externals: [
     nodeExternals(),
     nodeExternals({
