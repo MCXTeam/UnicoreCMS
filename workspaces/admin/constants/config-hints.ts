@@ -120,6 +120,22 @@ export const CONFIG_HINTS: Record<string, ConfigHint> = {
     title: 'cfg.cleanup_history_days_title',
     hint: 'cfg.cleanup_history_days_hint',
   },
+  cleanup_audit_access_days: {
+    title: 'cfg.cleanup_audit_access_days_title',
+    hint: 'cfg.cleanup_audit_access_days_hint',
+  },
+  cleanup_audit_finance_days: {
+    title: 'cfg.cleanup_audit_finance_days_title',
+    hint: 'cfg.cleanup_audit_finance_days_hint',
+  },
+  cleanup_audit_admin_days: {
+    title: 'cfg.cleanup_audit_admin_days_title',
+    hint: 'cfg.cleanup_audit_admin_days_hint',
+  },
+  cleanup_audit_content_days: {
+    title: 'cfg.cleanup_audit_content_days_title',
+    hint: 'cfg.cleanup_audit_content_days_hint',
+  },
   rcon_preset: {
     title: 'cfg.rcon_preset_title',
     hint: 'cfg.rcon_preset_hint',

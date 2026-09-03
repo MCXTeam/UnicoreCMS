@@ -10,7 +10,7 @@ import { UserBasicDto, UserDto } from './dto/user.dto';
 import { UserUpdateInput } from './dto/user-update.input';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { User } from './entities/user.entity';
-import { DeleteManyUuidInput, Paginate, PaginateQuery, THROTTLE_PUBLIC_USERS, Throttle } from '@common';
+import { Audit, DeleteManyUuidInput, Paginate, PaginateQuery, THROTTLE_PUBLIC_USERS, Throttle } from '@common';
 import { PasswordUpdateInput } from 'src/game/cabinet/settings/dto/password-update.input';
 import { Permissions } from '../roles/decorators/permission.decorator';
 import { matchPermission } from '../roles/guards/permisson.guard';
@@ -77,6 +77,7 @@ export class UsersController {
   }
 
   @Permissions(['panel.access', 'panel.users.field.password'])
+  @Audit({ action: 'auth.password.change', target: 'user', param: 'uuid' })
   @Patch(':uuid/password')
   async updatePassword(@CurrentUser() actor: User, @Param('uuid') uuid: string, @Body() body: PasswordUpdateInput) {
     return this.usersService.updatePassord(uuid, body, actor);
@@ -84,6 +85,7 @@ export class UsersController {
 
   @Permissions(['panel.access', 'panel.users.twofactor.reset'])
   @ApiOperation({ summary: 'Сбросить двухфакторную проверку' })
+  @Audit({ action: 'auth.twofactor.reset', target: 'user', param: 'uuid' })
   @Delete(':uuid/2fa')
   async resetTwoFactor(@CurrentUser() actor: User, @Param('uuid') uuid: string) {
     return this.usersService.resetTwoFactor(uuid, actor);
@@ -91,6 +93,7 @@ export class UsersController {
 
   @Permissions(['panel.access', 'panel.users.sessions.revoke'])
   @ApiOperation({ summary: 'Завершить все сеансы игрока' })
+  @Audit({ action: 'auth.session.revoke.all', target: 'user', param: 'uuid' })
   @Delete(':uuid/sessions')
   async closeSessions(@CurrentUser() actor: User, @Param('uuid') uuid: string) {
     return this.usersService.closeSessions(uuid, actor);

@@ -1,6 +1,8 @@
 export const ASCII_NAME =
   " __  __                                          ____              ____       \r\n/\\ \\/\\ \\          __                            /\\  _`\\    /'\\_/`\\/\\  _`\\     \r\n\\ \\ \\ \\ \\    ___ /\\_\\    ___    ___   _ __    __\\ \\ \\/\\_\\ /\\      \\ \\,\\L\\_\\   \r\n \\ \\ \\ \\ \\ /' _ `\\/\\ \\  /'___\\ / __`\\/\\`'__\\/'__`\\ \\ \\/_/_\\ \\ \\__\\ \\/_\\__ \\   \r\n  \\ \\ \\_\\ \\/\\ \\/\\ \\ \\ \\/\\ \\__//\\ \\L\\ \\ \\ \\//\\  __/\\ \\ \\L\\ \\\\ \\ \\_/\\ \\/\\ \\L\\ \\ \r\n   \\ \\_____\\ \\_\\ \\_\\ \\_\\ \\____\\ \\____/\\ \\_\\\\ \\____\\\\ \\____/ \\ \\_\\\\ \\_\\ `\\____\\\r\n    \\/_____/\\/_/\\/_/\\/_/\\/____/\\/___/  \\/_/ \\/____/ \\/___/   \\/_/ \\/_/\\/_____/";
 
+import { AuditClass } from 'unicore-common';
+
 export const TOTP_WINDOW = 1;
 export const TOTP_CODE_MAX_LENGTH = 10;
 export const TOTP_STEP_SECONDS = 30;
@@ -272,6 +274,29 @@ export const GIFT_CODE_LENGTH = 12;
 export const GIFT_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 export const KEEP_RCON_COMMANDS_DAYS = 30;
 export const KEEP_FOREVER = 0;
+
+export const AUDIT_RETENTION_DEFAULTS: Record<AuditClass, number> = {
+  access: 365,
+  finance: KEEP_FOREVER,
+  admin: 365,
+  content: 90,
+};
+
+export const AUDIT_KEY = 'audit';
+export const AUDIT_ACTION_MAX_LENGTH = 100;
+export const AUDIT_CLASS_MAX_LENGTH = 16;
+export const AUDIT_STATUS_MAX_LENGTH = 8;
+export const AUDIT_IDENTIFIER_MAX_LENGTH = 64;
+export const AUDIT_NAME_MAX_LENGTH = 64;
+export const AUDIT_TARGET_TYPE_MAX_LENGTH = 32;
+export const AUDIT_IP_MAX_LENGTH = 45;
+export const AUDIT_CLIENT_MAX_LENGTH = 64;
+export const AUDIT_META_MAX_LENGTH = 2000;
+export const AUDIT_CLEANUP_BATCH = 5000;
+export const AUDIT_DEFAULT_LIMIT = 25;
+export const AUDIT_MAX_LIMIT = 100;
+export const AUDIT_SYSTEM_ACTOR = 'system';
+export const AUDIT_LAUNCHER_CLIENT_PREFIX = 'launcher:';
 
 export const VK_LINK_PREFIX = 'https://vk.com/';
 

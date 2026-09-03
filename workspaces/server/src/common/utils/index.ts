@@ -5,6 +5,7 @@ export * from './ban';
 export * from './config-value';
 export * from './escape-html';
 export * from './getDigest';
+export * from './client';
 export * from './cookie';
 export * from './ip';
 export * from './path';

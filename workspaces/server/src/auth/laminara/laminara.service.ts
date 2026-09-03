@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { envConfig } from 'unicore-common';
-import { cmsVersion, isBanActive } from '@common';
+import { AuditService, cmsVersion, isBanActive } from '@common';
 import { NewsService } from 'src/admin/news/news.service';
 import { User } from 'src/admin/users/entities/user.entity';
 import { UsersService } from 'src/admin/users/users.service';
@@ -27,6 +27,7 @@ export class LaminaraService {
     private passwordService: PasswordService,
     private twoFactorService: TwoFactorService,
     private loginAttemptsService: LoginAttemptsService,
+    private auditService: AuditService,
     private newsService: NewsService,
   ) {}
 
@@ -35,6 +36,9 @@ export class LaminaraService {
   }
 
   async authenticate(input: LaminaraAuthenticateInput, ip?: string): Promise<LaminaraProfileDto> {
+    const failed = (reason: string, user?: User) =>
+      this.auditService.login({ login: input.login, user, ip, launcher: 'laminara', status: 'failure', reason });
+
     const user = await this.usersService.getByUsernameOrEmail(input.login);
 
     await this.loginAttemptsService.assert(input.login, ip, user);
@@ -42,11 +46,13 @@ export class LaminaraService {
     if (!user) {
       await this.passwordService.fakeVerify(input.password);
       await this.loginAttemptsService.fail(input.login, ip);
+      failed('unknown_user');
       throw this.error(GravitError.UserNotFound, HttpStatus.NOT_FOUND);
     }
 
     if (!(await this.authService.validateCredentials(user, input.password))) {
       await this.loginAttemptsService.fail(input.login, ip, user);
+      failed('invalid_password', user);
       throw this.error(GravitError.WrongPassword, HttpStatus.UNAUTHORIZED);
     }
 
@@ -55,11 +61,14 @@ export class LaminaraService {
 
       if (!(await this.twoFactorService.verify(user, input.totp))) {
         await this.loginAttemptsService.fail(input.login, ip, user);
+        failed('invalid_totp', user);
         throw this.error(GravitError.Wrong2FA, HttpStatus.UNAUTHORIZED);
       }
     }
 
     await this.loginAttemptsService.succeed(input.login, ip, user);
+
+    this.auditService.login({ login: input.login, user, ip, launcher: 'laminara', totp: user.two_factor_enabled ?? false });
 
     if (user.password_change_required) throw this.error(GravitError.PasswordChangeRequired, HttpStatus.FORBIDDEN);
 

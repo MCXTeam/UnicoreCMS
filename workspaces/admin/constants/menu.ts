@@ -145,6 +145,11 @@ export const CORE_MENU = [
         to: '/webhooks',
       },
       {
+        label: 'admin.menu_logs',
+        icon: 'pi pi-fw pi-history',
+        to: '/logs',
+      },
+      {
         label: 'admin.menu_modules',
         icon: 'pi pi-fw pi-box',
         to: '/modules',

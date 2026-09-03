@@ -7,6 +7,7 @@ export * from "./dashboard";
 export * from "./users";
 export * from "./content-translations";
 export * from "./webhooks";
+export * from "./audit";
 export * from "./password";
 export * from "./locales";
 export * from "./envconfig";

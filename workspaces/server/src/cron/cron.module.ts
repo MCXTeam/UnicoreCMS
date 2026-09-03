@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuditLog } from '@common';
 import { ConfigModule } from 'src/admin/config/config.module';
 import { EmailActivation } from 'src/admin/email/entities/email-activation.entity';
 import { PasswordReset } from 'src/admin/email/entities/password-reset.entity';
@@ -17,6 +18,7 @@ import { ServersModule } from 'src/game/servers/servers.module';
 import { CartItemKit } from 'src/game/store/cart/entities/cart-item-kit.entity';
 import { CartItem } from 'src/game/store/cart/entities/cart-item.entity';
 import { Payment } from 'src/payment/entities/payment.entity';
+import { AuditTasks } from './tasks/audit.tasks';
 import { CartTasks } from './tasks/cart.tasks';
 import { DonateTasks } from './tasks/donate.tasks';
 import { DonateGroup } from 'src/game/donate/groups/entities/donate-group.entity';
@@ -57,6 +59,7 @@ import { VoteGift } from 'src/game/cabinet/votes/entities/vote-gift.entity';
       Ban,
       Vote,
       VoteGift,
+      AuditLog,
     ]),
     ServersModule,
     OnlineModule,
@@ -74,12 +77,12 @@ import { VoteGift } from 'src/game/cabinet/votes/entities/vote-gift.entity';
     DonateTasks,
     PaymentTasks,
     ReferalsTasks,
-    HistoryTasks,
     EmailTasks,
     BanTasks,
     VotesTasks,
     RconTasks,
     WebhookTasks,
+    AuditTasks,
   ],
 })
 export class CronModule {}

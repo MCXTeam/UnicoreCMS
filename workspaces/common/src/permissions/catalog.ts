@@ -28,6 +28,7 @@ export const PERMISSION_GROUPS = [
   "payment",
   "email",
   "webhooks",
+  "logs",
   "locales",
   "config",
   "extensions",
@@ -210,6 +211,12 @@ export const PERMISSIONS = define({
   "panel.webhooks.update": { group: "webhooks" },
   "panel.webhooks.delete": { group: "webhooks" },
   "panel.webhooks.delete.many": { group: "webhooks" },
+
+  "panel.logs.read": { group: "logs" },
+  "panel.logs.access.read": { group: "logs" },
+  "panel.logs.finance.read": { group: "logs", danger: true },
+  "panel.logs.admin.read": { group: "logs", danger: true },
+  "panel.logs.content.read": { group: "logs" },
 
   "panel.locales.read": { group: "locales" },
   "panel.locales.update": { group: "locales" },

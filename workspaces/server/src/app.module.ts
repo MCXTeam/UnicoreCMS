@@ -5,6 +5,7 @@ import { DataSource } from 'typeorm';
 import { addTransactionalDataSource } from 'typeorm-transactional';
 import { envConfig } from 'unicore-common';
 import { enforceSessionTimezone } from './common/database';
+import { AuditModule } from './common/audit/audit.module';
 import { AuthModule } from './auth/auth.module';
 import { LoginAttemptsModule } from './auth/attempts/login-attempts.module';
 import { AdminModule } from './admin/admin.module';
@@ -60,6 +61,7 @@ export class AppLoggerMiddleware implements NestMiddleware {
     CacheModule.register({
       isGlobal: true,
     }),
+    AuditModule,
     LoginAttemptsModule,
     RecaptchaModule,
     ThrottlerModule,

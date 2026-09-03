@@ -62,6 +62,11 @@
       "import": "./dist/webhooks.mjs",
       "require": "./dist/webhooks.js"
     },
+    "./audit": {
+      "types": "./dist/audit.d.ts",
+      "import": "./dist/audit.mjs",
+      "require": "./dist/audit.js"
+    },
     "./extensions": {
       "types": "./dist/extensions.d.ts",
       "import": "./dist/extensions.mjs",

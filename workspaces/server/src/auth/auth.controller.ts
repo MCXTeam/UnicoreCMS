@@ -1,4 +1,5 @@
 import {
+  Audit,
   IpAddress,
   Locale,
   THROTTLE_LOGIN,
@@ -106,6 +107,7 @@ export class AuthController {
   @Recaptcha({ action: 'verify' })
   @Throttle(THROTTLE_VERIFY)
   @AllowPasswordPending()
+  @Audit({ action: 'auth.activate' })
   @Post('verify')
   verify(@CurrentUser() user: User, @Body() input: VerifyInput): Promise<UserDto> {
     return this.emailService.checkCode(user, input);
@@ -114,6 +116,7 @@ export class AuthController {
   @Public()
   @Recaptcha({ action: 'reset' })
   @Throttle(THROTTLE_PASSWORD_RESET)
+  @Audit({ action: 'auth.password.reset.request', meta: ['email'] })
   @Post('reset')
   resetReq(@IpAddress() ip: string, @Body() input: PasswordLinkInput) {
     return this.emailService.sendPasswordLink(ip, input);
@@ -122,6 +125,7 @@ export class AuthController {
   @Public()
   @Recaptcha({ action: 'reset' })
   @Throttle(THROTTLE_PASSWORD_RESET)
+  @Audit({ action: 'auth.password.reset.confirm' })
   @Post('password')
   reset(@Body() input: PasswordResetInput): Promise<UserDto> {
     return this.emailService.checkHash(input);
@@ -130,6 +134,7 @@ export class AuthController {
   @AllowInactive()
   @Throttle(THROTTLE_SESSION)
   @AllowPasswordPending()
+  @Audit({ action: 'auth.logout' })
   @Post('logout')
   async logout(
     @Req() request: Request,
@@ -170,6 +175,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Throttle(THROTTLE_SESSION)
   @AllowPasswordPending()
+  @Audit({ action: 'auth.session.revoke.all' })
   @Delete('sessions_all')
   async closeMeSessions(@CurrentUser() user: User, @Res({ passthrough: true }) response: Response) {
     await this.tokensService.revokeRefreshTokensByUser(user);
@@ -180,6 +186,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Throttle(THROTTLE_SESSION)
   @AllowPasswordPending()
+  @Audit({ action: 'auth.session.revoke.other' })
   @Delete('sessions_other')
   closeMeOtherSessions(@Req() request: Request, @CurrentUser() user: User, @Body() input: TokenInput) {
     return this.tokensService.revokeRefreshTokensByUserOther(user, this.cookies.resolve(request, input.token));
@@ -188,6 +195,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Throttle(THROTTLE_SESSION)
   @AllowPasswordPending()
+  @Audit({ action: 'auth.session.revoke', target: 'session', param: 'uuid' })
   @Delete('sessions/:uuid')
   closeMeSession(@CurrentUser() user: User, @Param('uuid') id: number) {
     return this.tokensService.revokeRefreshTokenBySessionAndUser(user, id);

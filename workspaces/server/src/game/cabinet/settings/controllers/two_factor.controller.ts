@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Audit } from '@common';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
@@ -15,12 +16,14 @@ export class TwoFactorController {
   }
 
   @Permissions(['player.twofactor.on'])
+  @Audit({ action: 'auth.twofactor.enable' })
   @Post('enable')
   connect(@CurrentUser() user: User, @Body() body: TwoFactorInput) {
     return this.twoFactorService.enable(user, body);
   }
 
   @Permissions(['player.twofactor.off'])
+  @Audit({ action: 'auth.twofactor.disable' })
   @Post('disable')
   disable(@CurrentUser() user: User, @Body() body: TwoFactorInput) {
     return this.twoFactorService.disable(user, body);

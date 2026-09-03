@@ -1,5 +1,5 @@
 import { ConflictException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { REQUIRE_2FA } from '@common';
+import { AuditService, REQUIRE_2FA, clientName } from '@common';
 import { events } from 'unicore-api';
 import { USER_FIELDS } from 'unicore-common';
 import { User } from 'src/admin/users/entities/user.entity';
@@ -35,6 +35,7 @@ export class AuthService {
     private emailService: EmailService,
     private twoFactorService: TwoFactorService,
     private loginAttemptsService: LoginAttemptsService,
+    private auditService: AuditService,
     @InjectRepository(Referal)
     private referalsRepository: Repository<Referal>,
   ) {}
@@ -60,6 +61,8 @@ export class AuthService {
 
   async login(body: LoginInput, agent?: string, ip?: string): Promise<AuthenticatedDto> {
     const { username_or_email, password } = body;
+    const failed = (reason: string, user?: User) =>
+      this.auditService.login({ login: username_or_email, user, ip, agent, status: 'failure', reason });
 
     const user = await this.usersService.getByUsernameOrEmail(username_or_email, ['skin', 'cloak', 'roles']);
 
@@ -68,6 +71,7 @@ export class AuthService {
     if (!user) {
       await this.passwordService.fakeVerify(password);
       await this.loginAttemptsService.fail(username_or_email, ip);
+      failed('unknown_user');
       throw new UnauthorizedException();
     }
 
@@ -75,6 +79,7 @@ export class AuthService {
 
     if (!valid) {
       await this.loginAttemptsService.fail(username_or_email, ip, user);
+      failed('invalid_password', user);
       throw new UnauthorizedException();
     }
 
@@ -83,6 +88,7 @@ export class AuthService {
 
       if (!(await this.twoFactorService.verify(user, body.totp))) {
         await this.loginAttemptsService.fail(username_or_email, ip, user);
+        failed('invalid_totp', user);
         throw new UnauthorizedException();
       }
     }
@@ -93,6 +99,8 @@ export class AuthService {
     const refreshToken = await this.tokensService.generateRefreshToken(user, agent, ip);
 
     await events().emit('user.login', { uuid: user.uuid, username: user.username, ip });
+
+    this.auditService.login({ login: username_or_email, user, ip, agent, totp: user.two_factor_enabled ?? false });
 
     return new AuthenticatedDto({ accessToken, refreshToken, user });
   }
@@ -140,6 +148,14 @@ export class AuthService {
     if (input.ref) await this.attachReferal(user, input.ref);
 
     await events().emit('user.registered', { uuid: user.uuid, username: user.username, email: user.email });
+
+    this.auditService.record({
+      action: 'auth.register',
+      actor: { type: 'user', id: user.uuid, name: user.username },
+      ip,
+      client: clientName(agent),
+      meta: { activationRequired },
+    });
 
     return new AuthenticatedDto({ accessToken, refreshToken, user });
   }

@@ -1,3 +1,4 @@
+export * from './audit';
 export * from './constants';
 export * from './crypto';
 export * from './custom-code';

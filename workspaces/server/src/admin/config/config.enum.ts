@@ -1,3 +1,5 @@
+import { AuditClass } from 'unicore-common';
+
 export enum ConfigField {
   LauncherExe = 'public_launcher_exe',
   LauncherJar = 'public_launcher_jar',
@@ -34,6 +36,10 @@ export enum ConfigField {
   KeepPaidPaymentsDays = 'cleanup_payments_paid_days',
   KeepPendingPaymentsDays = 'cleanup_payments_pending_days',
   KeepHistoryDays = 'cleanup_history_days',
+  KeepAuditAccessDays = 'cleanup_audit_access_days',
+  KeepAuditFinanceDays = 'cleanup_audit_finance_days',
+  KeepAuditAdminDays = 'cleanup_audit_admin_days',
+  KeepAuditContentDays = 'cleanup_audit_content_days',
   LaminaraBuilds = 'laminara_builds',
   RconPreset = 'rcon_preset',
   RconTplGiveItem = 'rcon_tpl_give_item',
@@ -50,3 +56,10 @@ export enum ConfigType {
   string,
   boolean,
 }
+
+export const AUDIT_RETENTION_FIELDS: Record<AuditClass, ConfigField> = {
+  access: ConfigField.KeepAuditAccessDays,
+  finance: ConfigField.KeepAuditFinanceDays,
+  admin: ConfigField.KeepAuditAdminDays,
+  content: ConfigField.KeepAuditContentDays,
+};

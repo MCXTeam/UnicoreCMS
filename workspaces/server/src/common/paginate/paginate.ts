@@ -88,6 +88,23 @@ function applySearch<T extends ObjectLiteral>(builder: SelectQueryBuilder<T>, qu
   );
 }
 
+export function parseFilter(entry: string): { operator: FilterOperator; value: string } {
+  const separator = entry.indexOf(PAGINATE_FILTER_SEPARATOR);
+
+  return {
+    operator: (separator > 0 ? entry.slice(0, separator) : FilterOperator.EQ) as FilterOperator,
+    value: separator > 0 ? entry.slice(separator + 1) : entry,
+  };
+}
+
+export function filterValues(query: PaginateQuery, column: string): string[] {
+  const raw = query.filter?.[column];
+
+  if (!raw) return [];
+
+  return (Array.isArray(raw) ? raw : [raw]).filter(Boolean).map((entry) => parseFilter(String(entry)).value);
+}
+
 function applyFilters<T extends ObjectLiteral>(
   builder: SelectQueryBuilder<T>,
   query: PaginateQuery,
@@ -101,9 +118,7 @@ function applyFilters<T extends ObjectLiteral>(
     if (!operators) continue;
 
     for (const entry of Array.isArray(raw) ? raw : [raw]) {
-      const separator = entry.indexOf(PAGINATE_FILTER_SEPARATOR);
-      const operator = (separator > 0 ? entry.slice(0, separator) : FilterOperator.EQ) as FilterOperator;
-      const value = separator > 0 ? entry.slice(separator + 1) : entry;
+      const { operator, value } = parseFilter(entry);
 
       if (!operators.includes(operator)) continue;
 

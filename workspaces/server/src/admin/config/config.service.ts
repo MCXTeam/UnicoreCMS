@@ -2,9 +2,10 @@ import { BadRequestException, Inject, Injectable, NotFoundException } from '@nes
 import { InjectRepository } from '@nestjs/typeorm';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { DEFAULT_ISSUANCE_PRESET, RCON_PRESETS } from 'unicore-common';
+import { AUDIT_CLASSES, DEFAULT_ISSUANCE_PRESET, RCON_PRESETS } from 'unicore-common';
 import { ACTIVE_MODULES_KEY } from 'unicore-api';
 import {
+  AUDIT_RETENTION_DEFAULTS,
   CacheKey,
   GIFTS_CODE_EXPIRE_DAYS,
   GIFTS_DAILY_LIMIT,
@@ -13,7 +14,7 @@ import {
   KEEP_PENDING_PAYMENTS_DAYS,
 } from '@common';
 import { IsNull, Repository } from 'typeorm';
-import { ConfigField, ConfigType } from './config.enum';
+import { AUDIT_RETENTION_FIELDS, ConfigField, ConfigType } from './config.enum';
 import { enabledModuleIds, moduleConfigSchema } from 'src/modules/runtime';
 import { configTypeOf, moduleConfigKey } from './module-config';
 import { CONFIG_CACHE_TTL_MS } from './config.constants';
@@ -100,6 +101,12 @@ export class ConfigService {
           value: String(KEEP_PENDING_PAYMENTS_DAYS),
         },
         { key: ConfigField.KeepHistoryDays, important: true, type: ConfigType.number, value: String(KEEP_HISTORY_DAYS) },
+        ...AUDIT_CLASSES.map((value) => ({
+          key: AUDIT_RETENTION_FIELDS[value],
+          important: true,
+          type: ConfigType.number,
+          value: String(AUDIT_RETENTION_DEFAULTS[value]),
+        })),
         { key: ConfigField.LaminaraBuilds, important: true, type: ConfigType.string, value: '' },
         { key: ConfigField.RconPreset, important: true, type: ConfigType.string, value: DEFAULT_ISSUANCE_PRESET },
         {

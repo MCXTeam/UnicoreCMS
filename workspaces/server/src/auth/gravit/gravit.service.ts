@@ -14,7 +14,7 @@ import { TwoFactorService } from 'src/game/cabinet/settings/providers/two_factor
 import { JWTMinecraftPayload, JWTPayload, JWTRefreshPayload } from '../interfaces/jwt-payload';
 import { GravitRefreshToken } from './dto/inputs/gravit-refresh-token.input';
 import { GravitDeleteSession, GravitExitUser } from './dto/inputs/gravit-session.input';
-import { isBanActive, normalizeIp, safeEqual } from '@common';
+import { AuditService, isBanActive, normalizeIp, safeEqual } from '@common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/admin/users/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -30,6 +30,7 @@ export class GravitService {
     private tokensService: TokensService,
     private twoFactorService: TwoFactorService,
     private loginAttemptsService: LoginAttemptsService,
+    private auditService: AuditService,
     private jwt: JwtService,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
@@ -87,6 +88,8 @@ export class GravitService {
     const password = input.password?.password ?? input.password?.firstPassword?.password;
     const totp = input.password?.secondPassword?.totp;
     const source = normalizeIp(input.context?.ip) || ip;
+    const failed = (reason: string, user?: User) =>
+      this.auditService.login({ login: input.login, user, ip: source, launcher: 'gravit', status: 'failure', reason });
 
     const user = await this.usersService.getByUsernameOrEmail(input.login);
 
@@ -94,6 +97,7 @@ export class GravitService {
 
     if (!user) {
       await this.loginAttemptsService.fail(input.login, source);
+      failed('unknown_user');
       throw new HttpException({ error: GravitError.UserNotFound }, HttpStatus.NOT_FOUND);
     }
 
@@ -102,6 +106,7 @@ export class GravitService {
     const valid = await this.authService.validateCredentials(user, password);
     if (!valid) {
       await this.loginAttemptsService.fail(input.login, source, user);
+      failed('invalid_password', user);
       throw new HttpException({ error: GravitError.WrongPassword }, HttpStatus.UNAUTHORIZED);
     }
 
@@ -110,11 +115,20 @@ export class GravitService {
 
       if (!(await this.twoFactorService.verify(user, totp))) {
         await this.loginAttemptsService.fail(input.login, source, user);
+        failed('invalid_totp', user);
         throw new HttpException({ error: GravitError.WrongPassword }, HttpStatus.UNAUTHORIZED);
       }
     }
 
     await this.loginAttemptsService.succeed(input.login, source, user);
+
+    this.auditService.login({
+      login: input.login,
+      user,
+      ip: source,
+      launcher: 'gravit',
+      totp: user.two_factor_enabled ?? false,
+    });
 
     await this.assertAllowed(user);
 

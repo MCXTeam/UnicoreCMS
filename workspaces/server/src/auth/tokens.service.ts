@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { AuthenticatedDto } from './dto/authenticated.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import ms from 'ms';
-import { MomentWrapper, REFRESH_ROTATION_LEEWAY_MS } from '@common';
+import { AuditService, MomentWrapper, REFRESH_ROTATION_LEEWAY_MS, clientName } from '@common';
 
 @Injectable()
 export class TokensService {
@@ -21,6 +21,7 @@ export class TokensService {
     @InjectRepository(RefreshToken)
     private tokensRepository: Repository<RefreshToken>,
     private usersService: UsersService,
+    private auditService: AuditService,
     private jwt: JwtService,
   ) {}
 
@@ -101,8 +102,8 @@ export class TokensService {
     }
   }
 
-  private async resolveRotatedToken(jwtid: string): Promise<RefreshToken | null> {
-    const rotated = await this.tokensRepository.findOneBy({ previousUuid: jwtid });
+  private async resolveRotatedToken(jwtid: string, ip?: string): Promise<RefreshToken | null> {
+    const rotated = await this.tokensRepository.findOne({ where: { previousUuid: jwtid }, relations: ['user'] });
 
     if (!rotated) return null;
 
@@ -112,10 +113,20 @@ export class TokensService {
 
     await this.tokensRepository.remove(rotated);
 
+    this.auditService.record({
+      action: 'auth.token.reuse',
+      status: 'failure',
+      actor: { type: 'user', id: rotated.user?.uuid, name: rotated.user?.username },
+      ip: ip ?? rotated.ip,
+      client: clientName(rotated.agent),
+      meta: { session: rotated.uuid },
+      immediate: true,
+    });
+
     throw new UnprocessableEntityException('Refresh token reuse detected');
   }
 
-  async resolveRefreshToken(encoded: string): Promise<{ user: User; token: RefreshToken }> {
+  async resolveRefreshToken(encoded: string, ip?: string): Promise<{ user: User; token: RefreshToken }> {
     const payload = (await this.decodeToken(encoded)) as JWTRefreshPayload;
 
     if (payload.type !== 'refresh' || !payload.jwtid) {
@@ -126,7 +137,7 @@ export class TokensService {
       (await this.tokensRepository.findOneBy({
         uuid: payload.jwtid,
         expires: MoreThanOrEqual(this.moment().utc().toDate()),
-      })) ?? (await this.resolveRotatedToken(payload.jwtid));
+      })) ?? (await this.resolveRotatedToken(payload.jwtid, ip));
 
     if (!token) {
       throw new UnprocessableEntityException('Refresh token not found');
@@ -145,8 +156,8 @@ export class TokensService {
     refresh: string,
     options: { agent?: string; ip?: string; rotate?: boolean } = {},
   ): Promise<Omit<AuthenticatedDto, 'user'>> {
-    const { token, user } = await this.resolveRefreshToken(refresh);
     const { ip, rotate = true } = options;
+    const { token, user } = await this.resolveRefreshToken(refresh, ip);
 
     const refreshToken = rotate ? await this.rotateRefreshToken(user, token, ip) : refresh;
 
