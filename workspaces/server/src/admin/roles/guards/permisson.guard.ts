@@ -1,13 +1,7 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { User } from 'src/admin/users/entities/user.entity';
-import {
-  filterPlayerPermissions,
-  Permission,
-  permissionUniverse,
-  resolvePermissions,
-  satisfiesPermissions,
-} from 'unicore-common';
+import { filterPlayerPermissions, Permission, permissionUniverse, resolvePermissions, satisfiesPermissions } from 'unicore-common';
 import _ from 'lodash';
 import { DONATE_PERMS_CACHE_KEY, PERMISSIONS_KEY } from 'src/common/constants';
 import { Role } from '../entities/role.entity';
@@ -61,11 +55,7 @@ export async function grantedPermissions(request: any): Promise<string[]> {
 
   if (user?.superuser) return permissionUniverse();
 
-  return [
-    ...(user?.roles || []).map((role) => role.perms || []).flat(),
-    ...(user?.perms || []),
-    ...(await playerPermissions(request)),
-  ];
+  return [...(user?.roles || []).map((role) => role.perms || []).flat(), ...(user?.perms || []), ...(await playerPermissions(request))];
 }
 
 export async function matchPermission(args: PermissionArgs, request: any): Promise<boolean> {
@@ -99,9 +89,9 @@ export class PermissionGuard implements CanActivate {
 
     if (!permissions) return true;
 
-    const request = context.switchToHttp().getRequest();
+    const request = context.getType() === 'http' ? context.switchToHttp().getRequest() : context.switchToWs().getClient();
 
-    if (!request.user) return false;
+    if (!request?.user) return false;
 
     return matchPermission(permissions, request);
   }

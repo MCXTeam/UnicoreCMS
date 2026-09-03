@@ -1,5 +1,9 @@
 <template>
-  <div class="row">
+  <div v-if="!found" class="panel text-center">
+    <h2 class="mt-0 mb-2">{{ $t('profile.not_found_title') }}</h2>
+    <p class="m-0">{{ $t('profile.not_found_hint', { username }) }}</p>
+  </div>
+  <div v-else class="row">
     <div class="col-xl-4">
       <div class="panel">
         <div class="d-flex flex-column align-items-center text-center w-100">
@@ -94,20 +98,25 @@ const { $moment, $t } = useNuxtApp()
 
 const playersApi = usePlayers()
 const route = useRoute()
+const username = String(route.params.username)
 
-const { data, error } = await useAsyncData<any>(`user-${route.params.username}`, async () => {
-  const user = await playersApi.profile(route.params.username as string)
+const { data, error } = await useAsyncData<any>(`user-${username}`, async () => {
+  const user = await playersApi.profile(username)
   const online = user.playtimes.find((pt: any) => pt.updated != pt.created && $moment(pt.updated).isAfter($moment().subtract(2, 'minutes')))
   return { user, online }
 })
 
-if (error.value || !data.value) throw createError({ statusCode: 404, fatal: true })
+const found = computed(() => !error.value && Boolean(data.value))
 
-const user = computed<any>(() => data.value.user)
-const online = computed<any>(() => data.value.online)
+if (!found.value && import.meta.server) setResponseStatus(useRequestEvent()!, 404)
 
-useUiStore().setName($t('profile.page_name', { username: user.value.username }))
-useHead({ title: computed(() => $t('profile.page_name', { username: user.value.username })) })
+const user = computed<any>(() => data.value?.user)
+const online = computed<any>(() => data.value?.online)
+
+const title = computed(() => (found.value ? $t('profile.page_name', { username: user.value.username }) : $t('profile.not_found_title')))
+
+useUiStore().setName(title.value)
+useHead({ title })
 
 const skin = ref<any>(null)
 

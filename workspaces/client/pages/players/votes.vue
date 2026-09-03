@@ -11,7 +11,7 @@
 
     <CabTile :title="$t('players.votes_title', { month: $moment().format('MMMM') })" icon="bx bx-party" :span="12">
       <template #actions>
-        <NuxtLink to="/cabinet/gifts">
+        <NuxtLink to="/cabinet/votes">
           <Button size="small" :label="$t('panel.vote_button')" />
         </NuxtLink>
       </template>

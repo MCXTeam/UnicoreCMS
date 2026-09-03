@@ -32,7 +32,7 @@
       <img src="/images/chest-minecraft.gif" height="180px" />
       <p class="mb-3">{{ $t('panel.vote_text') }}</p>
       <div class="d-flex">
-        <Button :as="NuxtLink" to="/cabinet/gifts" text class="m-0" size="large" :label="$t('panel.vote_button')" />
+        <Button :as="NuxtLink" to="/cabinet/votes" text class="m-0" size="large" :label="$t('panel.vote_button')" />
       </div>
     </div>
     <h2 class="mt-0">{{ $t('panel.servers') }}</h2>

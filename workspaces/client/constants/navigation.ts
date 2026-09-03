@@ -76,6 +76,7 @@ export const CORE_NAVIGATION: NavItem[] = [
     order: 80,
   },
   { key: 'cabinet.gifts', to: '/cabinet/gifts', label: 'cabinet.tab_gifts', icon: 'bx bx-party', places: ['cabinet.tabs'], order: 90 },
+  { key: 'cabinet.votes', to: '/cabinet/votes', label: 'cabinet.tab_votes', icon: 'bx bx-medal', places: ['cabinet.tabs'], order: 100 },
 
   {
     key: 'store.products',

@@ -62,41 +62,6 @@
           </Column>
         </DataTable>
       </CabTile>
-
-      <CabTile :title="$t('panel.vote')" icon="bx bx-party" :span="7">
-        <div v-if="monitorings.length" class="cab-servers">
-          <div v-for="mon in monitorings" :key="mon" class="cab-servers__row">
-            <img class="cab-mon__icon" :src="monitorings_map[mon].icon" />
-            <div>
-              <h4 v-text="monitorings_map[mon].name" />
-              <span>{{
-                $t('cabinet.vote_reward_once', { amount: $utils.formatCurrency('virtual', config.public_monitoring_reward) })
-              }}</span>
-            </div>
-            <Button class="ms-auto" size="small" as="a" :href="config['public_link_' + mon]" :label="$t('cabinet.vote')" />
-          </div>
-        </div>
-        <div v-else class="cab-empty">
-          <i class="bx bx-party"></i>
-          <span>{{ $t('cabinet.monitorings_empty') }}</span>
-        </div>
-      </CabTile>
-
-      <CabTile :title="$t('cabinet.vote_reward_title', { count: monitorings.length })" icon="bx bx-medal" :span="5">
-        <p class="cab-sub mt-0 mb-3">{{ $t('cabinet.vote_reward_text') }}</p>
-        <div class="cab-metrics">
-          <div class="cab-metrics__item">
-            <span class="cab-metrics__label">{{ $t('cabinet.bonuses') }}</span>
-            <span class="cab-metrics__value">
-              {{ $utils.formatCurrency('virtual', config.public_monitoring_reward * monitorings.length) }}
-            </span>
-          </div>
-          <div class="cab-metrics__item">
-            <span class="cab-metrics__label">{{ $t('cabinet.top_points') }}</span>
-            <span class="cab-metrics__value cab-metrics__value--soft" v-text="monitorings.length" />
-          </div>
-        </div>
-      </CabTile>
     </div>
   </div>
 </template>
@@ -104,25 +69,20 @@
 <script setup>
 import { Form, Field } from 'vee-validate'
 import { useReCaptcha } from 'vue-recaptcha-v3'
-import monitoringsMap from '~/json/monitorings.json'
 
 definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'cabinet.tab_gifts', hint: 'cabinet.gifts_hint' })
 
 const { $auth, $unicore, $t, $moment } = useNuxtApp()
 
 const cabinet = useCabinet()
-const votesApi = useVotes()
 const giftsApi = useGifts()
 const { copy } = useClipboard({ legacy: true })
 
 useHead({ title: computed(() => $t('header.cabinet')) })
 const recaptcha = useReCaptcha()
-const { config } = usePublicConfig()
 
 const { canActivate } = useAccess({ canActivate: 'player.gift.activate' })
 
-const monitorings_map = monitoringsMap
-const monitorings = ref([])
 const myGifts = ref([])
 const giftDialog = ref(false)
 const gift = ref(null)
@@ -130,7 +90,6 @@ const loading = ref(false)
 const gift_code = ref('')
 
 onMounted(async () => {
-  monitorings.value = await votesApi.monitorings()
   myGifts.value = await giftsApi.mine().catch(() => [])
 })
 
