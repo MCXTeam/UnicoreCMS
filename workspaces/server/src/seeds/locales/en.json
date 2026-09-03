@@ -289,6 +289,8 @@
   "admin.logs_details": "Details",
   "admin.logs_empty": "Nothing recorded yet",
   "admin.logs_field": "Field",
+  "admin.logs_open_for_player": "Player activity",
+  "admin.logs_player": "Player",
   "admin.logs_retention": "Records are never edited or deleted by hand: they expire according to the site settings.",
   "admin.logs_status": "Result",
   "admin.logs_target": "On whom or what",

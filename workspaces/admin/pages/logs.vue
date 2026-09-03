@@ -25,6 +25,25 @@
                 </span>
               </div>
               <div class="flex flex-column md:flex-row gap-2">
+                <AutoComplete
+                  v-model="player"
+                  :suggestions="players"
+                  @complete="searchPlayer($event)"
+                  @item-select="load()"
+                  @clear="load()"
+                  optionLabel="username"
+                  dropdown
+                  forceSelection
+                  :placeholder="$t('admin.logs_player')"
+                  class="w-full md:w-16rem"
+                >
+                  <template #option="slotProps">
+                    <div class="flex align-items-center">
+                      <SkinView2D class="rounded" :width="16" :height="16" :skin="slotProps.option.skin" />
+                      <span class="ml-2">{{ slotProps.option.username }}</span>
+                    </div>
+                  </template>
+                </AutoComplete>
                 <Select
                   v-model="filters.class"
                   :options="classOptions"
@@ -169,6 +188,8 @@ export default {
       },
       classes: [],
       actions: [],
+      players: [],
+      player: null,
       search: null,
       filters: {
         class: null,
@@ -194,6 +215,14 @@ export default {
     },
   },
   async mounted() {
+    const requested = String(this.$route.query.player ?? '').trim()
+
+    if (requested) {
+      const found = await this.$api.get('/users', { params: { search: requested, limit: 1 } }).then((res) => res.data.data)
+
+      this.player = found?.[0] ?? requested
+    }
+
     const [classes, actions] = await Promise.all([
       this.$api.get('/admin/logs/classes').then((res) => res.data),
       this.$api.get('/admin/logs/actions').then((res) => res.data),
@@ -256,7 +285,14 @@ export default {
 
       for (const [field, value] of Object.entries(this.filters)) if (value) params[`filter[${field}]`] = `$eq:${value}`
 
+      const player = typeof this.player === 'string' ? this.player.trim() : this.player?.uuid
+
+      if (player) params.player = player
+
       return params
+    },
+    async searchPlayer(event) {
+      this.players = await this.$api.get('/users', { params: { search: event.query.trim(), limit: 10 } }).then((res) => res.data.data)
     },
     async load() {
       this.loading = true

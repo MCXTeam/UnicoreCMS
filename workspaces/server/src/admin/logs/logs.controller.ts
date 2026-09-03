@@ -1,4 +1,4 @@
-import { Controller, Get, Req } from '@nestjs/common';
+import { Controller, Get, Query, Req } from '@nestjs/common';
 import { Paginate, PaginateQuery } from '@common';
 import { Permissions } from '../roles/decorators/permission.decorator';
 import { LogsService } from './logs.service';
@@ -19,7 +19,7 @@ export class LogsController {
   }
 
   @Get()
-  find(@Req() request: any, @Paginate() query: PaginateQuery) {
-    return this.logsService.find(query, request);
+  find(@Req() request: any, @Paginate() query: PaginateQuery, @Query('player') player?: string) {
+    return this.logsService.find(query, request, player);
   }
 }

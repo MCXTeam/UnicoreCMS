@@ -289,6 +289,8 @@
   "admin.logs_details": "Подробности",
   "admin.logs_empty": "Пока ничего не записано",
   "admin.logs_field": "Поле",
+  "admin.logs_open_for_player": "Действия игрока",
+  "admin.logs_player": "Игрок",
   "admin.logs_retention": "Записи не редактируются и не удаляются вручную — они сгорают по срокам из настроек сайта.",
   "admin.logs_status": "Результат",
   "admin.logs_target": "Над кем или чем",

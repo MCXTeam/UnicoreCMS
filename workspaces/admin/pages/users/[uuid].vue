@@ -543,6 +543,13 @@
                   :label="$t('admin.close_sessions')"
                   class="p-button-danger p-button mr-2 mb-2"
                 />
+                <Button
+                  v-if="canReadLogs"
+                  @click="openLogs()"
+                  :label="$t('admin.logs_open_for_player')"
+                  icon="pi pi-history"
+                  class="p-button-secondary p-button mr-2 mb-2"
+                />
               </VeeForm>
             </div>
           </div>
@@ -781,6 +788,7 @@ export default {
       canBan: 'panel.users.ban',
       canResetTwoFactor: 'panel.users.twofactor.reset',
       canCloseSessions: 'panel.users.sessions.revoke',
+      canReadLogs: 'panel.logs.read',
     })
 
     const fields = useFieldAccess('user', {
@@ -1117,6 +1125,9 @@ export default {
       })
     },
 
+    openLogs() {
+      this.$router.push({ path: '/logs', query: { player: this.user.uuid } })
+    },
     closeSessions() {
       this.confirm.require({
         message: this.$t('admin.close_sessions_confirm'),
