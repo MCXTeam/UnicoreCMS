@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # ---- builder ----
-FROM node:22-bookworm-slim AS builder
+FROM node:26-bookworm-slim AS builder
 
 RUN corepack enable && corepack prepare pnpm@11.20.0 --activate
 WORKDIR /usr/local/app
@@ -15,7 +15,7 @@ RUN pnpm install --frozen-lockfile
 RUN pnpm run build
 
 # ---- runtime ----
-FROM node:22-bookworm-slim AS runtime
+FROM node:26-bookworm-slim AS runtime
 
 ENV NODE_ENV=production
 
