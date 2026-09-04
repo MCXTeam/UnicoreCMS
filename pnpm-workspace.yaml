@@ -2,6 +2,7 @@ packages:
   - 'workspaces/*'
 
 nodeLinker: hoisted
+verifyDepsBeforeRun: false
 engineStrict: true
 strictPeerDependencies: false
 autoInstallPeers: true

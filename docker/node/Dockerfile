@@ -36,7 +36,7 @@ RUN corepack enable \
 WORKDIR /usr/local/app
 COPY --from=builder --chown=node:node /usr/local/app .
 
-RUN mkdir -p storage logs && chown -R node:node storage logs
+RUN mkdir -p storage logs && chown -R node:node storage logs && chown node:node /usr/local/app
 
 USER node
 
