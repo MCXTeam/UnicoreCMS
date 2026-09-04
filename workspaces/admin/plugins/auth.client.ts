@@ -5,6 +5,8 @@ export default defineNuxtPlugin(async () => {
 
   auth.loadTokens()
 
+  await auth.syncCsrf()
+
   if (!auth.hasSession) return
 
   try {

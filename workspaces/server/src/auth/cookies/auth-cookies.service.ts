@@ -47,6 +47,10 @@ export class AuthCookiesService {
     return Boolean(this.refreshToken(request));
   }
 
+  token(request: Request): string {
+    return cookieValue(request, CSRF_COOKIE);
+  }
+
   assertCsrf(request: Request): void {
     const cookie = cookieValue(request, CSRF_COOKIE);
     const header = String(request.headers[CSRF_HEADER] ?? '');

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { satisfiesPermission } from 'unicore-common/permissions'
-import { csrfToken, ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from 'unicore-common/auth'
+import { csrfToken, setCsrfToken, ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from 'unicore-common/auth'
 
 export interface AuthUser {
   uuid: string
@@ -41,6 +41,18 @@ export const useAuthStore = defineStore('auth', {
       this.refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY)
       this.cookieAuth = Boolean(csrfToken())
     },
+    async syncCsrf() {
+      if (!import.meta.client) return
+
+      const { $api } = useNuxtApp()
+
+      try {
+        const { data } = await $api.get('/auth/csrf')
+
+        setCsrfToken(data.token)
+        this.cookieAuth = Boolean(data.present)
+      } catch {}
+    },
     setTokens(access: string | null, refresh?: string | null) {
       this.accessToken = access
 
@@ -67,6 +79,9 @@ export const useAuthStore = defineStore('auth', {
       const { data } = await $api.post('/auth/login', payload, config)
 
       this.adopt(data)
+      await this.syncCsrf()
+
+      if (this.cookieAuth) this.setTokens(this.accessToken, null)
 
       return data
     },

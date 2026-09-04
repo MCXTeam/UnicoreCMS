@@ -103,6 +103,15 @@ export class AuthController {
     return tokens;
   }
 
+  @Public()
+  @AllowInactive()
+  @AllowPasswordPending()
+  @Throttle(THROTTLE_SESSION)
+  @Get('csrf')
+  csrf(@Req() request: Request): { token: string; present: boolean } {
+    return { token: this.cookies.token(request), present: this.cookies.present(request) };
+  }
+
   @AllowInactive()
   @Recaptcha({ action: 'verify' })
   @Throttle(THROTTLE_VERIFY)

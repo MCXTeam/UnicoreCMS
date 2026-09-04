@@ -24,7 +24,14 @@ export function readCookie(header: string, name: string): string {
   return "";
 }
 
+let issuedCsrfToken = "";
+
+export function setCsrfToken(token: string): void {
+  issuedCsrfToken = String(token ?? "");
+}
+
 export function csrfToken(): string {
+  if (issuedCsrfToken) return issuedCsrfToken;
   if (typeof document === "undefined") return "";
 
   return readCookie(document.cookie, CSRF_COOKIE);

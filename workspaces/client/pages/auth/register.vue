@@ -173,6 +173,7 @@ async function register() {
     const token = await recaptcha?.executeRecaptcha?.('register')
     const tokens = await authFlow.register({ ...form, ref: localStorage.getItem('ref') }, token)
     $auth.adopt(tokens)
+    await $auth.syncCsrf()
     await $auth.fetchUser()
     await navigateTo('/cabinet')
   } catch (err: any) {
