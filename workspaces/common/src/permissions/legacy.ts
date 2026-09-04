@@ -17,8 +17,10 @@ export const LEGACY_PERMISSIONS: Record<string, PermissionKey | null> = {
   "admin.dashboard.stats.online": "panel.dashboard.online",
   "admin.dashboard.stats.users": "panel.dashboard.users",
   "admin.dashboard.revenue": "panel.revenue.read",
-  "admin.dashboard.events": "panel.events.dashboard",
-  "admin.user.events": "panel.events.users",
+  "admin.dashboard.events": null,
+  "admin.user.events": null,
+  "panel.events.dashboard": null,
+  "panel.events.users": null,
 
   "admin.users.read": "panel.users.read",
   "admin.users.create": "panel.users.create",

@@ -33,7 +33,6 @@ export const PERMISSION_GROUPS = [
   "config",
   "extensions",
   "api",
-  "events",
   "player",
   "kernel",
 ] as const;
@@ -230,9 +229,6 @@ export const PERMISSIONS = define({
 
   "panel.api.read": { group: "api", danger: true },
   "panel.api.manage": { group: "api", danger: true },
-
-  "panel.events.dashboard": { group: "events" },
-  "panel.events.users": { group: "events" },
 
   "player.skin.upload": { group: "player" },
   "player.skin.hd": { group: "player" },
