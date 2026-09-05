@@ -239,8 +239,8 @@ importers:
         specifier: ^0.2.0
         version: 0.2.0
       nuxt-gtag:
-        specifier: ^4.1.0
-        version: 4.1.0(magic-string@1.1.0)(magicast@0.5.4)(oxc-parser@0.143.0)(unplugin@3.3.0(esbuild@0.28.1)(rollup@4.62.4)(vite@7.3.6(@types/node@22.20.1)(jiti@2.7.0)(sass@1.103.1)(terser@5.51.2)(yaml@2.9.0))(webpack@5.110.2))
+        specifier: ^5.0.0
+        version: 5.0.0(magic-string@1.1.0)(magicast@0.5.4)(oxc-parser@0.143.0)(unplugin@3.3.0(esbuild@0.28.1)(rollup@4.62.4)(vite@7.3.6(@types/node@22.20.1)(jiti@2.7.0)(sass@1.103.1)(terser@5.51.2)(yaml@2.9.0))(webpack@5.110.2))
       pinia:
         specifier: ^3.0.4
         version: 3.0.4(typescript@5.9.3)(vue@3.5.42(typescript@5.9.3))
@@ -5752,8 +5752,8 @@ packages:
       chokidar:
         optional: true
 
-  nuxt-gtag@4.1.0:
-    resolution: {integrity: sha512-2TL7RUA8N8NYGbY4UZ9IqKyMZMgO9cCGu6yqadUU8RF+Y81PXI+k+1giIA11XXStaJoGXaXeNsBUIJXn1tUy3A==}
+  nuxt-gtag@5.0.0:
+    resolution: {integrity: sha512-L0h7p4khJRWomv0HkyyL6jhWEejdFw2uS1LaJZG3rTwLWdxcCIbpoBRbjDtFQAc9owyYkLTBbmS90XZs/gElhQ==}
 
   nuxt-site-config-kit@4.2.3:
     resolution: {integrity: sha512-xAU061MrxDlv1CjHjP9+Qg3mAdKxQgO9sFzoy+LblKW+DDLRMGjaEIna/QUk0F0kWzhrf4dSpOVTW8OZv26xVg==}
@@ -14173,11 +14173,10 @@ snapshots:
       chokidar: 4.0.3
     optional: true
 
-  nuxt-gtag@4.1.0(magic-string@1.1.0)(magicast@0.5.4)(oxc-parser@0.143.0)(unplugin@3.3.0(esbuild@0.28.1)(rollup@4.62.4)(vite@7.3.6(@types/node@22.20.1)(jiti@2.7.0)(sass@1.103.1)(terser@5.51.2)(yaml@2.9.0))(webpack@5.110.2)):
+  nuxt-gtag@5.0.0(magic-string@1.1.0)(magicast@0.5.4)(oxc-parser@0.143.0)(unplugin@3.3.0(esbuild@0.28.1)(rollup@4.62.4)(vite@7.3.6(@types/node@22.20.1)(jiti@2.7.0)(sass@1.103.1)(terser@5.51.2)(yaml@2.9.0))(webpack@5.110.2)):
     dependencies:
       '@nuxt/kit': 4.5.2(magic-string@1.1.0)(magicast@0.5.4)(oxc-parser@0.143.0)(unplugin@3.3.0(esbuild@0.28.1)(rollup@4.62.4)(vite@7.3.6(@types/node@22.20.1)(jiti@2.7.0)(sass@1.103.1)(terser@5.51.2)(yaml@2.9.0))(webpack@5.110.2))
       defu: 6.1.7
-      pathe: 2.0.3
       ufo: 1.6.4
     transitivePeerDependencies:
       - magic-string
