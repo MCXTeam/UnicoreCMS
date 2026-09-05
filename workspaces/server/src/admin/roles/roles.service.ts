@@ -83,7 +83,7 @@ export class RolesService {
       throw new ConflictException();
     }
 
-    await assertGrantable(input.perms, request);
+    await assertGrantable(input.perms, request, 'panel.roles.grant.panel');
 
     const role = new Role();
 
@@ -104,7 +104,7 @@ export class RolesService {
       throw new NotFoundException();
     }
 
-    await assertGrantable(input.perms, request);
+    await assertGrantable(input.perms, request, 'panel.roles.grant.panel');
 
     const before = roleSnapshot(role);
 

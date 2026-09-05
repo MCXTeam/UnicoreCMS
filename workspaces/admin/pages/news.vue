@@ -343,6 +343,7 @@ import { sortTransform } from '~/helpers'
 import { fullSizeTemplate } from '~/constants'
 import { FilterMatchMode } from '@primevue/core/api'
 import { Form, Field } from 'vee-validate'
+import { NEWS_PANEL_SCOPE } from 'unicore-common/news'
 
 export default {
   components: {
@@ -456,6 +457,7 @@ export default {
             limit: this.news.meta.itemsPerPage,
             search: this.filters.global.value,
             sortBy: this.news.meta.sortBy,
+            scope: NEWS_PANEL_SCOPE,
           },
         })
         .then((res) => res.data)
@@ -509,7 +511,9 @@ export default {
     async openDialog(newsSingle = null) {
       this.updateMode = !!newsSingle
       if (newsSingle) {
-        const full = await this.$api.get(`/news/${newsSingle.id}`).then((res) => res.data)
+        const full = await this.$api
+          .get(`/news/${newsSingle.id}`, { params: { scope: NEWS_PANEL_SCOPE } })
+          .then((res) => res.data)
 
         this.newsSingle = this.$_.pick(full, this.$_.deepKeys(this.newsSingle))
       } else {

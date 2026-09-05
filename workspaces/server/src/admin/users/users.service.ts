@@ -34,7 +34,7 @@ import {
 import { PublicUsersDto } from './dto/public-users.dto';
 import { UserUpdateInput } from './dto/user-update.input';
 import { matchPermission, transformPermissions } from '../roles/guards/permisson.guard';
-import { AuditChanges, auditChanges, isPanelPermission, UserField, USER_FIELDS } from 'unicore-common';
+import { AuditChanges, auditChanges, filterPanelPermissions, isPanelPermission, UserField, USER_FIELDS } from 'unicore-common';
 import { SettingsService } from 'src/game/cabinet/settings/providers/settings.service';
 import { TwoFactorService } from 'src/game/cabinet/settings/providers/two_factor.service';
 import { PasswordChangeInput } from 'src/game/cabinet/settings/dto/password-change.input';
@@ -58,7 +58,12 @@ function sameSet(left: string[] = [], right: string[] = []): boolean {
 }
 
 function adminPermissions(user: Partial<User>): string[] {
-  const resolved = transformPermissions({ ...user, perms: [...(user.perms || [])], roles: [...(user.roles || [])] });
+  const resolved = transformPermissions({
+    ...user,
+    perms: [...(user.perms || [])],
+    roles: [...(user.roles || [])],
+    superuser: false,
+  });
 
   return (resolved.perms || []).filter(isPanelPermission);
 }
@@ -74,12 +79,12 @@ async function canManageSuperuser(actor: User): Promise<boolean> {
 export async function userPermissionCheck(user: User, actor: User) {
   if (actor.superuser) return true;
   if (user.superuser && !(await canManageSuperuser(actor))) return false;
-  const actorPerms = transformPermissions({ ...actor, perms: [...(actor.perms || [])] }).perms;
-  const targetPerms = transformPermissions({ ...user, perms: [...(user.perms || [])] }).perms;
-  for (const perm of targetPerms) {
-    if (!actorPerms.find((p) => p == perm)) return false;
-  }
-  return true;
+  const actorPerms = filterPanelPermissions(transformPermissions({ ...actor, perms: [...(actor.perms || [])] }).perms);
+  const targetPerms = filterPanelPermissions(
+    transformPermissions({ ...user, perms: [...(user.perms || [])], superuser: false }).perms,
+  );
+
+  return targetPerms.every((perm) => actorPerms.includes(perm));
 }
 
 export class UsersService {

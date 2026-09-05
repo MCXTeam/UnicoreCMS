@@ -98,7 +98,7 @@ export class AuthController {
       ip,
     });
 
-    if (fromCookie) this.cookies.issue(response, tokens.refreshToken);
+    if (fromCookie) this.cookies.issue(response, tokens.refreshToken, request);
 
     return tokens;
   }

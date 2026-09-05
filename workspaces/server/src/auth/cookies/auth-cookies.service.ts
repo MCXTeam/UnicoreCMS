@@ -25,11 +25,12 @@ export class AuthCookiesService {
     return ms(envConfig.jwtRefreshExpires as ms.StringValue);
   }
 
-  issue(response: Response, refreshToken: string): void {
+  issue(response: Response, refreshToken: string, request?: Request): void {
     const shared = { sameSite: this.sameSite, secure: envConfig.apiHttps, path: COOKIE_PATH, maxAge: this.maxAge } as const;
+    const csrf = (request && this.token(request)) || randomBytes(CSRF_TOKEN_BYTES).toString('hex');
 
     response.cookie(REFRESH_COOKIE, refreshToken, { ...shared, httpOnly: true });
-    response.cookie(CSRF_COOKIE, randomBytes(CSRF_TOKEN_BYTES).toString('hex'), { ...shared, httpOnly: false });
+    response.cookie(CSRF_COOKIE, csrf, { ...shared, httpOnly: false });
   }
 
   clear(response: Response): void {

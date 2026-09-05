@@ -120,6 +120,7 @@
                 :label="$t('admin.permissions')"
                 :required="true"
                 :error="errorMessage"
+                :disabled="!canGrantPanel"
               />
             </VeeField>
             <VeeField
@@ -290,6 +291,7 @@ export default {
       canCreate: 'panel.roles.create',
       canUpdate: 'panel.roles.update',
       canDelete: 'panel.roles.delete',
+      canGrantPanel: 'panel.roles.grant.panel',
     })
 
     return { toast, confirm, apiUrl: config.public.apiBaseurl, ...access }

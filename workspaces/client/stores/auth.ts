@@ -111,11 +111,12 @@ export const useAuthStore = defineStore('auth', {
       const token = this.refreshToken
       const cookie = this.cookieAuth
 
+      if (token || cookie) await $api.post('/auth/logout', token ? { refresh_token: token } : {}).catch(() => {})
+
       this.setUser(null)
       this.setTokens(null, null)
       this.cookieAuth = false
-
-      if (token || cookie) await $api.post('/auth/logout', token ? { refresh_token: token } : {}).catch(() => {})
+      setCsrfToken('')
     },
   },
 })

@@ -806,7 +806,7 @@ export default {
       canEditSuperuser: 'superuser',
     })
 
-    return { rc: rc.public, route, toast, confirm, ...access, ...fields }
+    return { rc: rc.public, route, toast, confirm, grantable: useGrantableRoles(), ...access, ...fields }
   },
   data() {
     return {
@@ -863,7 +863,7 @@ export default {
 
   computed: {
     roleOptions() {
-      return (this.roles || []).map((role) => ({ ...role, locked: role.important || !this.canGrantRole(role) }))
+      return (this.roles || []).map((role) => ({ ...role, locked: role.important || !this.grantable(role) }))
     },
 
     canBalanceReal() {
@@ -952,14 +952,6 @@ export default {
 
     hasServerPermission(permission, serverId) {
       return useAuthStore().has(serverId ? `${permission}.${serverId}` : permission)
-    },
-
-    canGrantRole(role) {
-      const auth = useAuthStore()
-
-      if (auth.user?.superuser) return true
-
-      return (role.perms || []).every((permission) => auth.has(permission))
     },
 
     async load() {

@@ -42,7 +42,7 @@
               </span>
             </div>
           </template>
-          <Column selectionMode="multiple" :style="{ width: '3rem' }"></Column>
+          <Column v-if="canDeleteMany" selectionMode="multiple" :style="{ width: '3rem' }"></Column>
           <Column field="username" :header="$t('admin.username')" sortable>
             <template #body="slotProps">
               <div class="flex align-items-center">
@@ -249,11 +249,11 @@ export default {
       canEditSuperuser: 'superuser',
     })
 
-    return { toast, confirm, ...access, ...fields }
+    return { toast, confirm, grantable: useGrantableRoles(), ...access, ...fields }
   },
   computed: {
     roleOptions() {
-      return (this.roles || []).map((role) => ({ ...role, locked: role.important || !this.canGrantRole(role) }))
+      return (this.roles || []).map((role) => ({ ...role, locked: role.important || !this.grantable(role) }))
     },
 
     sections() {
@@ -300,14 +300,6 @@ export default {
     this.load()
   },
   methods: {
-    canGrantRole(role) {
-      const auth = useAuthStore()
-
-      if (auth.user?.superuser) return true
-
-      return (role.perms || []).every((permission) => auth.has(permission))
-    },
-
     fillGeneratedPassword(handleChange) {
       const password = generatePassword()
 

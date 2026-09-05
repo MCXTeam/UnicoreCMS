@@ -11,6 +11,7 @@ export * from "./audit";
 export * from "./password";
 export * from "./payments";
 export * from "./locales";
+export * from "./news";
 export * from "./envconfig";
 export * from "./public-config";
 export * from "./console";

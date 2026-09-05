@@ -19,6 +19,7 @@ export default defineConfig({
     "src/password.ts",
     "src/payments.ts",
     "src/locales.ts",
+    "src/news.ts",
     "src/issuance/index.ts",
     "src/validation/index.ts",
     "src/sanitize.ts",

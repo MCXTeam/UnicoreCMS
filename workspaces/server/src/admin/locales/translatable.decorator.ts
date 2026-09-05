@@ -1,11 +1,11 @@
-import { contentTranslationPermissions } from 'unicore-common';
+import { anyScope, contentTranslationPermissions } from 'unicore-common';
 import { Translatable, TranslatableMeta, translatableByEntity, translatableOf } from 'unicore-api';
 
 export { Translatable, translatableByEntity, translatableOf };
 export type { TranslatableMeta };
 
 export function translationAccess(entity: string, mode: 'read' | 'write'): string[] {
-  const core = contentTranslationPermissions(entity, mode);
+  const core = contentTranslationPermissions(entity, mode).map((permission) => anyScope(permission));
 
   if (core.length) return core;
 

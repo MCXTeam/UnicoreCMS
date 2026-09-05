@@ -19,7 +19,8 @@
     "schema:sync": "pnpm run typeorm:cli schema:sync",
     "seed:run": "node dist/cli/main.js seed",
     "migrate:status": "node ./dist/migrations/cli.js status",
-    "schema:align": "node ./dist/migrations/cli.js align"
+    "schema:align": "node ./dist/migrations/cli.js align",
+    "test": "node --test \"test/*.test.mjs\""
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^2.3.7",

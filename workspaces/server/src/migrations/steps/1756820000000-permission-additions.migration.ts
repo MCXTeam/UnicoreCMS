@@ -30,6 +30,7 @@ const GRANTS: Grant[] = [
   { granted: 'panel.revenue.items', implied: ['panel.revenue.read'], mode: 'mirror' },
   { granted: 'panel.users.skin', implied: ['panel.users.update'], mode: 'exact' },
   { granted: 'panel.users.cloak', implied: ['panel.users.update'], mode: 'exact' },
+  { granted: 'panel.roles.grant.panel', implied: ['panel.users.grant.panel'], mode: 'exact' },
 ];
 
 function flatten(pattern: string): string {

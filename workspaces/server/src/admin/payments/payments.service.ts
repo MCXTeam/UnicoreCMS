@@ -2,12 +2,13 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FilterOperator, PaginateQuery, Paginated, paginate } from '@common';
-import { MANUAL_PAYMENT_METHOD, PAYMENT_TOP_LIMIT } from 'unicore-common';
+import { MANUAL_PAYMENT_METHOD, PAYMENT_PLAYERS_LIMIT, PAYMENT_TOP_LIMIT } from 'unicore-common';
 import { User } from 'src/admin/users/entities/user.entity';
 import { Payment } from 'src/payment/entities/payment.entity';
 import { PaymentStatuses } from 'src/payment/enums/payment-statuses.enum';
 import { PaymentHandlerService } from 'src/payment/methods/core/payment-handler.service';
 import { PaymentCreateInput } from './dto/payment-create.input';
+import { PaymentUpdateInput } from './dto/payment-update.input';
 
 export interface PaymentTopRow {
   uuid: string;
@@ -67,6 +68,43 @@ export class PaymentsService {
       total: Number(row.total) || 0,
       payments: Number(row.payments) || 0,
     }));
+  }
+
+  async players(search: string): Promise<{ uuid: string; username: string }[]> {
+    const value = String(search ?? '').trim();
+
+    const builder = this.usersRepository
+      .createQueryBuilder('user')
+      .select(['user.uuid', 'user.username'])
+      .orderBy('user.username', 'ASC')
+      .limit(PAYMENT_PLAYERS_LIMIT);
+
+    if (value) builder.where('user.username LIKE :value', { value: `%${value}%` });
+
+    const rows = await builder.getMany();
+
+    return rows.map((user) => ({ uuid: user.uuid, username: user.username }));
+  }
+
+  async update(id: number, input: PaymentUpdateInput): Promise<Payment> {
+    const payment = await this.paymentsRepository.findOne({ where: { id }, relations: ['user'] });
+
+    if (!payment) throw new NotFoundException();
+
+    if (payment.status === PaymentStatuses.PAID)
+      throw new BadRequestException('Завершённое пополнение изменить нельзя: деньги уже зачислены');
+
+    if (input.amount !== undefined) {
+      const amount = Number(input.amount);
+
+      if (!Number.isFinite(amount) || amount <= 0) throw new BadRequestException('Некорректная сумма');
+
+      await this.paymentsRepository.update({ id }, { amount });
+    }
+
+    if (input.status === PaymentStatuses.PAID) await this.handler.handler(id);
+
+    return this.paymentsRepository.findOne({ where: { id }, relations: ['user'] });
   }
 
   async create(input: PaymentCreateInput): Promise<Payment> {

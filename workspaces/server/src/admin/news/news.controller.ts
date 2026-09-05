@@ -24,6 +24,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { NEWS_PANEL_SCOPE } from 'unicore-common';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
@@ -37,19 +38,19 @@ import { NewsService } from './news.service';
 export class NewsController {
   constructor(private newsService: NewsService) {}
 
-  private async seesHidden(request: any): Promise<boolean> {
+  private async seesHidden(request: any, panel = false): Promise<boolean> {
     if (!request?.user) return false;
 
-    return matchPermission(
-      [['panel.news.hidden', 'panel.news.create', 'panel.news.update', 'panel.news.delete'], { or: true }],
-      request,
-    );
+    if (panel && (await matchPermission([['panel.news.create', 'panel.news.update', 'panel.news.delete'], { or: true }], request)))
+      return true;
+
+    return matchPermission(['panel.news.hidden'], request);
   }
 
   @Public()
   @Get()
-  async find(@Req() request: any, @Paginate() query: PaginateQuery) {
-    return this.newsService.find(query, await this.seesHidden(request));
+  async find(@Req() request: any, @Paginate() query: PaginateQuery, @Query('scope') scope?: string) {
+    return this.newsService.find(query, await this.seesHidden(request, scope === NEWS_PANEL_SCOPE));
   }
 
   @Public()
@@ -85,8 +86,8 @@ export class NewsController {
 
   @Public()
   @Get(':id')
-  async findOne(@Req() request: any, @Param('id', ParseIntPipe) id: number) {
-    return this.newsService.findOne(id, await this.seesHidden(request));
+  async findOne(@Req() request: any, @Param('id', ParseIntPipe) id: number, @Query('scope') scope?: string) {
+    return this.newsService.findOne(id, await this.seesHidden(request, scope === NEWS_PANEL_SCOPE));
   }
 
   @Audit({ action: 'content.create', target: 'news' })

@@ -123,6 +123,18 @@
                 />
               </template>
             </Column>
+            <Column v-if="canCreatePayment" :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
+              <template #body="slotProps">
+                <Button
+                  v-if="slotProps.data.status !== 'paid'"
+                  :label="$t('admin.payments_complete')"
+                  icon="pi pi-check"
+                  size="small"
+                  :disabled="paymentsLoading"
+                  @click="completePayment(slotProps.data)"
+                />
+              </template>
+            </Column>
           </DataTable>
 
           <h5 class="mt-5 mb-3">{{ $t('admin.payments_top_title') }}</h5>
@@ -202,6 +214,7 @@
 
 <script>
 import { useToast } from 'primevue/usetoast'
+import { useConfirm } from 'primevue/useconfirm'
 import { MANUAL_PAYMENT_METHOD, PAYMENT_STATUSES } from 'unicore-common/payments'
 
 export default {
@@ -217,7 +230,12 @@ export default {
       canCreatePayment: 'panel.revenue.payments.create',
     })
 
-    return { ...access, toast: useToast(), realDecimals: useRuntimeConfig().public.realDecimals }
+    return {
+      ...access,
+      toast: useToast(),
+      confirm: useConfirm(),
+      realDecimals: useRuntimeConfig().public.realDecimals,
+    }
   },
 
   data() {
@@ -321,6 +339,35 @@ export default {
       this.loadPayments()
     },
 
+    completePayment(payment) {
+      this.confirm.require({
+        message: this.$t('admin.payments_complete_confirm'),
+        header: this.$t('admin.payments_complete'),
+        icon: 'pi pi-exclamation-triangle',
+        accept: async () => {
+          this.paymentsLoading = true
+
+          const ok = await this.$api
+            .patch(`/admin/payments/${payment.id}`, { status: 'paid' })
+            .then(() => true)
+            .catch((error) => {
+              this.$utils.notifyError(error, this.$t('admin.invalid_data'))
+
+              return false
+            })
+
+          this.paymentsLoading = false
+
+          if (!ok) return
+
+          this.toast.add({ severity: 'success', detail: this.$t('admin.payments_completed'), life: 3000 })
+
+          await this.loadPayments()
+          await this.load()
+        },
+      })
+    },
+
     openPaymentDialog() {
       this.payment = { user: null, amount: null, method: null, paid: false }
       this.paymentDialog = true
@@ -328,8 +375,8 @@ export default {
 
     async searchPlayer(event) {
       this.players = await this.$api
-        .get('/users', { params: { search: event.query.trim(), limit: 10 } })
-        .then((res) => res.data.data)
+        .get('/admin/payments/players', { params: { search: event.query.trim() } })
+        .then((res) => res.data)
         .catch(() => [])
     },
 

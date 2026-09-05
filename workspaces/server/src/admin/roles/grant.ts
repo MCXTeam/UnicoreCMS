@@ -1,12 +1,16 @@
 import { ForbiddenException } from '@nestjs/common';
-import { isDenyPattern, denyTarget, isPlayerPermission, satisfiesPermission } from 'unicore-common';
+import { isDenyPattern, denyTarget, isPlayerPermission, Permission, satisfiesPermission } from 'unicore-common';
 import { grantedPermissions, matchPermission } from './guards/permisson.guard';
 
-export async function assertGrantable(patterns: string[] = [], request: any): Promise<void> {
+export async function assertGrantable(
+  patterns: string[] = [],
+  request: any,
+  grant: Permission = 'panel.users.grant.panel',
+): Promise<void> {
   if (request?.user?.superuser) return;
 
   const granted = await grantedPermissions(request);
-  const panel = await matchPermission(['panel.users.grant.panel'], request);
+  const panel = await matchPermission([grant], request);
 
   for (const pattern of patterns) {
     if (isDenyPattern(pattern)) continue;

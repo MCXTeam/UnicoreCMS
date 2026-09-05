@@ -87,6 +87,11 @@
       "import": "./dist/locales.mjs",
       "require": "./dist/locales.js"
     },
+    "./news": {
+      "types": "./dist/news.d.ts",
+      "import": "./dist/news.mjs",
+      "require": "./dist/news.js"
+    },
     "./envconfig": {
       "types": "./dist/envconfig.d.ts",
       "import": "./dist/envconfig.mjs",

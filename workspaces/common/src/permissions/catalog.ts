@@ -114,6 +114,7 @@ export const PERMISSIONS = define({
   "panel.roles.create": { group: "roles", danger: true },
   "panel.roles.update": { group: "roles", danger: true },
   "panel.roles.delete": { group: "roles", danger: true },
+  "panel.roles.grant.panel": { group: "roles", danger: true },
 
   "panel.servers.read": { group: "servers" },
   "panel.servers.sort": { group: "servers" },

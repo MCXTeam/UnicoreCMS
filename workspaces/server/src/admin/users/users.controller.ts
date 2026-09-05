@@ -27,7 +27,7 @@ import { Audit, DeleteManyUuidInput, Paginate, PaginateQuery, THROTTLE_PUBLIC_US
 import { PasswordUpdateInput } from 'src/game/cabinet/settings/dto/password-update.input';
 import { Permissions } from '../roles/decorators/permission.decorator';
 import { matchPermission } from '../roles/guards/permisson.guard';
-import { UserField, USER_FIELDS, USER_FIELD_PERMISSIONS } from 'unicore-common';
+import { UserField, USER_FIELDS, USER_FIELD_PERMISSIONS, isUpdateOnlyField } from 'unicore-common';
 
 @ApiTags('users')
 @Controller('users')
@@ -37,9 +37,13 @@ export class UsersController {
     private passwordPolicy: PasswordPolicyService,
   ) {}
 
-  private async allowedFields(request: any): Promise<UserField[]> {
+  private async allowedFields(request: any, updating = true): Promise<UserField[]> {
     const checked = await Promise.all(
-      USER_FIELDS.map(async (field) => ((await matchPermission([USER_FIELD_PERMISSIONS[field]], request)) ? field : null)),
+      USER_FIELDS.map(async (field) =>
+        (!updating && isUpdateOnlyField('user', field)) || (await matchPermission([USER_FIELD_PERMISSIONS[field]], request))
+          ? field
+          : null,
+      ),
     );
 
     return checked.filter(Boolean) as UserField[];
@@ -51,7 +55,7 @@ export class UsersController {
   async create(@Req() request: any, @CurrentUser() actor: User, @Body() createUserDto: UserInput) {
     await this.passwordPolicy.assert(createUserDto.password, { username: createUserDto.username, email: createUserDto.email });
 
-    return new UserDto(await this.usersService.create(createUserDto, actor, await this.allowedFields(request), false, request));
+    return new UserDto(await this.usersService.create(createUserDto, actor, await this.allowedFields(request, false), false, request));
   }
 
   @Permissions(['panel.access', 'panel.users.read'])
