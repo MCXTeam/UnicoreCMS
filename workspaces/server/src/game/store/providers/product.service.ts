@@ -110,6 +110,9 @@ export class ProductsService {
       .leftJoinAndSelect('kit.servers', 'servers')
       .leftJoinAndSelect('kit.categories', 'categories');
 
+    queryBuilderProducts.andWhere('product.hidden = :hidden', { hidden: false });
+    queryBuilderKits.andWhere('kit.hidden = :hidden', { hidden: false });
+
     if (query?.filter?.categories && !Array.isArray(query.filter.categories)) query.filter.categories = query.filter.categories.split(',');
 
     if (query.filter?.server && query.filter?.categories) {
@@ -297,6 +300,7 @@ export class ProductsService {
     product.sale = input.sale;
     product.give_method = input.give_method;
     product.virtual_percent = input.virtual_percent;
+    product.hidden = input.hidden === true;
     product.giftable = input.giftable !== false;
     product.multiple_of = input.multiple_of;
 
@@ -339,6 +343,7 @@ export class ProductsService {
     product.sale = input.sale;
     product.give_method = input.give_method;
     product.virtual_percent = input.virtual_percent;
+    product.hidden = input.hidden === true;
     product.giftable = input.giftable !== false;
     product.multiple_of = input.multiple_of;
 

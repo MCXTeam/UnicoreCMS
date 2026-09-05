@@ -15,7 +15,7 @@ export class ConfigController {
   private async rconOnly(request: any, permission: 'panel.config.read' | 'panel.config.update'): Promise<boolean> {
     if (await matchPermission([permission], request)) return false;
 
-    if (await matchPermission(['panel.servers.rcon.*'], request)) return true;
+    if (await matchPermission(['panel.servers.issuance'], request)) return true;
 
     throw new ForbiddenException();
   }

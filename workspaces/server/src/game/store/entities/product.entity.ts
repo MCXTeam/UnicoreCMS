@@ -16,6 +16,9 @@ export class Product {
   @Column({ name: 'name' })
   name: string;
 
+  @Column({ name: 'hidden', default: false })
+  hidden: boolean;
+
   @Column({ name: 'giftable', default: true })
   giftable: boolean;
 

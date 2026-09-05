@@ -13,6 +13,8 @@ export const DEFAULT_LOCALES = [
 
 export type LocaleCode = "ru" | "en";
 
+export const FALLBACK_LOCALE = "en";
+
 export const LOCALE_HEADER = "x-locale";
 export const LOCALE_COOKIE = "locale";
 export const LOCALE_ADMIN_COOKIE = "locale_admin";

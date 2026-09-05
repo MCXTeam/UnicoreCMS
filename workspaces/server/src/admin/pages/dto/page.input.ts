@@ -1,6 +1,7 @@
 import { Transform } from 'class-transformer';
 import { IsBoolean, IsDefined, IsOptional, IsString, Matches, MaxLength } from 'class-validator';
-import { NAME_MAX_LENGTH, PATH_MAX_LENGTH, PATH_PATTERN, SanitizeHtml, TEXT_MAX_LENGTH } from '@common';
+import { PAGE_PATH_MAX_LENGTH, PAGE_PATH_PATTERN } from 'unicore-common';
+import { NAME_MAX_LENGTH, SanitizeHtml, TEXT_MAX_LENGTH } from '@common';
 
 export class PageInput {
   @IsDefined()
@@ -10,8 +11,8 @@ export class PageInput {
 
   @IsDefined()
   @IsString()
-  @MaxLength(PATH_MAX_LENGTH)
-  @Matches(PATH_PATTERN)
+  @MaxLength(PAGE_PATH_MAX_LENGTH)
+  @Matches(PAGE_PATH_PATTERN)
   path: string;
 
   @IsOptional()

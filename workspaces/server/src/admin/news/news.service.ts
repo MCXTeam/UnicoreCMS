@@ -20,7 +20,7 @@ export class NewsService {
     private deliveriesService: WebhookDeliveriesService,
   ) {}
 
-  async create(input: NewsInput, file?: Express.Multer.File, allowCustomCode = false): Promise<News> {
+  async create(input: NewsInput, file?: Express.Multer.File, allowCustomCode = false, canPublish = true): Promise<News> {
     const news = new News();
 
     news.title = input.title;
@@ -35,7 +35,7 @@ export class NewsService {
 
     const saved = await this.newsRepository.save(news);
 
-    if (!saved.hidden)
+    if (!saved.hidden && canPublish)
       this.deliveriesService
         .enqueueNews(saved, PublishMode.Auto, input.webhooks)
         .catch((e) => this.logger.error(`Не удалось поставить новость ${saved.id} в очередь вебхуков: ${e}`));

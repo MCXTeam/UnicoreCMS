@@ -68,12 +68,26 @@ export function filterPanelPermissions(values: unknown): string[] {
   return values.filter(isPanelPermission);
 }
 
+export function longestScope(
+  permission: string,
+  scoped: Iterable<string>,
+): string | null {
+  let base: string | null = null;
+
+  for (const key of scoped)
+    if (
+      permission.startsWith(`${key}.`) &&
+      (!base || key.length > base.length)
+    )
+      base = key;
+
+  return base;
+}
+
 export function scopeOf(permission: string): string | null {
   if (permissionMeta(permission)) return null;
 
-  for (const key of scopedPermissions()) if (permission.startsWith(`${key}.`)) return key;
-
-  return null;
+  return longestScope(permission, scopedPermissions());
 }
 
 export function isScopedPermission(permission: string): boolean {

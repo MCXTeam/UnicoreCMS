@@ -2,7 +2,7 @@ import { Audit, NumberSortInput, DeleteManyInput, IpAddress } from '@common';
 import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Post, Req } from '@nestjs/common';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { assertServerPermission } from 'src/admin/roles/guards/permisson.guard';
-import { allowedServers } from 'src/admin/roles/server-scope';
+import { allowedServers, allowedServersAny } from 'src/admin/roles/server-scope';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { GiveDonatePermInput } from './dto/give-donate-perm.input';
@@ -20,7 +20,7 @@ export class PermissionsController {
     return this.donatePermissionsService.create(body, request);
   }
 
-  @Permissions(['panel.access', 'panel.donate.permissions.update.*'])
+  @Permissions(['panel.access', 'panel.donate.sort'])
   @Post('sort')
   sort(@Body() body: NumberSortInput) {
     return this.donatePermissionsService.sort(body);
@@ -29,7 +29,7 @@ export class PermissionsController {
   @Permissions([['panel.donate.read.*', 'panel.users.donate.*'], { or: true }])
   @Get()
   async find(@Req() request: any) {
-    return this.donatePermissionsService.find(['servers', 'kits', 'periods'], await allowedServers(request, 'panel.donate.read'));
+    return this.donatePermissionsService.find(['servers', 'kits', 'periods'], await allowedServersAny(request, ['panel.donate.read', 'panel.users.donate']));
   }
 
   @Get('me')

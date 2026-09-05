@@ -40,7 +40,7 @@ export async function assertFieldAccess(
   const granted = await grantedPermissions(request);
 
   for (const field of fields) {
-    if (canEditField(entity, field, granted)) continue;
+    if (canEditField(entity, field, granted, Boolean(current))) continue;
     if (!(field in input)) continue;
     if (current ? same(input[field], current[field]) : !meaningful(input[field])) continue;
 

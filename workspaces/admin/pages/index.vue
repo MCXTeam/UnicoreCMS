@@ -118,7 +118,7 @@
         <Chart type="bar" :data="barData" :options="barOptions" />
       </div>
     </div>
-    <div class="col-12 mt-2">
+    <div v-if="hasSection('online_records')" class="col-12 mt-2">
       <div class="card h-full">
         <div class="flex justify-content-between align-items-center mb-4">
           <h5>{{ $t('admin.servers_status') }}</h5>

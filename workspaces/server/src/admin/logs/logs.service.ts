@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Brackets, In, Repository, SelectQueryBuilder } from 'typeorm';
 import { AUDIT_CLASSES, AuditClass, Permission, auditActions, auditClassPermission } from 'unicore-common';
@@ -26,9 +26,6 @@ export class LogsService {
 
   async find(query: PaginateQuery, request: unknown, player?: string): Promise<Paginated<AuditLog>> {
     const allowed = await this.allowedClasses(request);
-
-    if (!allowed.length) throw new ForbiddenException();
-
     const requested = this.requestedClasses(query, allowed);
     const builder = this.auditRepository.createQueryBuilder('audit').where({ class: In(requested) });
 
@@ -71,10 +68,6 @@ export class LogsService {
 
     if (!requested.length) return allowed;
 
-    const matched = requested.filter((value) => allowed.includes(value));
-
-    if (!matched.length) throw new ForbiddenException();
-
-    return matched;
+    return requested.filter((value) => allowed.includes(value));
   }
 }

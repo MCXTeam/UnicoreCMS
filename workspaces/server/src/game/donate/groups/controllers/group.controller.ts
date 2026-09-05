@@ -16,7 +16,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { assertServerPermission } from 'src/admin/roles/guards/permisson.guard';
-import { allowedServers } from 'src/admin/roles/server-scope';
+import { allowedServers, allowedServersAny } from 'src/admin/roles/server-scope';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { Public } from 'src/auth/decorators/public.decorator';
@@ -35,7 +35,7 @@ export class DonateGroupsController {
     return this.donateGroupsService.create(body, request);
   }
 
-  @Permissions(['panel.access', 'panel.donate.groups.update.*'])
+  @Permissions(['panel.access', 'panel.donate.sort'])
   @Post('sort')
   sort(@Body() body: NumberSortInput) {
     return this.donateGroupsService.sort(body);
@@ -44,7 +44,7 @@ export class DonateGroupsController {
   @Permissions([['panel.donate.read.*', 'panel.users.donate.*'], { or: true }])
   @Get()
   async find(@Req() request: any) {
-    return this.donateGroupsService.find(['servers', 'kits', 'periods', 'features'], await allowedServers(request, 'panel.donate.read'));
+    return this.donateGroupsService.find(['servers', 'kits', 'periods', 'features'], await allowedServersAny(request, ['panel.donate.read', 'panel.users.donate']));
   }
 
   @Get('me')

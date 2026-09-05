@@ -38,7 +38,7 @@
               </span>
             </div>
           </template>
-          <Column selectionMode="multiple" :style="{ width: '3rem' }"></Column>
+          <Column v-if="canDeleteMany" selectionMode="multiple" :style="{ width: '3rem' }"></Column>
           <Column sortable field="id" header="ID" :style="{ width: '8rem' }"></Column>
           <Column field="name" :header="$t('admin.name')" sortable></Column>
           <Column field="type" :header="$t('admin.event')" sortable>

@@ -218,14 +218,17 @@ export default {
     const requested = String(this.$route.query.player ?? '').trim()
 
     if (requested) {
-      const found = await this.$api.get('/users', { params: { search: requested, limit: 1 } }).then((res) => res.data.data)
+      const found = await this.$api
+        .get('/users', { params: { search: requested, limit: 1 } })
+        .then((res) => res.data.data)
+        .catch(() => [])
 
       this.player = found?.[0] ?? requested
     }
 
     const [classes, actions] = await Promise.all([
-      this.$api.get('/admin/logs/classes').then((res) => res.data),
-      this.$api.get('/admin/logs/actions').then((res) => res.data),
+      this.$api.get('/admin/logs/classes').then((res) => res.data).catch(() => []),
+      this.$api.get('/admin/logs/actions').then((res) => res.data).catch(() => []),
     ])
 
     this.classes = classes
@@ -297,8 +300,11 @@ export default {
     async load() {
       this.loading = true
 
-      this.logs = await this.$api.get('/admin/logs', { params: this.params() }).then((res) => res.data)
-      this.loading = false
+      try {
+        this.logs = await this.$api.get('/admin/logs', { params: this.params() }).then((res) => res.data)
+      } finally {
+        this.loading = false
+      }
     },
     onPage(event) {
       this.logs.meta.currentPage = event.page + 1

@@ -32,8 +32,8 @@
               <h5 class="m-0">{{ $t('admin.donate_kits_title') }}</h5>
             </div>
           </template>
-          <Column :style="{ width: '3rem' }" :rowReorder="true" headerStyle="width: 3rem" />
-          <Column selectionMode="multiple" :style="{ width: '3rem' }"></Column>
+          <Column v-if="canSort" :style="{ width: '3rem' }" :rowReorder="true" headerStyle="width: 3rem" />
+          <Column v-if="canDeleteMany" selectionMode="multiple" :style="{ width: '3rem' }"></Column>
           <Column field="id" header="ID" :style="{ width: '8rem' }"></Column>
           <Column field="name" :header="$t('admin.name')"></Column>
           <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
@@ -173,6 +173,7 @@ export default {
       canUpdate: 'panel.donate.kits.update',
       canDelete: 'panel.donate.kits.delete',
       canDeleteMany: 'panel.donate.kits.delete.many',
+      canSort: 'panel.donate.sort',
     })
 
     return {

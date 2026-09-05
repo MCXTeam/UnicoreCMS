@@ -1,14 +1,9 @@
-import { assertServerEntities, assertServerList } from 'src/admin/roles/server-scope';
 import { PaginateQuery, Paginated, StorageManager, paginate } from '@common';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { ModInput } from './dto/mod.input';
 import { Mod } from './entities/mod.entity';
-
-const assertModScope = async (request: any, permission: string, mod: Mod): Promise<void> => {
-  await assertServerList(request, permission, (mod.servers || []).map((server) => server.id));
-};
 
 @Injectable()
 export class ModsService {
@@ -17,21 +12,7 @@ export class ModsService {
     private modsRepository: Repository<Mod>,
   ) {}
 
-  find(query: PaginateQuery, allowed: string[] | null = null): Promise<Paginated<Mod>> {
-    if (allowed) {
-      const scoped = this.modsRepository
-        .createQueryBuilder('mod')
-        .leftJoin('mod.servers', 'servers')
-        .where('servers.id IN(:...allowed)', { allowed: allowed.length ? allowed : [null] });
-
-      return paginate(query, scoped, {
-        sortableColumns: ['id', 'name'],
-        searchableColumns: ['id', 'name'],
-        defaultSortBy: [['name', 'ASC']],
-        maxLimit: 500,
-      });
-    }
-
+  find(query: PaginateQuery): Promise<Paginated<Mod>> {
     return paginate(query, this.modsRepository, {
       sortableColumns: ['id', 'name'],
       searchableColumns: ['id', 'name'],
@@ -54,14 +35,12 @@ export class ModsService {
     return this.modsRepository.save(mod);
   }
 
-  async update(id: number, input: ModInput, request?: any): Promise<Mod> {
-    const mod = await this.findOne(id, ['servers']);
+  async update(id: number, input: ModInput): Promise<Mod> {
+    const mod = await this.findOne(id);
 
     if (!mod) {
       throw new NotFoundException();
     }
-
-    await assertModScope(request, 'panel.mods.update', mod);
 
     mod.name = input.name;
     mod.description = input.description;
@@ -70,27 +49,22 @@ export class ModsService {
     return this.modsRepository.save(mod);
   }
 
-  async remove(id: number, request?: any) {
-    const mod = await this.findOne(id, ['servers']);
+  async remove(id: number) {
+    const mod = await this.findOne(id);
 
     if (!mod) {
       throw new NotFoundException();
     }
 
-    await assertModScope(request, 'panel.mods.delete', mod);
-
     return this.modsRepository.remove(mod);
   }
 
-  async removeMany(ids: number[], request?: any) {
+  async removeMany(ids: number[]) {
     const mods = await this.modsRepository.find({
       where: {
         id: In(ids),
       },
-      relations: ['servers'],
     });
-
-    await assertServerEntities(request, 'panel.mods.delete.many', mods);
 
     return this.modsRepository.remove(mods);
   }

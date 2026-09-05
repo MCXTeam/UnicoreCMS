@@ -69,7 +69,7 @@
               </span>
             </div>
           </template>
-          <Column selectionMode="multiple" :style="{ width: '3rem' }"></Column>
+          <Column v-if="canDeleteMany" selectionMode="multiple" :style="{ width: '3rem' }"></Column>
           <Column field="id" header="ID" :style="{ width: '8rem' }" sortable></Column>
           <Column field="name" :header="$t('admin.name')" sortable>
             <template #body="slotProps">
@@ -136,16 +136,16 @@
           <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <Button
-                v-if="canUpdate"
+                v-if="canUpdateOn(slotProps.data.servers)"
                 @click="openDialog(slotProps.data)"
                 icon="pi pi-pencil"
                 class="p-button-rounded p-button-success mr-2"
               />
               <Button
-                  v-if="canUpdate" @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary mr-2" />
+                  v-if="canUpdateOn(slotProps.data.servers)" @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary mr-2" />
               <Button
                 @click="removeProduct(slotProps.data.id)"
-                v-if="canDelete && !slotProps.data.important"
+                v-if="canDeleteOn(slotProps.data.servers) && !slotProps.data.important"
                 icon="pi pi-trash"
                 class="p-button-rounded p-button-warning mt-2"
               />
@@ -230,9 +230,9 @@
                   v-slot="{ value, errorMessage, handleChange, handleBlur }"
                 >
                   <div class="field">
-                    <label>{{ $t('admin.price') }}<FieldLock :allowed="canEditPrice" /></label>
+                    <label>{{ $t('admin.price') }}<FieldLock :allowed="canEditPrice()" /></label>
                     <InputNumber
-                      :disabled="!canEditPrice"
+                      :disabled="!canEditPrice()"
                       :modelValue="value"
                       @update:modelValue="handleChange"
                       @input="handleChange($event.value)"
@@ -254,9 +254,9 @@
                   v-slot="{ value, errorMessage, handleChange, handleBlur }"
                 >
                   <div class="field">
-                    <label>{{ $t('admin.sale') }}<FieldLock :allowed="canEditPrice" /></label>
+                    <label>{{ $t('admin.sale') }}<FieldLock :allowed="canEditPrice()" /></label>
                     <InputNumber
-                      :disabled="!canEditPrice"
+                      :disabled="!canEditPrice()"
                       suffix=" %"
                       :placeholder="$t('admin.unchanged')"
                       :useGrouping="false"
@@ -446,8 +446,8 @@
                 v-slot="{ value, errorMessage, handleChange }"
               >
                 <div class="field">
-                  <label>{{ $t('admin.commands') }}<span class="p-error"> *</span><FieldLock :allowed="canEditCommands" /></label>
-                  <InputChips :modelValue="value" @update:modelValue="handleChange" :disabled="!canEditCommands" />
+                  <label>{{ $t('admin.commands') }}<span class="p-error"> *</span><FieldLock :allowed="canEditCommands(updateMode)" /></label>
+                  <InputChips :modelValue="value" @update:modelValue="handleChange" :disabled="!canEditCommands(updateMode)" />
                   <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
                   <Divider align="left" type="dashed">
                     <b>{{ $t('admin.variables') }}</b>
@@ -499,7 +499,7 @@
                 </Editor>
               </div>
               <div class="field">
-                <label>{{ $t('admin.servers') }}</label>
+                <label>{{ $t('admin.servers') }}<span class="p-error"> *</span></label>
                 <MultiSelect
                   display="chip"
                   :filter="true"
@@ -549,9 +549,9 @@
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>{{ $t('admin.price') }}<span class="p-error"> *</span><FieldLock :allowed="canEditPrice" /></label>
+                      <label>{{ $t('admin.price') }}<span class="p-error"> *</span><FieldLock :allowed="canEditPrice(updateMode)" /></label>
                       <InputNumber
-                        :disabled="!canEditPrice"
+                        :disabled="!canEditPrice(updateMode)"
                         :modelValue="value"
                         @update:modelValue="handleChange"
                         @input="handleChange($event.value)"
@@ -573,9 +573,9 @@
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>{{ $t('admin.sale') }}<FieldLock :allowed="canEditPrice" /></label>
+                      <label>{{ $t('admin.sale') }}<FieldLock :allowed="canEditPrice(updateMode)" /></label>
                       <InputNumber
-                        :disabled="!canEditPrice"
+                        :disabled="!canEditPrice(updateMode)"
                         suffix=" %"
                         :useGrouping="false"
                         :modelValue="value"
@@ -610,6 +610,13 @@
                 </VeeField>
               </div>
               <div class="field-checkbox">
+                <Checkbox :binary="true" v-model="product.hidden" inputId="product-hidden" />
+                <label for="product-hidden" class="flex align-items-center gap-1">
+                  {{ $t('admin.hidden_item') }}
+                  <i v-tooltip.right="$t('admin.hidden_item_hint')" class="pi pi-question-circle text-color-secondary" />
+                </label>
+              </div>
+              <div class="field-checkbox">
                 <Checkbox :binary="true" v-model="product.giftable" inputId="product-giftable" />
                 <label for="product-giftable">{{ $t('admin.giftable') }}</label>
               </div>
@@ -622,7 +629,7 @@
             <template #footer>
               <Button :disabled="loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
-                :disabled="loading || !meta.valid"
+                :disabled="loading || !meta.valid || !product.servers.length"
                 :label="$t('common.save')"
                 icon="pi pi-check"
                 class="p-button-text"
@@ -653,7 +660,8 @@ export default {
     const { $t } = useNuxtApp()
 
     useHead({ title: computed(() => $t('admin.products')) })
-    const serverScope = useServerScope('panel.store.read')
+    const createScope = useServerScope('panel.store.products.create')
+    const updateScope = useServerScope('panel.store.products.update')
 
     const access = useAccess({
       canCreate: 'panel.store.products.create',
@@ -665,6 +673,11 @@ export default {
       canImport: 'panel.store.products.import',
     })
 
+    const scoped = useScopedAccess({
+      canUpdateOn: 'panel.store.products.update',
+      canDeleteOn: 'panel.store.products.delete',
+    })
+
     const fields = useFieldAccess('store_product', {
       canEditPrice: 'price',
       canEditCommands: 'commands',
@@ -672,8 +685,10 @@ export default {
 
     return {
       ...access,
+      ...scoped,
       ...fields,
-      serverScope,
+      createScope,
+      updateScope,
       translations,
       realDecimals: rc.public.realDecimals,
     }
@@ -710,6 +725,7 @@ export default {
         item_id: null,
         nbt: null,
         virtual_percent: null,
+        hidden: false,
         giftable: true,
         multiple_of: null,
       },
@@ -733,11 +749,13 @@ export default {
   },
   computed: {
     serverOptions() {
-      if (!this.serverScope) return this.servers
+      const scope = this.updateMode ? this.updateScope : this.createScope
+
+      if (!scope) return this.servers
 
       const attached = (this.product?.servers || []).map((server) => server.id || server)
 
-      return this.servers.filter((server) => this.serverScope.includes(server.id) || attached.includes(server.id))
+      return this.servers.filter((server) => scope.includes(server.id) || attached.includes(server.id))
     },
 
     sections() {
@@ -882,6 +900,7 @@ export default {
           icon: null,
           nbt: null,
           virtual_percent: null,
+        hidden: false,
         giftable: true,
           multiple_of: null,
         }

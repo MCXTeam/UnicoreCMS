@@ -176,7 +176,7 @@
     </Dialog>
 
     <div class="cab-grid">
-      <CabTile :title="$t('cabinet.donate_groups')" icon="bx bx-crown" :span="6">
+      <CabTile v-if="showGroups" :title="$t('cabinet.donate_groups')" icon="bx bx-crown" :span="6">
         <template #actions>
           <Select
             class="cab-select"
@@ -250,7 +250,7 @@
         </div>
       </CabTile>
 
-      <CabTile :title="$t('cabinet.donate_permissions')" icon="bx bx-key" :span="6">
+      <CabTile v-if="showPermissions" :title="$t('cabinet.donate_permissions')" icon="bx bx-key" :span="6">
         <template #actions>
           <Select
             class="cab-select"
@@ -337,10 +337,14 @@ const giftsApi = useGifts()
 useHead({ title: computed(() => $t('header.cabinet')) })
 const { config } = usePublicConfig()
 
-const { canBuyGroup, canBuyPermission } = useAccess({
+const { canBuyGroup, canBuyPermission, canGift } = useAccess({
   canBuyGroup: 'player.donate.group.buy',
   canBuyPermission: 'player.donate.permission.buy',
+  canGift: 'player.gift.buy',
 })
+
+const showGroups = computed(() => canBuyGroup.value || canGift.value)
+const showPermissions = computed(() => canBuyPermission.value || canGift.value)
 
 const donate = reactive({
   server_id: '',

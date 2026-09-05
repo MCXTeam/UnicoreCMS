@@ -60,6 +60,7 @@ export class GiftsService {
       .loadRelationCountAndMap('gift.activations', 'gift.activations')
       .leftJoin('gift.issued_by', 'issuer')
       .addSelect(['issuer.uuid', 'issuer.username'])
+      .orderBy('gift.created', 'DESC')
       .getMany();
 
     return gifts.map(({ issued_by, ...gift }) => ({ ...gift, issued_by: issued_by?.username ?? null }));

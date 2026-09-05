@@ -1,4 +1,4 @@
-import { ArrayMaxSize, IsArray, IsBoolean, IsDecimal, IsDefined, IsEnum, IsInt, IsNumber, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
+import { ArrayMaxSize, ArrayMinSize, IsArray, IsBoolean, IsDecimal, IsDefined, IsEnum, IsInt, IsNumber, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 import { GiveMethod } from '../enums/give-method.enum';
 import { BULK_ITEMS_MAX, NAME_MAX_LENGTH, PRICE_MIN, RCON_COMMAND_MAX_LENGTH, SanitizeHtml, SERVER_ID_MAX_LENGTH, TEXT_MAX_LENGTH } from '@common';
 
@@ -47,6 +47,7 @@ export class ProductInput {
 
   @IsDefined()
   @IsArray()
+  @ArrayMinSize(1)
   @ArrayMaxSize(BULK_ITEMS_MAX)
   @IsString({ each: true })
   @MaxLength(SERVER_ID_MAX_LENGTH, { each: true })
@@ -68,6 +69,10 @@ export class ProductInput {
   @IsInt()
   @Min(1)
   multiple_of?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  hidden?: boolean;
 
   @IsOptional()
   @IsBoolean()

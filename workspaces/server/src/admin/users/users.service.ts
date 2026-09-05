@@ -396,7 +396,7 @@ export class UsersService {
     if (input.superuser !== undefined && Boolean(input.superuser) !== Boolean(user.superuser) && !manageSuperuser)
       throw new ForbiddenException();
 
-    const superuser = manageSuperuser ? input.superuser : user.superuser;
+    const superuser = manageSuperuser && input.superuser !== undefined ? input.superuser : user.superuser;
 
     if (!allowed.has('username') && input.username !== undefined && input.username !== user.username) throw new ForbiddenException();
 

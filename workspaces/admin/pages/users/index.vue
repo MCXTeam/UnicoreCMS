@@ -107,14 +107,14 @@
             v-model="user.email"
             name="email"
             label="Email"
-            :rules="canEditEmail ? 'required|email' : ''"
+            :rules="canEditEmail(false) ? 'required|email' : ''"
             v-slot="{ value, errorMessage, handleChange, handleBlur }"
           >
             <div class="field">
-              <label>Email<span v-if="canEditEmail" class="p-error"> *</span><FieldLock :allowed="canEditEmail" /></label>
+              <label>Email<span v-if="canEditEmail(false)" class="p-error"> *</span><FieldLock :allowed="canEditEmail(false)" /></label>
               <InputText
                 :modelValue="value"
-                :disabled="!canEditEmail"
+                :disabled="!canEditEmail(false)"
                 @update:modelValue="handleChange"
                 @blur="handleBlur"
                 type="text"
@@ -123,8 +123,8 @@
             </div>
           </VeeField>
           <div class="field-checkbox">
-            <Checkbox :binary="true" v-model="user.activated" :disabled="!canEditActivated" />
-            <label>{{ $t('admin.activated_email') }}<FieldLock :allowed="canEditActivated" /></label>
+            <Checkbox :binary="true" v-model="user.activated" :disabled="!canEditActivated(false)" />
+            <label>{{ $t('admin.activated_email') }}<FieldLock :allowed="canEditActivated(false)" /></label>
           </div>
           <VeeField
             v-model="user.password"
@@ -180,22 +180,22 @@
 
         <template #access>
           <div class="field">
-            <label>{{ $t('admin.roles') }}<FieldLock :allowed="canEditRoles" /></label>
+            <label>{{ $t('admin.roles') }}<FieldLock :allowed="canEditRoles(false)" /></label>
             <MultiSelect
               display="chip"
               :filter="true"
-              :disabled="!canEditRoles"
+              :disabled="!canEditRoles(false)"
               v-model="user.roles"
-              optionDisabled="important"
-              :options="roles"
+              optionDisabled="locked"
+              :options="roleOptions"
               optionLabel="name"
               optionValue="id"
               :placeholder="$t('admin.choose_roles')"
               class="p-column-filter"
             />
           </div>
-          <PermissionsPicker v-model="user.perms" :label="$t('admin.rights')" :disabled="!canEditRoles" />
-          <div class="field-checkbox" v-if="canEditSuperuser">
+          <PermissionsPicker v-model="user.perms" :label="$t('admin.rights')" :disabled="!canEditRoles(false)" />
+          <div class="field-checkbox" v-if="canEditSuperuser(false)">
             <Checkbox :binary="true" v-model="user.superuser" />
             <label>{{ $t('admin.superuser') }}</label>
           </div>
@@ -252,6 +252,10 @@ export default {
     return { toast, confirm, ...access, ...fields }
   },
   computed: {
+    roleOptions() {
+      return (this.roles || []).map((role) => ({ ...role, locked: role.important || !this.canGrantRole(role) }))
+    },
+
     sections() {
       return [
         { key: 'main', label: 'admin.section_main', icon: 'pi pi-info-circle' },
@@ -296,6 +300,14 @@ export default {
     this.load()
   },
   methods: {
+    canGrantRole(role) {
+      const auth = useAuthStore()
+
+      if (auth.user?.superuser) return true
+
+      return (role.perms || []).every((permission) => auth.has(permission))
+    },
+
     fillGeneratedPassword(handleChange) {
       const password = generatePassword()
 

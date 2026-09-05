@@ -40,7 +40,10 @@ export class NewsController {
   private async seesHidden(request: any): Promise<boolean> {
     if (!request?.user) return false;
 
-    return matchPermission(['panel.news.hidden'], request);
+    return matchPermission(
+      [['panel.news.hidden', 'panel.news.create', 'panel.news.update', 'panel.news.delete'], { or: true }],
+      request,
+    );
   }
 
   @Public()
@@ -96,8 +99,13 @@ export class NewsController {
       limits: { fileSize: STORAGE_MAX_IMAGE_UPLOAD, files: 1 },
     }),
   )
-  create(@CurrentUser() user: User, @Body() body: NewsInput, @UploadedFile() file?: Express.Multer.File) {
-    return this.newsService.create(body, file, Boolean(user.superuser));
+  async create(
+    @Req() request: any,
+    @CurrentUser() user: User,
+    @Body() body: NewsInput,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    return this.newsService.create(body, file, Boolean(user.superuser), await matchPermission(['panel.news.publish'], request));
   }
 
   @Audit({ action: 'content.update', target: 'news', param: 'id' })

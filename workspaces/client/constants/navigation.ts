@@ -12,6 +12,7 @@ export interface NavItem {
   label: string
   icon?: string
   when?: NavVisibility
+  permissions?: string[]
   places: NavPlace[]
   order?: number
   exact?: boolean
@@ -41,12 +42,21 @@ export const CORE_NAVIGATION: NavItem[] = [
     places: ['cabinet.tabs'],
     order: 20,
   },
-  { key: 'cabinet.donate', to: '/cabinet/donate', label: 'cabinet.tab_donate', icon: 'bx bx-crown', places: ['cabinet.tabs'], order: 30 },
+  {
+    key: 'cabinet.donate',
+    to: '/cabinet/donate',
+    label: 'cabinet.tab_donate',
+    icon: 'bx bx-crown',
+    permissions: ['player.donate.group.buy', 'player.donate.permission.buy', 'player.gift.buy'],
+    places: ['cabinet.tabs'],
+    order: 30,
+  },
   {
     key: 'cabinet.settings',
     to: '/cabinet/settings',
     label: 'cabinet.tab_settings',
     icon: 'bx bx-edit-alt',
+    permissions: ['player.password.change', 'player.twofactor.on', 'player.twofactor.off'],
     places: ['cabinet.tabs'],
     order: 40,
   },
@@ -55,6 +65,7 @@ export const CORE_NAVIGATION: NavItem[] = [
     to: '/cabinet/payment',
     label: 'cabinet.tab_payment',
     icon: 'bx bx-wallet-alt',
+    permissions: ['player.payment', 'player.transfer', 'player.exchange'],
     places: ['cabinet.tabs'],
     order: 50,
   },
@@ -75,7 +86,15 @@ export const CORE_NAVIGATION: NavItem[] = [
     places: ['cabinet.tabs'],
     order: 80,
   },
-  { key: 'cabinet.gifts', to: '/cabinet/gifts', label: 'cabinet.tab_gifts', icon: 'bx bx-party', places: ['cabinet.tabs'], order: 90 },
+  {
+    key: 'cabinet.gifts',
+    to: '/cabinet/gifts',
+    label: 'cabinet.tab_gifts',
+    icon: 'bx bx-party',
+    permissions: ['player.gift.activate'],
+    places: ['cabinet.tabs'],
+    order: 90,
+  },
   { key: 'cabinet.votes', to: '/cabinet/votes', label: 'cabinet.tab_votes', icon: 'bx bx-medal', places: ['cabinet.tabs'], order: 100 },
 
   {

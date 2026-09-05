@@ -24,7 +24,7 @@
             <template #body="slotProps">
               <div class="flex align-items-center">
                 <IconAvatar :path="slotProps.data.icon" />
-                <span class="ml-2">{{ $utils.formatCurrency('real', slotProps.data.amount) }}%</span>
+                <span class="ml-2">{{ $utils.formatCurrency('real', slotProps.data.amount) }}</span>
               </div>
             </template>
           </Column>

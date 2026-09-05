@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
+  ArrayMinSize,
   IsArray,
   IsBoolean,
   IsDefined,
@@ -53,6 +54,7 @@ export class GroupInput {
 
   @IsDefined()
   @IsArray()
+  @ArrayMinSize(1)
   @ArrayMaxSize(BULK_ITEMS_MAX)
   @IsString({ each: true })
   @MaxLength(SERVER_ID_MAX_LENGTH, { each: true })
@@ -93,6 +95,10 @@ export class GroupInput {
   @Min(0)
   @Max(100)
   referal_percent?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  hidden?: boolean;
 
   @IsOptional()
   @IsBoolean()

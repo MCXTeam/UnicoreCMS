@@ -188,8 +188,6 @@ export const IP_MAX_LENGTH = 45;
 export const NAME_MAX_LENGTH = 120;
 export const CUSTOM_CODE_MAX_LENGTH = 100_000;
 export const TEXT_MAX_LENGTH = 2000;
-export const PATH_MAX_LENGTH = 120;
-export const PATH_PATTERN = /^[a-zA-Z0-9_-]+$/;
 
 export const IS_IP_PATTERN = 'isIpPattern';
 export const IP_ANY_PATTERN = '*';

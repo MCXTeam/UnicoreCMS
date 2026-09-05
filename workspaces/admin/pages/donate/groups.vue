@@ -33,8 +33,8 @@
               <h5 class="m-0">{{ $t('admin.donate_groups_title') }}</h5>
             </div>
           </template>
-          <Column :style="{ width: '3rem' }" :rowReorder="true" headerStyle="width: 3rem" />
-          <Column selectionMode="multiple" :style="{ width: '3rem' }"></Column>
+          <Column v-if="canSort" :style="{ width: '3rem' }" :rowReorder="true" headerStyle="width: 3rem" />
+          <Column v-if="canDeleteMany" selectionMode="multiple" :style="{ width: '3rem' }"></Column>
           <Column field="id" header="ID" :style="{ width: '8rem' }"></Column>
           <Column field="name" :header="$t('admin.name')">
             <template #body="slotProps">
@@ -58,19 +58,19 @@
           <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <Button
-                v-if="canUpdate"
+                v-if="canUpdateOn(slotProps.data.servers)"
                 @click="openDialog(slotProps.data)"
                 icon="pi pi-pencil"
                 class="p-button-rounded p-button-success mr-2"
               />
               <Button
-                v-if="canUpdate"
+                v-if="canUpdateOn(slotProps.data.servers)"
                 @click="openFileDialog(slotProps.data)"
                 icon="pi pi-images"
                 class="p-button-rounded p-button-secondary mr-2"
               />
               <Button
-                v-if="canDelete"
+                v-if="canDeleteOn(slotProps.data.servers)"
                 @click="removeGroup(slotProps.data.id)"
                 icon="pi pi-trash"
                 class="p-button-rounded p-button-warning mt-2"
@@ -156,12 +156,12 @@
                 </div>
               </VeeField>
               <div class="field">
-                <label>{{ $t('admin.servers') }}</label>
+                <label>{{ $t('admin.servers') }}<span class="p-error"> *</span></label>
                 <MultiSelect
                   v-model="group.servers"
                   display="chip"
                   :filter="true"
-                  :options="servers"
+                  :options="serverOptions"
                   optionLabel="name"
                   :placeholder="$t('admin.choose_servers')"
                   class="p-column-filter"
@@ -207,7 +207,7 @@
                   v-model="group.web_perms"
                   only="player"
                   :label="$t('admin.inject_web_rights')"
-                  :disabled="!canEditPerms"
+                  :disabled="!canEditPerms(updateMode)"
                 />
               </div>
               <div class="field">
@@ -222,10 +222,24 @@
                   optionValue="id"
                   :placeholder="$t('admin.choose_role')"
                   appendTo="body"
-                  :disabled="!canEditPerms"
+                  :disabled="!canEditPerms(updateMode)"
                   showClear
                 />
               </div>
+              <div class="field-checkbox">
+                <Checkbox :binary="true" v-model="group.staff" inputId="group-staff" />
+                <label for="group-staff" class="flex align-items-center gap-1">
+                  {{ $t('admin.staff') }}
+                  <i v-tooltip.right="$t('admin.staff_group_hint')" class="pi pi-question-circle text-color-secondary" />
+                </label>
+              </div>
+              <ColorField
+                v-if="group.staff"
+                v-model="group.color"
+                :label="$t('admin.staff_color')"
+                :hint="$t('admin.staff_color_hint')"
+                :placeholder="$t('admin.role_color_empty')"
+              />
             </template>
 
             <template #content>
@@ -290,9 +304,9 @@
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>{{ $t('admin.price') }}<span class="p-error"> *</span><FieldLock :allowed="canEditPrice" /></label>
+                      <label>{{ $t('admin.price') }}<span class="p-error"> *</span><FieldLock :allowed="canEditPrice(updateMode)" /></label>
                       <InputNumber
-                        :disabled="!canEditPrice"
+                        :disabled="!canEditPrice(updateMode)"
                         :modelValue="value"
                         @update:modelValue="handleChange"
                         @input="handleChange($event.value)"
@@ -315,9 +329,9 @@
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>{{ $t('admin.sale') }}<FieldLock :allowed="canEditPrice" /></label>
+                      <label>{{ $t('admin.sale') }}<FieldLock :allowed="canEditPrice(updateMode)" /></label>
                       <InputNumber
-                        :disabled="!canEditPrice"
+                        :disabled="!canEditPrice(updateMode)"
                         suffix=" %"
                         :useGrouping="false"
                         :modelValue="value"
@@ -376,6 +390,13 @@
                 </VeeField>
               </div>
               <div class="field-checkbox">
+                <Checkbox :binary="true" v-model="group.hidden" inputId="group-hidden" />
+                <label for="group-hidden" class="flex align-items-center gap-1">
+                  {{ $t('admin.hidden_item') }}
+                  <i v-tooltip.right="$t('admin.hidden_item_hint')" class="pi pi-question-circle text-color-secondary" />
+                </label>
+              </div>
+              <div class="field-checkbox">
                 <Checkbox :binary="true" v-model="group.giftable" inputId="group-giftable" />
                 <label for="group-giftable">{{ $t('admin.giftable') }}</label>
               </div>
@@ -386,20 +407,6 @@
                   <i v-tooltip.right="$t('admin.regiftable_hint')" class="pi pi-question-circle text-color-secondary" />
                 </label>
               </div>
-              <div class="field-checkbox">
-                <Checkbox :binary="true" v-model="group.staff" inputId="group-staff" />
-                <label for="group-staff" class="flex align-items-center gap-1">
-                  {{ $t('admin.staff') }}
-                  <i v-tooltip.right="$t('admin.staff_group_hint')" class="pi pi-question-circle text-color-secondary" />
-                </label>
-              </div>
-              <ColorField
-                v-if="group.staff"
-                v-model="group.color"
-                :label="$t('admin.staff_color')"
-                :hint="$t('admin.staff_color_hint')"
-                :placeholder="$t('admin.role_color_empty')"
-              />
             </template>
 
             <template #translation>
@@ -409,7 +416,7 @@
             <template #footer>
               <Button :disabled="loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
-                :disabled="loading || !meta.valid"
+                :disabled="loading || !meta.valid || !group.servers.length"
                 :label="$t('common.save')"
                 icon="pi pi-check"
                 class="p-button-text"
@@ -438,13 +445,20 @@ export default {
 
     useHead({ title: computed(() => $t('admin.menu_donate_groups')) })
     const config = useRuntimeConfig()
-    const serverScope = useServerScope('panel.donate.read')
+    const createScope = useServerScope('panel.donate.groups.create')
+    const updateScope = useServerScope('panel.donate.groups.update')
 
     const access = useAccess({
       canCreate: 'panel.donate.groups.create',
       canUpdate: 'panel.donate.groups.update',
       canDelete: 'panel.donate.groups.delete',
       canDeleteMany: 'panel.donate.groups.delete.many',
+      canSort: 'panel.donate.sort',
+    })
+
+    const scoped = useScopedAccess({
+      canUpdateOn: 'panel.donate.groups.update',
+      canDeleteOn: 'panel.donate.groups.delete',
     })
 
     const fields = useFieldAccess('donate_group', {
@@ -454,8 +468,10 @@ export default {
 
     return {
       ...access,
+      ...scoped,
       ...fields,
-      serverScope,
+      createScope,
+      updateScope,
       translations,
       realDecimals: config.public.realDecimals,
     }
@@ -483,6 +499,7 @@ export default {
         periods: [],
         virtual_percent: null,
         referal_percent: null,
+        hidden: false,
         giftable: true,
         regiftable: true,
         staff: false,
@@ -505,11 +522,13 @@ export default {
     },
 
     serverOptions() {
-      if (!this.serverScope) return this.servers
+      const scope = this.updateMode ? this.updateScope : this.createScope
+
+      if (!scope) return this.servers
 
       const attached = (this.group?.servers || []).map((server) => server.id || server)
 
-      return this.servers.filter((server) => this.serverScope.includes(server.id) || attached.includes(server.id))
+      return this.servers.filter((server) => scope.includes(server.id) || attached.includes(server.id))
     },
 
     sections() {
@@ -630,7 +649,8 @@ export default {
           periods: [],
           virtual_percent: null,
           referal_percent: null,
-          giftable: true,
+          hidden: false,
+        giftable: true,
           regiftable: true,
           staff: false,
           color: null,

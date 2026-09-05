@@ -11,7 +11,7 @@
           <template v-slot:end>
             <div class="my-2">
               <Button
-                v-if="canRcon"
+                v-if="canIssue"
                 :label="$t('admin.rcon_issuance')"
                 icon="pi pi-cog"
                 class="p-button-help"
@@ -35,7 +35,7 @@
               <h5 class="m-0">{{ $t('admin.servers_title') }}</h5>
             </div>
           </template>
-          <Column :style="{ width: '3rem' }" :rowReorder="true" headerStyle="width: 3rem" />
+          <Column v-if="canSort" :style="{ width: '3rem' }" :rowReorder="true" headerStyle="width: 3rem" />
           <Column field="id" header="ID" :style="{ width: '8rem' }"></Column>
           <Column field="name" :header="$t('admin.name')">
             <template #body="slotProps">
@@ -48,13 +48,13 @@
           <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <Button
-                v-if="canUpdate"
+                v-if="canUpdateOn(slotProps.data.id)"
                 @click="openDialog(slotProps.data)"
                 icon="pi pi-pencil"
                 class="p-button-rounded p-button-success mr-2"
               />
               <Button
-                v-if="canUpdate"
+                v-if="canUpdateOn(slotProps.data.id)"
                 @click="openFileDialog(slotProps.data)"
                 icon="pi pi-images"
                 class="p-button-rounded p-button-secondary mr-2"
@@ -441,20 +441,20 @@
                 <template v-if="server.delivery_mode === 1">
                   <div class="col-12 md:col-6">
                     <div class="field">
-                      <label>{{ $t('admin.rcon_host') }}<FieldLock :allowed="canEditRcon" /></label>
+                      <label>{{ $t('admin.rcon_host') }}<FieldLock :allowed="canEditRcon(updateMode)" /></label>
                       <InputText
                         v-model="server.rcon.host"
                         placeholder="127.0.0.1"
-                        :disabled="!canEditRcon"
+                        :disabled="!canEditRcon(updateMode)"
                         @update:modelValue="rconTest.ok = null"
                       />
                     </div>
                   </div>
                   <div class="col-12 md:col-6">
                     <div class="field">
-                      <label>{{ $t('admin.rcon_port') }}<FieldLock :allowed="canEditRcon" /></label>
+                      <label>{{ $t('admin.rcon_port') }}<FieldLock :allowed="canEditRcon(updateMode)" /></label>
                       <InputNumber
-                        :disabled="!canEditRcon"
+                        :disabled="!canEditRcon(updateMode)"
                         v-model="server.rcon.port"
                         :useGrouping="false"
                         placeholder="25575"
@@ -464,10 +464,10 @@
                   </div>
                   <div class="col-12 md:col-6">
                     <div class="field">
-                      <label>{{ $t('admin.rcon_password') }}<FieldLock :allowed="canEditRcon" /></label>
+                      <label>{{ $t('admin.rcon_password') }}<FieldLock :allowed="canEditRcon(updateMode)" /></label>
                       <Password
                         v-model="server.rcon.password"
-                        :disabled="!canEditRcon"
+                        :disabled="!canEditRcon(updateMode)"
                         :feedback="false"
                         toggleMask
                         inputClass="w-full"
@@ -493,7 +493,7 @@
                       />
                     </div>
                   </div>
-                  <div class="col-12" v-if="updateMode">
+                  <div class="col-12" v-if="updateMode && canRconOn(server.id)">
                     <Button
                       :label="$t('admin.rcon_queue_button')"
                       icon="pi pi-list"
@@ -550,13 +550,20 @@ export default {
       canUpdate: 'panel.servers.update',
       canDelete: 'panel.servers.delete',
       canRcon: 'panel.servers.rcon',
+      canIssue: 'panel.servers.issuance',
+      canSort: 'panel.servers.sort',
+    })
+
+    const scoped = useScopedAccess({
+      canUpdateOn: 'panel.servers.update',
+      canRconOn: 'panel.servers.rcon',
     })
 
     const fields = useFieldAccess('server', {
       canEditRcon: 'rcon',
     })
 
-    return { translations, apiUrl: config.public.apiBaseurl, ...access, ...fields }
+    return { translations, apiUrl: config.public.apiBaseurl, ...access, ...scoped, ...fields }
   },
   data() {
     return {

@@ -7,6 +7,7 @@ export interface PermissionMeta {
   scope?: PermissionScope;
   danger?: boolean;
   field?: PermissionField;
+  updateOnly?: boolean;
 }
 
 const define = <T extends Record<string, PermissionMeta>>(catalog: T): T =>
@@ -57,7 +58,11 @@ export const PERMISSIONS = define({
     group: "dashboard",
     field: ["dashboard", "users"],
   },
+  "panel.revenue.access": { group: "dashboard" },
   "panel.revenue.read": { group: "dashboard", scope: "server" },
+  "panel.revenue.items": { group: "dashboard", scope: "server" },
+  "panel.revenue.payments": { group: "dashboard" },
+  "panel.revenue.payments.create": { group: "dashboard", danger: true },
 
   "panel.users.read": { group: "users" },
   "panel.users.create": { group: "users" },
@@ -65,12 +70,25 @@ export const PERMISSIONS = define({
   "panel.users.delete": { group: "users" },
   "panel.users.delete.many": { group: "users" },
   "panel.users.ban": { group: "users" },
-  "panel.users.field.username": { group: "users", field: ["user", "username"] },
-  "panel.users.field.email": { group: "users", field: ["user", "email"] },
-  "panel.users.field.password": { group: "users", field: ["user", "password"] },
+  "panel.users.field.username": {
+    group: "users",
+    field: ["user", "username"],
+    updateOnly: true,
+  },
+  "panel.users.field.email": {
+    group: "users",
+    field: ["user", "email"],
+    updateOnly: true,
+  },
+  "panel.users.field.password": {
+    group: "users",
+    field: ["user", "password"],
+    updateOnly: true,
+  },
   "panel.users.field.activated": {
     group: "users",
     field: ["user", "activated"],
+    updateOnly: true,
   },
   "panel.users.field.roles": {
     group: "users",
@@ -84,6 +102,8 @@ export const PERMISSIONS = define({
   "panel.users.grant.panel": { group: "users", danger: true },
   "panel.users.twofactor.reset": { group: "users", danger: true },
   "panel.users.sessions.revoke": { group: "users" },
+  "panel.users.skin": { group: "users" },
+  "panel.users.cloak": { group: "users" },
   "panel.users.balance.real": { group: "users" },
   "panel.users.balance.bonus": { group: "users" },
   "panel.users.money": { group: "users", scope: "server" },
@@ -96,10 +116,12 @@ export const PERMISSIONS = define({
   "panel.roles.delete": { group: "roles", danger: true },
 
   "panel.servers.read": { group: "servers" },
+  "panel.servers.sort": { group: "servers" },
   "panel.servers.create": { group: "servers" },
   "panel.servers.update": { group: "servers", scope: "server" },
   "panel.servers.delete": { group: "servers" },
   "panel.servers.rcon": { group: "servers", scope: "server" },
+  "panel.servers.issuance": { group: "servers", danger: true },
   "panel.servers.field.rcon": {
     group: "servers",
     field: ["server", "rcon"],
@@ -114,17 +136,19 @@ export const PERMISSIONS = define({
   "panel.news.publish": { group: "news" },
   "panel.news.hidden": { group: "news" },
 
+  "panel.pages.read": { group: "pages" },
   "panel.pages.create": { group: "pages" },
   "panel.pages.update": { group: "pages" },
   "panel.pages.delete": { group: "pages" },
 
-  "panel.mods.read": { group: "mods", scope: "server" },
+  "panel.mods.read": { group: "mods" },
   "panel.mods.create": { group: "mods" },
-  "panel.mods.update": { group: "mods", scope: "server" },
-  "panel.mods.delete": { group: "mods", scope: "server" },
-  "panel.mods.delete.many": { group: "mods", scope: "server" },
+  "panel.mods.update": { group: "mods" },
+  "panel.mods.delete": { group: "mods" },
+  "panel.mods.delete.many": { group: "mods" },
 
   "panel.donate.read": { group: "donate", scope: "server" },
+  "panel.donate.sort": { group: "donate" },
   "panel.donate.groups.create": { group: "donate", scope: "server" },
   "panel.donate.groups.update": { group: "donate", scope: "server" },
   "panel.donate.groups.delete": { group: "donate", scope: "server" },
@@ -132,6 +156,7 @@ export const PERMISSIONS = define({
   "panel.donate.groups.field.price": {
     group: "donate",
     field: ["donate_group", "price", "sale"],
+    updateOnly: true,
   },
   "panel.donate.groups.field.perms": {
     group: "donate",
@@ -145,10 +170,11 @@ export const PERMISSIONS = define({
   "panel.donate.permissions.field.price": {
     group: "donate",
     field: ["donate_permission", "price", "sale"],
+    updateOnly: true,
   },
   "panel.donate.permissions.field.perms": {
     group: "donate",
-    field: ["donate_permission", "perms", "web_perms"],
+    field: ["donate_permission", "web_perms"],
     danger: true,
   },
   "panel.donate.kits.create": { group: "donate" },
@@ -174,11 +200,17 @@ export const PERMISSIONS = define({
   "panel.store.products.field.price": {
     group: "store",
     field: ["store_product", "price", "sale"],
+    updateOnly: true,
   },
   "panel.store.products.field.commands": {
     group: "store",
     field: ["store_product", "commands"],
     danger: true,
+  },
+  "panel.store.kits.field.price": {
+    group: "store",
+    field: ["store_kit", "price", "sale"],
+    updateOnly: true,
   },
   "panel.store.kits.create": { group: "store", scope: "server" },
   "panel.store.kits.update": { group: "store", scope: "server" },

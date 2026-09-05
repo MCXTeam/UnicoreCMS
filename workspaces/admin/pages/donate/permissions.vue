@@ -35,8 +35,8 @@
               <h5 class="m-0">{{ $t('admin.donate_permissions_title') }}</h5>
             </div>
           </template>
-          <Column :style="{ width: '3rem' }" :rowReorder="true" headerStyle="width: 3rem" />
-          <Column selectionMode="multiple" :style="{ width: '3rem' }"></Column>
+          <Column v-if="canSort" :style="{ width: '3rem' }" :rowReorder="true" headerStyle="width: 3rem" />
+          <Column v-if="canDeleteMany" selectionMode="multiple" :style="{ width: '3rem' }"></Column>
           <Column field="id" header="ID" :style="{ width: '8rem' }"></Column>
           <Column field="name" :header="$t('admin.name')"></Column>
           <Column field="price" :header="$t('admin.price')">
@@ -58,13 +58,13 @@
           <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <Button
-                v-if="canUpdate"
+                v-if="canUpdateOn(slotProps.data.servers)"
                 @click="openDialog(slotProps.data)"
                 icon="pi pi-pencil"
                 class="p-button-rounded p-button-success mr-2"
               />
               <Button
-                v-if="canDelete"
+                v-if="canDeleteOn(slotProps.data.servers)"
                 @click="removePermission(slotProps.data.id)"
                 icon="pi pi-trash"
                 class="p-button-rounded p-button-warning mt-2"
@@ -146,12 +146,12 @@
                 ></MultiSelect>
               </div>
               <div class="field" v-if="$_.get(permission.type, 'value') == 'game' || $_.get(permission.type, 'value') == 'kit'">
-                <label>{{ $t('admin.servers') }}</label>
+                <label>{{ $t('admin.servers') }}<span class="p-error"> *</span></label>
                 <MultiSelect
                   v-model="permission.servers"
                   display="chip"
                   :filter="true"
-                  :options="servers"
+                  :options="serverOptions"
                   optionLabel="name"
                   :placeholder="$t('admin.choose_servers')"
                   class="p-column-filter"
@@ -167,14 +167,14 @@
               </div>
               <div class="field" v-if="$_.get(permission.type, 'value') == 'game' || $_.get(permission.type, 'value') == 'kit'">
                 <label>{{ $t('admin.rights') }}</label>
-                <InputChips v-model="permission.perms" :placeholder="$t('admin.choose_permissions')" :disabled="!canEditPerms" />
+                <InputChips v-model="permission.perms" :placeholder="$t('admin.choose_permissions')" />
               </div>
               <PermissionsPicker
                 v-if="$_.get(permission.type, 'value') == 'web'"
                 v-model="permission.web_perms"
                 only="player"
                 :label="$t('admin.web_rights')"
-                :disabled="!canEditPerms"
+                :disabled="!canEditPerms(updateMode)"
               />
               <div class="field">
                 <label class="flex align-items-center gap-1">
@@ -188,7 +188,7 @@
                   optionValue="id"
                   :placeholder="$t('admin.choose_role')"
                   appendTo="body"
-                  :disabled="!canEditPerms"
+                  :disabled="!canEditPerms(updateMode)"
                   showClear
                 />
               </div>
@@ -235,9 +235,9 @@
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>{{ $t('admin.price') }}<span class="p-error"> *</span><FieldLock :allowed="canEditPrice" /></label>
+                      <label>{{ $t('admin.price') }}<span class="p-error"> *</span><FieldLock :allowed="canEditPrice(updateMode)" /></label>
                       <InputNumber
-                        :disabled="!canEditPrice"
+                        :disabled="!canEditPrice(updateMode)"
                         :modelValue="value"
                         @update:modelValue="handleChange"
                         @input="handleChange($event.value)"
@@ -260,9 +260,9 @@
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>{{ $t('admin.sale') }}<FieldLock :allowed="canEditPrice" /></label>
+                      <label>{{ $t('admin.sale') }}<FieldLock :allowed="canEditPrice(updateMode)" /></label>
                       <InputNumber
-                        :disabled="!canEditPrice"
+                        :disabled="!canEditPrice(updateMode)"
                         suffix=" %"
                         :useGrouping="false"
                         :modelValue="value"
@@ -321,6 +321,13 @@
                 </VeeField>
               </div>
               <div class="field-checkbox">
+                <Checkbox :binary="true" v-model="permission.hidden" inputId="permission-hidden" />
+                <label for="permission-hidden" class="flex align-items-center gap-1">
+                  {{ $t('admin.hidden_item') }}
+                  <i v-tooltip.right="$t('admin.hidden_item_hint')" class="pi pi-question-circle text-color-secondary" />
+                </label>
+              </div>
+              <div class="field-checkbox">
                 <Checkbox :binary="true" v-model="permission.giftable" inputId="permission-giftable" />
                 <label for="permission-giftable">{{ $t('admin.giftable') }}</label>
               </div>
@@ -340,7 +347,7 @@
             <template #footer>
               <Button :disabled="loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
-                :disabled="loading || !meta.valid"
+                :disabled="loading || !meta.valid || !serversFilled"
                 :label="$t('common.save')"
                 icon="pi pi-check"
                 class="p-button-text"
@@ -369,13 +376,20 @@ export default {
 
     useHead({ title: computed(() => $t('admin.menu_donate_permissions')) })
     const config = useRuntimeConfig()
-    const serverScope = useServerScope('panel.donate.read')
+    const createScope = useServerScope('panel.donate.permissions.create')
+    const updateScope = useServerScope('panel.donate.permissions.update')
 
     const access = useAccess({
       canCreate: 'panel.donate.permissions.create',
       canUpdate: 'panel.donate.permissions.update',
       canDelete: 'panel.donate.permissions.delete',
       canDeleteMany: 'panel.donate.permissions.delete.many',
+      canSort: 'panel.donate.sort',
+    })
+
+    const scoped = useScopedAccess({
+      canUpdateOn: 'panel.donate.permissions.update',
+      canDeleteOn: 'panel.donate.permissions.delete',
     })
 
     const fields = useFieldAccess('donate_permission', {
@@ -385,8 +399,10 @@ export default {
 
     return {
       ...access,
+      ...scoped,
       ...fields,
-      serverScope,
+      createScope,
+      updateScope,
       translations,
       realDecimals: config.public.realDecimals,
     }
@@ -412,6 +428,7 @@ export default {
         web_perms: [],
         virtual_percent: null,
         referal_percent: null,
+        hidden: false,
         giftable: true,
         regiftable: true,
       },
@@ -428,12 +445,20 @@ export default {
       return [{ id: null, name: '—' }, ...(this.roles || [])]
     },
 
+    serversFilled() {
+      if (this.$_.get(this.permission.type, 'value') === 'web') return true
+
+      return Boolean((this.permission.servers || []).length)
+    },
+
     serverOptions() {
-      if (!this.serverScope) return this.servers
+      const scope = this.updateMode ? this.updateScope : this.createScope
+
+      if (!scope) return this.servers
 
       const attached = (this.permission?.servers || []).map((server) => server.id || server)
 
-      return this.servers.filter((server) => this.serverScope.includes(server.id) || attached.includes(server.id))
+      return this.servers.filter((server) => scope.includes(server.id) || attached.includes(server.id))
     },
 
     sections() {
@@ -508,7 +533,8 @@ export default {
           web_perms: [],
           virtual_percent: null,
           referal_percent: null,
-          giftable: true,
+          hidden: false,
+        giftable: true,
           regiftable: true,
         }
       }

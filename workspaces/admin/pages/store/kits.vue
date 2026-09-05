@@ -44,7 +44,7 @@
               </span>
             </div>
           </template>
-          <Column selectionMode="multiple" :style="{ width: '3rem' }"></Column>
+          <Column v-if="canDeleteMany" selectionMode="multiple" :style="{ width: '3rem' }"></Column>
           <Column field="id" header="ID" :style="{ width: '8rem' }" sortable></Column>
           <Column field="name" :header="$t('admin.name')" sortable>
             <template #body="slotProps">
@@ -111,16 +111,16 @@
           <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <Button
-                v-if="canUpdate"
+                v-if="canUpdateOn(slotProps.data.servers)"
                 @click="openDialog(slotProps.data)"
                 icon="pi pi-pencil"
                 class="p-button-rounded p-button-success mr-2"
               />
               <Button
-                  v-if="canUpdate" @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary mr-2" />
+                  v-if="canUpdateOn(slotProps.data.servers)" @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary mr-2" />
               <Button
                 @click="removeKit(slotProps.data.id)"
-                v-if="canDelete && !slotProps.data.important"
+                v-if="canDeleteOn(slotProps.data.servers) && !slotProps.data.important"
                 icon="pi pi-trash"
                 class="p-button-rounded p-button-warning mt-2"
               />
@@ -188,7 +188,7 @@
                 </div>
               </VeeField>
               <div class="field">
-                <label>{{ $t('admin.servers') }}</label>
+                <label>{{ $t('admin.servers') }}<span class="p-error"> *</span></label>
                 <MultiSelect
                   display="chip"
                   :filter="true"
@@ -309,9 +309,10 @@
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>{{ $t('admin.price') }}<span class="p-error"> *</span></label>
+                      <label>{{ $t('admin.price') }}<span class="p-error"> *</span><FieldLock :allowed="canEditPrice(updateMode)" /></label>
                       <InputNumber
                         :modelValue="value"
+                        :disabled="!canEditPrice(updateMode)"
                         @update:modelValue="handleChange"
                         @input="handleChange($event.value)"
                         @blur="handleBlur"
@@ -332,11 +333,12 @@
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>{{ $t('admin.sale') }}</label>
+                      <label>{{ $t('admin.sale') }}<FieldLock :allowed="canEditPrice(updateMode)" /></label>
                       <InputNumber
                         suffix=" %"
                         :useGrouping="false"
                         :modelValue="value"
+                        :disabled="!canEditPrice(updateMode)"
                         @update:modelValue="handleChange"
                         @input="handleChange($event.value)"
                         @blur="handleBlur"
@@ -368,6 +370,13 @@
                 </VeeField>
               </div>
               <div class="field-checkbox">
+                <Checkbox :binary="true" v-model="kit.hidden" inputId="kit-hidden" />
+                <label for="kit-hidden" class="flex align-items-center gap-1">
+                  {{ $t('admin.hidden_item') }}
+                  <i v-tooltip.right="$t('admin.hidden_item_hint')" class="pi pi-question-circle text-color-secondary" />
+                </label>
+              </div>
+              <div class="field-checkbox">
                 <Checkbox :binary="true" v-model="kit.giftable" inputId="kit-giftable" />
                 <label for="kit-giftable">{{ $t('admin.giftable') }}</label>
               </div>
@@ -380,7 +389,7 @@
             <template #footer>
               <Button :disabled="loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
-                :disabled="loading || !meta.valid"
+                :disabled="loading || !meta.valid || !kit.servers.length"
                 :label="$t('common.save')"
                 icon="pi pi-check"
                 class="p-button-text"
@@ -411,7 +420,8 @@ export default {
     const { $t } = useNuxtApp()
 
     useHead({ title: computed(() => $t('admin.menu_kits')) })
-    const serverScope = useServerScope('panel.store.read')
+    const createScope = useServerScope('panel.store.kits.create')
+    const updateScope = useServerScope('panel.store.kits.update')
 
     const access = useAccess({
       canCreate: 'panel.store.kits.create',
@@ -420,9 +430,21 @@ export default {
       canDeleteMany: 'panel.store.kits.delete.many',
     })
 
+    const scoped = useScopedAccess({
+      canUpdateOn: 'panel.store.kits.update',
+      canDeleteOn: 'panel.store.kits.delete',
+    })
+
+    const fields = useFieldAccess('store_kit', {
+      canEditPrice: 'price',
+    })
+
     return {
       ...access,
-      serverScope,
+      ...scoped,
+      ...fields,
+      createScope,
+      updateScope,
       translations,
       realDecimals: rc.public.realDecimals,
     }
@@ -455,6 +477,7 @@ export default {
         items: [],
         icon: null,
         virtual_percent: null,
+        hidden: false,
         giftable: true,
       },
       fileDialog: false,
@@ -470,11 +493,13 @@ export default {
   },
   computed: {
     serverOptions() {
-      if (!this.serverScope) return this.servers
+      const scope = this.updateMode ? this.updateScope : this.createScope
+
+      if (!scope) return this.servers
 
       const attached = (this.kit?.servers || []).map((server) => server.id || server)
 
-      return this.servers.filter((server) => this.serverScope.includes(server.id) || attached.includes(server.id))
+      return this.servers.filter((server) => scope.includes(server.id) || attached.includes(server.id))
     },
 
     sections() {
@@ -624,6 +649,7 @@ export default {
           categories: this.filters?.categories?.value || [],
           items: [],
           virtual_percent: null,
+        hidden: false,
         giftable: true,
         }
       }

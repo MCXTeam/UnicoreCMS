@@ -42,7 +42,7 @@
               </span>
             </div>
           </template>
-          <Column selectionMode="multiple" :style="{ width: '3rem' }"></Column>
+          <Column v-if="canDeleteMany" selectionMode="multiple" :style="{ width: '3rem' }"></Column>
           <Column field="id" header="ID" :style="{ width: '8rem' }" sortable></Column>
           <Column field="title" :header="$t('admin.name')" sortable>
             <template #body="slotProps">
@@ -130,6 +130,9 @@
             </template>
 
             <template #main>
+              <Message v-if="!canPublish && !updateMode" severity="warn" :closable="false" class="mb-3">
+                {{ $t('admin.news_publish_denied') }}
+              </Message>
               <VeeField
                 v-model="newsSingle.title"
                 name="title"

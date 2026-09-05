@@ -77,7 +77,7 @@ export class ServersController {
     return this.serversService.update(id, body, request);
   }
 
-  @Permissions(['panel.access', 'panel.servers.update'])
+  @Permissions(['panel.access', 'panel.servers.sort'])
   @Post('sort')
   sort(@Body() body: StringSortInput) {
     return this.serversService.sort(body);

@@ -3,6 +3,7 @@
     <label v-if="label" class="flex align-items-center gap-1">
       <span>{{ label }}<span v-if="required" class="p-error"> *</span></span>
       <i v-tooltip.right="$t('admin.permissions_hint')" class="pi pi-question-circle text-color-secondary" />
+      <FieldLock :allowed="!disabled" />
     </label>
 
     <IconField class="permissions__search">
@@ -75,7 +76,8 @@
 </template>
 
 <script setup lang="ts">
-import { isPlayerPermission, satisfiesPermission } from 'unicore-common/permissions'
+import type { PermissionEntry } from 'unicore-common/permissions'
+import { isPlayerPermission, longestScope, satisfiesPermission } from 'unicore-common/permissions'
 import { usePermissionCatalog, type PermissionGroupView } from '~/composables/usePermissionCatalog'
 
 const props = withDefaults(
@@ -112,7 +114,12 @@ watch(
 
 const patterns = computed<string[]>(() => props.modelValue || [])
 
-const scoped = computed(() => groups.value.flatMap((group) => group.permissions).filter((entry) => entry.scope === 'server'))
+const scoped = computed(() =>
+  groups.value
+    .flatMap((group) => group.permissions)
+    .filter((entry) => entry.scope === 'server')
+    .map((entry) => entry.key),
+)
 
 const allowed = computed<PermissionGroupView[]>(() =>
   groups.value
@@ -145,9 +152,7 @@ const known = computed(() => new Set(groups.value.flatMap((group) => group.permi
 function scopeBase(key: string): string | null {
   if (known.value.has(key)) return null
 
-  for (const entry of scoped.value) if (key.startsWith(`${entry.key}.`)) return entry.key
-
-  return null
+  return longestScope(key, scoped.value)
 }
 
 function isExplicit(key: string): boolean {
@@ -190,22 +195,28 @@ function fullGroup(group: PermissionGroupView): PermissionGroupView {
   return allowed.value.find((item) => item.group === group.group) || group
 }
 
-function groupState(group: PermissionGroupView) {
+function controlled(group: PermissionGroupView): PermissionEntry[] {
   const permissions = fullGroup(group).permissions
   const grantable = permissions.filter((entry) => !entry.danger)
+
+  return grantable.length ? grantable : permissions
+}
+
+function groupState(group: PermissionGroupView) {
+  const permissions = fullGroup(group).permissions
+  const managed = controlled(group)
   const enabled = permissions.filter((entry) => isOn(entry.key)).length
-  const all = grantable.length > 0 && grantable.every((entry) => isOn(entry.key))
+  const all = managed.length > 0 && managed.every((entry) => isOn(entry.key))
 
   return { total: permissions.length, enabled, all, some: !all && enabled > 0 }
 }
 
 function toggleGroup(group: PermissionGroupView) {
-  const grantable = fullGroup(group).permissions.filter((entry) => !entry.danger)
   const turnOn = !groupState(group).all
 
   let next = [...patterns.value]
 
-  for (const entry of grantable) {
+  for (const entry of controlled(group)) {
     next = next.filter((pattern) => pattern !== entry.key && pattern !== `!${entry.key}` && scopeBase(pattern) !== entry.key)
 
     if (turnOn) next.push(entry.key)

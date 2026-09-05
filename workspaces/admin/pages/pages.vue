@@ -74,7 +74,7 @@
                 v-model="page.path"
                 name="path"
                 :label="$t('admin.path')"
-                :rules="{ required: true, regex: /^(?!\/)[a-z\/\-_]+$/ }"
+                :rules="{ required: true, regex: PAGE_PATH_PATTERN, max: PAGE_PATH_MAX_LENGTH }"
                 v-slot="{ value, errorMessage, handleChange }"
               >
                 <div class="field">
@@ -159,6 +159,7 @@
 import { fullSizeTemplate } from '~/constants'
 import { FilterMatchMode } from '@primevue/core/api'
 import { Form, Field } from 'vee-validate'
+import { PAGE_PATH_MAX_LENGTH, PAGE_PATH_PATTERN } from 'unicore-common/validation'
 
 export default {
   components: {
@@ -173,12 +174,13 @@ export default {
     useHead({ title: computed(() => $t('admin.menu_pages')) })
     const auth = useAuthStore()
     const access = useAccess({
+      canRead: 'panel.pages.read',
       canCreate: 'panel.pages.create',
       canUpdate: 'panel.pages.update',
       canDelete: 'panel.pages.delete',
     })
 
-    return { translations, auth, ...access }
+    return { translations, auth, PAGE_PATH_PATTERN, PAGE_PATH_MAX_LENGTH, ...access }
   },
 
   computed: {

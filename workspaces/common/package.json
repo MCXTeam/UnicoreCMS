@@ -77,6 +77,11 @@
       "import": "./dist/password.mjs",
       "require": "./dist/password.js"
     },
+    "./payments": {
+      "types": "./dist/payments.d.ts",
+      "import": "./dist/payments.mjs",
+      "require": "./dist/payments.js"
+    },
     "./locales": {
       "types": "./dist/locales.d.ts",
       "import": "./dist/locales.mjs",

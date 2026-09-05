@@ -71,7 +71,7 @@
       </Form>
     </CabTile>
 
-    <CabTile v-if="canTwoFactorOn || canTwoFactorOff" :title="$t('cabinet.two_factor')" icon="bx bx-shield-quarter" :span="6">
+    <CabTile v-if="showTwoFactor" :title="$t('cabinet.two_factor')" icon="bx bx-shield-quarter" :span="6">
       <div v-if="!$auth.user.two_factor_enabled" v-show="two_factor && !$auth.user.two_factor_enabled">
         <div class="cab-note mb-3">
           <p class="m-0">{{ $t('cabinet.two_factor_text1') }}</p>
@@ -185,6 +185,10 @@ const { canPassword, canTwoFactorOn, canTwoFactorOff } = useAccess({
 })
 
 useHead({ title: computed(() => $t('header.cabinet')) })
+
+const showTwoFactor = computed(() =>
+  $auth.user?.two_factor_enabled ? canTwoFactorOff.value : canTwoFactorOn.value,
+)
 
 const forcedPassword = computed(() => Boolean($auth.user?.password_change_required))
 

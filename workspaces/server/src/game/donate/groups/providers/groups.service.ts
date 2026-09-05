@@ -79,6 +79,7 @@ export class DonateGroupsService {
         .leftJoinAndSelect('images.server', 'image_server')
         .leftJoinAndSelect('group.servers', 'servers')
         .leftJoinAndSelect('group.features', 'features')
+        .where('group.hidden = :hidden', { hidden: false })
         .orderBy({ price: 'ASC' })
         .getMany()
     ).filter((perm) => perm.servers.find((srv) => srv.id == id));
@@ -298,6 +299,7 @@ export class DonateGroupsService {
     group.features = input.features.map((feature) => Object.assign(new GroupFeature(), feature));
     group.virtual_percent = input.virtual_percent;
     group.referal_percent = input.referal_percent ?? null;
+    group.hidden = input.hidden === true;
     group.giftable = input.giftable !== false;
     group.regiftable = input.regiftable !== false;
     group.staff = Boolean(input.staff);
@@ -357,6 +359,7 @@ export class DonateGroupsService {
     group.features = input.features.map((feature) => Object.assign(new GroupFeature(), feature));
     group.virtual_percent = input.virtual_percent;
     group.referal_percent = input.referal_percent ?? null;
+    group.hidden = input.hidden === true;
     group.giftable = input.giftable !== false;
     group.regiftable = input.regiftable !== false;
     group.staff = Boolean(input.staff);

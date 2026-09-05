@@ -1,7 +1,7 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
-import { DEFAULT_LOCALES, LocaleCode } from 'unicore-common';
+import { DEFAULT_LOCALES, FALLBACK_LOCALE, LocaleCode } from 'unicore-common';
 import { LocaleInput } from './dto/locale.input';
 import { TranslationsInput } from './dto/translations.input';
 import { Locale } from './entities/locale.entity';
@@ -98,7 +98,26 @@ export class LocalesService {
   async create(input: LocaleInput): Promise<Locale> {
     if (await this.localesRepository.findOneBy({ code: input.code })) throw new ConflictException();
 
-    return this.save(this.localesRepository.create(input));
+    const locale = await this.save(this.localesRepository.create(input));
+
+    await this.seedFromFallback(locale.code);
+
+    return locale;
+  }
+
+  private async seedFromFallback(code: string): Promise<void> {
+    const fallback = FALLBACK_LOCALE;
+
+    if (code === fallback) return;
+
+    const source = await this.translationsRepository.findBy({ localeCode: fallback });
+
+    if (!source.length) return;
+
+    await this.translationsRepository.upsert(
+      source.map((row) => ({ localeCode: code, key: row.key, value: row.value })),
+      ['localeCode', 'key'],
+    );
   }
 
   async update(code: string, input: LocaleInput): Promise<Locale> {

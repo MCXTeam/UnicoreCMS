@@ -1,4 +1,4 @@
-import { permissionEntries, permissionRevision } from "./registry";
+import { permissionEntries, permissionMeta, permissionRevision } from "./registry";
 import { satisfiesPermission } from "./resolve";
 
 export const PERMISSION_ENTITIES = [
@@ -7,6 +7,7 @@ export const PERMISSION_ENTITIES = [
   "donate_group",
   "donate_permission",
   "store_product",
+  "store_kit",
 ] as const;
 
 export type PermissionEntity = (typeof PERMISSION_ENTITIES)[number] | (string & {});
@@ -57,22 +58,36 @@ export function guardedFields(entity: PermissionEntity): string[] {
   return Object.keys(fieldPermissions(entity));
 }
 
+export function isUpdateOnlyField(
+  entity: PermissionEntity,
+  field: string,
+): boolean {
+  const permission = fieldPermission(entity, field);
+
+  return Boolean(permission && permissionMeta(permission)?.updateOnly);
+}
+
 export function canEditField(
   entity: PermissionEntity,
   field: string,
   granted: string[],
+  updating = true,
 ): boolean {
   const permission = fieldPermission(entity, field);
 
-  return !permission || satisfiesPermission(granted, permission);
+  if (!permission) return true;
+  if (!updating && permissionMeta(permission)?.updateOnly) return true;
+
+  return satisfiesPermission(granted, permission);
 }
 
 export function forbiddenFields(
   entity: PermissionEntity,
   granted: string[],
+  updating = true,
 ): string[] {
   return guardedFields(entity).filter(
-    (field) => !canEditField(entity, field, granted),
+    (field) => !canEditField(entity, field, granted, updating),
   );
 }
 
@@ -80,8 +95,9 @@ export function stripForbiddenFields<T extends Record<string, any>>(
   entity: PermissionEntity,
   input: T,
   granted: string[],
+  updating = true,
 ): T {
-  const forbidden = forbiddenFields(entity, granted);
+  const forbidden = forbiddenFields(entity, granted, updating);
 
   if (!forbidden.length) return input;
 

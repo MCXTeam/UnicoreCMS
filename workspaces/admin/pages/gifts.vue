@@ -39,7 +39,7 @@
               </span>
             </div>
           </template>
-          <Column selectionMode="multiple" :style="{ width: '3rem' }"></Column>
+          <Column v-if="canDeleteMany" selectionMode="multiple" :style="{ width: '3rem' }"></Column>
           <Column sortable field="id" header="ID" :style="{ width: '8rem' }"></Column>
           <Column field="promocode" :header="$t('admin.promocode')" sortable></Column>
           <Column field="issued_by" :header="$t('admin.gift_source')" sortable>

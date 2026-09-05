@@ -88,7 +88,7 @@ export class SkinController {
     return this.skinsService.updateSkinMe(req, file);
   }
 
-  @Permissions(['panel.access', 'panel.users.update'])
+  @Permissions(['panel.access', 'panel.users.skin'])
   @Patch('skin/:uuid')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -114,7 +114,7 @@ export class SkinController {
     return this.skinsService.updateCloakMe(req, file);
   }
 
-  @Permissions(['panel.access', 'panel.users.update'])
+  @Permissions(['panel.access', 'panel.users.cloak'])
   @Patch('cloak/:uuid')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -133,7 +133,7 @@ export class SkinController {
     return this.skinsService.removeSkin(user);
   }
 
-  @Permissions(['panel.access', 'panel.users.update'])
+  @Permissions(['panel.access', 'panel.users.skin'])
   @Delete('skin/:uuid')
   removeSkin(@Param('uuid') uuid: string) {
     return this.skinsService.removeSkinByUUID(uuid);
@@ -145,7 +145,7 @@ export class SkinController {
     return this.skinsService.removeCloak(user);
   }
 
-  @Permissions(['panel.access', 'panel.users.update'])
+  @Permissions(['panel.access', 'panel.users.cloak'])
   @Delete('cloak/:uuid')
   removeCloak(@Param('uuid') uuid: string) {
     return this.skinsService.removeCloakByUUID(uuid);

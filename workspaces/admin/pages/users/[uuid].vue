@@ -322,8 +322,9 @@
                 <div class="col-12 flex justify-content-center">
                   <SkinView3D class="rounded" :width="210" :height="300" :skin="user.skin" :cloak="user.cloak" ref="skin" />
                 </div>
-                <div class="col-12 flex justify-content-center" v-if="canUpdate">
+                <div class="col-12 flex justify-content-center" v-if="canEditSkin || canEditCloak">
                   <div class="grid">
+                    <template v-if="canEditSkin">
                     <div @click="$refs.skinInput.choose()" class="col-12 md:col-6">
                       <Button :label="$t('admin.upload_skin')" class="p-button mr-2 mb-2" />
                     </div>
@@ -340,6 +341,8 @@
                     <div class="col-12 md:col-6">
                       <Button @click="deleteSkin('skin')" :label="$t('admin.delete_skin')" class="p-button-danger p-button mr-2 mb-2" />
                     </div>
+                    </template>
+                    <template v-if="canEditCloak">
                     <div @click="$refs.cloakInput.choose()" class="col-12 md:col-6">
                       <Button :label="$t('admin.upload_cloak')" class="p-button mr-2 mb-2" />
                     </div>
@@ -356,6 +359,7 @@
                     <div class="col-12 md:col-6">
                       <Button @click="deleteSkin('cloak')" :label="$t('admin.delete_cloak')" class="p-button-danger p-button mr-2 mb-2" />
                     </div>
+                    </template>
                   </div>
                 </div>
               </div>
@@ -405,10 +409,10 @@
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>{{ $t('admin.username') }}<span class="p-error"> *</span><FieldLock :allowed="canEditUsername" /></label>
+                      <label>{{ $t('admin.username') }}<span class="p-error"> *</span><FieldLock :allowed="canEditUsername()" /></label>
                       <InputText
                         :modelValue="value"
-                        :disabled="!canEditUsername"
+                        :disabled="!canEditUsername()"
                         @update:modelValue="handleChange"
                         @blur="handleBlur"
                         type="text"
@@ -424,10 +428,10 @@
                     v-slot="{ value, errorMessage, handleChange, handleBlur }"
                   >
                     <div class="field">
-                      <label>Email<FieldLock :allowed="canEditEmail" /></label>
+                      <label>Email<FieldLock :allowed="canEditEmail()" /></label>
                       <InputText
                         :modelValue="value"
-                        :disabled="!canEditEmail"
+                        :disabled="!canEditEmail()"
                         @update:modelValue="handleChange"
                         @blur="handleBlur"
                         type="text"
@@ -436,27 +440,27 @@
                     </div>
                   </VeeField>
                   <div class="field-checkbox">
-                    <Checkbox :binary="true" v-model="user.activated" :disabled="!canEditActivated" />
-                    <label>{{ $t('admin.activated_email') }}<FieldLock :allowed="canEditActivated" /></label>
+                    <Checkbox :binary="true" v-model="user.activated" :disabled="!canEditActivated()" />
+                    <label>{{ $t('admin.activated_email') }}<FieldLock :allowed="canEditActivated()" /></label>
                   </div>
                   <h4>{{ $t('admin.roles_and_rights') }}</h4>
                   <div class="field">
-                    <label>{{ $t('admin.roles') }}<FieldLock :allowed="canEditRoles" /></label>
+                    <label>{{ $t('admin.roles') }}<FieldLock :allowed="canEditRoles()" /></label>
                     <MultiSelect
                       display="chip"
                       :filter="true"
-                      :disabled="!canEditRoles"
+                      :disabled="!canEditRoles()"
                       v-model="rolesUser"
-                      :options="roles"
+                      :options="roleOptions"
                       optionLabel="name"
                       optionValue="id"
-                      optionDisabled="important"
+                      optionDisabled="locked"
                       :placeholder="$t('admin.choose_roles')"
                       class="p-column-filter"
                     />
                   </div>
-                  <PermissionsPicker v-model="user.perms" :label="$t('admin.rights')" :disabled="!canEditRoles" />
-                  <div class="field-checkbox" v-if="canEditSuperuser">
+                  <PermissionsPicker v-model="user.perms" :label="$t('admin.rights')" :disabled="!canEditRoles()" />
+                  <div class="field-checkbox" v-if="canEditSuperuser()">
                     <Checkbox :binary="true" v-model="user.superuser" />
                     <label>{{ $t('admin.superuser') }}</label>
                   </div>
@@ -468,8 +472,8 @@
                   class="p-button mr-2 mb-4"
                 />
               </VeeForm>
-              <VeeForm v-if="canEditPassword || canResetTwoFactor || canCloseSessions" as="div" v-slot="{ meta }">
-                <div class="p-fluid" v-if="canEditPassword">
+              <VeeForm v-if="canEditPassword() || canResetTwoFactor || canCloseSessions" as="div" v-slot="{ meta }">
+                <div class="p-fluid" v-if="canEditPassword()">
                   <h4>{{ $t('admin.change_password') }}</h4>
                   <VeeField
                     v-model="passwordForm.password"
@@ -524,7 +528,7 @@
                   <Message severity="info" :closable="false">{{ $t('auth.sessions_closed_hint') }}</Message>
                 </div>
                 <Button
-                  v-if="canEditPassword"
+                  v-if="canEditPassword()"
                   :disabled="!meta.valid"
                   @click="updatePassword()"
                   :label="$t('common.save')"
@@ -789,6 +793,8 @@ export default {
       canResetTwoFactor: 'panel.users.twofactor.reset',
       canCloseSessions: 'panel.users.sessions.revoke',
       canReadLogs: 'panel.logs.read',
+      canEditSkin: 'panel.users.skin',
+      canEditCloak: 'panel.users.cloak',
     })
 
     const fields = useFieldAccess('user', {
@@ -856,6 +862,10 @@ export default {
   },
 
   computed: {
+    roleOptions() {
+      return (this.roles || []).map((role) => ({ ...role, locked: role.important || !this.canGrantRole(role) }))
+    },
+
     canBalanceReal() {
       return this.hasPermission('panel.users.balance.real')
     },
@@ -942,6 +952,14 @@ export default {
 
     hasServerPermission(permission, serverId) {
       return useAuthStore().has(serverId ? `${permission}.${serverId}` : permission)
+    },
+
+    canGrantRole(role) {
+      const auth = useAuthStore()
+
+      if (auth.user?.superuser) return true
+
+      return (role.perms || []).every((permission) => auth.has(permission))
     },
 
     async load() {
@@ -1067,7 +1085,7 @@ export default {
         await this.$api.patch('/users/' + this.user.uuid, {
           username: this.user.username,
           email: this.user.email,
-          ...(this.isSuperuser ? { superuser: this.user.superuser } : {}),
+          ...(this.canEditSuperuser() ? { superuser: this.user.superuser } : {}),
           activated: this.user.activated,
           roles: this.rolesUser,
           perms: this.user.perms,
@@ -1170,8 +1188,8 @@ export default {
         })
       }
 
-      this.$refs.skinInput.clear()
-      this.$refs.cloakInput.clear()
+      this.$refs.skinInput?.clear()
+      this.$refs.cloakInput?.clear()
     },
 
     async deleteSkin(type) {
@@ -1353,7 +1371,7 @@ export default {
     searchParams(query) {
       const params = { search: query.trim() }
 
-      if (this.whItem.server) params['filter.servers'] = this.whItem.server.id
+      if (this.whItem.server) params['filter[servers]'] = this.whItem.server.id
 
       return params
     },

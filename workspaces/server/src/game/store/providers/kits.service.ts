@@ -1,3 +1,4 @@
+import { assertFieldAccess } from 'src/admin/roles/field-permissions';
 import { assertServerEntities, assertServerList } from 'src/admin/roles/server-scope';
 import { PaginateQuery, Paginated, StorageManager, assertUploadedFile, paginate } from '@common';
 import { Injectable, NotFoundException } from '@nestjs/common';
@@ -70,6 +71,7 @@ export class KitsService {
 
   async create(input: KitInput, request?: any) {
     await assertServerList(request, 'panel.store.kits.create', input.servers);
+    await assertFieldAccess('store_kit', input, null, request);
 
     const kit = new Kit();
 
@@ -78,6 +80,7 @@ export class KitsService {
     kit.price = currencyUtils.roundByType(input.price, SystemCurrency.REAL);
     kit.sale = input.sale;
     kit.virtual_percent = input.virtual_percent;
+    kit.hidden = input.hidden === true;
     kit.giftable = input.giftable !== false;
 
     kit.servers = await this.serversRepository.findBy({
@@ -106,12 +109,14 @@ export class KitsService {
     }
 
     await assertServerList(request, 'panel.store.kits.update', input.servers, (kit.servers || []).map((server) => server.id));
+    await assertFieldAccess('store_kit', input, kit, request);
 
     kit.name = input.name;
     kit.price = currencyUtils.roundByType(input.price, SystemCurrency.REAL);
     kit.sale = input.sale;
     kit.description = input.description;
     kit.virtual_percent = input.virtual_percent;
+    kit.hidden = input.hidden === true;
     kit.giftable = input.giftable !== false;
 
     kit.servers = await this.serversRepository.findBy({

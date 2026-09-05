@@ -11,6 +11,7 @@ import { StorageModule } from './storage/storage.module';
 import { PagesModule } from './pages/pages.module';
 import { EmailModule } from './email/email.module';
 import { LocalesModule } from './locales/locales.module';
+import { AdminPaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { LocalesModule } from './locales/locales.module';
     PagesModule,
     EmailModule,
     LocalesModule,
+    AdminPaymentsModule,
   ],
 })
 export class AdminModule {}

@@ -40,7 +40,7 @@
         </div>
         <template #footer>
           <div class="cab-profile__actions">
-            <div class="cab-profile__action">
+            <div class="cab-profile__action" v-if="canUploadSkin">
               <input type="file" ref="skin" class="d-none" accept="image/png" @change="updateSkin()" />
               <Button size="small" :loading="skinLoading" @click="skin.click()">
                 <i class="bx bx-upload me-1"></i> {{ $t('cabinet.upload_skin') }}
@@ -58,7 +58,7 @@
                 <i class="bx bx-trash"></i>
               </Button>
             </div>
-            <div class="cab-profile__action">
+            <div class="cab-profile__action" v-if="canUploadCloak">
               <input type="file" ref="cloak" class="d-none" accept="image/png" @change="updateCloak()" />
               <Button size="small" outlined :loading="cloakLoading" @click="cloak.click()">
                 <i class="bx bx-upload me-1"></i> {{ $t('cabinet.upload_cloak') }}
@@ -197,7 +197,11 @@ const donateApi = useDonate()
 useHead({ title: computed(() => $t('header.cabinet')) })
 const { config } = usePublicConfig()
 
-const { canUnban } = useAccess({ canUnban: 'player.unban.buy' })
+const { canUnban, canUploadSkin, canUploadCloak } = useAccess({
+  canUnban: 'player.unban.buy',
+  canUploadSkin: 'player.skin.upload',
+  canUploadCloak: 'player.cloak.upload',
+})
 
 const Skin3D = ref(null)
 const skin = ref(null)

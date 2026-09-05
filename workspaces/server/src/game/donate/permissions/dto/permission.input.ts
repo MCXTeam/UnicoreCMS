@@ -1,4 +1,4 @@
-import { IsArray, IsBoolean, IsDefined, IsEnum, IsInt, IsNumber, IsOptional, IsString, Max, Min, MaxLength } from 'class-validator';
+import { ArrayMinSize, IsArray, IsBoolean, IsDefined, IsEnum, IsInt, IsNumber, IsOptional, IsString, Max, Min, MaxLength, ValidateIf } from 'class-validator';
 import { PermissionType } from '../enums/permission-type.enum';
 import { IsPlayerPerm, PRICE_MIN, SanitizeHtml } from '@common';
 
@@ -27,8 +27,10 @@ export class PermissionInput {
   @Max(99)
   sale: number;
 
+  @ValidateIf((input: PermissionInput) => input.type !== PermissionType.Web)
   @IsDefined()
   @IsArray()
+  @ArrayMinSize(1)
   @IsString({ each: true })
   servers?: string[];
 
@@ -69,6 +71,10 @@ export class PermissionInput {
   @Min(0)
   @Max(100)
   referal_percent?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  hidden?: boolean;
 
   @IsOptional()
   @IsBoolean()

@@ -27,7 +27,7 @@ export class GroupKitsController {
     return this.groupKitsService.create(body);
   }
 
-  @Permissions(['panel.access', 'panel.donate.kits.update'])
+  @Permissions(['panel.access', 'panel.donate.sort'])
   @Post('sort')
   sort(@Body() body: NumberSortInput) {
     return this.groupKitsService.sort(body);

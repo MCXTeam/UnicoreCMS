@@ -26,7 +26,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { matchPermission } from 'src/admin/roles/guards/permisson.guard';
-import { allowedServers } from 'src/admin/roles/server-scope';
+import { allowedServersAny } from 'src/admin/roles/server-scope';
 import { User } from 'src/admin/users/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { ProductFromGameInput } from '../dto/product-fromgame.dto';
@@ -42,7 +42,7 @@ export class ProductsController {
   @Permissions([['panel.store.read.*', 'panel.users.give.*'], { or: true }])
   @Get()
   async find(@Req() request: any, @Paginate() query: PaginateQuery) {
-    return this.productsService.find(query, await allowedServers(request, 'panel.store.read'));
+    return this.productsService.find(query, await allowedServersAny(request, ['panel.store.read', 'panel.users.give']));
   }
 
   @Permissions(['panel.access', 'panel.store.products.delete.many.*'])

@@ -63,10 +63,12 @@
             </template>
           </Column>
           <Column field="value" :header="$t('admin.value')">
+            <template #header><FieldLock :allowed="canUpdate" /></template>
             <template #body="slotProps">
               <InputText
                 class="w-full"
                 :modelValue="messages[slotProps.data.key]"
+                :disabled="!canUpdate"
                 @update:modelValue="setMessage(slotProps.data.key, $event)"
                 :placeholder="original[slotProps.data.key] ? '' : $t('admin.no_translation')"
               />

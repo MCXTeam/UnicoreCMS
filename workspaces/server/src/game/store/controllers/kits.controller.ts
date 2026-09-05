@@ -15,7 +15,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
-import { allowedServers } from 'src/admin/roles/server-scope';
+import { allowedServersAny } from 'src/admin/roles/server-scope';
 import { KitInput } from '../dto/kit.input.dto';
 import { KitsService } from '../providers/kits.service';
 
@@ -26,7 +26,7 @@ export class KitsController {
   @Permissions([['panel.store.read.*', 'panel.users.give.*'], { or: true }])
   @Get()
   async find(@Req() request: any, @Paginate() query: PaginateQuery) {
-    return this.kitsService.find(query, await allowedServers(request, 'panel.store.read'));
+    return this.kitsService.find(query, await allowedServersAny(request, ['panel.store.read', 'panel.users.give']));
   }
 
   @Permissions(['panel.access', 'panel.store.kits.delete.many.*'])

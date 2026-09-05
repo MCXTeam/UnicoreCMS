@@ -9,7 +9,13 @@
               <h5 class="m-0">{{ $t(section.title) }}</h5>
               <div class="flex align-items-center">
                 <ExtensionInstall v-if="canManage" @installed="load()" />
-                <Button :label="$t('admin.rebuild')" icon="pi pi-sync" class="p-button-text" @click="rebuildDialog = true" />
+                <Button
+                  v-if="canManage"
+                  :label="$t('admin.rebuild')"
+                  icon="pi pi-sync"
+                  class="p-button-text"
+                  @click="rebuildDialog = true"
+                />
                 <Button :label="$t('admin.refresh')" icon="pi pi-refresh" class="p-button-text" @click="load()" />
               </div>
             </div>

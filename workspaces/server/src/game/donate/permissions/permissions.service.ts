@@ -262,6 +262,7 @@ export class DonatePermissionsService {
         .leftJoinAndSelect('perm.kits', 'kits')
         .leftJoinAndSelect('kits.images', 'images')
         .leftJoinAndSelect('images.server', 'server')
+        .where('perm.hidden = :hidden', { hidden: false })
         .orderBy({ 'perm.priority': 'ASC', 'perm.id': 'ASC' })
         .getMany()
     ).filter((perm) => perm.servers.find((srv) => srv.id == id) || perm.type == PermissionType.Web);
@@ -354,6 +355,7 @@ export class DonatePermissionsService {
     perm.sale = input.sale;
     perm.virtual_percent = input.virtual_percent;
     perm.referal_percent = input.referal_percent ?? null;
+    perm.hidden = input.hidden === true;
     perm.giftable = input.giftable !== false;
     perm.regiftable = input.regiftable !== false;
 
@@ -414,6 +416,7 @@ export class DonatePermissionsService {
     perm.sale = input.sale;
     perm.virtual_percent = input.virtual_percent;
     perm.referal_percent = input.referal_percent ?? null;
+    perm.hidden = input.hidden === true;
     perm.giftable = input.giftable !== false;
     perm.regiftable = input.regiftable !== false;
 

@@ -20,6 +20,14 @@ export async function allowedServers(request: any, permission: Permission): Prom
   return Array.from(new Set(servers));
 }
 
+export async function allowedServersAny(request: any, permissions: Permission[]): Promise<string[] | null> {
+  const scopes = await Promise.all(permissions.map((permission) => allowedServers(request, permission)));
+
+  if (scopes.some((scope) => scope === null)) return null;
+
+  return Array.from(new Set(scopes.flat() as string[]));
+}
+
 export async function assertServerScope(request: any, permission: Permission, servers: string[] = []): Promise<void> {
   const allowed = await allowedServers(request, permission);
 

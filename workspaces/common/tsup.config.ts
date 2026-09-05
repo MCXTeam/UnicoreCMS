@@ -17,6 +17,7 @@ export default defineConfig({
     "src/audit.ts",
     "src/extensions.ts",
     "src/password.ts",
+    "src/payments.ts",
     "src/locales.ts",
     "src/issuance/index.ts",
     "src/validation/index.ts",

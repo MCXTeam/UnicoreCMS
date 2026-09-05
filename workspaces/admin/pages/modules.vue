@@ -66,7 +66,7 @@
                 @click="setEnabled(slotProps.data, true)"
               />
               <Button
-                v-if="slotProps.data.config && slotProps.data.config.length"
+                v-if="canManage && slotProps.data.config && slotProps.data.config.length"
                 icon="pi pi-cog"
                 class="p-button-rounded p-button-text"
                 :disabled="loading"
