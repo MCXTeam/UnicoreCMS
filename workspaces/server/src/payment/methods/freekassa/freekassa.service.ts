@@ -42,7 +42,7 @@ export class FreekassaService implements PaymentCoreService {
       .update([envConfig.freekassaMerchantID, input.AMOUNT, envConfig.freekassaSecretKeySecond, input.MERCHANT_ORDER_ID].join(':'))
       .digest('hex');
 
-    if (!safeEqual(sign, input.SIGN)) return PaymentResp.WrongSign;
+    if (!safeEqual(sign, String(input.SIGN || '').toLowerCase())) return PaymentResp.WrongSign;
 
     if (!(await this.paymentHandler.handler(input.MERCHANT_ORDER_ID, input.intid, input.AMOUNT))) return PaymentResp.WrongPayID;
 

@@ -60,11 +60,6 @@ export class WarehouseService {
 
       if (!gived) continue;
 
-      if (item.amount - gived.amount <= 0) {
-        await this.warehouseItemsRepository.remove(item);
-        continue;
-      }
-
       const decrement = await this.warehouseItemsRepository
         .createQueryBuilder()
         .update()

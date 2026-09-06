@@ -46,8 +46,6 @@ export class VotesTasks {
 
     if (!ids.length) return;
 
-    await this.votesRepository.delete(ids);
-
     for (const gift of gifts) {
       const winner = votes[gift.place - 1];
 
@@ -57,5 +55,7 @@ export class VotesTasks {
 
       if (bonus > 0) await this.usersRepository.increment({ uuid: winner.user.uuid }, 'real', bonus);
     }
+
+    await this.votesRepository.delete(ids);
   }
 }

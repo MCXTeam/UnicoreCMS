@@ -52,6 +52,12 @@ export class PaymentHandlerService {
 
   @Transactional()
   async handler(id: number, bill_id: string = null, reported?: number): Promise<boolean> {
+    if (reported != null && !(Number(reported) > 0)) {
+      this.logger.warn(`Платёж #${id}: провайдер сообщил сумму ${reported}, зачисление отклонено`);
+
+      return false;
+    }
+
     const claim = await this.paymentsRepo
       .createQueryBuilder()
       .update(Payment)

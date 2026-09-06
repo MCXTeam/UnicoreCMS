@@ -17,7 +17,7 @@ const register = [AnypayModule, UnitpayModule, FreekassaModule, EnotioModule, Pa
 );
 
 @Module({
-  imports: [...register, TypeOrmModule.forFeature([Payment]), FreekassaModule, BonusesModule],
+  imports: [...register, TypeOrmModule.forFeature([Payment]), BonusesModule],
   providers: [PaymentService],
   exports: [PaymentService],
   controllers: [PaymentController],

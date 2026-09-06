@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { AuditService, StorageManager } from '@common';
 import { auditChanges, RoleBadgeEffect } from 'unicore-common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -135,6 +135,8 @@ export class RolesService {
     if (!role) {
       throw new NotFoundException();
     }
+
+    if (role.important) throw new BadRequestException('Системную роль удалить нельзя');
 
     return this.rolesRepository.remove(role);
   }

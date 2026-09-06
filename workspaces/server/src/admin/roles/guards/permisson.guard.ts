@@ -18,10 +18,8 @@ export type PermissionArgs = Permission[] | [Permission[], PermissionOptions];
 export function transformPermissions(userPart: Partial<User>) {
   const user = { ...userPart };
 
-  if (!user?.perms) user.perms = [];
-  if (!user?.roles) user.roles = [];
-
-  user.perms.push(...user.roles.map((role) => role.perms).flat());
+  user.roles = userPart.roles || [];
+  user.perms = [...(userPart.perms || []), ...user.roles.map((role) => role.perms || []).flat()];
 
   if (user.perms.length) user.perms = resolvePermissions(user.perms);
 

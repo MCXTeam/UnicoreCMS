@@ -11,22 +11,28 @@ import { AuthSocket } from '../interfaces/auth-socket.interface';
 import { TokensService } from '../tokens.service';
 import { handshakeIp, ipAllowed, isBanActive, WS_API_KEY_PREFIX, WS_BEARER_PREFIX, WS_PUBLIC_ROOM } from '@common';
 
+interface AuthServices {
+  tokens: TokensService;
+  users: UsersService;
+  api: ApiService;
+}
+
 export class AuthAdapter extends IoAdapter {
-  private tokensService: TokensService;
-  private apiService: ApiService;
-  private usersService: UsersService;
+  private services: Promise<AuthServices> | null = null;
 
   constructor(private app: INestApplicationContext) {
     super(app);
-    app.resolve<TokensService>(TokensService).then((tokensService) => {
-      this.tokensService = tokensService;
-    });
-    app.resolve<UsersService>(UsersService).then((usersService) => {
-      this.usersService = usersService;
-    });
-    app.resolve<ApiService>(ApiService).then((apiService) => {
-      this.apiService = apiService;
-    });
+  }
+
+  private resolveServices(): Promise<AuthServices> {
+    if (!this.services)
+      this.services = Promise.all([
+        this.app.resolve<TokensService>(TokensService),
+        this.app.resolve<UsersService>(UsersService),
+        this.app.resolve<ApiService>(ApiService),
+      ]).then(([tokens, users, api]) => ({ tokens, users, api }));
+
+    return this.services;
   }
 
   private apiKeyFromHandshake(handshake: AuthSocket['handshake']): string | null {
@@ -63,21 +69,23 @@ export class AuthAdapter extends IoAdapter {
   }
 
   private async authorizeApiKey(socket: AuthSocket, apiKey: string): Promise<void> {
-    const apiToken = await this.apiService.findByKey(apiKey);
+    const { api, users } = await this.resolveServices();
+    const apiToken = await api.findByKey(apiKey);
 
     if (!ipAllowed(this.socketIp(socket), apiToken?.allow)) {
       throw new UnauthorizedException();
     }
 
-    const user = await this.usersService.getKernel();
-    user.perms = apiToken.perms;
+    const user = await users.getKernel();
+    user.perms = [...(apiToken.perms || [])];
 
     socket.join([...this.kernelRooms(apiToken, user), userRoom(user), ApiKeyRoom(apiToken)]);
     socket.user = user;
   }
 
   private async authorizeUser(socket: AuthSocket, refreshToken: string): Promise<void> {
-    const { user } = await this.tokensService.resolveRefreshToken(refreshToken);
+    const { tokens } = await this.resolveServices();
+    const { user } = await tokens.resolveRefreshToken(refreshToken);
 
     if (isBanActive(user.ban)) throw new UnauthorizedException();
 

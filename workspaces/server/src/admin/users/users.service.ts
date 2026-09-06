@@ -352,8 +352,11 @@ export class UsersService {
       id: In(input.roles),
     });
 
-    if (!user.roles.find((role) => role.id === ImportantRoles.Default))
-      user.roles.push(await this.rolesRepository.findOneBy({ id: ImportantRoles.Default }));
+    if (!user.roles.find((role) => role.id === ImportantRoles.Default)) {
+      const fallback = await this.requiredRole(ImportantRoles.Default);
+
+      if (fallback) user.roles.push(fallback);
+    }
 
     if (actor) {
       if (!(await userPermissionCheck(user, actor))) throw new ForbiddenException();

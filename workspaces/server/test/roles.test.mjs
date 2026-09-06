@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { after, describe, it } from 'node:test';
 import { closeDatabase } from './helpers/db.mjs';
-import { cleanup, createAdmin, createRole } from './helpers/stand.mjs';
+import { cleanup, createAdmin, createRole, rootSession } from './helpers/stand.mjs';
 
 after(async () => {
   await cleanup();
@@ -79,6 +79,30 @@ describe('Разрешения в роли', () => {
 
     assert.equal(byId.get(strong)?.grantable, false, 'роль сильнее выдающего помечена выдаваемой');
     assert.equal(byId.get(weak)?.grantable, true, 'пустая роль помечена невыдаваемой');
+  });
+
+  it('системную роль удалить нельзя', async () => {
+    const admin = await rootSession();
+
+    const { status } = await admin.del('/admin/roles/default');
+
+    assert.equal(status, 400);
+
+    const { body } = await admin.get('/admin/roles');
+
+    assert.ok(
+      (body || []).some((role) => role.id === 'default'),
+      'роль игрока пропала после попытки удаления',
+    );
+  });
+
+  it('обычную роль удалить можно', async () => {
+    const admin = await rootSession();
+    const id = await createRole([]);
+
+    const { status } = await admin.del(`/admin/roles/${id}`);
+
+    assert.ok(status >= 200 && status < 300, `удаление обычной роли отвергнуто: ${status}`);
   });
 
   it('признак выдачи приходит и без права смотреть роли', async () => {

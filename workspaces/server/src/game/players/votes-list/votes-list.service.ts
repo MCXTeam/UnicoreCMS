@@ -15,6 +15,7 @@ export class VotesListService {
 
   async refresh() {
     const votes: VotesGroupped[] = _(await this.votesRepo.find({ relations: ['user'] }))
+      .filter((v) => !!v.user)
       .groupBy((v) => v.user.uuid)
       .map((value) => ({
         user: value[0].user,
