@@ -7,7 +7,6 @@ export class Referal {
   userUuid: string;
 
   @OneToOne(() => User, {
-    cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
     nullable: false,

@@ -11,7 +11,6 @@ export class Cloak {
   userUuid: string;
 
   @OneToOne(() => User, {
-    cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })

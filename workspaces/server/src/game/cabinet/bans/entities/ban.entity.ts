@@ -7,7 +7,6 @@ export class Ban {
   userUuid: string;
 
   @OneToOne(() => User, {
-    cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })

@@ -17,7 +17,6 @@ export class Skin {
   userUuid: string;
 
   @OneToOne(() => User, {
-    cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })

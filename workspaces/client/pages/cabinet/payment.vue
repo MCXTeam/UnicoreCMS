@@ -306,7 +306,7 @@ export default {
         amount: '',
         server: '',
       },
-      payment_methods: true,
+      payment_methods: [],
       payment_methods_map: {
         anypay: 'AnyPay',
         centapp: 'CentApp',
