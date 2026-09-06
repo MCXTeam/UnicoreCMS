@@ -6,7 +6,7 @@ import { User } from 'src/admin/users/entities/user.entity';
 import { Server } from 'src/game/servers/entities/server.entity';
 import { IssuanceService } from 'src/game/servers/rcon/issuance.service';
 import { ServersService } from 'src/game/servers/servers.service';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Product } from '../entities/product.entity';
 import { WarehouseItem } from '../warehouse/entities/warehouse-item.entity';
 import { CartItem } from './entities/cart-item.entity';
@@ -364,20 +364,36 @@ export class CartService {
     await this.giveKit(user, server, kit);
   }
 
+  private async claimCart(user: User, server: Server): Promise<{ items: number[]; kits: number[] }> {
+    const lock = <T>(repository: Repository<T>, alias: string) =>
+      repository
+        .createQueryBuilder(alias)
+        .select(`${alias}.id`, 'id')
+        .where(`${alias}.user_uuid = :uuid AND ${alias}.server_id = :server`, { uuid: user.uuid, server: server.id })
+        .setLock('pessimistic_write')
+        .getRawMany();
+
+    const [items, kits] = await Promise.all([lock(this.cartItemsRepository, 'item'), lock(this.cartItemKitsRepository, 'kit')]);
+
+    return { items: items.map((row) => Number(row.id)), kits: kits.map((row) => Number(row.id)) };
+  }
+
   @Transactional()
   async buy(user: User, ip: string, body: CartBuyInput) {
     const server = await this.serversService.findOne(body.server_id);
 
     if (!server) throw new BadRequestException();
 
-    const cartItems = await this.cartItemsRepository.find({
-      where: { user: { uuid: user.uuid }, server: { id: server.id } },
-      relations: ['server', 'product'],
-    });
-    const cartKitItems = await this.cartItemKitsRepository.find({
-      where: { user: { uuid: user.uuid }, server: { id: server.id } },
-      relations: ['server', 'kit', 'kit.items'],
-    });
+    const claimed = await this.claimCart(user, server);
+
+    const cartItems = claimed.items.length
+      ? await this.cartItemsRepository.find({ where: { id: In(claimed.items) }, relations: ['server', 'product'] })
+      : [];
+    const cartKitItems = claimed.kits.length
+      ? await this.cartItemKitsRepository.find({ where: { id: In(claimed.kits) }, relations: ['server', 'kit', 'kit.items'] })
+      : [];
+
+    if (!cartItems.length && !cartKitItems.length) throw new BadRequestException('Корзина пуста');
 
     const price = this.priceCalc(cartItems, cartKitItems);
     let virtual_sale = 0;
