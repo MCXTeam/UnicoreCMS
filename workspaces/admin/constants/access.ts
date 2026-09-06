@@ -16,6 +16,7 @@ export const ROUTE_ACCESS: Record<string, RouteAccess> = {
   '/modules': ['panel.extensions.read'],
   '/themes': ['panel.extensions.read'],
   '/news': ['panel.news.read', 'panel.news.create', 'panel.news.update', 'panel.news.delete', 'panel.news.delete.many'],
+  '/layout': ['panel.layout.read', 'panel.layout.update'],
   '/pages': ['panel.pages.read', 'panel.pages.create', 'panel.pages.update', 'panel.pages.delete'],
   '/email': ['panel.email.read'],
   '/servers': ['panel.servers.read', 'panel.servers.create', 'panel.servers.update', 'panel.servers.delete'],

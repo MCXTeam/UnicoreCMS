@@ -22,6 +22,8 @@ export default defineConfig({
     "src/news.ts",
     "src/issuance/index.ts",
     "src/validation/index.ts",
+    "src/layout.ts",
+    "src/layout-presets.ts",
     "src/sanitize.ts",
     "src/security.ts",
     "src/auth.ts",

@@ -3,15 +3,19 @@ import { formatDuration, type DurationUnit } from 'unicore-common/duration'
 import { ACTIVE_MODULES_KEY } from 'unicore-api'
 import { setActiveModules } from 'unicore-api/client'
 import { useConfigStore } from '~/stores/config'
+import { useLayoutStore } from '~/stores/layout'
 import { useLocale } from '~/composables/useLocale'
 
 export default defineNuxtPlugin(async () => {
   const parser = new UAParser()
   const rc = useRuntimeConfig()
   const configStore = useConfigStore()
+  const layoutStore = useLayoutStore()
   const locale = useLocale()
 
   const config = await configStore.fetch().catch(() => null)
+
+  await layoutStore.fetch().catch(() => null)
 
   setActiveModules(config ? String(config[ACTIVE_MODULES_KEY] || '').split(',').filter(Boolean) : null)
 

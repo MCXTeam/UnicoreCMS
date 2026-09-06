@@ -20,6 +20,7 @@ export const PERMISSION_GROUPS = [
   "roles",
   "servers",
   "news",
+  "layout",
   "pages",
   "mods",
   "donate",
@@ -136,6 +137,9 @@ export const PERMISSIONS = define({
   "panel.news.delete.many": { group: "news" },
   "panel.news.publish": { group: "news" },
   "panel.news.hidden": { group: "news" },
+
+  "panel.layout.read": { group: "layout" },
+  "panel.layout.update": { group: "layout" },
 
   "panel.pages.read": { group: "pages" },
   "panel.pages.create": { group: "pages" },

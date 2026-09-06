@@ -43,6 +43,11 @@ export const CORE_MENU = [
         to: '/pages',
       },
       {
+        label: 'admin.menu_layout',
+        icon: 'pi pi-objects-column',
+        to: '/layout',
+      },
+      {
         label: 'admin.menu_email',
         icon: 'pi pi-send',
         to: '/email',

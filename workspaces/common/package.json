@@ -147,7 +147,17 @@
       "import": "./dist/vite.mjs",
       "require": "./dist/vite.js"
     },
-    "./dist/*": "./dist/*.js"
+    "./dist/*": "./dist/*.js",
+    "./layout": {
+      "types": "./dist/layout.d.ts",
+      "import": "./dist/layout.mjs",
+      "require": "./dist/layout.js"
+    },
+    "./layout-presets": {
+      "types": "./dist/layout-presets.d.ts",
+      "import": "./dist/layout-presets.mjs",
+      "require": "./dist/layout-presets.js"
+    }
   },
   "scripts": {
     "dev": "tsup --watch",

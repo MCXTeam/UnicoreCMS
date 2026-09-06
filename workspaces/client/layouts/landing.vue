@@ -2,78 +2,11 @@
   <div>
     <ClientOnly>
       <div class="vs-navbar-content paddingScroll" :class="{ paddingScrollActive: scrolled }">
-        <nav class="vs-navbar d-flex align-items-center justify-content-between py-2">
-          <div class="d-flex align-items-center">
-            <Button @click="activeSidebar = true" class="d-lg-none d-md-block me-4" text>
-              <i class="bx bx-menu"></i>
-            </Button>
-            <NuxtLink to="/" class="d-flex align-items-center without-underline">
-              <img class="my-1" src="/icon.png" height="64px" />
-              <h2 class="ms-3 my-0 d-none d-md-block">{{ $pub.sitename }}</h2>
-            </NuxtLink>
-            <template v-for="item in navbar" :key="item.key">
-              <a v-if="!item.module && item.href" :href="item.href" target="_blank" class="vs-navbar__item d-none d-lg-block">
-                <i :class="item.icon"></i> {{ $t(item.label) }}
-              </a>
-              <NuxtLink
-                v-else-if="!item.module"
-                :to="item.to"
-                class="vs-navbar__item d-none d-lg-block"
-                :class="{ 'router-link-active': isActive(item) }"
-              >
-                <i :class="item.icon"></i> {{ $t(item.label) }}
-              </NuxtLink>
-            </template>
-
-            <div v-if="moduleNav.length" ref="moreWrap" class="navbar-more d-none d-lg-block">
-              <button class="vs-navbar__item navbar-more__btn" :aria-expanded="moreOpen" @click.stop="moreOpen = !moreOpen">
-                <i class="bx bx-dots-horizontal-rounded"></i> {{ $t('header.more') }}
-                <i class="bx bx-chevron-down navbar-more__chevron" :class="{ open: moreOpen }"></i>
-              </button>
-              <Transition name="more-fade">
-                <div v-if="moreOpen" class="navbar-more__menu">
-                  <template v-for="item in moduleNav" :key="item.key">
-                    <a v-if="item.href" :href="item.href" target="_blank" class="navbar-more__item" @click="moreOpen = false">
-                      <i :class="item.icon"></i>
-                      <span>{{ $t(item.label) }}</span>
-                    </a>
-                    <NuxtLink v-else :to="item.to" class="navbar-more__item" @click="moreOpen = false">
-                      <i :class="item.icon"></i>
-                      <span>{{ $t(item.label) }}</span>
-                    </NuxtLink>
-                  </template>
-                </div>
-              </Transition>
-            </div>
-          </div>
-          <div class="d-flex align-items-center">
-            <div class="d-flex align-items-center" v-if="$auth.loggedIn">
-              <NuxtLink to="/start"
-                ><Button size="large">{{ $t('header.download') }} <i class="bx bxl-windows"></i></Button
-              ></NuxtLink>
-            </div>
-            <div class="d-flex" v-else>
-              <NuxtLink to="/auth" class="d-none d-md-block"
-                ><Button size="large" text>{{ $t('header.login') }}</Button></NuxtLink
-              >
-              <NuxtLink to="/start"
-                ><Button size="large">{{ $t('header.start') }} <i class="bx bx-play"></i></Button
-              ></NuxtLink>
-            </div>
-            <Select
-              v-if="locales.length > 1"
-              class="ms-2 d-none d-lg-inline-flex locale-select"
-              :modelValue="locale"
-              @update:modelValue="$setLocale"
-              :options="locales"
-              optionLabel="name"
-              optionValue="code"
-            />
-            <div class="ms-2 d-none d-lg-block" style="font-size: 1.5rem">
-              <i v-if="$colorMode.preference == 'light'" @click="$unicore.switchTheme()" class="bx bxs-sun" style="cursor: pointer"></i>
-              <i v-else @click="$unicore.switchTheme()" class="bx bxs-moon" style="cursor: pointer"></i>
-            </div>
-          </div>
+        <nav class="vs-navbar d-flex align-items-center py-2">
+          <Button @click="activeSidebar = true" class="d-lg-none d-md-block me-3" text>
+            <i class="bx bx-menu"></i>
+          </Button>
+          <LayoutRenderer class="flex-grow-1" place="header" />
         </nav>
       </div>
       <Drawer v-model:visible="activeSidebar" class="vs-sidebar">

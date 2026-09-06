@@ -7,6 +7,7 @@ import { UsersService } from 'src/admin/users/users.service';
 import { WebhooksService } from 'src/admin/webhook/webhooks.service';
 import { AuthService } from 'src/auth/auth.service';
 import { GravitService } from 'src/auth/gravit/gravit.service';
+import { WS_PUBLIC_ROOM } from '@common';
 import { kernelServerRoom, userRoom } from 'src/auth/helpers';
 import { AuthSocket } from 'src/auth/interfaces/auth-socket.interface';
 
@@ -26,5 +27,11 @@ export class EventsService {
     if (serverId !== undefined && serverId !== null && serverId !== '') rooms.push(kernelServerRoom(serverId));
 
     this.server.to(rooms).emit(event, payload);
+  }
+
+  emitPublic(event: string, payload?: unknown): void {
+    if (!this.server) return;
+
+    this.server.to(WS_PUBLIC_ROOM).emit(event, payload);
   }
 }

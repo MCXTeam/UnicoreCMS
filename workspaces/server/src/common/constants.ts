@@ -181,6 +181,11 @@ export const PWNED_LINE_SEPARATOR = /\r?\n/;
 export const PWNED_FIELD_SEPARATOR = ':';
 export const PWNED_RANGE_PATTERN = /^[0-9a-f]{35}:\d+$/im;
 
+export const LAYOUT_HTML_MAX_LENGTH = 200000;
+export const LAYOUT_ROWS_MAX = 12;
+export const LAYOUT_BLOCKS_MAX = 24;
+export const LAYOUT_LINKS_MAX = 60;
+
 export const TOKEN_MAX_LENGTH = 4096;
 export const SERVER_ID_MAX_LENGTH = 128;
 export const IP_MAX_LENGTH = 45;
