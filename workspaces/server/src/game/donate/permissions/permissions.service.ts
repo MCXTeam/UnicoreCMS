@@ -1,6 +1,6 @@
 import { assertServerPermission } from 'src/admin/roles/guards/permisson.guard';
 import { assertFieldAccess } from 'src/admin/roles/field-permissions';
-import { assertServerEntities, assertServerList } from 'src/admin/roles/server-scope';
+import { assertServerEntitiesOrGlobal, assertServerListOrGlobal } from 'src/admin/roles/server-scope';
 import { NumberSortInput, debitUserBalance, MomentWrapper, remainingSeconds } from '@common';
 import { events } from 'unicore-api';
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
@@ -28,6 +28,8 @@ import { configFieldNumber } from 'src/admin/config/config.utils';
 import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
 import { runAfterCommit } from 'src/common/utils/transaction';
 import { Transactional } from 'typeorm-transactional';
+
+const WEB_SCOPE = 'panel.donate.permissions.web';
 
 export interface PermissionQuote {
   permission: DonatePermission;
@@ -66,7 +68,9 @@ export class DonatePermissionsService {
 
     if (!allowed) return permissions;
 
-    return permissions.filter((permission) => (permission.servers || []).some((server) => allowed.includes(server.id)));
+    return permissions.filter(
+      (permission) => !(permission.servers || []).length || (permission.servers || []).some((server) => allowed.includes(server.id)),
+    );
   }
 
   me(user: User): Promise<UsersDonatePermission[]> {
@@ -345,7 +349,7 @@ export class DonatePermissionsService {
 
   async create(input: PermissionInput, request?: any) {
     await assertFieldAccess('donate_permission', input, null, request);
-    await assertServerList(request, 'panel.donate.permissions.create', input.servers);
+    await assertServerListOrGlobal(request, 'panel.donate.permissions.create', WEB_SCOPE, input.servers);
     const perm = new DonatePermission();
 
     perm.name = input.name;
@@ -403,9 +407,10 @@ export class DonatePermissionsService {
     }
 
     await assertFieldAccess('donate_permission', input, perm, request);
-    await assertServerList(
+    await assertServerListOrGlobal(
       request,
       'panel.donate.permissions.update',
+      WEB_SCOPE,
       input.servers,
       (perm.servers || []).map((server) => server.id),
     );
@@ -463,7 +468,7 @@ export class DonatePermissionsService {
       throw new NotFoundException();
     }
 
-    await assertServerEntities(request, 'panel.donate.permissions.delete', [perm]);
+    await assertServerEntitiesOrGlobal(request, 'panel.donate.permissions.delete', WEB_SCOPE, [perm]);
 
     return this.donatePermissionsRepository.remove(perm);
   }
@@ -476,7 +481,7 @@ export class DonatePermissionsService {
       relations: ['servers'],
     });
 
-    await assertServerEntities(request, 'panel.donate.permissions.delete.many', perms);
+    await assertServerEntitiesOrGlobal(request, 'panel.donate.permissions.delete.many', WEB_SCOPE, perms);
 
     return this.donatePermissionsRepository.remove(perms);
   }

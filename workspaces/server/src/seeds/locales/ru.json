@@ -1415,6 +1415,8 @@
   "perm.panel.donate.permissions.field.price.hint": "Цена и скидка донат-привилегий.",
   "perm.panel.donate.permissions.update": "Править донат-права",
   "perm.panel.donate.permissions.update.hint": "Редактирование донат-привилегий. Право выдаётся на все серверы или на выбранные.",
+  "perm.panel.donate.permissions.web": "Управлять веб-донат-правами",
+  "perm.panel.donate.permissions.web.hint": "Донат-права типа «Веб-пермишны» не привязаны к серверам, поэтому выдача по серверам к ним не применима. Без этого права такие записи видно, но править нельзя.",
   "perm.panel.donate.read": "Смотреть разделы доната",
   "perm.panel.donate.read.hint": "Просмотр донат-групп, привилегий и китов. Право выдаётся на все серверы или на выбранные.",
   "perm.panel.donate.sort": "Сортировать донат",

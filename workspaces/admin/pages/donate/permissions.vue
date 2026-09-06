@@ -58,13 +58,13 @@
           <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <Button
-                v-if="canUpdateOn(slotProps.data.servers)"
+                v-if="canEditRow(slotProps.data)"
                 @click="openDialog(slotProps.data)"
                 icon="pi pi-pencil"
                 class="p-button-rounded p-button-success mr-2"
               />
               <Button
-                v-if="canDeleteOn(slotProps.data.servers)"
+                v-if="canRemoveRow(slotProps.data)"
                 @click="removePermission(slotProps.data.id)"
                 icon="pi pi-trash"
                 class="p-button-rounded p-button-warning mt-2"
@@ -124,7 +124,7 @@
                     :modelValue="value"
                     @update:modelValue="handleChange"
                     @blur="handleBlur"
-                    :options="types"
+                    :options="availableTypes"
                     optionLabel="name"
                     appendTo="body"
                     :class="errorMessage && 'p-invalid'"
@@ -381,6 +381,7 @@ export default {
 
     const access = useAccess({
       canCreate: 'panel.donate.permissions.create',
+      canWeb: 'panel.donate.permissions.web',
       canUpdate: 'panel.donate.permissions.update',
       canDelete: 'panel.donate.permissions.delete',
       canDeleteMany: 'panel.donate.permissions.delete.many',
@@ -478,12 +479,30 @@ export default {
         { name: this.$t('admin.menu_kits'), value: 'kit' },
       ]
     },
+
+    availableTypes() {
+      if (this.canWeb) return this.types
+
+      return this.types.filter((type) => type.value !== 'web')
+    },
   },
 
   mounted() {
     this.load()
   },
   methods: {
+    canEditRow(permission) {
+      if (!(permission.servers || []).length) return this.canWeb
+
+      return this.canUpdateOn(permission.servers)
+    },
+
+    canRemoveRow(permission) {
+      if (!(permission.servers || []).length) return this.canWeb
+
+      return this.canDeleteOn(permission.servers)
+    },
+
     async load() {
       this.loading = true
       this.permissionDialog = false

@@ -5,7 +5,7 @@ import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { after, before, describe, it } from 'node:test';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const require = createRequire(import.meta.url);
 
@@ -13,32 +13,38 @@ const esbuildBinary = join(dirname(require.resolve('esbuild/package.json')), 'bi
 
 const here = dirname(fileURLToPath(import.meta.url));
 
-const source = resolve(here, '..', 'src', 'migrations', 'steps', '1756820000000-permission-additions.migration.ts');
+const steps = resolve(here, '..', 'src', 'migrations', 'steps');
 
 let workdir = null;
 let Migration = null;
+let WebScope = null;
+
+async function compile(file, exported) {
+  const outfile = join(workdir, exported + '.cjs');
+
+  execFileSync(
+    process.execPath,
+    [esbuildBinary, join(steps, file), '--bundle', '--platform=node', '--format=cjs', '--external:typeorm', '--outfile=' + outfile],
+    { stdio: 'ignore' },
+  );
+
+  const module = await import(pathToFileURL(outfile).href);
+
+  return module[exported] ?? module.default?.[exported];
+}
 
 before(async () => {
   workdir = mkdtempSync(join(tmpdir(), 'unicore-migration-'));
 
-  const outfile = join(workdir, 'migration.cjs');
-
-  execFileSync(
-    process.execPath,
-    [esbuildBinary, source, '--bundle', '--platform=node', '--format=cjs', '--external:typeorm', `--outfile=${outfile}`],
-    { stdio: 'ignore' },
-  );
-
-  const module = await import(`file://${outfile.replace(/\\/g, '/')}`);
-
-  Migration = module.PermissionAdditions1756820000000 ?? module.default?.PermissionAdditions1756820000000;
+  Migration = await compile('1756820000000-permission-additions.migration.ts', 'PermissionAdditions1756820000000');
+  WebScope = await compile('1756840000000-donate-web-scope.migration.ts', 'DonateWebScope1756840000000');
 });
 
 after(() => {
   if (workdir) rmSync(workdir, { recursive: true, force: true });
 });
 
-async function migrate(perms) {
+async function run(Step, perms) {
   let stored = perms.join(',');
 
   const runner = {
@@ -52,10 +58,12 @@ async function migrate(perms) {
     },
   };
 
-  await new Migration().up(runner);
+  await new Step().up(runner);
 
   return stored.split(',').filter(Boolean);
 }
+
+const migrate = (perms) => run(Migration, perms);
 
 const same = (got, want) => got.length === want.length && want.every((item) => got.includes(item));
 
@@ -121,5 +129,33 @@ describe('Миграция новых прав', () => {
     const got = await migrate(['panel.access', 'panel.users.read']);
 
     assert.ok(same(got, ['panel.access', 'panel.users.read']), `получили: ${got.join(', ')}`);
+  });
+});
+
+describe('Миграция права на веб-донат-права', () => {
+  const webScope = (perms) => run(WebScope, perms);
+
+  it('право на все серверы даёт управление веб-записями', async () => {
+    const got = await webScope(['panel.donate.permissions.create']);
+
+    assert.ok(same(got, ['panel.donate.permissions.create', 'panel.donate.permissions.web']), `получили: ${got.join(', ')}`);
+  });
+
+  it('правка на все серверы тоже даёт', async () => {
+    const got = await webScope(['panel.donate.permissions.update']);
+
+    assert.ok(same(got, ['panel.donate.permissions.update', 'panel.donate.permissions.web']), `получили: ${got.join(', ')}`);
+  });
+
+  it('скоуп на один сервер управления веб-записями не даёт', async () => {
+    const got = await webScope(['panel.donate.permissions.create.hitech']);
+
+    assert.ok(same(got, ['panel.donate.permissions.create.hitech']), `получили: ${got.join(', ')}`);
+  });
+
+  it('право не дублируется, если уже выдано', async () => {
+    const got = await webScope(['panel.donate.permissions.create', 'panel.donate.permissions.web']);
+
+    assert.ok(same(got, ['panel.donate.permissions.create', 'panel.donate.permissions.web']), `получили: ${got.join(', ')}`);
   });
 });

@@ -1415,6 +1415,8 @@
   "perm.panel.donate.permissions.field.price.hint": "Donate permission price and sale.",
   "perm.panel.donate.permissions.update": "Edit donate permissions",
   "perm.panel.donate.permissions.update.hint": "Editing donate permissions. Granted for all servers or selected ones.",
+  "perm.panel.donate.permissions.web": "Manage web donate permissions",
+  "perm.panel.donate.permissions.web.hint": "Donate permissions of the «Web» type are not bound to servers, so the per-server scope does not apply to them. Without this permission such records are visible but not editable.",
   "perm.panel.donate.read": "View donate sections",
   "perm.panel.donate.read.hint": "Viewing donate groups, permissions and kits. Granted for all servers or selected ones.",
   "perm.panel.donate.sort": "Sort donate sections",

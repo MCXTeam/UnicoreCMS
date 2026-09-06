@@ -131,3 +131,124 @@ describe('Донат в панели', () => {
     assert.ok(ok(status), `создание без веб-роли отвергнуто: ${status} ${JSON.stringify(body)}`);
   });
 });
+
+describe('Веб-донат-права', () => {
+  const webBody = (extra = {}) => permissionBody({ type: 'web', servers: undefined, perms: undefined, ...extra });
+
+  const createWeb = async () => {
+    const { session } = await createAdmin([
+      'panel.donate.read',
+      'panel.donate.permissions.create',
+      'panel.donate.permissions.web',
+    ]);
+    const { status, body } = await session.post('/donates/permissions', webBody());
+
+    if (body?.id) created.permissions.push(body.id);
+
+    assert.ok(ok(status), `подготовка веб-права не удалась: ${status} ${JSON.stringify(body)}`);
+
+    return body;
+  };
+
+  it('без права на веб-записи запись без серверов не создать', async () => {
+    if (!server) return;
+
+    const { session } = await createAdmin([`panel.donate.read.${server}`, `panel.donate.permissions.create.${server}`]);
+
+    const { status, body } = await session.post('/donates/permissions', webBody());
+
+    if (body?.id) created.permissions.push(body.id);
+
+    assert.equal(status, 403);
+  });
+
+  it('с правом на веб-записи создание проходит даже при скоупе на один сервер', async () => {
+    if (!server) return;
+
+    const { session } = await createAdmin([
+      `panel.donate.read.${server}`,
+      `panel.donate.permissions.create.${server}`,
+      'panel.donate.permissions.web',
+    ]);
+
+    const { status, body } = await session.post('/donates/permissions', webBody());
+
+    if (body?.id) created.permissions.push(body.id);
+
+    assert.ok(ok(status), `создание веб-права отвергнуто: ${status} ${JSON.stringify(body)}`);
+    assert.equal(body?.type, 'web');
+  });
+
+  it('админ со скоупом видит веб-записи в списке', async () => {
+    if (!server) return;
+
+    const web = await createWeb();
+    const { session } = await createAdmin([`panel.donate.read.${server}`]);
+
+    const { status, body } = await session.get('/donates/permissions');
+
+    assert.ok(ok(status), `список отвергнут: ${status}`);
+    assert.ok(
+      (body || []).some((item) => item.id === web.id),
+      'веб-запись пропала из списка',
+    );
+  });
+
+  it('без права на веб-записи их нельзя править', async () => {
+    if (!server) return;
+
+    const web = await createWeb();
+    const { session } = await createAdmin([
+      `panel.donate.read.${server}`,
+      `panel.donate.permissions.update.${server}`,
+    ]);
+
+    const { status } = await session.patch(`/donates/permissions/${web.id}`, webBody({ name: 'Другое имя' }));
+
+    assert.equal(status, 403);
+  });
+
+  it('с правом на веб-записи правка проходит', async () => {
+    if (!server) return;
+
+    const web = await createWeb();
+    const { session } = await createAdmin([
+      `panel.donate.read.${server}`,
+      `panel.donate.permissions.update.${server}`,
+      'panel.donate.permissions.web',
+    ]);
+
+    const { status, body } = await session.patch(`/donates/permissions/${web.id}`, webBody({ name: 'Другое имя' }));
+
+    assert.ok(ok(status), `правка веб-права отвергнута: ${status} ${JSON.stringify(body)}`);
+  });
+
+  it('без права на веб-записи их нельзя удалить', async () => {
+    if (!server) return;
+
+    const web = await createWeb();
+    const { session } = await createAdmin([
+      `panel.donate.read.${server}`,
+      `panel.donate.permissions.delete.${server}`,
+    ]);
+
+    const { status } = await session.del(`/donates/permissions/${web.id}`);
+
+    assert.equal(status, 403);
+  });
+
+  it('перевод веб-записи на сервер требует права на оба конца', async () => {
+    if (!server) return;
+
+    const web = await createWeb();
+    const { session } = await createAdmin([
+      `panel.donate.read.${server}`,
+      `panel.donate.permissions.update.${server}`,
+      'panel.donate.permissions.web',
+    ]);
+
+    const { status, body } = await session.patch(`/donates/permissions/${web.id}`, permissionBody({ name: 'Стало игровым' }));
+
+    assert.ok(ok(status), `перевод в игровое отвергнут: ${status} ${JSON.stringify(body)}`);
+  });
+});

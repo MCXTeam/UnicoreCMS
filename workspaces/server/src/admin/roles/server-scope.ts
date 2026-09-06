@@ -1,6 +1,8 @@
 import { ForbiddenException } from '@nestjs/common';
 import { denyTarget, isDenyPattern, Permission, satisfiesPermission } from 'unicore-common';
-import { grantedPermissions } from './guards/permisson.guard';
+import { grantedPermissions, matchPermission } from './guards/permisson.guard';
+
+const GLOBAL_DENIED = 'Запись не привязана к серверам, нужно право управлять такими записями';
 
 export async function allowedServers(request: any, permission: Permission): Promise<string[] | null> {
   if (!request?.user) return null;
@@ -72,4 +74,43 @@ export async function assertServerEntities(
 
     if (!servers.some((id) => allowed.includes(id))) throw new ForbiddenException('Запись не относится к вашим серверам');
   }
+}
+
+async function assertGlobalScope(request: any, global: Permission): Promise<void> {
+  if (!(await matchPermission([global], request))) throw new ForbiddenException(GLOBAL_DENIED);
+}
+
+export async function assertServerListOrGlobal(
+  request: any,
+  permission: Permission,
+  global: Permission,
+  next: string[] = [],
+  current?: string[],
+): Promise<void> {
+  const attached = current !== undefined && current.length > 0;
+  const wasGlobal = current !== undefined && !attached;
+  const willBeGlobal = !next.length;
+
+  if (wasGlobal || willBeGlobal) await assertGlobalScope(request, global);
+
+  if (willBeGlobal && !attached) return;
+
+  await assertServerList(request, permission, next, attached ? current : undefined);
+}
+
+export async function assertServerEntitiesOrGlobal(
+  request: any,
+  permission: Permission,
+  global: Permission,
+  entities: { servers?: { id: string }[] }[],
+): Promise<void> {
+  const isGlobal = (entity: { servers?: { id: string }[] }) => !(entity.servers || []).length;
+
+  if (entities.some(isGlobal)) await assertGlobalScope(request, global);
+
+  await assertServerEntities(
+    request,
+    permission,
+    entities.filter((entity) => !isGlobal(entity)),
+  );
 }
