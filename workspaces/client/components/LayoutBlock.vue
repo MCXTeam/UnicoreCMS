@@ -16,7 +16,7 @@
 
     <div v-else-if="block.type === 'html'" class="layout-block__html" v-html="$sanitize(block.html || '')" />
 
-    <div v-else-if="block.type === 'nav'" class="layout-block__nav" :style="navStyle">
+    <div v-else-if="block.type === 'nav'" class="layout-block__nav" :class="{ 'layout-block__nav--columns': columns > 1 }" :style="navStyle">
       <template v-for="link in links" :key="link.id">
         <a v-if="link.href" :href="link.href" target="_blank" class="layout-link">
           <i v-if="link.icon" :class="link.icon"></i> {{ linkLabel(link) }}
@@ -128,7 +128,9 @@ const substitute = (value: string) =>
 
 const textValue = computed(() => substitute(layoutText(props.block.text, locale.value)))
 
-const navStyle = computed(() => (props.block.columns && props.block.columns > 1 ? { columnCount: props.block.columns } : {}))
+const columns = computed(() => Number(props.block.columns) || 1)
+
+const navStyle = computed(() => (columns.value > 1 ? { columnCount: columns.value } : {}))
 
 const links = computed(() =>
   (props.block.links || [])
@@ -191,16 +193,24 @@ onBeforeUnmount(() => document.removeEventListener('click', onGlobalClick))
 .layout-block__nav {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 18px;
+  gap: 2px 18px;
 }
-.layout-block__nav[style*='column-count'] {
+.layout-block__nav--columns {
   display: block;
+}
+.layout-block__nav--columns .layout-link {
+  display: flex;
+  break-inside: avoid;
 }
 .layout-link {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 0;
+  padding: 5px 0;
+  white-space: nowrap;
+}
+.layout-block--login :deep(.p-button),
+.layout-block--launcher :deep(.p-button) {
   white-space: nowrap;
 }
 .layout-block__icons {
@@ -272,6 +282,9 @@ onBeforeUnmount(() => document.removeEventListener('click', onGlobalClick))
   gap: 0.6rem;
   padding: 0.5rem 0.7rem;
   border-radius: 10px;
+}
+.layout-render--header .layout-block__nav {
+  flex-wrap: nowrap;
 }
 @media (max-width: 991.98px) {
   .layout-hide-mobile {

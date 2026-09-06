@@ -301,6 +301,7 @@
   "admin.layout_mode_builder": "Конструктор",
   "admin.layout_mode_hint": "В режиме HTML поле заполняется разметкой из конструктора, дальше её можно править как угодно.",
   "admin.layout_mode_html": "Свой HTML",
+  "admin.layout_pick_block": "Выберите блок в предпросмотре или в списке слева — здесь появятся его настройки",
   "admin.layout_preset_confirm": "Пресет заменит текущую раскладку. Продолжить?",
   "admin.layout_presets": "Пресеты",
   "admin.layout_preview": "Предпросмотр",

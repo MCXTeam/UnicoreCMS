@@ -14,11 +14,13 @@
         >
           <template v-if="block.type === 'spacer'"><span class="lp__spacer" /></template>
           <template v-else-if="block.type === 'logo'">
-            <img :src="block.image || '/icon.png'" :height="`${Math.min(block.size || 64, 48)}px`" />
+            <img v-if="remote(block.image)" :src="block.image" :height="`${Math.min(block.size || 64, 48)}px`" />
+            <span v-else class="lp__thumb"><i class="pi pi-image" /></span>
             <b v-if="place === 'header'">{{ sitename }}</b>
           </template>
           <template v-else-if="block.type === 'image'">
-            <img :src="block.image || '/icon.png'" :height="`${Math.min(block.size || 100, 64)}px`" />
+            <img v-if="remote(block.image)" :src="block.image" :height="`${Math.min(block.size || 100, 64)}px`" />
+            <span v-else class="lp__thumb lp__thumb--lg"><i class="pi pi-image" /></span>
           </template>
           <template v-else-if="block.type === 'text'">
             <div>
@@ -30,7 +32,11 @@
           <template v-else-if="block.type === 'nav' || block.type === 'icons'">
             <div>
               <h4 v-if="text(block.title)" class="m-0 mb-1">{{ text(block.title) }}</h4>
-              <div class="lp__links" :style="block.columns && block.columns > 1 ? { columnCount: block.columns } : {}">
+              <div
+                class="lp__links"
+                :class="{ 'lp__links--columns': (block.columns || 1) > 1 }"
+                :style="(block.columns || 1) > 1 ? { columnCount: block.columns } : {}"
+              >
                 <span v-for="link in block.links || []" :key="link.id" class="lp__link">
                   <i v-if="link.icon && !link.icon.includes('/')" :class="link.icon" />
                   {{ label(link) }}
@@ -73,6 +79,8 @@ const text = (value?: LayoutText) => layoutText(value, locale.value)
 const substitute = (value: string) =>
   value.replace(/\{\{\s*sitename\s*\}\}/g, sitename.value).replace(/\{\{\s*year\s*\}\}/g, String(new Date().getFullYear()))
 
+const remote = (value?: string) => Boolean(value && /^https?:\/\//.test(value))
+
 const label = (link: LayoutLink) => (link.labelKey ? messages.value[link.labelKey] || link.labelKey : text(link.label))
 
 const html = computed(() =>
@@ -97,8 +105,14 @@ const html = computed(() =>
   min-width: 0;
   flex-wrap: wrap;
 }
+.lp--footer {
+  background: var(--surface-ground);
+}
 .lp--footer .lp__row {
   align-items: flex-start;
+}
+.lp--header {
+  padding: 10px 14px;
 }
 .lp__row + .lp__row {
   margin-top: 16px;
@@ -145,8 +159,27 @@ const html = computed(() =>
   flex-wrap: wrap;
   gap: 4px 14px;
 }
-.lp__links[style*='column-count'] {
+.lp__links--columns {
   display: block;
+}
+.lp__links--columns .lp__link {
+  display: flex;
+  break-inside: avoid;
+  padding: 2px 0;
+}
+.lp__thumb {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px dashed var(--p-content-border-color);
+  opacity: 0.6;
+}
+.lp__thumb--lg {
+  width: 56px;
+  height: 56px;
 }
 .lp__link {
   display: inline-flex;

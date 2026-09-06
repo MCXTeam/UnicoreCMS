@@ -39,13 +39,16 @@
           </template>
         </Toolbar>
 
-        <div class="mb-2 flex align-items-center gap-2">
+        <div class="mb-3 flex align-items-center justify-content-between gap-2">
           <h5 class="m-0">{{ $t('admin.layout_preview') }}</h5>
-          <LocaleEditorBar
+          <Select
+            v-if="locales.length > 1"
             v-model="locale"
-            :locales="locales.map((item: any) => item.code)"
-            :status="{}"
-            :isDefault="locale === defaultLocale"
+            :options="locales"
+            optionLabel="name"
+            optionValue="code"
+            class="w-12rem"
+            appendTo="body"
           />
         </div>
         <LayoutPreview :definition="current" :place="place" :active="selected?.id" @pick="pick" />
@@ -53,7 +56,7 @@
     </div>
 
     <div class="col-12 lg:col-7">
-      <div class="card">
+      <div class="card h-full">
         <div class="flex justify-content-between align-items-center mb-3">
           <h5 class="m-0">{{ $t('admin.layout_title') }}</h5>
           <Button :label="$t('admin.layout_row_add')" icon="pi pi-plus" text :disabled="!canUpdate" @click="addRow()" />
@@ -132,7 +135,7 @@
     </div>
 
     <div class="col-12 lg:col-5">
-      <div class="card layout-editor" v-if="selected">
+      <div class="card layout-editor h-full" v-if="selected">
         <div class="flex justify-content-between align-items-center mb-3">
           <h5 class="m-0">{{ blockName(selected.type) }}</h5>
           <Button icon="pi pi-times" text rounded @click="selected = null" />
@@ -215,8 +218,9 @@
           </div>
         </template>
       </div>
-      <div class="card" v-else>
-        <p class="m-0 text-color-secondary">{{ $t('admin.layout_block_empty') }}</p>
+      <div class="card layout-empty" v-else>
+        <i class="pi pi-objects-column" />
+        <p class="m-0">{{ $t('admin.layout_pick_block') }}</p>
       </div>
     </div>
   </div>
@@ -499,6 +503,20 @@ onMounted(load)
 }
 .layout-editor .field {
   margin-bottom: 12px;
+}
+.layout-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 220px;
+  color: var(--text-color-secondary);
+  text-align: center;
+}
+.layout-empty i {
+  font-size: 2rem;
+  opacity: 0.4;
 }
 .font-monospace {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;

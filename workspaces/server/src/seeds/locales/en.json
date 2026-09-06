@@ -301,6 +301,7 @@
   "admin.layout_mode_builder": "Builder",
   "admin.layout_mode_hint": "In HTML mode the field is filled with markup from the builder, then you can edit it freely.",
   "admin.layout_mode_html": "Custom HTML",
+  "admin.layout_pick_block": "Pick a block in the preview or in the list on the left — its settings will appear here",
   "admin.layout_preset_confirm": "The preset will replace the current layout. Continue?",
   "admin.layout_presets": "Presets",
   "admin.layout_preview": "Preview",
