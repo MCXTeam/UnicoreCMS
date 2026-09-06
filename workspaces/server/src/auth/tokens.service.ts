@@ -228,17 +228,17 @@ export class TokensService {
   }
 
   async sessions(user: User, token: string) {
-    var curnet = null;
+    let current = null;
 
     if (token) {
       try {
         const payload = (await this.decodeToken(token)) as JWTRefreshPayload;
-        curnet = await this.tokensRepository.findOneBy({ uuid: payload.jwtid });
+        current = await this.tokensRepository.findOneBy({ uuid: payload.jwtid });
       } catch {}
     }
 
     return {
-      curnet,
+      current,
       all: await this.tokensRepository.find({
         where: { user: { uuid: user.uuid } },
         order: { updated: 'DESC' },

@@ -212,7 +212,7 @@ export class ConfigService {
     return saved;
   }
 
-  async delate(key: string) {
+  async remove(key: string) {
     const cfg = await this.configRepo.findOneBy({ key, important: IsNull() });
 
     if (!cfg) throw new NotFoundException();

@@ -1,7 +1,7 @@
 import { Skin } from '../entities/skin.entity';
 import { Exclude, Expose } from 'class-transformer';
 import { SkinMeta } from './skin-meta';
-import { StorageManager, getDeigest } from '@common';
+import { StorageManager, getDigest } from '@common';
 
 export class SkinDto {
   @Exclude()
@@ -17,7 +17,7 @@ export class SkinDto {
 
   @Expose()
   get digest(): string {
-    return getDeigest(this.file);
+    return getDigest(this.file);
   }
 
   @Expose()

@@ -14,7 +14,7 @@
               {{
                 data.agent == 'launcher'
                   ? $t('cabinet.launcher')
-                  : $utils.uaParse(data.agent).raw + (data.id == sessions.curnet.id ? ` (${$t('cabinet.current_session')})` : '')
+                  : $utils.uaParse(data.agent).raw + (data.id == sessions.current.id ? ` (${$t('cabinet.current_session')})` : '')
               }}
             </span>
           </template>
@@ -61,7 +61,7 @@ export default {
     return {
       deletingId: null,
       sessions: {
-        curnet: null,
+        current: null,
         all: [],
       },
     }
@@ -75,7 +75,7 @@ export default {
     async load() {
       this.sessions = await this.cabinet.sessions(this.$auth.refreshToken)
 
-      if (!this.sessions.curnet) this.$unicore.logout()
+      if (!this.sessions.current) this.$unicore.logout()
     },
 
     async sessionDelete(id) {

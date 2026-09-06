@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { events } from 'unicore-api';
 import { InjectRepository } from '@nestjs/typeorm';
-import { debitUserBalance } from '@common';
+import { CART_AMOUNT_MIN, debitUserBalance } from '@common';
 import { User } from 'src/admin/users/entities/user.entity';
 import { Server } from 'src/game/servers/entities/server.entity';
 import { IssuanceService } from 'src/game/servers/rcon/issuance.service';
@@ -165,25 +165,26 @@ export class CartService {
 
   async add(user: User, body: CartInput) {
     const server = await this.serversService.findOne(body.server_id);
+    const amount = body.amount ?? CART_AMOUNT_MIN;
 
     if (body.type == PayloadType.Product) {
       const product = await this.productsRepository.findOne({ where: { id: body.id }, relations: ['servers'] });
 
       if (!product || !server || !product.servers.find((srv) => srv.id == server.id)) throw new BadRequestException();
 
-      if (product.multiple_of && body.amount % product.multiple_of != 0) throw new BadRequestException();
+      if (product.multiple_of && amount % product.multiple_of != 0) throw new BadRequestException();
 
       let cartItem = (await this.resolver(this.cartItemsRepository, server, user, product)) as CartItem;
 
       if (cartItem) {
-        cartItem.amount += body.amount;
+        cartItem.amount += amount;
       } else {
         cartItem = new CartItem();
 
         cartItem.product = product;
         cartItem.server = server;
         cartItem.user = user;
-        cartItem.amount = body.amount;
+        cartItem.amount = amount;
       }
 
       return new CartItemProtected(await this.cartItemsRepository.save(cartItem));
@@ -233,15 +234,23 @@ export class CartService {
   async removeOwn(user: User, type: PayloadType, id: number) {
     if (type == PayloadType.Product) {
       const cartItem = await this.cartItemsRepository.findOneBy({ user: { uuid: user.uuid }, id });
+
+      if (!cartItem) throw new NotFoundException();
+
       return new CartItemProtected(await this.cartItemsRepository.remove(cartItem));
-    } else {
-      const cartItemKit = await this.cartItemKitsRepository.findOneBy({ user: { uuid: user.uuid }, id });
-      return new CartItemKitProtected(await this.cartItemKitsRepository.remove(cartItemKit));
     }
+
+    const cartItemKit = await this.cartItemKitsRepository.findOneBy({ user: { uuid: user.uuid }, id });
+
+    if (!cartItemKit) throw new NotFoundException();
+
+    return new CartItemKitProtected(await this.cartItemKitsRepository.remove(cartItemKit));
   }
 
   async remove(id: number) {
     const cartItem = await this.cartItemsRepository.findOneBy({ id });
+
+    if (!cartItem) throw new NotFoundException();
 
     return this.cartItemsRepository.remove(cartItem);
   }

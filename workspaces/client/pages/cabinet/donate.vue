@@ -371,7 +371,7 @@ const regiftDialog = ref(false)
 const regift = ref(null)
 const loading = ref(false)
 
-const serverOptions = computed(() => servers.value.map((server, index) => ({ label: server.name, value: String(index) })))
+const serverOptions = computed(() => servers.value.map((server) => ({ label: server.name, value: server.id })))
 const giftsAvailable = computed(() => giftsApi.codeEnabled.value || giftsApi.directEnabled.value)
 const giftGroupPayload = computed(() => ({
   type: 'donate',
@@ -485,7 +485,7 @@ async function buyGroup() {
   loading.value = true
   try {
     await donateApi.buyGroup({
-      server: servers.value[Number(donate.server_id)].id,
+      server: donate.server_id,
       group: donate.group.id,
       period: donate.period,
       use_virtual: donate.use_virtual,
@@ -502,7 +502,7 @@ async function buyPermission() {
   loading.value = true
   try {
     await donateApi.buyPermission({
-      server: servers.value[Number(permission.server_id)].id,
+      server: permission.permission.type == 'web' ? undefined : permission.server_id,
       permission: permission.permission.id,
       period: permission.period,
       use_virtual: permission.use_virtual,
@@ -529,19 +529,19 @@ async function fetchDonates(id) {
 async function fetchPermissions(id) {
   donatePermissions.value = null
   donatePermissions.value = await donateApi.permissionsByServer(id)
-  permission.server = servers.value[Number(permission.server_id)]
+  permission.server = servers.value.find((item) => item.id === permission.server_id)
 }
 
 watch(
   () => donate.server_id,
   (val) => {
-    fetchDonates(servers.value[Number(val)].id)
+    fetchDonates(val)
   },
 )
 watch(
   () => permission.server_id,
   (val) => {
-    fetchPermissions(servers.value[Number(val)].id)
+    fetchPermissions(val)
   },
 )
 
@@ -550,8 +550,8 @@ onMounted(async () => {
   servers.value = await serversApi.fetchList()
 
   if (servers.value.length) {
-    donate.server_id = String(0)
-    permission.server_id = String(0)
+    donate.server_id = servers.value[0].id
+    permission.server_id = servers.value[0].id
   }
 })
 </script>

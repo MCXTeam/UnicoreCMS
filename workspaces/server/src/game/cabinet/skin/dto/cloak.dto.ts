@@ -1,6 +1,6 @@
 import { Skin } from '../entities/skin.entity';
 import { Exclude, Expose } from 'class-transformer';
-import { StorageManager, getDeigest } from '@common';
+import { StorageManager, getDigest } from '@common';
 
 export class CloakDto {
   @Expose()
@@ -10,7 +10,7 @@ export class CloakDto {
 
   @Expose()
   get digest(): string {
-    return getDeigest(this.file);
+    return getDigest(this.file);
   }
 
   @Exclude()

@@ -4,9 +4,18 @@ import { User } from './entities/user.entity';
 import { UserInput } from './dto/user.input';
 import _ from 'lodash';
 import { Role } from '../roles/entities/role.entity';
-import { BadRequestException, ConflictException, ForbiddenException, forwardRef, Inject, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  forwardRef,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { ImportantRoles } from '../roles/emums/important-roles.enum';
+import { ImportantRoles } from '../roles/enums/important-roles.enum';
 import { PlaytimeService } from 'src/game/cabinet/playtime/playtime.service';
 import { Vote } from 'src/game/cabinet/votes/entities/vote.entity';
 import { UserPublicDto } from './dto/user-public.dto';
@@ -77,6 +86,7 @@ async function canManageSuperuser(actor: User): Promise<boolean> {
   return matchPermission(['panel.users.field.superuser'], { user: actor });
 }
 
+@Injectable()
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
 

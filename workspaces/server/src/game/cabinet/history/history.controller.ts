@@ -7,16 +7,16 @@ import { HistoryService } from './history.service';
 
 @Controller('cabinet/history')
 export class HistoryController {
-  constructor(private histiryService: HistoryService) {}
+  constructor(private historyService: HistoryService) {}
 
   @Get('me')
   findOwn(@Paginate() query: PaginateQuery, @CurrentUser() user: User) {
-    return this.histiryService.find(query, user);
+    return this.historyService.find(query, user);
   }
 
   @Permissions(['panel.access', 'panel.users.read'])
   @Get('user/:uuid')
   find(@Paginate() query: PaginateQuery, @Param('uuid') uuid: string) {
-    return this.histiryService.findByUUID(query, uuid);
+    return this.historyService.findByUUID(query, uuid);
   }
 }

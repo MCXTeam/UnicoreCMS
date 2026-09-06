@@ -252,9 +252,9 @@ export const envConfig: EnvConfig = {
   mailFrom: env.get("MAIL_FROM").asString(),
   smtpService: env.get("SMTP_SERVICE").asString(),
   smtpHost: env.get("SMTP_HOST").asString(),
-  smtpPort: env.get("SMTP_PORT").asPortNumber(),
-  smtpIgnoreTLS: env.get("SMTP_IGNORE_TLS").asBool(),
-  smtpSecure: env.get("SMTP_SECURE").asBool(),
+  smtpPort: env.get("SMTP_PORT").default(587).asPortNumber(),
+  smtpIgnoreTLS: env.get("SMTP_IGNORE_TLS").default("false").asBool(),
+  smtpSecure: env.get("SMTP_SECURE").default("false").asBool(),
   smtpUser: env.get("SMTP_USER").asString(),
   smtpPassword: env.get("SMTP_PASSWORD").asString(),
 

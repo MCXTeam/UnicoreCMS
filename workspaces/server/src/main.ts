@@ -65,7 +65,7 @@ async function bootstrap() {
   );
 
   if (envConfig.swagger) {
-    const config = new DocumentBuilder().setTitle('UnicoreAPI').setDescription('The cats API description').setVersion('1.0').build();
+    const config = new DocumentBuilder().setTitle('UnicoreAPI').setDescription('UnicoreCMS REST API').setVersion('1.0').build();
     const document = SwaggerModule.createDocument(app, config);
 
     app.use(`/${SWAGGER_PATH}`, (_request: Request, response: Response, next: NextFunction) => {

@@ -171,7 +171,7 @@ describe('Авторизация', () => {
     const { status, body } = await client.post('/auth/sessions/me', {});
 
     assert.ok(ok(status), `список сессий отвергнут: ${status}`);
-    assert.ok(body?.curnet, 'текущая сессия не помечена');
+    assert.ok(body?.current, 'текущая сессия не помечена');
   });
 
   it('данные о себе отдаются вошедшему', async () => {

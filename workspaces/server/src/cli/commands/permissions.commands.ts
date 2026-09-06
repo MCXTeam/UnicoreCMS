@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import clc from 'cli-color';
 import { randomUUID } from 'crypto';
 import { RoutePermissions } from 'src/admin/roles/route-permissions.service';
-import { ImportantRoles } from 'src/admin/roles/emums/important-roles.enum';
+import { ImportantRoles } from 'src/admin/roles/enums/important-roles.enum';
 import { resolvePermissions } from 'unicore-common';
 import { CommandDefinition, CommandOption } from '../command';
 import { stdout } from '../stdout';

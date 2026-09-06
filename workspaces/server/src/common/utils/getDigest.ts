@@ -1,14 +1,12 @@
 import { StorageManager } from '@common';
 import * as crypto from 'crypto';
 
-export function getDeigest(file: string | Buffer): string | null {
+export function getDigest(file: string | Buffer): string | null {
   if (!file) return null;
 
-  if (typeof file === 'string') {
-    file = StorageManager.read(file);
-  }
+  const content = typeof file === 'string' ? StorageManager.read(file) : file;
 
-  const digest = Buffer.from(crypto.createHash('md5').update(file).digest('hex')).toString('base64');
+  if (!content) return null;
 
-  return digest;
+  return Buffer.from(crypto.createHash('md5').update(content).digest('hex')).toString('base64');
 }

@@ -267,8 +267,16 @@ export class ProductsService {
       .orderBy(['priority', 'name'], ['desc', 'asc'])
       .value();
 
-    server.min_price = (await this.productsRepository.findOne({ where: {}, order: { price: 'ASC' } }))?.price || 0;
-    server.max_price = (await this.productsRepository.findOne({ where: {}, order: { price: 'DESC' } }))?.price || 0;
+    const bounds = await this.productsRepository
+      .createQueryBuilder('product')
+      .leftJoin('product.servers', 'servers')
+      .where('servers.id = :id', { id: server.id })
+      .select('MIN(product.price)', 'min')
+      .addSelect('MAX(product.price)', 'max')
+      .getRawOne();
+
+    server.min_price = Number(bounds?.min ?? 0);
+    server.max_price = Number(bounds?.max ?? 0);
 
     return server;
   }
@@ -524,7 +532,7 @@ export class ProductsService {
 
         if (sale === 0) product.sale = null;
 
-        if (price) product.price = currencyUtils.roundByType(price, SystemCurrency.REAL);
+        if (price !== undefined && price !== null) product.price = currencyUtils.roundByType(price, SystemCurrency.REAL);
 
         if (servers_.length) product.servers = servers_;
         else if (servers && servers.length) product.servers = await this.serversRepository.find({ where: { id: In(servers) } });

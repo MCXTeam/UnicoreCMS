@@ -66,10 +66,15 @@ export class BonusesService {
       throw new NotFoundException();
     }
 
-    StorageManager.remove(bonus.icon);
+    const previous = bonus.icon;
+
     bonus.icon = file.filename;
 
-    return this.bonusesRepository.save(bonus);
+    const saved = await this.bonusesRepository.save(bonus);
+
+    StorageManager.remove(previous);
+
+    return saved;
   }
 
   async removeIcon(id: number) {

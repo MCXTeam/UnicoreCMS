@@ -51,7 +51,7 @@ export class ConfigController {
   async delete(@Req() request: any, @Param('key') key: string) {
     await this.assertConfigUpdate(request);
 
-    return this.configService.delate(key);
+    return this.configService.remove(key);
   }
 
   @Audit({ action: 'config.create', target: 'config', bodyParam: 'key' })

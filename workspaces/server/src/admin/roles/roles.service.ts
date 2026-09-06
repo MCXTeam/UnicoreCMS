@@ -7,7 +7,7 @@ import { Repository } from 'typeorm';
 import { RoleUpdateInput } from './dto/role-update.input';
 import { RoleCreateInput } from './dto/role-create.input';
 import { User } from '../users/entities/user.entity';
-import { ImportantRoles } from './emums/important-roles.enum';
+import { ImportantRoles } from './enums/important-roles.enum';
 import { assertGrantable } from './grant';
 
 export function roleSnapshot(role: Partial<Role>): Record<string, unknown> {
@@ -149,10 +149,15 @@ export class RolesService {
       throw new NotFoundException();
     }
 
-    StorageManager.remove(role.badge_image);
+    const previous = role.badge_image;
+
     role.badge_image = file.filename;
 
-    return this.rolesRepository.save(role);
+    const saved = await this.rolesRepository.save(role);
+
+    StorageManager.remove(previous);
+
+    return saved;
   }
 
   async removeBadgeImage(id: string): Promise<Role> {

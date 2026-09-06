@@ -53,13 +53,17 @@ export class SkinService {
 
     let skin = (await this.skinsRepository.findOneBy({ user: { uuid: user.uuid } })) || new Skin();
 
-    if (skin.file) StorageManager.remove(skin.file);
+    const previous = skin.file;
 
     skin.user = user;
     skin.file = file.filename;
     skin.slim = MinecraftSkinType.isSlim(StorageManager.path(file.filename));
 
-    return this.skinsRepository.save(skin);
+    const saved = await this.skinsRepository.save(skin);
+
+    if (previous) StorageManager.remove(previous);
+
+    return saved;
   }
 
   async updateSkinMe(req: any, file: Express.Multer.File) {
@@ -87,12 +91,16 @@ export class SkinService {
 
     let cloak = (await this.cloaksRepository.findOneBy({ user: { uuid: user.uuid } })) || new Cloak();
 
-    if (cloak.file) StorageManager.remove(cloak.file);
+    const previous = cloak.file;
 
     cloak.user = user;
     cloak.file = file.filename;
 
-    return this.cloaksRepository.save(cloak);
+    const saved = await this.cloaksRepository.save(cloak);
+
+    if (previous) StorageManager.remove(previous);
+
+    return saved;
   }
 
   async updateCloakMe(req: any, file: Express.Multer.File) {
