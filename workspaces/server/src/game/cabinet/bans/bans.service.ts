@@ -2,7 +2,8 @@ import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundEx
 import { runAfterCommit } from 'src/common/utils/transaction';
 import { events } from 'unicore-api';
 import { InjectRepository } from '@nestjs/typeorm';
-import { userPermissionCheck, UsersService } from 'src/admin/users/users.service';
+import { UsersService } from 'src/admin/users/users.service';
+import { userPermissionCheck } from 'src/admin/roles/grant';
 import { Repository } from 'typeorm';
 import { BanInput } from './dto/ban.input';
 import { Ban } from './entities/ban.entity';

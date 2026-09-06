@@ -107,7 +107,7 @@ export class ExtensionCatalogService {
 
     if (source.kind !== input.kind) throw new BadRequestException('Источник не содержит расширений этого типа');
 
-    const cached = await this.fetch(source, false);
+    const cached = await this.fetch(source, true);
     const entry = cached.entries.find((item) => item.id === input.id);
 
     if (!entry) throw new BadRequestException(`В источнике «${source.name}» нет расширения «${input.id}»`);

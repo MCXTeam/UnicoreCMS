@@ -1,6 +1,6 @@
 <template>
   <div class="grid">
-    <RebuildDialog v-model:visible="rebuildDialog" />
+    <RebuildDialog v-model:visible="rebuildDialog" :preset="rebuildSides" />
     <div v-for="section in sections" :key="section.side" class="col-12">
       <div class="card">
         <DataTable :value="section.themes" :loading="loading" responsiveLayout="scroll" dataKey="id">
@@ -8,13 +8,13 @@
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
               <h5 class="m-0">{{ $t(section.title) }}</h5>
               <div class="flex align-items-center">
-                <ExtensionInstall v-if="canManage" @installed="load()" />
+                <ExtensionInstall v-if="canManage" @installed="afterInstall($event)" />
                 <Button
                   v-if="canManage"
                   :label="$t('admin.rebuild')"
                   icon="pi pi-sync"
                   class="p-button-text"
-                  @click="rebuildDialog = true"
+                  @click="openRebuild()"
                 />
                 <Button :label="$t('admin.refresh')" icon="pi pi-refresh" class="p-button-text" @click="load()" />
               </div>
@@ -80,7 +80,7 @@
       </div>
     </div>
     <div class="col-12">
-      <ExtensionCatalog kind="theme" :canManage="canManage" @installed="load()" />
+      <ExtensionCatalog kind="theme" :canManage="canManage" @installed="afterInstall($event)" />
     </div>
   </div>
 </template>
@@ -109,6 +109,7 @@ export default {
       themes: [],
       locked: { client: false, admin: false },
       rebuildDialog: false,
+      rebuildSides: null,
       loading: true,
     }
   },
@@ -129,6 +130,15 @@ export default {
       if (typeof value === 'string') return value
 
       return value[this.locale] || value.ru || value.en || Object.values(value)[0] || ''
+    },
+    openRebuild(sides = null) {
+      this.rebuildSides = sides
+      this.rebuildDialog = true
+    },
+    async afterInstall(result) {
+      await this.load()
+
+      if (result?.steps?.rebuild) this.openRebuild(result.sides)
     },
     severity(status) {
       if (status === 'active') return 'success'

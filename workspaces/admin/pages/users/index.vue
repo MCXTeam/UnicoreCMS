@@ -249,11 +249,11 @@ export default {
       canEditSuperuser: 'superuser',
     })
 
-    return { toast, confirm, grantable: useGrantableRoles(), ...access, ...fields }
+    return { toast, confirm, ...access, ...fields }
   },
   computed: {
     roleOptions() {
-      return (this.roles || []).map((role) => ({ ...role, locked: role.important || !this.grantable(role) }))
+      return (this.roles || []).map((role) => ({ ...role, locked: role.important || role.grantable === false }))
     },
 
     sections() {

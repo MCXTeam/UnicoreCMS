@@ -1,0 +1,94 @@
+import assert from 'node:assert/strict';
+import { after, describe, it } from 'node:test';
+import { closeDatabase } from './helpers/db.mjs';
+import { cleanup, createAdmin, createRole } from './helpers/stand.mjs';
+
+after(async () => {
+  await cleanup();
+  await closeDatabase();
+});
+
+const ok = (status) => status >= 200 && status < 300;
+
+const keys = (body) => (body?.permissions || []).map((entry) => entry.key);
+
+describe('Разрешения в роли', () => {
+  it('без права на администраторские права роли доступны только возможности игрока', async () => {
+    const { session } = await createAdmin(['panel.roles.read', 'panel.roles.update']);
+
+    const { status, body } = await session.get('/admin/permissions/catalog');
+
+    assert.ok(ok(status), `каталог не отдан: ${status}`);
+    assert.ok(keys(body).length, 'каталог пуст');
+    assert.ok(
+      keys(body).every((key) => key.startsWith('player.')),
+      `в каталоге есть непанельные права: ${keys(body).join(', ')}`,
+    );
+  });
+
+  it('панельное право в роль без этого права не записать', async () => {
+    const { session } = await createAdmin(['panel.roles.read', 'panel.roles.update', 'panel.users.read']);
+    const id = await createRole(['player.donate.group.buy']);
+
+    const { status } = await session.patch(`/admin/roles/${id}`, { name: 'Роль', perms: ['panel.users.read'], priority: 1 });
+
+    assert.equal(status, 403);
+  });
+
+  it('игровое право в роль записать можно', async () => {
+    const { session } = await createAdmin(['panel.roles.read', 'panel.roles.update']);
+    const id = await createRole(['player.donate.group.buy']);
+
+    const { status } = await session.patch(`/admin/roles/${id}`, {
+      name: 'Роль',
+      perms: ['player.donate.permission.buy'],
+      priority: 1,
+    });
+
+    assert.ok(ok(status), `игровое право отвергнуто: ${status}`);
+  });
+
+  it('с правом на администраторские права видны свои панельные права', async () => {
+    const { session } = await createAdmin(['panel.roles.read', 'panel.roles.update', 'panel.roles.grant.panel', 'panel.users.read']);
+
+    const { body } = await session.get('/admin/permissions/catalog');
+
+    assert.ok(keys(body).includes('panel.users.read'), 'своего права нет в каталоге');
+    assert.ok(!keys(body).includes('panel.config.update'), 'каталог отдаёт право, которого у выдающего нет');
+  });
+
+  it('панельное право в роль со своим правом записывается', async () => {
+    const { session } = await createAdmin(['panel.roles.read', 'panel.roles.update', 'panel.roles.grant.panel', 'panel.users.read']);
+    const id = await createRole([]);
+
+    const { status } = await session.patch(`/admin/roles/${id}`, { name: 'Роль', perms: ['panel.users.read'], priority: 1 });
+
+    assert.ok(ok(status), `панельное право отвергнуто: ${status}`);
+  });
+
+  it('список ролей помечает роль, которую выдать нельзя', async () => {
+    const { session } = await createAdmin(['panel.users.read', 'panel.users.update', 'panel.users.grant.panel']);
+    const strong = await createRole(['panel.config.read', 'panel.config.update']);
+    const weak = await createRole([]);
+
+    const { status, body } = await session.get('/admin/roles');
+
+    assert.ok(ok(status), `список ролей не отдан: ${status}`);
+
+    const byId = new Map((body || []).map((role) => [role.id, role]));
+
+    assert.equal(byId.get(strong)?.grantable, false, 'роль сильнее выдающего помечена выдаваемой');
+    assert.equal(byId.get(weak)?.grantable, true, 'пустая роль помечена невыдаваемой');
+  });
+
+  it('признак выдачи приходит и без права смотреть роли', async () => {
+    const { session } = await createAdmin(['panel.users.read', 'panel.users.update']);
+    const strong = await createRole(['panel.config.read', 'panel.config.update']);
+
+    const { body } = await session.get('/admin/roles');
+    const role = (body || []).find((item) => item.id === strong);
+
+    assert.deepEqual(role?.perms, [], 'состав роли виден без права смотреть роли');
+    assert.equal(role?.grantable, false, 'без права смотреть роли признак выдачи не пришёл');
+  });
+});

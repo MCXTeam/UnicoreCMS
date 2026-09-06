@@ -75,6 +75,7 @@ export class InstallService {
       version: manifest.version,
       previousVersion: previous,
       steps: this.steps(content.kind, manifest, fresh),
+      sides: this.sides(content.kind, manifest),
     });
   }
 
@@ -181,6 +182,18 @@ export class InstallService {
       restart: kind === 'module',
       enable: fresh,
     };
+  }
+
+  private sides(kind: ExtensionKind, manifest: ModuleManifest | ThemeManifest): ThemeSide[] {
+    if (kind === 'theme') return [((manifest as ThemeManifest).side || 'client') as ThemeSide];
+
+    const module = manifest as ModuleManifest;
+    const sides: ThemeSide[] = [];
+
+    if (module.client) sides.push('client');
+    if (module.admin) sides.push('admin');
+
+    return sides;
   }
 
   async remove(kind: ExtensionKind, id: string): Promise<{ removed: boolean }> {

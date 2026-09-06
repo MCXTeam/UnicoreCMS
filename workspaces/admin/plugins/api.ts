@@ -50,8 +50,14 @@ export default defineNuxtPlugin((nuxtApp) => {
       if (status === 403 && import.meta.client && !original?.silent) {
         const toast = nuxtApp.vueApp.config.globalProperties.$toast
         const t = (key: string) => String((nuxtApp as any).$t?.(key) ?? key)
+        const reason = error.response?.data?.message
 
-        toast?.add({ severity: 'error', summary: t('error.title'), detail: t('error.no_permission'), life: 4000 })
+        toast?.add({
+          severity: 'error',
+          summary: t('error.title'),
+          detail: typeof reason === 'string' && reason !== 'Forbidden' ? reason : t('error.no_permission'),
+          life: 4000,
+        })
       }
 
       return Promise.reject(error)

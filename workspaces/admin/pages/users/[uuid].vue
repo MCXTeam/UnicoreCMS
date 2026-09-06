@@ -806,7 +806,7 @@ export default {
       canEditSuperuser: 'superuser',
     })
 
-    return { rc: rc.public, route, toast, confirm, grantable: useGrantableRoles(), ...access, ...fields }
+    return { rc: rc.public, route, toast, confirm, ...access, ...fields }
   },
   data() {
     return {
@@ -863,7 +863,7 @@ export default {
 
   computed: {
     roleOptions() {
-      return (this.roles || []).map((role) => ({ ...role, locked: role.important || !this.grantable(role) }))
+      return (this.roles || []).map((role) => ({ ...role, locked: role.important || role.grantable === false }))
     },
 
     canBalanceReal() {
@@ -997,6 +997,12 @@ export default {
     },
 
     async warehouseFetch() {
+      if (!this.warehouse_server) {
+        this.warehouse = []
+
+        return
+      }
+
       this.wh_loading = true
       this.warehouse = await this.$api
         .get(`/store/warehouse/admin/${this.user.uuid}/${this.warehouse_server.id}`)

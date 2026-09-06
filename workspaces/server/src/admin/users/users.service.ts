@@ -34,7 +34,8 @@ import {
 import { PublicUsersDto } from './dto/public-users.dto';
 import { UserUpdateInput } from './dto/user-update.input';
 import { matchPermission, transformPermissions } from '../roles/guards/permisson.guard';
-import { AuditChanges, auditChanges, filterPanelPermissions, isPanelPermission, UserField, USER_FIELDS } from 'unicore-common';
+import { AuditChanges, auditChanges, isPanelPermission, UserField, USER_FIELDS } from 'unicore-common';
+import { userPermissionCheck } from '../roles/grant';
 import { SettingsService } from 'src/game/cabinet/settings/providers/settings.service';
 import { TwoFactorService } from 'src/game/cabinet/settings/providers/two_factor.service';
 import { PasswordChangeInput } from 'src/game/cabinet/settings/dto/password-change.input';
@@ -74,17 +75,6 @@ async function canGrantAdminPermissions(actor: User): Promise<boolean> {
 
 async function canManageSuperuser(actor: User): Promise<boolean> {
   return matchPermission(['panel.users.field.superuser'], { user: actor });
-}
-
-export async function userPermissionCheck(user: User, actor: User) {
-  if (actor.superuser) return true;
-  if (user.superuser && !(await canManageSuperuser(actor))) return false;
-  const actorPerms = filterPanelPermissions(transformPermissions({ ...actor, perms: [...(actor.perms || [])] }).perms);
-  const targetPerms = filterPanelPermissions(
-    transformPermissions({ ...user, perms: [...(user.perms || [])], superuser: false }).perms,
-  );
-
-  return targetPerms.every((perm) => actorPerms.includes(perm));
 }
 
 export class UsersService {

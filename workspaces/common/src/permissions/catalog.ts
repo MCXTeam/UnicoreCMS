@@ -161,7 +161,7 @@ export const PERMISSIONS = define({
   },
   "panel.donate.groups.field.perms": {
     group: "donate",
-    field: ["donate_group", "web_perms"],
+    field: ["donate_group", "web_perms", "web_role_id"],
     danger: true,
   },
   "panel.donate.permissions.create": { group: "donate", scope: "server" },
@@ -175,7 +175,7 @@ export const PERMISSIONS = define({
   },
   "panel.donate.permissions.field.perms": {
     group: "donate",
-    field: ["donate_permission", "web_perms"],
+    field: ["donate_permission", "web_perms", "web_role_id"],
     danger: true,
   },
   "panel.donate.kits.create": { group: "donate" },

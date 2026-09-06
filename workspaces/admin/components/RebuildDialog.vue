@@ -48,6 +48,7 @@ import { REBUILD_POLL_MS } from '~/constants'
 export default {
   props: {
     visible: { type: Boolean, default: false },
+    preset: { type: Array, default: null },
   },
   emits: ['update:visible'],
   data() {
@@ -59,8 +60,14 @@ export default {
   },
   watch: {
     visible(value) {
-      if (value) this.poll()
-      else clearTimeout(this.timer)
+      if (!value) {
+        clearTimeout(this.timer)
+        return
+      }
+
+      if (this.preset?.length) this.sides = { client: this.preset.includes('client'), admin: this.preset.includes('admin') }
+
+      this.poll()
     },
   },
   mounted() {

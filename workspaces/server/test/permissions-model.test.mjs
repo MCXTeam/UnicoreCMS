@@ -139,6 +139,15 @@ describe('Ограничения полей', () => {
     assert.ok(!guardedFields('donate_permission').includes('perms'));
   });
 
+  it('веб-роль на время привилегии закрыта тем же правом, что и веб-права', () => {
+    for (const entity of ['donate_group', 'donate_permission']) {
+      assert.ok(guardedFields(entity).includes('web_role_id'), `${entity}.web_role_id не под охраной`);
+      assert.equal(canEditField(entity, 'web_role_id', [], false), false);
+    }
+
+    assert.equal(canEditField('donate_permission', 'web_role_id', ['panel.donate.permissions.field.perms'], true), true);
+  });
+
   it('цена кита магазина под охраной', () => {
     assert.ok(guardedFields('store_kit').includes('price'));
   });

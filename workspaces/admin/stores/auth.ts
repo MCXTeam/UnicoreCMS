@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { satisfiesPermission } from 'unicore-common/permissions'
+import { anyScope, satisfiesPermission } from 'unicore-common/permissions'
 import { csrfToken, setCsrfToken, ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from 'unicore-common/auth'
 import { SUPERUSER_ONLY, type RouteAccess } from '~/constants/access'
 
@@ -39,7 +39,7 @@ export const useAuthStore = defineStore('auth', {
         if (!access) return true
         if (access === SUPERUSER_ONLY) return false
 
-        return access.some((perm) => this.has(perm))
+        return access.some((perm) => this.has(anyScope(perm)))
       }
     },
   },

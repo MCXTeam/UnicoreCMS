@@ -394,7 +394,7 @@ export default {
 
     const fields = useFieldAccess('donate_permission', {
       canEditPrice: 'price',
-      canEditPerms: 'perms',
+      canEditPerms: 'web_perms',
     })
 
     return {

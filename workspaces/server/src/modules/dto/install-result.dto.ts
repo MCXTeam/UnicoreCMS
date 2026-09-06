@@ -13,6 +13,7 @@ export class InstallResultDto {
   version: string;
   previousVersion?: string;
   steps: InstallSteps;
+  sides: ('client' | 'admin')[];
 
   constructor(partial: Partial<InstallResultDto>) {
     Object.assign(this, partial);

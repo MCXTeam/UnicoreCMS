@@ -3,10 +3,13 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { Audit, imageFileFilter, STORAGE_MAX_IMAGE_UPLOAD, StorageManager } from '@common';
 import { Permissions } from './decorators/permission.decorator';
 import { matchPermission } from './guards/permisson.guard';
+import { roleGrantable } from './grant';
 import { RoleCreateInput } from './dto/role-create.input';
 import { RoleUpdateInput } from './dto/role-update.input';
 import { Role } from './entities/role.entity';
 import { RolesService } from './roles.service';
+
+export type RoleListItem = Role & { grantable: boolean };
 
 @Controller('admin/roles')
 export class RolesController {
@@ -14,12 +17,17 @@ export class RolesController {
 
   @Permissions(['panel.access'])
   @Get()
-  async findAll(@Req() request: any): Promise<Role[]> {
+  async findAll(@Req() request: any): Promise<RoleListItem[]> {
     const roles = await this.rolesService.find();
+    const detailed = await matchPermission(['panel.roles.read'], request);
 
-    if (await matchPermission(['panel.roles.read'], request)) return roles;
+    return Promise.all(
+      roles.map(async (role) => {
+        const grantable = await roleGrantable(role, request.user);
 
-    return roles.map((role) => ({ ...role, perms: [] })) as Role[];
+        return Object.assign(role, { perms: detailed ? role.perms : [], grantable });
+      }),
+    );
   }
 
   @Permissions(['panel.roles.create'])
