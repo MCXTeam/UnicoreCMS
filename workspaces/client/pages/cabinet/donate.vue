@@ -494,7 +494,7 @@ async function buyGroup() {
     groupDialog.value = false
     $unicore.successNotification($t('store.purchase_done'))
   } catch (e) {
-    if (e.response?.status == 400) $unicore.errorNotification($t('cabinet.buy_group_error'))
+    if (e.response?.status != 403) $unicore.errorNotification($t('cabinet.buy_group_error'))
   }
   loading.value = false
 }
@@ -511,7 +511,7 @@ async function buyPermission() {
     permissionDialog.value = false
     $unicore.successNotification($t('store.purchase_done'))
   } catch (e) {
-    if (e.response?.status == 400) $unicore.errorNotification($t('cabinet.buy_permission_error'))
+    if (e.response?.status != 403) $unicore.errorNotification($t('cabinet.buy_permission_error'))
   }
   loading.value = false
 }

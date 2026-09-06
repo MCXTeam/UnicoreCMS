@@ -10,7 +10,6 @@ export class Vote {
   monitoring: string;
 
   @ManyToOne(() => User, {
-    cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })

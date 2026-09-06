@@ -21,7 +21,6 @@ export class Money {
   userUuid: string;
 
   @ManyToOne(() => User, {
-    cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })

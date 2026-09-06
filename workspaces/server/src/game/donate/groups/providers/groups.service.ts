@@ -302,7 +302,6 @@ export class DonateGroupsService {
     group.hidden = input.hidden === true;
     group.giftable = input.giftable !== false;
     group.regiftable = input.regiftable !== false;
-    group.staff = Boolean(input.staff);
     group.color = input.color ?? null;
 
     group.servers = await this.serversRepository.findBy({
@@ -362,7 +361,6 @@ export class DonateGroupsService {
     group.hidden = input.hidden === true;
     group.giftable = input.giftable !== false;
     group.regiftable = input.regiftable !== false;
-    group.staff = Boolean(input.staff);
     group.color = input.color ?? null;
 
     group.servers = await this.serversRepository.findBy({

@@ -89,10 +89,12 @@ export class DonatePermissionsService {
   }
 
   private findGrant(user: User, server: Server, permission: DonatePermission): Promise<UsersDonatePermission | null> {
+    const scope = permission.type == PermissionType.Web || !server ? null : { id: server.id };
+
     return this.userPermissionsRepository.findOne({
       where: {
         user: { uuid: user.uuid },
-        server: permission.type == PermissionType.Web ? null : { id: server.id },
+        server: scope,
         permission: { id: permission.id },
       },
       relations: ['user'],

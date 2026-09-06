@@ -19,7 +19,6 @@ export class CartItemKit {
   kit: Kit;
 
   @ManyToOne(() => User, {
-    cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
     nullable: false,

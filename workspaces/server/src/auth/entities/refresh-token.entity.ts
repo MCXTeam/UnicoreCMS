@@ -50,7 +50,6 @@ export class RefreshToken {
   agent?: string;
 
   @ManyToOne(() => User, {
-    cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })

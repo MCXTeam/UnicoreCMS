@@ -9,7 +9,6 @@ export class UsersDonateGroup {
   id: number;
 
   @ManyToOne(() => User, {
-    cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })

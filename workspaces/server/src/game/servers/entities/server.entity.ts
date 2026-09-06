@@ -11,7 +11,6 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
-  ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryColumn,
@@ -21,7 +20,6 @@ import { Mod } from '../mods/entities/mod.entity';
 import { Online } from '../online/entities/online.entity';
 import { Query } from '../online/entities/query.entity';
 import { RCON } from '../rcon/entities/rcon.entity';
-import { ServerGroup } from './server-group.entity';
 import { ServerGalleryImage } from './server-gallery.entity';
 import { ServerInstance } from './server-instance.entity';
 import { ServerTable } from './server-table.entity';
@@ -67,9 +65,6 @@ export class Server {
 
   @Column({ name: 'wipe', default: false })
   wipe: boolean;
-
-  @ManyToOne(() => ServerGroup, (room) => room.servers, { eager: true })
-  group: ServerGroup[];
 
   @OneToOne(() => Online, (online) => online.server, {
     cascade: ['insert', 'update'],

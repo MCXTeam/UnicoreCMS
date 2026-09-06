@@ -24,7 +24,6 @@ export class Payment {
   status: PaymentStatuses;
 
   @ManyToOne(() => User, {
-    cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })

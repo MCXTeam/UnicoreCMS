@@ -9,7 +9,6 @@ export class UsersDonatePermission {
   id: number;
 
   @ManyToOne(() => User, {
-    cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })

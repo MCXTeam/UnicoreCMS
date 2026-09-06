@@ -19,7 +19,6 @@ export class GiftActivation {
   userUuid: string;
 
   @ManyToOne(() => User, {
-    cascade: ['insert', 'update', 'remove'],
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })

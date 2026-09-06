@@ -125,7 +125,10 @@ export class ApiHostService implements OnApplicationBootstrap, OnApplicationShut
   private async staffMembers(): Promise<StaffMember[]> {
     const [roles, granted] = await Promise.all([
       this.roles.find({ where: { staff: true }, relations: ['users'] }),
-      this.userGroups.find({ where: [{ expired: IsNull() }, { expired: MoreThan(new Date()) }], relations: ['user'] }),
+      this.userGroups.find({
+        where: [{ expired: IsNull() }, { expired: MoreThan(new Date()) }],
+        relations: ['user', 'group.web_role'],
+      }),
     ]);
 
     const members: StaffMember[] = [];
@@ -145,7 +148,7 @@ export class ApiHostService implements OnApplicationBootstrap, OnApplicationShut
         });
 
     for (const row of granted)
-      if (row.group?.staff && row.user && row.server)
+      if (row.group?.web_role?.staff && row.user && row.server)
         members.push({
           uuid: row.user.uuid,
           username: row.user.username,

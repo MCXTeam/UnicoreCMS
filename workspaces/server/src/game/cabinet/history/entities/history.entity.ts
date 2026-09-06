@@ -22,7 +22,6 @@ export class History {
   ip: string;
 
   @ManyToOne(() => User, {
-    cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
     nullable: false,
@@ -94,7 +93,6 @@ export class History {
   payment?: Payment;
 
   @ManyToOne(() => User, {
-    cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
     nullable: true,

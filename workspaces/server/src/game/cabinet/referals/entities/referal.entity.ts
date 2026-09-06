@@ -16,7 +16,6 @@ export class Referal {
   user: User;
 
   @ManyToOne(() => User, {
-    cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
     nullable: false,

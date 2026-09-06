@@ -1,7 +1,7 @@
 <template>
   <div>
     <ClientOnly>
-      <div v-if="$auth.user" class="panel d-none d-xl-flex flex-column align-items-center py-4 mb-5">
+      <div v-if="$auth.user" class="panel d-flex flex-column align-items-center py-4 mb-5">
         <h3 class="mb-4 mt-0"><i class="bx bx-user"></i> {{ $t('panel.hello', { username: $auth.user.username }) }}</h3>
         <div class="d-flex align-items-center w-100 mb-2 mini-profile p-2">
           <Avatar class="rounded shadow me-3" size="large">

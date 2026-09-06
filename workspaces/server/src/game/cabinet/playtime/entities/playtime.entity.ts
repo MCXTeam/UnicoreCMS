@@ -8,7 +8,6 @@ export class Playtime {
   userUuid: string;
 
   @ManyToOne(() => User, {
-    cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })

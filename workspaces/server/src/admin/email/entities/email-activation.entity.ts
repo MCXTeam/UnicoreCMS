@@ -13,7 +13,6 @@ export class EmailActivation {
   attempts: number;
 
   @ManyToOne(() => User, {
-    cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })

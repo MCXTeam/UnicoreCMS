@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { after, before, describe, it } from 'node:test';
 import { closeDatabase, query } from './helpers/db.mjs';
-import { cleanup, createAdmin } from './helpers/stand.mjs';
+import { cleanup, createAdmin, createUser, rootSession } from './helpers/stand.mjs';
 
 const created = { groups: [], permissions: [] };
 
@@ -129,6 +129,84 @@ describe('Донат в панели', () => {
     if (body?.id) created.permissions.push(body.id);
 
     assert.ok(ok(status), `создание без веб-роли отвергнуто: ${status} ${JSON.stringify(body)}`);
+  });
+});
+
+describe('Покупка доната игроком', () => {
+  it('веб-донат-право покупается и появляется у игрока', async () => {
+    if (!period) return;
+
+    const owner = await rootSession();
+    const created_ = await owner.post('/donates/permissions', {
+      name: uniqueName(),
+      type: 'web',
+      description: 'тест',
+      price: 10,
+      sale: 0,
+      periods: [period],
+      web_perms: ['player.skin.hd'],
+    });
+
+    if (created_.body?.id) created.permissions.push(created_.body.id);
+
+    assert.ok(ok(created_.status), `веб-право не создано: ${created_.status} ${JSON.stringify(created_.body)}`);
+
+    const player = await createUser();
+
+    await query('UPDATE unicore_users SET `real` = 1000 WHERE username = ?', [player.username]);
+
+    const { status, body } = await player.session.post('/donates/permissions/buy', {
+      permission: created_.body.id,
+      period,
+      use_virtual: false,
+    });
+
+    assert.ok(ok(status), `покупка веб-права отвергнута: ${status} ${JSON.stringify(body)}`);
+
+    const mine = await player.session.get('/donates/permissions/me');
+
+    assert.ok(
+      (mine.body || []).some((item) => item.permission?.id === created_.body.id || item.permissionId === created_.body.id),
+      'купленное веб-право не появилось у игрока',
+    );
+
+    await query('DELETE FROM unicore_users_donate_permissions WHERE permission_id = ?', [created_.body.id]).catch(() => null);
+  });
+});
+
+describe('Выдача доната', () => {
+  it('выдача группы не трогает строку пользователя', async () => {
+    if (!server || !period) return;
+
+    const owner = await rootSession();
+    const target = await createUser();
+    const group = await owner.post('/donates/groups', groupBody());
+
+    if (group.body?.id) created.groups.push(group.body.id);
+
+    assert.ok(ok(group.status), `группа не создана: ${group.status} ${JSON.stringify(group.body)}`);
+
+    const [before] = await query('SELECT uuid, username, email, `real`, `virtual` FROM unicore_users WHERE username = ?', [
+      target.username,
+    ]);
+
+    const { status, body } = await owner.post('/donates/groups/admin/give', {
+      user_uuid: before.uuid,
+      server_id: server,
+      group_id: group.body.id,
+      period_id: period,
+    });
+
+    assert.ok(ok(status), `выдача отвергнута: ${status} ${JSON.stringify(body)}`);
+
+    const [after] = await query('SELECT username, email, `real`, `virtual` FROM unicore_users WHERE uuid = ?', [before.uuid]);
+
+    assert.equal(after.username, before.username, 'ник пользователя изменился при выдаче доната');
+    assert.equal(after.email, before.email, 'почта пользователя изменилась при выдаче доната');
+    assert.equal(String(after.real), String(before.real), 'реальный баланс изменился при выдаче доната');
+    assert.equal(String(after.virtual), String(before.virtual), 'внутренний баланс изменился при выдаче доната');
+
+    await query('DELETE FROM unicore_users_donate_groups WHERE user_uuid = ?', [before.uuid]).catch(() => null);
   });
 });
 

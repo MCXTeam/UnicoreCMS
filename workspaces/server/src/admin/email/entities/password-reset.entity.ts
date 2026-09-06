@@ -13,7 +13,6 @@ export class PasswordReset {
   ip: string;
 
   @ManyToOne(() => User, {
-    cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })

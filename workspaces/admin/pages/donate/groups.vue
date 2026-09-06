@@ -226,15 +226,8 @@
                   showClear
                 />
               </div>
-              <div class="field-checkbox">
-                <Checkbox :binary="true" v-model="group.staff" inputId="group-staff" />
-                <label for="group-staff" class="flex align-items-center gap-1">
-                  {{ $t('admin.staff') }}
-                  <i v-tooltip.right="$t('admin.staff_group_hint')" class="pi pi-question-circle text-color-secondary" />
-                </label>
-              </div>
               <ColorField
-                v-if="group.staff"
+                v-if="staffRole"
                 v-model="group.color"
                 :label="$t('admin.staff_color')"
                 :hint="$t('admin.staff_color_hint')"
@@ -502,7 +495,6 @@ export default {
         hidden: false,
         giftable: true,
         regiftable: true,
-        staff: false,
         color: null,
       },
       groupDialog: false,
@@ -529,6 +521,10 @@ export default {
       const attached = (this.group?.servers || []).map((server) => server.id || server)
 
       return this.servers.filter((server) => scope.includes(server.id) || attached.includes(server.id))
+    },
+
+    staffRole() {
+      return Boolean((this.roles || []).find((role) => role.id === this.group.web_role_id)?.staff)
     },
 
     sections() {
@@ -652,8 +648,7 @@ export default {
           hidden: false,
         giftable: true,
           regiftable: true,
-          staff: false,
-          color: null,
+            color: null,
         }
       }
       this.translations.attach(this.group)

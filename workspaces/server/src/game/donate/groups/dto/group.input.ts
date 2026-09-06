@@ -109,10 +109,6 @@ export class GroupInput {
   regiftable?: boolean;
 
   @IsOptional()
-  @IsBoolean()
-  staff?: boolean;
-
-  @IsOptional()
   @IsHexColor()
   color?: string;
 }

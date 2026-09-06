@@ -31,9 +31,6 @@ export class DonateGroup {
   @Column({ name: 'regiftable', default: true })
   regiftable: boolean;
 
-  @Column({ name: 'staff', default: false })
-  staff: boolean;
-
   @Column({ name: 'color', length: ROLE_COLOR_MAX_LENGTH, nullable: true })
   color: string;
 

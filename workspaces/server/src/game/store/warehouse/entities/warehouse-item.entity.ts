@@ -19,7 +19,6 @@ export class WarehouseItem {
   product: Product;
 
   @ManyToOne(() => User, {
-    cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
     nullable: false,
