@@ -7,35 +7,30 @@
             <SelectButton v-model="place" :options="places" optionLabel="name" optionValue="value" :allowEmpty="false" />
           </template>
           <template #end>
-            <SelectButton
-              v-model="current.mode"
-              :options="modes"
-              optionLabel="name"
-              optionValue="value"
-              :allowEmpty="false"
-              :disabled="!canUpdate"
-              @update:modelValue="onModeChange"
-            />
-            <Select
-              class="ms-2"
-              v-model="preset"
-              :options="presets"
-              optionLabel="name"
-              optionValue="id"
-              :placeholder="$t('admin.layout_presets')"
-              :disabled="!canUpdate"
-              appendTo="body"
-              showClear
-              @update:modelValue="applyPreset"
-            />
-            <Button
-              class="ms-2"
-              :label="$t('common.save')"
-              icon="pi pi-check"
-              :loading="loading"
-              :disabled="!canUpdate"
-              @click="save()"
-            />
+            <div class="flex align-items-center gap-3">
+              <SelectButton
+                v-model="current.mode"
+                :options="modes"
+                optionLabel="name"
+                optionValue="value"
+                :allowEmpty="false"
+                :disabled="!canUpdate"
+                @update:modelValue="onModeChange"
+              />
+              <Select
+                v-model="preset"
+                :options="presets"
+                optionLabel="name"
+                optionValue="id"
+                class="w-14rem"
+                :placeholder="$t('admin.layout_presets')"
+                :disabled="!canUpdate"
+                appendTo="body"
+                showClear
+                @update:modelValue="applyPreset"
+              />
+              <Button :label="$t('common.save')" icon="pi pi-check" :loading="loading" :disabled="!canUpdate" @click="save()" />
+            </div>
           </template>
         </Toolbar>
 
