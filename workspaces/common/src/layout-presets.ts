@@ -48,6 +48,15 @@ const ABOUT_TEXT = {
 
 const NAV_TITLE = { ru: "Навигация", en: "Navigation" };
 
+const DOCS_TITLE = { ru: "Документы", en: "Documents" };
+
+const SOCIALS_TITLE = { ru: "Мы в соцсетях", en: "Follow us" };
+
+const NOTICE_TEXT = {
+  ru: "<p>Здесь можно разместить объявление: акцию, новость или ссылку на важную страницу.</p>",
+  en: "<p>Use this strip for an announcement: a sale, a news item or a link to an important page.</p>",
+};
+
 export const DEFAULT_FOOTER: LayoutDefinition = builder([
   {
     id: "main",
@@ -115,12 +124,8 @@ export const LAYOUT_PRESETS: LayoutPreset[] = [
     definition: builder([
       {
         id: "top",
-        align: "between",
-        blocks: [
-          { id: "notice", type: "text", grow: true, text: {} },
-          { id: "locale", type: "locale", hideOn: ["mobile"] },
-          { id: "theme", type: "theme", hideOn: ["mobile"] },
-        ],
+        align: "center",
+        blocks: [{ id: "notice", type: "text", text: NOTICE_TEXT }],
       },
       {
         id: "main",
@@ -130,8 +135,10 @@ export const LAYOUT_PRESETS: LayoutPreset[] = [
           { id: "nav", type: "nav", links: CORE_NAVBAR, hideOn: ["mobile"] },
           { id: "spacer", type: "spacer", grow: true },
           { id: "online", type: "online", hideOn: ["mobile"] },
-          { id: "launcher", type: "launcher" },
           { id: "login", type: "login" },
+          { id: "launcher", type: "launcher" },
+          { id: "locale", type: "locale", hideOn: ["mobile"] },
+          { id: "theme", type: "theme", hideOn: ["mobile"] },
         ],
       },
     ]),
@@ -148,8 +155,8 @@ export const LAYOUT_PRESETS: LayoutPreset[] = [
         blocks: [
           { id: "about", type: "text", grow: true, text: ABOUT_TEXT },
           { id: "nav", type: "nav", grow: true, links: CORE_FOOTER.slice(0, 4), title: NAV_TITLE },
-          { id: "docs", type: "nav", grow: true, links: [], title: {} },
-          { id: "socials", type: "icons", grow: true, links: [], title: {} },
+          { id: "docs", type: "nav", grow: true, links: [], title: DOCS_TITLE },
+          { id: "socials", type: "icons", grow: true, links: [], title: SOCIALS_TITLE },
         ],
       },
       {
