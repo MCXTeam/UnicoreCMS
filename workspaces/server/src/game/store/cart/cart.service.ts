@@ -258,7 +258,7 @@ export class CartService {
   async quoteSingle(user: User, input: SingleQuoteInput): Promise<SingleQuote> {
     const server = await this.serversService.findOne(input.server);
 
-    if (!server) throw new NotFoundException();
+    if (!server) throw new NotFoundException('Сервер не найден');
 
     const items: CartItem[] = [];
     const kits: CartItemKit[] = [];
@@ -269,9 +269,11 @@ export class CartService {
     if (input.product) {
       product = await this.productsRepository.findOne({ where: { id: input.product }, relations: ['servers'] });
 
-      if (!product || !product.servers.find((srv) => srv.id == server.id)) throw new NotFoundException();
+      if (!product) throw new NotFoundException('Товар не найден');
+      if (!product.servers.find((srv) => srv.id == server.id)) throw new NotFoundException('Этого товара нет на выбранном сервере');
 
-      if (product.multiple_of && amount % product.multiple_of != 0) throw new BadRequestException();
+      if (product.multiple_of && amount % product.multiple_of != 0)
+        throw new BadRequestException(`Количество должно быть кратно ${product.multiple_of}`);
 
       const item = new CartItem();
 
@@ -284,7 +286,8 @@ export class CartService {
     } else {
       kit = await this.kitsRepository.findOne({ where: { id: input.kit }, relations: ['servers', 'items'] });
 
-      if (!kit || !kit.servers.find((srv) => srv.id == server.id)) throw new NotFoundException();
+      if (!kit) throw new NotFoundException('Набор не найден');
+      if (!kit.servers.find((srv) => srv.id == server.id)) throw new NotFoundException('Этого набора нет на выбранном сервере');
 
       const item = new CartItemKit();
 

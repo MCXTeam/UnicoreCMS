@@ -79,7 +79,7 @@ function filters(query: Query): Record<string, string | string[]> | undefined {
     if (!match) continue;
     if (typeof value !== 'string' && !Array.isArray(value)) continue;
 
-    collected[match[1]] = value as string | string[];
+    collected[match[1] ?? match[2]] = value as string | string[];
   }
 
   return Object.keys(collected).length ? collected : undefined;
