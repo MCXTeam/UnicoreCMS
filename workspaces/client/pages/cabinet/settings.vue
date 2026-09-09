@@ -30,17 +30,23 @@
           rules="required|isStrongPassword"
           v-slot="{ value, errorMessage, handleChange, handleBlur }"
         >
-          <Password
-            :feedback="false"
-            :toggleMask="true"
-            :modelValue="value"
-            @update:modelValue="handleChange"
-            @blur="handleBlur"
-            :placeholder="$t('auth.new_password')"
-            class="w-100"
-            inputClass="w-100"
-            :class="errorMessage && 'p-invalid'"
-          />
+          <div class="d-flex gap-2">
+            <Password
+              ref="passwordField"
+              :feedback="false"
+              :toggleMask="true"
+              :modelValue="value"
+              @update:modelValue="handleChange"
+              @blur="handleBlur"
+              :placeholder="$t('auth.new_password')"
+              class="w-100"
+              inputClass="w-100"
+              :class="errorMessage && 'p-invalid'"
+            />
+            <Button type="button" outlined v-tooltip.bottom="$t('auth.password_generate')" @click="fillGeneratedPassword(handleChange)">
+              <i class="bx bx-refresh"></i>
+            </Button>
+          </div>
           <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
         </Field>
         <label class="cab-label">{{ $t('cabinet.repeat_password') }}</label>
@@ -51,6 +57,7 @@
           v-slot="{ value, errorMessage, handleChange, handleBlur }"
         >
           <Password
+            ref="passwordConfirmField"
             :feedback="false"
             :toggleMask="true"
             :modelValue="value"
@@ -68,6 +75,45 @@
           <label for="sessionsClose">{{ $t('auth.close_sessions') }}</label>
         </div>
         <Button @click="changePassword()" :disabled="!meta.valid" class="w-100" :label="$t('auth.change_password')" />
+      </Form>
+    </CabTile>
+
+    <CabTile v-if="canEmail" :title="$t('cabinet.email_change')" icon="bx bx-envelope" :span="6">
+      <p class="cab-sub mt-0 mb-3">{{ $t('cabinet.email_hint') }}</p>
+      <p class="m-0 mb-3 text-sm">
+        {{ $t('cabinet.email_current') }} <b v-text="$auth.user?.email || $t('cabinet.email_none')" />
+      </p>
+      <Form v-if="!email_form.sent" v-slot="{ meta }" class="cab-form">
+        <label class="cab-label">{{ $t('cabinet.email_new') }}</label>
+        <Field v-model="email_form.email" name="email" rules="required|email" v-slot="{ value, errorMessage, handleChange, handleBlur }">
+          <InputText
+            :modelValue="value"
+            @update:modelValue="handleChange"
+            @blur="handleBlur"
+            :placeholder="$t('cabinet.email_new')"
+            class="w-100"
+            :class="errorMessage && 'p-invalid'"
+          />
+          <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+        </Field>
+        <Button @click="requestEmail()" :disabled="!meta.valid" class="w-100" :label="$t('cabinet.email_send_code')" />
+      </Form>
+      <Form v-else v-slot="{ meta }" class="cab-form">
+        <p class="m-0 text-sm">{{ $t('cabinet.email_code_sent', { email: email_form.email }) }}</p>
+        <label class="cab-label">{{ $t('auth.activation_code') }}</label>
+        <Field v-model="email_form.code" name="code" rules="required|min:6|max:6" v-slot="{ value, errorMessage, handleChange, handleBlur }">
+          <InputText
+            :modelValue="value"
+            @update:modelValue="handleChange"
+            @blur="handleBlur"
+            :placeholder="$t('auth.activation_code')"
+            class="w-100"
+            :class="errorMessage && 'p-invalid'"
+          />
+          <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+        </Field>
+        <Button @click="confirmEmail()" :disabled="!meta.valid" class="w-100" :label="$t('cabinet.email_confirm')" />
+        <Button text class="w-100" :label="$t('common.cancel')" @click="resetEmailForm()" />
       </Form>
     </CabTile>
 
@@ -170,6 +216,7 @@
 <script setup>
 import QRCode from 'qrcode-with-logos'
 import { Form, Field } from 'vee-validate'
+import { generatePassword } from 'unicore-common/password'
 
 definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'cabinet.tab_settings', hint: 'cabinet.settings_hint' })
 
@@ -178,8 +225,9 @@ const { $auth, $unicore, $t } = useNuxtApp()
 const cabinet = useCabinet()
 const twoFactor = useTwoFactor()
 
-const { canPassword, canTwoFactorOn, canTwoFactorOff } = useAccess({
+const { canPassword, canEmail, canTwoFactorOn, canTwoFactorOff } = useAccess({
   canPassword: 'player.password.change',
+  canEmail: 'player.email.change',
   canTwoFactorOn: 'player.twofactor.on',
   canTwoFactorOff: 'player.twofactor.off',
 })
@@ -202,7 +250,29 @@ const password_form = reactive({
 const two_factor_form = reactive({
   code: '',
 })
+const email_form = reactive({
+  email: '',
+  code: '',
+  sent: false,
+})
 const two_factor = ref(null)
+const passwordField = ref(null)
+const passwordConfirmField = ref(null)
+
+function unmask(field) {
+  if (field && !field.unmasked) field.onMaskToggle()
+}
+
+function fillGeneratedPassword(handleChange) {
+  const password = generatePassword()
+
+  password_form.password = password
+  password_form.password_confirm = password
+
+  handleChange(password)
+  unmask(passwordField.value)
+  unmask(passwordConfirmField.value)
+}
 
 onMounted(async () => {
   if (!$auth.user.two_factor_enabled) await GenerateQR()
@@ -219,6 +289,37 @@ async function changePassword() {
     else await $auth.fetchUser()
   } catch (err) {
     $unicore.errorNotification($t('cabinet.password_wrong'), err)
+  }
+  loading.close()
+}
+
+function resetEmailForm() {
+  email_form.email = ''
+  email_form.code = ''
+  email_form.sent = false
+}
+
+async function requestEmail() {
+  const loading = $unicore.loading()
+  try {
+    await cabinet.requestEmailChange(email_form.email)
+    email_form.sent = true
+    $unicore.successNotification($t('cabinet.email_code_sent', { email: email_form.email }))
+  } catch (err) {
+    $unicore.errorNotification($t('cabinet.email_request_failed'), err)
+  }
+  loading.close()
+}
+
+async function confirmEmail() {
+  const loading = $unicore.loading()
+  try {
+    await cabinet.confirmEmailChange(email_form.code)
+    await $auth.fetchUser()
+    resetEmailForm()
+    $unicore.successNotification($t('cabinet.email_changed'))
+  } catch (err) {
+    $unicore.errorNotification($t('auth.code_invalid'), err)
   }
   loading.close()
 }

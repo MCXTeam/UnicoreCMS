@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { EmailModule } from 'src/admin/email/email.module';
 import { PasswordModule } from 'src/auth/password/password.module';
 import { SettingsService } from './providers/settings.service';
 import { SettingsController } from './controllers/settings.controller';
@@ -9,7 +10,7 @@ import { User } from 'src/admin/users/entities/user.entity';
 import { RefreshToken } from 'src/auth/entities/refresh-token.entity';
 
 @Module({
-  imports: [PasswordModule, TypeOrmModule.forFeature([User, RefreshToken])],
+  imports: [EmailModule, PasswordModule, TypeOrmModule.forFeature([User, RefreshToken])],
   providers: [SettingsService, TwoFactorService],
   controllers: [SettingsController, TwoFactorController],
   exports: [SettingsService, TwoFactorService],

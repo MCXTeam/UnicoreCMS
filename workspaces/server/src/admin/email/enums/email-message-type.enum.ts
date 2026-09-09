@@ -18,4 +18,9 @@ export enum EmailMessageType {
    * Подарок от другого игрока
    */
   Gift = 'gift',
+
+  /**
+   * Подтверждение новой почты
+   */
+  EmailChange = 'email_change',
 }

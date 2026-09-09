@@ -6,13 +6,14 @@ import { User } from '../users/entities/user.entity';
 import { EmailController } from './email.controller';
 import { EmailService } from './email.service';
 import { EmailActivation } from './entities/email-activation.entity';
+import { EmailChange } from './entities/email-change.entity';
 import { EmailMessage } from './entities/email-message.entity';
 import { PasswordReset } from './entities/password-reset.entity';
 import { EmailMessageType } from './enums/email-message-type.enum';
 import { PasswordModule } from 'src/auth/password/password.module';
 
 @Module({
-  imports: [PasswordModule, TypeOrmModule.forFeature([EmailMessage, EmailActivation, User, PasswordReset, RefreshToken])],
+  imports: [PasswordModule, TypeOrmModule.forFeature([EmailMessage, EmailActivation, EmailChange, User, PasswordReset, RefreshToken])],
   providers: [EmailService],
   controllers: [EmailController],
   exports: [EmailService],
@@ -45,6 +46,11 @@ export class EmailModule implements OnModuleInit {
           id: EmailMessageType.Gift,
           title: 'Вам подарок',
           content: `<h1>Привет, {USERNAME}!</h1><p><br></p><p>Игрок {SENDER} сделал вам подарок на {SITENAME}: {GIFT}.</p><p>Подарок уже выдан, загляните в личный кабинет.</p>`,
+        },
+        {
+          id: EmailMessageType.EmailChange,
+          title: 'Подтверждение новой почты',
+          content: `<h1>Привет, {USERNAME}!</h1><p><br></p><p>Этот адрес указан как новая почта аккаунта на {SITENAME}.</p><p>Код подтверждения:</p><h2>{CODE}</h2><p><br></p><p>Если вы этого не делали, просто не вводите код — почта останется прежней.</p>`,
         },
       ])
       .orIgnore()

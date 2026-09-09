@@ -63,6 +63,7 @@ export const AUDIT_ACTIONS = define({
   "auth.register": { class: "access" },
   "auth.activate": { class: "access" },
   "auth.password.change": { class: "access" },
+  "auth.email.change": { class: "access" },
   "auth.password.reset.request": { class: "access" },
   "auth.password.reset.confirm": { class: "access" },
   "auth.token.reuse": { class: "access", danger: true },

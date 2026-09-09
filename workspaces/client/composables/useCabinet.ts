@@ -12,6 +12,8 @@ export const useCabinet = () => {
     closeAllSessions: () => api.delete('/auth/sessions_all').then((res) => res.data),
     closeOtherSessions: (token: string) => api.delete('/auth/sessions_other', { data: { token } }).then((res) => res.data),
     changePassword: (payload: Record<string, unknown>) => api.post('/cabinet/settings/password', payload).then((res) => res.data),
+    requestEmailChange: (email: string) => api.post('/cabinet/settings/email', { email }).then((res) => res.data),
+    confirmEmailChange: (code: string) => api.post('/cabinet/settings/email/confirm', { code }).then((res) => res.data),
     activateGift: (gift_code: string, recaptcha?: string) =>
       api
         .post('/cabinet/gifts/activate', { gift_code }, recaptcha ? { headers: { recaptcha } } : {})

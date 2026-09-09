@@ -1,5 +1,5 @@
 import { MailerService } from '@nestjs-modules/mailer';
-import { Inject, Injectable, Logger, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Inject, Injectable, Logger, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MoreThan, Repository } from 'typeorm';
 import { envConfig } from 'unicore-common';
@@ -8,6 +8,7 @@ import { User } from '../users/entities/user.entity';
 import { EmailInput } from './dto/email.input';
 import { TestEmailInput } from './dto/test-email.input';
 import { EmailActivation } from './entities/email-activation.entity';
+import { EmailChange } from './entities/email-change.entity';
 import { EmailMessage } from './entities/email-message.entity';
 import { EmailMessageType } from './enums/email-message-type.enum';
 
@@ -53,6 +54,8 @@ export class EmailService {
     private emailMessagesRepository: Repository<EmailMessage>,
     @InjectRepository(EmailActivation)
     private emailActivationsRepository: Repository<EmailActivation>,
+    @InjectRepository(EmailChange)
+    private emailChangesRepository: Repository<EmailChange>,
     @InjectRepository(PasswordReset)
     private passwordResetRepository: Repository<PasswordReset>,
     @InjectRepository(User)
@@ -159,6 +162,81 @@ export class EmailService {
 
     user.activated = true;
     await this.usersRepository.update({ uuid: user.uuid }, { activated: true });
+
+    return new UserDto(user);
+  }
+
+  async sendEmailChange(user: User, email: string): Promise<void> {
+    const address = email.trim().toLowerCase();
+
+    if (user.email && user.email.toLowerCase() === address) throw new BadRequestException('email_same');
+    if (await this.usersRepository.findOneBy({ email: address })) throw new ConflictException('email_taken');
+
+    if (
+      (await this.emailChangesRepository.countBy({
+        created: MoreThan(this.moment().utc().subtract(EMAIL_ACTIVATION_RESEND_WINDOW_MINUTES, 'minutes').toDate()),
+        user: { uuid: user.uuid },
+      })) >= EMAIL_ACTIVATION_RESEND_MAX
+    ) {
+      throw new TooManyAttemptsException(EMAIL_ACTIVATION_RESEND_WINDOW_MINUTES * 60);
+    }
+
+    const { content, title } = await this.contentTranslations.localize(
+      'email_message',
+      EmailMessageType.EmailChange,
+      user.locale,
+      await this.emailMessagesRepository.findOneBy({ id: EmailMessageType.EmailChange }),
+    );
+
+    const change = new EmailChange();
+    const code = randomFromAlphabet(EMAIL_CODE_ALPHABET, EMAIL_CODE_LENGTH);
+
+    change.user = user;
+    change.email = address;
+    change.code = code;
+
+    await this.emailChangesRepository.save(change);
+
+    const html = renderEmailTemplate(content, { USERNAME: user.username, SITENAME: envConfig.sitename, CODE: code });
+
+    this.mailerService.sendMail({ to: address, subject: title, html }).catch((e) => {
+      this.logger.error(e.toString());
+    });
+  }
+
+  async confirmEmailChange(user: User, input: VerifyInput): Promise<UserDto> {
+    const change = await this.emailChangesRepository.findOne({
+      where: {
+        user: { uuid: user.uuid },
+        created: MoreThan(this.moment().utc().subtract(EMAIL_ACTIVATION_TTL_MINUTES, 'minutes').toDate()),
+      },
+      order: { created: 'DESC' },
+    });
+
+    if (!change) throw new NotFoundException();
+
+    if (!safeEqual(change.code, input.code)) {
+      change.attempts += 1;
+
+      if (change.attempts >= EMAIL_ACTIVATION_MAX_ATTEMPTS) await this.emailChangesRepository.delete({ user: { uuid: user.uuid } });
+      else await this.emailChangesRepository.save(change);
+
+      throw new NotFoundException();
+    }
+
+    if (await this.usersRepository.findOneBy({ email: change.email })) {
+      await this.emailChangesRepository.delete({ user: { uuid: user.uuid } });
+
+      throw new ConflictException('email_taken');
+    }
+
+    await this.emailChangesRepository.delete({ user: { uuid: user.uuid } });
+    await this.emailActivationsRepository.delete({ user: { uuid: user.uuid } });
+
+    user.email = change.email;
+    user.activated = true;
+
+    await this.usersRepository.update({ uuid: user.uuid }, { email: change.email, activated: true });
 
     return new UserDto(user);
   }

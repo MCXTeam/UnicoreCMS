@@ -273,6 +273,7 @@ export const PERMISSIONS = define({
   "player.cloak.upload": { group: "player" },
   "player.cloak.hd": { group: "player" },
   "player.password.change": { group: "player" },
+  "player.email.change": { group: "player" },
   "player.twofactor.on": { group: "player" },
   "player.twofactor.off": { group: "player" },
   "player.payment": { group: "player" },
