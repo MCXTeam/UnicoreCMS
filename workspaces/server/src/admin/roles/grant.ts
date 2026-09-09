@@ -22,7 +22,9 @@ export async function userPermissionCheck(user: User, actor: User): Promise<bool
   return targetPerms.every((perm) => actorPerms.includes(perm));
 }
 
-export function roleGrantable(role: Role, actor: User): Promise<boolean> {
+export async function roleGrantable(role: Role, actor: User): Promise<boolean> {
+  if (!outranksRole(role, actor)) return false;
+
   return userPermissionCheck({ perms: [], roles: [role], superuser: false } as User, actor);
 }
 
@@ -41,9 +43,41 @@ export async function assertGrantable(
 
     const target = denyTarget(pattern);
 
-    if (!panel && !isPlayerPermission(target))
-      throw new ForbiddenException(`Нельзя выдать право «${target}»: нет права выдавать права панели`);
+    if (isPlayerPermission(target)) continue;
+
+    if (!panel) throw new ForbiddenException(`Нельзя выдать право «${target}»: нет права выдавать права панели`);
 
     if (!satisfiesPermission(granted, target)) throw new ForbiddenException(`Нельзя выдать право «${target}»: его нет у вас`);
+  }
+}
+
+export function actorPriority(actor: User): number | null {
+  const own = (actor?.roles || []).filter((role) => !role.important);
+
+  if (!own.length) return null;
+
+  return own.reduce((top, role) => Math.max(top, role.priority ?? 0), Number.NEGATIVE_INFINITY);
+}
+
+export function outranksRole(role: Role, actor: User): boolean {
+  if (actor?.superuser) return true;
+
+  const priority = actorPriority(actor);
+
+  if (priority === null) return true;
+
+  return (role.priority ?? 0) < priority;
+}
+
+export async function assertRolesGrantable(next: Role[], current: Role[], actor: User): Promise<void> {
+  if (!actor || actor.superuser) return;
+
+  const already = new Set((current || []).map((role) => role.id));
+
+  for (const role of next || []) {
+    if (role.important || already.has(role.id)) continue;
+
+    if (!(await roleGrantable(role, actor)))
+      throw new ForbiddenException(`Нельзя выдать роль «${role.name}»: её приоритет не ниже вашего или в ней есть лишние права`);
   }
 }

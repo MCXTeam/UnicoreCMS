@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { after, describe, it } from 'node:test';
 import { closeDatabase } from './helpers/db.mjs';
-import { cleanup, createAdmin, createRole, rootSession } from './helpers/stand.mjs';
+import { cleanup, createAdmin, createRole, createUser, rootSession } from './helpers/stand.mjs';
 
 after(async () => {
   await cleanup();
@@ -114,5 +114,55 @@ describe('Разрешения в роли', () => {
 
     assert.deepEqual(role?.perms, [], 'состав роли виден без права смотреть роли');
     assert.equal(role?.grantable, false, 'без права смотреть роли признак выдачи не пришёл');
+  });
+});
+
+describe('Приоритет ролей', () => {
+  const staffPerms = ['panel.users.read', 'panel.users.update', 'panel.users.field.roles', 'panel.users.grant.panel'];
+
+  async function staff(priority) {
+    const roleId = await createRole(staffPerms, { priority });
+
+    return createUser({ perms: ['panel.access'], roles: [roleId] });
+  }
+
+  it('роль с тем же приоритетом выдать нельзя', async () => {
+    const { session } = await staff(5);
+    const same = await createRole([], { priority: 5 });
+
+    const { body } = await session.get('/admin/roles');
+    const role = (body || []).find((item) => item.id === same);
+
+    assert.equal(role?.grantable, false, 'роль с равным приоритетом помечена выдаваемой');
+  });
+
+  it('роль с меньшим приоритетом выдать можно', async () => {
+    const { session } = await staff(5);
+    const lower = await createRole([], { priority: 4 });
+
+    const { body } = await session.get('/admin/roles');
+    const role = (body || []).find((item) => item.id === lower);
+
+    assert.equal(role?.grantable, true, 'роль ниже по приоритету помечена невыдаваемой');
+  });
+
+  it('назначение роли не ниже своей отвергается сервером', async () => {
+    const { session } = await staff(5);
+    const same = await createRole([], { priority: 5 });
+    const { username } = await createUser({});
+    const target = await rootSession().then((admin) => admin.get(`/users/${username}`));
+
+    const uuid = target.body?.uuid;
+
+    if (!uuid) return;
+
+    const { status } = await session.patch(`/users/${uuid}`, {
+      username,
+      locale: 'ru',
+      roles: [same],
+      perms: [],
+    });
+
+    assert.equal(status, 403, 'сервер принял роль с равным приоритетом');
   });
 });

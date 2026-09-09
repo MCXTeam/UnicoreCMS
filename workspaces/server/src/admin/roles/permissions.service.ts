@@ -24,7 +24,8 @@ export class PermissionsService {
       superuser || (await matchPermission([['panel.users.grant.panel', 'panel.roles.grant.panel'], { or: true }], request));
 
     return permissionEntries().filter((entry) => {
-      if (!panel && !isPlayerPermission(entry.key)) return false;
+      if (isPlayerPermission(entry.key)) return true;
+      if (!panel) return false;
 
       return superuser || satisfiesPermission(granted, entry.key);
     });

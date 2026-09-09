@@ -44,7 +44,7 @@ import { PublicUsersDto } from './dto/public-users.dto';
 import { UserUpdateInput } from './dto/user-update.input';
 import { matchPermission, transformPermissions } from '../roles/guards/permisson.guard';
 import { AuditChanges, auditChanges, isPanelPermission, UserField, USER_FIELDS } from 'unicore-common';
-import { userPermissionCheck } from '../roles/grant';
+import { assertRolesGrantable, userPermissionCheck } from '../roles/grant';
 import { SettingsService } from 'src/game/cabinet/settings/providers/settings.service';
 import { TwoFactorService } from 'src/game/cabinet/settings/providers/two_factor.service';
 import { PasswordChangeInput } from 'src/game/cabinet/settings/dto/password-change.input';
@@ -368,6 +368,8 @@ export class UsersService {
       if (fallback) user.roles.push(fallback);
     }
 
+    await assertRolesGrantable(user.roles, [], actor);
+
     if (actor) {
       if (!(await userPermissionCheck(user, actor))) throw new ForbiddenException();
 
@@ -441,6 +443,8 @@ export class UsersService {
 
       if (!user.roles.find((role) => role.id === ImportantRoles.Default))
         user.roles.push(await this.rolesRepository.findOneBy({ id: ImportantRoles.Default }));
+
+      await assertRolesGrantable(user.roles, before.roles, actor);
     }
 
     if (actor && !(await userPermissionCheck(user, actor))) throw new ForbiddenException();
