@@ -16,7 +16,7 @@ import {
 import { IsNull, Repository } from 'typeorm';
 import { AUDIT_RETENTION_FIELDS, ConfigField, ConfigType } from './config.enum';
 import { enabledModuleIds, moduleConfigSchema } from 'src/modules/runtime';
-import { configTypeOf, moduleConfigKey } from './module-config';
+import { configTypeOf, isInactiveModuleConfigKey, moduleConfigKey } from './module-config';
 import { CONFIG_CACHE_TTL_MS } from './config.constants';
 import { isValidConfigNumber } from './config.utils';
 import { ConfigInput } from './dto/config.input';
@@ -145,7 +145,9 @@ export class ConfigService {
   }
 
   async find() {
-    return this.configTransformer(await this.configRepo.find({ order: { important: 'DESC' } }));
+    const rows = await this.configRepo.find({ order: { important: 'DESC' } });
+
+    return this.configTransformer(rows.filter((row) => !isInactiveModuleConfigKey(row.key)));
   }
 
   async load(): Promise<LoadedConfig> {

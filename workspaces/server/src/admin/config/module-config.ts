@@ -1,5 +1,5 @@
 import { ConfigFieldSchema, modulePrefixes } from 'unicore-api';
-import { moduleConfigSchema } from 'src/modules/runtime';
+import { discover, moduleConfigSchema } from 'src/modules/runtime';
 import { ConfigType } from './config.enum';
 
 export const configTypeOf = (type: ConfigFieldSchema['type']): ConfigType => {
@@ -21,3 +21,15 @@ export const moduleConfigFields = (): { key: string; field: ConfigFieldSchema; m
   );
 
 export const moduleConfigRule = (key: string): ConfigFieldSchema | null => moduleConfigFields().find((item) => item.key === key)?.field || null;
+
+const inactiveModuleConfigPrefixes = (): string[] =>
+  discover()
+    .modules.filter((module) => !module.enabled)
+    .flatMap((module) => {
+      const prefixes = modulePrefixes(module.id);
+
+      return [prefixes.config, prefixes.publicConfig];
+    });
+
+export const isInactiveModuleConfigKey = (key: string): boolean =>
+  inactiveModuleConfigPrefixes().some((prefix) => key.startsWith(prefix));
