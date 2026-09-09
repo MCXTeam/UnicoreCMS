@@ -1,10 +1,10 @@
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { DonatePermission } from '../../permissions/entities/donate-permission.entity';
 import { DonateGroup } from './donate-group.entity';
-import { GroupKitImage } from './group-kit-image.entity';
+import { GroupKitServer } from './group-kit-server.entity';
 import { Translatable } from 'src/admin/locales/translatable.decorator';
 
-@Translatable('group_kit', ['name', 'description'])
+@Translatable('group_kit', ['name', 'description', 'servers.*.description'])
 @Entity({
   name: 'unicore_group_kits',
   orderBy: {
@@ -41,9 +41,9 @@ export class GroupKit {
   })
   permission: DonatePermission[];
 
-  @OneToMany(() => GroupKitImage, (item) => item.kit, {
+  @OneToMany(() => GroupKitServer, (item) => item.kit, {
     cascade: ['insert', 'update'],
     eager: true,
   })
-  images: GroupKitImage[];
+  servers: GroupKitServer[];
 }

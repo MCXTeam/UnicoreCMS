@@ -14,7 +14,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
-import { GroupKitInput } from '../dto/group-kit.input';
+import { GroupKitDescriptionInput, GroupKitInput } from '../dto/group-kit.input';
 import { GroupKitsService } from '../providers/group-kit.service';
 
 @Controller('donates/group-kits')
@@ -86,5 +86,11 @@ export class GroupKitsController {
   @Delete('image/:server/:id')
   removeMedia(@Param('server') server: string, @Param('id', ParseIntPipe) id: number) {
     return this.groupKitsService.removeMedia(server, id);
+  }
+
+  @Permissions(['panel.access', 'panel.donate.kits.update'])
+  @Patch('description/:server/:id')
+  updateDescription(@Param('server') server: string, @Param('id', ParseIntPipe) id: number, @Body() body: GroupKitDescriptionInput) {
+    return this.groupKitsService.updateDescription(server, id, body.description);
   }
 }

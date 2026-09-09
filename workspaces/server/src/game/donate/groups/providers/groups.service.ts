@@ -75,8 +75,8 @@ export class DonateGroupsService {
         .createQueryBuilder('group')
         .leftJoinAndSelect('group.periods', 'periods')
         .leftJoinAndSelect('group.kits', 'kits')
-        .leftJoinAndSelect('kits.images', 'images')
-        .leftJoinAndSelect('images.server', 'image_server')
+        .leftJoinAndSelect('kits.servers', 'kit_servers')
+        .leftJoinAndSelect('kit_servers.server', 'kit_server')
         .leftJoinAndSelect('group.servers', 'servers')
         .leftJoinAndSelect('group.features', 'features')
         .where('group.hidden = :hidden', { hidden: false })
@@ -91,18 +91,15 @@ export class DonateGroupsService {
           Object.assign(group, {
             periods: _.orderBy(group.periods, ['multiplier'], ['asc']),
             kits: _(
-              group.kits.map((kit) =>
-                Object.assign(kit, {
+              group.kits.map((kit) => {
+                const own = kit.servers.find((item) => item.server.id == id);
+
+                return Object.assign(kit, {
                   priority: kit.priority ? kit.priority : 0,
-                  images: _(
-                    kit.images
-                      .filter((image) => image.server.id == id)
-                      .map((image) => Object.assign(image, { priority: image.server.priority ? image.server.priority : 0 })),
-                  )
-                    .orderBy(['server.priority', 'id'], ['asc', 'asc'])
-                    .value(),
-                }),
-              ),
+                  description: own?.description || kit.description,
+                  images: own?.image ? [own] : [],
+                });
+              }),
             )
               .orderBy(['priority', 'id'], ['asc', 'asc'])
               .value(),

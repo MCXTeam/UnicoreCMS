@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Server } from 'src/game/servers/entities/server.entity';
 import { In, Repository } from 'typeorm';
 import { GroupKitInput } from '../dto/group-kit.input';
-import { GroupKitImage } from '../entities/group-kit-image.entity';
+import { GroupKitServer } from '../entities/group-kit-server.entity';
 import { GroupKit } from '../entities/group-kit.entity';
 
 @Injectable()
@@ -80,45 +80,62 @@ export class GroupKitsService {
     return this.groupKitsRepository.remove(groups);
   }
 
-  async updateMedia(server_id: string, id: number, file: Express.Multer.File) {
+  private async overrideOf(server_id: string, id: number): Promise<{ kit: GroupKit; server: Server; row: GroupKitServer }> {
     const server = await this.serversRepository.findOneBy({ id: server_id });
     const kit = await this.findOne(id);
 
-    if (!kit || !server) {
-      StorageManager.remove(file.filename);
-      throw new NotFoundException();
+    if (!kit || !server) throw new NotFoundException();
+
+    let row = kit.servers.find((item) => item.server.id == server.id);
+
+    if (!row) {
+      row = new GroupKitServer();
+      row.server = server;
     }
 
-    var gkImage = kit.images.find((img) => img.server.id == server.id);
+    return { kit, server, row };
+  }
 
-    if (gkImage) {
-      StorageManager.remove(gkImage.image);
-    } else {
-      gkImage = new GroupKitImage();
-      gkImage.server = server;
-    }
-
-    gkImage.image = file.filename;
-
-    kit.images = kit.images.filter((img) => img.server.id != server.id).concat([gkImage]);
+  private save(kit: GroupKit, server: Server, row: GroupKitServer | null) {
+    kit.servers = kit.servers.filter((item) => item.server.id != server.id).concat(row ? [row] : []);
 
     return this.groupKitsRepository.save(kit);
   }
 
+  async updateMedia(server_id: string, id: number, file: Express.Multer.File) {
+    let override: { kit: GroupKit; server: Server; row: GroupKitServer };
+
+    try {
+      override = await this.overrideOf(server_id, id);
+    } catch (error) {
+      StorageManager.remove(file.filename);
+      throw error;
+    }
+
+    const { kit, server, row } = override;
+
+    if (row.image) StorageManager.remove(row.image);
+
+    row.image = file.filename;
+
+    return this.save(kit, server, row);
+  }
+
   async removeMedia(server_id: string, id: number) {
-    const server = await this.serversRepository.findOneBy({ id: server_id });
-    const kit = await this.findOne(id);
+    const { kit, server, row } = await this.overrideOf(server_id, id);
 
-    if (!kit || !server) {
-      throw new NotFoundException();
-    }
+    if (row.image) StorageManager.remove(row.image);
 
-    var gkImage = kit.images.find((img) => img.server.id == server.id);
+    row.image = null;
 
-    if (gkImage) {
-      kit.images = kit.images.filter((img) => img.server.id != server.id);
-    }
+    return this.save(kit, server, row.description ? row : null);
+  }
 
-    return this.groupKitsRepository.save(kit);
+  async updateDescription(server_id: string, id: number, description: string) {
+    const { kit, server, row } = await this.overrideOf(server_id, id);
+
+    row.description = description?.trim() || null;
+
+    return this.save(kit, server, row.description || row.image ? row : null);
   }
 }

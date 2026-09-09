@@ -118,14 +118,14 @@
       <div class="description-html" v-if="permission.permission.description" v-html="$sanitize(permission.permission.description)" />
       <div v-if="permission.permission.type == 'kit'" class="text-center mb-2">
         <div v-for="kit in permission.permission.kits" :key="kit.id">
-          <div v-if="kit.images.find((img) => img.server.id == permission.server.id)">
+          <div v-if="kitImage(kit, permission.server.id) || kitDescription(kit, permission.server.id)">
             <h4 v-if="permission.permission.kits.length > 1" class="m-0" v-text="kit.name" />
-            <div class="description-html" v-if="kit.description" v-html="$sanitize(kit.description)" />
-            <img
-              class="mt-2"
-              width="250px"
-              :src="`${$pub.apiBaseurl}/${kit.images.find((img) => img.server.id == permission.server.id).image}`"
+            <div
+              class="description-html"
+              v-if="kitDescription(kit, permission.server.id)"
+              v-html="$sanitize(kitDescription(kit, permission.server.id))"
             />
+            <img v-if="kitImage(kit, permission.server.id)" class="mt-2" width="250px" :src="kitImage(kit, permission.server.id)" />
           </div>
         </div>
       </div>
@@ -328,7 +328,7 @@
 
 definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'cabinet.tab_donate' })
 
-const { $auth, $unicore, $t } = useNuxtApp()
+const { $auth, $unicore, $t, $pub } = useNuxtApp()
 
 const donateApi = useDonate()
 const serversApi = useServers()
@@ -372,6 +372,16 @@ const regift = ref(null)
 const loading = ref(false)
 
 const serverOptions = computed(() => servers.value.map((server) => ({ label: server.name, value: server.id })))
+
+const kitOverride = (kit, serverId) => (kit.servers || []).find((item) => item.server.id == serverId)
+
+const kitImage = (kit, serverId) => {
+  const image = kitOverride(kit, serverId)?.image
+
+  return image ? `${$pub.apiBaseurl}/${image}` : null
+}
+
+const kitDescription = (kit, serverId) => kitOverride(kit, serverId)?.description || kit.description
 const giftsAvailable = computed(() => giftsApi.codeEnabled.value || giftsApi.directEnabled.value)
 const giftGroupPayload = computed(() => ({
   type: 'donate',

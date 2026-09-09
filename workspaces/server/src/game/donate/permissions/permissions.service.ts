@@ -266,8 +266,8 @@ export class DonatePermissionsService {
         .leftJoinAndSelect('perm.periods', 'periods')
         .leftJoinAndSelect('perm.servers', 'servers')
         .leftJoinAndSelect('perm.kits', 'kits')
-        .leftJoinAndSelect('kits.images', 'images')
-        .leftJoinAndSelect('images.server', 'server')
+        .leftJoinAndSelect('kits.servers', 'kit_servers')
+        .leftJoinAndSelect('kit_servers.server', 'kit_server')
         .where('perm.hidden = :hidden', { hidden: false })
         .orderBy({ 'perm.priority': 'ASC', 'perm.id': 'ASC' })
         .getMany()
@@ -280,16 +280,15 @@ export class DonatePermissionsService {
           Object.assign(perms, {
             periods: _.orderBy(perms.periods, ['multiplier'], ['asc']),
             kits: _(
-              perms.kits.map((kit) =>
-                Object.assign(kit, {
+              perms.kits.map((kit) => {
+                const own = kit.servers.find((item) => item.server.id == id);
+
+                return Object.assign(kit, {
                   priority: kit.priority ? kit.priority : 0,
-                  images: _(
-                    kit.images.map((image) => Object.assign(image, { priority: image.server.priority ? image.server.priority : 0 })),
-                  )
-                    .orderBy(['server.priority', 'id'], ['asc', 'asc'])
-                    .value(),
-                }),
-              ),
+                  description: own?.description || kit.description,
+                  images: own?.image ? [own] : [],
+                });
+              }),
             )
               .orderBy(['priority', 'id'], ['asc', 'asc'])
               .value(),
@@ -307,8 +306,8 @@ export class DonatePermissionsService {
         .leftJoinAndSelect('perm.periods', 'periods')
         .leftJoinAndSelect('perm.servers', 'servers')
         .leftJoinAndSelect('perm.kits', 'kits')
-        .leftJoinAndSelect('kits.images', 'images')
-        .leftJoinAndSelect('images.server', 'server')
+        .leftJoinAndSelect('kits.servers', 'kit_servers')
+        .leftJoinAndSelect('kit_servers.server', 'kit_server')
         .where({ type: Not(PermissionType.Web) })
         .orderBy({ 'perm.priority': 'ASC', 'perm.id': 'ASC' })
         .getMany()

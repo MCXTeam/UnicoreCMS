@@ -60,27 +60,40 @@
           </Column>
         </DataTable>
 
-        <Dialog v-model:visible="fileDialog" :style="{ width: '600px' }" :modal="true" :header="$t('admin.kit_images')" class="p-fluid">
-          <div v-for="server in servers" :key="server.id" class="grid mb-4 pt-2">
-            <div class="col-12 md:col-6">
-              <h4 v-text="server.name" />
-              <Avatar v-if="!kit.images.find((img) => img.server.id == server.id)" icon="pi pi-image" size="xlarge" />
-              <Image v-else width="200" :src="`${apiUrl + '/' + kit.images.find((img) => img.server.id == server.id).image}`" preview />
-            </div>
-            <div class="col-12 md:col-6">
-              <div class="field mb-0 mt-2">
-                <Button :label="$t('admin.upload')" icon="pi pi-upload" @click="preUpdateImage(server.id)" />
-                <Button :label="$t('admin.delete')" icon="pi pi-trash" class="p-button-secondary mt-2" @click="removeImage(server.id)" />
-                <FileUpload
-                  :ref="'imageInput-' + server.id"
-                  :pt="{ root: { class: 'hidden' } }"
-                  mode="basic"
-                  name="file"
-                  accept="image/*"
-                  :auto="true"
-                  :customUpload="true"
-                  @uploader="uploadImage"
-                />
+        <Dialog v-model:visible="fileDialog" :style="{ width: '700px' }" :modal="true" :header="$t('admin.kit_servers')" class="p-fluid">
+          <p class="mt-0 text-color-secondary">{{ $t('admin.kit_servers_hint') }}</p>
+          <div v-for="server in servers" :key="server.id" class="kit-server">
+            <h4 class="mt-0 mb-3" v-text="server.name" />
+            <div class="grid">
+              <div class="col-12 md:col-5">
+                <Avatar v-if="!serverImage(server.id)" icon="pi pi-image" size="xlarge" />
+                <Image v-else width="200" :src="`${apiUrl}/${serverImage(server.id)}`" preview />
+                <div class="field mb-0 mt-3">
+                  <Button :label="$t('admin.upload')" icon="pi pi-upload" @click="preUpdateImage(server.id)" />
+                  <Button :label="$t('admin.delete')" icon="pi pi-trash" class="p-button-secondary mt-2" @click="removeImage(server.id)" />
+                  <FileUpload
+                    :ref="'imageInput-' + server.id"
+                    :pt="{ root: { class: 'hidden' } }"
+                    mode="basic"
+                    name="file"
+                    accept="image/*"
+                    :auto="true"
+                    :customUpload="true"
+                    @uploader="uploadImage"
+                  />
+                </div>
+              </div>
+              <div class="col-12 md:col-7">
+                <div class="field mb-0">
+                  <label>{{ $t('admin.kit_server_description') }}</label>
+                  <Textarea
+                    :modelValue="serverDescriptions[server.id]"
+                    rows="5"
+                    :placeholder="$t('admin.kit_server_description_placeholder')"
+                    @update:modelValue="(value) => (serverDescriptions[server.id] = value)"
+                    @change="saveDescription(server.id)"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -194,8 +207,9 @@ export default {
         id: null,
         name: null,
         description: null,
-        images: [],
+        servers: [],
       },
+      serverDescriptions: {},
       servers: null,
       kitDialog: false,
     }
@@ -266,8 +280,30 @@ export default {
         await this.load()
       } catch {}
     },
+    serverImage(id) {
+      return (this.kit.servers || []).find((item) => item.server.id == id)?.image || null
+    },
+    async saveDescription(id) {
+      const description = this.serverDescriptions[id] || ''
+
+      try {
+        await this.$api.patch(`/donates/group-kits/description/${id}/${this.kit.id}`, { description })
+      } catch {
+        return this.$utils.notifyError(null, this.$t('admin.invalid_data'))
+      }
+
+      const image = this.serverImage(id)
+      const server = this.servers.find((item) => item.id == id)
+      const rest = (this.kit.servers || []).filter((item) => item.server.id != id)
+
+      this.kit.servers = description || image ? [...rest, { server, image, description: description || null }] : rest
+      this.kits = (this.kits || []).map((item) => (item.id == this.kit.id ? { ...item, servers: this.kit.servers } : item))
+    },
     async openFileDialog(kit) {
       this.kit = this.$_.pick(kit, this.$_.deepKeys(this.kit))
+      this.serverDescriptions = Object.fromEntries(
+        (this.kit.servers || []).filter((item) => item.description).map((item) => [item.server.id, item.description]),
+      )
       this.fileDialog = true
     },
     async openDialog(kit = null) {
@@ -279,7 +315,7 @@ export default {
           id: null,
           name: null,
           description: null,
-          images: [],
+          servers: [],
         }
       }
       this.translations.attach(this.kit)
@@ -374,3 +410,16 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.kit-server {
+  padding-bottom: 18px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--p-content-border-color);
+}
+.kit-server:last-child {
+  padding-bottom: 0;
+  margin-bottom: 0;
+  border-bottom: none;
+}
+</style>

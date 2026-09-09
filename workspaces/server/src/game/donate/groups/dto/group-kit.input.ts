@@ -11,3 +11,10 @@ export class GroupKitInput {
   @SanitizeHtml()
   description: string;
 }
+
+export class GroupKitDescriptionInput {
+  @IsOptional()
+  @IsString()
+  @SanitizeHtml()
+  description?: string;
+}

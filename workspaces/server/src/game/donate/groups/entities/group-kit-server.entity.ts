@@ -3,8 +3,8 @@ import { Server } from 'src/game/servers/entities/server.entity';
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { GroupKit } from './group-kit.entity';
 
-@Entity({ name: 'unicore_group_kit_images' })
-export class GroupKitImage {
+@Entity({ name: 'unicore_group_kit_servers' })
+export class GroupKitServer {
   @PrimaryColumn({ name: 'kit_id' })
   kitId: number;
 
@@ -31,10 +31,13 @@ export class GroupKitImage {
   @JoinColumn({ name: 'server_id' })
   server: Server;
 
-  @Column({ name: 'image' })
-  image: string;
+  @Column({ name: 'image', nullable: true })
+  image?: string;
+
+  @Column('text', { name: 'description', nullable: true })
+  description?: string;
 
   removeFile() {
-    StorageManager.remove(this.image);
+    if (this.image) StorageManager.remove(this.image);
   }
 }
