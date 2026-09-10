@@ -19,8 +19,7 @@ export enum EmailMessageType {
    */
   Gift = 'gift',
 
-  /**
-   * Подтверждение новой почты
-   */
   EmailChange = 'email_change',
+
+  EmailChanged = 'email_changed',
 }

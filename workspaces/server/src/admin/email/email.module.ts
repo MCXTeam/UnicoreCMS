@@ -52,6 +52,11 @@ export class EmailModule implements OnModuleInit {
           title: 'Подтверждение новой почты',
           content: `<h1>Привет, {USERNAME}!</h1><p><br></p><p>Этот адрес указан как новая почта аккаунта на {SITENAME}.</p><p>Код подтверждения:</p><h2>{CODE}</h2><p><br></p><p>Если вы этого не делали, просто не вводите код — почта останется прежней.</p>`,
         },
+        {
+          id: EmailMessageType.EmailChanged,
+          title: 'Почта аккаунта изменена',
+          content: `<h1>Привет, {USERNAME}!</h1><p><br></p><p>Почта аккаунта на {SITENAME} изменена на {EMAIL}.</p><p>Если это были не вы, срочно свяжитесь с администрацией: доступ к аккаунту нужно вернуть.</p>`,
+        },
       ])
       .orIgnore()
       .execute();

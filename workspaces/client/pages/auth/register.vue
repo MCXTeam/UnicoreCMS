@@ -116,7 +116,6 @@
 <script setup lang="ts">
 import { Form, Field } from 'vee-validate'
 import { useReCaptcha } from 'vue-recaptcha-v3'
-import { generatePassword } from 'unicore-common/password'
 
 definePageMeta({ layout: 'auth', middleware: 'guest' })
 
@@ -142,23 +141,10 @@ const rules = reactive({
 
 const rulesAccepted = (value: unknown) => value === true || $t('auth.rules_required')
 
-const passwordField = ref<any>(null)
-const passwordConfirmField = ref<any>(null)
-
-function unmask(field: any) {
-  if (field && !field.unmasked) field.onMaskToggle()
-}
-
-function fillGeneratedPassword(handleChange: (value: string) => void) {
-  const password = generatePassword()
-
+const { passwordField, passwordConfirmField, fill: fillGeneratedPassword } = usePasswordGenerator((password) => {
   form.password = password
   form.password_confirm = password
-
-  handleChange(password)
-  unmask(passwordField.value)
-  unmask(passwordConfirmField.value)
-}
+})
 
 onMounted(async () => {
   const page = await pagesApi.rules()

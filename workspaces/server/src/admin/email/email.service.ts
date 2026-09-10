@@ -2,6 +2,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { BadRequestException, ConflictException, Inject, Injectable, Logger, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MoreThan, Repository } from 'typeorm';
+import { Transactional } from 'typeorm-transactional';
 import { envConfig } from 'unicore-common';
 import { events } from 'unicore-api';
 import { User } from '../users/entities/user.entity';
@@ -17,7 +18,12 @@ import {
   EMAIL_ACTIVATION_RESEND_MAX,
   EMAIL_ACTIVATION_RESEND_WINDOW_MINUTES,
   EMAIL_ACTIVATION_TTL_MINUTES,
+  EMAIL_CHANGE_SAME,
+  EMAIL_CHANGE_TAKEN,
+  EMAIL_CHANGE_WRONG_PASSWORD,
   EMAIL_CODE_ALPHABET,
+  EMAIL_CODE_EXPIRED,
+  EMAIL_CODE_INVALID,
   EMAIL_CODE_LENGTH,
   MomentWrapper,
   PASSWORD_RESET_HASH_LENGTH,
@@ -40,6 +46,11 @@ import { PasswordService } from 'src/auth/password/password.service';
 import { PasswordPolicyService } from 'src/auth/password/password-policy.service';
 import { passwordAad } from 'src/auth/password/password-aad';
 import { ContentTranslationsService } from '../locales/content-translations.service';
+
+export interface EmailChangeRequest {
+  email: string;
+  password: string;
+}
 
 @Injectable()
 export class EmailService {
@@ -102,14 +113,7 @@ export class EmailService {
   }
 
   async sendActivation(user: User) {
-    if (
-      (await this.emailActivationsRepository.countBy({
-        created: MoreThan(this.moment().utc().subtract(EMAIL_ACTIVATION_RESEND_WINDOW_MINUTES, 'minutes').toDate()),
-        user: { uuid: user.uuid },
-      })) >= EMAIL_ACTIVATION_RESEND_MAX
-    ) {
-      throw new TooManyAttemptsException(EMAIL_ACTIVATION_RESEND_WINDOW_MINUTES * 60);
-    }
+    await this.assertResendAllowed(this.emailActivationsRepository, user);
 
     const { content, title } = await this.contentTranslations.localize(
       'email_message',
@@ -133,30 +137,47 @@ export class EmailService {
     });
   }
 
-  async checkCode(user: User, input: VerifyInput): Promise<UserDto> {
-    const activation = await this.emailActivationsRepository.findOne({
+  private async takeCode<T extends { code: string; attempts: number }>(
+    repository: Repository<T>,
+    user: User,
+    code: string,
+  ): Promise<T> {
+    const pending = await repository.findOne({
       where: {
         user: { uuid: user.uuid },
         created: MoreThan(this.moment().utc().subtract(EMAIL_ACTIVATION_TTL_MINUTES, 'minutes').toDate()),
-      },
-      order: { created: 'DESC' },
+      } as any,
+      order: { created: 'DESC' } as any,
     });
 
-    if (!activation) {
-      throw new NotFoundException();
+    if (!pending) throw new NotFoundException(EMAIL_CODE_EXPIRED);
+
+    if (safeEqual(pending.code, code)) return pending;
+
+    pending.attempts += 1;
+
+    if (pending.attempts < EMAIL_ACTIVATION_MAX_ATTEMPTS) {
+      await repository.save(pending as any);
+
+      throw new NotFoundException(EMAIL_CODE_INVALID);
     }
 
-    if (!safeEqual(activation.code, input.code)) {
-      activation.attempts += 1;
+    await repository.delete({ user: { uuid: user.uuid } } as any);
 
-      if (activation.attempts >= EMAIL_ACTIVATION_MAX_ATTEMPTS) {
-        await this.emailActivationsRepository.delete({ user: { uuid: user.uuid } });
-      } else {
-        await this.emailActivationsRepository.save(activation);
-      }
+    throw new NotFoundException(EMAIL_CODE_EXPIRED);
+  }
 
-      throw new NotFoundException();
-    }
+  private async assertResendAllowed<T>(repository: Repository<T>, user: User): Promise<void> {
+    const recent = await repository.countBy({
+      created: MoreThan(this.moment().utc().subtract(EMAIL_ACTIVATION_RESEND_WINDOW_MINUTES, 'minutes').toDate()),
+      user: { uuid: user.uuid },
+    } as any);
+
+    if (recent >= EMAIL_ACTIVATION_RESEND_MAX) throw new TooManyAttemptsException(EMAIL_ACTIVATION_RESEND_WINDOW_MINUTES * 60);
+  }
+
+  async checkCode(user: User, input: VerifyInput): Promise<UserDto> {
+    await this.takeCode(this.emailActivationsRepository, user, input.code);
 
     await this.emailActivationsRepository.delete({ user: { uuid: user.uuid } });
 
@@ -166,20 +187,28 @@ export class EmailService {
     return new UserDto(user);
   }
 
-  async sendEmailChange(user: User, email: string): Promise<void> {
-    const address = email.trim().toLowerCase();
+  private async assertOwner(user: User, password: string): Promise<void> {
+    const { valid } = await this.passwordService.verify(password, user.password, passwordAad(user.uuid));
 
-    if (user.email && user.email.toLowerCase() === address) throw new BadRequestException('email_same');
-    if (await this.usersRepository.findOneBy({ email: address })) throw new ConflictException('email_taken');
+    if (!valid) throw new BadRequestException(EMAIL_CHANGE_WRONG_PASSWORD);
+  }
 
-    if (
-      (await this.emailChangesRepository.countBy({
-        created: MoreThan(this.moment().utc().subtract(EMAIL_ACTIVATION_RESEND_WINDOW_MINUTES, 'minutes').toDate()),
-        user: { uuid: user.uuid },
-      })) >= EMAIL_ACTIVATION_RESEND_MAX
-    ) {
-      throw new TooManyAttemptsException(EMAIL_ACTIVATION_RESEND_WINDOW_MINUTES * 60);
-    }
+  private takenBy(email: string): Promise<User> {
+    return this.usersRepository
+      .createQueryBuilder('user')
+      .where('LOWER(user.email) = LOWER(:email)', { email })
+      .getOne();
+  }
+
+  async sendEmailChange(user: User, input: EmailChangeRequest): Promise<void> {
+    const address = input.email.trim();
+
+    await this.assertOwner(user, input.password);
+
+    if (user.email && user.email.toLowerCase() === address.toLowerCase()) throw new BadRequestException(EMAIL_CHANGE_SAME);
+    if (await this.takenBy(address)) throw new ConflictException(EMAIL_CHANGE_TAKEN);
+
+    await this.assertResendAllowed(this.emailChangesRepository, user);
 
     const { content, title } = await this.contentTranslations.localize(
       'email_message',
@@ -195,6 +224,7 @@ export class EmailService {
     change.email = address;
     change.code = code;
 
+    await this.emailChangesRepository.delete({ user: { uuid: user.uuid } });
     await this.emailChangesRepository.save(change);
 
     const html = renderEmailTemplate(content, { USERNAME: user.username, SITENAME: envConfig.sitename, CODE: code });
@@ -204,41 +234,50 @@ export class EmailService {
     });
   }
 
+  @Transactional()
   async confirmEmailChange(user: User, input: VerifyInput): Promise<UserDto> {
-    const change = await this.emailChangesRepository.findOne({
-      where: {
-        user: { uuid: user.uuid },
-        created: MoreThan(this.moment().utc().subtract(EMAIL_ACTIVATION_TTL_MINUTES, 'minutes').toDate()),
-      },
-      order: { created: 'DESC' },
-    });
+    const change = await this.takeCode(this.emailChangesRepository, user, input.code);
+    const previous = user.email;
 
-    if (!change) throw new NotFoundException();
-
-    if (!safeEqual(change.code, input.code)) {
-      change.attempts += 1;
-
-      if (change.attempts >= EMAIL_ACTIVATION_MAX_ATTEMPTS) await this.emailChangesRepository.delete({ user: { uuid: user.uuid } });
-      else await this.emailChangesRepository.save(change);
-
-      throw new NotFoundException();
-    }
-
-    if (await this.usersRepository.findOneBy({ email: change.email })) {
+    if (await this.takenBy(change.email)) {
       await this.emailChangesRepository.delete({ user: { uuid: user.uuid } });
 
-      throw new ConflictException('email_taken');
+      throw new ConflictException(EMAIL_CHANGE_TAKEN);
     }
 
+    await this.usersRepository.update({ uuid: user.uuid }, { email: change.email, activated: true });
     await this.emailChangesRepository.delete({ user: { uuid: user.uuid } });
     await this.emailActivationsRepository.delete({ user: { uuid: user.uuid } });
 
     user.email = change.email;
     user.activated = true;
 
-    await this.usersRepository.update({ uuid: user.uuid }, { email: change.email, activated: true });
+    await this.noticeEmailChanged(user, previous);
 
     return new UserDto(user);
+  }
+
+  private async noticeEmailChanged(user: User, previous: string | null): Promise<void> {
+    if (!previous) return;
+
+    try {
+      const { content, title } = await this.contentTranslations.localize(
+        'email_message',
+        EmailMessageType.EmailChanged,
+        user.locale,
+        await this.emailMessagesRepository.findOneBy({ id: EmailMessageType.EmailChanged }),
+      );
+
+      const html = renderEmailTemplate(content, {
+        USERNAME: user.username,
+        SITENAME: envConfig.sitename,
+        EMAIL: user.email,
+      });
+
+      await this.mailerService.sendMail({ to: previous, subject: title, html });
+    } catch (e) {
+      this.logger.error(String(e));
+    }
   }
 
   async sendGift(recipient: User, sender: string, gift: string) {

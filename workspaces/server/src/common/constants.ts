@@ -77,7 +77,7 @@ export const RCON_BATCH_LIMIT = 200;
 export const RCON_STALE_MS = 5 * 60_000;
 export const RCON_TEST_TIMEOUT_MS = 5000;
 
-export const EMAIL_CODE_LENGTH = 6;
+export { EMAIL_CODE_LENGTH, EMAIL_CODE_EXPIRED } from 'unicore-common';
 export const EMAIL_CODE_ALPHABET = '0123456789';
 export const EMAIL_ACTIVATION_TTL_MINUTES = 60;
 export const EMAIL_ACTIVATION_MAX_ATTEMPTS = 5;
@@ -109,6 +109,11 @@ export const RECAPTCHA_TIMEOUT_MS = 5000;
 export const RECAPTCHA_KEY = 'recaptcha';
 export const RECAPTCHA_HEADER = 'recaptcha';
 export const RECAPTCHA_FAILED = 'error.recaptcha';
+
+export const EMAIL_CODE_INVALID = 'error.email_code_invalid';
+export const EMAIL_CHANGE_SAME = 'error.email_same';
+export const EMAIL_CHANGE_TAKEN = 'error.email_taken';
+export const EMAIL_CHANGE_WRONG_PASSWORD = 'error.email_password';
 
 export const COOKIE_PAIR_SEPARATOR = ';';
 export const COOKIE_VALUE_SEPARATOR = '=';

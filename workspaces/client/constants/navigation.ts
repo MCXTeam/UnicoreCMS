@@ -56,7 +56,7 @@ export const CORE_NAVIGATION: NavItem[] = [
     to: '/cabinet/settings',
     label: 'cabinet.tab_settings',
     icon: 'bx bx-edit-alt',
-    permissions: ['player.password.change', 'player.twofactor.on', 'player.twofactor.off'],
+    permissions: ['player.password.change', 'player.email.change', 'player.twofactor.on', 'player.twofactor.off'],
     places: ['cabinet.tabs'],
     order: 40,
   },

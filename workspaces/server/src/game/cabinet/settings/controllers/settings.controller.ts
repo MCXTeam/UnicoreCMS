@@ -30,9 +30,10 @@ export class SettingsController {
   @Permissions(['player.email.change'])
   @UseGuards(ThrottlerCoreGuard)
   @Throttle(THROTTLE_RESEND)
+  @Audit({ action: 'auth.email.request', meta: ['email'] })
   @Post('email')
   requestEmail(@CurrentUser() user: User, @Body() body: EmailChangeInput) {
-    return this.emailService.sendEmailChange(user, body.email);
+    return this.emailService.sendEmailChange(user, body);
   }
 
   @Permissions(['player.email.change'])

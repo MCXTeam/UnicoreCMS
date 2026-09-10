@@ -73,6 +73,8 @@ export default defineNuxtPlugin((nuxtApp) => {
       notify('success', t('common.success'), text)
     },
     errorNotification(text: string, error?: any) {
+      if (error?.response?.status === 429) return notify('error', t('error.title'), t('error.too_many_requests'))
+
       notify('error', t('error.title'), serverText(error) ?? text)
     },
     switchTheme() {
