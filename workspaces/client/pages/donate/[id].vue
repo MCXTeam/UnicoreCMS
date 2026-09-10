@@ -54,9 +54,9 @@
         >
           <div class="col-12">
             <div
-              v-if="kitDescription(kit_active.payload, route.params.id)"
+              v-if="kitDescription(kit_active.payload, serverId)"
               class="description-html"
-              v-html="$sanitize(kitDescription(kit_active.payload, route.params.id))"
+              v-html="$sanitize(kitDescription(kit_active.payload, serverId))"
             />
           </div>
           <div v-for="(img, i) in kit_active.payload.images" :key="i" class="col-xl-4 mb-3">
@@ -96,6 +96,8 @@ const kit_pinned = ref(false)
 let kitHideTimer: ReturnType<typeof setTimeout> | null = null
 
 const { description: kitDescription } = useKitContent()
+
+const serverId = computed(() => String(route.params.id))
 
 function findKit(donate_id: any, kit_id: any) {
   return donates.value.find((d: any) => d.id == donate_id)?.kits.find((k: any) => k.id == kit_id)
