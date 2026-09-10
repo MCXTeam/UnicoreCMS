@@ -34,13 +34,29 @@ export const readState = (): ModulesState => {
   }
 };
 
+let cache: DiscoveryResult | null = null;
+
+export const forgetDiscovery = (): void => {
+  cache = null;
+};
+
 export const writeState = (state: ModulesState): void => {
+  forgetDiscovery();
+
   if (!existsSync(modulesPath)) return;
 
   writeFileSync(STATE_FILE(), `${JSON.stringify(state, null, 2)}\n`, 'utf-8');
 };
 
 export const discover = (): DiscoveryResult => {
+  if (cache) return cache;
+
+  cache = scan();
+
+  return cache;
+};
+
+const scan = (): DiscoveryResult => {
   const modules: DiscoveredModule[] = [];
   const broken: { id: string; reason: string }[] = [];
 

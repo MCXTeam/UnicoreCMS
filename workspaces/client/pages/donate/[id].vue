@@ -53,7 +53,11 @@
           @mouseleave="viewKitDestroy()"
         >
           <div class="col-12">
-            <p v-if="kitDescription(kit_active.payload)" class="description-html" v-text="kitDescription(kit_active.payload)" />
+            <div
+              v-if="kitDescription(kit_active.payload, route.params.id)"
+              class="description-html"
+              v-html="$sanitize(kitDescription(kit_active.payload, route.params.id))"
+            />
           </div>
           <div v-for="(img, i) in kit_active.payload.images" :key="i" class="col-xl-4 mb-3">
             <div class="kit-image">
@@ -91,7 +95,7 @@ const kit_active = ref<{ payload: any; donate_id: any }>({ payload: null, donate
 const kit_pinned = ref(false)
 let kitHideTimer: ReturnType<typeof setTimeout> | null = null
 
-const kitDescription = (kit: any) => kit?.servers?.[0]?.description || kit?.description
+const { description: kitDescription } = useKitContent()
 
 function findKit(donate_id: any, kit_id: any) {
   return donates.value.find((d: any) => d.id == donate_id)?.kits.find((k: any) => k.id == kit_id)

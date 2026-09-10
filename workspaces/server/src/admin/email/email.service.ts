@@ -147,24 +147,19 @@ export class EmailService {
         user: { uuid: user.uuid },
         created: MoreThan(this.moment().utc().subtract(EMAIL_ACTIVATION_TTL_MINUTES, 'minutes').toDate()),
       } as any,
-      order: { created: 'DESC' } as any,
+      order: { created: 'DESC', id: 'DESC' } as any,
     });
 
     if (!pending) throw new NotFoundException(EMAIL_CODE_EXPIRED);
+    if (pending.attempts >= EMAIL_ACTIVATION_MAX_ATTEMPTS) throw new NotFoundException(EMAIL_CODE_EXPIRED);
 
     if (safeEqual(pending.code, code)) return pending;
 
     pending.attempts += 1;
 
-    if (pending.attempts < EMAIL_ACTIVATION_MAX_ATTEMPTS) {
-      await repository.save(pending as any);
+    await repository.save(pending as any);
 
-      throw new NotFoundException(EMAIL_CODE_INVALID);
-    }
-
-    await repository.delete({ user: { uuid: user.uuid } } as any);
-
-    throw new NotFoundException(EMAIL_CODE_EXPIRED);
+    throw new NotFoundException(pending.attempts >= EMAIL_ACTIVATION_MAX_ATTEMPTS ? EMAIL_CODE_EXPIRED : EMAIL_CODE_INVALID);
   }
 
   private async assertResendAllowed<T>(repository: Repository<T>, user: User): Promise<void> {

@@ -61,7 +61,14 @@
 </template>
 
 <script setup lang="ts">
-import { layoutText, type LayoutDefinition, type LayoutLink, type LayoutPlace, type LayoutText } from 'unicore-common/layout'
+import {
+  LAYOUT_PLACEHOLDER_PATTERN,
+  layoutText,
+  type LayoutDefinition,
+  type LayoutLink,
+  type LayoutPlace,
+  type LayoutText,
+} from 'unicore-common/layout'
 
 const props = defineProps<{ definition: LayoutDefinition; place: LayoutPlace; active?: string }>()
 
@@ -85,7 +92,10 @@ const label = (link: LayoutLink) => (link.labelKey ? messages.value[link.labelKe
 
 const html = computed(() =>
   substitute(
-    (props.definition.html || '').replace(/\{\{\s*([a-z]+)\s*\}\}/g, (_, name: string) => `<span class="lp__slot">{{ ${name} }}</span>`),
+    (props.definition.html || '').replace(
+      new RegExp(LAYOUT_PLACEHOLDER_PATTERN.source, 'g'),
+      (whole: string, name: string) => (name === 'sitename' || name === 'year' ? whole : `<span class="lp__slot">{{ ${name} }}</span>`),
+    ),
   ),
 )
 </script>

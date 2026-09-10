@@ -77,6 +77,11 @@
       "import": "./dist/password.mjs",
       "require": "./dist/password.js"
     },
+    "./email": {
+      "types": "./dist/email.d.ts",
+      "import": "./dist/email.mjs",
+      "require": "./dist/email.js"
+    },
     "./payments": {
       "types": "./dist/payments.d.ts",
       "import": "./dist/payments.mjs",

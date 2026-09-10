@@ -3,8 +3,6 @@
     <template v-if="definition.mode === 'html'">
       <template v-for="(part, index) in parts" :key="index">
         <div v-if="part.kind === 'html'" class="layout-html" v-html="$sanitize(part.value)" />
-        <span v-else-if="part.name === 'sitename'">{{ $pub.sitename }}</span>
-        <span v-else-if="part.name === 'year'">{{ new Date().getFullYear() }}</span>
         <LayoutBlock v-else :block="slotBlock(part.name)" :place="place" />
       </template>
     </template>
@@ -24,9 +22,12 @@ import {
   type LayoutDefinition,
   type LayoutPlace,
 } from 'unicore-common/layout'
+import { escapeHtml } from 'unicore-common/sanitize'
 import { DEFAULT_LAYOUT } from 'unicore-common/layout-presets'
 
 const props = defineProps<{ place: LayoutPlace; layout?: LayoutDefinition | null }>()
+
+const { $pub } = useNuxtApp() as any
 
 const store = useLayoutStore()
 
@@ -34,21 +35,31 @@ const definition = computed(() => props.layout || store.place(props.place))
 
 type Part = { kind: 'html'; value: string } | { kind: 'slot'; name: string }
 
+const source = computed(() => {
+  const values: Record<string, string> = {
+    sitename: String($pub.sitename || ''),
+    year: String(new Date().getFullYear()),
+  }
+
+  return (definition.value.html || '').replace(new RegExp(LAYOUT_PLACEHOLDER_PATTERN.source, 'g'), (whole, name: string) =>
+    name in values ? escapeHtml(values[name]) : whole,
+  )
+})
+
 const parts = computed<Part[]>(() => {
-  const source = definition.value.html || ''
   const pattern = new RegExp(LAYOUT_PLACEHOLDER_PATTERN.source, 'g')
   const result: Part[] = []
   let last = 0
   let match: RegExpExecArray | null
 
-  while ((match = pattern.exec(source))) {
-    if (match.index > last) result.push({ kind: 'html', value: source.slice(last, match.index) })
+  while ((match = pattern.exec(source.value))) {
+    if (match.index > last) result.push({ kind: 'html', value: source.value.slice(last, match.index) })
 
     result.push({ kind: 'slot', name: match[1] })
     last = match.index + match[0].length
   }
 
-  if (last < source.length) result.push({ kind: 'html', value: source.slice(last) })
+  if (last < source.value.length) result.push({ kind: 'html', value: source.value.slice(last) })
 
   return result
 })
@@ -68,18 +79,31 @@ function slotBlock(name: string): Block {
 </script>
 
 <style scoped>
-.layout-render--html {
+.layout-render--header.layout-render--html {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 16px;
   min-width: 0;
 }
-.layout-row {
+.layout-row,
+.layout-render--html :deep(.layout-row) {
   display: flex;
   align-items: center;
   gap: 16px;
   min-width: 0;
+}
+.layout-render--html :deep(.layout-row--start) {
+  justify-content: flex-start;
+}
+.layout-render--html :deep(.layout-row--center) {
+  justify-content: center;
+}
+.layout-render--html :deep(.layout-row--end) {
+  justify-content: flex-end;
+}
+.layout-render--html :deep(.layout-row--between) {
+  justify-content: space-between;
 }
 .layout-row--start {
   justify-content: flex-start;

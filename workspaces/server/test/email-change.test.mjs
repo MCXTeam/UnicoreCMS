@@ -123,7 +123,24 @@ describe('Смена почты в кабинете', () => {
       attempts.push(rows[0]?.attempts ?? null);
     }
 
-    assert.deepEqual(attempts.slice(0, 4), [1, 2, 3, 4], `счётчик попыток не растёт: ${attempts.join(', ')}`);
-    assert.equal(attempts[4], null, 'заявка не сгорела после пяти неверных попыток');
+    assert.deepEqual(attempts, [1, 2, 3, 4, 5], `счётчик попыток не растёт: ${attempts.join(', ')}`);
+
+    const code = await pendingCode(username);
+    const { status } = await session.post('/cabinet/settings/email/confirm', { code });
+
+    assert.equal(status, 404, 'верный код принят после исчерпания попыток');
+  });
+
+  it('сгоревшая заявка не обнуляет лимит отправок', async () => {
+    const { username, session } = await createUser({});
+
+    for (let index = 0; index < 3; index++)
+      await session.post('/cabinet/settings/email', { email: `${username}-${index}@example.com`, password: PASSWORD });
+
+    for (let index = 0; index < 5; index++) await session.post('/cabinet/settings/email/confirm', { code: '000000' });
+
+    const { status } = await session.post('/cabinet/settings/email', { email: `${username}-more@example.com`, password: PASSWORD });
+
+    assert.equal(status, 429, `после сгорания кода лимит отправок обнулился: ${status}`);
   });
 });

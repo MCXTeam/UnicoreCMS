@@ -241,7 +241,7 @@
 <script setup>
 import QRCode from 'qrcode-with-logos'
 import { Form, Field } from 'vee-validate'
-import { EMAIL_CODE_EXPIRED, EMAIL_CODE_LENGTH } from 'unicore-common'
+import { EMAIL_CODE_EXPIRED, EMAIL_CODE_LENGTH } from 'unicore-common/email'
 import { serverMessage } from 'unicore-common/messages'
 
 definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'cabinet.tab_settings', hint: 'cabinet.settings_hint' })
@@ -337,7 +337,7 @@ async function confirmEmail() {
   } catch (err) {
     if (serverMessage(err) === EMAIL_CODE_EXPIRED) resetEmailForm()
 
-    $unicore.errorNotification($t(err?.response?.status === 404 ? 'auth.code_invalid' : 'cabinet.email_request_failed'), err)
+    $unicore.errorNotification($t('common.unknown_error'), err)
   }
   loading.close()
 }

@@ -9,7 +9,6 @@ export * from "./content-translations";
 export * from "./webhooks";
 export * from "./audit";
 export * from "./password";
-export * from "./email";
 export * from "./payments";
 export * from "./locales";
 export * from "./news";

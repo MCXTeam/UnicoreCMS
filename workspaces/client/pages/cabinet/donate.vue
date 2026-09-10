@@ -373,15 +373,7 @@ const loading = ref(false)
 
 const serverOptions = computed(() => servers.value.map((server) => ({ label: server.name, value: server.id })))
 
-const kitOverride = (kit, serverId) => (kit.servers || []).find((item) => item.server.id == serverId)
-
-const kitImage = (kit, serverId) => {
-  const image = kitOverride(kit, serverId)?.image
-
-  return image ? `${$pub.apiBaseurl}/${image}` : null
-}
-
-const kitDescription = (kit, serverId) => kitOverride(kit, serverId)?.description || kit.description
+const { description: kitDescription, image: kitImage } = useKitContent()
 const giftsAvailable = computed(() => giftsApi.codeEnabled.value || giftsApi.directEnabled.value)
 const giftGroupPayload = computed(() => ({
   type: 'donate',

@@ -96,6 +96,10 @@ export class ContentTranslationsService {
 
       if (!objects) continue;
 
+      const meta = translatableByEntity(row.entity);
+
+      if (meta && !isAllowedPath(meta, row.path)) continue;
+
       for (const object of objects) setPath(object, row.path, row.value);
     }
   }

@@ -302,6 +302,7 @@ import {
   LAYOUT_BLOCK_TYPES,
   LAYOUT_SCREENS,
   LAYOUT_VISIBILITY,
+  layoutText,
   type LayoutBlock,
   type LayoutBlockType,
   type LayoutDefinition,
@@ -309,6 +310,7 @@ import {
   type LayoutRow,
   type LayoutState,
 } from 'unicore-common/layout'
+import { escapeHtml } from 'unicore-common/sanitize'
 
 const { $t, $api } = useNuxtApp() as any
 const toast = useToast()
@@ -518,22 +520,20 @@ function removeLink(index: number) {
   selected.value?.links?.splice(index, 1)
 }
 
-function attribute(value: unknown): string {
-  return String(value ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-}
+const COMPONENT_BLOCKS = ['login', 'launcher', 'locale', 'theme', 'online', 'nav', 'logo']
 
 function toHtml(definition: LayoutDefinition): string {
-  const rows = definition.rows
+  return definition.rows
     .map((row) => {
       const blocks = row.blocks
         .map((block) => {
-          if (['login', 'launcher', 'locale', 'theme', 'online', 'nav', 'logo'].includes(block.type)) return `  {{${block.type}}}`
-          if (block.type === 'text') return `  <div>${block.text?.[locale.value] || ''}</div>`
+          if (COMPONENT_BLOCKS.includes(block.type)) return `  {{${block.type}}}`
+          if (block.type === 'text') return `  <div>${layoutText(block.text, locale.value)}</div>`
           if (block.type === 'html') return `  ${block.html || ''}`
-          if (block.type === 'image') return `  <img src="${attribute(block.image)}" height="${Number(block.size) || 100}" />`
+          if (block.type === 'image') return `  <img src="${escapeHtml(block.image)}" height="${Number(block.size) || 100}" />`
           if (block.type === 'icons')
             return `  <div class="icons">${(block.links || [])
-              .map((link) => `<a href="${attribute(link.href || link.to || '#')}"><i class="${attribute(link.icon)}"></i></a>`)
+              .map((link) => `<a href="${escapeHtml(link.href || link.to || '#')}"><i class="${escapeHtml(link.icon)}"></i></a>`)
               .join('')}</div>`
 
           return ''
@@ -541,12 +541,13 @@ function toHtml(definition: LayoutDefinition): string {
         .filter(Boolean)
         .join('\n')
 
-      return blocks
+      if (!blocks) return ''
+      if (row.blocks.some((block) => COMPONENT_BLOCKS.includes(block.type))) return blocks
+
+      return `<div class="layout-row layout-row--${row.align || 'between'}">\n${blocks}\n</div>`
     })
     .filter(Boolean)
     .join('\n')
-
-  return rows
 }
 
 function onModeChange(mode: string) {

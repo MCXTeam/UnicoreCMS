@@ -14,6 +14,7 @@ import { IssuanceService } from 'src/game/servers/rcon/issuance.service';
 import { In, Not, Repository } from 'typeorm';
 import { Period } from '../entities/period.entity';
 import { GroupKit } from '../groups/entities/group-kit.entity';
+import { kitsForServer, kitsWithAllImages } from '../groups/kit-shape';
 import { GiveDonatePermInput } from './dto/give-donate-perm.input';
 import { PermissionBuyInput } from './dto/permission-buy.input';
 import { PermissionInput } from './dto/permission.input';
@@ -279,19 +280,7 @@ export class DonatePermissionsService {
         .map((perms) =>
           Object.assign(perms, {
             periods: _.orderBy(perms.periods, ['multiplier'], ['asc']),
-            kits: _(
-              perms.kits.map((kit) => {
-                const own = kit.servers.find((item) => item.server.id == id);
-
-                return Object.assign(kit, {
-                  priority: kit.priority ? kit.priority : 0,
-                  servers: own ? [own] : [],
-                  images: own?.image ? [own] : [],
-                });
-              }),
-            )
-              .orderBy(['priority', 'id'], ['asc', 'asc'])
-              .value(),
+            kits: kitsForServer(perms.kits, id),
           }),
         ),
     )
@@ -315,11 +304,7 @@ export class DonatePermissionsService {
 
     return perms
       .filter((perm) => perm.periods.length)
-      .map((perm) =>
-        Object.assign(perm, {
-          kits: perm.kits.map((kit) => Object.assign(kit, { images: kit.servers.filter((item) => item.image) })),
-        }),
-      );
+      .map((perm) => Object.assign(perm, { kits: kitsWithAllImages(perm.kits) }));
   }
 
   // For UnicoreConnect

@@ -18,6 +18,7 @@ import { GiveDonateGroupInput } from '../dto/give-donate-group.input';
 import { GroupBuyInput } from '../dto/group-buy.input';
 import { GroupInput } from '../dto/group.input';
 import { DonateGroup } from '../entities/donate-group.entity';
+import { kitsForServer } from '../kit-shape';
 import { GroupFeature } from '../entities/group-feature.entity';
 import { GroupKit } from '../entities/group-kit.entity';
 import { UsersDonateGroup } from '../entities/user-donate.entity';
@@ -90,19 +91,7 @@ export class DonateGroupsService {
         .map((group) =>
           Object.assign(group, {
             periods: _.orderBy(group.periods, ['multiplier'], ['asc']),
-            kits: _(
-              group.kits.map((kit) => {
-                const own = kit.servers.find((item) => item.server.id == id);
-
-                return Object.assign(kit, {
-                  priority: kit.priority ? kit.priority : 0,
-                  servers: own ? [own] : [],
-                  images: own?.image ? [own] : [],
-                });
-              }),
-            )
-              .orderBy(['priority', 'id'], ['asc', 'asc'])
-              .value(),
+            kits: kitsForServer(group.kits, id),
           }),
         ),
     )

@@ -10,7 +10,7 @@ export const useNavigation = (place: NavPlace) => {
 
   return computed<NavItem[]>(() =>
     [...CORE_NAVIGATION, ...((clientNav(place) || []) as unknown as NavItem[]).map((item) => ({ ...item, module: true }))]
-      .filter((item) => item.places.includes(place))
+      .filter((item) => !item.places || item.places.includes(place))
       .filter((item) => {
         if (item.when === 'auth') return auth.loggedIn
         if (item.when === 'guest') return !auth.loggedIn
