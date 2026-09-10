@@ -518,6 +518,10 @@ function removeLink(index: number) {
   selected.value?.links?.splice(index, 1)
 }
 
+function attribute(value: unknown): string {
+  return String(value ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
 function toHtml(definition: LayoutDefinition): string {
   const rows = definition.rows
     .map((row) => {
@@ -526,10 +530,10 @@ function toHtml(definition: LayoutDefinition): string {
           if (['login', 'launcher', 'locale', 'theme', 'online', 'nav', 'logo'].includes(block.type)) return `  {{${block.type}}}`
           if (block.type === 'text') return `  <div>${block.text?.[locale.value] || ''}</div>`
           if (block.type === 'html') return `  ${block.html || ''}`
-          if (block.type === 'image') return `  <img src="${block.image || ''}" height="${block.size || 100}" />`
+          if (block.type === 'image') return `  <img src="${attribute(block.image)}" height="${Number(block.size) || 100}" />`
           if (block.type === 'icons')
             return `  <div class="icons">${(block.links || [])
-              .map((link) => `<a href="${link.href || link.to || '#'}"><i class="${link.icon || ''}"></i></a>`)
+              .map((link) => `<a href="${attribute(link.href || link.to || '#')}"><i class="${attribute(link.icon)}"></i></a>`)
               .join('')}</div>`
 
           return ''
@@ -537,8 +541,9 @@ function toHtml(definition: LayoutDefinition): string {
         .filter(Boolean)
         .join('\n')
 
-      return `<div class="layout-row layout-row--${row.align || 'between'}">\n${blocks}\n</div>`
+      return blocks
     })
+    .filter(Boolean)
     .join('\n')
 
   return rows

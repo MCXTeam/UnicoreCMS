@@ -87,7 +87,7 @@ describe('Смена почты в кабинете', () => {
     assert.equal(body?.message, 'error.email_taken', 'причина отказа не дошла до клиента');
   });
 
-  it('новая заявка отменяет предыдущую', async () => {
+  it('новая заявка отменяет код предыдущей', async () => {
     const { username, session } = await createUser({});
 
     await session.post('/cabinet/settings/email', { email: `${username}-one@example.com`, password: PASSWORD });
@@ -96,15 +96,34 @@ describe('Смена почты в кабинете', () => {
 
     await session.post('/cabinet/settings/email', { email: `${username}-two@example.com`, password: PASSWORD });
 
-    const rows = await query(
-      'SELECT COUNT(*) AS total FROM unicore_email_changes c JOIN unicore_users u ON u.uuid = c.user_uuid WHERE u.username = ?',
-      [username],
-    );
+    const second = await pendingCode(username);
 
-    assert.equal(Number(rows[0]?.total), 1, 'старые заявки на смену почты остались в базе');
+    assert.notEqual(first, second, 'вторая заявка не создала новый код');
 
     const { status } = await session.post('/cabinet/settings/email/confirm', { code: first });
 
     assert.equal(status, 404, 'код из отменённой заявки сработал');
+  });
+
+  it('неверные коды сжигают заявку после пяти попыток', async () => {
+    const { username, session } = await createUser({});
+
+    await session.post('/cabinet/settings/email', { email: address(username), password: PASSWORD });
+
+    const attempts = [];
+
+    for (let index = 0; index < 5; index++) {
+      await session.post('/cabinet/settings/email/confirm', { code: '000000' });
+
+      const rows = await query(
+        'SELECT c.attempts FROM unicore_email_changes c JOIN unicore_users u ON u.uuid = c.user_uuid WHERE u.username = ?',
+        [username],
+      );
+
+      attempts.push(rows[0]?.attempts ?? null);
+    }
+
+    assert.deepEqual(attempts.slice(0, 4), [1, 2, 3, 4], `счётчик попыток не растёт: ${attempts.join(', ')}`);
+    assert.equal(attempts[4], null, 'заявка не сгорела после пяти неверных попыток');
   });
 });

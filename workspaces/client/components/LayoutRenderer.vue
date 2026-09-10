@@ -1,5 +1,5 @@
 <template>
-  <div class="layout-render" :class="`layout-render--${place}`">
+  <div class="layout-render" :class="[`layout-render--${place}`, definition.mode === 'html' && 'layout-render--html']">
     <template v-if="definition.mode === 'html'">
       <template v-for="(part, index) in parts" :key="index">
         <div v-if="part.kind === 'html'" class="layout-html" v-html="$sanitize(part.value)" />
@@ -68,6 +68,13 @@ function slotBlock(name: string): Block {
 </script>
 
 <style scoped>
+.layout-render--html {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  min-width: 0;
+}
 .layout-row {
   display: flex;
   align-items: center;

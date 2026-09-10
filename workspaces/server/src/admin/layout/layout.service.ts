@@ -18,7 +18,15 @@ import {
   LayoutState,
   LayoutText,
 } from 'unicore-common';
-import { AuditService, CacheKey, LAYOUT_BLOCKS_MAX, LAYOUT_LINKS_MAX, LAYOUT_ROWS_MAX, sanitizeHtml } from '@common';
+import {
+  AuditService,
+  CacheKey,
+  LAYOUT_BLOCKS_MAX,
+  LAYOUT_HTML_MAX_LENGTH,
+  LAYOUT_LINKS_MAX,
+  LAYOUT_ROWS_MAX,
+  sanitizeHtml,
+} from '@common';
 import { EventsService } from 'src/events/events.service';
 import { LayoutInput } from './dto/layout.input';
 import { Layout } from './entities/layout.entity';
@@ -104,7 +112,7 @@ export class LayoutService {
 
     if (input.mode === 'builder' && !rows.length) throw new BadRequestException('Нужен хотя бы один ряд');
 
-    return { mode: input.mode, rows, html: sanitizeHtml(clean(input.html, 200000)) };
+    return { mode: input.mode, rows, html: sanitizeHtml(clean(input.html, LAYOUT_HTML_MAX_LENGTH)) };
   }
 
   private parse(row: Layout | null, fallback: LayoutDefinition): LayoutDefinition {

@@ -4,7 +4,7 @@ import { DonateGroup } from './donate-group.entity';
 import { GroupKitServer } from './group-kit-server.entity';
 import { Translatable } from 'src/admin/locales/translatable.decorator';
 
-@Translatable('group_kit', ['name', 'description', 'servers.*.description'])
+@Translatable('group_kit', ['name', 'description'])
 @Entity({
   name: 'unicore_group_kits',
   orderBy: {

@@ -285,7 +285,7 @@ export class DonatePermissionsService {
 
                 return Object.assign(kit, {
                   priority: kit.priority ? kit.priority : 0,
-                  description: own?.description || kit.description,
+                  servers: own ? [own] : [],
                   images: own?.image ? [own] : [],
                 });
               }),
@@ -313,7 +313,13 @@ export class DonatePermissionsService {
         .getMany()
     ).filter((perm) => perm.servers.find((srv) => srv.id == id) || perm.type == PermissionType.Web);
 
-    return perms.filter((perm) => perm.periods.length);
+    return perms
+      .filter((perm) => perm.periods.length)
+      .map((perm) =>
+        Object.assign(perm, {
+          kits: perm.kits.map((kit) => Object.assign(kit, { images: kit.servers.filter((item) => item.image) })),
+        }),
+      );
   }
 
   // For UnicoreConnect

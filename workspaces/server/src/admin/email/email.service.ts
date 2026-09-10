@@ -1,7 +1,7 @@
 import { MailerService } from '@nestjs-modules/mailer';
 import { BadRequestException, ConflictException, Inject, Injectable, Logger, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MoreThan, Repository } from 'typeorm';
+import { LessThan, MoreThan, Repository } from 'typeorm';
 import { Transactional } from 'typeorm-transactional';
 import { envConfig } from 'unicore-common';
 import { events } from 'unicore-api';
@@ -224,7 +224,10 @@ export class EmailService {
     change.email = address;
     change.code = code;
 
-    await this.emailChangesRepository.delete({ user: { uuid: user.uuid } });
+    await this.emailChangesRepository.delete({
+      user: { uuid: user.uuid },
+      created: LessThan(this.moment().utc().subtract(EMAIL_ACTIVATION_RESEND_WINDOW_MINUTES, 'minutes').toDate()),
+    });
     await this.emailChangesRepository.save(change);
 
     const html = renderEmailTemplate(content, { USERNAME: user.username, SITENAME: envConfig.sitename, CODE: code });
@@ -234,7 +237,6 @@ export class EmailService {
     });
   }
 
-  @Transactional()
   async confirmEmailChange(user: User, input: VerifyInput): Promise<UserDto> {
     const change = await this.takeCode(this.emailChangesRepository, user, input.code);
     const previous = user.email;
@@ -245,16 +247,21 @@ export class EmailService {
       throw new ConflictException(EMAIL_CHANGE_TAKEN);
     }
 
-    await this.usersRepository.update({ uuid: user.uuid }, { email: change.email, activated: true });
-    await this.emailChangesRepository.delete({ user: { uuid: user.uuid } });
-    await this.emailActivationsRepository.delete({ user: { uuid: user.uuid } });
-
-    user.email = change.email;
-    user.activated = true;
+    await this.applyEmailChange(user, change.email);
 
     await this.noticeEmailChanged(user, previous);
 
     return new UserDto(user);
+  }
+
+  @Transactional()
+  private async applyEmailChange(user: User, email: string): Promise<void> {
+    await this.usersRepository.update({ uuid: user.uuid }, { email, activated: true });
+    await this.emailChangesRepository.delete({ user: { uuid: user.uuid } });
+    await this.emailActivationsRepository.delete({ user: { uuid: user.uuid } });
+
+    user.email = email;
+    user.activated = true;
   }
 
   private async noticeEmailChanged(user: User, previous: string | null): Promise<void> {

@@ -22,7 +22,7 @@ export const moduleConfigFields = (): { key: string; field: ConfigFieldSchema; m
 
 export const moduleConfigRule = (key: string): ConfigFieldSchema | null => moduleConfigFields().find((item) => item.key === key)?.field || null;
 
-const inactiveModuleConfigPrefixes = (): string[] =>
+export const inactiveModuleConfigPrefixes = (): string[] =>
   discover()
     .modules.filter((module) => !module.enabled)
     .flatMap((module) => {
@@ -30,6 +30,3 @@ const inactiveModuleConfigPrefixes = (): string[] =>
 
       return [prefixes.config, prefixes.publicConfig];
     });
-
-export const isInactiveModuleConfigKey = (key: string): boolean =>
-  inactiveModuleConfigPrefixes().some((prefix) => key.startsWith(prefix));

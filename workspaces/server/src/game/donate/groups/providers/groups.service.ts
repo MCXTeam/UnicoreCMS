@@ -96,7 +96,7 @@ export class DonateGroupsService {
 
                 return Object.assign(kit, {
                   priority: kit.priority ? kit.priority : 0,
-                  description: own?.description || kit.description,
+                  servers: own ? [own] : [],
                   images: own?.image ? [own] : [],
                 });
               }),

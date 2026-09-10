@@ -53,7 +53,7 @@
           @mouseleave="viewKitDestroy()"
         >
           <div class="col-12">
-            <p v-if="kit_active.payload.description" class="description-html" v-text="kit_active.payload.description" />
+            <p v-if="kitDescription(kit_active.payload)" class="description-html" v-text="kitDescription(kit_active.payload)" />
           </div>
           <div v-for="(img, i) in kit_active.payload.images" :key="i" class="col-xl-4 mb-3">
             <div class="kit-image">
@@ -90,6 +90,8 @@ useHead({ title: computed(() => `${$t('header.donate')} ${server.value.name}`) }
 const kit_active = ref<{ payload: any; donate_id: any }>({ payload: null, donate_id: null })
 const kit_pinned = ref(false)
 let kitHideTimer: ReturnType<typeof setTimeout> | null = null
+
+const kitDescription = (kit: any) => kit?.servers?.[0]?.description || kit?.description
 
 function findKit(donate_id: any, kit_id: any) {
   return donates.value.find((d: any) => d.id == donate_id)?.kits.find((k: any) => k.id == kit_id)

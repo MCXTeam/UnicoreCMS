@@ -337,7 +337,7 @@ async function confirmEmail() {
   } catch (err) {
     if (serverMessage(err) === EMAIL_CODE_EXPIRED) resetEmailForm()
 
-    $unicore.errorNotification($t('auth.code_invalid'), err)
+    $unicore.errorNotification($t(err?.response?.status === 404 ? 'auth.code_invalid' : 'cabinet.email_request_failed'), err)
   }
   loading.close()
 }

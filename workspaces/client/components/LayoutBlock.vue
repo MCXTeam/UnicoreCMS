@@ -104,7 +104,7 @@ const locale = useLocale()
 const locales = useLocales()
 const ioStore = useIoStore()
 const { config } = usePublicConfig()
-const navigation = useNavigation('navbar')
+const navigation = useNavigation(props.place === 'footer' ? 'footer' : 'navbar')
 
 const moreWrap = ref<HTMLElement | null>(null)
 const moreOpen = ref(false)
@@ -144,9 +144,7 @@ const links = computed(() =>
     .filter((link) => link.to || link.href),
 )
 
-const moduleLinks = computed(() =>
-  props.place === 'header' && props.block.type === 'nav' ? navigation.value.filter((item: any) => item.module) : [],
-)
+const moduleLinks = computed(() => (props.block.type === 'nav' ? navigation.value.filter((item: any) => item.module) : []))
 
 const linkLabel = (link: LayoutLink) => (link.labelKey ? $t(link.labelKey) : layoutText(link.label, locale.value))
 
