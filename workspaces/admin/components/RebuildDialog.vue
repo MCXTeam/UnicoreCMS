@@ -19,7 +19,11 @@
       <Tag v-if="rebuild.running" severity="info" :value="$t('admin.rebuild_running', { side: rebuild.side || '—' })" />
       <Tag v-else-if="rebuild.ok === true" severity="success" :value="$t('admin.rebuild_done')" />
       <Tag v-else-if="rebuild.ok === false" severity="danger" :value="rebuild.error || $t('admin.rebuild_failed')" />
+      <Tag v-if="rebuild.ok === true && !rebuild.running" severity="warn" icon="pi pi-exclamation-triangle" :value="$t('admin.rebuild_restart')" />
     </div>
+    <Message v-if="rebuild.ok === true && !rebuild.running" severity="warn" :closable="false" class="mt-0 mb-3">
+      {{ $t('admin.rebuild_restart_hint') }}
+    </Message>
     <pre ref="logEl" class="rebuild-log">{{ rebuild.log.join('\n') || $t('admin.rebuild_log_empty') }}</pre>
     <template #footer>
       <Button :label="$t('common.close')" icon="pi pi-times" class="p-button-text" @click="$emit('update:visible', false)" />
