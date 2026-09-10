@@ -863,6 +863,8 @@
   "audit.action.money.deposit": "Начисление с игрового сервера",
   "audit.action.money.exchange": "Обмен валюты",
   "audit.action.money.pay": "Перевод между игроками в игре",
+  "audit.action.money.real.deposit": "Начисление реальной валюты с сервера",
+  "audit.action.money.real.withdraw": "Списание реальной валюты с сервера",
   "audit.action.money.transfer": "Перевод другому игроку",
   "audit.action.money.withdraw": "Списание с игрового сервера",
   "audit.action.payment.created": "Создание платежа",

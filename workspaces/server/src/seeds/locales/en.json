@@ -863,6 +863,8 @@
   "audit.action.money.deposit": "Credit from the game server",
   "audit.action.money.exchange": "Currency exchange",
   "audit.action.money.pay": "In-game transfer between players",
+  "audit.action.money.real.deposit": "Real balance credited from a server",
+  "audit.action.money.real.withdraw": "Real balance debited from a server",
   "audit.action.money.transfer": "Transfer to another player",
   "audit.action.money.withdraw": "Debit from the game server",
   "audit.action.payment.created": "Payment created",

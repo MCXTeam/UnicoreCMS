@@ -80,6 +80,8 @@ export const AUDIT_ACTIONS = define({
   "money.exchange": { class: "finance" },
   "money.deposit": { class: "finance" },
   "money.withdraw": { class: "finance" },
+  "money.real.deposit": { class: "finance", danger: true },
+  "money.real.withdraw": { class: "finance", danger: true },
   "money.pay": { class: "finance" },
   "payment.created": { class: "finance" },
   "payment.manual": { class: "finance" },

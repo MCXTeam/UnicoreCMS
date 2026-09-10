@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
-import { AuditService } from '@common';
+import { AuditService, creditUserBalance, debitUserBalance } from '@common';
 import { User } from 'src/admin/users/entities/user.entity';
 import { ServersService } from 'src/game/servers/servers.service';
 import { Connection, Repository } from 'typeorm';
@@ -15,10 +15,18 @@ import { ConfigService } from 'src/admin/config/config.service';
 import { MoneyUpdateInput } from './dto/money-update.input';
 import { MoneyPayCommandInput } from './dto/money-pay-command.input';
 import { MoneyWDInput } from './dto/monet-wd.input';
+import { RealWDInput } from './dto/real-wd.input';
 import { currencyUtils, SystemCurrency } from 'src/common/utils/currencyUtils';
 import { ConfigField } from 'src/admin/config/config.enum';
 import { configFieldNumber } from 'src/admin/config/config.utils';
 import { Transactional } from 'typeorm-transactional';
+
+export interface RealBalance {
+  uuid: string;
+  username: string;
+  real: number;
+  virtual: number;
+}
 
 @Injectable()
 export class MoneyService {
@@ -119,11 +127,19 @@ export class MoneyService {
     });
   }
 
-  private adjusted(request: unknown, user: User, field: string, before: number, after: number, server?: string): void {
+  private adjusted(
+    request: unknown,
+    user: User,
+    field: string,
+    before: number,
+    after: number,
+    server?: string,
+    action = 'money.balance.adjust',
+  ): void {
     const { actor, ip, client } = this.auditService.context(request);
 
     this.auditService.record({
-      action: 'money.balance.adjust',
+      action,
       actor,
       ip,
       client,
@@ -235,6 +251,46 @@ export class MoneyService {
     if (!debit.affected) throw new BadRequestException();
 
     return true;
+  }
+
+  private realBalanceOf(user: User): RealBalance {
+    return { uuid: user.uuid, username: user.username, real: user.real, virtual: user.virtual };
+  }
+
+  private async realUser(uuid: string): Promise<User> {
+    const user = await this.usersRepo.findOneBy({ uuid });
+
+    if (!user) throw new NotFoundException();
+
+    return user;
+  }
+
+  async findRealByUser(uuid: string): Promise<RealBalance> {
+    return this.realBalanceOf(await this.realUser(uuid));
+  }
+
+  @Transactional()
+  async depositReal(input: RealWDInput, request?: unknown): Promise<RealBalance> {
+    const user = await this.realUser(input.user_uuid);
+    const amount = currencyUtils.roundByType(input.amount, SystemCurrency.REAL);
+
+    await creditUserBalance(this.usersRepo, user.uuid, amount);
+
+    this.adjusted(request, user, 'real', user.real, currencyUtils.roundByType(user.real + amount, SystemCurrency.REAL), undefined, 'money.real.deposit');
+
+    return this.findRealByUser(user.uuid);
+  }
+
+  @Transactional()
+  async withdrawReal(input: RealWDInput, request?: unknown): Promise<RealBalance> {
+    const user = await this.realUser(input.user_uuid);
+    const amount = currencyUtils.roundByType(input.amount, SystemCurrency.REAL);
+
+    await debitUserBalance(this.usersRepo, user.uuid, amount);
+
+    this.adjusted(request, user, 'real', user.real, currencyUtils.roundByType(user.real - amount, SystemCurrency.REAL), undefined, 'money.real.withdraw');
+
+    return this.findRealByUser(user.uuid);
   }
 
   @Transactional()

@@ -10,6 +10,7 @@ import { MoneyExchangeInput } from './dto/money-exchange.input';
 import { MoneyPayCommandInput } from './dto/money-pay-command.input';
 import { MoneyUpdateInput } from './dto/money-update.input';
 import { MoneyInput, MoneyTransferType } from './dto/money.input';
+import { RealWDInput } from './dto/real-wd.input';
 import { MoneyService } from './money.service';
 
 @Controller('cabinet/money')
@@ -19,6 +20,24 @@ export class MoneyController {
   @Get('me')
   me(@CurrentUser() user: User) {
     return this.moneyService.findOneByUser(user);
+  }
+
+  @Permissions(['kernel.connect'])
+  @Get('user/:uuid/real')
+  async findRealByUser(@Param('uuid') uuid: string) {
+    return this.moneyService.findRealByUser(uuid);
+  }
+
+  @Permissions(['kernel.connect'])
+  @Post('user/deposit/real')
+  async depositReal(@Req() request: any, @Body() body: RealWDInput) {
+    return this.moneyService.depositReal(body, request);
+  }
+
+  @Permissions(['kernel.connect'])
+  @Post('user/withdraw/real')
+  async withdrawReal(@Req() request: any, @Body() body: RealWDInput) {
+    return this.moneyService.withdrawReal(body, request);
   }
 
   @Permissions(['kernel.connect'])
