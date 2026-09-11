@@ -8,7 +8,7 @@
         </div>
       </template>
       <DataTable class="no-overflow-table large-table" :value="sessions.all">
-        <Column headerStyle="width: 35%" :header="$t('cabinet.device')">
+        <Column headerStyle="width: 30%" :header="$t('cabinet.device')">
           <template #body="{ data }">
             <span v-tooltip="`UUID: ${data.uuid}`">
               {{
@@ -19,16 +19,16 @@
             </span>
           </template>
         </Column>
-        <Column headerStyle="width: 15%" header="IP">
+        <Column headerStyle="width: 13%" header="IP">
           <template #body="{ data }"> {{ data.ip }} </template>
         </Column>
-        <Column headerStyle="width: 20%" :header="$t('cabinet.last_activity')">
+        <Column headerStyle="width: 23%" :header="$t('cabinet.last_activity')">
           <template #body="{ data }"> {{ $moment(data.updated).format('D MMMM YYYY, HH:mm:ss') }} </template>
         </Column>
-        <Column headerStyle="width: 20%" :header="$t('cabinet.session_created')">
+        <Column headerStyle="width: 23%" :header="$t('cabinet.session_created')">
           <template #body="{ data }"> {{ $moment(data.created).format('D MMMM YYYY, HH:mm:ss') }} </template>
         </Column>
-        <Column headerStyle="width: 10%">
+        <Column headerStyle="width: 11%">
           <template #body="{ data }">
             <Button :loading="deletingId == data.id" severity="danger" text @click="sessionDelete(data.id)">
               <i class="bx bx-trash"></i>

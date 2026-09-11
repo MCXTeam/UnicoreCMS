@@ -1,7 +1,7 @@
 <template>
   <div class="cab-grid">
-    <CabTile :title="$t('profile.server_stats')" icon="bx bx-bar-chart-alt-2" :span="7">
-      <div v-if="playtime" class="cab-servers">
+    <CabTile :title="$t('profile.server_stats')" icon="bx bx-bar-chart-alt-2" :span="12">
+      <div v-if="playtime" class="cab-servers cab-servers--grid">
         <div v-for="pt in playtime" :key="pt.server.id" class="cab-servers__row">
           <IconAvatar :path="pt.server.icon" size="large" icon="bx bxs-server" />
           <div>
@@ -15,7 +15,7 @@
           </div>
         </div>
       </div>
-      <div v-else class="cab-servers">
+      <div v-else class="cab-servers cab-servers--grid">
         <Skeleton v-for="n in 3" :key="n" height="62px" borderRadius="14px" />
       </div>
     </CabTile>

@@ -8,7 +8,7 @@
           </NuxtLink>
         </template>
         <div class="cab-skin__stage">
-          <SkinView3D :width="120" :height="164" :skin="$auth.user.skin" :cloak="$auth.user.cloak" ref="Skin3D" />
+          <SkinView3D :width="190" :height="260" :skin="$auth.user.skin" :cloak="$auth.user.cloak" ref="Skin3D" />
           <div class="cab-skin__anim">
             <i v-tooltip.top="$t('cabinet.pose_stand')" class="bx bx-male" @click="Skin3D.setAnimation(null)"></i>
             <i v-tooltip.top="$t('cabinet.pose_walk')" class="bx bx-walk" @click="Skin3D.setAnimation('walk')"></i>

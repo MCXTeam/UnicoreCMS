@@ -20,6 +20,8 @@
 }
 
 .cab {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
   background:
     radial-gradient(1200px 420px at 12% -10%, rgba(var(--vs-primary), 0.18), transparent 60%),
@@ -37,7 +39,7 @@
   .p-datatable-header-cell {
     padding: 0 14px 10px;
     border-bottom: 1px solid var(--cab-line);
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -47,7 +49,7 @@
   .p-datatable-tbody > tr > td {
     padding: 13px 14px;
     border-bottom: 1px solid rgba(var(--vs-text), 0.05);
-    font-size: 14px;
+    font-size: 15px;
   }
 
   .p-datatable-tbody > tr:last-child > td {
@@ -101,7 +103,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 18px;
+  font-size: 19px;
   font-weight: 600;
   color: rgba(var(--vs-text), 0.9) !important;
 }
@@ -118,7 +120,7 @@
   gap: 7px;
   padding: 8px 14px;
   border-radius: 10px;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--cab-muted) !important;
   transition: all 180ms;
 
@@ -127,13 +129,13 @@
     color: rgba(var(--vs-text), 0.9) !important;
   }
 
-  &.nuxt-link-exact-active {
+  &.is-active {
     background: rgba(var(--vs-primary), 0.14);
     color: rgb(var(--vs-primary)) !important;
   }
 
   i {
-    font-size: 18px;
+    font-size: 19px;
   }
 }
 
@@ -161,30 +163,32 @@
   }
 
   i {
-    font-size: 18px;
+    font-size: 19px;
     color: rgb(var(--vs-primary));
   }
 }
 
 .cab-icon-btn i {
-  font-size: 20px;
+  font-size: 21px;
 }
 
 .cab-burger i {
-  font-size: 24px;
+  font-size: 25px;
 }
 
 .cab-shell {
   display: grid;
   grid-template-columns: 268px minmax(0, 1fr);
   gap: 28px;
+  width: 100%;
   max-width: 1440px;
   margin: 0 auto;
-  padding: 28px 24px 0;
+  padding: 28px 24px 100px;
+  flex: 1 1 auto;
 
   @include media-breakpoint-down(xl) {
     grid-template-columns: minmax(0, 1fr);
-    padding: 20px 16px 0;
+    padding: 20px 16px 80px;
   }
 }
 
@@ -194,6 +198,23 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
+
+  @include media-breakpoint-up(xl) {
+    max-height: calc(100vh - 108px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--cab-line) transparent;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      border-radius: 6px;
+      background: var(--cab-line);
+    }
+  }
 }
 
 .cab-aside__desktop {
@@ -232,7 +253,7 @@
   }
 
   &__text span {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--cab-muted);
   }
 }
@@ -257,13 +278,13 @@
     gap: 12px;
     padding: 11px 14px;
     border-radius: 12px;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     color: var(--cab-muted) !important;
     transition: all 160ms;
 
     i {
-      font-size: 19px;
+      font-size: 20px;
     }
 
     &:hover {
@@ -271,6 +292,7 @@
       color: rgba(var(--vs-text), 0.9) !important;
     }
 
+    &.is-active,
     &.nuxt-link-exact-active,
     &.no-exact.nuxt-link-active {
       background: rgba(var(--vs-primary), 0.14);
@@ -306,7 +328,7 @@
 
   p {
     margin-top: 6px !important;
-    font-size: 14px;
+    font-size: 15px;
     color: var(--cab-muted);
   }
 }
@@ -331,7 +353,7 @@
     padding: 9px 14px;
     border: 1px solid var(--cab-line);
     border-radius: 999px;
-    font-size: 13px;
+    font-size: 14px;
     color: var(--cab-muted) !important;
 
     &.nuxt-link-exact-active,
@@ -346,7 +368,7 @@
 .cab-grid {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  align-items: start;
+  align-items: stretch;
   gap: var(--cab-gap);
 
   @include media-breakpoint-down(lg) {
@@ -402,14 +424,14 @@
     align-items: center;
     gap: 9px;
     margin: 0;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--cab-muted);
 
     i {
-      font-size: 16px;
+      font-size: 17px;
       color: rgb(var(--vs-primary));
     }
   }
@@ -488,7 +510,7 @@
   }
 
   &__label {
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -503,13 +525,13 @@
   }
 
   &__value--soft {
-    font-size: 22px;
+    font-size: 23px;
     color: rgba(var(--vs-text), 0.75);
   }
 }
 
 .cab-sub {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--cab-muted);
 }
 
@@ -525,7 +547,7 @@
     gap: 16px;
     padding: 9px 0;
     border-bottom: 1px solid rgba(var(--vs-text), 0.05);
-    font-size: 14px;
+    font-size: 15px;
 
     &:last-child {
       border-bottom: none;
@@ -594,7 +616,7 @@
   }
 
   &__name {
-    font-size: 22px;
+    font-size: 23px;
     font-weight: 600;
     line-height: 1.2;
     overflow-wrap: anywhere;
@@ -640,9 +662,7 @@
     gap: 6px;
     padding: 10px 18px 12px;
     border-radius: 16px;
-    background:
-      radial-gradient(120px 90px at 50% 18%, rgba(var(--vs-primary), 0.18), transparent 70%),
-      var(--cab-inner);
+    background: var(--cab-inner);
   }
 
   &__anim {
@@ -651,7 +671,7 @@
     color: var(--cab-muted);
 
     i {
-      font-size: 18px;
+      font-size: 19px;
       cursor: pointer;
       transition: color 160ms;
 
@@ -681,7 +701,7 @@
 
   &--grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
     gap: 10px;
   }
 
@@ -695,16 +715,16 @@
 
     h4 {
       margin: 0;
-      font-size: 15px;
+      font-size: 16px;
     }
 
     span {
-      font-size: 13px;
+      font-size: 14px;
       color: var(--cab-muted);
     }
 
     b {
-      font-size: 15px;
+      font-size: 16px;
       font-weight: 600;
     }
   }
@@ -718,7 +738,7 @@
     text-align: right;
 
     span {
-      font-size: 11px;
+      font-size: 13px;
       letter-spacing: 0.06em;
       text-transform: uppercase;
       color: var(--cab-muted);
@@ -732,7 +752,7 @@
   gap: 8px;
   padding: 7px 13px;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
 
   &--ok {
@@ -755,7 +775,7 @@
   min-height: 120px;
   text-align: center;
   color: var(--cab-muted);
-  font-size: 13px;
+  font-size: 14px;
 
   i {
     font-size: 26px;
@@ -766,7 +786,7 @@
 .cab-select {
   min-width: 160px;
   --p-form-field-padding-y: 0.45rem;
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .cab .p-avatar {
@@ -779,17 +799,17 @@
   }
 
   i {
-    font-size: 18px;
+    font-size: 19px;
   }
 }
 
 .cab .p-avatar-lg i {
-  font-size: 22px;
+  font-size: 23px;
 }
 
 .cab-section {
   margin: 0 0 12px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -835,7 +855,7 @@
 
     h4 {
       margin: 0;
-      font-size: 15px;
+      font-size: 16px;
       text-transform: uppercase;
     }
   }
@@ -844,7 +864,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 13px;
+    font-size: 14px;
     color: var(--cab-muted);
 
     b {
@@ -859,7 +879,7 @@
   border-radius: 999px;
   background: rgba(var(--vs-primary), 0.18);
   color: rgb(var(--vs-primary));
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
 }
 
@@ -876,7 +896,7 @@
 }
 
 .cab-label {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.04em;
   color: var(--cab-muted);
@@ -908,7 +928,7 @@
   }
 
   span {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--cab-muted);
   }
 
@@ -973,7 +993,7 @@
   }
 
   &__name {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 500;
   }
 }
@@ -1007,7 +1027,7 @@
 
 .cab-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
   gap: 10px;
 }
 
@@ -1039,7 +1059,7 @@
 
   &__cats {
     display: block;
-    font-size: 12px;
+    font-size: 13px;
     color: var(--cab-muted);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1056,17 +1076,17 @@
 
     strike,
     span {
-      font-size: 11px;
+      font-size: 13px;
       color: var(--cab-muted);
     }
 
     b {
-      font-size: 15px;
+      font-size: 16px;
     }
   }
 
   &__cart {
-    font-size: 20px;
+    font-size: 21px;
     color: var(--cab-muted);
     transition: color 160ms;
   }
@@ -1077,7 +1097,7 @@
 
   h3,
   h4 {
-    font-size: 13px;
+    font-size: 14px;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--cab-muted);
@@ -1096,7 +1116,7 @@
   background: var(--cab-inner);
 
   span {
-    font-size: 13px;
+    font-size: 14px;
     color: var(--cab-muted);
   }
 }

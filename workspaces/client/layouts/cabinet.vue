@@ -10,7 +10,12 @@
           <span class="d-none d-md-inline">{{ $pub.sitename }}</span>
         </NuxtLink>
         <nav class="cab-top__nav d-none d-xl-flex">
-          <NuxtLink v-for="item in navbar" :key="item.key" :to="item.to" class="cab-top__link without-underline">
+          <NuxtLink
+            v-for="item in navbar"
+            :key="item.key"
+            :to="item.to"
+            :class="['cab-top__link', 'without-underline', { 'is-active': inSection(item) }]"
+          >
             <i :class="item.icon"></i> {{ $t(item.label) }}
           </NuxtLink>
         </nav>
@@ -36,7 +41,12 @@
         <h3 class="ms-2 my-0">{{ $pub.sitename }}</h3>
       </template>
       <nav class="cab-menu">
-        <NuxtLink v-for="item in navbar" :key="item.key" :to="item.to" class="cab-menu__item without-underline">
+        <NuxtLink
+          v-for="item in navbar"
+          :key="item.key"
+          :to="item.to"
+          :class="['cab-menu__item', 'without-underline', { 'is-active': inSection(item) }]"
+        >
           <i :class="item.icon"></i> {{ $t(item.label) }}
         </NuxtLink>
       </nav>
@@ -85,7 +95,7 @@
       </main>
     </div>
 
-    <Footer style="margin-top: 100px" />
+    <Footer />
     <GiftCodeDialog />
   </div>
 </template>
@@ -119,6 +129,14 @@ const tabs = computed(() => {
 
   return cabinetTabs.value
 })
+
+function inSection(item: NavItem) {
+  const target = String(item.to || '')
+
+  if (!target) return false
+
+  return route.path === target || route.path.startsWith(`${target}/`)
+}
 
 function tabClass(tab: NavItem) {
   if (tab.exact !== false) return ''
