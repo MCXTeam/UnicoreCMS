@@ -40,6 +40,7 @@ export interface ClientNavItem {
   when?: 'always' | 'auth' | 'guest'
   places?: ClientNavPlace[]
   order?: number
+  visible?: () => boolean
 }
 
 export type SlotComponent = string | object

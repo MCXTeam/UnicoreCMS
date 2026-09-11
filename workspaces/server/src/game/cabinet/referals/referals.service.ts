@@ -63,7 +63,7 @@ export class ReferalsService {
     return Math.max(base, ...overrides);
   }
 
-  async paymentReward(user: User, paid: number): Promise<{ inviter: User; amount: number } | null> {
+  async paymentReward(user: User, paid: number): Promise<{ inviter: User; amount: number; percent: number } | null> {
     const referal = await this.referalsRepo.findOne({ where: { user: { uuid: user.uuid } }, relations: ['inviter'] });
 
     if (!referal?.inviter) return null;
@@ -71,6 +71,6 @@ export class ReferalsService {
     const percent = await this.paymentPercent(referal.inviter);
     const amount = currencyUtils.roundByType((paid * percent) / 100, SystemCurrency.REAL);
 
-    return amount > 0 ? { inviter: referal.inviter, amount } : null;
+    return amount > 0 ? { inviter: referal.inviter, amount, percent } : null;
   }
 }

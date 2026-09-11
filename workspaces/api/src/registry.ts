@@ -1,6 +1,7 @@
 import { API_VERSION } from './version'
 import { Capabilities } from './capabilities'
 import { EventBus } from './events'
+import { HookBus } from './hooks'
 import { AuditSink, ModuleAuditAction } from './audit'
 import { ConfigFieldSchema, ModulePermission } from './manifest'
 
@@ -20,6 +21,7 @@ export interface ModuleContribution {
 export interface Registry {
   apiVersion: string
   events: EventBus
+  hooks: HookBus
   capabilities: Capabilities
   core: unknown | null
   audit: AuditSink | null
@@ -31,6 +33,7 @@ const KEY = Symbol.for('unicore.api.registry.v1')
 const create = (): Registry => ({
   apiVersion: API_VERSION,
   events: new EventBus(),
+  hooks: new HookBus(),
   capabilities: new Capabilities(),
   core: null,
   audit: null,
@@ -69,6 +72,8 @@ export const contributions = (): ModuleContribution[] => [...getRegistry().modul
 export const contribution = (id: string): ModuleContribution | undefined => getRegistry().modules.get(id)
 
 export const events = (): EventBus => getRegistry().events
+
+export const hooks = (): HookBus => getRegistry().hooks
 
 export const capabilities = (): Capabilities => getRegistry().capabilities
 

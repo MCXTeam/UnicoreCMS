@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Global, Inject, Injectable, Logger, Module, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { DataSource } from 'typeorm';
-import { API_VERSION, capabilities, events, setCore } from 'unicore-api';
+import { API_VERSION, capabilities, events, hooks, setCore } from 'unicore-api';
 import type { CoreApi, LoggerApi, StaffMember, UserRecord } from 'unicore-api';
 import { formatError, stdout } from '@common';
 import { staffGroupAppearance, staffRoleAppearance } from 'unicore-common';
@@ -71,6 +71,10 @@ export class ApiHostService implements OnApplicationBootstrap, OnApplicationShut
       this.logger.error(`[module:${owner || 'unknown'}] обработчик события ${event}: ${formatError(error)}`);
     });
 
+    hooks().setErrorReporter((hook, owner, error) => {
+      this.logger.error(`[module:${owner || 'unknown'}] обработчик хука ${hook}: ${formatError(error)}`);
+    });
+
     const runtime = moduleRuntime();
 
     for (const module of runtime.loaded) {
@@ -100,6 +104,7 @@ export class ApiHostService implements OnApplicationBootstrap, OnApplicationShut
     return {
       id,
       events: events(),
+      hooks: hooks(),
       capabilities: capabilities(),
       logger: this.moduleLogger(id),
       core: () => this.buildCore(),

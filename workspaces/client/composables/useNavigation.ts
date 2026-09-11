@@ -18,6 +18,7 @@ export const useNavigation = (place: NavPlace) => {
         return true
       })
       .filter((item) => !item.permissions?.length || item.permissions.some((permission) => auth.has(permission)))
+      .filter((item) => typeof item.visible !== 'function' || item.visible())
       .map((item) => ({ ...item, href: item.configLink ? String(config.value?.[item.configLink] || '') : item.href }))
       .sort((a, b) => (a.order || 100) - (b.order || 100)),
   )

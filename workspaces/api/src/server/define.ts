@@ -1,6 +1,7 @@
 import { ConfigFieldSchema, ModulePermission } from '../manifest'
 import { getRegistry, ModuleContribution, registerContribution } from '../registry'
 import { EventBus } from '../events'
+import { HookBus } from '../hooks'
 import { Capabilities } from '../capabilities'
 import { core, coreReady } from './core'
 import { CoreApi, LoggerApi } from './types'
@@ -8,6 +9,7 @@ import { CoreApi, LoggerApi } from './types'
 export interface ModuleContext {
   id: string
   events: EventBus
+  hooks: HookBus
   capabilities: Capabilities
   logger: LoggerApi
   core: () => CoreApi
@@ -49,6 +51,7 @@ export const moduleContext = (id: string): ModuleContext => {
   return {
     id,
     events: registry.events,
+    hooks: registry.hooks,
     capabilities: registry.capabilities,
     logger: coreReady()
       ? core().logger(id)

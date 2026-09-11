@@ -1,5 +1,6 @@
 export const CORE_CAPABILITIES = [
   'core.events',
+  'core.hooks',
   'users.read',
   'config.read',
   'config.write',

@@ -17,6 +17,7 @@ export interface NavItem {
   order?: number
   exact?: boolean
   module?: boolean
+  visible?: () => boolean
 }
 
 export const CORE_NAVIGATION: NavItem[] = [

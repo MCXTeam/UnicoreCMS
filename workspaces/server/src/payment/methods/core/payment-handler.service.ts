@@ -10,7 +10,7 @@ import { Payment } from 'src/payment/entities/payment.entity';
 import { PaymentStatuses } from 'src/payment/enums/payment-statuses.enum';
 import { LessThanOrEqual, Repository } from 'typeorm';
 import { Transactional } from 'typeorm-transactional';
-import { events } from 'unicore-api';
+import { events, hooks } from 'unicore-api';
 import { AuditService } from 'src/common/audit';
 import { runAfterCommit } from 'src/common/utils/transaction';
 
@@ -93,8 +93,18 @@ export class PaymentHandlerService {
     await this.historyService.create(HistoryType.Payment, payment.ip, payment.user, payment);
 
     const reward = await this.referalsService.paymentReward(payment.user, paid);
+    const rewardAllowed =
+      reward &&
+      (await hooks().allowed('payment.referal', {
+        paymentId: id,
+        uuid: payment.user.uuid,
+        inviterUuid: reward.inviter.uuid,
+        paid,
+        percent: reward.percent,
+        amount: reward.amount,
+      }));
 
-    if (reward) {
+    if (reward && rewardAllowed) {
       await this.usersRepo.increment({ uuid: reward.inviter.uuid }, 'real', reward.amount);
       await this.historyService.create(HistoryType.ReferalReward, payment.ip, reward.inviter, payment.user, payment, reward.amount);
 
@@ -106,7 +116,9 @@ export class PaymentHandlerService {
       });
     }
 
-    runAfterCommit(() => events().emit('payment.paid', { id, uuid: payment.user.uuid, amount: credit, method: payment.method }));
+    runAfterCommit(() =>
+      events().emit('payment.paid', { id, uuid: payment.user.uuid, amount: credit, paid, method: payment.method }),
+    );
 
     this.auditService.record({
       action: 'payment.paid',

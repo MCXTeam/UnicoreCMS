@@ -8,7 +8,7 @@ export interface CoreEventMap {
   'user.banned': { uuid: string; username: string; reason?: string; until?: Date | null }
   'user.unbanned': { uuid: string; username: string }
   'payment.created': { id: number; uuid: string; amount: number; method: string }
-  'payment.paid': { id: number; uuid: string; amount: number; method: string }
+  'payment.paid': { id: number; uuid: string; amount: number; paid: number; method: string }
   'purchase.completed': { uuid: string; serverId: number; kind: 'product' | 'kit'; itemId: number; amount: number }
   'donate.group.granted': { uuid: string; serverId: number; groupId: number; seconds: number }
   'donate.group.revoked': { uuid: string; serverId: number; groupId: number }
