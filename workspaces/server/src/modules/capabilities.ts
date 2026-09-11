@@ -9,6 +9,7 @@ export const CORE_CAPABILITIES = [
   'issuance.group',
   'issuance.permission',
   'issuance.commands',
+  'issuance.queue',
   'servers.online',
   'payments.methods',
   'payments.credit',

@@ -156,7 +156,7 @@ export class DonatePermissionsService {
     runAfterCommit(() =>
       events().emit('donate.permission.granted', {
         uuid: user.uuid,
-        serverId: Number(server?.id || 0),
+        serverId: String(server?.id ?? ''),
         permissionId: permission.id,
         seconds,
       }),
@@ -197,7 +197,7 @@ export class DonatePermissionsService {
     runAfterCommit(() =>
       events().emit('donate.permission.revoked', {
         uuid: udp.user.uuid,
-        serverId: Number(udp.server?.id || 0),
+        serverId: String(udp.server?.id ?? ""),
         permissionId: udp.permission.id,
       }),
     );

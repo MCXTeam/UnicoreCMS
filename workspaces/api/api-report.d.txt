@@ -72,7 +72,7 @@ declare const clientSlots: (slot: ClientSlotName) => ClientSlotEntry[];
 export { CLIENT_NAV_PLACES, CLIENT_SLOTS, type ClientModuleDefinition, type ClientNavItem, type ClientNavPlace, type ClientNavSource, type ClientSlotEntry, type ClientSlotName, type SlotComponent, clientModules, clientNav, clientSlots, defineClientModule, moduleActive, setActiveModules };
 
 === index.d.ts ===
-export { A as ACTIVE_MODULES_KEY, a as ALLOW_INACTIVE_KEY, b as API_MAJOR, c as API_VERSION, d as AuditSink, C as CORE_API, e as CacheApi, f as Capabilities, g as ConfigApi, h as CoreApi, i as CoreEventMap, j as CoreEventName, k as CoreHookMap, l as CoreHookName, E as EVENT_BUS, m as EventBus, n as EventErrorReporter, o as EventHandler, H as HookBus, p as HookErrorReporter, q as HookHandler, I as IS_PUBLIC_KEY, r as IssuanceApi, s as IssuanceGroupRef, t as IssuancePermissionRef, u as IssuanceProductRef, v as IssuanceServerRef, w as IssuanceTarget, L as LocalesApi, x as LoggerApi, M as MODULE_CONFIG, y as MODULE_ID, z as MODULE_ID_PATTERN, B as MailApi, D as ModuleAuditAction, F as ModuleAuditActor, G as ModuleAuditActorType, J as ModuleAuditClass, K as ModuleAuditEntry, N as ModuleAuditStatus, O as ModuleAuditTarget, P as ModuleContext, Q as ModuleContribution, R as ModuleDefinition, S as MoneyApi, T as PERMISSIONS_KEY, U as PaymentCoreModule, V as PaymentCoreService, W as PaymentCreateInput, X as PaymentLink, Y as PaymentsApi, Z as REGISTRY_SYMBOL, _ as Registry, $ as ServerOnline, a0 as ServerRecord, a1 as ServersApi, a2 as SkinRecord, a3 as StaffApi, a4 as StaffMember, a5 as StorageApi, a6 as THEME_ID_PATTERN, a7 as Translatable, a8 as TranslatableAccess, a9 as TranslatableMeta, aa as UnicoreApiNotReadyError, ab as UserRecord, ac as UsersApi, ad as WebhookChannel, ae as WebhookDeliveryResult, af as WebhookPost, ag as WebhookTarget, ah as WebhooksApi, ai as audit, aj as capabilities, ak as contribution, al as contributions, am as core, an as coreReady, ao as defineModule, ap as events, aq as getRegistry, ar as hooks, as as moduleAuditActionKey, at as moduleContext, au as modulePrefixes, av as registerContribution, aw as setAuditSink, ax as setCore, ay as translatableByEntity, az as translatableEntities, aA as translatableOf } from './translatable-Da_torYx.js';
+export { A as ACTIVE_MODULES_KEY, a as ALLOW_INACTIVE_KEY, b as API_MAJOR, c as API_VERSION, d as AuditSink, C as CORE_API, e as CacheApi, f as Capabilities, g as ConfigApi, h as CoreApi, i as CoreEventMap, j as CoreEventName, k as CoreHookMap, l as CoreHookName, E as EVENT_BUS, m as EventBus, n as EventErrorReporter, o as EventHandler, H as HookBus, p as HookErrorReporter, q as HookHandler, I as IS_PUBLIC_KEY, r as IssuanceApi, s as IssuanceGroupRef, t as IssuancePermissionRef, u as IssuanceProductRef, v as IssuanceServerRef, w as IssuanceTarget, L as LocalesApi, x as LoggerApi, M as MODULE_CONFIG, y as MODULE_ID, z as MODULE_ID_PATTERN, B as MailApi, D as ModuleAuditAction, F as ModuleAuditActor, G as ModuleAuditActorType, J as ModuleAuditClass, K as ModuleAuditEntry, N as ModuleAuditStatus, O as ModuleAuditTarget, P as ModuleContext, Q as ModuleContribution, R as ModuleDefinition, S as MoneyApi, T as PERMISSIONS_KEY, U as PaymentCoreModule, V as PaymentCoreService, W as PaymentCreateInput, X as PaymentLink, Y as PaymentsApi, Z as REGISTRY_SYMBOL, _ as Registry, $ as ServerOnline, a0 as ServerRecord, a1 as ServersApi, a2 as SkinRecord, a3 as StaffApi, a4 as StaffMember, a5 as StorageApi, a6 as THEME_ID_PATTERN, a7 as Translatable, a8 as TranslatableAccess, a9 as TranslatableMeta, aa as UnicoreApiNotReadyError, ab as UserRecord, ac as UsersApi, ad as WebhookChannel, ae as WebhookDeliveryResult, af as WebhookPost, ag as WebhookTarget, ah as WebhooksApi, ai as audit, aj as capabilities, ak as contribution, al as contributions, am as core, an as coreReady, ao as defineModule, ap as events, aq as getRegistry, ar as hooks, as as moduleAuditActionKey, at as moduleContext, au as modulePrefixes, av as registerContribution, aw as setAuditSink, ax as setCore, ay as translatableByEntity, az as translatableEntities, aA as translatableOf } from './translatable-Cx1tQiS4.js';
 export { ConfigFieldSchema, ConfigFieldType, LocalizedText, ModuleManifest, ModulePermission, ModulePermissionSchema, PRIMEVUE_PRESETS, PrimeVuePreset, ThemeManifest, ValidationResult, localizedText, modulePermissionKey, modulePermissionMeta, validateModuleManifest, validateThemeManifest } from './manifest.js';
 export { RoleAppearance } from 'unicore-common';
 import 'typeorm';
@@ -197,7 +197,7 @@ declare const resolveLayers: (options: ResolveLayersOptions) => ResolvedLayers;
 export { type LayerSide, type ResolveLayersOptions, type ResolvedLayers, type ResolvedModuleLayer, type ResolvedThemeLayer, guardLayers, resolveLayers };
 
 === server/index.d.ts ===
-export { A as ACTIVE_MODULES_KEY, a as ALLOW_INACTIVE_KEY, b as API_MAJOR, c as API_VERSION, C as CORE_API, e as CacheApi, f as Capabilities, g as ConfigApi, h as CoreApi, i as CoreEventMap, j as CoreEventName, k as CoreHookMap, l as CoreHookName, E as EVENT_BUS, m as EventBus, n as EventErrorReporter, o as EventHandler, H as HookBus, p as HookErrorReporter, q as HookHandler, I as IS_PUBLIC_KEY, r as IssuanceApi, s as IssuanceGroupRef, t as IssuancePermissionRef, u as IssuanceProductRef, v as IssuanceServerRef, w as IssuanceTarget, L as LocalesApi, x as LoggerApi, M as MODULE_CONFIG, y as MODULE_ID, z as MODULE_ID_PATTERN, B as MailApi, P as ModuleContext, Q as ModuleContribution, R as ModuleDefinition, S as MoneyApi, T as PERMISSIONS_KEY, U as PaymentCoreModule, V as PaymentCoreService, W as PaymentCreateInput, X as PaymentLink, Y as PaymentsApi, Z as REGISTRY_SYMBOL, _ as Registry, $ as ServerOnline, a0 as ServerRecord, a1 as ServersApi, a2 as SkinRecord, a3 as StaffApi, a4 as StaffMember, a5 as StorageApi, a6 as THEME_ID_PATTERN, a7 as Translatable, a8 as TranslatableAccess, a9 as TranslatableMeta, aa as UnicoreApiNotReadyError, ab as UserRecord, ac as UsersApi, ad as WebhookChannel, ae as WebhookDeliveryResult, af as WebhookPost, ag as WebhookTarget, ah as WebhooksApi, ai as audit, aj as capabilities, ak as contribution, al as contributions, am as core, an as coreReady, ao as defineModule, ap as events, aq as getRegistry, ar as hooks, at as moduleContext, au as modulePrefixes, av as registerContribution, aw as setAuditSink, ax as setCore, ay as translatableByEntity, az as translatableEntities, aA as translatableOf } from '../translatable-Da_torYx.js';
+export { A as ACTIVE_MODULES_KEY, a as ALLOW_INACTIVE_KEY, b as API_MAJOR, c as API_VERSION, C as CORE_API, e as CacheApi, f as Capabilities, g as ConfigApi, h as CoreApi, i as CoreEventMap, j as CoreEventName, k as CoreHookMap, l as CoreHookName, E as EVENT_BUS, m as EventBus, n as EventErrorReporter, o as EventHandler, H as HookBus, p as HookErrorReporter, q as HookHandler, I as IS_PUBLIC_KEY, r as IssuanceApi, s as IssuanceGroupRef, t as IssuancePermissionRef, u as IssuanceProductRef, v as IssuanceServerRef, w as IssuanceTarget, L as LocalesApi, x as LoggerApi, M as MODULE_CONFIG, y as MODULE_ID, z as MODULE_ID_PATTERN, B as MailApi, P as ModuleContext, Q as ModuleContribution, R as ModuleDefinition, S as MoneyApi, T as PERMISSIONS_KEY, U as PaymentCoreModule, V as PaymentCoreService, W as PaymentCreateInput, X as PaymentLink, Y as PaymentsApi, Z as REGISTRY_SYMBOL, _ as Registry, $ as ServerOnline, a0 as ServerRecord, a1 as ServersApi, a2 as SkinRecord, a3 as StaffApi, a4 as StaffMember, a5 as StorageApi, a6 as THEME_ID_PATTERN, a7 as Translatable, a8 as TranslatableAccess, a9 as TranslatableMeta, aa as UnicoreApiNotReadyError, ab as UserRecord, ac as UsersApi, ad as WebhookChannel, ae as WebhookDeliveryResult, af as WebhookPost, ag as WebhookTarget, ah as WebhooksApi, ai as audit, aj as capabilities, ak as contribution, al as contributions, am as core, an as coreReady, ao as defineModule, ap as events, aq as getRegistry, ar as hooks, at as moduleContext, au as modulePrefixes, av as registerContribution, aw as setAuditSink, ax as setCore, ay as translatableByEntity, az as translatableEntities, aA as translatableOf } from '../translatable-Cx1tQiS4.js';
 export { ConfigFieldSchema, ConfigFieldType, LocalizedText, ModuleManifest, ModulePermission, ModulePermissionSchema, PRIMEVUE_PRESETS, PrimeVuePreset, ThemeManifest, ValidationResult, localizedText, modulePermissionKey, modulePermissionMeta, validateModuleManifest, validateThemeManifest } from '../manifest.js';
 import * as _nestjs_common from '@nestjs/common';
 import { CronOptions } from '@nestjs/schedule';
@@ -215,11 +215,11 @@ declare const UserAgent: (...dataOrPipes: unknown[]) => ParameterDecorator;
 declare function SafeCron(expression: string, task: string, options?: CronOptions): MethodDecorator;
 export { AllowInactive, CurrentUser, IpAddress, type PermissionOptions, Permissions, Public, SafeCron, UserAgent };
 
-=== translatable-Da_torYx.d.ts ===
+=== translatable-Cx1tQiS4.d.ts ===
 import { ModulePermission, ConfigFieldSchema } from './manifest.js';
 import { DataSource } from 'typeorm';
 import { RoleAppearance } from 'unicore-common';
-declare const API_VERSION = "1.10.0";
+declare const API_VERSION = "1.11.0";
 declare const API_MAJOR: number;
 declare const IS_PUBLIC_KEY = "isPublic";
 declare const PERMISSIONS_KEY = "permissions";
@@ -285,31 +285,31 @@ interface CoreEventMap {
     };
     'purchase.completed': {
         uuid: string;
-        serverId: number;
+        serverId: string;
         kind: 'product' | 'kit';
         itemId: number;
         amount: number;
     };
     'donate.group.granted': {
         uuid: string;
-        serverId: number;
+        serverId: string;
         groupId: number;
         seconds: number;
     };
     'donate.group.revoked': {
         uuid: string;
-        serverId: number;
+        serverId: string;
         groupId: number;
     };
     'donate.permission.granted': {
         uuid: string;
-        serverId: number;
+        serverId: string;
         permissionId: number;
         seconds: number;
     };
     'donate.permission.revoked': {
         uuid: string;
-        serverId: number;
+        serverId: string;
         permissionId: number;
     };
     'gift.activated': {
@@ -530,6 +530,7 @@ interface IssuanceApi {
     deliverPermission(user: IssuanceTarget, server: IssuanceServerRef, permission: IssuancePermissionRef, seconds?: number): Promise<boolean>;
     removePermission(user: IssuanceTarget, server: IssuanceServerRef, permission: IssuancePermissionRef): Promise<boolean>;
     runCommands(serverId: string | number, commands: string[]): Promise<void>;
+    queueCommands(serverId: string | number, commands: string[], label?: string): Promise<number>;
 }
 interface ServerRecord {
     id: string;

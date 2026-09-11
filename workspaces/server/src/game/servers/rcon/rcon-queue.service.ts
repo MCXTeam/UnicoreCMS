@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { randomUUID } from 'crypto';
 import { In, LessThan, Repository } from 'typeorm';
-import { RconCommandStatus } from 'unicore-common';
+import { RconCommandStatus, sanitizeCommandValue } from 'unicore-common';
 import { RconCommand } from './entities/rcon-command.entity';
 import { RconService } from './rcon.service';
 import {
@@ -43,7 +43,7 @@ export class RconQueueService {
   private build(serverId: string, command: string, meta: EnqueueMeta): RconCommand {
     return this.queueRepository.create({
       serverId,
-      command,
+      command: sanitizeCommandValue(command),
       label: meta.label,
       kind: meta.kind,
       status: RconCommandStatus.Pending,

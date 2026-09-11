@@ -18,6 +18,7 @@ export enum IssuanceKind {
   GroupRemove = "group_remove",
   PermSet = "perm_set",
   PermUnset = "perm_unset",
+  Module = "module",
 }
 
 export interface PlaceholderDef {

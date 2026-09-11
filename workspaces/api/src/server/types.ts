@@ -81,6 +81,7 @@ export interface IssuanceApi {
   deliverPermission(user: IssuanceTarget, server: IssuanceServerRef, permission: IssuancePermissionRef, seconds?: number): Promise<boolean>
   removePermission(user: IssuanceTarget, server: IssuanceServerRef, permission: IssuancePermissionRef): Promise<boolean>
   runCommands(serverId: string | number, commands: string[]): Promise<void>
+  queueCommands(serverId: string | number, commands: string[], label?: string): Promise<number>
 }
 
 export interface ServerRecord {

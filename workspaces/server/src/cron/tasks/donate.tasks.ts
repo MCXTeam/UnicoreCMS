@@ -10,6 +10,7 @@ import { PermissionType } from 'src/game/donate/permissions/enums/permission-typ
 import { IssuanceService } from 'src/game/servers/rcon/issuance.service';
 import { DonateWebRoleService } from 'src/game/donate/web-role.service';
 import { Repository } from 'typeorm';
+import { events } from 'unicore-api';
 
 @Injectable()
 export class DonateTasks {
@@ -48,6 +49,13 @@ export class DonateTasks {
     for (const udg of await this.udRepository.remove(expiresUD)) {
       await this.webRoles.revokeGroupRole(udg.user?.uuid, udg.group?.id);
 
+      if (udg.user?.uuid && udg.group?.id)
+        await events().emit('donate.group.revoked', {
+          uuid: udg.user.uuid,
+          serverId: String(udg.server?.id ?? ''),
+          groupId: udg.group.id,
+        });
+
       this.eventsService.emitKernel('take_group', udg, udg.server?.id);
 
       if (this.issuanceService.isRcon(udg.server)) {
@@ -60,6 +68,13 @@ export class DonateTasks {
 
     for (const udp of await this.upRepository.remove(expiresUP)) {
       await this.webRoles.revokePermissionRole(udp.user?.uuid, udp.permission?.id);
+
+      if (udp.user?.uuid && udp.permission?.id)
+        await events().emit('donate.permission.revoked', {
+          uuid: udp.user.uuid,
+          serverId: String(udp.server?.id ?? ''),
+          permissionId: udp.permission.id,
+        });
 
       if (udp.permission?.type != PermissionType.Web) {
         this.eventsService.emitKernel('take_permission', udp, udp.server?.id);

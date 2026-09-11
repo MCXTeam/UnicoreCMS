@@ -249,6 +249,7 @@ export class ApiHostService implements OnApplicationBootstrap, OnApplicationShut
         runCommands: async (serverId, commands) => {
           await this.rconService.sendCommands(String(serverId), commands);
         },
+        queueCommands: (serverId, commands, label) => this.issuanceService.queueCommands(String(serverId), commands, label),
       },
       staff: {
         members: () => this.staffMembers(),

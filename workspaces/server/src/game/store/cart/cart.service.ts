@@ -460,7 +460,7 @@ export class CartService {
           await this.historyService.create(HistoryType.ProductPurchase, ip, user, ci.product, ci.server, ci.amount, cost);
           await events().emit('purchase.completed', {
             uuid: user.uuid,
-            serverId: Number(ci.server.id),
+            serverId: String(ci.server.id),
             kind: 'product',
             itemId: ci.product.id,
             amount: ci.amount,
@@ -473,7 +473,7 @@ export class CartService {
           await this.historyService.create(HistoryType.KitPurchase, ip, user, cik.kit, cik.server, cost);
           await events().emit('purchase.completed', {
             uuid: user.uuid,
-            serverId: Number(cik.server.id),
+            serverId: String(cik.server.id),
             kind: 'kit',
             itemId: cik.kit.id,
             amount: 1,

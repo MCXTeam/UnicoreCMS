@@ -162,6 +162,12 @@ export class IssuanceService {
     return true;
   }
 
+  async queueCommands(serverId: string, commands: string[], label?: string): Promise<number> {
+    const queued = await this.rconQueue.enqueueMany(serverId, commands, { label, kind: IssuanceKind.Module });
+
+    return queued.length;
+  }
+
   private async getTemplate(key: ConfigField): Promise<string> {
     const config = await this.configService.load();
     const value = config[key];

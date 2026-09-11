@@ -9,11 +9,11 @@ export interface CoreEventMap {
   'user.unbanned': { uuid: string; username: string }
   'payment.created': { id: number; uuid: string; amount: number; method: string }
   'payment.paid': { id: number; uuid: string; amount: number; paid: number; method: string }
-  'purchase.completed': { uuid: string; serverId: number; kind: 'product' | 'kit'; itemId: number; amount: number }
-  'donate.group.granted': { uuid: string; serverId: number; groupId: number; seconds: number }
-  'donate.group.revoked': { uuid: string; serverId: number; groupId: number }
-  'donate.permission.granted': { uuid: string; serverId: number; permissionId: number; seconds: number }
-  'donate.permission.revoked': { uuid: string; serverId: number; permissionId: number }
+  'purchase.completed': { uuid: string; serverId: string; kind: 'product' | 'kit'; itemId: number; amount: number }
+  'donate.group.granted': { uuid: string; serverId: string; groupId: number; seconds: number }
+  'donate.group.revoked': { uuid: string; serverId: string; groupId: number }
+  'donate.permission.granted': { uuid: string; serverId: string; permissionId: number; seconds: number }
+  'donate.permission.revoked': { uuid: string; serverId: string; permissionId: number }
   'gift.activated': { uuid: string; promocode: string; type: string }
   'news.published': { id: number; title: string }
 }
