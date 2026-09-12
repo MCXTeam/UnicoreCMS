@@ -15,5 +15,14 @@ export default defineConfig({
   sourcemap: true,
   splitting: false,
   target: "es2021",
-  external: ["@nestjs/common", "@nestjs/core", "@nestjs/schedule", "typeorm", "rxjs", "reflect-metadata"],
+  external: [
+    "@nestjs/common",
+    "@nestjs/core",
+    "@nestjs/schedule",
+    "typeorm",
+    "rxjs",
+    "reflect-metadata",
+    "class-transformer",
+    "class-validator",
+  ],
 });

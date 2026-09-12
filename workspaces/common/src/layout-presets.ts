@@ -8,7 +8,6 @@ const link = (id: string, labelKey: string, extra: Partial<LayoutLink> = {}): La
 
 const CORE_NAVBAR: LayoutLink[] = [
   link("servers", "header.servers", { to: "/servers", icon: "bx bx-server" }),
-  link("forum", "header.forum", { configLink: "public_link_forum", icon: "bx bx-chat" }),
   link("rules", "header.rules", { to: "/page/rules", icon: "bx bx-paperclip" }),
   link("donate", "header.donate", { to: "/donate", icon: "bx bx-donate-heart" }),
 ];
@@ -16,7 +15,6 @@ const CORE_NAVBAR: LayoutLink[] = [
 const CORE_FOOTER: LayoutLink[] = [
   link("home", "header.home", { to: "/", icon: "bx bx-home" }),
   link("servers", "header.servers", { to: "/servers", icon: "bx bx-server" }),
-  link("forum", "header.forum", { configLink: "public_link_forum", icon: "bx bx-chat" }),
   link("rules", "header.rules", { to: "/page/rules", icon: "bx bx-paperclip" }),
   link("donate", "header.donate", { to: "/donate", icon: "bx bx-donate-heart" }),
   link("start", "header.start", { to: "/start", icon: "bx bx-play" }),
@@ -33,6 +31,7 @@ export const DEFAULT_HEADER: LayoutDefinition = builder([
       { id: "logo", type: "logo", size: 64 },
       { id: "nav", type: "nav", links: CORE_NAVBAR, hideOn: ["mobile"] },
       { id: "spacer", type: "spacer", grow: true },
+      { id: "notifications", type: "notifications", when: "auth" },
       { id: "login", type: "login" },
       { id: "launcher", type: "launcher" },
       { id: "locale", type: "locale", hideOn: ["mobile"] },
@@ -93,6 +92,7 @@ export const LAYOUT_PRESETS: LayoutPreset[] = [
           { id: "spacer-left", type: "spacer", grow: true },
           { id: "nav", type: "nav", links: CORE_NAVBAR, hideOn: ["mobile"] },
           { id: "spacer-right", type: "spacer", grow: true },
+          { id: "notifications", type: "notifications", when: "auth" },
           { id: "login", type: "login" },
           { id: "locale", type: "locale", hideOn: ["mobile"] },
           { id: "theme", type: "theme", hideOn: ["mobile"] },
@@ -111,6 +111,7 @@ export const LAYOUT_PRESETS: LayoutPreset[] = [
         blocks: [
           { id: "logo", type: "logo", size: 48 },
           { id: "spacer", type: "spacer", grow: true },
+          { id: "notifications", type: "notifications", when: "auth" },
           { id: "launcher", type: "launcher" },
           { id: "login", type: "login" },
         ],
@@ -135,6 +136,7 @@ export const LAYOUT_PRESETS: LayoutPreset[] = [
           { id: "nav", type: "nav", links: CORE_NAVBAR, hideOn: ["mobile"] },
           { id: "spacer", type: "spacer", grow: true },
           { id: "online", type: "online", hideOn: ["mobile"] },
+          { id: "notifications", type: "notifications", when: "auth" },
           { id: "login", type: "login" },
           { id: "launcher", type: "launcher" },
           { id: "locale", type: "locale", hideOn: ["mobile"] },

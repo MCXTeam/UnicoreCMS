@@ -49,6 +49,7 @@
           <template v-else-if="block.type === 'launcher'"><span class="lp__btn">{{ $t('header.start') }}</span></template>
           <template v-else-if="block.type === 'locale'"><span class="lp__pill">RU</span></template>
           <template v-else-if="block.type === 'theme'"><i class="bx bxs-moon lp__icon" /></template>
+          <template v-else-if="block.type === 'notifications'"><i class="bx bx-bell lp__icon" /></template>
           <template v-else-if="block.type === 'online'">
             <span class="lp__dot" />{{ $t('header.online') }} <b>128</b>
           </template>

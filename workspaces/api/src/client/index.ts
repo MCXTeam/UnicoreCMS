@@ -41,6 +41,7 @@ export interface ClientNavItem {
   places?: ClientNavPlace[]
   order?: number
   visible?: () => boolean
+  inline?: boolean
 }
 
 export type SlotComponent = string | object

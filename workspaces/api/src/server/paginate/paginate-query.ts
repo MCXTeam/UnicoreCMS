@@ -1,12 +1,17 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { Request } from 'express';
 import {
   PAGINATE_FILTER_PATTERN,
   PAGINATE_SORT_DIRECTIONS,
   PAGINATE_SORT_PATTERN,
   PAGINATE_SORT_SEPARATOR,
   PaginateSortDirection,
-} from '../constants';
+} from './constants'
+
+export interface PaginateRequest {
+  query?: Record<string, unknown>
+  originalUrl?: string
+  url?: string
+}
 
 export type PaginateSort = [string, PaginateSortDirection];
 
@@ -85,7 +90,7 @@ function filters(query: Query): Record<string, string | string[]> | undefined {
   return Object.keys(collected).length ? collected : undefined;
 }
 
-export function parsePaginateQuery(request: Request): PaginateQuery {
+export function parsePaginateQuery(request: PaginateRequest): PaginateQuery {
   const query = (request.query ?? {}) as Query;
   const search = query.search;
 

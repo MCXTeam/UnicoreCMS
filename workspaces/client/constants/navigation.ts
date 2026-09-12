@@ -18,12 +18,12 @@ export interface NavItem {
   exact?: boolean
   module?: boolean
   visible?: () => boolean
+  inline?: boolean
 }
 
 export const CORE_NAVIGATION: NavItem[] = [
   { key: 'home', to: '/', label: 'header.home', icon: 'bx bx-home', places: ['footer'], order: 5 },
   { key: 'servers', to: '/servers', label: 'header.servers', icon: 'bx bx-server', places: ['navbar', 'footer'], order: 10 },
-  { key: 'forum', configLink: 'public_link_forum', label: 'header.forum', icon: 'bx bx-chat', places: ['navbar', 'footer'], order: 20 },
   { key: 'rules', to: '/page/rules', label: 'header.rules', icon: 'bx bx-paperclip', places: ['navbar', 'footer'], order: 30 },
   { key: 'donate', to: '/donate', label: 'header.donate', icon: 'bx bx-donate-heart', places: ['navbar', 'footer'], order: 40 },
   { key: 'start', to: '/start', label: 'header.start', icon: 'bx bx-play', places: ['footer'], order: 50 },
@@ -77,6 +77,14 @@ export const CORE_NAVIGATION: NavItem[] = [
     icon: 'bx bx-history',
     places: ['cabinet.tabs'],
     order: 60,
+  },
+  {
+    key: 'cabinet.notifications',
+    to: '/cabinet/notifications',
+    label: 'notifications.tab',
+    icon: 'bx bx-bell',
+    places: ['cabinet.tabs'],
+    order: 65,
   },
   { key: 'cabinet.auth', to: '/cabinet/auth', label: 'cabinet.tab_auth', icon: 'bx bx-bug', places: ['cabinet.tabs'], order: 70 },
   {

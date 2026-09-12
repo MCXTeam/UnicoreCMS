@@ -7,7 +7,7 @@ import {
   PAGINATE_MAX_LIMIT,
   PAGINATE_OPERATORS,
   PaginateSortDirection,
-} from '../constants';
+} from './constants'
 import { PaginateQuery, PaginateSort } from './paginate-query';
 
 export enum FilterOperator {

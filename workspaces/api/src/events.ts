@@ -1,3 +1,5 @@
+export type DonateRevokeReason = 'expired' | 'revoked'
+
 export interface CoreEventMap {
   'core.ready': { version: string }
   'core.shutdown': Record<string, never>
@@ -11,9 +13,9 @@ export interface CoreEventMap {
   'payment.paid': { id: number; uuid: string; amount: number; paid: number; method: string }
   'purchase.completed': { uuid: string; serverId: string; kind: 'product' | 'kit'; itemId: number; amount: number }
   'donate.group.granted': { uuid: string; serverId: string; groupId: number; seconds: number }
-  'donate.group.revoked': { uuid: string; serverId: string; groupId: number }
+  'donate.group.revoked': { uuid: string; serverId: string; groupId: number; reason: DonateRevokeReason }
   'donate.permission.granted': { uuid: string; serverId: string; permissionId: number; seconds: number }
-  'donate.permission.revoked': { uuid: string; serverId: string; permissionId: number }
+  'donate.permission.revoked': { uuid: string; serverId: string; permissionId: number; reason: DonateRevokeReason }
   'gift.activated': { uuid: string; promocode: string; type: string }
   'news.published': { id: number; title: string }
 }

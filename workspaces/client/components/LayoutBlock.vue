@@ -25,6 +25,14 @@
           <i v-if="link.icon" :class="link.icon"></i> {{ linkLabel(link) }}
         </NuxtLink>
       </template>
+      <template v-for="item in inlineModuleLinks" :key="item.key">
+        <a v-if="item.href" :href="item.href" target="_blank" class="layout-link">
+          <i v-if="item.icon" :class="item.icon"></i> {{ $t(item.label) }}
+        </a>
+        <NuxtLink v-else :to="item.to" class="layout-link">
+          <i v-if="item.icon" :class="item.icon"></i> {{ $t(item.label) }}
+        </NuxtLink>
+      </template>
       <div v-if="moduleLinks.length" ref="moreWrap" class="layout-more">
         <button class="layout-link layout-more__btn" :aria-expanded="moreOpen" @click.stop="moreOpen = !moreOpen">
           <i class="bx bx-dots-horizontal-rounded"></i> {{ $t('header.more') }}
@@ -85,6 +93,8 @@
       <i v-else class="bx bxs-moon"></i>
     </div>
 
+    <NotificationsBell v-else-if="block.type === 'notifications' && $auth.loggedIn" />
+
     <div v-else-if="block.type === 'online'" class="layout-block__online">
       <span class="layout-block__online-dot" />
       <span>{{ $t('header.online') }}</span>
@@ -144,7 +154,11 @@ const links = computed(() =>
     .filter((link) => link.to || link.href),
 )
 
-const moduleLinks = computed(() => (props.block.type === 'nav' ? navigation.value.filter((item: any) => item.module) : []))
+const modulePlaced = computed(() => (props.block.type === 'nav' ? navigation.value.filter((item: any) => item.module) : []))
+
+const inlineModuleLinks = computed(() => modulePlaced.value.filter((item: any) => item.inline))
+
+const moduleLinks = computed(() => modulePlaced.value.filter((item: any) => !item.inline))
 
 const linkLabel = (link: LayoutLink) => (link.labelKey ? $t(link.labelKey) : layoutText(link.label, locale.value))
 

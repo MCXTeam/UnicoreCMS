@@ -97,6 +97,11 @@
       "import": "./dist/news.mjs",
       "require": "./dist/news.js"
     },
+    "./notifications": {
+      "types": "./dist/notifications.d.ts",
+      "import": "./dist/notifications.mjs",
+      "require": "./dist/notifications.js"
+    },
     "./envconfig": {
       "types": "./dist/envconfig.d.ts",
       "import": "./dist/envconfig.mjs",

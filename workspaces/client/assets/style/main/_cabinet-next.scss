@@ -766,6 +766,48 @@
   }
 }
 
+.cab-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  &__remove {
+    align-self: center;
+    margin-left: auto;
+  }
+}
+
+.cab-toggle {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--cab-inner);
+
+  > i {
+    font-size: 20px;
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    margin-right: auto;
+
+    b {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    span {
+      font-size: 13px;
+      color: var(--cab-muted);
+    }
+  }
+}
+
 .cab-empty {
   display: flex;
   flex-direction: column;

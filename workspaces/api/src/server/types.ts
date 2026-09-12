@@ -19,6 +19,7 @@ export interface UserRecord {
   skin?: SkinRecord | null
   cloak?: SkinRecord | null
   role?: (RoleAppearance & { id?: string }) | null
+  roles: string[]
 }
 
 export interface IssuanceTarget {
@@ -52,7 +53,9 @@ export interface IssuancePermissionRef {
 }
 
 export interface UsersApi {
+  record(user: unknown): UserRecord | null
   getById(uuid: string): Promise<UserRecord | null>
+  getMany(uuids: string[]): Promise<UserRecord[]>
   getByUsername(username: string): Promise<UserRecord | null>
   getByEmail(email: string): Promise<UserRecord | null>
   search(query: string, limit?: number): Promise<UserRecord[]>
@@ -166,6 +169,39 @@ export interface CacheApi {
   del(key: string): Promise<void>
 }
 
+export interface SanitizeNarrow {
+  denyTags?: string[]
+  denyAttributes?: string[]
+}
+
+export interface HtmlApi {
+  sanitize(html: string, narrow?: SanitizeNarrow): string
+}
+
+export interface NotificationCategoryInput {
+  id: string
+  labelKey: string
+  hintKey?: string
+  icon?: string
+}
+
+export interface NotificationInput {
+  type: string
+  category: string
+  titleKey: string
+  bodyKey?: string
+  params?: Record<string, string | number>
+  link?: string
+  icon?: string
+}
+
+export interface NotificationsApi {
+  registerCategory(category: NotificationCategoryInput, moduleId?: string): void
+  send(uuid: string, input: NotificationInput): Promise<void>
+  sendMany(uuids: string[], input: NotificationInput): Promise<void>
+  unread(uuid: string): Promise<number>
+}
+
 export interface LoggerApi {
   log(message: string): void
   warn(message: string): void
@@ -184,6 +220,8 @@ export interface CoreApi {
   money: MoneyApi
   payments: PaymentsApi
   webhooks: WebhooksApi
+  notifications: NotificationsApi
+  html: HtmlApi
   mail: MailApi
   storage: StorageApi
   cache: CacheApi

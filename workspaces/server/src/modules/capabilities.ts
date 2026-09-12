@@ -14,6 +14,8 @@ export const CORE_CAPABILITIES = [
   'payments.methods',
   'payments.credit',
   'webhooks.send',
+  'notifications.send',
+  'html.sanitize',
   'mail.send',
   'storage.write',
   'cache',

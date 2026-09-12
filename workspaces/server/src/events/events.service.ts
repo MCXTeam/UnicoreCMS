@@ -1,15 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { MessageBody, SubscribeMessage } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import { UserDto } from 'src/admin/users/dto/user.dto';
-import UsersModule from 'src/admin/users/users.module';
-import { UsersService } from 'src/admin/users/users.service';
-import { WebhooksService } from 'src/admin/webhook/webhooks.service';
-import { AuthService } from 'src/auth/auth.service';
-import { GravitService } from 'src/auth/gravit/gravit.service';
 import { WS_PUBLIC_ROOM } from '@common';
 import { kernelServerRoom, userRoom } from 'src/auth/helpers';
-import { AuthSocket } from 'src/auth/interfaces/auth-socket.interface';
 
 @Injectable()
 export class EventsService {
@@ -33,5 +25,11 @@ export class EventsService {
     if (!this.server) return;
 
     this.server.to(WS_PUBLIC_ROOM).emit(event, payload);
+  }
+
+  emitUser(uuid: string, event: string, payload?: unknown): void {
+    if (!this.server || !uuid) return;
+
+    this.server.to(userRoom(uuid)).emit(event, payload);
   }
 }

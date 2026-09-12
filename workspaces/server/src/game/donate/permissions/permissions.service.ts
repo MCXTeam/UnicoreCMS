@@ -197,8 +197,9 @@ export class DonatePermissionsService {
     runAfterCommit(() =>
       events().emit('donate.permission.revoked', {
         uuid: udp.user.uuid,
-        serverId: String(udp.server?.id ?? ""),
+        serverId: String(udp.server?.id ?? ''),
         permissionId: udp.permission.id,
+        reason: 'revoked',
       }),
     );
 

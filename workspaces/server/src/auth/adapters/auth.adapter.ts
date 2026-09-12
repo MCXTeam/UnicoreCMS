@@ -9,7 +9,18 @@ import { kernelServerRoom, userRoom } from '../helpers';
 import { ApiKeyRoom } from '../helpers/api-key-room';
 import { AuthSocket } from '../interfaces/auth-socket.interface';
 import { TokensService } from '../tokens.service';
-import { handshakeIp, ipAllowed, isBanActive, WS_API_KEY_PREFIX, WS_BEARER_PREFIX, WS_PUBLIC_ROOM } from '@common';
+import {
+  cookieValue,
+  CSRF_COOKIE,
+  handshakeIp,
+  ipAllowed,
+  isBanActive,
+  REFRESH_COOKIE,
+  safeEqual,
+  WS_API_KEY_PREFIX,
+  WS_BEARER_PREFIX,
+  WS_PUBLIC_ROOM,
+} from '@common';
 
 interface AuthServices {
   tokens: TokensService;
@@ -47,7 +58,22 @@ export class AuthAdapter extends IoAdapter {
 
     const authorization = handshake.headers?.authorization;
 
-    return authorization?.startsWith(WS_BEARER_PREFIX) ? authorization.slice(WS_BEARER_PREFIX.length) : null;
+    if (authorization?.startsWith(WS_BEARER_PREFIX)) return authorization.slice(WS_BEARER_PREFIX.length);
+
+    return this.refreshTokenFromCookie(handshake);
+  }
+
+  private refreshTokenFromCookie(handshake: AuthSocket['handshake']): string | null {
+    if (!handshake.headers?.cookie) return null;
+
+    const source = { headers: handshake.headers as Record<string, any> };
+    const refresh = cookieValue(source, REFRESH_COOKIE);
+    const csrfCookie = cookieValue(source, CSRF_COOKIE);
+    const csrfSent = (handshake.auth as Record<string, unknown> | undefined)?.csrf;
+
+    if (!refresh || !csrfCookie || typeof csrfSent !== 'string') return null;
+
+    return safeEqual(csrfCookie, csrfSent) ? refresh : null;
   }
 
   private socketIp(socket: AuthSocket): string {

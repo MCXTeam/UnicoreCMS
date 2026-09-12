@@ -24,6 +24,7 @@
             <i class="bx bx-wallet-alt"></i>
             <span>{{ $utils.formatCurrency('real', $auth.user?.real) }}</span>
           </NuxtLink>
+          <NotificationsBell />
           <Button text class="cab-icon-btn" @click="$unicore.switchTheme()">
             <i v-if="$colorMode.preference == 'light'" class="bx bxs-sun"></i>
             <i v-else class="bx bxs-moon"></i>

@@ -16,7 +16,7 @@ import { ThrottlerModule } from './common/throttler/throttler.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MomentModule } from './moment';
 import { EventsModule } from './events/events.module';
-import { MailerModule } from '@nestjs-modules/mailer';
+import { AppMailerModule } from './admin/email/mailer.module';
 import { ormconfig } from './ormconfig';
 import { GravitModule } from './auth/gravit/gravit.module';
 import { GmlModule } from './auth/gml/gml.module';
@@ -65,22 +65,7 @@ export class AppLoggerMiddleware implements NestMiddleware {
     LoginAttemptsModule,
     RecaptchaModule,
     ThrottlerModule,
-    MailerModule.forRoot({
-      defaults: {
-        from: envConfig.mailFrom,
-      },
-      transport: {
-        service: envConfig.smtpService,
-        host: envConfig.smtpHost,
-        port: envConfig.smtpPort,
-        ignoreTLS: envConfig.smtpIgnoreTLS,
-        secure: envConfig.smtpSecure,
-        auth: {
-          user: envConfig.smtpUser,
-          pass: envConfig.smtpPassword,
-        },
-      },
-    }),
+    AppMailerModule,
     MomentModule,
     ScheduleModule.forRoot(),
     AuthModule,

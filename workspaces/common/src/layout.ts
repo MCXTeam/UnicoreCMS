@@ -18,6 +18,7 @@ export const LAYOUT_BLOCK_TYPES = [
   "locale",
   "theme",
   "online",
+  "notifications",
   "spacer",
 ] as const;
 
@@ -87,6 +88,7 @@ export const LAYOUT_PLACEHOLDERS = [
   "locale",
   "theme",
   "online",
+  "notifications",
   "year",
 ] as const;
 

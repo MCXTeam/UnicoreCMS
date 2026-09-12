@@ -7,8 +7,19 @@ import { GiftsModule } from './gifts/gifts.module';
 import { VotesModule } from './votes/votes.module';
 import { SettingsModule } from './settings/settings.module';
 import { BanModule } from './bans/bans.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
-  imports: [PlaytimeModule, HistoryModule, SkinModule, ReferalsModule, GiftsModule, VotesModule, SettingsModule, BanModule],
+  imports: [
+    PlaytimeModule,
+    HistoryModule,
+    SkinModule,
+    ReferalsModule,
+    GiftsModule,
+    VotesModule,
+    SettingsModule,
+    BanModule,
+    NotificationsModule,
+  ],
 })
 export class CabinetModule {}

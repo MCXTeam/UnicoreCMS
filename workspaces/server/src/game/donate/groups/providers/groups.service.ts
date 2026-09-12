@@ -212,7 +212,12 @@ export class DonateGroupsService {
     await this.webRoles.revokeGroupRole(udg.user.uuid, udg.group.id);
     runAfterCommit(() => this.eventsService.emitKernel('take_group', udg, udg.server?.id));
     runAfterCommit(() =>
-      events().emit('donate.group.revoked', { uuid: udg.user.uuid, serverId: String(udg.server.id), groupId: udg.group.id }),
+      events().emit('donate.group.revoked', {
+        uuid: udg.user.uuid,
+        serverId: String(udg.server.id),
+        groupId: udg.group.id,
+        reason: 'revoked',
+      }),
     );
 
     if (this.issuanceService.isRcon(udg.server)) {

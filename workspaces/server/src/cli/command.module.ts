@@ -5,6 +5,9 @@ import { DataSource } from 'typeorm';
 import { addTransactionalDataSource } from 'typeorm-transactional';
 import { enforceSessionTimezone } from 'src/common/database';
 import { AuditModule } from 'src/common/audit/audit.module';
+import { AppMailerModule } from 'src/admin/email/mailer.module';
+import { LocalesModule } from 'src/admin/locales/locales.module';
+import { MomentModule } from 'src/moment';
 import UsersModule from 'src/admin/users/users.module';
 import { PasswordModule } from 'src/auth/password/password.module';
 import { RecaptchaModule } from 'src/auth/recaptcha/recaptcha.module';
@@ -30,6 +33,9 @@ import { ExtensionSource } from 'src/modules/catalog/entities/extension-source.e
       isGlobal: true,
     }),
     AuditModule,
+    AppMailerModule,
+    MomentModule,
+    LocalesModule,
     UsersModule,
     PasswordModule,
     RecaptchaModule,

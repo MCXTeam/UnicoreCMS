@@ -21,6 +21,7 @@ export interface ModulePermissionSchema {
   group?: string
   scope?: 'server'
   danger?: boolean
+  granted?: boolean
 }
 
 export type ModulePermission = string | ModulePermissionSchema
@@ -227,12 +228,13 @@ export const modulePermissionKey = (permission: ModulePermission): string =>
 export const modulePermissionMeta = (
   id: string,
   permission: ModulePermission,
-): { group: string; scope?: 'server'; danger?: boolean } => {
+): { group: string; scope?: 'server'; danger?: boolean; granted?: boolean } => {
   if (typeof permission === 'string') return { group: `mod.${id}` }
 
   return {
     group: permission.group || `mod.${id}`,
     ...(permission.scope ? { scope: permission.scope } : {}),
     ...(permission.danger ? { danger: permission.danger } : {}),
+    ...(permission.granted ? { granted: permission.granted } : {}),
   }
 }

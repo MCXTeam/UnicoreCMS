@@ -21,6 +21,7 @@ export default defineConfig({
     "src/payments.ts",
     "src/locales.ts",
     "src/news.ts",
+    "src/notifications.ts",
     "src/issuance/index.ts",
     "src/validation/index.ts",
     "src/layout.ts",

@@ -20,7 +20,7 @@ export interface ParsedOption {
 }
 
 export function parseFlags(flags: string): ParsedOption {
-  const names = flags.match(CLI_OPTION_FLAG_PATTERN) ?? [];
+  const names: string[] = flags.match(CLI_OPTION_FLAG_PATTERN) ?? [];
 
   return {
     short: names.find((name) => !name.startsWith('--'))?.replace(/^-/, ''),

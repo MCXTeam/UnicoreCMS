@@ -14,7 +14,13 @@ export const AllowInactive = () => SetMetadata(ALLOW_INACTIVE_KEY, true)
 export const Permissions = (permissions: string[], options?: PermissionOptions) =>
   SetMetadata(PERMISSIONS_KEY, options ? [permissions, options] : permissions)
 
-export const CurrentUser = createParamDecorator((_data: unknown, ctx: ExecutionContext) => ctx.switchToHttp().getRequest().user)
+export const CurrentUser = createParamDecorator((_data: unknown, ctx: ExecutionContext) => {
+  const user = ctx.switchToHttp().getRequest().user
+
+  if (!user) return null
+
+  return coreReady() ? core().users.record(user) : user
+})
 
 export const IpAddress = createParamDecorator((_data: unknown, ctx: ExecutionContext) => ctx.switchToHttp().getRequest().ip)
 

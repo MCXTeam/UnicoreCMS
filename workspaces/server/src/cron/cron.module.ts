@@ -38,6 +38,7 @@ import { WebhooksModule } from 'src/admin/webhook/webhooks.module';
 import { VotesTasks } from './tasks/votes.tasks';
 import { Vote } from 'src/game/cabinet/votes/entities/vote.entity';
 import { VoteGift } from 'src/game/cabinet/votes/entities/vote-gift.entity';
+import { NotificationTasks } from './tasks/notifications.tasks';
 
 @Module({
   imports: [
@@ -83,6 +84,7 @@ import { VoteGift } from 'src/game/cabinet/votes/entities/vote-gift.entity';
     RconTasks,
     WebhookTasks,
     AuditTasks,
+    NotificationTasks,
   ],
 })
 export class CronModule {}

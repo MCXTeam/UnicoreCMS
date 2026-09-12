@@ -54,6 +54,7 @@ export class DonateTasks {
           uuid: udg.user.uuid,
           serverId: String(udg.server?.id ?? ''),
           groupId: udg.group.id,
+          reason: 'expired',
         });
 
       this.eventsService.emitKernel('take_group', udg, udg.server?.id);
@@ -74,6 +75,7 @@ export class DonateTasks {
           uuid: udp.user.uuid,
           serverId: String(udp.server?.id ?? ''),
           permissionId: udp.permission.id,
+          reason: 'expired',
         });
 
       if (udp.permission?.type != PermissionType.Web) {

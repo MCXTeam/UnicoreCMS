@@ -5,7 +5,7 @@ import { Cache } from 'cache-manager';
 import { DataSource } from 'typeorm';
 import { API_VERSION, capabilities, events, hooks, setCore } from 'unicore-api';
 import type { CoreApi, LoggerApi, StaffMember, UserRecord } from 'unicore-api';
-import { formatError, stdout } from '@common';
+import { formatError, sanitizeHtml, stdout } from '@common';
 import { staffGroupAppearance, staffRoleAppearance } from 'unicore-common';
 import { StorageManager } from 'src/common/storage/storage.class';
 import { ConfigService } from 'src/admin/config/config.service';
@@ -13,7 +13,7 @@ import { LocalesService } from 'src/admin/locales/locales.service';
 import { UsersService } from 'src/admin/users/users.service';
 import { User } from 'src/admin/users/entities/user.entity';
 import { roleAppearanceOf, roleAppearanceRecord } from 'src/admin/roles/dto/role-appearance.dto';
-import { matchPermission, transformPermissions } from 'src/admin/roles/guards/permisson.guard';
+import { effectivePermissions, matchPermission, transformPermissions } from 'src/admin/roles/guards/permisson.guard';
 import { IssuanceService } from 'src/game/servers/rcon/issuance.service';
 import { RconService } from 'src/game/servers/rcon/rcon.service';
 import { RconModule } from 'src/game/servers/rcon/rcon.module';
@@ -34,9 +34,11 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigModule } from 'src/admin/config/config.module';
 import UsersModule from 'src/admin/users/users.module';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, IsNull, MoreThan } from 'typeorm';
+import { Repository, In, IsNull, MoreThan } from 'typeorm';
 import { Role } from 'src/admin/roles/entities/role.entity';
 import { UsersDonateGroup } from 'src/game/donate/groups/entities/user-donate.entity';
+import { NotificationsService } from 'src/game/cabinet/notifications/notifications.service';
+import { registerNotificationCategory } from 'src/game/cabinet/notifications/notification-categories';
 import { CORE_CAPABILITIES } from './capabilities';
 import { moduleRuntime } from './runtime';
 
@@ -58,6 +60,7 @@ export class ApiHostService implements OnApplicationBootstrap, OnApplicationShut
     private readonly paymentHandler: PaymentHandlerService,
     private readonly webhookDeliveries: WebhookDeliveriesService,
     private readonly mailerService: MailerService,
+    private readonly notificationsService: NotificationsService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     @InjectRepository(Role) private readonly roles: Repository<Role>,
     @InjectRepository(UsersDonateGroup) private readonly userGroups: Repository<UsersDonateGroup>,
@@ -107,7 +110,7 @@ export class ApiHostService implements OnApplicationBootstrap, OnApplicationShut
       hooks: hooks(),
       capabilities: capabilities(),
       logger: this.moduleLogger(id),
-      core: () => this.buildCore(),
+      core: () => this.buildCore(id),
     };
   }
 
@@ -120,10 +123,11 @@ export class ApiHostService implements OnApplicationBootstrap, OnApplicationShut
       email: user.email,
       activated: Boolean(user.activated),
       superuser: Boolean(user.superuser),
-      perms: user.perms || [],
+      perms: effectivePermissions({ ...user, perms: [...(user.perms || [])], roles: [...(user.roles || [])] }).perms || [],
       skin: user.skin ? { file: user.skin.file, slim: Boolean(user.skin.slim) } : null,
       cloak: user.cloak ? { file: user.cloak.file } : null,
       role: roleAppearanceRecord(user.roles),
+      roles: (user.roles || []).map((role) => role.id),
     };
   }
 
@@ -186,13 +190,23 @@ export class ApiHostService implements OnApplicationBootstrap, OnApplicationShut
     for (const failure of runtime.failures) this.logger.warn(`Модуль ${failure.id} не загружен: ${failure.reason}`);
   }
 
-  private buildCore(): CoreApi {
+  private buildCore(moduleId: string | null = null): CoreApi {
     return {
       version: API_VERSION,
       users: {
-        getById: async (uuid) => this.userRecord(await this.usersService.getById(uuid).catch(() => null)),
-        getByUsername: async (username) => this.userRecord(await this.usersService.getByUsername(username).catch(() => null)),
-        getByEmail: async (email) => this.userRecord(await this.usersService.getByEmail(email).catch(() => null)),
+        record: (user) => this.userRecord(user as User),
+        getById: async (uuid) => this.userRecord(await this.usersService.getById(uuid, ['roles']).catch(() => null)),
+        getMany: async (uuids) => {
+          const unique = [...new Set((uuids || []).filter(Boolean))];
+
+          if (!unique.length) return [];
+
+          const users = await this.dataSource.getRepository(User).find({ where: { uuid: In(unique) }, relations: ['roles'] });
+
+          return users.map((user) => this.userRecord(user));
+        },
+        getByUsername: async (username) => this.userRecord(await this.usersService.getByUsername(username, ['roles']).catch(() => null)),
+        getByEmail: async (email) => this.userRecord(await this.usersService.getByEmail(email, ['roles']).catch(() => null)),
         search: async (query, limit) =>
           (await this.usersService.search(String(query || ''), limit).catch(() => [])).map((user) => this.userRecord(user)),
         perms: async (uuid) => {
@@ -331,6 +345,15 @@ export class ApiHostService implements OnApplicationBootstrap, OnApplicationShut
             url: post.url,
             image: post.image || undefined,
           }),
+      },
+      html: {
+        sanitize: (html, narrow) => sanitizeHtml(String(html ?? ''), narrow),
+      },
+      notifications: {
+        registerCategory: (category, owner) => registerNotificationCategory(category, owner || moduleId || undefined),
+        send: (uuid, input) => this.notificationsService.send(uuid, input),
+        sendMany: (uuids, input) => this.notificationsService.sendMany(uuids, input),
+        unread: (uuid) => this.notificationsService.unread(uuid),
       },
       mail: {
         send: async (to, subject, html) => {
