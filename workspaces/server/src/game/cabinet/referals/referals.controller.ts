@@ -19,6 +19,11 @@ export class ReferalsController {
 
   @Get('me/percent')
   async mePercent(@CurrentUser() user: User) {
-    return { percent: await this.referalsService.paymentPercent(user) };
+    const [percent, rewards] = await Promise.all([
+      this.referalsService.paymentPercent(user),
+      this.referalsService.rewardsEnabled(user.uuid),
+    ]);
+
+    return { percent, rewards };
   }
 }

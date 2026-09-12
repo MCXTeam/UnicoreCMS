@@ -13,6 +13,7 @@ import { PlaytimeService } from '../playtime/playtime.service';
 import { InviterDto } from './dto/inviter.dto';
 import { ReferalDto } from './dto/referals.dto';
 import { Referal } from './entities/referal.entity';
+import { hooks } from 'unicore-api';
 import _ from 'lodash';
 
 @Injectable()
@@ -47,7 +48,13 @@ export class ReferalsService {
     return _.orderBy(referalsTransform, ['playtime', 'user.created'], ['desc', 'desc']);
   }
 
+  rewardsEnabled(inviterUuid: string): Promise<boolean> {
+    return hooks().allowed('referal.rewards', { inviterUuid });
+  }
+
   async paymentPercent(inviter: User): Promise<number> {
+    if (!(await this.rewardsEnabled(inviter.uuid))) return 0;
+
     const active = [{ expired: IsNull() }, { expired: MoreThan(new Date()) }];
     const [groups, permissions] = await Promise.all([
       this.userGroupsRepo.find({ where: active.map((expired) => ({ ...expired, user: { uuid: inviter.uuid } })) }),

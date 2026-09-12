@@ -61,8 +61,14 @@
     </div>
 
     <div v-else-if="block.type === 'login'" class="layout-block__login">
-      <NuxtLink v-if="$auth.loggedIn" to="/cabinet">
-        <Button size="large" text>{{ $t('header.cabinet') }}</Button>
+      <NuxtLink
+        v-if="$auth.loggedIn"
+        to="/cabinet"
+        class="layout-profile without-underline"
+        v-tooltip.bottom="$t('header.cabinet')"
+      >
+        <SkinView2D class="layout-profile__face" :width="28" :height="28" :skin="$auth.user?.skin" />
+        <span class="layout-profile__name">{{ $auth.user?.username }}</span>
       </NuxtLink>
       <NuxtLink v-else to="/auth">
         <Button size="large" text>{{ $t('header.login') }}</Button>
@@ -215,11 +221,41 @@ onBeforeUnmount(() => document.removeEventListener('click', onGlobalClick))
   break-inside: avoid;
 }
 .layout-link {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 5px 0;
   white-space: nowrap;
+}
+.layout-link:hover {
+  text-decoration: none;
+}
+.layout-link:hover::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: rgba(var(--vs-primary), 0.5);
+}
+.layout-profile {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  color: inherit;
+  white-space: nowrap;
+}
+.layout-profile__face {
+  flex: 0 0 auto;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.layout-profile__name {
+  font-weight: 600;
 }
 .layout-block--login :deep(.p-button),
 .layout-block--launcher :deep(.p-button) {

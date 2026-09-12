@@ -1,5 +1,5 @@
 <template>
-  <span class="player-name">
+  <span class="player-name" :class="{ 'player-name--stacked': stacked }">
     <span v-if="badge && badgeBefore" :class="badgeClass" :style="badgeStyle">{{ activeRole?.name }}</span>
     <span :style="nameStyle">{{ username }}</span>
     <span v-if="badge && !badgeBefore" :class="badgeClass" :style="badgeStyle">{{ activeRole?.name }}</span>
@@ -13,6 +13,7 @@ const props = defineProps<{
   username: string
   role?: RoleAppearance | null
   roles?: RoleAppearance[] | null
+  stacked?: boolean
 }>()
 
 const { $pub } = useNuxtApp()
@@ -31,5 +32,9 @@ const nameStyle = computed(() => roleNameStyle(activeRole.value))
   display: inline-flex;
   align-items: center;
   gap: 0.5em;
+}
+.player-name--stacked {
+  flex-direction: column;
+  gap: 0.35em;
 }
 </style>

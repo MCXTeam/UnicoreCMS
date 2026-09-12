@@ -15,7 +15,7 @@ let reader = null;
 let readerUuid = null;
 let moderator = null;
 
-const nodes = { root: null, open: null, closed: null, hidden: null, guarded: null };
+const nodes = { root: null, open: null, closed: null, hidden: null, guarded: null, spare: null };
 
 let topicId = null;
 let firstPostId = null;
@@ -53,6 +53,7 @@ before(async () => {
   nodes.open = await makeNode({ slug: `${unique()}-open`, title: 'Открытый раздел', parent_id: nodes.root, position: 2 });
   nodes.closed = await makeNode({ slug: `${unique()}-closed`, title: 'Закрытый раздел', parent_id: nodes.root, locked: true });
   nodes.hidden = await makeNode({ slug: `${unique()}-hidden`, title: 'Скрытый раздел', parent_id: nodes.root, hidden: true });
+  nodes.spare = await makeNode({ slug: `${unique()}-spare`, title: 'Раздел для проверок прав', position: 9 });
   nodes.guarded = await makeNode({
     slug: `${unique()}-guarded`,
     title: 'Раздел по праву',
@@ -121,6 +122,37 @@ describe('Форум', () => {
     assert.ok(ok(allowed.status), `тема не создана: ${allowed.status} ${JSON.stringify(allowed.body)}`);
 
     topicId = allowed.body.id;
+  });
+
+  it('роль выше приоритетом возвращает право, отнятое ролью ниже', async () => {
+    const low = await createRole(['!mod.forum.write'], { priority: 1 });
+    const high = await createRole(['mod.forum.write'], { priority: 9 });
+    const both = await createUser({ roles: [low, high] });
+    const slug = await slugOf(nodes.spare);
+
+    const profile = await both.session.get('/auth/me');
+
+    assert.ok(profile.body.user.perms.includes('mod.forum.write'), 'старшая роль не вернула право');
+
+    const { status } = await both.session.post(`/mod/forum/nodes/${slug}/topics`, {
+      title: 'Тема от старшей роли',
+      content: '<p>текст</p>',
+    });
+
+    assert.ok(ok(status), `игрок со старшей ролью не смог создать тему: ${status}`);
+  });
+
+  it('запрет на чтение закрывает форум целиком', async () => {
+    const blind = await createRole(['!mod.forum.read'], { priority: 1 });
+    const user = await createUser({ roles: [blind] });
+    const slug = await slugOf(nodes.spare);
+
+    const index = await user.session.get('/mod/forum');
+    const node = await user.session.get(`/mod/forum/nodes/${slug}`);
+
+    assert.equal(node.status, 403, 'раздел открылся без права на чтение');
+    assert.ok(ok(index.status), `главная форума недоступна: ${index.status}`);
+    assert.equal(index.body.sections.length, 0, 'разделы видны без права на чтение');
   });
 
   it('запрет у роли убирает право и из списка прав игрока', async () => {
@@ -229,6 +261,86 @@ describe('Форум', () => {
     const denied = await writer.patch(`/mod/forum/posts/${foreign.id}`, { content: '<p>подмена</p>' });
 
     assert.equal(denied.status, 403);
+  });
+
+  it('модератор правит чужое сообщение только с отдельным правом', async () => {
+    const reply = await writer.post(`/mod/forum/topics/${topicId}/posts`, { content: '<p>Сообщение автора темы.</p>' });
+
+    assert.ok(ok(reply.status), `ответ не создан: ${reply.status}`);
+
+    const plainRole = await createRole(['mod.forum.moderate']);
+    const plain = await createUser({ roles: [plainRole] });
+    const opened = await plain.session.get(`/mod/forum/topics/${topicId}`);
+    const foreign = opened.body.posts.data.find((post) => post.id === reply.body.id);
+
+    assert.ok(foreign, 'сообщение для проверки не найдено');
+    assert.equal(foreign.can.edit, false, 'модератор видит правку чужого сообщения без права');
+    assert.equal(foreign.can.delete, true, 'модератор не может удалить чужое сообщение');
+
+    const denied = await plain.session.patch(`/mod/forum/posts/${foreign.id}`, { content: '<p>подмена модератором</p>' });
+
+    assert.equal(denied.status, 403, 'чужое сообщение переписали без права');
+
+    const editorRole = await createRole(['mod.forum.moderate', 'mod.forum.edit_posts']);
+    const editor = await createUser({ roles: [editorRole] });
+    const allowed = await editor.session.patch(`/mod/forum/posts/${foreign.id}`, { content: '<p>правка с правом</p>' });
+
+    assert.ok(ok(allowed.status), `правка с правом не прошла: ${allowed.status}`);
+
+    const logged = await query(
+      'SELECT action, class, target_id FROM unicore_audit_logs WHERE action = ? ORDER BY id DESC LIMIT 1',
+      ['mod.forum.post.edit'],
+    );
+
+    assert.equal(logged[0]?.class, 'mod.forum', 'правка чужого сообщения не попала в раздел журнала «Форум»');
+    assert.equal(Number(logged[0]?.target_id), foreign.id);
+  });
+
+  it('автор открывает только ту тему, которую закрыл сам', async () => {
+    const slug = await slugOf(nodes.spare);
+    const created = await writer.post(`/mod/forum/nodes/${slug}/topics`, { title: 'Тема автора', content: '<p>текст</p>' });
+
+    assert.ok(ok(created.status), `тема не создана: ${created.status}`);
+
+    const own = created.body.id;
+
+    assert.ok(ok((await writer.patch(`/mod/forum/topics/${own}`, { closed: true })).status), 'автор не смог закрыть свою тему');
+    assert.ok(ok((await writer.patch(`/mod/forum/topics/${own}`, { closed: false })).status), 'автор не смог открыть свою тему');
+
+    const byAdmin = await admin.patch(`/mod/forum/topics/${own}`, { closed: true });
+
+    assert.ok(ok(byAdmin.status), `модератор не смог закрыть тему: ${byAdmin.status}`);
+
+    const denied = await writer.patch(`/mod/forum/topics/${own}`, { closed: false });
+
+    assert.equal(denied.status, 403, 'автор открыл тему, закрытую модератором');
+
+    const view = await writer.get(`/mod/forum/topics/${own}`);
+
+    assert.equal(view.body.can.open, false);
+    assert.ok(ok((await admin.patch(`/mod/forum/topics/${own}`, { closed: false })).status));
+  });
+
+  it('настройка запрещает игроку закрывать свои темы', async () => {
+    const slug = await slugOf(nodes.spare);
+    const created = await writer.post(`/mod/forum/nodes/${slug}/topics`, { title: 'Тема без закрытия', content: '<p>текст</p>' });
+    const own = created.body.id;
+
+    const off = await admin.patch('/config', { key: 'mod_forum_player_close', value: 'false', type: 2 });
+
+    assert.ok(ok(off.status), `настройка не сохранилась: ${off.status} ${JSON.stringify(off.body)}`);
+
+    try {
+      const denied = await writer.patch(`/mod/forum/topics/${own}`, { closed: true });
+
+      assert.equal(denied.status, 403, 'игрок закрыл тему при выключенной настройке');
+
+      const view = await writer.get(`/mod/forum/topics/${own}`);
+
+      assert.equal(view.body.can.close, false);
+    } finally {
+      await admin.patch('/config', { key: 'mod_forum_player_close', value: 'true', type: 2 });
+    }
   });
 
   it('первое сообщение темы не удаляется отдельно', async () => {

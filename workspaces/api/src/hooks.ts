@@ -1,5 +1,6 @@
 export interface CoreHookMap {
   'payment.referal': { paymentId: number; uuid: string; inviterUuid: string; paid: number; percent: number; amount: number }
+  'referal.rewards': { inviterUuid: string }
 }
 
 export type CoreHookName = keyof CoreHookMap

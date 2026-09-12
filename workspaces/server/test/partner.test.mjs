@@ -305,6 +305,33 @@ describe('Партнёрская программа', () => {
     assert.equal(payouts.length, 0, 'выплаты удалённого партнёра остались');
   });
 
+  it('у активного партнёра реферальные награды ядра выключены', async () => {
+    const admin = await rootSession();
+    const player = await createUser({});
+    const uuid = await uuidOf(player.username);
+
+    const before = await player.session.get('/cabinet/referals/me/percent');
+
+    assert.equal(before.body?.rewards, true, 'обычному игроку выключили награды ядра');
+
+    const created = await admin.post('/mod/partner', { username: player.username, percent: 10, terms: 'x', active: true });
+
+    assert.ok(ok(created.status), `партнёр не создан: ${created.status}`);
+
+    const active = await player.session.get('/cabinet/referals/me/percent');
+
+    assert.equal(active.body?.rewards, false, 'активному партнёру остались награды ядра');
+    assert.equal(active.body?.percent, 0, 'активному партнёру остался процент на баланс');
+
+    await admin.patch(`/mod/partner/${uuid}`, { percent: 10, terms: 'x', active: false });
+
+    const paused = await player.session.get('/cabinet/referals/me/percent');
+
+    assert.equal(paused.body?.rewards, true, 'неактивному партнёру не вернули награды ядра');
+
+    await admin.del(`/mod/partner/${uuid}`);
+  });
+
   it('без права список партнёров закрыт', async () => {
     const { session } = await createAdmin([]);
 

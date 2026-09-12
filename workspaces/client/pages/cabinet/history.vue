@@ -38,7 +38,7 @@
         </Column>
         <Column v-if="history_type == 'payment'" :header="$t('cabinet.payment_method')">
           <template #body="{ data }"
-            ><span v-if="data.payment"> {{ data.payment.method }} </span></template
+            ><span v-if="data.payment"> {{ paymentMethod(data.payment.method) }} </span></template
           >
         </Column>
         <Column v-if="history_type == 'payment'" :header="$t('cabinet.amount')">
@@ -48,7 +48,7 @@
         </Column>
         <Column v-if="history_type == 'payment'" :header="$t('cabinet.status')">
           <template #body="{ data }"
-            ><span v-if="data.payment"> {{ data.payment.status }} </span></template
+            ><span v-if="data.payment"> {{ paymentStatus(data.payment.status) }} </span></template
           >
         </Column>
 
@@ -195,6 +195,8 @@
 </template>
 
 <script>
+import { MANUAL_PAYMENT_METHOD, PAYMENT_STATUSES } from 'unicore-common/payments'
+
 definePageMeta({
   layout: 'cabinet',
   middleware: ['auth', 'verify'],
@@ -251,6 +253,14 @@ export default {
   },
 
   methods: {
+    paymentMethod(value) {
+      return value === MANUAL_PAYMENT_METHOD ? this.$t('cabinet.payment_method_manual') : value
+    },
+
+    paymentStatus(value) {
+      return PAYMENT_STATUSES.includes(value) ? this.$t(`cabinet.payment_status_${value}`) : value
+    },
+
     async load() {
       this.loading = true
 
