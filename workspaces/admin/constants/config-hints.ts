@@ -48,10 +48,6 @@ export const CONFIG_HINTS: Record<string, ConfigHint> = {
     title: 'cfg.public_unban_price_title',
     hint: 'cfg.public_unban_price_hint',
   },
-  public_link_forum: {
-    title: 'cfg.public_link_forum_title',
-    hint: 'cfg.public_link_forum_hint',
-  },
   public_link_discord: {
     title: 'cfg.public_link_discord_title',
     hint: 'cfg.public_link_discord_hint',

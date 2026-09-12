@@ -165,10 +165,7 @@
       <div v-else-if="money.length" class="cab-servers cab-servers--grid">
         <div v-for="m in money" :key="m.server.id" class="cab-servers__row">
           <IconAvatar :path="m.server.icon" icon="bx bxs-server" />
-          <div>
-            <h4 v-text="m.server.name" />
-            <span v-text="m.server.id" />
-          </div>
+          <h4 class="m-0" v-text="m.server.name" />
           <div class="cab-servers__value">
             <b>{{ $t('cabinet.coins', { amount: $utils.formatCurrency('ingame', m.money) }) }}</b>
           </div>

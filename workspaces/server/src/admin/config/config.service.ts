@@ -64,7 +64,6 @@ export class ConfigService {
         },
         { key: ConfigField.LauncherExe, important: true, type: ConfigType.string },
         { key: ConfigField.LauncherJar, important: true, type: ConfigType.string },
-        { key: ConfigField.LinkForum, important: true, type: ConfigType.string, value: 'https://unicorecms.ru' },
         { key: ConfigField.LinkDiscord, important: true, type: ConfigType.string, value: 'https://t.me/unicore_project' },
         { key: ConfigField.LinkTelegram, important: true, type: ConfigType.string, value: 'https://t.me/unicore_project' },
         { key: ConfigField.LinkVk, important: true, type: ConfigType.string, value: 'https://t.me/unicore_project' },

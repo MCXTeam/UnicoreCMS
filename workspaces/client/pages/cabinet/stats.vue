@@ -4,10 +4,7 @@
       <div v-if="playtime" class="cab-servers cab-servers--grid">
         <div v-for="pt in playtime" :key="pt.server.id" class="cab-servers__row">
           <IconAvatar :path="pt.server.icon" size="large" icon="bx bxs-server" />
-          <div>
-            <h4 v-text="pt.server.name" />
-            <span v-text="pt.server.id" />
-          </div>
+          <h4 class="m-0" v-text="pt.server.name" />
           <div class="cab-servers__value">
             <span>{{ $t('cabinet.playtime') }}</span>
             <b v-if="pt.time">{{ $utils.formatDuration(pt.time) }}</b>

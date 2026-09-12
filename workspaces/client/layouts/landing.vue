@@ -57,13 +57,13 @@
       </Drawer>
     </ClientOnly>
     <div id="padding-scroll-content">
-      <Header />
-      <div class="container mt-5">
+      <Header v-if="hero" />
+      <div class="container" :class="hero ? 'mt-5' : 'landing-no-hero'">
         <div class="row">
-          <div class="col-xl-9 pe-xl-5 landing-main">
+          <div :class="wide ? 'col-12' : 'col-xl-9 pe-xl-5 landing-main'">
             <slot />
           </div>
-          <div class="col mt-5 mt-xl-0 landing-aside">
+          <div v-if="!wide" class="col mt-5 mt-xl-0 landing-aside">
             <LandingPanel :onlines="onlines" :config="config" />
           </div>
         </div>
@@ -82,6 +82,8 @@ const { $socket, $setLocale } = useNuxtApp()
 
 const ioStore = useIoStore()
 
+const wide = computed(() => Boolean(route.meta.wide))
+const hero = computed(() => route.meta.hero !== false)
 const onlines = computed(() => ioStore.serversOnline)
 const { config } = usePublicConfig()
 
