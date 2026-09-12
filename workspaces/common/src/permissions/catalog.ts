@@ -6,6 +6,7 @@ export interface PermissionMeta {
   group: string;
   scope?: PermissionScope;
   danger?: boolean;
+  granted?: boolean;
   field?: PermissionField;
   updateOnly?: boolean;
 }

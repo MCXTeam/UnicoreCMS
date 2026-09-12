@@ -61,6 +61,16 @@ export function isDangerPermission(key: string): boolean {
   return Boolean(permissionMeta(key)?.danger);
 }
 
+export function isGrantedPermission(key: string): boolean {
+  return Boolean(permissionMeta(key)?.granted);
+}
+
+export function defaultGrantedPermissions(): string[] {
+  return permissionEntries()
+    .filter((entry) => entry.granted)
+    .map((entry) => entry.key);
+}
+
 export function scopedPermissions(): string[] {
   return permissionEntries()
     .filter((entry) => entry.scope)

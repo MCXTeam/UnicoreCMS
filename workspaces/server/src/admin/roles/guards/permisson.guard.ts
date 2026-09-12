@@ -1,7 +1,14 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { User } from 'src/admin/users/entities/user.entity';
-import { filterPlayerPermissions, Permission, permissionUniverse, resolvePermissions, satisfiesPermissions } from 'unicore-common';
+import {
+  defaultGrantedPermissions,
+  filterPlayerPermissions,
+  Permission,
+  permissionUniverse,
+  resolvePermissions,
+  satisfiesPermissions,
+} from 'unicore-common';
 import _ from 'lodash';
 import { DONATE_PERMS_CACHE_KEY, PERMISSIONS_KEY } from 'src/common/constants';
 import { Role } from '../entities/role.entity';
@@ -15,11 +22,11 @@ export type PermissionOptions = {
 
 export type PermissionArgs = Permission[] | [Permission[], PermissionOptions];
 
-export function transformPermissions(userPart: Partial<User>) {
+export function transformPermissions(userPart: Partial<User>, extra: string[] = []) {
   const user = { ...userPart };
 
   user.roles = userPart.roles || [];
-  user.perms = [...(userPart.perms || []), ...user.roles.map((role) => role.perms || []).flat()];
+  user.perms = [...extra, ...(userPart.perms || []), ...user.roles.map((role) => role.perms || []).flat()];
 
   if (user.perms.length) user.perms = resolvePermissions(user.perms);
 
@@ -28,6 +35,10 @@ export function transformPermissions(userPart: Partial<User>) {
   if (user.superuser) user.perms = permissionUniverse();
 
   return user;
+}
+
+export function effectivePermissions(userPart: Partial<User>): Partial<User> {
+  return transformPermissions(userPart, defaultGrantedPermissions());
 }
 
 export async function playerPermissions(request: any): Promise<string[]> {
@@ -53,7 +64,12 @@ export async function grantedPermissions(request: any): Promise<string[]> {
 
   if (user?.superuser) return permissionUniverse();
 
-  return [...(user?.roles || []).map((role) => role.perms || []).flat(), ...(user?.perms || []), ...(await playerPermissions(request))];
+  return [
+    ...defaultGrantedPermissions(),
+    ...(user?.roles || []).map((role) => role.perms || []).flat(),
+    ...(user?.perms || []),
+    ...(await playerPermissions(request)),
+  ];
 }
 
 export async function matchPermission(args: PermissionArgs, request: any): Promise<boolean> {

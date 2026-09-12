@@ -4,7 +4,7 @@ import { Skin } from 'src/game/cabinet/skin/entities/skin.entity';
 import { User } from '../entities/user.entity';
 import { union } from 'lodash';
 import { resolvePermissions } from 'unicore-common';
-import { transformPermissions } from 'src/admin/roles/guards/permisson.guard';
+import { effectivePermissions } from 'src/admin/roles/guards/permisson.guard';
 import { BanDto } from 'src/game/players/banlist/dto/paginated-bans.dto';
 
 export class UserDto {
@@ -52,7 +52,7 @@ export class UserDto {
   updated: Date;
 
   constructor(partial: Partial<User>, granted: string[] = []) {
-    const user = transformPermissions(partial);
+    const user = effectivePermissions(partial);
 
     Object.assign(this, user);
 

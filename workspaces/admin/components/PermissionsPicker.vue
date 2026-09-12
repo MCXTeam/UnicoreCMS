@@ -33,6 +33,12 @@
             </span>
             <i v-if="hint_(entry.key)" v-tooltip.right="hint_(entry.key)" class="pi pi-question-circle text-color-secondary" />
             <Tag v-if="entry.danger" severity="warn" :value="$t('admin.permission_danger')" v-tooltip.top="$t('admin.permission_danger_hint')" />
+            <Tag
+              v-else-if="entry.granted"
+              severity="info"
+              :value="$t('admin.permission_granted')"
+              v-tooltip.top="$t('admin.permission_granted_hint')"
+            />
             <Tag v-else-if="isCovered(entry.key)" severity="secondary" :value="$t('admin.permission_covered')" />
             <button
               v-if="entry.scope === 'server' && isOn(entry.key)"
@@ -77,7 +83,7 @@
 
 <script setup lang="ts">
 import type { PermissionEntry } from 'unicore-common/permissions'
-import { isPlayerPermission, longestScope, satisfiesPermission } from 'unicore-common/permissions'
+import { denyTarget, isDenyPattern, isPlayerPermission, longestScope, permissionMatches, satisfiesPermission } from 'unicore-common/permissions'
 import { usePermissionCatalog, type PermissionGroupView } from '~/composables/usePermissionCatalog'
 
 const props = withDefaults(
@@ -149,6 +155,10 @@ const visibleGroups = computed<PermissionGroupView[]>(() => {
 
 const known = computed(() => new Set(groups.value.flatMap((group) => group.permissions).map((entry) => entry.key)))
 
+const granted = computed(
+  () => new Set(groups.value.flatMap((group) => group.permissions).filter((entry) => entry.granted).map((entry) => entry.key)),
+)
+
 function scopeBase(key: string): string | null {
   if (known.value.has(key)) return null
 
@@ -159,7 +169,17 @@ function isExplicit(key: string): boolean {
   return patterns.value.includes(key) || patterns.value.some((pattern) => scopeBase(pattern) === key)
 }
 
+function isDefault(key: string): boolean {
+  return granted.value.has(key)
+}
+
+function isDenied(key: string): boolean {
+  return patterns.value.some((pattern) => isDenyPattern(pattern) && permissionMatches(key, denyTarget(pattern)))
+}
+
 function isOn(key: string): boolean {
+  if (isDefault(key)) return !isDenied(key)
+
   return isExplicit(key) || satisfiesPermission(patterns.value, key)
 }
 
@@ -177,7 +197,7 @@ function toggle(key: string) {
   if (isOn(key)) {
     const next = patterns.value.filter((pattern) => pattern !== key && scopeBase(pattern) !== key)
 
-    if (satisfiesPermission(next, key)) next.push(`!${key}`)
+    if (isDefault(key) || satisfiesPermission(next, key)) next.push(`!${key}`)
 
     apply(next)
 
@@ -186,7 +206,7 @@ function toggle(key: string) {
 
   const next = patterns.value.filter((pattern) => pattern !== `!${key}`)
 
-  if (!satisfiesPermission(next, key)) next.push(key)
+  if (!isDefault(key) && !satisfiesPermission(next, key)) next.push(key)
 
   apply(next)
 }
