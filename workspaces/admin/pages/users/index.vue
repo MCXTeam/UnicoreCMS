@@ -66,7 +66,11 @@
           <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <NuxtLink :to="`/users/` + slotProps.data.uuid">
-                <Button icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" />
+                <Button
+                  :icon="canUpdate ? 'pi pi-pencil' : 'pi pi-eye'"
+                  :class="['p-button-rounded mr-2', canUpdate ? 'p-button-success' : 'p-button-secondary']"
+                  v-tooltip.top="canUpdate ? $t('admin.edit') : $t('admin.users_open')"
+                />
               </NuxtLink>
               <Button
                 v-if="canDelete"
@@ -237,6 +241,7 @@ export default {
     const confirm = useConfirm()
     const access = useAccess({
       canCreate: 'panel.users.create',
+      canUpdate: 'panel.users.update',
       canDelete: 'panel.users.delete',
       canDeleteMany: 'panel.users.delete.many',
     })

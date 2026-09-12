@@ -188,7 +188,7 @@
                 display="chip"
                 :filter="true"
                 v-model="productMany.servers"
-                :options="servers"
+                :options="manyServerOptions"
                 optionLabel="name"
                 :placeholder="productMany.servers.length ? $t('admin.choose_servers') : $t('admin.unchanged')"
                 class="p-column-filter"
@@ -298,7 +298,7 @@
                 display="chip"
                 :filter="true"
                 v-model="productMany.servers"
-                :options="servers"
+                :options="importServerOptions"
                 optionLabel="name"
                 :placeholder="productMany.servers.length ? $t('admin.choose_servers') : $t('admin.not_chosen')"
                 class="p-column-filter"
@@ -506,6 +506,7 @@
                     </div>
                   </template>
                 </MultiSelect>
+                <small v-if="!product.servers?.length" class="p-error">{{ $t('admin.servers_required') }}</small>
               </div>
               <div class="field">
                 <label>{{ $t('admin.categories') }}</label>
@@ -652,6 +653,8 @@ export default {
     useHead({ title: computed(() => $t('admin.products')) })
     const createScope = useServerScope('panel.store.products.create')
     const updateScope = useServerScope('panel.store.products.update')
+    const updateManyScope = useServerScope('panel.store.products.update.many')
+    const importScope = useServerScope('panel.store.products.import')
 
     const access = useAccess({
       canCreate: 'panel.store.products.create',
@@ -679,6 +682,8 @@ export default {
       ...fields,
       createScope,
       updateScope,
+      updateManyScope,
+      importScope,
       translations,
       realDecimals: rc.public.realDecimals,
     }
@@ -738,6 +743,18 @@ export default {
     }
   },
   computed: {
+    manyServerOptions() {
+      if (!this.updateManyScope) return this.servers
+
+      const attached = (this.selected || []).flatMap((product) => (product.servers || []).map((server) => server.id || server))
+
+      return this.servers.filter((server) => this.updateManyScope.includes(server.id) || attached.includes(server.id))
+    },
+
+    importServerOptions() {
+      return this.importScope ? this.servers.filter((server) => this.importScope.includes(server.id)) : this.servers
+    },
+
     serverOptions() {
       const scope = this.updateMode ? this.updateScope : this.createScope
 

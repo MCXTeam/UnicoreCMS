@@ -8,7 +8,7 @@ import { RoleUpdateInput } from './dto/role-update.input';
 import { RoleCreateInput } from './dto/role-create.input';
 import { User } from '../users/entities/user.entity';
 import { ImportantRoles } from './enums/important-roles.enum';
-import { assertGrantable } from './grant';
+import { assertGrantable, assertRoleOutranked, assertRolePriority } from './grant';
 
 export function roleSnapshot(role: Partial<Role>): Record<string, unknown> {
   return {
@@ -84,6 +84,7 @@ export class RolesService {
     }
 
     await assertGrantable(input.perms, request, 'panel.roles.grant.panel');
+    assertRolePriority(input.priority, request?.user);
 
     const role = new Role();
 
@@ -104,7 +105,9 @@ export class RolesService {
       throw new NotFoundException();
     }
 
-    await assertGrantable(input.perms, request, 'panel.roles.grant.panel');
+    await assertGrantable(input.perms, request, 'panel.roles.grant.panel', role.perms || []);
+    assertRoleOutranked(role, request?.user);
+    assertRolePriority(input.priority, request?.user);
 
     const before = roleSnapshot(role);
 
@@ -129,7 +132,7 @@ export class RolesService {
     return saved;
   }
 
-  async remove(id: string): Promise<Role> {
+  async remove(id: string, request?: any): Promise<Role> {
     const role = await this.findOne(id);
 
     if (!role) {
@@ -138,15 +141,24 @@ export class RolesService {
 
     if (role.important) throw new BadRequestException('Системную роль удалить нельзя');
 
+    assertRoleOutranked(role, request?.user);
+
     return this.rolesRepository.remove(role);
   }
 
-  async updateBadgeImage(id: string, file: Express.Multer.File): Promise<Role> {
+  async updateBadgeImage(id: string, file: Express.Multer.File, request?: any): Promise<Role> {
     const role = await this.findOne(id);
 
     if (!role) {
       StorageManager.remove(file.filename);
       throw new NotFoundException();
+    }
+
+    try {
+      assertRoleOutranked(role, request?.user);
+    } catch (error) {
+      StorageManager.remove(file.filename);
+      throw error;
     }
 
     const previous = role.badge_image;
@@ -160,12 +172,14 @@ export class RolesService {
     return saved;
   }
 
-  async removeBadgeImage(id: string): Promise<Role> {
+  async removeBadgeImage(id: string, request?: any): Promise<Role> {
     const role = await this.findOne(id);
 
     if (!role) {
       throw new NotFoundException();
     }
+
+    assertRoleOutranked(role, request?.user);
 
     StorageManager.remove(role.badge_image);
     role.badge_image = null;

@@ -54,14 +54,14 @@
           <Column :style="{ width: '8rem' }" :bodyStyle="{ 'text-align': 'right' }">
             <template #body="slotProps">
               <Button
-                v-if="canUpdate"
+                v-if="canUpdate && slotProps.data.grantable"
                 @click="openDialog(slotProps.data)"
                 icon="pi pi-pencil"
                 class="p-button-rounded p-button-success mr-2"
               />
               <Button
                 @click="removeRole(slotProps.data.id)"
-                v-if="canDelete && !slotProps.data.important"
+                v-if="canDelete && slotProps.data.grantable && !slotProps.data.important"
                 icon="pi pi-trash"
                 class="p-button-rounded p-button-warning mt-2"
               />
@@ -120,7 +120,7 @@
                 :label="$t('admin.permissions')"
                 :required="true"
                 :error="errorMessage"
-                :disabled="!canGrantPanel"
+                :only="canGrantPanel ? undefined : 'player'"
               />
             </VeeField>
             <VeeField

@@ -250,7 +250,7 @@
         >
           <div class="field">
             <label>{{ $t('admin.right') }}<span class="p-error"> *</span></label>
-            <Select :modelValue="value" @update:modelValue="handleChange" :options="donatePermissions" optionLabel="name" appendTo="body">
+            <Select :modelValue="value" @update:modelValue="handleChange" :options="givableDonatePermissions" optionLabel="name" appendTo="body">
               <template #option="slotProps">
                 <div class="flex align-items-center">
                   <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
@@ -795,6 +795,8 @@ export default {
       canReadLogs: 'panel.logs.read',
       canEditSkin: 'panel.users.skin',
       canEditCloak: 'panel.users.cloak',
+      canGiveDonate: 'panel.users.donate',
+      canReadDonate: 'panel.donate.read',
     })
 
     const fields = useFieldAccess('user', {
@@ -892,6 +894,17 @@ export default {
       return this.donateGroups.filter((group) => group.servers?.some((server) => server.id == this.udgForm.server.id))
     },
 
+    givableDonatePermissions() {
+      const everywhere = this.hasPermission('panel.users.donate')
+      const allowed = this.donateServers.map((server) => server.id)
+
+      return this.donatePermissions.filter((permission) => {
+        if (permission.type == 'web' || !permission.servers?.length) return everywhere
+
+        return permission.servers.some((entry) => allowed.includes(entry.id))
+      })
+    },
+
     permissionServers() {
       const permission = this.udpForm.permission
       const allowed = this.donateServers
@@ -957,12 +970,15 @@ export default {
     async load() {
       const optional = (url) => this.$api.get(url, { silent: true }).then((res) => res.data).catch(() => [])
 
+      const donate = this.canGiveDonate || this.canReadDonate
+      const none = () => Promise.resolve([])
+
       const [roles, servers, periods, donatePermissions, donateGroups] = await Promise.all([
         optional('/admin/roles'),
         optional('/servers'),
-        optional('/donates/periods'),
-        optional('/donates/permissions'),
-        optional('/donates/groups'),
+        donate ? optional('/donates/periods') : none(),
+        donate ? optional('/donates/permissions') : none(),
+        donate ? optional('/donates/groups') : none(),
       ])
 
       this.roles = roles

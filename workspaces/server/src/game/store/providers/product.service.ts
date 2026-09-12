@@ -468,9 +468,11 @@ export class ProductsService {
     return mapping;
   }
 
-  async importItems(input: ProductsImportInput, filename: string, allowCommands = false, remove_tmp: boolean = true) {
+  async importItems(input: ProductsImportInput, filename: string, allowCommands = false, remove_tmp: boolean = true, request?: any) {
     const fileBuffer = StorageManager.read(filename);
     if (remove_tmp) StorageManager.remove(filename);
+
+    await assertServerList(request, 'panel.store.products.import', String(input.servers || '').split(',').filter(Boolean));
 
     if (!fileBuffer) throw new BadRequestException();
 
@@ -521,6 +523,19 @@ export class ProductsService {
     });
 
     await assertServerEntities(request, 'panel.store.products.update.many', products);
+
+    for (const product of products) {
+      const patch = input.products.find((entity) => entity.id === product.id);
+
+      if (patch?.servers?.length)
+        await assertServerList(
+          request,
+          'panel.store.products.update.many',
+          patch.servers,
+          (product.servers || []).map((server) => server.id),
+        );
+    }
+
     let servers_: Server[] = [];
     let categories_: Category[] = [];
 

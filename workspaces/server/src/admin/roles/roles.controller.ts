@@ -46,8 +46,8 @@ export class RolesController {
   @Permissions(['panel.roles.delete'])
   @Audit({ action: 'role.delete', target: 'role', param: 'id' })
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.rolesService.remove(id);
+  remove(@Req() request: any, @Param('id') id: string) {
+    return this.rolesService.remove(id, request);
   }
 
   @Permissions(['panel.roles.update'])
@@ -60,14 +60,14 @@ export class RolesController {
       limits: { fileSize: STORAGE_MAX_IMAGE_UPLOAD, files: 1 },
     }),
   )
-  updateBadgeImage(@Param('id') id: string, @UploadedFile() file: Express.Multer.File) {
-    return this.rolesService.updateBadgeImage(id, file);
+  updateBadgeImage(@Req() request: any, @Param('id') id: string, @UploadedFile() file: Express.Multer.File) {
+    return this.rolesService.updateBadgeImage(id, file, request);
   }
 
   @Permissions(['panel.roles.update'])
   @Audit({ action: 'role.update', target: 'role', param: 'id' })
   @Delete(':id/badge')
-  removeBadgeImage(@Param('id') id: string) {
-    return this.rolesService.removeBadgeImage(id);
+  removeBadgeImage(@Req() request: any, @Param('id') id: string) {
+    return this.rolesService.removeBadgeImage(id, request);
   }
 }

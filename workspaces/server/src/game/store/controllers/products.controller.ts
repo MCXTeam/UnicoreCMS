@@ -28,7 +28,6 @@ import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { matchPermission } from 'src/admin/roles/guards/permisson.guard';
 import { allowedServersAny } from 'src/admin/roles/server-scope';
 import { User } from 'src/admin/users/entities/user.entity';
-import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { ProductFromGameInput } from '../dto/product-fromgame.dto';
 import { ProductsManyInput } from '../dto/product-many.input';
 import { ProductInput } from '../dto/product.dto';
@@ -113,12 +112,12 @@ export class ProductsController {
       limits: { fileSize: STORAGE_MAX_ZIP_UPLOAD, files: 1 },
     }),
   )
-  async importItems(@CurrentUser() user: User, @Body() body: ProductsImportInput, @UploadedFile() file: Express.Multer.File) {
+  async importItems(@Req() request: any, @Body() body: ProductsImportInput, @UploadedFile() file: Express.Multer.File) {
     if (!file) throw new BadRequestException();
 
-    const allowCommands = await matchPermission(['panel.access', 'panel.servers.update'], { user });
+    const allowCommands = await matchPermission(['panel.access', 'panel.servers.update'], request);
 
-    return this.productsService.importItems(body, file.filename, allowCommands);
+    return this.productsService.importItems(body, file.filename, allowCommands, true, request);
   }
 
   @Permissions(['panel.access', 'panel.store.products.update.*'])

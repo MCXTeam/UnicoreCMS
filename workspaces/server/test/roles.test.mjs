@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { after, describe, it } from 'node:test';
-import { closeDatabase } from './helpers/db.mjs';
-import { cleanup, createAdmin, createRole, createUser, rootSession } from './helpers/stand.mjs';
+import { closeDatabase, query } from './helpers/db.mjs';
+import { cleanup, createAdmin, createRole, createUser, rootSession, uniqueRoleId } from './helpers/stand.mjs';
 
 after(async () => {
   await cleanup();
@@ -164,5 +164,104 @@ describe('Приоритет ролей', () => {
     });
 
     assert.equal(status, 403, 'сервер принял роль с равным приоритетом');
+  });
+});
+
+describe('Управление ролями по приоритету', () => {
+  const managerPerms = ['panel.roles.read', 'panel.roles.create', 'panel.roles.update', 'panel.roles.delete'];
+
+  async function manager(priority) {
+    const roleId = await createRole(managerPerms, { priority });
+
+    return createUser({ perms: ['panel.access'], roles: [roleId] });
+  }
+
+  it('роль с приоритетом не ниже своего не создать', async () => {
+    const { session } = await manager(5);
+
+    const above = await session.post('/admin/roles', {
+      id: uniqueRoleId(),
+      name: 'Роль выше',
+      perms: ['player.donate.group.buy'],
+      priority: 9,
+    });
+
+    assert.equal(above.status, 403, `создана роль с приоритетом выше своего: ${JSON.stringify(above.body)}`);
+
+    const below = await session.post('/admin/roles', {
+      id: uniqueRoleId(),
+      name: 'Роль ниже',
+      perms: ['player.donate.group.buy'],
+      priority: 2,
+    });
+
+    assert.ok(ok(below.status), `роль ниже по приоритету не создана: ${below.status} ${JSON.stringify(below.body)}`);
+
+    await rootSession().then((admin) => admin.del(`/admin/roles/${below.body.id}`)).catch(() => null);
+  });
+
+  it('роль выше по приоритету нельзя ни изменить, ни удалить', async () => {
+    const { session } = await manager(5);
+    const senior = await createRole(['player.donate.group.buy'], { priority: 8 });
+
+    const updated = await session.patch(`/admin/roles/${senior}`, {
+      name: 'Переименована',
+      perms: ['player.donate.group.buy'],
+      priority: 8,
+    });
+
+    assert.equal(updated.status, 403, 'изменена роль выше по приоритету');
+
+    const removed = await session.del(`/admin/roles/${senior}`);
+
+    assert.equal(removed.status, 403, 'удалена роль выше по приоритету');
+  });
+
+  it('своей роли нельзя поднять приоритет выше собственного', async () => {
+    const { session } = await manager(5);
+    const junior = await createRole(['player.donate.group.buy'], { priority: 1 });
+
+    const { status } = await session.patch(`/admin/roles/${junior}`, {
+      name: 'Повышение',
+      perms: ['player.donate.group.buy'],
+      priority: 7,
+    });
+
+    assert.equal(status, 403, 'роль подняли выше своего приоритета');
+  });
+});
+
+describe('Санкции роли «Заблокированный»', () => {
+  it('бан снимает право, даже если его выдали лично', async () => {
+    const admin = await rootSession();
+    const player = await createUser({ perms: ['player.transfer'] });
+    const uuid = (await query('SELECT uuid FROM unicore_users WHERE username = ?', [player.username]))[0]?.uuid;
+
+    const before = await player.session.get('/auth/me');
+
+    assert.ok(before.body.user.perms.includes('player.transfer'), 'личное право не досталось игроку');
+
+    const banned = await admin.post('/bans', { user_uuid: uuid, reason: 'e2e' });
+
+    assert.ok(ok(banned.status), `бан не выдан: ${banned.status} ${JSON.stringify(banned.body)}`);
+
+    const after = await player.session.get('/auth/me');
+
+    assert.ok(!after.body.user.perms.includes('player.transfer'), 'бан не забрал право, выданное лично');
+
+    const transfer = await player.session.post('/cabinet/money/own/transfer', {
+      username: 'e2eroot',
+      server: 'hitech',
+      amount: 1,
+      type: 'virtual',
+    });
+
+    assert.equal(transfer.status, 403, 'забаненный игрок прошёл проверку права на перевод');
+
+    await admin.del(`/bans/${uuid}`);
+
+    const restored = await player.session.get('/auth/me');
+
+    assert.ok(restored.body.user.perms.includes('player.transfer'), 'после разбана право не вернулось');
   });
 });

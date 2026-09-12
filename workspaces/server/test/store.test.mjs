@@ -60,7 +60,7 @@ describe('Каталог магазина', () => {
     if (!server) return;
 
     const rows = await query('SELECT product_id FROM unicore_servers_products WHERE server_id = ? LIMIT 1', [server]);
-    const productId = rows[0]?.product_id;
+    const productId = Number(rows[0]?.product_id);
 
     if (!productId) return;
 
@@ -76,5 +76,34 @@ describe('Каталог магазина', () => {
     } finally {
       await query('INSERT IGNORE INTO unicore_servers_products (server_id, product_id) VALUES (?, ?)', [server, productId]);
     }
+  });
+});
+
+describe('Скоуп серверов в каталоге', () => {
+  it('массовая правка не перепривязывает товар на чужой сервер', async () => {
+    const servers = await query('SELECT id FROM unicore_servers ORDER BY priority ASC LIMIT 2');
+
+    if (servers.length < 2) return;
+
+    const [mine, foreign] = servers.map((row) => row.id);
+    const rows = await query('SELECT product_id FROM unicore_servers_products WHERE server_id = ? LIMIT 1', [mine]);
+    const productId = Number(rows[0]?.product_id);
+
+    if (!productId) return;
+
+    const { session } = await createAdmin([`panel.store.read`, `panel.store.products.update.many.${mine}`]);
+
+    const denied = await session.patch('/store/products/bulk', {
+      products: [{ id: productId, servers: [foreign] }],
+    });
+
+    assert.equal(denied.status, 403, 'товар перепривязали на сервер без права');
+
+    const attached = await query('SELECT server_id FROM unicore_servers_products WHERE product_id = ?', [productId]);
+    const allowed = await session.patch('/store/products/bulk', {
+      products: [{ id: productId, servers: attached.map((row) => row.server_id) }],
+    });
+
+    assert.ok(allowed.status >= 200 && allowed.status < 300, `своя привязка отвергнута: ${allowed.status}`);
   });
 });
