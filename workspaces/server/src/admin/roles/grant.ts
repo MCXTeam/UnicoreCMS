@@ -32,13 +32,17 @@ export async function assertGrantable(
   patterns: string[] = [],
   request: any,
   grant: Permission = 'panel.users.grant.panel',
+  current?: string[],
 ): Promise<void> {
   if (request?.user?.superuser) return;
 
   const granted = await grantedPermissions(request);
   const panel = await matchPermission([grant], request);
+  const kept = new Set(current || []);
 
   for (const pattern of patterns) {
+    if (kept.has(pattern)) continue;
+
     if (isDenyPattern(pattern)) continue;
 
     const target = denyTarget(pattern);
@@ -67,6 +71,20 @@ export function outranksRole(role: Role, actor: User): boolean {
   if (priority === null) return true;
 
   return (role.priority ?? 0) < priority;
+}
+
+export function assertRolePriority(priority: number | null | undefined, actor: User): void {
+  if (!actor || actor.superuser) return;
+
+  const own = actorPriority(actor);
+
+  if (own === null) return;
+
+  if ((priority ?? 0) >= own) throw new ForbiddenException('Нельзя задать роли приоритет не ниже вашего');
+}
+
+export function assertRoleOutranked(role: Role, actor: User): void {
+  if (!outranksRole(role, actor)) throw new ForbiddenException(`Роль «${role.name}» не ниже вас по приоритету`);
 }
 
 export async function assertRolesGrantable(next: Role[], current: Role[], actor: User): Promise<void> {

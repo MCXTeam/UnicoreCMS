@@ -1,3 +1,4 @@
+import { sharedState } from "../shared-state";
 import {
   PERMISSIONS,
   PERMISSION_GROUPS,
@@ -9,44 +10,50 @@ export interface PermissionEntry extends PermissionMeta {
   key: string;
 }
 
-const extra = new Map<string, PermissionMeta>();
+interface RegistryState {
+  extra: Map<string, PermissionMeta>;
+  cache: PermissionEntry[] | null;
+  revision: number;
+}
 
-let cache: PermissionEntry[] | null = null;
+const state = sharedState<RegistryState>("unicore.permissions.registry.v1", () => ({
+  extra: new Map<string, PermissionMeta>(),
+  cache: null,
+  revision: 0,
+}));
 
-let revision = 0;
-
-export const permissionRevision = (): number => revision;
+export const permissionRevision = (): number => state.revision;
 
 export function registerPermissions(
   entries: Record<string, PermissionMeta>,
 ): void {
-  for (const [key, meta] of Object.entries(entries)) extra.set(key, meta);
+  for (const [key, meta] of Object.entries(entries)) state.extra.set(key, meta);
 
-  cache = null;
-  revision += 1;
+  state.cache = null;
+  state.revision += 1;
 }
 
 export function unregisterPermissions(keys: string[]): void {
-  for (const key of keys) extra.delete(key);
+  for (const key of keys) state.extra.delete(key);
 
-  cache = null;
-  revision += 1;
+  state.cache = null;
+  state.revision += 1;
 }
 
 export function resetPermissionRegistry(): void {
-  extra.clear();
-  cache = null;
-  revision += 1;
+  state.extra.clear();
+  state.cache = null;
+  state.revision += 1;
 }
 
 export function permissionEntries(): PermissionEntry[] {
-  if (!cache)
-    cache = [
+  if (!state.cache)
+    state.cache = [
       ...Object.entries(PERMISSIONS).map(([key, meta]) => ({ key, ...meta })),
-      ...Array.from(extra, ([key, meta]) => ({ key, ...meta })),
+      ...Array.from(state.extra, ([key, meta]) => ({ key, ...meta })),
     ];
 
-  return cache;
+  return state.cache;
 }
 
 export function permissionUniverse(): string[] {
@@ -54,7 +61,7 @@ export function permissionUniverse(): string[] {
 }
 
 export function permissionMeta(key: string): PermissionMeta | undefined {
-  return extra.get(key) ?? PERMISSIONS[key as PermissionKey];
+  return state.extra.get(key) ?? PERMISSIONS[key as PermissionKey];
 }
 
 export function isDangerPermission(key: string): boolean {

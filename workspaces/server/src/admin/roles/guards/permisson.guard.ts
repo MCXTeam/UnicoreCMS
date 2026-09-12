@@ -6,12 +6,13 @@ import {
   filterPlayerPermissions,
   Permission,
   permissionUniverse,
-  resolvePermissions,
+  resolvePermissionLayers,
   satisfiesPermissions,
 } from 'unicore-common';
 import _ from 'lodash';
-import { DONATE_PERMS_CACHE_KEY, PERMISSIONS_KEY } from 'src/common/constants';
+import { DONATE_PERMS_CACHE_KEY, GRANTED_PERMS_CACHE_KEY, PERMISSIONS_KEY } from 'src/common/constants';
 import { Role } from '../entities/role.entity';
+import { ImportantRoles } from '../enums/important-roles.enum';
 import { getDataSourceByName } from 'typeorm-transactional';
 import { UsersDonateGroup } from 'src/game/donate/groups/entities/user-donate.entity';
 import { UsersDonatePermission } from 'src/game/donate/permissions/entities/user-permission.entity';
@@ -22,15 +23,27 @@ export type PermissionOptions = {
 
 export type PermissionArgs = Permission[] | [Permission[], PermissionOptions];
 
+const SANCTION_ROLES: string[] = [ImportantRoles.Banned];
+
+const isSanction = (role: Role): boolean => SANCTION_ROLES.includes(role.id);
+
+export function roleLayers(roles: Role[] = []): string[][] {
+  return [...roles]
+    .filter((role) => !isSanction(role))
+    .sort((left, right) => (left.priority ?? 0) - (right.priority ?? 0))
+    .map((role) => role.perms || []);
+}
+
+export function sanctionLayers(roles: Role[] = []): string[][] {
+  return (roles || []).filter(isSanction).map((role) => role.perms || []);
+}
+
 export function transformPermissions(userPart: Partial<User>, extra: string[] = []) {
   const user = { ...userPart };
+  const roles = userPart.roles || [];
 
-  user.roles = userPart.roles || [];
-  user.perms = [...extra, ...(userPart.perms || []), ...user.roles.map((role) => role.perms || []).flat()];
-
-  if (user.perms.length) user.perms = resolvePermissions(user.perms);
-
-  user.roles = user.roles.map((role) => _.omit(role, 'perms')) as Role[];
+  user.perms = resolvePermissionLayers([extra, ...roleLayers(roles), userPart.perms || [], ...sanctionLayers(roles)]);
+  user.roles = roles.map((role) => _.omit(role, 'perms')) as Role[];
 
   if (user.superuser) user.perms = permissionUniverse();
 
@@ -64,12 +77,19 @@ export async function grantedPermissions(request: any): Promise<string[]> {
 
   if (user?.superuser) return permissionUniverse();
 
-  return [
-    ...defaultGrantedPermissions(),
-    ...(user?.roles || []).map((role) => role.perms || []).flat(),
-    ...(user?.perms || []),
-    ...(await playerPermissions(request)),
-  ];
+  if (request?.[GRANTED_PERMS_CACHE_KEY]) return request[GRANTED_PERMS_CACHE_KEY];
+
+  const granted = resolvePermissionLayers([
+    defaultGrantedPermissions(),
+    ...roleLayers(user?.roles),
+    user?.perms || [],
+    await playerPermissions(request),
+    ...sanctionLayers(user?.roles),
+  ]);
+
+  if (request) request[GRANTED_PERMS_CACHE_KEY] = granted;
+
+  return granted;
 }
 
 export async function matchPermission(args: PermissionArgs, request: any): Promise<boolean> {

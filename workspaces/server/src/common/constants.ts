@@ -19,6 +19,7 @@ export const WS_PUBLIC_ROOM = 'public';
 export const IS_PUBLIC_KEY = 'isPublic';
 export const PERMISSIONS_KEY = 'permissions';
 export const RUNTIME_PERMISSIONS_KEY = 'runtimePermissions';
+export const GRANTED_PERMS_CACHE_KEY = 'grantedPermsCache';
 export const DONATE_PERMS_CACHE_KEY = '__donateWebPerms';
 export const ALLOW_INACTIVE_KEY = 'allowInactive';
 export const ALLOW_PASSWORD_PENDING_KEY = 'allowPasswordPending';
@@ -273,7 +274,8 @@ export const AUDIT_RETENTION_DEFAULTS: Record<AuditClass, number> = {
 
 export const AUDIT_KEY = 'audit';
 export const AUDIT_ACTION_MAX_LENGTH = 100;
-export const AUDIT_CLASS_MAX_LENGTH = 16;
+export const AUDIT_CLASS_MAX_LENGTH = 64;
+export const AUDIT_ACTOR_TYPE_MAX_LENGTH = 16;
 export const AUDIT_STATUS_MAX_LENGTH = 8;
 export const AUDIT_IDENTIFIER_MAX_LENGTH = 64;
 export const AUDIT_NAME_MAX_LENGTH = 64;

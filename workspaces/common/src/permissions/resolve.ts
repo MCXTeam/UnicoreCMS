@@ -120,10 +120,10 @@ export function matchPermissions(
   });
 }
 
-export function resolvePermissions(
+function permissionSets(
   patterns: string[],
-  universe: string[] = permissionUniverse(),
-): string[] {
+  universe: string[],
+): { allow: Set<string>; deny: Set<string> } {
   const allow = new Set<string>();
   const deny = new Set<string>();
 
@@ -148,13 +148,44 @@ export function resolvePermissions(
     allow.add(pattern);
   }
 
-  return Array.from(allow).filter((permission) => {
-    if (deny.has(permission)) return false;
+  return { allow, deny };
+}
 
-    const base = scopeOf(permission);
+function denied(permission: string, deny: Set<string>): boolean {
+  if (deny.has(permission)) return true;
 
-    return !base || !deny.has(base);
-  });
+  const base = scopeOf(permission);
+
+  return Boolean(base && deny.has(base));
+}
+
+export function resolvePermissions(
+  patterns: string[],
+  universe: string[] = permissionUniverse(),
+): string[] {
+  const { allow, deny } = permissionSets(patterns, universe);
+
+  return Array.from(allow).filter((permission) => !denied(permission, deny));
+}
+
+export function resolvePermissionLayers(
+  layers: string[][],
+  universe: string[] = permissionUniverse(),
+): string[] {
+  const granted = new Set<string>();
+
+  for (const patterns of layers) {
+    if (!patterns.length) continue;
+
+    const { allow, deny } = permissionSets(patterns, universe);
+
+    for (const permission of allow) granted.add(permission);
+
+    for (const permission of granted)
+      if (denied(permission, deny)) granted.delete(permission);
+  }
+
+  return Array.from(granted);
 }
 
 export function coveredPermissions(
