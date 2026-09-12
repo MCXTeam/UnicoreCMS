@@ -1,6 +1,6 @@
 <template>
   <div class="cab-grid">
-    <CabTile v-if="rewards" :title="$t('cabinet.referal_you_get')" icon="bx bxs-megaphone" :span="6" accent>
+    <CabTile :title="$t('cabinet.referal_you_get')" icon="bx bxs-megaphone" :span="6" accent>
       <div class="cab-metric">
         {{ $t('cabinet.referal_to_balance', { amount: $utils.formatCurrency('real', config.public_referal_reward) }) }}
       </div>
@@ -9,7 +9,7 @@
       </p>
     </CabTile>
 
-    <CabTile :title="$t('cabinet.referal_player_gets')" icon="bx bx-user-plus" :span="rewards ? 6 : 12">
+    <CabTile :title="$t('cabinet.referal_player_gets')" icon="bx bx-user-plus" :span="6">
       <div class="cab-metric">
         {{ $t('cabinet.referal_to_balance', { amount: $utils.formatCurrency('real', config.public_referal_reward_player) }) }}
       </div>
@@ -81,7 +81,6 @@ export default {
       link: '',
       referals: [],
       percent: 0,
-      rewards: true,
     }
   },
 
@@ -92,14 +91,10 @@ export default {
 
   methods: {
     async load() {
-      const [referals, reward] = await Promise.all([
-        this.cabinet.referals(),
-        this.cabinet.referalPercent().catch(() => ({ percent: 0, rewards: true })),
-      ])
+      const [referals, reward] = await Promise.all([this.cabinet.referals(), this.cabinet.referalPercent().catch(() => ({ percent: 0 }))])
 
       this.referals = referals
       this.percent = Number(reward?.percent) || 0
-      this.rewards = reward?.rewards !== false
     },
 
     async copyLink() {

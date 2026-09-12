@@ -1,5 +1,4 @@
 import { SafeCron } from '@common';
-import { hooks } from 'unicore-api';
 import { CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from 'src/admin/config/config.service';
@@ -45,9 +44,6 @@ export class ReferalsTasks {
     if (!claimed.affected) return;
 
     await this.usersRepository.increment({ uuid: ref.user.uuid }, 'real', Number(config[ConfigField.ReferalRewardPlayer]));
-
-    if (!(await hooks().allowed('referal.rewards', { inviterUuid: ref.inviter.uuid }))) return;
-
     await this.usersRepository.increment({ uuid: ref.inviter.uuid }, 'real', Number(config[ConfigField.ReferalReward]));
   }
 }

@@ -305,31 +305,39 @@ describe('Партнёрская программа', () => {
     assert.equal(payouts.length, 0, 'выплаты удалённого партнёра остались');
   });
 
-  it('у активного партнёра реферальные награды ядра выключены', async () => {
+  it('процент с пополнений не идёт активному партнёру и возвращается неактивному', async () => {
     const admin = await rootSession();
     const player = await createUser({});
     const uuid = await uuidOf(player.username);
+    const percentKey = 'public_referal_payment_percent';
+    const before = (await query('SELECT `value` FROM unicore_configs WHERE `key` = ?', [percentKey]))[0]?.value ?? '0';
 
-    const before = await player.session.get('/cabinet/referals/me/percent');
+    await admin.patch('/config', { key: percentKey, value: '5', type: 0 });
 
-    assert.equal(before.body?.rewards, true, 'обычному игроку выключили награды ядра');
+    try {
+      const plain = await player.session.get('/cabinet/referals/me/percent');
 
-    const created = await admin.post('/mod/partner', { username: player.username, percent: 10, terms: 'x', active: true });
+      assert.equal(plain.body?.percent, 5, 'обычному игроку не достался процент ядра');
+      assert.equal('rewards' in (plain.body || {}), false, 'ответ всё ещё несёт признак отключения наград');
 
-    assert.ok(ok(created.status), `партнёр не создан: ${created.status}`);
+      const created = await admin.post('/mod/partner', { username: player.username, percent: 10, terms: 'x', active: true });
 
-    const active = await player.session.get('/cabinet/referals/me/percent');
+      assert.ok(ok(created.status), `партнёр не создан: ${created.status}`);
 
-    assert.equal(active.body?.rewards, false, 'активному партнёру остались награды ядра');
-    assert.equal(active.body?.percent, 0, 'активному партнёру остался процент на баланс');
+      const active = await player.session.get('/cabinet/referals/me/percent');
 
-    await admin.patch(`/mod/partner/${uuid}`, { percent: 10, terms: 'x', active: false });
+      assert.equal(active.body?.percent, 0, 'активному партнёру остался процент ядра на баланс');
 
-    const paused = await player.session.get('/cabinet/referals/me/percent');
+      await admin.patch(`/mod/partner/${uuid}`, { percent: 10, terms: 'x', active: false });
 
-    assert.equal(paused.body?.rewards, true, 'неактивному партнёру не вернули награды ядра');
+      const paused = await player.session.get('/cabinet/referals/me/percent');
 
-    await admin.del(`/mod/partner/${uuid}`);
+      assert.equal(paused.body?.percent, 5, 'неактивному партнёру не вернулся процент ядра');
+
+      await admin.del(`/mod/partner/${uuid}`);
+    } finally {
+      await admin.patch('/config', { key: percentKey, value: String(before), type: 0 });
+    }
   });
 
   it('без права список партнёров закрыт', async () => {

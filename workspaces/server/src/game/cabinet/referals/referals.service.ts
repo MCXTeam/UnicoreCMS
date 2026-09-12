@@ -48,12 +48,12 @@ export class ReferalsService {
     return _.orderBy(referalsTransform, ['playtime', 'user.created'], ['desc', 'desc']);
   }
 
-  rewardsEnabled(inviterUuid: string): Promise<boolean> {
-    return hooks().allowed('referal.rewards', { inviterUuid });
+  percentEnabled(inviterUuid: string): Promise<boolean> {
+    return hooks().allowed('referal.percent', { inviterUuid });
   }
 
   async paymentPercent(inviter: User): Promise<number> {
-    if (!(await this.rewardsEnabled(inviter.uuid))) return 0;
+    if (!(await this.percentEnabled(inviter.uuid))) return 0;
 
     const active = [{ expired: IsNull() }, { expired: MoreThan(new Date()) }];
     const [groups, permissions] = await Promise.all([
