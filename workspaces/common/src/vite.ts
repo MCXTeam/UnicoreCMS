@@ -1,10 +1,11 @@
 import {
   CHUNK_SIZE_WARNING_LIMIT,
+  EDITOR_OPTIMIZE_DEPS,
   LEGACY_FONT_EXTENSIONS,
   VENDOR_CHUNKS,
 } from "./constants";
 
-export { CHUNK_SIZE_WARNING_LIMIT };
+export { CHUNK_SIZE_WARNING_LIMIT, EDITOR_OPTIMIZE_DEPS };
 
 interface CssPlugin {
   name: string;

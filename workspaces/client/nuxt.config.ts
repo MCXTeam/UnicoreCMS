@@ -4,7 +4,7 @@ import { projectRoot } from 'unicore-common/ports'
 import { buildParallelism } from 'unicore-common/build'
 import { resolveLayers } from 'unicore-api/nuxt'
 import { SITEMAP_EXCLUDE } from './constants'
-import { CHUNK_SIZE_WARNING_LIMIT, vendorChunks, woff2Only } from 'unicore-common/vite'
+import { CHUNK_SIZE_WARNING_LIMIT, EDITOR_OPTIMIZE_DEPS, vendorChunks, woff2Only } from 'unicore-common/vite'
 import { FRONTEND_TEMPLATE_ROOTS, usedPrimevueComponents } from 'unicore-common/primevue'
 import { components as primevueComponents } from '@primevue/metadata'
 import { createRequire } from 'module'
@@ -18,15 +18,17 @@ for (const problem of layers.problems) console.warn(`[unicore] ${problem}`)
 
 const templateRoots = FRONTEND_TEMPLATE_ROOTS.map((entry) => resolve(dirname(fileURLToPath(import.meta.url)), entry))
 const primevueRoot = resolve(dirname(createRequire(import.meta.url).resolve('primevue/config')), '..')
+const uiLayer = dirname(createRequire(import.meta.url).resolve('unicore-ui/package.json'))
+const uiComponents = resolve(uiLayer, 'components')
 
 const primevueInUse = usedPrimevueComponents({
-  roots: [...templateRoots, ...layers.theme, ...layers.modules],
+  roots: [...templateRoots, uiComponents, ...layers.theme, ...layers.modules],
   components: primevueComponents,
   primevueRoot,
 })
 
 export default defineNuxtConfig({
-  extends: [...layers.theme, ...layers.modules],
+  extends: [uiLayer, ...layers.theme, ...layers.modules],
 
   ssr: true,
 
@@ -169,6 +171,10 @@ export default defineNuxtConfig({
         { find: /^moment-timezone$/, replacement: 'moment-timezone/builds/moment-timezone-with-data-10-year-range' },
         { find: /^moment$/, replacement: 'moment/moment.js' },
       ],
+    },
+
+    optimizeDeps: {
+      include: EDITOR_OPTIMIZE_DEPS,
     },
   },
 

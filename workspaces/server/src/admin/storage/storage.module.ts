@@ -1,4 +1,7 @@
 import { Module } from '@nestjs/common';
+import { StorageController } from './storage.controller';
 
-@Module({})
+@Module({
+  controllers: [StorageController],
+})
 export class StorageModule {}

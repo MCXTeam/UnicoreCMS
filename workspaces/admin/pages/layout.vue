@@ -279,8 +279,8 @@
                 v-tooltip.top="link.configLink ? $t('admin.layout_link_config_hint') : ''"
                 @update:modelValue="(v) => setLinkUrl(link, v ?? '')"
               />
-              <InputText size="small" v-model="link.icon" placeholder="bx bx-link" :disabled="!canUpdate" />
-              <Button icon="pi pi-trash" text rounded severity="danger" :disabled="!canUpdate" @click="removeLink(index)" />
+              <IconPicker v-model="link.icon" class="layout-link-icon" compact :disabled="!canUpdate" />
+              <Button icon="pi pi-trash" text rounded size="small" severity="danger" :disabled="!canUpdate" @click="removeLink(index)" />
             </div>
           </div>
         </div>
@@ -752,7 +752,7 @@ onMounted(load)
 .layout-links__head,
 .layout-links__row {
   display: grid;
-  grid-template-columns: 1.1fr 1.3fr 1.25fr 2.25rem;
+  grid-template-columns: 1.1fr 1.3fr 5.5rem 2.25rem;
   gap: 8px;
   align-items: center;
 }
@@ -764,6 +764,10 @@ onMounted(load)
 .layout-links__row :deep(.p-inputtext) {
   padding-inline: 8px;
   text-overflow: ellipsis;
+}
+.layout-link-icon :deep(.icon-picker__field) {
+  padding: 0.5rem 8px;
+  font-size: 0.875rem;
 }
 .layout-links__row + .layout-links__row {
   margin-top: 8px;

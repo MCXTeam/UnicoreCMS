@@ -1,0 +1,13 @@
+{
+  "name": "unicore-ui",
+  "version": "1.2.0",
+  "private": true,
+  "type": "module",
+  "main": "./nuxt.config.ts",
+  "scripts": {
+    "format": "prettier --write --list-different ."
+  },
+  "dependencies": {
+    "quill": "^2.0.3"
+  }
+}

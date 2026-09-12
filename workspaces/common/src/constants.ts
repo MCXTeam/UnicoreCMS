@@ -298,6 +298,8 @@ export const FRONTEND_TEMPLATE_ROOTS = [
   "pages",
 ];
 
+export const EDITOR_OPTIMIZE_DEPS = ["quill", "quill-delta"];
+
 export const VENDOR_CHUNKS: [string, RegExp][] = [
   ["editor", /node_modules[\\/](quill|quill-delta|primevue[\\/]editor)[\\/]/],
   ["chart", /node_modules[\\/](chart\.js|primevue[\\/]chart)[\\/]/],

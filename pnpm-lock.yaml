@@ -47,6 +47,9 @@ importers:
       axios:
         specifier: ^1.20.0
         version: 1.20.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
+      boxicons:
+        specifier: ^2.1.4
+        version: 2.1.4
       chart.js:
         specifier: ^4.5.1
         version: 4.5.1
@@ -77,9 +80,6 @@ importers:
       primevue:
         specifier: ^4.5.5
         version: 4.5.5(vue@3.5.42(typescript@5.9.3))
-      quill:
-        specifier: ^2.0.3
-        version: 2.0.3
       skinview3d:
         specifier: ^3.4.2
         version: 3.4.2
@@ -95,6 +95,9 @@ importers:
       unicore-common:
         specifier: workspace:*
         version: link:../common
+      unicore-ui:
+        specifier: workspace:*
+        version: link:../ui
       vee-validate:
         specifier: ^4.15.1
         version: 4.15.1(vue@3.5.42(typescript@5.9.3))
@@ -169,6 +172,12 @@ importers:
       '@types/semver':
         specifier: ^7.7.1
         version: 7.8.0
+      class-transformer:
+        specifier: ^0.5.1
+        version: 0.5.1
+      class-validator:
+        specifier: ^0.15.1
+        version: 0.15.1
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
@@ -271,6 +280,9 @@ importers:
       unicore-common:
         specifier: workspace:*
         version: link:../common
+      unicore-ui:
+        specifier: workspace:*
+        version: link:../ui
       vee-validate:
         specifier: ^4.15.1
         version: 4.15.1(vue@3.5.42(typescript@5.9.3))
@@ -550,6 +562,12 @@ importers:
       webpack-node-externals:
         specifier: ^3.0.0
         version: 3.0.0
+
+  workspaces/ui:
+    dependencies:
+      quill:
+        specifier: ^2.0.3
+        version: 2.0.3
 
 packages:
 

@@ -238,17 +238,7 @@
             <template #content>
               <div class="field">
                 <label>{{ $t('admin.description') }}</label>
-                <Editor v-model="group.description" editorStyle="height: 220px">
-                  <template #toolbar>
-                    <span class="ql-formats">
-                      <button class="ql-bold"></button>
-                      <button class="ql-italic"></button>
-                      <button class="ql-underline"></button>
-                      <button class="ql-link"></button>
-                      <button class="ql-image"></button>
-                    </span>
-                  </template>
-                </Editor>
+                <RichEditor v-model="group.description" height="220px" />
               </div>
               <div class="field">
                 <label>{{ $t('admin.features_block') }}</label>

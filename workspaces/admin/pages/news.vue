@@ -186,15 +186,7 @@
                       :allowEmpty="false"
                     />
                   </div>
-                  <Editor v-if="contentMode === 'visual'" :modelValue="value" @update:modelValue="handleChange" editorStyle="height: 220px">
-                    <template #toolbar>
-                      <span class="ql-formats">
-                        <button class="ql-bold"></button>
-                        <button class="ql-italic"></button>
-                        <button class="ql-underline"></button>
-                      </span>
-                    </template>
-                  </Editor>
+                  <RichEditor v-if="contentMode === 'visual'" :modelValue="value" @update:modelValue="handleChange" height="220px" />
                   <Textarea v-else :modelValue="value" @update:modelValue="handleChange" class="font-mono" rows="12" spellcheck="false" />
                   <small v-if="contentMode === 'html'">{{ $t('admin.html_sanitize_hint') }}</small>
                   <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>

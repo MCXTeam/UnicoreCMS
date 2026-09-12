@@ -115,7 +115,7 @@
                   <label class="m-0">{{ $t('admin.content') }}</label>
                   <SelectButton v-model="contentMode" :options="contentModes" optionLabel="label" optionValue="value" :allowEmpty="false" />
                 </div>
-                <Editor v-if="contentMode === 'visual'" v-model="page.content" editorStyle="height: 400px"></Editor>
+                <RichEditor v-if="contentMode === 'visual'" v-model="page.content" height="400px" />
                 <Textarea v-else v-model="page.content" class="font-mono" rows="18" spellcheck="false" />
                 <small v-if="contentMode === 'html'">{{ $t('admin.html_sanitize_hint') }}</small>
               </div>

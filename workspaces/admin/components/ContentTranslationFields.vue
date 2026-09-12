@@ -10,11 +10,11 @@
         <div v-else-if="field.type === 'html'" v-html="$sanitize(translations.original(field.path))" />
         <span v-else>{{ translations.original(field.path) }}</span>
       </div>
-      <Editor
+      <RichEditor
         v-if="field.type === 'html'"
         :modelValue="translations.fields[field.path]"
         @update:modelValue="translations.fields[field.path] = $event"
-        editorStyle="height: 260px"
+        height="260px"
       />
       <Textarea
         v-else-if="field.type === 'textarea'"

@@ -56,7 +56,7 @@
               </VeeField>
               <div class="field">
                 <label>{{ $t('admin.content') }}</label>
-                <Editor v-model="email.content" editorStyle="height: 400px"></Editor>
+                <RichEditor v-model="email.content" height="400px" />
               </div>
             </template>
             <ContentTranslationFields v-else :translations="translations" />

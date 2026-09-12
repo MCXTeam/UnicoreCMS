@@ -129,16 +129,7 @@
               </VeeField>
               <div class="field">
                 <label>{{ $t('admin.description') }}</label>
-                <Editor v-model="mod.description" editorStyle="height: 220px">
-                  <template #toolbar>
-                    <span class="ql-formats">
-                      <button class="ql-bold"></button>
-                      <button class="ql-italic"></button>
-                      <button class="ql-underline"></button>
-                      <button class="ql-link"></button>
-                    </span>
-                  </template>
-                </Editor>
+                <RichEditor v-model="mod.description" height="220px" />
               </div>
               <VeeField v-model="mod.link" name="link" label="URL" rules="url" v-slot="{ value, errorMessage, handleChange, handleBlur }">
                 <div class="field">

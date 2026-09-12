@@ -136,16 +136,7 @@
               </VeeField>
               <div class="field">
                 <label>{{ $t('admin.description') }}</label>
-                <Editor v-model="kit.description" editorStyle="height: 220px">
-                  <template #toolbar>
-                    <span class="ql-formats">
-                      <button class="ql-bold"></button>
-                      <button class="ql-italic"></button>
-                      <button class="ql-underline"></button>
-                      <button class="ql-link"></button>
-                    </span>
-                  </template>
-                </Editor>
+                <RichEditor v-model="kit.description" height="220px" />
               </div>
             </template>
             <ContentTranslationFields v-else :translations="translations" />

@@ -486,17 +486,7 @@
             <template #content>
               <div class="field">
                 <label>{{ $t('admin.description') }}</label>
-                <Editor v-model="product.description" editorStyle="height: 160px">
-                  <template #toolbar>
-                    <span class="ql-formats">
-                      <button class="ql-bold"></button>
-                      <button class="ql-italic"></button>
-                      <button class="ql-underline"></button>
-                      <button class="ql-link"></button>
-                      <button class="ql-image"></button>
-                    </span>
-                  </template>
-                </Editor>
+                <RichEditor v-model="product.description" height="160px" />
               </div>
               <div class="field">
                 <label>{{ $t('admin.servers') }}<span class="p-error"> *</span></label>

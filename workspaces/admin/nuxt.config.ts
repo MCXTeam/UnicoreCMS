@@ -2,7 +2,7 @@ import './load-env'
 import { publicConfig } from 'unicore-common/public-config'
 import { projectRoot } from 'unicore-common/ports'
 import { buildParallelism } from 'unicore-common/build'
-import { CHUNK_SIZE_WARNING_LIMIT, vendorChunks, woff2Only } from 'unicore-common/vite'
+import { CHUNK_SIZE_WARNING_LIMIT, EDITOR_OPTIMIZE_DEPS, vendorChunks, woff2Only } from 'unicore-common/vite'
 import { FRONTEND_TEMPLATE_ROOTS, usedPrimevueComponents } from 'unicore-common/primevue'
 import { components as primevueComponents } from '@primevue/metadata'
 import { createRequire } from 'module'
@@ -17,15 +17,17 @@ for (const problem of layers.problems) console.warn(`[unicore] ${problem}`)
 
 const templateRoots = FRONTEND_TEMPLATE_ROOTS.map((entry) => resolve(dirname(fileURLToPath(import.meta.url)), entry))
 const primevueRoot = resolve(dirname(createRequire(import.meta.url).resolve('primevue/config')), '..')
+const uiLayer = dirname(createRequire(import.meta.url).resolve('unicore-ui/package.json'))
+const uiComponents = resolve(uiLayer, 'components')
 
 const primevueInUse = usedPrimevueComponents({
-  roots: [...templateRoots, ...layers.theme, ...layers.modules],
+  roots: [...templateRoots, uiComponents, ...layers.theme, ...layers.modules],
   components: primevueComponents,
   primevueRoot,
 })
 
 export default defineNuxtConfig({
-  extends: [...layers.theme, ...layers.modules],
+  extends: [uiLayer, ...layers.theme, ...layers.modules],
 
   ssr: false,
 
@@ -46,6 +48,7 @@ export default defineNuxtConfig({
   css: [
     'primeicons/primeicons.css',
     'primeflex/primeflex.css',
+    'boxicons/css/boxicons.min.css',
     'unicore-common/styles/role-badge.css',
     'unicore-common/styles/toast.css',
     '~/assets/fonts/main.scss',
@@ -126,7 +129,7 @@ export default defineNuxtConfig({
       ],
     },
     optimizeDeps: {
-      include: ['quill', 'quill-delta'],
+      include: EDITOR_OPTIMIZE_DEPS,
     },
   },
 
