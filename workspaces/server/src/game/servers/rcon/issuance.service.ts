@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { DeliveryMode, IssuanceKind } from 'unicore-common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { DeliveryMode, IssuanceKind, transportOf } from 'unicore-common';
+import { EventsService } from 'src/events/events.service';
+import { Server } from '../entities/server.entity';
 import { ConfigField } from 'src/admin/config/config.enum';
 import { ConfigService } from 'src/admin/config/config.service';
 import { GiveMethod } from 'src/game/store/enums/give-method.enum';
@@ -44,9 +48,11 @@ export interface IssuancePermission {
 @Injectable()
 export class IssuanceService {
   constructor(
+    @InjectRepository(Server) private readonly serversRepository: Repository<Server>,
     private readonly rconQueue: RconQueueService,
     private readonly template: TemplateService,
     private readonly configService: ConfigService,
+    private readonly eventsService: EventsService,
   ) {}
 
   isRcon(server?: IssuanceServer): boolean {
@@ -163,7 +169,11 @@ export class IssuanceService {
   }
 
   async queueCommands(serverId: string, commands: string[], label?: string): Promise<number> {
-    const queued = await this.rconQueue.enqueueMany(serverId, commands, { label, kind: IssuanceKind.Module });
+    const server = await this.serversRepository.findOne({ where: { id: serverId } });
+    const transport = transportOf(server?.delivery_mode ?? DeliveryMode.Rcon);
+    const queued = await this.rconQueue.enqueueMany(serverId, commands, { label, kind: IssuanceKind.Module, transport });
+
+    if (queued.length && transport === 'plugin') this.eventsService.emitKernel('run_commands', { serverId }, serverId);
 
     return queued.length;
   }

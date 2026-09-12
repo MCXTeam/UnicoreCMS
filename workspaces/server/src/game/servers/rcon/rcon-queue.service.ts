@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { randomUUID } from 'crypto';
 import { In, LessThan, Repository } from 'typeorm';
-import { RconCommandStatus, sanitizeCommandValue } from 'unicore-common';
+import { CommandTransport, RconCommandStatus, sanitizeCommandValue } from 'unicore-common';
 import { RconCommand } from './entities/rcon-command.entity';
 import { RconService } from './rcon.service';
 import {
@@ -17,6 +17,7 @@ import {
 export interface EnqueueMeta {
   label?: string;
   kind?: string;
+  transport?: CommandTransport;
 }
 
 @Injectable()
@@ -46,9 +47,48 @@ export class RconQueueService {
       command: sanitizeCommandValue(command),
       label: meta.label,
       kind: meta.kind,
+      transport: meta.transport ?? 'rcon',
       status: RconCommandStatus.Pending,
       attempts: 0,
     });
+  }
+
+  async claimForPlugin(serverId: string): Promise<RconCommand[]> {
+    const worker = `plugin:${serverId}:${randomUUID()}`;
+    const claimed = await this.queueRepository
+      .createQueryBuilder()
+      .update()
+      .set({ status: RconCommandStatus.Processing, worker })
+      .where('status = :pending AND transport = :transport AND server_id = :serverId', {
+        pending: RconCommandStatus.Pending,
+        transport: 'plugin',
+        serverId,
+      })
+      .limit(RCON_BATCH_LIMIT)
+      .execute();
+
+    if (!claimed.affected) return [];
+
+    return this.queueRepository.find({
+      where: { status: RconCommandStatus.Processing, worker },
+      order: { id: 'ASC' },
+    });
+  }
+
+  async completeFromPlugin(serverId: string, done: number[] = [], failed: number[] = []): Promise<void> {
+    const taken = { serverId, transport: 'plugin' as CommandTransport, status: RconCommandStatus.Processing };
+
+    if (done.length)
+      await this.queueRepository.update(
+        { ...taken, id: In(done) },
+        { status: RconCommandStatus.Sent, sentAt: new Date(), worker: null, error: null },
+      );
+
+    if (failed.length)
+      await this.queueRepository.update(
+        { ...taken, id: In(failed) },
+        { status: RconCommandStatus.Failed, worker: null, error: 'Плагин не выполнил команду' },
+      );
   }
 
   private async releaseStale(): Promise<void> {
@@ -68,8 +108,9 @@ export class RconQueueService {
       .createQueryBuilder()
       .update()
       .set({ status: RconCommandStatus.Processing, worker: this.worker })
-      .where('status = :pending AND (next_attempt IS NULL OR next_attempt <= :now)', {
+      .where('status = :pending AND transport = :transport AND (next_attempt IS NULL OR next_attempt <= :now)', {
         pending: RconCommandStatus.Pending,
+        transport: 'rcon',
         now: new Date(),
       })
       .limit(RCON_BATCH_LIMIT)

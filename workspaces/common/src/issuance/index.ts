@@ -12,6 +12,15 @@ export enum RconCommandStatus {
   Processing = 3,
 }
 
+export const COMMAND_TRANSPORTS = ["rcon", "plugin"] as const;
+
+export type CommandTransport = (typeof COMMAND_TRANSPORTS)[number];
+
+export const COMMAND_TRANSPORT_MAX_LENGTH = 16;
+
+export const transportOf = (mode: DeliveryMode): CommandTransport =>
+  mode === DeliveryMode.Rcon ? "rcon" : "plugin";
+
 export enum IssuanceKind {
   Item = "item",
   GroupAdd = "group_add",

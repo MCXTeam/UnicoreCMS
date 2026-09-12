@@ -1,4 +1,4 @@
-import { RconCommandStatus } from 'unicore-common';
+import { COMMAND_TRANSPORT_MAX_LENGTH, CommandTransport, RconCommandStatus } from 'unicore-common';
 import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Server } from '../../entities/server.entity';
 
@@ -23,6 +23,10 @@ export class RconCommand {
 
   @Column({ name: 'kind', nullable: true })
   kind?: string;
+
+  @Index()
+  @Column({ name: 'transport', length: COMMAND_TRANSPORT_MAX_LENGTH, default: 'rcon' })
+  transport: CommandTransport;
 
   @Index()
   @Column({ name: 'status', type: 'int', default: RconCommandStatus.Pending })

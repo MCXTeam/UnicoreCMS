@@ -2,6 +2,7 @@ import { Audit } from '@common';
 import { Body, Controller, Get, Param, Post, Req } from '@nestjs/common';
 import { Permissions } from 'src/admin/roles/decorators/permission.decorator';
 import { assertServerPermission } from 'src/admin/roles/guards/permisson.guard';
+import { CommandsAckInput } from '../dto/commands-ack.input';
 import { RconRunInput } from '../dto/rcon-run.input';
 import { RconQueueService } from './rcon-queue.service';
 import { RconService } from './rcon.service';
@@ -12,6 +13,22 @@ export class RconController {
     private rconService: RconService,
     private rconQueueService: RconQueueService,
   ) {}
+
+  @Permissions(['kernel.connect'])
+  @Get(':server/commands')
+  async pending(@Param('server') server: string) {
+    const commands = await this.rconQueueService.claimForPlugin(server);
+
+    return commands.map((item) => ({ id: item.id, command: item.command }));
+  }
+
+  @Permissions(['kernel.connect'])
+  @Post(':server/commands/ack')
+  async ack(@Param('server') server: string, @Body() body: CommandsAckInput) {
+    await this.rconQueueService.completeFromPlugin(server, body.done || [], body.failed || []);
+
+    return { done: true };
+  }
 
   @Permissions(['panel.access', 'panel.servers.rcon.*'])
   @Post(':server/test')
