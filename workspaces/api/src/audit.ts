@@ -1,4 +1,10 @@
-export type ModuleAuditClass = 'access' | 'finance' | 'admin' | 'content'
+export type ModuleAuditClass = 'access' | 'finance' | 'admin' | 'content' | (string & {})
+
+export interface ModuleAuditClassDefinition {
+  key: string
+  labelKey: string
+  permission: string
+}
 
 export type ModuleAuditStatus = 'success' | 'failure'
 
@@ -8,6 +14,7 @@ export interface ModuleAuditAction {
   key: string
   class: ModuleAuditClass
   danger?: boolean
+  labelKey?: string
 }
 
 export interface ModuleAuditActor {
@@ -39,3 +46,5 @@ export interface AuditSink {
 }
 
 export const moduleAuditActionKey = (id: string, action: ModuleAuditAction): string => `mod.${id}.${action.key}`
+
+export const moduleAuditClassKey = (id: string, suffix?: string): string => (suffix ? `mod.${id}.${suffix}` : `mod.${id}`)

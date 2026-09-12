@@ -1,3 +1,4 @@
+import { ModuleAuditAction, ModuleAuditClassDefinition } from '../audit'
 import { ConfigFieldSchema, ModulePermission } from '../manifest'
 import { getRegistry, ModuleContribution, registerContribution } from '../registry'
 import { EventBus } from '../events'
@@ -20,6 +21,8 @@ export interface ModuleDefinition {
   entities?: unknown[]
   nestModules?: unknown[]
   permissions?: ModulePermission[]
+  auditActions?: ModuleAuditAction[]
+  auditClasses?: ModuleAuditClassDefinition[]
   config?: ConfigFieldSchema[]
   locales?: Record<string, Record<string, string>>
   paymentModules?: unknown[]
@@ -33,6 +36,8 @@ export const defineModule = (definition: ModuleDefinition): ModuleDefinition => 
     entities: definition.entities || [],
     nestModules: definition.nestModules || [],
     permissions: definition.permissions || [],
+    auditActions: definition.auditActions || [],
+    auditClasses: definition.auditClasses || [],
     config: definition.config || [],
     locales: definition.locales || {},
     paymentModules: definition.paymentModules || [],

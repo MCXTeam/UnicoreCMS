@@ -1,5 +1,12 @@
 import { resolve } from 'path';
-import { AuditActionMeta, PermissionMeta, registerAuditActions, registerPermissions } from 'unicore-common';
+import {
+  AuditActionMeta,
+  AuditClassMeta,
+  PermissionMeta,
+  registerAuditActions,
+  registerAuditClasses,
+  registerPermissions,
+} from 'unicore-common';
 import { moduleAuditActionKey, modulePermissionKey, modulePermissionMeta } from 'unicore-api';
 import { discover, DiscoveredModule } from './discovery';
 import { readLocaleFiles } from './locales';
@@ -28,7 +35,17 @@ const auditActionsOf = (modules: LoadedModule[]): Record<string, AuditActionMeta
     modules.flatMap((item) =>
       (item.contribution?.auditActions || []).map((action) => [
         moduleAuditActionKey(item.id, action),
-        { class: action.class, danger: action.danger } as AuditActionMeta,
+        { class: action.class, danger: action.danger, labelKey: action.labelKey } as AuditActionMeta,
+      ]),
+    ),
+  );
+
+const auditClassesOf = (modules: LoadedModule[]): Record<string, AuditClassMeta> =>
+  Object.fromEntries(
+    modules.flatMap((item) =>
+      (item.contribution?.auditClasses || []).map((entry) => [
+        entry.key,
+        { labelKey: entry.labelKey, permission: entry.permission } as AuditClassMeta,
       ]),
     ),
   );
@@ -43,6 +60,7 @@ const initialize = (): ModuleRuntimeState => {
 
   registerPermissions(permissionsOf(active));
   registerAuditActions(auditActionsOf(active));
+  registerAuditClasses(auditClassesOf(active));
 
   return {
     loaded: active,

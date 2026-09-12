@@ -1,7 +1,8 @@
-import { AuditActorType, AuditChanges, AuditClass, AuditStatus } from 'unicore-common';
+import { AuditActorType, AuditChanges, AuditClassName, AuditStatus } from 'unicore-common';
 import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 import {
   AUDIT_ACTION_MAX_LENGTH,
+  AUDIT_ACTOR_TYPE_MAX_LENGTH,
   AUDIT_CLASS_MAX_LENGTH,
   AUDIT_CLIENT_MAX_LENGTH,
   AUDIT_IDENTIFIER_MAX_LENGTH,
@@ -22,12 +23,12 @@ export class AuditLog {
   action: string;
 
   @Column({ name: 'class', length: AUDIT_CLASS_MAX_LENGTH })
-  class: AuditClass;
+  class: AuditClassName;
 
   @Column({ name: 'status', length: AUDIT_STATUS_MAX_LENGTH })
   status: AuditStatus;
 
-  @Column({ name: 'actor_type', length: AUDIT_CLASS_MAX_LENGTH })
+  @Column({ name: 'actor_type', length: AUDIT_ACTOR_TYPE_MAX_LENGTH })
   actorType: AuditActorType;
 
   @Index()

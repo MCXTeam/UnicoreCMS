@@ -5,6 +5,7 @@ import { satisfies } from 'semver';
 import { getMetadataArgsStorage } from 'typeorm';
 import { PATH_METADATA } from '@nestjs/common/constants';
 import { modulesPath, PERMISSION_LOCALE_PREFIX, permissionGroupKey } from 'unicore-common';
+import { AUDIT_CLASS_MAX_LENGTH } from 'src/common/constants';
 import { API_VERSION, contribution, ModuleContribution, modulePermissionKey, modulePrefixes } from 'unicore-api';
 import { DiscoveredModule } from './discovery';
 
@@ -37,6 +38,30 @@ const validateNamespaces = (module: DiscoveredModule, contributed: ModuleContrib
 
   for (const permission of contributed.permissions.map(modulePermissionKey))
     if (!permission.startsWith(prefixes.permission)) problems.push(`право «${permission}» должно начинаться с «${prefixes.permission}»`);
+
+  const own = `mod.${module.id}`;
+
+  for (const action of contributed.auditActions || [])
+    if (action.labelKey && !action.labelKey.startsWith(prefixes.locale))
+      problems.push(`название действия журнала «${action.labelKey}» должно начинаться с «${prefixes.locale}»`);
+
+  const declared = new Set(contributed.permissions.map(modulePermissionKey));
+
+  for (const entry of contributed.auditClasses || []) {
+    if (entry.key.length > AUDIT_CLASS_MAX_LENGTH)
+      problems.push(`название раздела журнала «${entry.key}» длиннее ${AUDIT_CLASS_MAX_LENGTH} символов`);
+
+    if (entry.key !== own && !entry.key.startsWith(prefixes.permission))
+      problems.push(`раздел журнала «${entry.key}» должен называться «${own}» или начинаться с «${prefixes.permission}»`);
+
+    if (!entry.permission.startsWith(prefixes.permission))
+      problems.push(`право на раздел журнала «${entry.permission}» должно начинаться с «${prefixes.permission}»`);
+    else if (!declared.has(entry.permission))
+      problems.push(`право на раздел журнала «${entry.permission}» не объявлено модулем в permissions`);
+
+    if (!entry.labelKey.startsWith(prefixes.locale))
+      problems.push(`название раздела журнала «${entry.labelKey}» должно начинаться с «${prefixes.locale}»`);
+  }
 
   const permissionLocale = `${PERMISSION_LOCALE_PREFIX}${prefixes.permission}`;
   const permissionGroupLocale = permissionGroupKey(`mod.${module.id}`);

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Brackets, In, Repository, SelectQueryBuilder } from 'typeorm';
-import { AUDIT_CLASSES, AuditClass, Permission, auditActions, auditClassPermission } from 'unicore-common';
+import { AuditClassName, Permission, auditActions, auditClassKey, auditClassPermission, auditClasses } from 'unicore-common';
 import { AUDIT_DEFAULT_LIMIT, AUDIT_MAX_LIMIT, AuditLog, FilterOperator, Paginated, PaginateQuery, filterValues, paginate } from '@common';
 import { matchPermission } from '../roles/guards/permisson.guard';
 
@@ -12,16 +12,23 @@ export class LogsService {
     private auditRepository: Repository<AuditLog>,
   ) {}
 
-  async allowedClasses(request: unknown): Promise<AuditClass[]> {
-    const allowed: AuditClass[] = [];
+  async allowedClasses(request: unknown): Promise<AuditClassName[]> {
+    const allowed: AuditClassName[] = [];
 
-    for (const value of AUDIT_CLASSES) if (await matchPermission([auditClassPermission(value) as Permission], request)) allowed.push(value);
+    for (const value of auditClasses())
+      if (await matchPermission([auditClassPermission(value) as Permission], request)) allowed.push(value);
 
     return allowed;
   }
 
   actions() {
     return auditActions();
+  }
+
+  async classes(request: unknown): Promise<{ id: AuditClassName; labelKey: string }[]> {
+    const allowed = await this.allowedClasses(request);
+
+    return allowed.map((id) => ({ id, labelKey: auditClassKey(id) }));
   }
 
   async find(query: PaginateQuery, request: unknown, player?: string): Promise<Paginated<AuditLog>> {
@@ -63,8 +70,8 @@ export class LogsService {
     );
   }
 
-  private requestedClasses(query: PaginateQuery, allowed: AuditClass[]): AuditClass[] {
-    const requested = filterValues(query, 'class') as AuditClass[];
+  private requestedClasses(query: PaginateQuery, allowed: AuditClassName[]): AuditClassName[] {
+    const requested = filterValues(query, 'class') as AuditClassName[];
 
     if (!requested.length) return allowed;
 

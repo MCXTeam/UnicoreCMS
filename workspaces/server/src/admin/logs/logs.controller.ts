@@ -15,7 +15,7 @@ export class LogsController {
 
   @Get('classes')
   classes(@Req() request: any) {
-    return this.logsService.allowedClasses(request);
+    return this.logsService.classes(request);
   }
 
   @Get()

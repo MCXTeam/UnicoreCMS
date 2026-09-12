@@ -88,13 +88,13 @@
             <template #body="slotProps">
               <div class="flex align-items-center gap-2">
                 <i v-if="slotProps.data.status === 'failure'" class="pi pi-exclamation-triangle text-orange-500" />
-                <span>{{ $t(`audit.action.${slotProps.data.action}`) }}</span>
+                <span>{{ actionLabel(slotProps.data.action) }}</span>
               </div>
             </template>
           </Column>
           <Column field="class" :header="$t('admin.logs_class')" sortable :style="{ width: '11rem' }">
             <template #body="slotProps">
-              <Tag :severity="classSeverity(slotProps.data.class)" :value="$t(`audit.class.${slotProps.data.class}`)" />
+              <Tag :severity="classSeverity(slotProps.data.class)" :value="classLabel(slotProps.data.class)" />
             </template>
           </Column>
           <Column field="actorName" :header="$t('admin.logs_actor')" sortable>
@@ -203,12 +203,12 @@ export default {
   },
   computed: {
     classOptions() {
-      return this.classes.map((value) => ({ value, label: this.$t(`audit.class.${value}`) }))
+      return this.classes.map((entry) => ({ value: entry.id, label: this.classLabel(entry.id) }))
     },
     actionOptions() {
       return this.actions
         .filter((entry) => !this.filters.class || entry.class === this.filters.class)
-        .map((entry) => ({ value: entry.key, label: this.$t(`audit.action.${entry.key}`) }))
+        .map((entry) => ({ value: entry.key, label: this.actionLabel(entry.key) }))
     },
     statusOptions() {
       return STATUSES.map((value) => ({ value, label: this.$t(`audit.status.${value}`) }))
@@ -237,6 +237,16 @@ export default {
     await this.load()
   },
   methods: {
+    actionLabel(value) {
+      const known = this.actions.find((entry) => entry.key === value)
+
+      return this.$t(known?.labelKey || `audit.action.${value}`)
+    },
+    classLabel(value) {
+      const known = this.classes.find((entry) => entry.id === value)
+
+      return this.$t(known ? known.labelKey : `audit.class.${value}`)
+    },
     classSeverity(value) {
       return CLASS_SEVERITY[value] ?? 'secondary'
     },

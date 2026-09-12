@@ -1,6 +1,49 @@
+import { sharedState } from "./shared-state";
+
 export const AUDIT_CLASSES = ["access", "finance", "admin", "content"] as const;
 
 export type AuditClass = (typeof AUDIT_CLASSES)[number];
+
+export type AuditClassName = AuditClass | (string & {});
+
+export interface AuditClassMeta {
+  labelKey: string;
+  permission: string;
+}
+
+interface AuditState {
+  actions: Map<string, AuditActionMeta>;
+  classes: Map<string, AuditClassMeta>;
+  cache: AuditActionEntry[] | null;
+}
+
+const state = sharedState<AuditState>("unicore.audit.registry.v1", () => ({
+  actions: new Map<string, AuditActionMeta>(),
+  classes: new Map<string, AuditClassMeta>(),
+  cache: null,
+}));
+
+export function registerAuditClasses(
+  entries: Record<string, AuditClassMeta>,
+): void {
+  for (const [key, meta] of Object.entries(entries)) state.classes.set(key, meta);
+}
+
+export function unregisterAuditClasses(keys: string[]): void {
+  for (const key of keys) state.classes.delete(key);
+}
+
+export function resetAuditClassRegistry(): void {
+  state.classes.clear();
+}
+
+export function auditClasses(): AuditClassName[] {
+  return [...AUDIT_CLASSES, ...state.classes.keys()];
+}
+
+export function auditClassMeta(value: string): AuditClassMeta | null {
+  return state.classes.get(value) ?? null;
+}
 
 export const AUDIT_ACTOR_TYPES = [
   "user",
@@ -17,8 +60,9 @@ export const AUDIT_STATUSES = ["success", "failure"] as const;
 export type AuditStatus = (typeof AUDIT_STATUSES)[number];
 
 export interface AuditActionMeta {
-  class: AuditClass;
+  class: AuditClassName;
   danger?: boolean;
+  labelKey?: string;
 }
 
 export type AuditChanges = Record<string, [unknown, unknown]>;
@@ -136,64 +180,60 @@ export interface AuditActionEntry extends AuditActionMeta {
   key: string;
 }
 
-const extra = new Map<string, AuditActionMeta>();
-
-let cache: AuditActionEntry[] | null = null;
-
 export function registerAuditActions(
   entries: Record<string, AuditActionMeta>,
 ): void {
-  for (const [key, meta] of Object.entries(entries)) extra.set(key, meta);
+  for (const [key, meta] of Object.entries(entries)) state.actions.set(key, meta);
 
-  cache = null;
+  state.cache = null;
 }
 
 export function unregisterAuditActions(keys: string[]): void {
-  for (const key of keys) extra.delete(key);
+  for (const key of keys) state.actions.delete(key);
 
-  cache = null;
+  state.cache = null;
 }
 
 export function resetAuditActionRegistry(): void {
-  extra.clear();
-  cache = null;
+  state.actions.clear();
+  state.cache = null;
 }
 
 export function auditActions(): AuditActionEntry[] {
-  if (cache) return cache;
+  if (state.cache) return state.cache;
 
   const merged = new Map<string, AuditActionMeta>(
     Object.entries(AUDIT_ACTIONS) as [string, AuditActionMeta][],
   );
 
-  for (const [key, meta] of extra) merged.set(key, meta);
+  for (const [key, meta] of state.actions) merged.set(key, meta);
 
-  cache = Array.from(merged, ([key, meta]) => ({ key, ...meta })).sort((a, b) =>
+  state.cache = Array.from(merged, ([key, meta]) => ({ key, ...meta })).sort((a, b) =>
     a.key.localeCompare(b.key),
   );
 
-  return cache;
+  return state.cache;
 }
 
 export function auditActionMeta(action: string): AuditActionMeta | null {
   return (
-    extra.get(action) ??
+    state.actions.get(action) ??
     (AUDIT_ACTIONS as Record<string, AuditActionMeta>)[action] ??
     null
   );
 }
 
-export function auditActionClass(action: string): AuditClass | null {
+export function auditActionClass(action: string): AuditClassName | null {
   return auditActionMeta(action)?.class ?? null;
 }
 
 export const AUDIT_LOCALE_PREFIX = "audit.";
 
 export const auditActionKey = (action: string): string =>
-  `${AUDIT_LOCALE_PREFIX}action.${action}`;
+  auditActionMeta(action)?.labelKey ?? `${AUDIT_LOCALE_PREFIX}action.${action}`;
 
 export const auditClassKey = (value: string): string =>
-  `${AUDIT_LOCALE_PREFIX}class.${value}`;
+  auditClassMeta(value)?.labelKey ?? `${AUDIT_LOCALE_PREFIX}class.${value}`;
 
 export const auditActorTypeKey = (value: string): string =>
   `${AUDIT_LOCALE_PREFIX}actor.${value}`;
@@ -201,4 +241,4 @@ export const auditActorTypeKey = (value: string): string =>
 export const AUDIT_PERMISSION_PREFIX = "panel.logs.";
 
 export const auditClassPermission = (value: string): string =>
-  `${AUDIT_PERMISSION_PREFIX}${value}.read`;
+  auditClassMeta(value)?.permission ?? `${AUDIT_PERMISSION_PREFIX}${value}.read`;

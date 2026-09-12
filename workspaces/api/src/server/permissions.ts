@@ -1,1 +1,6 @@
-export { satisfiesPermission, satisfiesPermissions } from 'unicore-common/permissions'
+export {
+  defaultGrantedPermissions,
+  resolvePermissionLayers,
+  satisfiesPermission,
+  satisfiesPermissions,
+} from 'unicore-common/permissions'

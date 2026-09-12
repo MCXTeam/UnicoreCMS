@@ -2,7 +2,7 @@ import { API_VERSION } from './version'
 import { Capabilities } from './capabilities'
 import { EventBus } from './events'
 import { HookBus } from './hooks'
-import { AuditSink, ModuleAuditAction } from './audit'
+import { AuditSink, ModuleAuditAction, ModuleAuditClassDefinition } from './audit'
 import { ConfigFieldSchema, ModulePermission } from './manifest'
 
 export interface ModuleContribution {
@@ -11,6 +11,7 @@ export interface ModuleContribution {
   nestModules: unknown[]
   permissions: ModulePermission[]
   auditActions?: ModuleAuditAction[]
+  auditClasses?: ModuleAuditClassDefinition[]
   config: ConfigFieldSchema[]
   locales: Record<string, Record<string, string>>
   paymentModules: unknown[]
