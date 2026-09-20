@@ -7,6 +7,8 @@ export const useCabinet = () => {
     referals: () => api.get('/cabinet/referals/me').then((res) => res.data),
     referalPercent: () => api.get('/cabinet/referals/me/percent').then((res) => res.data),
     inviter: () => api.get('/cabinet/referals/me/inviter').then((res) => res.data),
+    inviterRules: () => api.get('/cabinet/referals/me/inviter/rules').then((res) => res.data),
+    bindInviter: (code: string) => api.put('/cabinet/referals/me/inviter', { code }).then((res) => res.data),
     sessions: (token: string) => api.post('/auth/sessions/me', { token }).then((res) => res.data),
     closeSession: (id: number | string) => api.delete(`/auth/sessions/${id}`).then((res) => res.data),
     closeAllSessions: () => api.delete('/auth/sessions_all').then((res) => res.data),

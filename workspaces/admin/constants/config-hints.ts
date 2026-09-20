@@ -36,6 +36,14 @@ export const CONFIG_HINTS: Record<string, ConfigHint> = {
     title: 'cfg.public_referal_payment_percent_title',
     hint: 'cfg.public_referal_payment_percent_hint',
   },
+  public_referal_bind_enabled: {
+    title: 'cfg.public_referal_bind_enabled_title',
+    hint: 'cfg.public_referal_bind_enabled_hint',
+  },
+  public_referal_rebind_enabled: {
+    title: 'cfg.public_referal_rebind_enabled_title',
+    hint: 'cfg.public_referal_rebind_enabled_hint',
+  },
   public_monitoring_reward: {
     title: 'cfg.public_monitoring_reward_title',
     hint: 'cfg.public_monitoring_reward_hint',

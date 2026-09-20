@@ -10,6 +10,7 @@ export const ROUTE_ACCESS: Record<string, RouteAccess> = {
   '/users': ['panel.users.read'],
   '/revenue': ['panel.revenue.access'],
   '/roles': ['panel.roles.read'],
+  '/referals': ['panel.referals.read'],
   '/config': ['panel.config.read'],
   '/locales': ['panel.locales.read'],
   '/api': ['panel.api.read'],

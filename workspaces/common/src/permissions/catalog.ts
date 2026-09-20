@@ -19,6 +19,7 @@ export const PERMISSION_GROUPS = [
   "dashboard",
   "users",
   "roles",
+  "referals",
   "servers",
   "news",
   "layout",
@@ -117,6 +118,11 @@ export const PERMISSIONS = define({
   "panel.roles.update": { group: "roles", danger: true },
   "panel.roles.delete": { group: "roles", danger: true },
   "panel.roles.grant.panel": { group: "roles", danger: true },
+
+  "panel.referals.read": { group: "referals" },
+  "panel.referals.create": { group: "referals" },
+  "panel.referals.update": { group: "referals" },
+  "panel.referals.delete": { group: "referals" },
 
   "panel.servers.read": { group: "servers" },
   "panel.servers.sort": { group: "servers" },

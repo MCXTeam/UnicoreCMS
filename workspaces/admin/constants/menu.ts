@@ -18,6 +18,11 @@ export const CORE_MENU = [
         to: '/roles',
       },
       {
+        label: 'admin.menu_referals',
+        icon: 'pi pi-fw pi-share-alt',
+        to: '/referals',
+      },
+      {
         label: 'admin.menu_revenue',
         icon: 'pi pi-fw pi-wallet',
         to: '/revenue',

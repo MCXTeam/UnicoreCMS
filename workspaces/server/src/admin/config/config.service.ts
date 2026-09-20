@@ -72,6 +72,8 @@ export class ConfigService {
         { key: ConfigField.ReferalReward, important: true, type: ConfigType.number, value: '20' },
         { key: ConfigField.ReferalRewardPlayer, important: true, type: ConfigType.number, value: '20' },
         { key: ConfigField.ReferalPaymentPercent, important: true, type: ConfigType.number, value: '0' },
+        { key: ConfigField.ReferalBindEnabled, important: true, type: ConfigType.boolean, value: 'false' },
+        { key: ConfigField.ReferalRebindEnabled, important: true, type: ConfigType.boolean, value: 'false' },
         { key: ConfigField.MonitoringReward, important: true, type: ConfigType.number, value: '2' },
         { key: ConfigField.LinkMctop, important: true, type: ConfigType.string, value: 'https://unicorecms.ru' },
         { key: ConfigField.LinkMinecraftraiting, important: true, type: ConfigType.string, value: 'https://unicorecms.ru' },

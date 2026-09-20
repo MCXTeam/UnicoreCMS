@@ -142,6 +142,12 @@ export const AUDIT_ACTIONS = define({
   "gift.delete": { class: "finance" },
   "unban.purchase": { class: "finance" },
 
+  "referal.bind": { class: "finance" },
+
+  "referal.create": { class: "admin" },
+  "referal.update": { class: "admin" },
+  "referal.delete": { class: "admin" },
+
   "user.create": { class: "admin" },
   "user.update": { class: "admin" },
   "user.delete": { class: "admin", danger: true },

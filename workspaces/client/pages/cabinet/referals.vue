@@ -1,6 +1,6 @@
 <template>
   <div class="cab-grid">
-    <CabTile :title="$t('cabinet.referal_you_get')" icon="bx bxs-megaphone" :span="6" accent>
+    <CabTile v-if="showYouGet" :title="$t('cabinet.referal_you_get')" icon="bx bxs-megaphone" :span="rewardSpan" accent>
       <div class="cab-metric">
         {{ $t('cabinet.referal_to_balance', { amount: $utils.formatCurrency('real', config.public_referal_reward) }) }}
       </div>
@@ -9,7 +9,7 @@
       </p>
     </CabTile>
 
-    <CabTile :title="$t('cabinet.referal_player_gets')" icon="bx bx-user-plus" :span="6">
+    <CabTile v-if="showPlayerGets" :title="$t('cabinet.referal_player_gets')" icon="bx bx-user-plus" :span="rewardSpan">
       <div class="cab-metric">
         {{ $t('cabinet.referal_to_balance', { amount: $utils.formatCurrency('real', config.public_referal_reward_player) }) }}
       </div>
@@ -82,6 +82,20 @@ export default {
       referals: [],
       percent: 0,
     }
+  },
+
+  computed: {
+    showYouGet() {
+      return Number(this.config?.public_referal_reward) > 0
+    },
+
+    showPlayerGets() {
+      return Number(this.config?.public_referal_reward_player) > 0
+    },
+
+    rewardSpan() {
+      return this.showYouGet && this.showPlayerGets ? 6 : 12
+    },
   },
 
   mounted() {

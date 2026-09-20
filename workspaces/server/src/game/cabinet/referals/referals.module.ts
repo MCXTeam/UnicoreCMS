@@ -5,11 +5,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Referal } from './entities/referal.entity';
 import { PlaytimeModule } from '../playtime/playtime.module';
 import { ConfigModule } from 'src/admin/config/config.module';
+import { User } from 'src/admin/users/entities/user.entity';
 import { UsersDonateGroup } from 'src/game/donate/groups/entities/user-donate.entity';
 import { UsersDonatePermission } from 'src/game/donate/permissions/entities/user-permission.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Referal, UsersDonateGroup, UsersDonatePermission]), PlaytimeModule, ConfigModule],
+  imports: [TypeOrmModule.forFeature([Referal, User, UsersDonateGroup, UsersDonatePermission]), PlaytimeModule, ConfigModule],
   providers: [ReferalsService],
   exports: [ReferalsService],
   controllers: [ReferalsController],

@@ -235,6 +235,34 @@
         </div>
       </div>
     </CabTile>
+
+    <CabTile v-if="inviterRules.enabled" :title="$t('cabinet.inviter_title')" icon="bx bx-user-voice" :span="6">
+      <p class="cab-sub mt-0 mb-3">{{ $t(inviterRules.editable ? 'cabinet.inviter_hint' : 'cabinet.inviter_locked') }}</p>
+      <p v-if="inviter" class="m-0 mb-3">
+        {{ $t('cabinet.inviter_current') }} <b v-text="inviter.inviter?.username" />
+      </p>
+      <Form v-slot="{ meta }" class="cab-form">
+        <label class="cab-label">{{ $t('cabinet.inviter_code') }}</label>
+        <Field
+          v-model="inviter_form.code"
+          :name="$t('cabinet.inviter_code')"
+          rules="required"
+          v-slot="{ value, errorMessage, handleChange, handleBlur }"
+        >
+          <InputText
+            :modelValue="value"
+            @update:modelValue="handleChange"
+            @blur="handleBlur"
+            :disabled="!inviterRules.editable"
+            :placeholder="$t('cabinet.inviter_code')"
+            class="w-100"
+            :class="errorMessage && 'p-invalid'"
+          />
+          <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+        </Field>
+        <Button :disabled="!meta.valid || !inviterRules.editable" class="w-100" :label="$t('cabinet.inviter_save')" @click="bindInviter()" />
+      </Form>
+    </CabTile>
   </div>
 </template>
 
@@ -282,8 +310,13 @@ const email_form = reactive({
   code: '',
   sent: false,
 })
+const inviter_form = reactive({
+  code: '',
+})
 const codeLength = EMAIL_CODE_LENGTH
 const two_factor = ref(null)
+const inviter = ref(null)
+const inviterRules = ref({ enabled: false, editable: false, bound: false })
 const { passwordField, passwordConfirmField, fill: fillGeneratedPassword } = usePasswordGenerator((password) => {
   password_form.password = password
   password_form.password_confirm = password
@@ -291,7 +324,33 @@ const { passwordField, passwordConfirmField, fill: fillGeneratedPassword } = use
 
 onMounted(async () => {
   if (!$auth.user.two_factor_enabled) await GenerateQR()
+
+  await loadInviter()
 })
+
+async function loadInviter() {
+  inviterRules.value = await cabinet.inviterRules().catch(() => ({ enabled: false, editable: false, bound: false }))
+
+  if (!inviterRules.value.enabled) return
+
+  inviter.value = await cabinet.inviter().catch(() => null)
+  inviter_form.code = inviter.value?.inviter?.username || ''
+}
+
+async function bindInviter() {
+  const loading = $unicore.loading()
+
+  try {
+    inviter.value = await cabinet.bindInviter(inviter_form.code)
+    inviterRules.value = await cabinet.inviterRules()
+
+    $unicore.successNotification($t('cabinet.inviter_saved'))
+  } catch (err) {
+    $unicore.errorNotification(serverMessage(err) || $t('cabinet.inviter_failed'))
+  }
+
+  loading.close()
+}
 
 async function changePassword() {
   if (password_form.password_old == password_form.password) return $unicore.errorNotification($t('cabinet.password_same'))

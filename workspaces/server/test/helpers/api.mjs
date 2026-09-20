@@ -83,6 +83,10 @@ export class Session {
     return this.request('PATCH', path, { ...options, body: body ?? {} });
   }
 
+  put(path, body, options) {
+    return this.request('PUT', path, { ...options, body: body ?? {} });
+  }
+
   del(path, body, options) {
     return this.request('DELETE', path, { ...options, body });
   }
