@@ -245,7 +245,7 @@
   "admin.irreversible": "This cannot be undone.",
   "admin.is_default": "Default",
   "admin.issuance_divider": "Issuance method",
-  "admin.issuance_hint": "RCON — the CMS connects to the server itself and runs commands from templates. Plugin — items go through the UnicoreConnect storage.",
+  "admin.issuance_hint": "RCON — the CMS connects to the server itself and runs commands from templates. Plugin — items go through the UnicoreConnect storage, and the plugin pulls queued commands and runs them itself; no RCON port needed.",
   "admin.issuance_label": "How to hand out items and perks",
   "admin.issuance_plugin": "Plugin (UnicoreConnect)",
   "admin.issuance_rcon": "RCON (the CMS runs commands)",

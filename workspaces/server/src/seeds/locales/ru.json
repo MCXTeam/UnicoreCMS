@@ -245,7 +245,7 @@
   "admin.irreversible": "Данный процесс будет необратим!",
   "admin.is_default": "Основной",
   "admin.issuance_divider": "Способ выдачи",
-  "admin.issuance_hint": "RCON — CMS сама подключается к серверу и выполняет команды по шаблонам. Плагин — выдача через склад UnicoreConnect.",
+  "admin.issuance_hint": "RCON — CMS сама подключается к серверу и выполняет команды по шаблонам. Плагин — товары уходят на склад UnicoreConnect, а команды плагин забирает из очереди и выполняет сам; порт RCON открывать не нужно.",
   "admin.issuance_label": "Как выдавать товары и привилегии",
   "admin.issuance_plugin": "Плагин (UnicoreConnect)",
   "admin.issuance_rcon": "RCON (CMS выполняет команды)",
