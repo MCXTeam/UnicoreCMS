@@ -21,7 +21,7 @@
         <a v-if="link.href" :href="link.href" target="_blank" class="layout-link">
           <i v-if="link.icon" :class="link.icon"></i> {{ linkLabel(link) }}
         </a>
-        <NuxtLink v-else :to="link.to" class="layout-link">
+        <NuxtLink v-else :to="link.to" class="layout-link" :class="{ 'layout-link--active': isNavActive(route.path, link.to) }">
           <i v-if="link.icon" :class="link.icon"></i> {{ linkLabel(link) }}
         </NuxtLink>
       </template>
@@ -29,21 +29,33 @@
         <a v-if="item.href" :href="item.href" target="_blank" class="layout-link">
           <i v-if="item.icon" :class="item.icon"></i> {{ $t(item.label) }}
         </a>
-        <NuxtLink v-else :to="item.to" class="layout-link">
+        <NuxtLink v-else :to="item.to" class="layout-link" :class="{ 'layout-link--active': isNavActive(route.path, item.to) }">
           <i v-if="item.icon" :class="item.icon"></i> {{ $t(item.label) }}
         </NuxtLink>
       </template>
       <div v-if="moduleLinks.length" ref="moreWrap" class="layout-more">
-        <button class="layout-link layout-more__btn" :aria-expanded="moreOpen" @click.stop="moreOpen = !moreOpen">
+        <button
+          ref="moreButton"
+          class="layout-link layout-more__btn"
+          :class="{ 'layout-link--active': moreActive }"
+          :aria-expanded="moreOpen"
+          @click.stop="toggleMore"
+        >
           <i class="bx bx-dots-horizontal-rounded"></i> {{ $t('header.more') }}
         </button>
         <Transition name="more-fade">
-          <div v-if="moreOpen" class="layout-more__menu">
+          <div v-if="moreOpen" ref="moreMenu" class="layout-more__menu" :style="moreStyle">
             <template v-for="item in moduleLinks" :key="item.key">
               <a v-if="item.href" :href="item.href" target="_blank" class="layout-more__item" @click="moreOpen = false">
                 <i :class="item.icon"></i><span>{{ $t(item.label) }}</span>
               </a>
-              <NuxtLink v-else :to="item.to" class="layout-more__item" @click="moreOpen = false">
+              <NuxtLink
+                v-else
+                :to="item.to"
+                class="layout-more__item"
+                :class="{ 'layout-more__item--active': isNavActive(route.path, item.to) }"
+                @click="moreOpen = false"
+              >
                 <i :class="item.icon"></i><span>{{ $t(item.label) }}</span>
               </NuxtLink>
             </template>
@@ -112,10 +124,12 @@
 
 <script setup lang="ts">
 import { layoutText, type LayoutBlock, type LayoutLink, type LayoutPlace } from 'unicore-common/layout'
+import { isNavActive } from '~/constants/navigation'
 
 const props = defineProps<{ block: LayoutBlock; place: LayoutPlace }>()
 
 const { $auth, $t, $pub } = useNuxtApp() as any
+const route = useRoute()
 const locale = useLocale()
 const locales = useLocales()
 const ioStore = useIoStore()
@@ -123,7 +137,10 @@ const { config } = usePublicConfig()
 const navigation = useNavigation(props.place === 'footer' ? 'footer' : 'navbar')
 
 const moreWrap = ref<HTMLElement | null>(null)
+const moreButton = ref<HTMLElement | null>(null)
+const moreMenu = ref<HTMLElement | null>(null)
 const moreOpen = ref(false)
+const moreStyle = ref<Record<string, string>>({})
 
 const onlines = computed(() => ioStore.serversOnline)
 
@@ -166,7 +183,28 @@ const inlineModuleLinks = computed(() => modulePlaced.value.filter((item: any) =
 
 const moduleLinks = computed(() => modulePlaced.value.filter((item: any) => !item.inline))
 
+const moreActive = computed(() => moduleLinks.value.some((item: any) => isNavActive(route.path, item.to)))
+
 const linkLabel = (link: LayoutLink) => (link.labelKey ? $t(link.labelKey) : layoutText(link.label, locale.value))
+
+function placeMore() {
+  const button = moreButton.value
+
+  if (!button) return
+
+  const rect = button.getBoundingClientRect()
+  const width = moreMenu.value?.offsetWidth || 220
+  const half = width / 2
+  const center = Math.min(Math.max(rect.left + rect.width / 2, half + 8), window.innerWidth - half - 8)
+
+  moreStyle.value = { top: `${Math.round(rect.bottom + 10)}px`, left: `${Math.round(center)}px` }
+}
+
+function toggleMore() {
+  moreOpen.value = !moreOpen.value
+
+  if (moreOpen.value) nextTick(placeMore)
+}
 
 function onGlobalClick(event: MouseEvent) {
   if (!moreOpen.value) return
@@ -175,8 +213,38 @@ function onGlobalClick(event: MouseEvent) {
   moreOpen.value = false
 }
 
-onMounted(() => document.addEventListener('click', onGlobalClick))
-onBeforeUnmount(() => document.removeEventListener('click', onGlobalClick))
+function onKeydown(event: KeyboardEvent) {
+  if (event.key === 'Escape') moreOpen.value = false
+}
+
+watch(moreOpen, (open) => {
+  if (open) {
+    window.addEventListener('scroll', placeMore, true)
+    window.addEventListener('resize', placeMore)
+
+    return
+  }
+
+  window.removeEventListener('scroll', placeMore, true)
+  window.removeEventListener('resize', placeMore)
+})
+
+watch(
+  () => route.fullPath,
+  () => (moreOpen.value = false),
+)
+
+onMounted(() => {
+  document.addEventListener('click', onGlobalClick)
+  document.addEventListener('keydown', onKeydown)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', onGlobalClick)
+  document.removeEventListener('keydown', onKeydown)
+  window.removeEventListener('scroll', placeMore, true)
+  window.removeEventListener('resize', placeMore)
+})
 </script>
 
 <style scoped>
@@ -218,6 +286,7 @@ onBeforeUnmount(() => document.removeEventListener('click', onGlobalClick))
 }
 .layout-block__nav--columns .layout-link {
   display: flex;
+  width: fit-content;
   break-inside: avoid;
 }
 .layout-link {
@@ -231,7 +300,8 @@ onBeforeUnmount(() => document.removeEventListener('click', onGlobalClick))
 .layout-link:hover {
   text-decoration: none;
 }
-.layout-link:hover::after {
+.layout-link:hover::after,
+.layout-link--active::after {
   content: '';
   position: absolute;
   right: 0;
@@ -240,6 +310,9 @@ onBeforeUnmount(() => document.removeEventListener('click', onGlobalClick))
   height: 2px;
   border-radius: 2px;
   background: rgba(var(--vs-primary), 0.5);
+}
+.layout-link--active::after {
+  background: rgb(var(--vs-primary));
 }
 .layout-profile {
   display: inline-flex;
@@ -306,12 +379,10 @@ onBeforeUnmount(() => document.removeEventListener('click', onGlobalClick))
   border: none;
   cursor: pointer;
   font: inherit;
-  color: inherit;
+  color: rgb(var(--vs-primary));
 }
 .layout-more__menu {
-  position: absolute;
-  top: calc(100% + 10px);
-  left: 50%;
+  position: fixed;
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
@@ -330,6 +401,46 @@ onBeforeUnmount(() => document.removeEventListener('click', onGlobalClick))
   gap: 0.6rem;
   padding: 0.5rem 0.7rem;
   border-radius: 10px;
+  white-space: nowrap;
+  color: rgb(var(--vs-text));
+  text-decoration: none !important;
+  transition: background 0.15s;
+}
+.layout-more__item i {
+  font-size: 1.1rem;
+  color: var(--p-primary-color);
+}
+.layout-more__item:hover,
+.layout-more__item--active {
+  background: rgba(var(--vs-text), 0.06);
+}
+.more-fade-enter-active,
+.more-fade-leave-active {
+  transition:
+    opacity 0.15s,
+    transform 0.15s;
+}
+.more-fade-enter-from,
+.more-fade-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -4px);
+}
+.locale-select.p-select {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+.locale-select.p-select:not(.p-disabled):hover,
+.locale-select.p-select.p-focus {
+  border-color: var(--p-content-border-color);
+}
+.locale-select :deep(.p-select-label) {
+  padding: 0.3rem 0.4rem;
+  color: var(--p-text-muted-color);
+}
+.locale-select :deep(.p-select-dropdown) {
+  width: 1.75rem;
+  color: var(--p-text-muted-color);
 }
 .layout-render--header .layout-block__nav {
   flex-wrap: nowrap;

@@ -75,10 +75,9 @@
 
 <script setup>
 import { useIoStore } from '~/stores/io'
-import { useLocale, useLocales } from '~/composables/useLocale'
 
 const route = useRoute()
-const { $socket, $setLocale } = useNuxtApp()
+const { $socket } = useNuxtApp()
 
 const ioStore = useIoStore()
 
@@ -87,52 +86,24 @@ const hero = computed(() => route.meta.hero !== false)
 const onlines = computed(() => ioStore.serversOnline)
 const { config } = usePublicConfig()
 
-const locales = useLocales()
-const locale = useLocale()
-
 const navbar = useNavigation('navbar')
 const cabinetNav = useNavigation('cabinet')
 const sidebarNav = computed(() => [...navbar.value, ...cabinetNav.value])
 
-const moduleNav = computed(() => navbar.value.filter((item) => item.module))
-
-const moreWrap = ref(null)
-const moreOpen = ref(false)
 const activeSidebar = ref(false)
 const scrolled = ref(false)
 
-function isActive(item) {
-  return item.to && (item.to === '/' ? route.path === '/' : route.path.startsWith(item.to))
-}
-
 function onScroll() {
   scrolled.value = window.scrollY > 0
-}
-
-function onGlobalClick(event) {
-  if (!moreOpen.value) return
-  if (moreWrap.value?.contains(event.target)) return
-
-  moreOpen.value = false
-}
-
-function onKeydown(event) {
-  if (event.key === 'Escape') moreOpen.value = false
 }
 
 onMounted(() => {
   $socket?.emit('servers/online', {}, (res) => ioStore.setServersOnline(res))
   onScroll()
   window.addEventListener('scroll', onScroll, { passive: true })
-  document.addEventListener('click', onGlobalClick)
-  document.addEventListener('keydown', onKeydown)
 })
 
-onBeforeUnmount(() => {
-  window.removeEventListener('scroll', onScroll)
-  document.removeEventListener('click', onGlobalClick)
-  document.removeEventListener('keydown', onKeydown)
-})
+onBeforeUnmount(() => window.removeEventListener('scroll', onScroll))
 
 watch(
   () => route.fullPath,
@@ -144,102 +115,3 @@ watch(
   },
 )
 </script>
-
-<style scoped lang="scss">
-.navbar-more {
-  position: relative;
-  display: none;
-
-  @media (min-width: 992px) {
-    display: block;
-  }
-}
-
-.navbar-more__btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font: inherit;
-}
-
-.navbar-more__chevron {
-  font-size: 0.9rem;
-  transition: transform 0.15s;
-
-  &.open {
-    transform: rotate(180deg);
-  }
-}
-
-.navbar-more__menu {
-  position: absolute;
-  top: calc(100% + 10px);
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  min-width: 220px;
-  padding: 0.4rem;
-  border: 1px solid var(--p-content-border-color);
-  border-radius: 14px;
-  background: var(--vs-theme-layout);
-  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
-  z-index: 300;
-}
-
-.navbar-more__item {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.55rem 0.7rem;
-  border-radius: 10px;
-  white-space: nowrap;
-  color: var(--vs-text);
-  text-decoration: none !important;
-  transition: background 0.15s;
-
-  i {
-    font-size: 1.1rem;
-    color: var(--p-primary-color);
-  }
-
-  &:hover {
-    background: rgba(var(--vs-text), 0.06);
-  }
-}
-
-.more-fade-enter-active,
-.more-fade-leave-active {
-  transition:
-    opacity 0.15s,
-    transform 0.15s;
-}
-
-.more-fade-enter-from,
-.more-fade-leave-to {
-  opacity: 0;
-  transform: translate(-50%, -4px);
-}
-
-.locale-select.p-select {
-  background: transparent;
-  border-color: transparent;
-  box-shadow: none;
-}
-
-.locale-select.p-select:not(.p-disabled):hover,
-.locale-select.p-select.p-focus {
-  border-color: var(--p-content-border-color);
-}
-
-.locale-select :deep(.p-select-label) {
-  padding: 0.3rem 0.4rem;
-  color: var(--p-text-muted-color);
-}
-
-.locale-select :deep(.p-select-dropdown) {
-  width: 1.75rem;
-  color: var(--p-text-muted-color);
-}
-</style>

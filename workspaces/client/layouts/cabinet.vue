@@ -107,7 +107,7 @@ import CartSidebar from '~/components/CartSidebar.vue'
 import StoreProductsSidebar from '~/components/StoreProductsSidebar.vue'
 import WarehouseSidebar from '~/components/WarehouseSidebar.vue'
 import { useUiStore, type StoreSidebarName } from '~/stores/ui'
-import type { NavItem } from '~/constants/navigation'
+import { isNavActive, type NavItem } from '~/constants/navigation'
 
 const storeSidebars: Record<StoreSidebarName, Component> = {
   CartSidebar,
@@ -132,11 +132,7 @@ const tabs = computed(() => {
 })
 
 function inSection(item: NavItem) {
-  const target = String(item.to || '')
-
-  if (!target) return false
-
-  return route.path === target || route.path.startsWith(`${target}/`)
+  return isNavActive(route.path, item.to)
 }
 
 function tabClass(tab: NavItem) {

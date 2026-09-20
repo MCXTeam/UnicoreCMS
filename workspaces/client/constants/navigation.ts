@@ -21,6 +21,13 @@ export interface NavItem {
   inline?: boolean
 }
 
+export function isNavActive(path: string, target?: string | null): boolean {
+  if (!target) return false
+  if (target === '/') return path === '/'
+
+  return path === target || path.startsWith(`${target}/`)
+}
+
 export const CORE_NAVIGATION: NavItem[] = [
   { key: 'home', to: '/', label: 'header.home', icon: 'bx bx-home', places: ['footer'], order: 5 },
   { key: 'servers', to: '/servers', label: 'header.servers', icon: 'bx bx-server', places: ['navbar', 'footer'], order: 10 },
