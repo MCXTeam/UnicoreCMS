@@ -18,7 +18,7 @@
             :binary="true"
             :modelValue="groupState(group).all"
             :indeterminate="groupState(group).some"
-            :disabled="disabled"
+            :disabled="disabled || !controlled(group).length"
             @update:modelValue="toggleGroup(group)"
           />
           <span class="permissions__group-name">{{ group.label }}</span>
@@ -26,12 +26,23 @@
         </div>
 
         <div class="permissions__rows">
-          <div v-for="entry in group.permissions" :key="entry.key" class="permissions__row">
-            <Checkbox :binary="true" :modelValue="isOn(entry.key)" :disabled="disabled" @update:modelValue="toggle(entry.key)" />
+          <div
+            v-for="entry in group.permissions"
+            :key="entry.key"
+            class="permissions__row"
+            :class="{ 'permissions__row--locked': locked(entry) }"
+          >
+            <Checkbox
+              :binary="true"
+              :modelValue="isOn(entry.key)"
+              :disabled="disabled || locked(entry)"
+              @update:modelValue="toggle(entry.key)"
+            />
             <span class="permissions__name" :class="{ 'permissions__name--covered': isCovered(entry.key) }">
               {{ label_(entry.key) }}
             </span>
             <i v-if="hint_(entry.key)" v-tooltip.right="hint_(entry.key)" class="pi pi-question-circle text-color-secondary" />
+            <i v-if="locked(entry)" v-tooltip.right="$t('admin.permission_locked_hint')" class="pi pi-lock permissions__lock" />
             <Tag v-if="entry.danger" severity="warn" :value="$t('admin.permission_danger')" v-tooltip.top="$t('admin.permission_danger_hint')" />
             <Tag
               v-else-if="entry.granted"
@@ -77,12 +88,14 @@
       <p v-else-if="!visibleGroups.length" class="permissions__empty">{{ $t('admin.permissions_empty') }}</p>
     </div>
 
+    <p v-if="loaded && !failed && hasLocked" class="permissions__note"><i class="pi pi-lock" /> {{ $t('admin.permission_locked_note') }}</p>
+
     <small v-show="error" class="p-error">{{ error }}</small>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { PermissionEntry } from 'unicore-common/permissions'
+import type { PermissionCatalogEntry } from 'unicore-common/permissions'
 import { denyTarget, isDenyPattern, isPlayerPermission, longestScope, permissionMatches, satisfiesPermission } from 'unicore-common/permissions'
 import { usePermissionCatalog, type PermissionGroupView } from '~/composables/usePermissionCatalog'
 
@@ -155,6 +168,16 @@ const visibleGroups = computed<PermissionGroupView[]>(() => {
 
 const known = computed(() => new Set(groups.value.flatMap((group) => group.permissions).map((entry) => entry.key)))
 
+const hasLocked = computed(() => allowed.value.some((group) => group.permissions.some(locked)))
+
+const grantableKeys = computed(
+  () => new Set(groups.value.flatMap((group) => group.permissions).filter((entry) => !locked(entry)).map((entry) => entry.key)),
+)
+
+function locked(entry: PermissionCatalogEntry): boolean {
+  return entry.grantable === false
+}
+
 const granted = computed(
   () => new Set(groups.value.flatMap((group) => group.permissions).filter((entry) => entry.granted).map((entry) => entry.key)),
 )
@@ -193,6 +216,7 @@ function apply(next: string[]) {
 
 function toggle(key: string) {
   if (props.disabled) return
+  if (!grantableKeys.value.has(key)) return
 
   if (isOn(key)) {
     const next = patterns.value.filter((pattern) => pattern !== key && scopeBase(pattern) !== key)
@@ -215,8 +239,8 @@ function fullGroup(group: PermissionGroupView): PermissionGroupView {
   return allowed.value.find((item) => item.group === group.group) || group
 }
 
-function controlled(group: PermissionGroupView): PermissionEntry[] {
-  const permissions = fullGroup(group).permissions
+function controlled(group: PermissionGroupView): PermissionCatalogEntry[] {
+  const permissions = fullGroup(group).permissions.filter((entry) => !locked(entry))
   const grantable = permissions.filter((entry) => !entry.danger)
 
   return grantable.length ? grantable : permissions
@@ -303,7 +327,6 @@ function setScope(key: string, ids: string[]) {
 
   apply(next)
 }
-
 </script>
 
 <style scoped>
@@ -349,6 +372,21 @@ function setScope(key: string, ids: string[]) {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+.permissions__row--locked .permissions__name {
+  color: var(--p-text-muted-color);
+}
+.permissions__lock {
+  color: var(--p-text-muted-color);
+  font-size: 0.8rem;
+}
+.permissions__note {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.75rem 0 0;
+  color: var(--p-text-muted-color);
+  font-size: 0.85rem;
 }
 .permissions__name--covered {
   color: var(--p-text-muted-color);

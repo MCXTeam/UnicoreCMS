@@ -12,6 +12,8 @@ const ok = (status) => status >= 200 && status < 300;
 
 const keys = (body) => (body?.permissions || []).map((entry) => entry.key);
 
+const entry = (body, key) => (body?.permissions || []).find((item) => item.key === key);
+
 describe('Разрешения в роли', () => {
   it('без права на администраторские права роли доступны только возможности игрока', async () => {
     const { session } = await createAdmin(['panel.roles.read', 'panel.roles.update']);
@@ -48,13 +50,30 @@ describe('Разрешения в роли', () => {
     assert.ok(ok(status), `игровое право отвергнуто: ${status}`);
   });
 
-  it('с правом на администраторские права видны свои панельные права', async () => {
+  it('с правом на администраторские права чужие права видны, но помечены невыдаваемыми', async () => {
     const { session } = await createAdmin(['panel.roles.read', 'panel.roles.update', 'panel.roles.grant.panel', 'panel.users.read']);
 
     const { body } = await session.get('/admin/permissions/catalog');
 
-    assert.ok(keys(body).includes('panel.users.read'), 'своего права нет в каталоге');
-    assert.ok(!keys(body).includes('panel.config.update'), 'каталог отдаёт право, которого у выдающего нет');
+    assert.equal(entry(body, 'panel.users.read')?.grantable, true, 'своё право не отмечено выдаваемым');
+    assert.equal(entry(body, 'panel.config.update')?.grantable, false, 'чужое право не отмечено невыдаваемым');
+  });
+
+  it('без права на администраторские права чужие панельные права в каталог не попадают', async () => {
+    const { session } = await createAdmin(['panel.roles.read', 'panel.roles.update', 'panel.users.read']);
+
+    const { body } = await session.get('/admin/permissions/catalog');
+
+    assert.ok(!keys(body).includes('panel.config.update'), 'каталог отдаёт панельное право без права их выдавать');
+  });
+
+  it('невыдаваемое право в роль не записать даже с правом на администраторские права', async () => {
+    const { session } = await createAdmin(['panel.roles.read', 'panel.roles.update', 'panel.roles.grant.panel', 'panel.users.read']);
+    const id = await createRole([]);
+
+    const { status } = await session.patch(`/admin/roles/${id}`, { name: 'Роль', perms: ['panel.config.update'], priority: 1 });
+
+    assert.equal(status, 403);
   });
 
   it('панельное право в роль со своим правом записывается', async () => {

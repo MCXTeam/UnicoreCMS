@@ -10,6 +10,10 @@ export interface PermissionEntry extends PermissionMeta {
   key: string;
 }
 
+export interface PermissionCatalogEntry extends PermissionEntry {
+  grantable: boolean;
+}
+
 interface RegistryState {
   extra: Map<string, PermissionMeta>;
   cache: PermissionEntry[] | null;

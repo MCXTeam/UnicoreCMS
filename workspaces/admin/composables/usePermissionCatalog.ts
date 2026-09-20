@@ -1,4 +1,4 @@
-import type { PermissionEntry } from 'unicore-common/permissions'
+import type { PermissionCatalogEntry } from 'unicore-common/permissions'
 import { permissionGroupKey, permissionHintKey, permissionLabelKey } from 'unicore-common/permissions'
 import { useMessages } from '~/composables/useLocale'
 
@@ -10,11 +10,11 @@ export interface PermissionScopeOption {
 export interface PermissionGroupView {
   group: string
   label: string
-  permissions: PermissionEntry[]
+  permissions: PermissionCatalogEntry[]
 }
 
 export function usePermissionCatalog() {
-  const permissions = useState<PermissionEntry[]>('permission-catalog', () => [])
+  const permissions = useState<PermissionCatalogEntry[]>('permission-catalog', () => [])
   const servers = useState<PermissionScopeOption[]>('permission-scopes', () => [])
   const loaded = useState<boolean>('permission-catalog-loaded', () => false)
   const failed = useState<boolean>('permission-catalog-failed', () => false)
@@ -58,7 +58,7 @@ export function usePermissionCatalog() {
 
   const groups = computed<PermissionGroupView[]>(() => {
     const order: string[] = []
-    const buckets = new Map<string, PermissionEntry[]>()
+    const buckets = new Map<string, PermissionCatalogEntry[]>()
 
     for (const entry of permissions.value) {
       if (!buckets.has(entry.group)) {
