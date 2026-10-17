@@ -1,8 +1,14 @@
 <template>
   <span class="player-name" :class="{ 'player-name--stacked': stacked }">
-    <span v-if="badge && badgeBefore" :class="badgeClass" :style="badgeStyle">{{ activeRole?.name }}</span>
+    <span v-if="badge && badgeBefore" :class="badgeClass" :style="badgeStyle">
+      <img v-if="activeRole?.badge_image" :src="`${$pub.apiBaseurl}/${activeRole.badge_image}`" :alt="activeRole.name" />
+      <template v-else>{{ activeRole?.name }}</template>
+    </span>
     <span :style="nameStyle">{{ username }}</span>
-    <span v-if="badge && !badgeBefore" :class="badgeClass" :style="badgeStyle">{{ activeRole?.name }}</span>
+    <span v-if="badge && !badgeBefore" :class="badgeClass" :style="badgeStyle">
+      <img v-if="activeRole?.badge_image" :src="`${$pub.apiBaseurl}/${activeRole.badge_image}`" :alt="activeRole.name" />
+      <template v-else>{{ activeRole?.name }}</template>
+    </span>
   </span>
 </template>
 

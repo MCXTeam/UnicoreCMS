@@ -28,6 +28,9 @@ import { ContentLocaleInterceptor } from './admin/locales/content-locale.interce
 import { ContentTranslationsService } from './admin/locales/content-translations.service';
 import { LocalesService } from './admin/locales/locales.service';
 import { applySchema } from './migrations/runner';
+import { DataSource } from 'typeorm';
+import { UsersService } from './admin/users/users.service';
+import { createInitialAdmin } from './admin/users/initial-admin';
 
 process.env.TZ = envConfig.timezone;
 
@@ -94,6 +97,8 @@ async function bootstrap() {
   );
   app.useGlobalFilters(new EntityNotFoundFilter(), new TooManyAttemptsFilter());
 
+  await app.init();
+  await createInitialAdmin(app.get(DataSource), app.get(UsersService));
   await app.listen(envConfig.backendPort, '0.0.0.0');
 }
 

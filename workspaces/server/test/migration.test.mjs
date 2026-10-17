@@ -18,6 +18,7 @@ const steps = resolve(here, '..', 'src', 'migrations', 'steps');
 let workdir = null;
 let Migration = null;
 let WebScope = null;
+let BadgeImage = null;
 
 async function compile(file, exported) {
   const outfile = join(workdir, exported + '.cjs');
@@ -38,6 +39,7 @@ before(async () => {
 
   Migration = await compile('1756820000000-permission-additions.migration.ts', 'PermissionAdditions1756820000000');
   WebScope = await compile('1756840000000-donate-web-scope.migration.ts', 'DonateWebScope1756840000000');
+  BadgeImage = await compile('1756970000000-role-badge-image.migration.ts', 'RoleBadgeImage1756970000000');
 });
 
 after(() => {
@@ -66,6 +68,35 @@ async function run(Step, perms) {
 const migrate = (perms) => run(Migration, perms);
 
 const same = (got, want) => got.length === want.length && want.every((item) => got.includes(item));
+
+describe('Тексты настройки картинки плашки', () => {
+  it('обновляет прежние подсказки и сохраняет пользовательские переводы', async () => {
+    const values = new Map([
+      ['ru:admin.role_badge_image', 'Картинка на фон'],
+      ['ru:admin.role_badge_image_hint', 'Растягивается по плашке и перекрывает цвет фона.'],
+      ['en:admin.role_badge_image', 'Custom badge label'],
+      ['en:admin.role_badge_image_hint', 'Stretched over the badge and covers the background color.'],
+    ]);
+    await new BadgeImage().up({
+      getTable: async () => ({}),
+      query: async (_sql, [after, locale, key, before]) => {
+        const id = `${locale}:${key}`;
+        if (values.get(id) === before) values.set(id, after);
+      },
+    });
+    assert.equal(values.get('ru:admin.role_badge_image'), 'Картинка плашки');
+    assert.equal(values.get('ru:admin.role_badge_image_hint'), 'Заменяет текст плашки и сохраняет пропорции исходного изображения.');
+    assert.equal(values.get('en:admin.role_badge_image'), 'Custom badge label');
+    assert.equal(values.get('en:admin.role_badge_image_hint'), 'Replaces the badge text and keeps the original image proportions.');
+  });
+
+  it('пропускает ещё не созданную таблицу переводов', async () => {
+    await new BadgeImage().up({
+      getTable: async () => null,
+      query: async () => assert.fail('таблицы переводов ещё нет'),
+    });
+  });
+});
 
 describe('Миграция новых прав', () => {
   it('скоуп доходности переносится на топ покупок', async () => {

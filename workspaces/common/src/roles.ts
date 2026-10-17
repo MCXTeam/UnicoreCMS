@@ -49,6 +49,8 @@ export const ROLE_BADGE_CLASS = "role-badge";
 export function roleBadgeClass(role?: RoleAppearance | null): string[] {
   const classes = [ROLE_BADGE_CLASS];
 
+  if (role?.badge_image) return [...classes, `${ROLE_BADGE_CLASS}--image`];
+
   if (role?.badge_effect === RoleBadgeEffect.AnimatedGradient)
     classes.push(`${ROLE_BADGE_CLASS}--animated`);
   if (role?.badge_effect === RoleBadgeEffect.Neon)
@@ -111,6 +113,8 @@ export function roleBadgeStyle(
 ): Record<string, string> {
   if (!role) return {};
 
+  if (role.badge_image) return {};
+
   const color = role.badge_color || ROLE_BADGE_DEFAULT_COLOR;
   const background = role.badge_background || ROLE_BADGE_DEFAULT_BACKGROUND;
   const end = role.badge_background_end || background;
@@ -126,9 +130,6 @@ export function roleBadgeStyle(
     style.boxShadow = `0 0 0.35rem ${background}, 0 0 1rem ${background}`;
     style.textShadow = `0 0 0.4rem ${color}`;
   }
-
-  if (role.badge_image)
-    style.backgroundImage = `url('${imageBaseUrl}${role.badge_image}')`;
 
   return style;
 }

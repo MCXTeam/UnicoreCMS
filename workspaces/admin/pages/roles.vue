@@ -43,9 +43,10 @@
           </Column>
           <Column :header="$t('admin.role_appearance')">
             <template #body="slotProps">
-              <span v-if="slotProps.data.badge" :class="badgeClass(slotProps.data)" :style="badgeStyle(slotProps.data)">{{
-                slotProps.data.name
-              }}</span>
+              <span v-if="slotProps.data.badge" :class="badgeClass(slotProps.data)" :style="badgeStyle(slotProps.data)">
+                <img v-if="slotProps.data.badge_image" :src="`${apiUrl}/${slotProps.data.badge_image}`" :alt="slotProps.data.name" />
+                <template v-else>{{ slotProps.data.name }}</template>
+              </span>
               <span v-else-if="slotProps.data.color" :style="nameStyle(slotProps.data)">{{ $t('admin.role_preview_username') }}</span>
               <span v-else>—</span>
             </template>
@@ -165,9 +166,10 @@
               <label>{{ $t('admin.role_preview') }}</label>
               <div class="flex align-items-center gap-2 role-preview">
                 <span :style="previewNameStyle">{{ $t('admin.role_preview_username') }}</span>
-                <span v-if="role.badge" :class="previewBadgeClass" :style="previewBadgeStyle">{{
-                  role.name || $t('admin.role_preview_name')
-                }}</span>
+                <span v-if="role.badge" :class="previewBadgeClass" :style="previewBadgeStyle">
+                  <img v-if="role.badge_image" :src="`${apiUrl}/${role.badge_image}`" :alt="role.name || $t('admin.role_preview_name')" />
+                  <template v-else>{{ role.name || $t('admin.role_preview_name') }}</template>
+                </span>
               </div>
             </div>
             <ColorField

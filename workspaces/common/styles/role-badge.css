@@ -20,6 +20,21 @@
   animation: role-badge-glow 2s ease-in-out infinite;
 }
 
+.role-badge--image {
+  max-width: 100%;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.role-badge--image img {
+  display: block;
+  width: auto;
+  height: 1.8em;
+  max-width: 100%;
+  object-fit: contain;
+}
+
 @keyframes role-badge-shift {
   from {
     background-position: 0% 50%;
