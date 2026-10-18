@@ -23,7 +23,7 @@
     "test": "node --test \"test/*.test.mjs\""
   },
   "dependencies": {
-    "@nestjs-modules/mailer": "^2.3.7",
+    "@nestjs-modules/mailer": "^3.0.2",
     "@nestjs/axios": "^12.0.0",
     "@nestjs/cache-manager": "^12.0.0",
     "@nestjs/common": "^12.0.1",
@@ -50,12 +50,12 @@
     "moment-range": "^4.0.2",
     "multer": "^2.3.0",
     "mysql2": "^3.24.2",
-    "nodemailer": "^9.1.0",
+    "nodemailer": "^10.1.3",
     "otpauth": "^9.5.1",
     "passport": "^0.7.0",
     "passport-headerapikey": "^1.2.2",
     "passport-jwt": "^4.0.1",
-    "proxy-addr": "^2.0.7",
+    "proxy-addr": "^2.0.8",
     "rcon-client": "^4.2.5",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",

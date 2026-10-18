@@ -7,6 +7,7 @@
     "node": ">=22.12 <25"
   },
   "scripts": {
+    "audit": "node --test scripts/security-patches.test.cjs && pnpm audit --audit-level high",
     "dev": "pnpm --filter unicore-common run build && pnpm --filter unicore-api run build && pnpm -r --parallel run dev",
     "build": "pnpm -r --workspace-concurrency=1 run build",
     "build:server": "pnpm --filter unicore-common run build && pnpm --filter unicore-api run build && pnpm --filter unicore-server run build",
