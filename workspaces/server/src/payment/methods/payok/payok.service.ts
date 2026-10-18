@@ -42,7 +42,7 @@ export class PayokService implements PaymentCoreService {
   }
 
   async handler(ip: string, input: any): Promise<PaymentResp> {
-    const config = (await this.settings.gateway('payok')).values;
+    const config = (await this.settings.configuredGateway('payok')).values;
     const sign = crypto
       .createHash('md5')
       .update([config.secret, input.desc, input.currency, config.shopId, input.payment_id, input.amount].join('|'))

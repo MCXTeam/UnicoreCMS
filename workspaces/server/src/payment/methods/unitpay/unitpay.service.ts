@@ -42,7 +42,7 @@ export class UnitpayService implements PaymentCoreService {
   }
 
   async handler(ip: string, input: any): Promise<any> {
-    const config = (await this.settings.gateway('unitpay')).values;
+    const config = (await this.settings.configuredGateway('unitpay')).values;
     if (!this.ips.find((i) => i == ip)) return { error: { message: PaymentResp.BadIp } };
 
     if (!input?.params || typeof input.params !== 'object') return { error: { message: PaymentResp.WrongSign } };

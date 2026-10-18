@@ -162,7 +162,7 @@ export function lava(config: Record<string, string>): Gateway {
       assertGateway(typeof request.body.invoice_id === 'string');
       const result = await send(http, 'status', { shopId: config.shopId, invoiceId: request.body.invoice_id });
       assertGateway(result.id === request.body.invoice_id && String(result.shop_id) === config.shopId);
-      return { providerId: String(result.id), transactionId: String(result.id), orderId: String(result.order_id), amount: result.amount, currency: config.currency, paid: result.status === 'success' };
+      return { providerId: String(result.id), transactionId: String(result.id), orderId: String(result.order_id), amount: result.amount, currency: result.currency, paid: result.status === 'success' };
     },
   };
 }

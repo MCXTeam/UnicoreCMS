@@ -7,7 +7,6 @@ import { Payment } from '../../entities/payment.entity';
 import { User } from '../../../admin/users/entities/user.entity';
 import { PaymentStatuses } from '../../enums/payment-statuses.enum';
 import { PaymentQuoteService, paymentMinor } from '../core/payment-quote.service';
-import { GATEWAYS } from '../../settings/gateway-definitions';
 import { PaymentSettingsService } from '../../settings/payment-settings.service';
 import { CheckoutContext, Gateway, GatewayHttp, GatewayRequest } from './protocol';
 import { cloudpayments, crystalpay, heleket, lava, platega, yookassa } from './invoice-gateways';
@@ -33,9 +32,8 @@ export class GatewayService {
 
   private async adapter(id: string, savedMode?: string, enabled = false) {
     if (!Object.prototype.hasOwnProperty.call(adapters, id)) throw new NotFoundException();
-    const config = { ...(await this.settings.gateway(id, enabled)).values };
+    const config = { ...(await this.settings.configuredGateway(id, enabled)).values };
     if (savedMode) config.mode = savedMode;
-    if (GATEWAYS.find((item) => item.id === id).fields.some((field) => field.required && !config[field.key])) throw new ServiceUnavailableException('payment_not_configured');
     return adapters[id](config);
   }
 
@@ -79,7 +77,7 @@ export class GatewayService {
     if (id === 'tebex' && payment.provider_data?.mode === 'headless' && ![payment.provider_data.packageId, payment.provider_data.packageIdent].filter(Boolean).includes(result.productId)) throw new BadRequestException('payment_package');
     const expectedAmount = payment.provider_amount ?? payment.amount;
     const expectedCurrency = payment.provider_currency || 'RUB';
-    if (paymentMinor(result.amount) === null || paymentMinor(result.amount) !== paymentMinor(expectedAmount) || (id !== 'freekassa' && !result.currency) || (result.currency && result.currency !== expectedCurrency)) throw new BadRequestException('payment_amount');
+    if (paymentMinor(result.amount) === null || paymentMinor(result.amount) !== paymentMinor(expectedAmount) || (!['freekassa', 'lava'].includes(id) && !result.currency) || (result.currency && result.currency !== expectedCurrency)) throw new BadRequestException('payment_amount');
     if (result.prerequest) return 'YES';
     if (!result.transactionId || !(await this.quotes.settle(id, payment.id, result.transactionId, result.amount, result.currency))) throw new BadRequestException('payment_order');
     return result.response ?? 'OK';

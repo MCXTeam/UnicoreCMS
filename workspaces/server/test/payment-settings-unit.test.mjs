@@ -3,9 +3,10 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, before, describe, it } from 'node:test';
+import { createHmac } from 'node:crypto';
 import { compileSource } from './helpers/compile-source.mjs';
 
-let directory, Settings, Exchange, parse, Quotes, minor;
+let directory, Settings, Exchange, parse, Quotes, minor, Gateways;
 before(async () => {
   directory = await mkdtemp(join(tmpdir(), 'unicore-rates-'));
   Settings = (await compileSource('payment/settings/payment-settings.service.ts', directory, 'settings')).PaymentSettingsService;
@@ -13,6 +14,7 @@ before(async () => {
   Exchange = exchange.ExchangeRatesService; parse = exchange.parseCbrRates;
   const quotes = await compileSource('payment/methods/core/payment-quote.service.ts', directory, 'quotes');
   Quotes = quotes.PaymentQuoteService; minor = quotes.paymentMinor;
+  Gateways = (await compileSource('payment/methods/gateways/gateway.service.ts', directory, 'gateways')).GatewayService;
 });
 after(async () => { if (directory) await rm(directory, { recursive: true, force: true }); });
 function storage() {
@@ -56,11 +58,22 @@ describe('Настройки платёжных систем', () => {
     for (const input of [
       { mode: 'unknown', baseCurrency: 'RUB', manualRates: { RUB: 1 } },
       { mode: 'manual', baseCurrency: 'USD', manualRates: { RUB: 1 } },
+      { mode: 'manual', baseCurrency: 'USD', manualRates: { RUB: 1, USD: 90 } },
       { mode: 'manual', baseCurrency: 'RUB', manualRates: { RUB: 2 } },
       { mode: 'manual', baseCurrency: 'RUB', manualRates: { USD: 0 } },
     ]) await assert.rejects(settings.updateRates(input));
     const saved = await settings.updateRates({ mode: 'manual', baseCurrency: 'RUB', manualRates: { USD: 90 } });
     assert.equal(saved.manualRates.RUB, 1); assert.equal(saved.manualRates.USD, 90);
+  });
+  it('не разрешает создание и проверку платежей без обязательного секрета', async () => {
+    const settings = new Settings(storage());
+    for (const id of ['anypay', 'centapp', 'enotio', 'payok', 'unitpay']) {
+      await settings.updateGateway(id, { enabled: false, values: {}, clearSecrets: ['secret'] });
+      await assert.rejects(settings.configuredGateway(id));
+    }
+    await settings.updateGateway('centapp', { enabled: true, values: { shopId: 'shop', secret: 'fixture-secret' } });
+    await settings.updateGateway('centapp', { enabled: false, values: {} });
+    assert.equal((await settings.configuredGateway('centapp')).values.secret, 'fixture-secret');
   });
 });
 
@@ -93,7 +106,7 @@ describe('Курсы и снимок счёта', () => {
     const rows = new Map();
     const repository = { async update(id, values) { rows.set(id, { ...saved, ...values }); }, async findOneBy({ id, method }) { const row = rows.get(id); return row?.method === method ? row : null; } };
     const handler = { async create(method, amount, user, ip) { saved = { id: 42, method, amount, user, ip }; return saved; }, async handler(...args) { settled = args; return true; } };
-    const quote = new Quotes({ gateway: async () => ({ values: { currency: 'USD' } }) }, { quote: async () => ({ amount: 10, currency: 'USD', rate: 90, baseCurrency: 'RUB', date: '17.10.2026' }) }, handler, repository);
+    const quote = new Quotes({ configuredGateway: async () => ({ values: { currency: 'USD' } }) }, { quote: async () => ({ amount: 10, currency: 'USD', rate: 90, baseCurrency: 'RUB', date: '17.10.2026' }) }, handler, repository);
     const result = await quote.create('tebex', 900, { uuid: 'player' }, '127.0.0.1');
     assert.equal(result.payment.exchange_rate, 90); assert.equal(result.amount, 10);
     assert.equal(await quote.settle('tebex', 42, 'txn', '10.00', 'USD'), true);
@@ -101,6 +114,21 @@ describe('Курсы и снимок счёта', () => {
     assert.equal(await quote.settle('yookassa', 42, 'txn', 10, 'USD'), false);
     assert.equal(await quote.settle('tebex', 42, 'txn', 9.99, 'USD'), false);
     assert.equal(await quote.settle('tebex', 42, 'txn', 10, 'EUR'), false);
+  });
+  it('Lava сверяет сохранённый валютный счёт после изменения валюты настройки', async () => {
+    let settled;
+    const payment = { id: 42, method: 'lava', provider_id: 'invoice', provider_amount: 10, provider_currency: 'USD', amount: 900, user: { uuid: 'player' } };
+    const gateways = new Gateways(
+      { configuredGateway: async () => ({ values: { shopId: 'shop', secret: 'secret', additionalKey: 'callback-secret', currency: 'EUR' } }) },
+      { settle: async (...args) => { settled = args; return true; } },
+      { findOne: async () => payment },
+    );
+    gateways.http = async () => ({ status_check: true, status: 200, data: { id: 'invoice', shop_id: 'shop', order_id: '42', amount: 10, status: 'success' } });
+    const body = { invoice_id: 'invoice', order_id: '42', amount: 10, status: 'success' };
+    const raw = Buffer.from(JSON.stringify(body));
+    const signature = createHmac('sha256', 'callback-secret').update(raw).digest('hex');
+    assert.equal(await gateways.notification('lava', { body, raw, headers: { signature }, ip: '127.0.0.1' }), 'OK');
+    assert.deepEqual(settled, ['lava', 42, 'invoice', 10, undefined]);
   });
   it('суммы не принимают NaN, экспоненты, отрицательные и лишние десятичные знаки', () => {
     for (const value of [NaN, Infinity, '-1', '1e2', '1.001', true, [], {}, null, '']) assert.equal(minor(value), null);

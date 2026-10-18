@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { decryptField, encryptField } from '../../common/crypto/encrypted-column';
@@ -31,6 +31,13 @@ export class PaymentSettingsService {
   async enabledIds(): Promise<string[]> {
     const values = await Promise.all(GATEWAYS.map(async (item) => (await this.gateway(item.id)).enabled ? item.id : null));
     return values.filter(Boolean);
+  }
+
+  async configuredGateway(id: string, enabled = false): Promise<GatewaySettings> {
+    const settings = await this.gateway(id, enabled);
+    const definition = GATEWAYS.find((item) => item.id === id);
+    if (definition.fields.some((field) => field.required && !settings.values[field.key]?.trim())) throw new ServiceUnavailableException('payment_not_configured');
+    return settings;
   }
 
   async publicGateway(id: string) {
@@ -82,7 +89,7 @@ export class PaymentSettingsService {
   async rates(): Promise<RateSettings> { return this.read('rates', DEFAULT_RATES); }
 
   async updateRates(input: RateSettings): Promise<RateSettings> {
-    if (!['manual', 'cbr'].includes(input.mode) || !/^[A-Z]{3}$/.test(input.baseCurrency) || !input.manualRates || Array.isArray(input.manualRates)) throw new BadRequestException();
+    if (!['manual', 'cbr'].includes(input.mode) || input.baseCurrency !== 'RUB' || !input.manualRates || Array.isArray(input.manualRates)) throw new BadRequestException();
     const entries = Object.entries(input.manualRates);
     if (entries.length > 100 || entries.some(([key, value]) => !/^[A-Z]{3}$/.test(key) || typeof value !== 'number' || !Number.isFinite(value) || value <= 0 || value > 1e12)) throw new BadRequestException();
     if (input.manualRates.RUB !== undefined && input.manualRates.RUB !== 1) throw new BadRequestException('RUB');

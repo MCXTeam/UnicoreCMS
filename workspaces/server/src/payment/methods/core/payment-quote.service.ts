@@ -25,7 +25,7 @@ export class PaymentQuoteService {
 
   async create(method: string, amount: number, user: User, ip: string) {
     if (paymentMinor(amount) === null) throw new BadRequestException('amount');
-    const config = (await this.settings.gateway(method, true)).values;
+    const config = (await this.settings.configuredGateway(method, true)).values;
     const quote = await this.exchange.quote(amount, config.currency);
     const payment = await this.handler.create(method, amount, user, ip);
     Object.assign(payment, {

@@ -32,7 +32,7 @@ export class EnotioService implements PaymentCoreService {
   }
 
   async handler(ip: string, input: any): Promise<PaymentResp> {
-    const config = (await this.settings.gateway('enotio')).values;
+    const config = (await this.settings.configuredGateway('enotio')).values;
     const sign = crypto
       .createHash('md5')
       .update([config.merchantId, input.amount, config.secretSecond, input.merchant_id].join(':'))

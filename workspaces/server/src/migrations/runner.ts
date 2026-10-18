@@ -3,6 +3,7 @@ import { envConfig } from 'unicore-common';
 import { formatError, stderr, stdout } from '@common';
 import { SCHEMA_LOCK_ATTEMPTS, SCHEMA_LOCK_NAME, SCHEMA_LOCK_TIMEOUT } from '../common/constants';
 import { ormconfig } from '../ormconfig';
+import { unchangedIndexQueries } from './unchanged-indexes';
 
 interface AlignResult {
   applied: number;
@@ -84,10 +85,12 @@ async function releaseLock(runner: QueryRunner): Promise<void> {
 
 export async function alignSchema(dataSource: DataSource, runner: QueryRunner): Promise<AlignResult> {
   const { upQueries } = await dataSource.driver.createSchemaBuilder().log();
+  const unchanged = await unchangedIndexQueries(upQueries, runner);
   const result: AlignResult = { applied: 0, attention: [], failed: [] };
   const created = new Set<string>();
 
   for (const query of upQueries) {
+    if (unchanged.has(query.query)) continue;
     const table = tableName(query.query);
     const creates = isCreateTable(query.query);
     const allowed = creates || isCreateIndex(query.query) || isAddColumn(query.query) || (isForeignKey(query.query) && created.has(table));

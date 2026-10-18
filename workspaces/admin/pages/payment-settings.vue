@@ -1,12 +1,6 @@
 <template>
   <div class="grid payment-settings">
-    <div class="col-12">
-      <div class="card">
-        <h5>{{ $t('admin.payment_settings_title') }}</h5>
-        <p class="text-color-secondary mb-0">{{ $t('admin.payment_settings_hint') }}</p>
-      </div>
-    </div>
-    <div class="col-12" aria-live="polite">
+    <div v-if="error || notice" class="col-12" aria-live="polite">
       <Message v-if="error" severity="error" :closable="false">{{ error }}</Message>
       <Message v-if="notice" severity="success" :closable="false">{{ notice }}</Message>
     </div>
@@ -25,7 +19,7 @@
             </div>
             <div class="field col-12 md:col-6">
               <label for="payment-base-currency">{{ $t('admin.payment_base_currency') }}</label>
-              <InputText id="payment-base-currency" v-model="rates.baseCurrency" class="w-full" maxlength="3" :disabled="!canUpdate" required pattern="[A-Za-z]{3}" />
+              <InputText id="payment-base-currency" :modelValue="rates.baseCurrency" class="w-full" readonly />
             </div>
           </div>
           <p class="text-color-secondary">{{ $t('admin.payment_rates_hint') }}</p>

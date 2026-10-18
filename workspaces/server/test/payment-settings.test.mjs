@@ -58,3 +58,31 @@ test('payment settings permissions, encrypted secrets and immutable concurrent s
     for (const row of saved) await query('INSERT INTO unicore_payment_settings (id,value) VALUES (?,?)', [row.id, row.value]);
   }
 });
+
+test('legacy notification with a deleted secret cannot settle a waiting payment', async () => {
+  const saved = await query('SELECT * FROM unicore_payment_settings WHERE id = ?', ['centapp']);
+  const admin = await rootSession();
+  let paymentId;
+  try {
+    const user = await createUser();
+    const [before] = await query('SELECT `real` AS balance FROM unicore_users WHERE username = ?', [user.username]);
+    const created = await admin.post('/admin/payments', { username: user.username, amount: 100, paid: false });
+    assert.equal(created.status, 201);
+    paymentId = created.body.id;
+    await query('UPDATE unicore_payments SET method = ? WHERE id = ?', ['centapp', paymentId]);
+    const cleared = await admin.patch('/admin/payment-settings/centapp', { enabled: false, values: {}, clearSecrets: ['secret'] });
+    assert.equal(cleared.status, 200);
+    const input = { OutSum: '100.00', InvId: String(paymentId), TrsId: `forged-${paymentId}`, Status: 'SUCCESS' };
+    input.SignatureValue = createHash('md5').update(`${input.OutSum}:${input.InvId}:`).digest('hex').toUpperCase();
+    const response = await fetch(`${api}/payment/methods/centapp/handler`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input) });
+    assert.equal(response.status, 503);
+    const [payment] = await query('SELECT status FROM unicore_payments WHERE id = ?', [paymentId]);
+    assert.equal(payment.status, 'waiting');
+    const [after] = await query('SELECT `real` AS balance FROM unicore_users WHERE username = ?', [user.username]);
+    assert.equal(after.balance, before.balance);
+  } finally {
+    if (paymentId) await query('DELETE FROM unicore_payments WHERE id = ?', [paymentId]);
+    await query('DELETE FROM unicore_payment_settings WHERE id = ?', ['centapp']);
+    for (const row of saved) await query('INSERT INTO unicore_payment_settings (id,value) VALUES (?,?)', [row.id, row.value]);
+  }
+});

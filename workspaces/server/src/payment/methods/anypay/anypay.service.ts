@@ -57,7 +57,7 @@ export class AnypayService implements PaymentCoreService {
   }
 
   async handler(ip: string, input: any) {
-    const config = (await this.settings.gateway('anypay')).values;
+    const config = (await this.settings.configuredGateway('anypay')).values;
     if (!this.ips.find((i) => i == ip)) return PaymentResp.BadIp;
 
     const sign = crypto
