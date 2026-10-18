@@ -52,6 +52,7 @@ async function bootstrap() {
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: NestLogger,
+    rawBody: true,
   });
 
   app.set('trust proxy', envConfig.trustProxy);

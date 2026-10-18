@@ -5,27 +5,28 @@ import { envConfig } from 'unicore-common';
 import { safeEqual } from '@common';
 import { PaymentCreateDto } from '../core/dto/payment-create.dto';
 import { PaymentCoreService, PaymentLink } from '../core/payment-core.service';
-import { PaymentHandlerService } from '../core/payment-handler.service';
+import { PaymentQuoteService } from '../core/payment-quote.service';
+import { PaymentSettingsService } from '../../settings/payment-settings.service';
 import { CentappModule } from './centapp.module';
 import axios from 'axios';
 import * as crypto from 'crypto';
 
 @Injectable()
 export class CentappService implements PaymentCoreService {
-  constructor(private paymentHandler: PaymentHandlerService) {}
+  constructor(private quotes: PaymentQuoteService, private settings: PaymentSettingsService) {}
 
   async createLink(user: User, input: PaymentCreateDto, ip: string): Promise<PaymentLink> {
-    const payment = await this.paymentHandler.create(CentappModule.id, input.amount, user, ip);
-    const axiosConfig = { headers: { Authorization: 'Bearer ' + envConfig.centappToken }, timeout: 10000 };
+    const { payment, amount, config } = await this.quotes.create(CentappModule.id, input.amount, user, ip);
+    const axiosConfig = { headers: { Authorization: 'Bearer ' + config.secret }, timeout: 10000 };
 
     try {
       const link = await axios
         .post(
           'https://cent.app/api/v1/bill/create',
           {
-            amount: input.amount,
+            amount: amount,
             order_id: payment.id,
-            shop_id: envConfig.centappShopID,
+            shop_id: config.shopId,
           },
           axiosConfig,
         )
@@ -38,11 +39,12 @@ export class CentappService implements PaymentCoreService {
   }
 
   async handler(ip: string, input: any): Promise<PaymentResp> {
-    const sign = crypto.createHash('md5').update([input.OutSum, input.InvId, envConfig.centappToken].join(':')).digest('hex').toUpperCase();
+    const config = (await this.settings.gateway('centapp')).values;
+    const sign = crypto.createHash('md5').update([input.OutSum, input.InvId, config.secret].join(':')).digest('hex').toUpperCase();
 
     if (!safeEqual(sign, String(input.SignatureValue || '').toUpperCase()) || input.Status == 'FAIL') return PaymentResp.WrongSign;
 
-    if (!(await this.paymentHandler.handler(input.InvId, input.TrsId, input.OutSum))) return PaymentResp.WrongPayID;
+    if (!(await this.quotes.settle('centapp', input.InvId, input.TrsId, input.OutSum))) return PaymentResp.WrongPayID;
 
     return PaymentResp.OK;
   }

@@ -51,7 +51,13 @@ export class PaymentHandlerService {
   }
 
   @Transactional()
-  async handler(id: number, bill_id: string = null, reported?: number): Promise<boolean> {
+  async handler(id: number, bill_id: string = null, reported?: number, method?: string): Promise<boolean> {
+    if (method) {
+      if (!Number.isSafeInteger(Number(id)) || Number(id) <= 0 || !Number.isFinite(Number(reported)) || Number(reported) <= 0 || !bill_id) return false;
+      const existing = await this.paymentsRepo.findOne({ where: { id: Number(id), method }, lock: { mode: 'pessimistic_write' } });
+      if (!existing || Number(existing.amount) !== Number(reported)) return false;
+      if (existing.status === PaymentStatuses.PAID) return existing.bill_id === bill_id;
+    }
     if (reported != null && !(Number(reported) > 0)) {
       this.logger.warn(`Платёж #${id}: провайдер сообщил сумму ${reported}, зачисление отклонено`);
 

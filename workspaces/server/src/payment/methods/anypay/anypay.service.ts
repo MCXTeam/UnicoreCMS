@@ -8,21 +8,22 @@ import { AnypayModule } from './anypay.module';
 import * as crypto from 'crypto';
 import { PaymentStatuses, PaymentStatusesRedirect } from 'src/payment/enums/payment-statuses.enum';
 import { PaymentResp } from 'src/payment/enums/payment-resp.enum';
-import { PaymentHandlerService } from '../core/payment-handler.service';
+import { PaymentQuoteService } from '../core/payment-quote.service';
+import { PaymentSettingsService } from '../../settings/payment-settings.service';
 
 @Injectable()
 export class AnypayService implements PaymentCoreService {
   private ips = ['185.162.128.38', '185.162.128.39', '185.162.128.88'];
 
-  constructor(private paymentHandler: PaymentHandlerService) {}
+  constructor(private quotes: PaymentQuoteService, private settings: PaymentSettingsService) {}
 
   async createLink(user: User, input: PaymentCreateDto, ip: string): Promise<PaymentLink> {
-    const payment = await this.paymentHandler.create(AnypayModule.id, input.amount, user, ip);
+    const { payment, amount, config } = await this.quotes.create(AnypayModule.id, input.amount, user, ip);
 
     const params = {
-      merchant_id: envConfig.anypayMerchantID,
+      merchant_id: config.merchantId,
       pay_id: payment.id,
-      amount: input.amount,
+      amount: amount,
       currency: 'RUB',
       desc: `Payment: #${payment.id} (${user.username})`,
       success_url: `${envConfig.apiBaseurl}/payment/redirect/${PaymentStatusesRedirect.SUCCESS}/${AnypayModule.id}`,
@@ -41,7 +42,7 @@ export class AnypayService implements PaymentCoreService {
           params.desc,
           params.success_url,
           params.fail_url,
-          envConfig.anypaySecretKey,
+          config.secret,
         ].join(':'),
       )
       .digest('hex');
@@ -56,18 +57,19 @@ export class AnypayService implements PaymentCoreService {
   }
 
   async handler(ip: string, input: any) {
+    const config = (await this.settings.gateway('anypay')).values;
     if (!this.ips.find((i) => i == ip)) return PaymentResp.BadIp;
 
     const sign = crypto
       .createHash('sha256')
       .update(
-        [input.currency, input.amount, input.pay_id, envConfig.anypayMerchantID, PaymentStatuses.PAID, envConfig.anypaySecretKey].join(':'),
+        [input.currency, input.amount, input.pay_id, config.merchantId, PaymentStatuses.PAID, config.secret].join(':'),
       )
       .digest('hex');
 
     if (!safeEqual(sign, input.sign)) return PaymentResp.WrongSign;
 
-    if (!(await this.paymentHandler.handler(input.pay_id, input.transaction_id, input.amount))) return PaymentResp.WrongPayID;
+    if (!(await this.quotes.settle('anypay', input.pay_id, input.transaction_id, input.amount))) return PaymentResp.WrongPayID;
 
     return PaymentResp.OK;
   }

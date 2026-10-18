@@ -5,7 +5,8 @@ import { envConfig } from 'unicore-common';
 import { safeEqual } from '@common';
 import { PaymentCreateDto } from '../core/dto/payment-create.dto';
 import { PaymentCoreService, PaymentLink } from '../core/payment-core.service';
-import { PaymentHandlerService } from '../core/payment-handler.service';
+import { PaymentQuoteService } from '../core/payment-quote.service';
+import { PaymentSettingsService } from '../../settings/payment-settings.service';
 import { UnitpayModule } from './unitpay.module';
 import * as crypto from 'crypto';
 
@@ -13,13 +14,13 @@ import * as crypto from 'crypto';
 export class UnitpayService implements PaymentCoreService {
   private ips = ['31.186.100.49', '52.29.152.23', '52.19.56.234'];
 
-  constructor(private paymentHandler: PaymentHandlerService) {}
+  constructor(private quotes: PaymentQuoteService, private settings: PaymentSettingsService) {}
 
   async createLink(user: User, input: PaymentCreateDto, ip: string): Promise<PaymentLink> {
-    const payment = await this.paymentHandler.create(UnitpayModule.id, input.amount, user, ip);
+    const { payment, amount, config } = await this.quotes.create(UnitpayModule.id, input.amount, user, ip);
 
     const params = {
-      sum: input.amount,
+      sum: amount,
       account: payment.id,
       desc: `Payment: #${payment.id} (${user.username})`,
       currency: 'RUB',
@@ -27,10 +28,10 @@ export class UnitpayService implements PaymentCoreService {
 
     const sign = crypto
       .createHash('sha256')
-      .update([params.account, params.currency, params.desc, params.sum, envConfig.unitpaySecretKey].join('{up}'))
+      .update([params.account, params.currency, params.desc, params.sum, config.secret].join('{up}'))
       .digest('hex');
 
-    const url = new URL('https://unitpay.ru/pay/' + envConfig.unitpayPublicKey);
+    const url = new URL('https://unitpay.ru/pay/' + config.publicId);
     for (const param in params) {
       url.searchParams.append(param, params[param]);
     }
@@ -41,6 +42,7 @@ export class UnitpayService implements PaymentCoreService {
   }
 
   async handler(ip: string, input: any): Promise<any> {
+    const config = (await this.settings.gateway('unitpay')).values;
     if (!this.ips.find((i) => i == ip)) return { error: { message: PaymentResp.BadIp } };
 
     if (!input?.params || typeof input.params !== 'object') return { error: { message: PaymentResp.WrongSign } };
@@ -54,7 +56,7 @@ export class UnitpayService implements PaymentCoreService {
             .filter((k) => k != 'sign' && k != 'signature')
             .sort()
             .map((k) => input.params[k]),
-          envConfig.unitpaySecretKey,
+          config.secret,
         ].join('{up}'),
       )
       .digest('hex');
@@ -62,7 +64,7 @@ export class UnitpayService implements PaymentCoreService {
     if (!safeEqual(sign, input.params.signature)) return { error: { message: PaymentResp.WrongSign } };
 
     if (input.method == 'pay') {
-      if (!(await this.paymentHandler.handler(input.params.account, input.params.unitpayId, input.params.sum)))
+      if (!(await this.quotes.settle('unitpay', input.params.account, input.params.unitpayId, input.params.sum)))
         return { error: { message: PaymentResp.WrongPayID } };
     }
 

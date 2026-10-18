@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from 'src/admin/users/entities/user.entity';
 import { Payment } from './entities/payment.entity';
+import { PaymentSettingsService } from './settings/payment-settings.service';
 
 @Injectable()
 export class PaymentService {
@@ -11,10 +12,11 @@ export class PaymentService {
   constructor(
     @InjectRepository(Payment)
     private paymentsRepository: Repository<Payment>,
+    private settings: PaymentSettingsService,
   ) {}
 
   async getMethods() {
-    return this.methods;
+    return [...new Set([...(await this.settings.enabledIds()), ...this.methods])];
   }
 
   async setMethods(methods: string[]) {

@@ -19,6 +19,9 @@ import { User } from 'src/admin/users/entities/user.entity';
 import { RCON } from 'src/game/servers/rcon/entities/rcon.entity';
 import { ExtensionSource } from 'src/modules/catalog/entities/extension-source.entity';
 import { CommandDefinition } from '../command';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { PaymentSetting } from 'src/payment/settings/payment-setting.entity';
 import { stdout } from '../stdout';
 
 @Injectable()
@@ -33,6 +36,7 @@ export class CryptoRewrapCommand implements CommandDefinition {
     private rconRepository: Repository<RCON>,
     @InjectRepository(ExtensionSource)
     private sourcesRepository: Repository<ExtensionSource>,
+    @InjectDataSource() private dataSource: DataSource,
   ) {}
 
   private rewrapField(value: string, field: string, id: string): string {
@@ -92,11 +96,17 @@ export class CryptoRewrapCommand implements CommandDefinition {
         { token: this.rewrapField(source.token, ENCRYPTED_SOURCE_TOKEN, String(source.id)) },
       );
 
+    const settingsRepository = this.dataSource.getRepository(PaymentSetting);
+    const paymentSettings = await settingsRepository.find();
+    for (const setting of paymentSettings)
+      await settingsRepository.update({ id: setting.id }, { value: this.rewrapField(setting.value, 'payment-settings', setting.id) });
+
     stdout(clc.magenta('Secrets re-encrypted with the current key'));
     stdout(`Passwords: ${clc.magenta(String(passwords))}`);
     stdout(`Two-factor secrets: ${clc.magenta(String(secrets))}`);
     stdout(`RCON passwords: ${clc.magenta(String(rcons.length))}`);
     stdout(`Extension source tokens: ${clc.magenta(String(sources.length))}`);
+    stdout(`Payment settings: ${clc.magenta(String(paymentSettings.length))}`);
 
     if (failed) stdout(clc.red(`Failed to decrypt: ${failed} (wrong ENCRYPTION_KEY_PREVIOUS?)`));
   }

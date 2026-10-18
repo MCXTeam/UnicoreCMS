@@ -130,6 +130,11 @@ export const CORE_MENU = [
         to: '/payment',
       },
       {
+        label: 'admin.payment_settings_title',
+        icon: 'pi pi-fw pi-credit-card',
+        to: '/payment-settings',
+      },
+      {
         label: 'admin.menu_gifts',
         icon: 'pi pi-fw pi-dollar',
         to: '/gifts',

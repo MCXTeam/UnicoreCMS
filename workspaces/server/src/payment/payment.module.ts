@@ -1,5 +1,4 @@
 import { Module, OnModuleInit } from '@nestjs/common';
-import { FreekassaModule } from './methods/freekassa/freekassa.module';
 import { PaymentService } from './payment.service';
 import { PaymentController } from './payment.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -11,13 +10,13 @@ import { EnotioModule } from './methods/enotio/enotio.module';
 import { PayokModule } from './methods/payok/payok.module';
 import { UnitpayModule } from './methods/unitpay/unitpay.module';
 import { modulePaymentModules } from 'src/modules/runtime';
+import { GatewayModule } from './methods/gateways/gateway.module';
+import { PaymentSettingsModule } from './settings/payment-settings.module';
 
-const register = [AnypayModule, UnitpayModule, FreekassaModule, EnotioModule, PayokModule, CentappModule, ...modulePaymentModules()].filter(
-  (method) => method.enabled,
-);
+const register = modulePaymentModules().filter((method) => method.enabled);
 
 @Module({
-  imports: [...register, TypeOrmModule.forFeature([Payment]), BonusesModule],
+  imports: [PaymentSettingsModule, AnypayModule, UnitpayModule, EnotioModule, PayokModule, CentappModule, GatewayModule, ...register, TypeOrmModule.forFeature([Payment]), BonusesModule],
   providers: [PaymentService],
   exports: [PaymentService],
   controllers: [PaymentController],

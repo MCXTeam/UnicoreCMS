@@ -51,7 +51,7 @@
         <div v-else class="cab-methods">
           <label v-for="method in payment_methods" :key="method" class="cab-method">
             <RadioButton v-model="payment.method" :value="method" />
-            <span class="cab-method__name">{{ $t('cabinet.pay_via', { method: payment_methods_map[method] }) }}</span>
+            <span class="cab-method__name">{{ $t('cabinet.pay_via', { method: payment_methods_map[method] || method }) }}</span>
             <Button
               v-if="payment.method == method"
               class="ms-auto"
@@ -314,6 +314,15 @@ export default {
         enotio: 'EnotIO',
         payok: 'PayOk',
         unitpay: 'UnitPay',
+        platega: 'Platega',
+        crystalpay: 'CrystalPay',
+        yookassa: 'ЮKassa',
+        heleket: 'Heleket',
+        tebex: 'Tebex',
+        cloudpayments: 'CloudPayments',
+        lava: 'Lava Business',
+        webmoney: 'WebMoney',
+        yoomoney: 'ЮMoney',
       },
       payment: {
         amount: 100,
