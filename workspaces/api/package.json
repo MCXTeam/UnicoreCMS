@@ -1,6 +1,6 @@
 {
   "name": "unicore-api",
-  "version": "1.14.0",
+  "version": "1.15.0",
   "private": true,
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -40,6 +40,7 @@
   "scripts": {
     "dev": "tsup --watch",
     "build": "tsup",
+    "test": "node --test test/*.test.cjs",
     "format": "prettier --write --list-different .",
     "api:snapshot": "node ./scripts/api-snapshot.mjs --write",
     "api:check": "node ./scripts/api-snapshot.mjs"

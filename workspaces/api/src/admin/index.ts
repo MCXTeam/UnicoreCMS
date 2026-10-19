@@ -1,6 +1,8 @@
 import { warnUnknown } from '../warn'
 
-export const ADMIN_SLOTS = ['dashboard', 'users.profile'] as const
+export * from './form'
+
+export const ADMIN_SLOTS = ['dashboard', 'users.profile', 'store.product.form'] as const
 
 export type AdminSlotName = (typeof ADMIN_SLOTS)[number]
 

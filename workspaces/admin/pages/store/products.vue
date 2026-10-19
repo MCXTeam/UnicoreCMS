@@ -365,6 +365,10 @@
             class="p-fluid"
           >
             <template #before>
+              <div v-if="productFormError" role="alert" class="mb-3">
+                <p class="p-error">{{ productFormError }}</p>
+                <Button v-if="!productFormReady" :disabled="loading" :label="$t('admin.retry')" icon="pi pi-refresh" class="p-button-text" @click="loadProductExtensions" />
+              </div>
               <LocaleEditorBar
                 v-model="translations.locale"
                 :locales="translations.locales"
@@ -617,14 +621,20 @@
               <ContentTranslationFields :translations="translations" />
             </template>
 
+            <template #after>
+              <div v-show="translations.isDefault && section === 'main'">
+                <ExtensionSlot v-if="productForm" :key="productFormKey" name="store.product.form" :form="productForm.context" :product="product" :disabled="loading" />
+              </div>
+            </template>
+
             <template #footer>
               <Button :disabled="loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button
-                :disabled="loading || !meta.valid || !product.servers.length"
+                :disabled="loading || !productFormReady || !meta.valid || !product.servers.length"
                 :label="$t('common.save')"
                 icon="pi pi-check"
                 class="p-button-text"
-                @click="updateMode ? updateProduct() : createProduct()"
+                @click="saveProduct"
               />
             </template>
           </SectionedDialog>
@@ -638,6 +648,8 @@
 import { sortTransform } from '~/helpers'
 import { FilterMatchMode } from '@primevue/core/api'
 import { Form, Field } from 'vee-validate'
+import { markRaw, nextTick } from 'vue'
+import { AdminFormError, createAdminForm } from 'unicore-api/admin'
 
 export default {
   components: {
@@ -734,6 +746,11 @@ export default {
       importDialog: false,
       fileDialog: false,
       productDialog: false,
+      productForm: null,
+      productFormKey: 0,
+      productFormReady: false,
+      productFormError: null,
+      productSavedPayload: null,
       section: 'main',
       filters: {
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -787,7 +804,40 @@ export default {
   mounted() {
     this.load()
   },
+  beforeUnmount() {
+    this.disposeProductForm()
+  },
+  watch: {
+    productDialog(visible) {
+      if (!visible) this.disposeProductForm()
+    },
+  },
   methods: {
+    disposeProductForm() {
+      this.productFormKey++
+      this.productForm?.dispose()
+      this.productForm = null
+      this.productFormReady = false
+      this.productFormError = null
+      this.productSavedPayload = null
+    },
+    async loadProductExtensions() {
+      const form = this.productForm
+      if (!form) return
+      this.loading = true
+      this.productFormError = null
+      try {
+        await form.load()
+        if (this.productForm === form) this.productFormReady = true
+      } catch (error) {
+        if (this.productForm === form) {
+          this.productFormError = this.$t('admin.extension_form_load_failed', { module: error.moduleId })
+          this.productFormReady = false
+        }
+      } finally {
+        if (this.productForm === form) this.loading = false
+      }
+    },
     async load() {
       this.loading = true
       this.products = await this.$api
@@ -879,6 +929,7 @@ export default {
       } catch {}
     },
     hideDialog() {
+      this.disposeProductForm()
       this.productDialog = false
     },
     hideManyDialog() {
@@ -888,6 +939,9 @@ export default {
       this.importDialog = false
     },
     async openDialog(product = null) {
+      this.disposeProductForm()
+      const generation = this.productFormKey
+      this.loading = true
       this.updateMode = !!product
       if (product) {
         this.product = this.$_.pick(product, this.$_.deepKeys(this.product))
@@ -913,8 +967,25 @@ export default {
         }
       }
       this.translations.attach(this.product)
-      await this.translations.load(product ? product.id : null)
+      try {
+        await this.translations.load(product ? product.id : null)
+      } catch (error) {
+        if (generation === this.productFormKey) {
+          this.loading = false
+          this.$utils.notifyError(error)
+        }
+        return
+      }
+      if (generation !== this.productFormKey) return
+      this.productForm = markRaw(createAdminForm('store.product', () => ({
+        id: this.product.id,
+        mode: this.updateMode ? 'edit' : 'create',
+        value: this.product,
+      })))
       this.productDialog = true
+      this.loading = true
+      await nextTick()
+      await this.loadProductExtensions()
     },
     async openManyDialog() {
       this.productMany = {
@@ -938,55 +1009,47 @@ export default {
       this.product = this.$_.pick(product, this.$_.deepKeys(this.product))
       this.fileDialog = true
     },
-    async createProduct() {
+    async saveProduct() {
+      if (this.loading || !this.productFormReady) return
       this.loading = true
+      this.productFormError = null
+      const creating = this.product.id == null
       try {
-        const { data } = await this.$api.post('/store/products', {
+        await this.productForm.validate()
+        const payload = this.$_.omit({
           ...this.product,
           servers: this.product.servers.map((server) => server.id),
           categories: this.product.categories.map((category) => category.id),
-        })
-
-        await this.translations.save(data.id)
-        this.$toast.add({
-          severity: 'success',
-          detail: this.$t('admin.product_created'),
-          life: 3000,
-        })
-        await this.load()
-      } catch (err) {
-        this.loading = false
-        this.$toast.add({
-          severity: 'error',
-          detail: this.$t('admin.invalid_data'),
-          life: 3000,
-        })
-      }
-    },
-    async updateProduct() {
-      this.loading = true
-      try {
-        await this.$api.patch(
-          '/store/products/' + this.product.id,
-          this.$_.omit(
-            {
-              ...this.product,
-              servers: this.product.servers.map((server) => server.id),
-              categories: this.product.categories.map((category) => category.id),
-            },
-            'id',
-          ),
-        )
+        }, 'id')
+        const serialized = JSON.stringify(payload)
+        if (this.productSavedPayload !== serialized) {
+          if (this.product.id == null) {
+            const { data } = await this.$api.post('/store/products', payload)
+            this.product.id = data.id
+            this.updateMode = true
+          } else {
+            await this.$api.patch('/store/products/' + this.product.id, payload)
+          }
+          this.productSavedPayload = serialized
+        }
 
         await this.translations.save(this.product.id)
+        await this.productForm.save()
         this.$toast.add({
           severity: 'success',
-          detail: this.$t('admin.product_updated'),
+          detail: this.$t(creating ? 'admin.product_created' : 'admin.product_updated'),
           life: 3000,
         })
         await this.load()
       } catch (err) {
         this.loading = false
+        if (err instanceof AdminFormError) {
+          this.section = 'main'
+          if (err.phase === 'load') this.productFormReady = false
+          const key = err.phase === 'save' ? 'admin.extension_form_save_failed' : err.phase === 'load' ? 'admin.extension_form_load_failed' : 'admin.extension_form_invalid'
+          this.productFormError = this.$t(key, { module: err.moduleId })
+          return
+        }
         this.$toast.add({
           severity: 'error',
           detail: this.$t('admin.invalid_data'),

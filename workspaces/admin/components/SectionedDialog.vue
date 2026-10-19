@@ -5,7 +5,7 @@
     :modal="true"
     :closable="closable"
     :header="header"
-    :style="{ width }"
+    :style="{ width, maxWidth: 'calc(100vw - 2rem)' }"
     :pt="{ root: { class: 'sectioned-dialog' } }"
   >
     <slot name="before" />
@@ -30,6 +30,8 @@
         <slot :name="section.key" />
       </div>
     </div>
+
+    <slot name="after" />
 
     <template #footer>
       <slot name="footer" />
@@ -123,7 +125,13 @@ export default {
 
 <style lang="scss">
 .sectioned-dialog {
+  min-width: 0;
   overflow: visible;
+
+  .p-dialog-title {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
 
   .sectioned-dialog__nav {
     position: absolute;
