@@ -24,10 +24,11 @@ import { ServerCreateInput } from './dto/server-create.input';
 import { ServerUpdateInput } from './dto/server-update.input';
 import { ServerMedia } from './enums/server-media.enum';
 import { ServersService } from './servers.service';
+import { OnlineService } from './online/online.service';
 
 @Controller('servers')
 export class ServersController {
-  constructor(private serversService: ServersService) {}
+  constructor(private serversService: ServersService, private onlineService: OnlineService) {}
 
   @Permissions(['panel.access', 'panel.servers.create'])
   @Audit({ action: 'content.create', target: 'server', bodyParam: 'id' })
@@ -45,13 +46,13 @@ export class ServersController {
   @Public()
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    const server = await this.serversService.findOne(id, ['mods', 'query', 'table', 'instances']);
+    const server = await this.serversService.findOne(id, ['mods', 'query', 'table', 'instances', 'online']);
 
     if (!server) {
       throw new NotFoundException();
     }
 
-    return server;
+    return this.onlineService.publicServer(server);
   }
 
   @Permissions([['panel.servers.read', 'panel.servers.update.*'], { or: true }])

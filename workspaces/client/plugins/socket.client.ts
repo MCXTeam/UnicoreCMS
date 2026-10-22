@@ -22,6 +22,9 @@ export default defineNuxtPlugin(() => {
   })
 
   socket.on('servers/online', (data: any) => ioStore.setServersOnline(data))
+  socket.on('connect_error', () => ioStore.markOnlineUnknown())
+  socket.on('disconnect', () => ioStore.markOnlineUnknown())
+  socket.on('connect', () => socket.emit('servers/online', (data: any) => ioStore.setServersOnline(data)))
   socket.on('layout/updated', () => layoutStore.fetch().catch(() => null))
   socket.on(NOTIFICATION_EVENT_NEW, (data: NotificationView) => notifications.receive(data))
   socket.on(NOTIFICATION_EVENT_STATE, (data: { unread: number }) => notifications.setUnread(data?.unread ?? 0))

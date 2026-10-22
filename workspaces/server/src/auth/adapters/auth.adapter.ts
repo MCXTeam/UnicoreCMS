@@ -115,7 +115,7 @@ export class AuthAdapter extends IoAdapter {
 
     if (isBanActive(user.ban)) throw new UnauthorizedException();
 
-    socket.join([...new UserDto(user).perms, userRoom(user)]);
+    socket.join([WS_PUBLIC_ROOM, ...new UserDto(user).perms, userRoom(user)]);
     socket.user = user;
   }
 

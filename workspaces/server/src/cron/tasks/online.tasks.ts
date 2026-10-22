@@ -2,7 +2,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { CronExpression } from '@nestjs/schedule';
 import { SafeCron } from '@common';
 import { EventsService } from 'src/events/events.service';
-import { UpdateOnline } from 'src/game/servers/online/interfaces/update-online.interface';
 import { OnlineService } from 'src/game/servers/online/online.service';
 import { ServersService } from 'src/game/servers/servers.service';
 
@@ -10,6 +9,7 @@ import { ServersService } from 'src/game/servers/servers.service';
 export class OnlineTasks {
   private readonly logger = new Logger('OnlineTasks');
   private running = false;
+  private lastPayload = '';
 
   constructor(
     private eventsService: EventsService,
@@ -24,10 +24,12 @@ export class OnlineTasks {
 
     try {
       const servers = await this.serversService.find(['online', 'query', 'instances']);
-      const serversUpdated: UpdateOnline[] = await Promise.all(servers.map((server) => this.onlineService.updateOnline(server)));
+      await this.onlineService.updateAll(servers);
 
-      if (serversUpdated.find((upd) => upd.updated)) {
-        const onlines = await this.onlineService.updateOnlinesRecords();
+      const onlines = await this.onlineService.updateOnlinesRecords();
+      const payload = JSON.stringify(onlines);
+      if (payload !== this.lastPayload) {
+        this.lastPayload = payload;
         this.eventsService.server.to('public').emit('servers/online', onlines);
         this.logger.debug('Online updated');
       }

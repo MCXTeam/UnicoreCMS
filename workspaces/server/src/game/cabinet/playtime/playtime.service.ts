@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/admin/users/entities/user.entity';
 import { UsersService } from 'src/admin/users/users.service';
@@ -7,6 +7,8 @@ import { ServersService } from 'src/game/servers/servers.service';
 import { In, Repository } from 'typeorm';
 import { PlaytimeInput } from './dto/playtime.input';
 import { Playtime } from './entities/playtime.entity';
+import { ConnectInstance } from '../../connect/entities/connect-instance.entity';
+import { ConnectPlaytime } from '../../connect/entities/connect-session.entity';
 
 @Injectable()
 export class PlaytimeService {
@@ -19,13 +21,17 @@ export class PlaytimeService {
   ) {}
 
   private async generate(server: Server, user: User, time: number = 0) {
-    const pt = new Playtime();
+    await this.playtimeRepository.createQueryBuilder().insert().into(Playtime).values({ serverId: server.id, userUuid: user.uuid, time }).orIgnore().execute();
+    return this.playtimeRepository.findOneByOrFail({ serverId: server.id, userUuid: user.uuid });
+  }
 
-    pt.server = server;
-    pt.user = user;
-    pt.time = time;
-
-    return await this.playtimeRepository.save(pt);
+  private summary(row: Playtime, total?: ConnectPlaytime) {
+    return Object.assign(row, {
+      time: total ? Math.floor((total.baselineMs + total.activeMs) / 60000) : row.time,
+      connectedMs: total?.connectedMs ?? null,
+      activeMs: total?.activeMs ?? null,
+      legacyBaselineMs: total?.baselineMs ?? row.time * 60000,
+    });
   }
 
   async findOneByUser(user: User | string): Promise<Playtime[]> {
@@ -42,11 +48,13 @@ export class PlaytimeService {
       },
     });
 
+    const totals = await this.playtimeRepository.manager.findBy(ConnectPlaytime, { userUuid: user.uuid });
     return Promise.all(
       servers.map(async (server) => {
         const finder = pt.find((m) => m.server.id == server.id);
-        if (finder) return finder;
-        else return await this.generate(server, user as User);
+        const total = totals.find((row) => row.serverId === server.id);
+        const row = finder || await this.generate(server, user as User, total ? Math.floor((total.baselineMs + total.activeMs) / 60000) : 0);
+        return this.summary(row, total);
       }),
     );
   }
@@ -72,13 +80,14 @@ export class PlaytimeService {
       relations: ['user', 'server'],
     });
 
-    if (pt) return pt;
+    const total = await this.playtimeRepository.manager.findOneBy(ConnectPlaytime, { serverId: server_id, userUuid: user.uuid });
+    if (pt) return this.summary(pt, total);
     else {
       const server = await this.serversService.findOne(server_id);
 
       if (!server) throw new NotFoundException();
 
-      return this.generate(server, user as User);
+      return this.summary(await this.generate(server, user as User, total ? Math.floor((total.baselineMs + total.activeMs) / 60000) : 0), total);
     }
   }
 
@@ -96,6 +105,9 @@ export class PlaytimeService {
   }
 
   async update(input: PlaytimeInput[]) {
+    if (input.length && await this.playtimeRepository.manager.exists(ConnectInstance, { where: { serverId: In(input.map((row) => row.server)) } })) {
+      throw new ConflictException('Server uses Connect v2 sessions; legacy minute writes are disabled');
+    }
     const servers = await this.serversService.find();
     const pt = await this.playtimeRepository.find({
       where: { user: { uuid: In(input.map((v) => v.user_uuid)) } },

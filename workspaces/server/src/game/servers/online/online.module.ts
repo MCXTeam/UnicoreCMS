@@ -11,9 +11,10 @@ import { Mod } from '../mods/entities/mod.entity';
 import { ServerGalleryImage } from '../entities/server-gallery.entity';
 import { ServerInstance } from '../entities/server-instance.entity';
 import { RconModule } from '../rcon/rcon.module';
+import { ConnectModule } from '../../connect/connect.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Online, Server, OnlinesRecord, OnlinesAbsoluteRecord, Query, Mod, ServerInstance, ServerGalleryImage]), RconModule],
+  imports: [TypeOrmModule.forFeature([Online, Server, OnlinesRecord, OnlinesAbsoluteRecord, Query, Mod, ServerInstance, ServerGalleryImage]), RconModule, ConnectModule],
   providers: [OnlineService, ServersService],
   exports: [OnlineService],
 })

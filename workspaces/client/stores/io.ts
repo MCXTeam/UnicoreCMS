@@ -5,17 +5,29 @@ export const useIoStore = defineStore('io', {
     serversOnline: {
       servers: null,
       total: {
-        online: 0,
+        online: null,
         records: {
-          absolute: 0,
-          today: 0,
+          absolute: { online: 0, created: null },
+          today: { online: 0, created: null },
         },
       },
     } as any,
   }),
   actions: {
     setServersOnline(value: any) {
-      this.serversOnline = value
+      if (Array.isArray(value?.servers) && value?.total) this.serversOnline = value
+    },
+    markOnlineUnknown() {
+      this.serversOnline.servers ??= []
+      this.serversOnline.total.online = null
+      this.serversOnline.total.freshness = 'stale'
+      for (const server of this.serversOnline.servers || []) {
+        server.players = null
+        server.online = null
+        server.freshness = 'stale'
+        server.playerList = []
+        for (const instance of server.server?.instances || []) { instance.online = null; instance.players = null }
+      }
     },
   },
 })

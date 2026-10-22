@@ -3,7 +3,8 @@ export const useCabinet = () => {
 
   return {
     history: (params: Record<string, unknown> = {}) => api.get('/cabinet/history/me', { params }).then((res) => res.data),
-    playtime: () => api.get('/cabinet/playtime/me').then((res) => res.data),
+    gamePunishments: (signal?: AbortSignal) => api.get('/cabinet/game-punishments/me', { signal }).then((res) => res.data),
+    playtime: (signal?: AbortSignal) => api.get('/cabinet/playtime/me', { signal }).then((res) => res.data),
     referals: () => api.get('/cabinet/referals/me').then((res) => res.data),
     referalPercent: () => api.get('/cabinet/referals/me/percent').then((res) => res.data),
     inviter: () => api.get('/cabinet/referals/me/inviter').then((res) => res.data),

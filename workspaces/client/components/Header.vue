@@ -19,10 +19,11 @@
                 <span class="text-uppercase">{{ $t('header.online') }}</span>
               </div>
               <h1 class="mt-2">
-                <ClientOnly>
+                <ClientOnly v-if="onlines.total.online != null">
                   <CountTo :startVal="0" :endVal="onlines.total.online" :duration="1000" />
                   <template #fallback>{{ onlines.total.online }}</template>
                 </ClientOnly>
+                <span v-else :aria-label="$t('panel.online_unknown')">?</span>
               </h1>
             </div>
             <div>

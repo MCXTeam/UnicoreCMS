@@ -116,7 +116,7 @@
     <div v-else-if="block.type === 'online'" class="layout-block__online">
       <span class="layout-block__online-dot" />
       <span>{{ $t('header.online') }}</span>
-      <b>{{ onlines.total.online }}</b>
+      <b :title="onlines.total.online == null ? $t('panel.online_unknown') : undefined">{{ onlines.total.online ?? '?' }}</b>
     </div>
   </div>
   <div v-else-if="block.type === 'spacer'" class="layout-spacer" />
@@ -283,6 +283,9 @@ onBeforeUnmount(() => {
 }
 .layout-block__nav--columns {
   display: block;
+  width: 100%;
+  column-width: 10rem;
+  column-gap: 18px;
 }
 .layout-block__nav--columns .layout-link {
   display: flex;

@@ -97,6 +97,12 @@
   max-width: 1440px;
   margin: 0 auto;
   padding: 12px 24px;
+
+  @include media-breakpoint-down(sm) {
+    padding-inline: 12px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
 }
 
 .cab-brand {
@@ -1161,4 +1167,48 @@
     font-size: 14px;
     color: var(--cab-muted);
   }
+}
+
+.cab-playtime {
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--cab-inner);
+  min-width: 0;
+
+  &__server {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+
+    h4 { margin: 0; font-size: 16px; overflow-wrap: anywhere; }
+    > :first-child { flex-shrink: 0; }
+  }
+
+  &__metrics {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+
+    > div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; }
+    dt { color: var(--cab-muted); font-size: 14px; font-weight: 400; }
+    dd { margin: 0; font-size: 16px; font-weight: 600; overflow-wrap: anywhere; }
+  }
+}
+
+.cab-punishments {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+
+  &__row {
+    padding: 12px;
+    border-radius: 14px;
+    background: var(--cab-inner);
+    overflow-wrap: anywhere;
+    p { margin: 10px 0; white-space: pre-wrap; }
+    > span { font-size: 14px; color: var(--cab-muted); }
+  }
+
+  &__heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
 }

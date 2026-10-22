@@ -37,6 +37,7 @@
     </div>
     <h2 class="mt-0">{{ $t('panel.servers') }}</h2>
     <div v-if="onlines.servers" class="">
+      <p v-if="!onlines.servers.length && onlines.total.online == null">{{ $t('panel.online_unknown') }}</p>
       <div v-for="online in onlines.servers" :key="online.server.id" class="mb-4">
         <div class="onlines d-flex justify-content-between align-items-end mb-3">
           <div class="d-flex">
@@ -53,23 +54,25 @@
           </div>
           <div class="d-flex flex-column align-items-end">
             <div v-tooltip.top="$t('panel.record_tooltip', { record: online.record, today: online.record_today })">
-              <h2 v-if="online.online" class="mb-1 mt-0">
+              <h2 v-if="online.online && online.players != null" class="mb-1 mt-0">
                 <ClientOnly>
                   <CountTo :startVal="0" :endVal="online.players" :duration="1000" />
                   <template #fallback>{{ online.players }}</template>
                 </ClientOnly>
               </h2>
-              <h2 v-else class="mb-1 mt-0 text-uppercase">{{ $t('panel.offline') }}</h2>
+              <h2 v-else-if="online.online === false" class="mb-1 mt-0 text-uppercase">{{ $t('panel.offline') }}</h2>
+              <span v-else class="fw-semibold">{{ $t('panel.online_unknown') }}</span>
             </div>
             <span v-if="online.online">{{ $t('panel.of') }} {{ online.maxplayers }}</span>
           </div>
         </div>
-        <ProgressBar style="height: 0.5em" :showValue="false" :value="(online.players / online.maxplayers) * 100" />
+        <ProgressBar v-if="online.players != null && online.maxplayers > 0" style="height: 0.5em" :showValue="false" :value="Math.min(100, (online.players / online.maxplayers) * 100)" />
         <div v-if="online.server.instances?.length" class="server-instances mt-2">
           <div v-for="instance in online.server.instances" :key="instance.name" class="d-flex justify-content-between align-items-center">
             <span>{{ instance.name }}</span>
             <span v-if="instance.online">{{ instance.players }} {{ $t('panel.of') }} {{ instance.maxplayers }}</span>
-            <span v-else class="text-uppercase">{{ $t('panel.offline') }}</span>
+            <span v-else-if="instance.online === false" class="text-uppercase">{{ $t('panel.offline') }}</span>
+            <span v-else>{{ $t('panel.online_unknown') }}</span>
           </div>
         </div>
       </div>
@@ -77,10 +80,11 @@
         <p class="m-0">
           {{ $t('panel.total_online') }}:
           <b>
-            <ClientOnly>
+            <ClientOnly v-if="onlines.total.online != null">
               <CountTo :startVal="0" :endVal="onlines.total.online" :duration="1000" />
               <template #fallback>{{ onlines.total.online }}</template>
             </ClientOnly>
+            <span v-else>{{ $t('panel.online_unknown') }}</span>
           </b>
         </p>
         <p class="m-0" v-tooltip.top="$moment(onlines.total.records.today.created).format('D MMMM YYYY, HH:mm')">

@@ -14,6 +14,8 @@ import { OnlinesAbsoluteRecord } from './entities/onlines-absolute-record.entity
 import { RecordOnlineInterface } from './interfaces/record-online.interface';
 import { classToPlain } from 'class-transformer';
 import { DEFAULT_MINECRAFT_PORT, PING_TIMEOUT_MS } from '@common';
+import { ConnectPresenceService } from '../../connect/connect-presence.service';
+import { PresenceView } from '../../connect/connect.protocol';
 
 @Injectable()
 export class OnlineService {
@@ -26,6 +28,7 @@ export class OnlineService {
     private onlinesRecordsRepository: Repository<OnlinesRecord>,
     @InjectRepository(OnlinesAbsoluteRecord)
     private onlinesAbsoluteRecordsRepository: Repository<OnlinesAbsoluteRecord>,
+    private connectPresence: ConnectPresenceService,
   ) {}
 
   async find(): Promise<Onlines> {
@@ -36,9 +39,17 @@ export class OnlineService {
       ['server.priority'],
       ['asc'],
     );
+    const { views: presence, network } = await this.connectPresence.overview(servers.map((server) => server.serverId));
+    for (const server of servers) {
+      const view = presence.get(server.serverId);
+      if (view) {
+        Object.assign(server, view);
+        server.server.instances = server.server.instances?.map((instance) => ({ ...instance, online: null, players: null, maxplayers: null }));
+      }
+    }
     const record = await this.onlinesRecordsRepository.findOne({
       order: { created: 'DESC' },
-      where: { created: MoreThanOrEqual(moment().startOf('day').toDate()) },
+      where: { created: MoreThanOrEqual(moment().utc().startOf('day').toDate()) },
     });
     const absolute = (
       await this.onlinesAbsoluteRecordsRepository.find({
@@ -50,9 +61,9 @@ export class OnlineService {
     return {
       servers,
       total: {
-        online: _(servers)
-          .map((serv) => serv.players)
-          .sum(),
+        online: servers.some((server) => server.players == null) ? null : (network?.players || 0) + _.sumBy(servers.filter((server) => !presence.has(server.serverId)), 'players'),
+        aggregation: presence.size === servers.length ? 'unique' : presence.size ? 'mixed' : 'count-only',
+        freshness: servers.some((server) => server.players == null) ? 'stale' : 'fresh',
         records: {
           today: {
             online: record?.online || 0,
@@ -69,13 +80,14 @@ export class OnlineService {
 
   async updateOnlinesRecords(): Promise<Onlines> {
     const onlines: Onlines = await this.find();
+    if (onlines.total.online == null || onlines.total.aggregation === 'mixed') return onlines;
     let today: RecordOnlineInterface;
     let absolute: RecordOnlineInterface;
 
     const id = (
       await this.onlinesRecordsRepository.findOne({
         order: { created: 'DESC' },
-        where: { created: MoreThanOrEqual(moment().startOf('day').toDate()) },
+        where: { created: MoreThanOrEqual(moment().utc().startOf('day').toDate()) },
       })
     )?.id;
 
@@ -86,7 +98,7 @@ export class OnlineService {
       absolute = { online: entity.online, created: entity.created };
     }
 
-    if (onlines.total.online > onlines.total.records.today.online) {
+    if (!id || onlines.total.online > onlines.total.records.today.online) {
       if (moment(onlines.total.records.today.created).utc().isSame(moment().utc(), 'day') && id) {
         await this.onlinesRecordsRepository
           .createQueryBuilder()
@@ -119,6 +131,15 @@ export class OnlineService {
     if (today) onlines.total.records.today = today;
 
     return onlines;
+  }
+
+  async publicServer(server: Server): Promise<Server> {
+    const view = (await this.connectPresence.views([server.id])).get(server.id);
+    if (view) {
+      if (server.online) Object.assign(server.online, view);
+      if (server.instances) server.instances = server.instances.map((instance) => ({ ...instance, online: null, players: null, maxplayers: null }));
+    }
+    return server;
   }
 
   private async ping(host: string, port?: number): Promise<Pick<Online, 'maxplayers' | 'online' | 'players'>> {
@@ -158,27 +179,35 @@ export class OnlineService {
     };
   }
 
-  async updateOnline(server: Server): Promise<UpdateOnline> {
+  async updateAll(servers: Server[]): Promise<UpdateOnline[]> {
+    const views = await this.connectPresence.views(servers.map((server) => server.id));
+    return Promise.all(servers.map((server) => this.updateOnline(server, views.get(server.id) || null)));
+  }
+
+  async updateOnline(server: Server, presence?: PresenceView | null): Promise<UpdateOnline> {
     const hasInstances = Boolean(server.instances?.length);
 
-    if (!server.online || (!hasInstances && !server.query?.host)) {
+    const view = presence === undefined ? (await this.connectPresence.views([server.id])).get(server.id) : presence;
+    if (!server.online || (!view && !hasInstances && !server.query?.host)) {
       return {
         instance: server,
         updated: false,
       };
     }
 
-    const online = hasInstances ? await this.updateInstances(server) : await this.ping(server.query.host, server.query.port);
+    const ping = hasInstances ? await this.updateInstances(server) : server.query?.host ? await this.ping(server.query.host, server.query.port) : null;
+    const online = view ? { online: view.online, players: view.players, maxplayers: view.maxplayers } : ping;
 
-    if (!_.isEqual(classToPlain(server.online), { ...server.online, ...online })) {
+    const newDay = !moment().utc().isSame(moment(server.online.updated).utc(), 'day');
+    if (newDay || !_.isEqual(classToPlain(server.online), { ...server.online, ...online })) {
       var record: number = server.online.record;
-      var record_today: number = server.online.record_today;
+      var record_today: number = newDay ? 0 : server.online.record_today;
 
-      if (online.players > server.online.record) {
+      if (online.players != null && online.players > server.online.record) {
         record = online.players;
       }
 
-      if (online.players > server.online.record_today || !moment().utc().isSame(moment(server.online.updated).utc(), 'd')) {
+      if (online.players != null && (online.players > record_today || newDay)) {
         record_today = online.players;
       }
 
@@ -189,7 +218,7 @@ export class OnlineService {
         .where('server_id = :id', { id: server.id })
         .execute();
 
-      server.online = { ...server.online, ...online };
+      server.online = { ...server.online, ...online, record, record_today, updated: new Date() };
 
       return {
         instance: server,

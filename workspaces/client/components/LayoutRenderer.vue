@@ -125,6 +125,12 @@ function slotBlock(name: string): Block {
 .layout-render--footer .layout-row + .layout-row {
   margin-top: 24px;
 }
+@media (max-width: 767px) {
+  .layout-render--footer .layout-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
 .layout-html {
   display: contents;
 }
