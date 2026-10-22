@@ -34,6 +34,9 @@ overrides:
   mailparser>linkify-it: ^5.0.2
   tsup>esbuild: ^0.28.1
   bundle-require>esbuild: ^0.28.1
+  follow-redirects: ^1.16.1
+  launch-editor: ^2.14.2
+  vite@7: ^7.3.7
 
 peerDependencyRules:
   ignoreMissing:
