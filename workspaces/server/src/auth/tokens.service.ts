@@ -25,10 +25,11 @@ export class TokensService {
     private jwt: JwtService,
   ) {}
 
-  async generateAccessToken(user: User): Promise<string> {
+  async generateAccessToken(user: User, launcherSession?: string): Promise<string> {
     const payload: JWTPayload = {
       sub: user.uuid,
       type: 'access',
+      ...(launcherSession ? { launcherSession } : {}),
     };
 
     return this.jwt.sign(payload, {

@@ -11,11 +11,11 @@ export class GravitAuthReportDto {
   oauthExpire: number;
   session: GravitSessionDto;
 
-  constructor(user: User, accessToken: string, refreshToken: string) {
+  constructor(user: User, accessToken: string, refreshToken: string, sessionId: string, hardware: Record<string, unknown> | null = null) {
     this.minecraftAccessToken = user.accessToken;
     this.oauthAccessToken = accessToken;
     this.oauthRefreshToken = refreshToken;
     this.oauthExpire = Math.round(ms(envConfig.jwtExpires as ms.StringValue) / 1000);
-    this.session = instanceToPlain(new GravitSessionDto(user)) as GravitSessionDto;
+    this.session = instanceToPlain(new GravitSessionDto(user, sessionId, hardware)) as GravitSessionDto;
   }
 }

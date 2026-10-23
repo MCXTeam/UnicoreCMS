@@ -172,6 +172,9 @@ export const AUDIT_ACTIONS = define({
   "rcon.command": { class: "admin", danger: true },
   "ban.create": { class: "admin" },
   "ban.remove": { class: "admin" },
+  "hardware.read": { class: "access" },
+  "hardware.ban": { class: "admin", danger: true },
+  "hardware.revoke": { class: "admin", danger: true },
 
   "content.create": { class: "content" },
   "content.update": { class: "content" },

@@ -11,6 +11,7 @@ import { GravitJoinServer } from './dto/inputs/gravit-join-server.input';
 import { GravitRefreshToken } from './dto/inputs/gravit-refresh-token.input';
 import { GravitDeleteSession, GravitExitUser } from './dto/inputs/gravit-session.input';
 import { GravitService } from './gravit.service';
+import { GravitHardwareJoinInput } from './dto/inputs/gravit-hardware-join.input';
 
 @Permissions(['kernel.provider'])
 @Controller('auth/gravit')
@@ -72,7 +73,7 @@ export class GravitController {
   }
 
   @Post('joinServer')
-  joinServer(@Body() body: GravitJoinServer) {
+  joinServer(@Body() body: GravitHardwareJoinInput) {
     return this.gravitService.joinServer(body);
   }
 }

@@ -5,6 +5,8 @@ export class JWTPayload {
 
   api?: boolean;
 
+  launcherSession?: string;
+
   type?: JWTTokenType;
 
   iat?: number;

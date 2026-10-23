@@ -74,6 +74,9 @@ export const PERMISSIONS = define({
   "panel.users.delete": { group: "users" },
   "panel.users.delete.many": { group: "users" },
   "panel.users.ban": { group: "users" },
+  "panel.users.hardware.read": { group: "users" },
+  "panel.users.hardware.ban": { group: "users", danger: true },
+  "panel.users.hardware.revoke": { group: "users", danger: true },
   "panel.users.field.username": {
     group: "users",
     field: ["user", "username"],

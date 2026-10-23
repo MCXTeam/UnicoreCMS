@@ -52,6 +52,10 @@ export class GravitPassword {
 }
 
 export class GravitAuthorize {
+  @IsOptional()
+  @IsBoolean()
+  hardwareRequired?: boolean;
+
   @IsDefined()
   @IsString()
   @MaxLength(NAME_MAX_LENGTH)

@@ -1,9 +1,6 @@
 import { GravitUserDto } from './gravit-user.dto';
-import { randomId } from '@common';
 import { User } from 'src/admin/users/entities/user.entity';
 import { instanceToPlain } from 'class-transformer';
-import { envConfig } from 'unicore-common';
-import ms from 'ms';
 
 export class GravitSessionDto {
   id: string;
@@ -11,9 +8,16 @@ export class GravitSessionDto {
   accessToken: string;
   expireIn: number;
 
-  constructor(user: User) {
-    this.id = randomId();
+  expire: number;
+  hardwareId: string | null;
+  userHardware: Record<string, unknown> | null;
+
+  constructor(user: User, sessionId: string, hardware: Record<string, any> | null = null) {
+    this.id = sessionId;
     this.expireIn = 0;
+    this.expire = 0;
+    this.hardwareId = hardware?.id || null;
+    this.userHardware = hardware;
     this.user = instanceToPlain(new GravitUserDto(user)) as GravitUserDto;
     this.accessToken=this.user.accessToken;
   }

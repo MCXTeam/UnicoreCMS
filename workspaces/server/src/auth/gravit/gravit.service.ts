@@ -21,6 +21,8 @@ import { Repository } from 'typeorm';
 import { GravitJoinServer } from './dto/inputs/gravit-join-server.input';
 import { GravitCheckServer } from './dto/inputs/gravit-check-server.input';
 import { RefreshToken } from '../entities/refresh-token.entity';
+import { HardwareService } from '../hardware/hardware.service';
+import { GravitHardwareJoinInput } from './dto/inputs/gravit-hardware-join.input';
 
 @Injectable()
 export class GravitService {
@@ -32,6 +34,7 @@ export class GravitService {
     private loginAttemptsService: LoginAttemptsService,
     private auditService: AuditService,
     private jwt: JwtService,
+    private hardware: HardwareService,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
     @InjectRepository(RefreshToken)
@@ -69,10 +72,18 @@ export class GravitService {
       throw new HttpException({ error: GravitError.InvalidToken }, HttpStatus.UNAUTHORIZED);
 
     const user = await this.usersService.getById(accessTokenPayload.sub);
-
     if (!user) throw new HttpException({ error: GravitError.UserNotFound }, HttpStatus.NOT_FOUND);
+    await this.assertAllowed(user);
+    const sessionId = accessTokenPayload.launcherSession || await this.legacySessionId(user);
+    const state = await this.hardware.session(sessionId, false);
+    if (state.token.user.uuid !== user.uuid) throw new ForbiddenException();
+    return new GravitSessionDto({ ...user, accessToken: state.minecraftAccessToken } as User, sessionId, state.hardware);
+  }
 
-    return new GravitSessionDto(user);
+  private async legacySessionId(user: User) {
+    const payload = await this.tokensService.decodeToken(user.accessToken) as JWTMinecraftPayload;
+    if (payload.type !== 'minecraft' || payload.sub !== user.uuid || !payload.ref) throw new ForbiddenException();
+    return payload.ref;
   }
 
   private async assertAllowed(user: User) {
@@ -135,29 +146,24 @@ export class GravitService {
     const refreshToken = await this.tokensService.generateRefreshToken(user, 'launcher', input?.context?.ip);
     const refreshTokenPayload = (await this.tokensService.decodeToken(refreshToken)) as JWTRefreshPayload;
 
-    const accessToken = await this.tokensService.generateAccessToken(user);
+    const accessToken = await this.tokensService.generateAccessToken(user, refreshTokenPayload.jwtid);
 
     user.accessToken = await this.tokensService.generateMinecraftAccessToken(user, refreshTokenPayload);
     await this.usersRepository.update({ uuid: user.uuid }, { accessToken: user.accessToken });
+    await this.hardware.begin(refreshTokenPayload.jwtid, input.hardwareRequired === true, user.accessToken);
 
-    return new GravitAuthReportDto(user, accessToken, refreshToken);
+    return new GravitAuthReportDto(user, accessToken, refreshToken, refreshTokenPayload.jwtid);
   }
 
   async refreshAccessToken(input: GravitRefreshToken) {
     try {
-      const { user } = await this.tokensService.resolveRefreshToken(input.refreshToken);
-      // const refreshTokenPayload = await this.tokensService.decodeToken(input.refreshToken) as JWTRefreshPayload;
-      const { accessToken } = await this.tokensService.createTokensFromRefreshToken(input.refreshToken, {
-        agent: 'launcher',
-        ip: input?.context?.ip,
-        rotate: false,
-      });
-
-      // user.accessToken = await this.tokensService.generateMinecraftAccessToken(user, refreshTokenPayload)
-      // await this.usersRepository.save(user)
-
-      return new GravitAuthReportDto(user, accessToken, input.refreshToken);
+      const { user, token } = await this.tokensService.resolveRefreshToken(input.refreshToken);
+      await this.assertAllowed(user);
+      const state = await this.hardware.session(token.uuid, false);
+      const accessToken = await this.tokensService.generateAccessToken(user, token.uuid);
+      return new GravitAuthReportDto({ ...user, accessToken: state.minecraftAccessToken } as User, accessToken, input.refreshToken, token.uuid, state.hardware);
     } catch (e) {
+      if (e instanceof HttpException && e.getStatus() === HttpStatus.FORBIDDEN) throw e;
       if (e instanceof TokenExpiredError) {
         throw new HttpException({ error: GravitError.ExpireToken }, HttpStatus.UNAUTHORIZED);
       } else {
@@ -185,7 +191,7 @@ export class GravitService {
     await this.dropLauncherSessions(input.username);
   }
 
-  async joinServer(input: GravitJoinServer) {
+  async joinServer(input: GravitHardwareJoinInput) {
     try {
       var minecraftTokenPayload = (await this.tokensService.decodeToken(input.accessToken)) as JWTMinecraftPayload;
     } catch (e) {
@@ -194,17 +200,15 @@ export class GravitService {
 
     if (minecraftTokenPayload.type && minecraftTokenPayload.type != 'minecraft') throw new ForbiddenException();
 
-    const token = await this.tokensRepository.findOne({
-      where: {
-        uuid: minecraftTokenPayload.ref,
-      },
-      relations: ['user', 'user.ban'],
-    });
-
-    if (!token?.user || !safeEqual(token.user.accessToken, input.accessToken)) throw new ForbiddenException();
+    const state = await this.hardware.session(minecraftTokenPayload.ref, true);
+    const token = state.token;
+    if (state.required && input.hardwareId !== state.hardware?.id) throw new ForbiddenException();
+    if (!token?.user || minecraftTokenPayload.sub !== token.user.uuid || !safeEqual(state.minecraftAccessToken, input.accessToken)) throw new ForbiddenException();
+    if (input.username !== token.user.username || input.uuid && input.uuid !== token.user.uuid) throw new ForbiddenException();
 
     await this.assertAllowed(token.user);
 
+    await this.hardware.recordJoin(token.user.uuid, input.serverId, token.id);
     await this.usersRepository.update({ uuid: token.user.uuid }, { serverId: input.serverId });
   }
 
@@ -220,6 +224,7 @@ export class GravitService {
     if (!user) throw new ForbiddenException();
 
     await this.assertAllowed(user);
+    await this.hardware.checkJoin(user.uuid, input.serverId);
 
     return new GravitUserDto(user);
   }

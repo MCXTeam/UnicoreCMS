@@ -310,9 +310,11 @@
     <Tabs v-if="user" value="main">
       <TabList>
         <Tab value="main">{{ $t('admin.tab_main') }}</Tab>
+        <Tab v-if="canReadHardware" value="hardware">{{ $t('hardware.title') }}</Tab>
         <Tab v-if="canBalanceReal || canBalanceBonus || canMoneyServers || canDonate || canGive" value="commerce">E-Commerce</Tab>
       </TabList>
       <TabPanels>
+        <TabPanel v-if="canReadHardware" value="hardware"><UserHardwarePanel :uuid="user.uuid" /></TabPanel>
         <TabPanel value="main">
         <div class="grid" v-if="user">
           <div class="col-12 md:col-6">
@@ -789,6 +791,7 @@ export default {
     const confirm = useConfirm()
 
     const access = useAccess({
+      canReadHardware: 'panel.users.hardware.read',
       canUpdate: 'panel.users.update',
       canBan: 'panel.users.ban',
       canResetTwoFactor: 'panel.users.twofactor.reset',

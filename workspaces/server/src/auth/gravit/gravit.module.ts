@@ -10,9 +10,12 @@ import { SettingsModule } from 'src/game/cabinet/settings/settings.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/admin/users/entities/user.entity';
 import { RefreshToken } from '../entities/refresh-token.entity';
+import { HardwareModule } from '../hardware/hardware.module';
+import { GravitHardwareController } from './gravit-hardware.controller';
 
 @Module({
   imports: [
+    HardwareModule,
     UsersModule,
     AuthModule,
     SettingsModule,
@@ -23,7 +26,7 @@ import { RefreshToken } from '../entities/refresh-token.entity';
     TypeOrmModule.forFeature([User, RefreshToken]),
   ],
   providers: [GravitService],
-  controllers: [GravitController],
+  controllers: [GravitController, GravitHardwareController],
   exports: [GravitService],
 })
 export class GravitModule {}
