@@ -2,6 +2,7 @@
 import { spawn } from "node:child_process";
 import { join, resolve } from "node:path";
 import { atomic, json, optionalJson, exists, fail } from "./files.mjs";
+import { signalGroup, waitGroupStopped } from "./process-groups.mjs";
 
 const directory = resolve(process.argv[2]);
 let children = [];
@@ -9,26 +10,32 @@ let current;
 let busy = false;
 let desired = false;
 let restartTimer;
+const signal = (child, value) => {
+  if (!child.pid) return;
+  try {
+    if (process.platform === "linux") signalGroup(child.pid, value);
+    else child.kill(value);
+  } catch (error) { if (error.code !== "ESRCH") throw error; }
+};
+const stopChild = async (child) => {
+  signal(child, "SIGTERM");
+  if (child.pid && child.exitCode === null && child.signalCode === null) {
+    await new Promise((resolve) => {
+      const done = () => { clearTimeout(timer); child.off("exit", done); resolve(); };
+      const timer = setTimeout(done, 15000);
+      child.once("exit", done);
+    });
+  }
+  signal(child, "SIGKILL");
+  if (process.platform === "linux" && child.pid) await waitGroupStopped(child.pid);
+};
 const stop = async () => {
   desired = false;
   clearTimeout(restartTimer);
   restartTimer = undefined;
   const active = children;
+  await Promise.all(active.map(stopChild));
   children = [];
-  await Promise.all(
-    active.map((child) =>
-      child.exitCode !== null
-        ? Promise.resolve()
-        : new Promise((resolve) => {
-            child.once("exit", resolve);
-            child.kill("SIGTERM");
-            setTimeout(() => {
-              child.kill("SIGKILL");
-              resolve();
-            }, 15000).unref();
-          }),
-    ),
-  );
 };
 async function start(root, data) {
   if (!root || !data) fail("supervisor_configuration");
@@ -44,7 +51,7 @@ async function start(root, data) {
     spawn(
       process.execPath,
       [name === "server" ? "dist/main.js" : "start.mjs"],
-      { cwd: join(root, "workspaces", name), env, stdio: "inherit" },
+      { cwd: join(root, "workspaces", name), env, stdio: "inherit", detached: process.platform === "linux", windowsHide: true },
     ),
   );
   desired = true;

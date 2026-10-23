@@ -4,6 +4,7 @@ import { Permissions } from '../roles/decorators/permission.decorator';
 import { UpdatesService } from './updates.service';
 import { UpdatesInput } from './updates.input';
 import { UpdatesSetupService } from './updates-setup.service';
+import { PterodactylSetupInput } from './pterodactyl-setup.input';
 
 @Controller('admin/updates')
 @Permissions(['panel.access', 'panel.updates.read'])
@@ -25,6 +26,13 @@ export class UpdatesController {
   @Audit({ action: 'update.setup' })
   connect() {
     return this.setup.connect();
+  }
+
+  @Post('setup/pterodactyl')
+  @Permissions(['panel.access', 'panel.updates.read', 'panel.updates.setup'])
+  @Audit({ action: 'update.setup' })
+  pterodactyl(@Body() input: PterodactylSetupInput) {
+    return this.setup.pterodactyl(input);
   }
   @Get('diff') diff(@Query('id') id: string, @Query('path') path: string) {
     return this.service.request(`/diff?${new URLSearchParams({ id, path })}`);

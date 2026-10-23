@@ -10,6 +10,7 @@ import { serve } from "./daemon.mjs";
 import { DirectoryReleases } from "./releases.mjs";
 import { json } from "./files.mjs";
 import { setup } from "./setup.mjs";
+import { createExecutor } from "./executors.mjs";
 
 try {
   const [action, configFile, ...args] = process.argv.slice(2);
@@ -29,7 +30,7 @@ try {
       source: config.releases.directory
         ? new DirectoryReleases(config.releases)
         : new GitHubReleases(config.releases),
-      executor: new LocalExecutor(config),
+      executor: createExecutor(config),
     });
     await coordinator.init();
     if (action === "serve")

@@ -24,6 +24,7 @@ import {
 } from "./files.mjs";
 import { component, parts } from "./releases.mjs";
 import { compatibility, mergeFile } from "./merge.mjs";
+import { processScope } from "./process-groups.mjs";
 
 const finalStates = ["completed", "rolled_back", "cancelled", "failed"];
 const recoveryStates = [
@@ -116,7 +117,7 @@ export class UpdateCoordinator {
         : null;
     try {
       await lock.writeFile(
-        JSON.stringify({ pid: process.pid, identity, startedAt: Date.now() }),
+        JSON.stringify({ pid: process.pid, identity, scope: process.platform === "linux" ? await processScope() : null, startedAt: Date.now() }),
       );
       await lock.sync();
       return await run();
@@ -128,6 +129,10 @@ export class UpdateCoordinator {
   async unlockAfterRestart() {
     const lock = await optionalJson(this.path("lock"), null);
     if (!lock) return;
+    if (lock.scope && process.platform === "linux" && lock.scope !== await processScope()) {
+      await unlink(this.path("lock"));
+      return;
+    }
     if (process.platform === "linux" && lock.identity) {
       const identity = await readFile(`/proc/${lock.pid}/stat`, "utf8").then(
         processStart,

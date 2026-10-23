@@ -102,6 +102,13 @@ async function fixture(task) {
     await rm(folder, { recursive: true, force: true });
   }
 }
+test("restart reclaims a lease belonging to the previous container namespace", { skip: process.platform !== "linux" }, () =>
+  fixture(async ({ core }) => {
+    await atomic(core.path("lock"), { pid: process.pid, identity: "old", scope: "previous-namespace" });
+    await core.unlockAfterRestart();
+    await assert.rejects(readFile(core.path("lock")), { code: "ENOENT" });
+  }),
+);
 test("complete update preserves customization and protected data; repeat apply is idempotent", () =>
   fixture(async ({ core, root, directory, events }) => {
     await writeFile(

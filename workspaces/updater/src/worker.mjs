@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { UpdateCoordinator } from "./coordinator.mjs";
-import { LocalExecutor } from "./executor.mjs";
+import { createExecutor } from "./executors.mjs";
+import { nativeTools } from "./native-executor.mjs";
 import { GitHubReleases, DirectoryReleases } from "./releases.mjs";
 import { serve } from "./daemon.mjs";
 import { ensureBuilder, setupFile } from "./bootstrap.mjs";
@@ -10,7 +11,7 @@ import { join } from "node:path";
 const config = await json(process.argv[2]);
 const coordinator = new UpdateCoordinator({ ...config,
   source: config.releases.directory ? new DirectoryReleases(config.releases) : new GitHubReleases(config.releases),
-  executor: new LocalExecutor(config) });
+  executor: createExecutor(config) });
 const server = await serve(coordinator, { ...config.runner, token: (await readFile(config.runner.tokenFile, "utf8")).trim() });
 for (const signal of ["SIGTERM", "SIGINT"]) process.on(signal, () => server.close(() => process.exit(0)));
 let preparing = false;
@@ -20,7 +21,8 @@ async function prepare() {
   preparing = true;
   await atomic(setupFile(config.data), { state: "preparing" });
   try {
-    await ensureBuilder(config);
+    if (config.executor === "native") await nativeTools();
+    else await ensureBuilder(config);
     const deadline = Date.now() + 300000;
     while (await exists(join(config.directory, "adopting"))) {
       if (Date.now() > deadline) fail("setup_busy");

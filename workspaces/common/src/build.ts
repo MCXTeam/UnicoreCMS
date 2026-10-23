@@ -27,6 +27,11 @@ import {
 import { envFilePath } from "./ports";
 
 function memoryLimit(): number | null {
+  const budget = Number(process.env.UNICORE_BUILD_MEMORY_BYTES);
+  const constrain = (limit: number) =>
+    Number.isSafeInteger(budget) && budget > 0
+      ? Math.min(limit, budget)
+      : limit;
   for (const file of CGROUP_LIMIT_FILES) {
     let limit: number;
 
@@ -39,12 +44,12 @@ function memoryLimit(): number | null {
     if (!Number.isFinite(limit) || limit <= 0 || limit > CGROUP_LIMIT_MAX)
       continue;
 
-    return limit;
+    return constrain(limit);
   }
 
   const total = totalmem();
 
-  return Number.isFinite(total) && total > 0 ? total : null;
+  return Number.isFinite(total) && total > 0 ? constrain(total) : null;
 }
 
 export function heapOptions(): string[] {

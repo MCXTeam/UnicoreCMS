@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "exports": { ".": "./src/index.mjs", "./bootstrap": "./src/bootstrap.mjs" },
+  "exports": { ".": "./src/index.mjs", "./bootstrap": "./src/bootstrap.mjs", "./pterodactyl": "./src/pterodactyl.mjs" },
   "bin": { "unicore-update": "./src/cli.mjs" },
   "scripts": {
     "build": "node --check src/index.mjs",

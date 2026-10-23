@@ -34,7 +34,7 @@ jobs:
         pnpm run build
 
     - name: Updater tests
-      run: pnpm --filter unicore-updater test
+      run: pnpm --filter unicore-updater test && node --test scripts/portable-nitro.test.mjs scripts/build-budget.test.cjs
 
     - name: Updater API tests
       run: pnpm --filter unicore-server exec node --test test/updates-setup-permissions.test.mjs test/updates-connection.test.mjs test/update-body-parser.test.mjs test/server-instance-schema.test.mjs

@@ -1,6 +1,8 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { projectRoot, dataRoot } from 'unicore-common/ports';
 import { discovery } from 'unicore-updater/bootstrap';
+import { PterodactylTransition } from 'unicore-updater/pterodactyl';
+import { PterodactylSetupInput } from './pterodactyl-setup.input';
 import { join } from 'node:path';
 import { spawn } from 'node:child_process';
 
@@ -25,5 +27,20 @@ export class UpdatesSetupService {
     child.once('exit', () => { this.connecting = false; });
     child.unref();
     return { state: 'connecting' };
+  }
+
+  async pterodactyl(input: PterodactylSetupInput) {
+    if (this.connecting) throw new BadRequestException('updates.error.setup_busy');
+    this.connecting = true;
+    try {
+      const transition = new PterodactylTransition(input);
+      await transition.verifyData(dataRoot);
+      if (input.action === 'inspect') return await transition.inspect();
+      if (!input.fingerprint) throw new Error();
+      return await transition.apply(input.fingerprint, dataRoot);
+    } catch (error: any) {
+      const allowed = ['pterodactyl_configuration', 'pterodactyl_permission', 'pterodactyl_http', 'pterodactyl_image_unavailable', 'pterodactyl_server_mismatch', 'stale_plan'];
+      throw new BadRequestException(`updates.error.${allowed.includes(error.code) ? error.code : 'pterodactyl_http'}`);
+    } finally { this.connecting = false; }
   }
 }

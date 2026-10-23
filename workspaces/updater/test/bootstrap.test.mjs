@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, mkdir, writeFile, readFile, stat, rm } from "node:fs/promises";
+import { mkdtemp, mkdir, writeFile, readFile, stat, rm, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { configuration, ensureInstallation, installationPaths, readConnection, discovery } from "../src/bootstrap.mjs";
@@ -52,6 +52,16 @@ test("control and connection files never enter release archives or code comparis
   assert.equal(managed(".unicore-updater-setup.json"), false);
   assert.equal(managed(".unicore-updater.json.temporary.tmp"), false);
   assert.equal(managed("workspaces/updater/src/bootstrap.mjs"), true);
+});
+
+test("bootstrap reclaims an old container's lock even when its PID has been reused", { skip: process.platform !== "linux" }, async (t) => {
+  const { root } = await fixture(t);
+  const paths = installationPaths(root);
+  await mkdir(paths.directory, { recursive: true });
+  await writeFile(join(paths.directory, "bootstrap.lock"), JSON.stringify({ pid: process.pid, identity: "previous-process", boot: "previous-boot" }));
+  await ensureInstallation(root);
+  assert.equal((await readConnection(root)).token.length, 64);
+  assert(!(await readdir(paths.directory)).some((name) => name.endsWith(".claim")));
 });
 
 test("database container clients inherit the password without placing it in process arguments", async (t) => {

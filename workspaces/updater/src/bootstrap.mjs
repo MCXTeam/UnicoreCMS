@@ -1,13 +1,14 @@
-import { access, mkdir, readFile, open, unlink, lstat } from "node:fs/promises";
+import { access, mkdir, readFile, link, unlink, lstat } from "node:fs/promises";
 import { constants } from "node:fs";
 import { join, resolve } from "node:path";
 import { parseEnv } from "node:util";
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { tmpdir } from "node:os";
 import { atomic, json, optionalJson, exists, fail } from "./files.mjs";
 import { checked } from "./deployment.mjs";
 import { setup } from "./setup.mjs";
 import paths from "./paths.cjs";
+import { processScope } from "./process-groups.mjs";
 
 export const connectionFile = (data) => join(data, ".unicore-updater.json");
 export const setupFile = (data) => join(data, ".unicore-updater-setup.json");
@@ -31,9 +32,10 @@ export async function configuration(root, data = root, options = {}) {
   };
   const backend = port("BACKEND_PORT", env.SERVER_PORT || 5000);
   const ports = [backend, port("CLIENT_PORT", 3000), port("ADMIN_PORT", 4000)];
-  const key = await readFile(join(paths.root, "compat/release-signing-public.pem"), "utf8");
+  const key = options.publicKey || await readFile(join(paths.root, "compat/release-signing-public.pem"), "utf8");
   return {
     root: paths.root, data: paths.data, directory: paths.directory,
+    ...(options.executor ? { executor: options.executor } : {}),
     builderImage: options.builderImage || "unicore-updater-builder:local",
     memory: "4g", storeDirectory: join(paths.directory, "package-store"),
     database: { envFile: join(paths.data, ".env"), image: "mariadb:11.8", containerClient: true, network: options.network || "host", ...(options.database || {}) },
@@ -52,25 +54,39 @@ export async function ensureInstallation(root, data = root, options = {}) {
   const paths = installationPaths(root, data, options.directory);
   await mkdir(paths.directory, { recursive: true, mode: 0o700 });
   const lockFile = join(paths.directory, "bootstrap.lock");
-  let lock;
-  for (let attempt = 0; attempt < 120; attempt++) {
-    try {
-      lock = await open(lockFile, "wx", 0o600);
-      await lock.writeFile(String(process.pid));
-      break;
-    } catch (error) {
-      if (error.code !== "EEXIST") throw error;
-      const pid = Number(await readFile(lockFile, "utf8"));
-      if (pid > 0) {
-        try { process.kill(pid, 0); } catch (failure) {
-          if (failure.code === "ESRCH") await unlink(lockFile).catch(() => {});
-        }
-      }
-      await new Promise((done) => setTimeout(done, 250));
-    }
-  }
-  if (!lock) fail("setup_busy");
+  const claimFile = join(paths.directory, `bootstrap-${randomUUID()}.claim`);
+  const processIdentity = async (pid) => readFile(`/proc/${pid}/stat`, "utf8").then((raw) => raw.slice(raw.lastIndexOf(")") + 2).split(" ")[19], (error) => error.code === "ENOENT" ? null : Promise.reject(error));
+  const boot = (await readFile("/proc/sys/kernel/random/boot_id", "utf8")).trim();
+  const scope = await processScope();
+  await atomic(claimFile, { pid: process.pid, identity: await processIdentity(process.pid), boot, scope });
+  let locked = false;
   try {
+    for (let attempt = 0; attempt < 120; attempt++) {
+      try {
+        await link(claimFile, lockFile);
+        locked = true;
+        break;
+      } catch (error) {
+        if (error.code !== "EEXIST") throw error;
+        const raw = await readFile(lockFile, "utf8").catch((failure) => failure.code === "ENOENT" ? "" : Promise.reject(failure));
+        if (!raw) { await new Promise((done) => setTimeout(done, 250)); continue; }
+        const owner = raw.trim().startsWith("{") ? JSON.parse(raw) : { pid: Number(raw) };
+        const pid = owner.pid;
+        const clearStale = async () => {
+          if (await readFile(lockFile, "utf8").catch((failure) => failure.code === "ENOENT" ? null : Promise.reject(failure)) === raw)
+            await unlink(lockFile).catch((failure) => { if (failure.code !== "ENOENT") throw failure; });
+        };
+        if (pid > 0) {
+          if ((owner.scope && owner.scope !== scope) || (owner.boot && owner.boot !== boot) || (owner.identity && await processIdentity(pid) !== owner.identity)) {
+            await clearStale();
+          } else try { process.kill(pid, 0); } catch (failure) {
+            if (failure.code === "ESRCH") await clearStale();
+          }
+        }
+        await new Promise((done) => setTimeout(done, 250));
+      }
+    }
+    if (!locked) fail("setup_busy");
     const file = join(paths.directory, "config.json");
     let config = await optionalJson(file, null);
     if (!config) {
@@ -84,8 +100,8 @@ export async function ensureInstallation(root, data = root, options = {}) {
       await atomic(join(paths.directory, "ipc/launcher.json"), { root: config.root, data: config.data });
     return { config, file, paths };
   } finally {
-    await lock.close();
-    await unlink(lockFile);
+    if (locked) await unlink(lockFile);
+    await unlink(claimFile);
   }
 }
 export async function ensureBuilder(config) {
@@ -97,20 +113,25 @@ export async function discovery(root, data, environment = process.env) {
   const connection = await readConnection(data);
   const state = await optionalJson(setupFile(data), null);
   const linux = process.platform === "linux";
+  const native = environment.UNICORE_UPDATER_PTERODACTYL === "1";
+  const transition = !native && await optionalJson(join(data, ".unicore-updater-transition.json"), null);
+  const switching = transition?.state === "switching" && Date.now() - Date.parse(transition.at) < 180000;
   const external = environment.UNICORE_UPDATER_EXTERNAL === "1" && connection;
   let docker = null;
   if (external) {
     if (state?.state === "ready" || state?.error === "builder_unavailable") docker = true;
     else if (state?.error === "docker_unavailable") docker = false;
-  } else {
+  } else if (!native) {
     docker = linux && await checked("docker", ["info", "--format", "{{.ServerVersion}}"], { timeout: 5000 }).then(() => true, () => false);
   }
   const managed = environment.UNICORE_UPDATER_MANAGED === "1";
   const pm2 = environment.pm_id !== undefined;
-  const mode = managed ? "managed" : pm2 ? "pm2" : await exists("/.dockerenv") ? "container" : "manual";
+  const container = await exists("/.dockerenv");
+  const mode = native ? "pterodactyl" : managed ? "managed" : pm2 ? "pm2" : container ? "container" : "manual";
   const writable = await access(data, constants.W_OK).then(() => true, () => false);
-  return { mode, checks: { linux, docker, writable }, canConnect: linux && writable && (managed || pm2) && docker,
-    state: state?.state || (connection ? "starting" : "discovered"), error: state?.error,
+  return { mode, checks: { linux, ...(native ? {} : { docker }), writable }, canConnect: linux && writable && (managed || pm2) && docker,
+    pterodactylAvailable: container && !native,
+    state: switching ? "starting" : state?.state || (connection ? "starting" : "discovered"), error: state?.error,
     command: !managed && !pm2 ? "pnpm start" : undefined,
     hostCommand: mode === "container" ? "docker compose --profile prod up -d --build" : undefined };
 }

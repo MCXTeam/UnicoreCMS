@@ -369,8 +369,7 @@ export class LocalExecutor {
     await atomic(join(folder, "hold"), "1");
     return join(folder, ".env");
   }
-  async build(op, root) {
-    await interruptTasks(op.id);
+  async buildEnvironment(op, root) {
     await this.copyShared(root, op, false);
     const buildEnv = (await exists(join(root, ".env.example")))
       ? parseEnv(await readFile(join(root, ".env.example"), "utf8"))
@@ -395,6 +394,10 @@ export class LocalExecutor {
         .map(([key, value]) => `${key}=${JSON.stringify(value)}`)
         .join("\n"),
     );
+  }
+  async build(op, root) {
+    await interruptTasks(op.id);
+    await this.buildEnvironment(op, root);
     if (!/^[a-zA-Z0-9][a-zA-Z0-9_./:@-]*$/.test(this.config.builderImage))
       fail("invalid_image");
     const cache = join(this.folder(op), "dependencies");

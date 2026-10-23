@@ -20,12 +20,13 @@ function load(path, stubs) {
 test('the real setup route requires its own permission and cannot be invoked through prepare access', async () => {
   let connected = 0;
   class UpdatesService { request() { return { configured: false }; } }
-  class UpdatesSetupService { discover() { return { checks: { linux: true } }; } connect() { connected++; return { state: 'connecting' }; } }
+  class UpdatesSetupService { discover() { return { checks: { linux: true } }; } connect() { connected++; return { state: 'connecting' }; } pterodactyl() { connected++; return { state: 'restarting' }; } }
   const constants = { PERMISSIONS_KEY: 'permissions', GRANTED_PERMS_CACHE_KEY: 'grantedPermsCache', DONATE_PERMS_CACHE_KEY: '__donateWebPerms' };
   const permissions = load('admin/roles/decorators/permission.decorator.ts', { 'src/common/constants': constants });
   const { UpdatesController } = load('admin/updates/updates.controller.ts', {
     '@common': { Audit: () => () => {} }, '../roles/decorators/permission.decorator': permissions,
     './updates.service': { UpdatesService }, './updates-setup.service': { UpdatesSetupService }, './updates.input': { UpdatesInput: class {} },
+    './pterodactyl-setup.input': { PterodactylSetupInput: class {} },
   });
   const { PermissionGuard } = load('admin/roles/guards/permisson.guard.ts', {
     'unicore-common': require('unicore-common/permissions'), 'src/common/constants': constants,
@@ -51,5 +52,9 @@ test('the real setup route requires its own permission and cannot be invoked thr
     assert.equal(connected, 0);
     assert.equal((await fetch(url + '/admin/updates/setup', { method: 'POST', headers: { 'x-test-rights': 'panel.updates.setup' } })).status, 201);
     assert.equal(connected, 1);
+    assert.equal((await fetch(url + '/admin/updates/setup/pterodactyl', { method: 'POST', headers: { 'x-test-rights': 'panel.updates.prepare' } })).status, 403);
+    assert.equal(connected, 1);
+    assert.equal((await fetch(url + '/admin/updates/setup/pterodactyl', { method: 'POST', headers: { 'x-test-rights': 'panel.updates.setup' } })).status, 201);
+    assert.equal(connected, 2);
   } finally { await app.close(); }
 });
