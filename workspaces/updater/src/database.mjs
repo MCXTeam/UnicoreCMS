@@ -11,7 +11,7 @@ export class MariaDbBackup {
     this.directory = directory;
   }
   async settings() {
-    const env = parseEnv(await readFile(this.config.envFile, "utf8"));
+    const env = { ...parseEnv(await readFile(this.config.envFile, "utf8")), ...this.config.environment };
     const data = {
       host: env.DATABASE_HOST,
       port: env.DATABASE_PORT || "3306",
@@ -40,6 +40,15 @@ export class MariaDbBackup {
       "--default-character-set=utf8mb4",
     ];
   }
+  clientCommand(name, args) {
+    return this.config.containerClient
+      ? { file: "docker", args: ["run", "--rm", "-i", "--network", this.config.network || "host", "--env", "MYSQL_PWD", this.config.image || "mariadb:11.8", name, ...args] }
+      : { file: name, args };
+  }
+  async runClient(name, args, options) {
+    const command = this.clientCommand(name, args);
+    return checked(command.file, command.args, options);
+  }
   async dump(folder) {
     const data = await this.settings();
     const [characterSet, collation] = (
@@ -55,7 +64,7 @@ export class MariaDbBackup {
       )
     )
       fail("database_charset");
-    const output = await checked(
+    const output = await this.runClient(
       this.config.dump || "mariadb-dump",
       [
         ...(await this.connection()),
@@ -83,7 +92,7 @@ export class MariaDbBackup {
     };
   }
   async query(sql) {
-    return checked(
+    return this.runClient(
       this.config.client || "mariadb",
       [
         ...(await this.connection()),
@@ -100,7 +109,7 @@ export class MariaDbBackup {
     await this.query(
       `SELECT 1 FROM information_schema.SCHEMATA WHERE SCHEMA_NAME='${data.database}'`,
     );
-    await checked(this.config.dump || "mariadb-dump", ["--version"]);
+    await this.runClient(this.config.dump || "mariadb-dump", ["--version"]);
   }
   async clone(backup, name, network) {
     const timeout = this.config.startupTimeoutMs || 300000;
@@ -214,7 +223,8 @@ export class MariaDbBackup {
     const args = [...(await this.connection()), data.database];
     const env = await this.clientEnv();
     await new Promise((resolve, reject) => {
-      const child = spawn(this.config.client || "mariadb", args, {
+      const command = this.clientCommand(this.config.client || "mariadb", args);
+      const child = spawn(command.file, command.args, {
         env,
         stdio: ["pipe", "ignore", "ignore"],
         windowsHide: true,

@@ -129,7 +129,7 @@ export class DockerDeployment {
       "-d",
       "--init",
       "--user",
-      processOwner(),
+      this.config.user || processOwner(),
       "--name",
       this.config.container,
       "--restart",
@@ -137,6 +137,8 @@ export class DockerDeployment {
       "--cap-drop=ALL",
       "--security-opt=no-new-privileges",
       ...this.config.arguments,
+      "--env",
+      "UNICORE_UPDATER_EXTERNAL=1",
       "--env",
       `UNICORE_DATA_ROOT=${this.config.dataMount || "/data"}`,
       "--env",
@@ -153,9 +155,9 @@ export class DockerDeployment {
         ? ["--mount", `type=bind,src=${root},dst=/app,readonly`]
         : []),
       image,
-      "pnpm",
-      "run",
-      "start",
+      ...((await exists(join(root, "scripts/start.mjs")))
+        ? ["node", "scripts/start.mjs"]
+        : ["pnpm", "run", "start"]),
     );
   }
   async open(root, context, op) {

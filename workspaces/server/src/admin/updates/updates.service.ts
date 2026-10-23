@@ -1,12 +1,39 @@
 import { BadGatewayException, BadRequestException, Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { request as httpRequest } from 'node:http';
+import { dataRoot } from 'unicore-common/ports';
+import { readFile, lstat } from 'node:fs/promises';
+import { join } from 'node:path';
 
 @Injectable()
 export class UpdatesService {
+  private async setupState() {
+    try {
+      const state = JSON.parse(await readFile(join(dataRoot, '.unicore-updater-setup.json'), 'utf8'));
+      return { state: state.state, error: state.error };
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+      return null;
+    }
+  }
   async request(path: string, input?: Record<string, unknown>) {
     const address = process.env.UNICORE_UPDATER_URL;
-    const token = process.env.UNICORE_UPDATER_TOKEN;
-    const socketPath = process.env.UNICORE_UPDATER_SOCKET;
+    let token = process.env.UNICORE_UPDATER_TOKEN;
+    let socketPath = process.env.UNICORE_UPDATER_SOCKET;
+    if ((!address && !socketPath) || !token) {
+      const file = process.env.UNICORE_UPDATER_CONNECTION_FILE || join(dataRoot, '.unicore-updater.json');
+      try {
+        const info = await lstat(file);
+        if (!info.isFile() || info.size > 16384 || (process.platform !== 'win32' && (info.mode & 0o077)))
+          throw new ServiceUnavailableException('updates.invalid_connection');
+        const connection = JSON.parse(await readFile(file, 'utf8'));
+        if (typeof connection.token !== 'string' || connection.token.length < 32 || typeof connection.socketFile !== 'string' || !connection.socketFile.startsWith('/'))
+          throw new ServiceUnavailableException('updates.invalid_connection');
+        token = connection.token;
+        socketPath = connection.socketFile;
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw new ServiceUnavailableException('updates.invalid_connection');
+      }
+    }
     if ((!address && !socketPath) || !token) {
       if (path === '/status') return { configured: false, installation: null, operations: [], jobs: [] };
       throw new ServiceUnavailableException('updates.not_configured');
@@ -46,7 +73,7 @@ export class UpdatesService {
         throw new BadGatewayException('updates.runner_unavailable');
       });
       if (result.status >= 400) throw new BadRequestException(`updates.error.${result.data.code || 'operation_failed'}`);
-      return result.data;
+      return path === '/status' ? { ...result.data, setup: await this.setupState() } : result.data;
     }
     if (!address) throw new ServiceUnavailableException('updates.invalid_address');
     const url = new URL(address);
@@ -66,6 +93,6 @@ export class UpdatesService {
     }
     const result = await response.json();
     if (!response.ok) throw new BadRequestException(`updates.error.${result.code || 'operation_failed'}`);
-    return result;
+    return path === '/status' ? { ...result, setup: await this.setupState() } : result;
   }
 }

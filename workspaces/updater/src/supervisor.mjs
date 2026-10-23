@@ -7,7 +7,12 @@ const directory = resolve(process.argv[2]);
 let children = [];
 let current;
 let busy = false;
+let desired = false;
+let restartTimer;
 const stop = async () => {
+  desired = false;
+  clearTimeout(restartTimer);
+  restartTimer = undefined;
   const active = children;
   children = [];
   await Promise.all(
@@ -42,6 +47,15 @@ async function start(root, data) {
       { cwd: join(root, "workspaces", name), env, stdio: "inherit" },
     ),
   );
+  desired = true;
+  for (const child of children) {
+    const restart = () => {
+      if (!desired || restartTimer) return;
+      restartTimer = setTimeout(async () => { await stop(); await start(root, data); }, 1000);
+    };
+    child.on("error", restart);
+    child.on("exit", restart);
+  }
 }
 process.on("SIGTERM", () => void stop().then(() => process.exit(0)));
 process.on("SIGINT", () => void stop().then(() => process.exit(0)));

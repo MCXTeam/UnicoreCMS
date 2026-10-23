@@ -13,7 +13,7 @@
     "build:server": "pnpm --filter unicore-common run build && pnpm --filter unicore-api run build && pnpm --filter unicore-server run build",
     "build:client": "pnpm --filter unicore-client run build",
     "build:admin": "pnpm --filter unicore-admin run build",
-    "start": "pnpm -r --parallel run start",
+    "start": "node scripts/start.mjs",
     "lint": "pnpm -r run lint",
     "format": "pnpm -r run format",
     "sync": "pnpm --filter unicore-server run schema:sync",

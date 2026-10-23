@@ -520,6 +520,9 @@ importers:
       unicore-common:
         specifier: workspace:*
         version: link:../common
+      unicore-updater:
+        specifier: workspace:*
+        version: link:../updater
       vk-io:
         specifier: ^4.10.1
         version: 4.10.1(reflect-metadata@0.2.2)(supports-color@10.2.2)

@@ -43,6 +43,7 @@ lerna-debug.log*
 !.vscode/extensions.json
 .env
 /initial-admin.txt
+/.unicore-updater*
 
 /storage/*
 !/storage/default

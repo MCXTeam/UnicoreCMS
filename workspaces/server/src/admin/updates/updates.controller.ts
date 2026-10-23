@@ -3,17 +3,28 @@ import { Audit } from '@common';
 import { Permissions } from '../roles/decorators/permission.decorator';
 import { UpdatesService } from './updates.service';
 import { UpdatesInput } from './updates.input';
+import { UpdatesSetupService } from './updates-setup.service';
 
 @Controller('admin/updates')
 @Permissions(['panel.access', 'panel.updates.read'])
 export class UpdatesController {
-  constructor(private readonly service: UpdatesService) {}
+  constructor(private readonly service: UpdatesService, private readonly setup: UpdatesSetupService) {}
 
   @Get() status() {
     return this.service.request('/status');
   }
   @Get('releases') releases() {
     return this.service.request('/releases');
+  }
+  @Get('setup') discover() {
+    return this.setup.discover();
+  }
+
+  @Post('setup')
+  @Permissions(['panel.access', 'panel.updates.read', 'panel.updates.setup'])
+  @Audit({ action: 'update.setup' })
+  connect() {
+    return this.setup.connect();
   }
   @Get('diff') diff(@Query('id') id: string, @Query('path') path: string) {
     return this.service.request(`/diff?${new URLSearchParams({ id, path })}`);

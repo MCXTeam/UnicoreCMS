@@ -33,6 +33,12 @@ jobs:
         pnpm install --frozen-lockfile
         pnpm run build
 
+    - name: Updater tests
+      run: pnpm --filter unicore-updater test
+
+    - name: Updater API tests
+      run: pnpm --filter unicore-server exec node --test test/updates-setup-permissions.test.mjs test/updates-connection.test.mjs test/update-body-parser.test.mjs test/server-instance-schema.test.mjs
+
     - name: Аудит зависимостей
       if: matrix.node == 22
       run: pnpm run audit

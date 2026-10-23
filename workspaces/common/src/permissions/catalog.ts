@@ -46,6 +46,7 @@ export const PERMISSION_GROUPS = [
 export const PERMISSIONS = define({
   "panel.access": { group: "access" },
   "panel.updates.read": { group: "updates" },
+  "panel.updates.setup": { group: "updates", danger: true },
   "panel.updates.prepare": { group: "updates", danger: true },
   "panel.updates.apply": { group: "updates", danger: true },
   "panel.updates.recover": { group: "updates", danger: true },

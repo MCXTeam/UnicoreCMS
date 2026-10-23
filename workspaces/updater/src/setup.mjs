@@ -26,7 +26,7 @@ export function connectEnvironment(text, connection, token) {
   return `${clean}${key}=${JSON.stringify(value)}\nUNICORE_UPDATER_TOKEN=${JSON.stringify(token)}\n`;
 }
 
-export async function setup(config) {
+export async function setup(config, { writeEnvironment = true, reuseRuntime = false } = {}) {
   if (process.platform !== "linux") fail("linux_executor_required");
   for (const key of ["root", "data", "directory"]) {
     if (!isAbsolute(config[key] || "")) fail("absolute_paths_required");
@@ -58,7 +58,7 @@ export async function setup(config) {
   )
     fail("runner_configuration");
   const destination = join(config.directory, "runtime");
-  if (await exists(destination)) fail("already_configured");
+  if ((await exists(destination)) && !reuseRuntime) fail("already_configured");
   const env = await readFile(config.database.envFile, "utf8");
   await json(join(config.root, "package.json"));
   await mkdir(join(config.directory, "ipc"), { recursive: true, mode: 0o700 });
@@ -79,7 +79,8 @@ export async function setup(config) {
     );
   const file = join(config.directory, "config.json");
   await atomic(file, config);
-  await atomic(config.database.envFile, connectEnvironment(env, runner, token));
+  if (writeEnvironment)
+    await atomic(config.database.envFile, connectEnvironment(env, runner, token));
   return {
     config: file,
     executable: join(destination, "src/cli.mjs"),

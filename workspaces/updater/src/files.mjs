@@ -24,6 +24,7 @@ export const json = async (path) => JSON.parse(await readFile(path, "utf8"));
 export const optionalJson = async (path, fallback) =>
   (await exists(path)) ? json(path) : fallback;
 export const managed = (name) =>
+  !name.split("/")[0].startsWith(".unicore-updater") &&
   ![
     "storage",
     "logs",
@@ -32,6 +33,8 @@ export const managed = (name) =>
     ".codex",
     ".playwright-mcp",
     ".ssh",
+    ".unicore-updater.json",
+    ".unicore-updater-setup.json",
   ].includes(name.split("/")[0]) &&
   !name
     .split("/")

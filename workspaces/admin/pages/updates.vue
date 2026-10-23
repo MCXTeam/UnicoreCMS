@@ -6,9 +6,7 @@
         <Button :label="$t('admin.refresh')" icon="pi pi-refresh" outlined :loading="state.loading.value" @click="state.refresh()" />
       </div>
       <Message v-if="state.error.value" severity="error" :closable="false" role="alert">{{ state.error.value }}</Message>
-      <Message v-if="!state.status.value.configured && !state.loading.value" severity="info" :closable="false">{{
-        $t('updates.not_configured')
-      }}</Message>
+      <UpdaterSetup v-if="(!state.status.value.configured || (state.status.value.setup && state.status.value.setup.state !== 'ready')) && !state.loading.value" @connected="state.refresh()" />
       <template v-if="state.status.value.configured">
         <p>{{ $t('updates.description') }}</p>
         <dl v-if="state.status.value.installation" class="updates-versions">
@@ -244,7 +242,7 @@ const auth = useAuthStore()
 const canPrepare = computed(() => auth.has('panel.updates.prepare'))
 const canApply = computed(() => auth.has('panel.updates.apply'))
 const canRecover = computed(() => auth.has('panel.updates.recover'))
-const blocked = computed(() => state.busy.value || state.pending.value)
+const blocked = computed(() => state.busy.value || state.pending.value || (state.status.value.setup && state.status.value.setup.state !== 'ready'))
 const editable = computed(() => ['planned', 'ready', 'needs_resolution', 'verification_failed'].includes(op.value?.state))
 const outstanding = computed(() => op.value && !['completed', 'rolled_back', 'cancelled', 'failed'].includes(op.value.state))
 const binary = computed(() => diff.value?.result && typeof diff.value.result !== 'string')
