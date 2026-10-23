@@ -1,0 +1,36 @@
+name: Release
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: cp .env.example .env && pnpm install --frozen-lockfile
+      - run: pnpm run build
+      - run: pnpm --filter unicore-updater test
+      - run: pnpm --filter unicore-api run api:check
+      - run: pnpm --filter unicore-server run typecheck && pnpm --filter unicore-admin run typecheck && pnpm --filter unicore-client run typecheck
+      - name: Sign release
+        env:
+          SIGNING_KEY: ${{ secrets.UNICORE_RELEASE_SIGNING_KEY }}
+          UNICORE_RELEASE_SIGNING_KEY_FILE: ${{ runner.temp }}/unicore-release-key.pem
+        run: |
+          umask 077
+          printf '%s' "$SIGNING_KEY" > "$UNICORE_RELEASE_SIGNING_KEY_FILE"
+          node scripts/updater-release.mjs . "$RUNNER_TEMP/unicore-release"
+          rm "$UNICORE_RELEASE_SIGNING_KEY_FILE"
+      - name: Publish draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          test "${GITHUB_REF_NAME}" = "v$(node -p 'require("./package.json").version')"
+          gh release create "$GITHUB_REF_NAME" "$RUNNER_TEMP/unicore-release/"* --draft --generate-notes --title "$GITHUB_REF_NAME"

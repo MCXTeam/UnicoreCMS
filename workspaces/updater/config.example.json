@@ -1,0 +1,44 @@
+{
+  "root": "/srv/unicore/site",
+  "data": "/srv/unicore/shared",
+  "directory": "/srv/unicore/updater",
+  "builderImage": "unicore-updater-builder:local",
+  "memory": "4g",
+  "storeDirectory": "/srv/unicore/package-store",
+  "database": {
+    "envFile": "/srv/unicore/shared/.env",
+    "network": "unicore",
+    "startupTimeoutMs": 300000,
+    "image": "mariadb:11.8"
+  },
+  "deployment": {
+    "type": "docker",
+    "container": "unicore-app",
+    "arguments": [
+      "--network",
+      "unicore",
+      "-p",
+      "127.0.0.1:3000:3000",
+      "-p",
+      "127.0.0.1:4000:4000",
+      "-p",
+      "127.0.0.1:5000:5000"
+    ]
+  },
+  "health": ["http://127.0.0.1:5000/_update/health"],
+  "smoke": [
+    { "port": 5000, "path": "/_update/health" },
+    { "port": 3000, "path": "/" },
+    { "port": 4000, "path": "/updates" }
+  ],
+  "runner": {
+    "host": "127.0.0.1",
+    "port": 9751
+  },
+  "releases": {
+    "repository": "MCXTeam/UnicoreCMS",
+    "keys": {
+      "unicore-2026-10": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEANxEARSOhiNY6cjX2YiUE2xgdTrjg6aZWpQeKe9/2XNw=\n-----END PUBLIC KEY-----\n"
+    }
+  }
+}

@@ -146,6 +146,7 @@ export async function applySchema(): Promise<void> {
       );
 
     for (const failure of align.failed) stderr(`Не удалось применить: ${failure}`);
+    if (align.failed.length) throw new Error('Не удалось дополнить схему базы');
   } catch (error) {
     stderr('Обновление базы не выполнено, сервер остановлен');
     stderr(formatError(error));

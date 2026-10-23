@@ -175,6 +175,9 @@ export const AUDIT_ACTIONS = define({
   "hardware.read": { class: "access" },
   "hardware.ban": { class: "admin", danger: true },
   "hardware.revoke": { class: "admin", danger: true },
+  "update.prepare": { class: "admin", danger: true },
+  "update.apply": { class: "admin", danger: true },
+  "update.recover": { class: "admin", danger: true },
 
   "content.create": { class: "content" },
   "content.update": { class: "content" },

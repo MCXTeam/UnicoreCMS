@@ -29,6 +29,7 @@ import { ApiHostModule } from './modules/api-host.module';
 import { ModulesModule } from './modules/modules.module';
 import { ThemesModule } from './modules/themes.module';
 import { moduleNestImports } from './modules/runtime';
+import { updateHold } from './common/update-hold';
 
 @Injectable()
 export class AppLoggerMiddleware implements NestMiddleware {
@@ -67,7 +68,7 @@ export class AppLoggerMiddleware implements NestMiddleware {
     ThrottlerModule,
     AppMailerModule,
     MomentModule,
-    ScheduleModule.forRoot(),
+    ScheduleModule.forRoot({ cronJobs: !updateHold(), intervals: !updateHold(), timeouts: !updateHold() }),
     AuthModule,
     GravitModule,
     GmlModule,

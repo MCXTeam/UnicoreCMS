@@ -1,0 +1,9 @@
+{
+  "database": { "rollback": "restore" },
+  "components": {
+    "server": { "provides": { "http": "1", "database": "1" }, "requires": { "extensions": ["1"] } },
+    "client": { "requires": { "http": ["1"], "extensions": ["1"] } },
+    "admin": { "requires": { "http": ["1"], "extensions": ["1"] } },
+    "api": { "provides": { "extensions": "1" } }
+  }
+}

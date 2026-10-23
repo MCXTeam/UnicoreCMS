@@ -1,0 +1,13 @@
+{
+  "name": "unicore-updater",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.mjs",
+  "bin": { "unicore-update": "./src/cli.mjs" },
+  "scripts": {
+    "build": "node --check src/index.mjs",
+    "test": "node --test test/*.test.mjs"
+  },
+  "engines": { "node": ">=22.12 <25" }
+}

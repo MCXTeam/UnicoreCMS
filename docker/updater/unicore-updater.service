@@ -1,0 +1,16 @@
+[Unit]
+Description=UnicoreCMS update runner
+After=docker.service network-online.target
+Requires=docker.service
+
+[Service]
+Type=simple
+WorkingDirectory=/srv/unicore/updater
+ExecStart=/usr/bin/node /srv/unicore/updater/runtime/src/cli.mjs serve /srv/unicore/updater/config.json
+Restart=on-failure
+RestartSec=5
+UMask=0077
+TimeoutStopSec=45
+
+[Install]
+WantedBy=multi-user.target

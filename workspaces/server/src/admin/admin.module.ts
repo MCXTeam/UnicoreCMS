@@ -14,6 +14,7 @@ import { EmailModule } from './email/email.module';
 import { LocalesModule } from './locales/locales.module';
 import { AdminPaymentsModule } from './payments/payments.module';
 import { AdminReferalsModule } from './referals/referals.module';
+import { UpdatesModule } from './updates/updates.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { AdminReferalsModule } from './referals/referals.module';
     LocalesModule,
     AdminPaymentsModule,
     AdminReferalsModule,
+    UpdatesModule,
   ],
 })
 export class AdminModule {}

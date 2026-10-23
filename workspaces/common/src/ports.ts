@@ -35,6 +35,7 @@ const findUp = (name: string): string | undefined => {
 const locateEnvFile = (): string => {
   const fallback = resolve(ENV_FILE_NAME);
   if (!isNodeRuntime) return fallback;
+  if (processEnv.UNICORE_DATA_ROOT) return resolve(processEnv.UNICORE_DATA_ROOT, ENV_FILE_NAME);
 
   const envFile = findUp(ENV_FILE_NAME);
   if (envFile) return envFile;
@@ -45,10 +46,11 @@ const locateEnvFile = (): string => {
 
 export const envFilePath = locateEnvFile();
 
-export const projectRoot = dirname(envFilePath);
-export const storagePath = resolve(projectRoot, "storage");
-export const modulesPath = resolve(projectRoot, "modules");
-export const themesPath = resolve(projectRoot, "themes");
+export const projectRoot = processEnv.UNICORE_CODE_ROOT ? resolve(processEnv.UNICORE_CODE_ROOT) : dirname(envFilePath);
+export const dataRoot = processEnv.UNICORE_DATA_ROOT ? resolve(processEnv.UNICORE_DATA_ROOT) : projectRoot;
+export const storagePath = resolve(dataRoot, "storage");
+export const modulesPath = resolve(dataRoot, "modules");
+export const themesPath = resolve(dataRoot, "themes");
 export const clientPath = resolve(projectRoot, "workspaces", "client");
 export const adminPath = resolve(projectRoot, "workspaces", "admin");
 

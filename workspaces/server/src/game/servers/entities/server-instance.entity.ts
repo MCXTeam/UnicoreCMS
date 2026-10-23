@@ -8,7 +8,7 @@ import { Server } from './server.entity';
   },
 })
 export class ServerInstance {
-  @Column({ length: 36, nullable: true })
+  @Column({ nullable: true })
   @Generated('uuid')
   id: string | null;
 

@@ -1,13 +1,13 @@
 import { open, unlink } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import type { DataSource } from 'typeorm';
-import { envConfig, generatePassword, passwordIssue, projectRoot } from 'unicore-common';
+import { envConfig, generatePassword, passwordIssue, dataRoot } from 'unicore-common';
 import type { UsersService } from './users.service';
 
 export async function createInitialAdmin(
   dataSource: DataSource,
   usersService: UsersService,
-  credentialsPath = resolve(projectRoot, 'initial-admin.txt'),
+  credentialsPath = resolve(dataRoot, 'initial-admin.txt'),
   output: (message: string) => void = (message) => { process.stdout.write(`${message}\n`); },
 ): Promise<void> {
   const runner = dataSource.createQueryRunner();

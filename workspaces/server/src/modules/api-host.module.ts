@@ -41,6 +41,7 @@ import { NotificationsService } from 'src/game/cabinet/notifications/notificatio
 import { registerNotificationCategory } from 'src/game/cabinet/notifications/notification-categories';
 import { CORE_CAPABILITIES } from './capabilities';
 import { moduleRuntime } from './runtime';
+import { updateHold } from '../common/update-hold';
 
 @Injectable()
 export class ApiHostService implements OnApplicationBootstrap, OnApplicationShutdown {
@@ -67,6 +68,7 @@ export class ApiHostService implements OnApplicationBootstrap, OnApplicationShut
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
+    if (updateHold() && process.env.UNICORE_UPDATE_SANDBOX !== '1') return;
     setCore(this.buildCore());
     capabilities().replace(CORE_CAPABILITIES);
 
@@ -79,6 +81,7 @@ export class ApiHostService implements OnApplicationBootstrap, OnApplicationShut
     });
 
     const runtime = moduleRuntime();
+    if (process.env.UNICORE_UPDATE_SANDBOX === '1' && runtime.failures.length) throw new Error('Не удалось загрузить расширения проверочной версии');
 
     for (const module of runtime.loaded) {
       const setup = module.contribution?.setup;
@@ -89,6 +92,7 @@ export class ApiHostService implements OnApplicationBootstrap, OnApplicationShut
         await setup(this.context(module.id));
       } catch (error) {
         this.logger.error(`[module:${module.id}] ошибка инициализации: ${formatError(error)}`);
+        if (process.env.UNICORE_UPDATE_SANDBOX === '1') throw error;
       }
     }
 

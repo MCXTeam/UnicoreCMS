@@ -31,6 +31,8 @@ import { applySchema } from './migrations/runner';
 import { DataSource } from 'typeorm';
 import { UsersService } from './admin/users/users.service';
 import { createInitialAdmin } from './admin/users/initial-admin';
+import { updateHold } from './common/update-hold';
+import { installUpdateBodyParser } from './common/update-body-parser';
 
 process.env.TZ = envConfig.timezone;
 
@@ -58,6 +60,20 @@ async function bootstrap() {
   app.set('trust proxy', envConfig.trustProxy);
   app.disable('x-powered-by');
   app.enableShutdownHooks();
+  installUpdateBodyParser(app);
+  app.use('/_update/health', (request: Request, response: Response, next: NextFunction) => {
+    if (request.method !== 'GET') return next();
+    return response.json({ ready: true, maintenance: updateHold() });
+  });
+  if (updateHold()) {
+    app.use((request: Request, response: Response, next: NextFunction) => {
+      if (request.method === 'GET' && request.path === '/_update/health') return response.json({ ready: true, maintenance: true });
+      if (process.env.UNICORE_UPDATE_SANDBOX === '1') return next();
+      response.setHeader(RETRY_AFTER_HEADER, '30');
+      return response.status(503).json({ message: 'maintenance' });
+    });
+    app.getHttpServer().prependListener('upgrade', (_request: Request, socket: any) => socket.destroy());
+  }
 
   app.use(
     helmet({

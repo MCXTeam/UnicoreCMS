@@ -1,3 +1,6 @@
+const updaterLauncher = process.env.UNICORE_UPDATER_LAUNCHER;
+const updaterConfig = process.env.UNICORE_UPDATER_LAUNCHER_CONFIG;
+
 module.exports = {
   apps: [
     {
@@ -17,5 +20,10 @@ module.exports = {
       script: 'start.mjs',
       interpreter: 'node',
     },
-  ],
+  ].map(app => updaterLauncher && updaterConfig ? {
+    ...app,
+    script: updaterLauncher,
+    args: [updaterConfig, app.name.replace('unicore-', '')],
+    interpreter: 'node',
+  } : app),
 };

@@ -179,6 +179,11 @@ export const CORE_MENU = [
         icon: 'pi pi-fw pi-palette',
         to: '/themes',
       },
+      {
+        label: 'updates.title',
+        icon: 'pi pi-fw pi-cloud-download',
+        to: '/updates',
+      },
     ],
   },
 ]

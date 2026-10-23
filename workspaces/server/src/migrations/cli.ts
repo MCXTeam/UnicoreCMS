@@ -1,9 +1,10 @@
 import { formatError, stderr } from '@common';
-import { runAlign, schemaStatus } from './runner';
+import { applySchema, runAlign, schemaStatus } from './runner';
 
 const commands: Record<string, () => Promise<void>> = {
   status: schemaStatus,
   align: runAlign,
+  apply: applySchema,
 };
 
 const command = commands[process.argv[2]];
