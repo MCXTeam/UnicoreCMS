@@ -8,6 +8,7 @@ strictPeerDependencies: false
 autoInstallPeers: true
 
 overrides:
+  body-parser@2: ^2.4.0
   dompurify: ^3.4.17
   canvas: ^3.1.0
   multer: ^2.3.0
