@@ -3,7 +3,7 @@ import { PlaytimeDto } from 'src/game/cabinet/playtime/dto/playtime.dto';
 import { Playtime } from 'src/game/cabinet/playtime/entities/playtime.entity';
 import { Cloak } from 'src/game/cabinet/skin/entities/cloak.entity';
 import { Skin } from 'src/game/cabinet/skin/entities/skin.entity';
-import { BanDto } from 'src/game/players/banlist/dto/paginated-bans.dto';
+import { BanDto } from 'src/game/cabinet/bans/dto/account-ban.dto';
 import { RoleAppearanceDto, roleAppearance } from 'src/admin/roles/dto/role-appearance.dto';
 import { User } from '../entities/user.entity';
 

@@ -5,6 +5,7 @@ import { useMessages } from '~/composables/useLocale'
 export interface PermissionScopeOption {
   id: string
   name: string
+  labelKey?: string
 }
 
 export interface PermissionGroupView {
@@ -16,6 +17,7 @@ export interface PermissionGroupView {
 export function usePermissionCatalog() {
   const permissions = useState<PermissionCatalogEntry[]>('permission-catalog', () => [])
   const servers = useState<PermissionScopeOption[]>('permission-scopes', () => [])
+  const punishments = useState<PermissionScopeOption[]>('punishment-permission-scopes', () => [])
   const loaded = useState<boolean>('permission-catalog-loaded', () => false)
   const failed = useState<boolean>('permission-catalog-failed', () => false)
   const messages = useMessages()
@@ -32,6 +34,7 @@ export function usePermissionCatalog() {
 
       permissions.value = data.permissions || []
       servers.value = data.servers || []
+      punishments.value = data.punishments || []
       loaded.value = true
     } catch {
       failed.value = true
@@ -72,5 +75,5 @@ export function usePermissionCatalog() {
     return order.map((group) => ({ group, label: groupLabel(group), permissions: buckets.get(group)! }))
   })
 
-  return { permissions, servers, groups, loaded, failed, load, label, hint, groupLabel, t: $t }
+  return { permissions, servers, punishments, groups, loaded, failed, load, label, hint, groupLabel, t: $t }
 }

@@ -5,7 +5,7 @@ import { User } from '../entities/user.entity';
 import { union } from 'lodash';
 import { resolvePermissions } from 'unicore-common';
 import { effectivePermissions } from 'src/admin/roles/guards/permisson.guard';
-import { BanDto } from 'src/game/players/banlist/dto/paginated-bans.dto';
+import { BanDto } from 'src/game/cabinet/bans/dto/account-ban.dto';
 
 export class UserDto {
   uuid: string;

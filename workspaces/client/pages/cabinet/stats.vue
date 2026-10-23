@@ -22,21 +22,8 @@
         <Skeleton v-for="n in 3" :key="n" height="150px" borderRadius="14px" />
       </div>
     </CabTile>
-    <CabTile :title="$t('cabinet.game_punishments')" icon="bx bx-shield-quarter" :span="12">
-      <Message v-if="punishmentsError" severity="error" :closable="false">{{ $t('cabinet.punishments_load_error') }}</Message>
-      <Skeleton v-else-if="punishments === null" height="62px" borderRadius="14px" />
-      <p v-else-if="!punishments.length" class="m-0">{{ $t('cabinet.no_game_punishments') }}</p>
-      <div v-else class="cab-punishments">
-        <article v-for="punishment in punishments" :key="punishment.id" class="cab-punishments__row">
-          <div class="cab-punishments__heading">
-            <b>{{ $t(`cabinet.punishment_kind_${punishment.kind}`) }} · {{ serverName(punishment.scope.serverId) }}</b>
-            <Tag :severity="punishment.status === 'ACTIVE' ? 'warn' : 'secondary'" :value="$t(`cabinet.punishment_status_${punishment.status}`)" />
-          </div>
-          <p>{{ punishment.reason }}</p>
-          <span v-if="punishment.expiresAtMs">{{ $t('cabinet.punishment_until', { date: $moment(punishment.expiresAtMs).format('D MMMM YYYY, HH:mm') }) }}</span>
-          <span v-else-if="punishment.kind === 'BAN' || punishment.kind === 'MUTE'">{{ $t('cabinet.punishment_permanent') }}</span>
-        </article>
-      </div>
+    <CabTile :title="$t('punishments.title')" icon="bx bx-shield-quarter" :span="12">
+      <PunishmentFeed own />
     </CabTile>
   </div>
 </template>
@@ -46,6 +33,5 @@ definePageMeta({ layout: 'cabinet', middleware: ['auth', 'verify'], title: 'cabi
 
 const { $t } = useNuxtApp()
 useHead({ title: computed(() => $t('header.cabinet')) })
-const { playtime, punishments, playtimeError, punishmentsError } = useCabinetStats()
-const serverName = (id) => playtime.value?.find((row) => row.server.id === id)?.server.name || id
+const { playtime, playtimeError } = useCabinetStats()
 </script>

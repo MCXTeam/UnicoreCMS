@@ -53,7 +53,7 @@ export class BansController {
   @Permissions(['panel.access', 'panel.users.ban'])
   @Audit({ action: 'ban.remove', target: 'user', param: 'uuid' })
   @Delete('admin/:uuid')
-  deleteFromAdmin(@Param('uuid') uuid: string) {
-    return this.bansService.remove(uuid);
+  deleteFromAdmin(@Param('uuid') uuid: string, @CurrentUser() user: User) {
+    return this.bansService.remove(uuid, user);
   }
 }

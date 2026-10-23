@@ -4,6 +4,12 @@ import type { PresenceSnapshot } from '../connect.protocol';
 @Entity({ name: 'unicore_connect_instances' })
 @Index(['serverId'])
 export class ConnectInstance {
+  @Column({ length: 128, nullable: true })
+  displayName: string | null;
+
+  @Column({ length: 36, nullable: true })
+  serverInstanceId: string | null;
+
   @PrimaryColumn({ length: 64 })
   id: string;
 

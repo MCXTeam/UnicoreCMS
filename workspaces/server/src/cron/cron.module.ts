@@ -39,6 +39,7 @@ import { VotesTasks } from './tasks/votes.tasks';
 import { Vote } from 'src/game/cabinet/votes/entities/vote.entity';
 import { VoteGift } from 'src/game/cabinet/votes/entities/vote-gift.entity';
 import { NotificationTasks } from './tasks/notifications.tasks';
+import { PunishmentsModule } from 'src/game/punishments/punishments.module';
 
 @Module({
   imports: [
@@ -68,6 +69,7 @@ import { NotificationTasks } from './tasks/notifications.tasks';
     ConfigModule,
     PlaytimeModule,
     WebhooksModule,
+    PunishmentsModule,
   ],
   providers: [
     DonateWebRoleService,

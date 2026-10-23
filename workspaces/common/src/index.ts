@@ -10,6 +10,7 @@ export * from "./webhooks";
 export * from "./audit";
 export * from "./password";
 export * from "./payments";
+export * from "./punishments";
 export * from "./locales";
 export * from "./news";
 export * from "./notifications";

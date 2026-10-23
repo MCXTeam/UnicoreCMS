@@ -1,15 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from 'src/admin/config/config.module';
-import { User } from 'src/admin/users/entities/user.entity';
 import UsersModule from 'src/admin/users/users.module';
 import { BansController } from './bans.controller';
 import { BansService } from './bans.service';
 import { Ban } from './entities/ban.entity';
-import { HistoryModule } from '../history/history.module';
+import { PunishmentsModule } from '../../punishments/punishments.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Ban, User]), UsersModule, ConfigModule, HistoryModule],
+  imports: [TypeOrmModule.forFeature([Ban]), UsersModule, PunishmentsModule],
   providers: [BansService],
   controllers: [BansController],
 })

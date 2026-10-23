@@ -8,6 +8,9 @@ export class GamePunishment {
   @PrimaryColumn({ length: 64 })
   id: string;
 
+  @Column({ length: 64, nullable: true })
+  caseId: string | null;
+
   @Column({ length: 64 })
   serverId: string;
 
@@ -57,6 +60,12 @@ export class GamePunishmentCommand {
   @PrimaryColumn({ length: 36 })
   commandId: string;
 
+  @Column({ length: 64, nullable: true })
+  caseId: string | null;
+
+  @Column({ length: 64, nullable: true })
+  bindingId: string | null;
+
   @Column({ length: 64 })
   requestHash: string;
 
@@ -77,6 +86,9 @@ export class GamePunishmentCommand {
 
   @Column({ type: 'simple-json', nullable: true })
   result: Record<string, any> | null;
+
+  @Column({ type: 'datetime', nullable: true, default: () => 'CURRENT_TIMESTAMP' })
+  offeredAt: Date | null;
 
   @CreateDateColumn()
   createdAt: Date;

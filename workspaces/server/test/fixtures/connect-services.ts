@@ -6,3 +6,18 @@ export { ConnectInstance } from '../../src/game/connect/entities/connect-instanc
 export { ConnectPlaytime, ConnectSession } from '../../src/game/connect/entities/connect-session.entity';
 export { GamePunishment, GamePunishmentEvent, GamePunishmentCommand } from '../../src/game/connect/entities/game-punishment.entity';
 export { OnlineService } from '../../src/game/servers/online/online.service';
+export { PunishmentDeliveryService } from '../../src/game/punishments/punishment-delivery.service';
+export { PunishmentCoordinator } from '../../src/game/punishments/punishment-coordinator.service';
+export { PunishmentAccess } from '../../src/game/punishments/punishment-access.service';
+export { PunishmentAdmin } from '../../src/game/punishments/punishment-admin.service';
+export { PunishmentGroupsService } from '../../src/game/punishments/punishment-groups.service';
+export { PunishmentPurchasesService } from '../../src/game/punishments/punishment-purchases.service';
+export { AccountRestrictionsService } from '../../src/game/punishments/account-restrictions.service';
+export { PunishmentPolicy } from '../../src/game/punishments/punishment-policy.service';
+export { PunishmentViews } from '../../src/game/punishments/punishment-views.service';
+export { PunishmentTasks } from '../../src/game/punishments/punishment-tasks.service';
+export * from '../../src/game/punishments/entities/punishment.entity';
+export * from '../../src/game/punishments/entities/punishment-group.entity';
+export * from '../../src/game/punishments/entities/punishment-purchase.entity';
+export { Ban } from '../../src/game/cabinet/bans/entities/ban.entity';
+export { lockPunishments } from '../../src/game/punishments/punishment.model';

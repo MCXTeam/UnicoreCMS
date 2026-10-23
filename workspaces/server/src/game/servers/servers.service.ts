@@ -17,6 +17,7 @@ import { Online } from './online/entities/online.entity';
 import { Query } from './online/entities/query.entity';
 import { RCON } from './rcon/entities/rcon.entity';
 import { RconService } from './rcon/rcon.service';
+import { randomUUID } from 'node:crypto';
 
 @Injectable()
 export class ServersService {
@@ -68,7 +69,7 @@ export class ServersService {
     server.content = input.content;
     server.wipe = input.wipe ?? false;
     server.table = (input.table ?? []).map((row, index) => ({ ...row, priority: index } as ServerTable));
-    server.instances = (input.instances ?? []).map((instance, index) => ({ ...instance, priority: index } as ServerInstance));
+    server.instances = (input.instances ?? []).map((instance, index) => ({ ...instance, id: randomUUID(), priority: index } as ServerInstance));
 
     server.online = new Online();
     server.query = new Query();
@@ -107,7 +108,13 @@ export class ServersService {
     server.content = input.content;
     server.wipe = input.wipe ?? false;
     server.table = (input.table ?? []).map((row, index) => ({ ...row, priority: index } as ServerTable));
-    server.instances = (input.instances ?? []).map((instance, index) => ({ ...instance, priority: index } as ServerInstance));
+    const previousInstances = server.instances || [];
+    server.instances = (input.instances ?? []).map((instance, index) => {
+      if (instance.id && !previousInstances.some((previous) => previous.id === instance.id)) throw new BadRequestException('Адрес не принадлежит этому серверу');
+      const previous = previousInstances.find((previous) => previous.id === instance.id || !instance.id && previous.host === instance.host && previous.port === instance.port && previous.name === instance.name);
+      return { ...instance, id: previous?.id || randomUUID(), priority: index } as ServerInstance;
+    });
+    if (server.instances.length !== new Set(server.instances.map((instance) => instance.id)).size) throw new BadRequestException('Адреса сервера должны быть уникальными');
 
     server.query.host = input.query.host;
     server.query.port = input.query.port;

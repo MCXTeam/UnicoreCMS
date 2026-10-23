@@ -366,7 +366,8 @@
             </div>
             <div class="p-4" v-if="canBan">
               <VeeForm as="div" v-slot="{ meta }">
-                <h4>{{ $t('admin.ban_block') }} ({{ user.ban ? $t('admin.yes') : $t('admin.no') }})</h4>
+                <h4>{{ $t('punishments.account') }} ({{ user.ban ? $t('admin.yes') : $t('admin.no') }})</h4>
+                <p>{{ $t('punishments.account_scope') }}</p>
                 <div class="p-fluid">
                   <VeeField
                     v-model="ban_model.reason"

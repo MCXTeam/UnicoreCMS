@@ -20,7 +20,7 @@ describe('Connect v2: MariaDB transactions', { skip: process.env.CONNECT_TEST_DB
     const { DataSource } = compiled.require('typeorm');
     const metadata = compiled.require('typeorm').getMetadataArgsStorage();
     const entities = metadata.tables.map((row) => row.target).filter((type) => typeof type === 'function');
-    db = new DataSource({ type: 'mariadb', host: '127.0.0.1', port: 13316, username: 'root', password: '', database: 'connect_contracts', entities, synchronize: true, dropSchema: true, timezone: 'Z', extra: { connectionLimit: 8 } });
+    db = new DataSource({ type: 'mariadb', host: '127.0.0.1', port: Number(process.env.CONNECT_TEST_PORT || 13316), username: 'root', password: '', database: 'connect_contracts', entities, synchronize: true, dropSchema: true, timezone: 'Z', extra: { connectionLimit: 8 } });
     await db.initialize();
     await db.query('INSERT INTO unicore_servers (id) VALUES (?)', ['contract']);
     await db.query('INSERT INTO unicore_users (uuid,username) VALUES (?,?)', [userUuid, 'Player']);
@@ -28,7 +28,8 @@ describe('Connect v2: MariaDB transactions', { skip: process.env.CONNECT_TEST_DB
     identity = new mod.ConnectIdentityService(db);
     sessions = new mod.ConnectSessionsService(identity, { del: async () => {} });
     presence = new mod.ConnectPresenceService(identity, db);
-    punishments = new mod.GamePunishmentsService(identity, db);
+    const delivery = new mod.PunishmentDeliveryService();
+    punishments = new mod.GamePunishmentsService(identity, db, new mod.PunishmentCoordinator(delivery), delivery, new mod.PunishmentAccess(db, delivery));
     connection.epoch = (await identity.register(connection, token)).epoch;
   });
   after(async () => { if (db?.isInitialized) await db.destroy(); if (directory) await rm(directory, { recursive: true, force: true }); });

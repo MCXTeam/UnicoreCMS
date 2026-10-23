@@ -1,26 +1,14 @@
 import { SafeCron } from '@common';
 import { Injectable } from '@nestjs/common';
 import { CronExpression } from '@nestjs/schedule';
-import { InjectRepository } from '@nestjs/typeorm';
-import moment from 'moment';
-import { Ban } from 'src/game/cabinet/bans/entities/ban.entity';
-import { IsNull, Not, Repository } from 'typeorm';
+import { AccountRestrictionsService } from 'src/game/punishments/account-restrictions.service';
 
 @Injectable()
 export class BanTasks {
-  constructor(
-    @InjectRepository(Ban)
-    private bansRepository: Repository<Ban>,
-  ) {}
+  constructor(private accounts: AccountRestrictionsService) {}
 
   @SafeCron(CronExpression.EVERY_10_MINUTES, 'ban-cleanup')
   async clean() {
-    const expiresBans = await this.bansRepository
-      .createQueryBuilder('ud')
-      .where('ud.expires < :expires', { expires: moment().utc().toDate() })
-      .andWhere({ expires: Not(IsNull()) })
-      .getMany();
-
-    await this.bansRepository.remove(expiresBans);
+    await this.accounts.cleanExpired();
   }
 }

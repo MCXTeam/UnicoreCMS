@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import { Column, Entity, Generated, JoinColumn, ManyToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 import { Server } from './server.entity';
 
 @Entity({
@@ -8,6 +8,10 @@ import { Server } from './server.entity';
   },
 })
 export class ServerInstance {
+  @Column({ length: 36, nullable: true })
+  @Generated('uuid')
+  id: string | null;
+
   @PrimaryColumn({ name: 'priority' })
   priority: number;
 

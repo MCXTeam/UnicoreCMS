@@ -1,4 +1,4 @@
-export type PermissionScope = "server";
+export type PermissionScope = "server" | "punishment";
 
 export type PermissionField = [entity: string, ...fields: string[]];
 
@@ -18,6 +18,7 @@ export const PERMISSION_GROUPS = [
   "access",
   "dashboard",
   "users",
+  "punishments",
   "roles",
   "referals",
   "servers",
@@ -102,6 +103,13 @@ export const PERMISSIONS = define({
     field: ["user", "superuser"],
     danger: true,
   },
+  "panel.punishments.read": { group: "punishments", scope: "punishment" },
+  "panel.punishments.issue": { group: "punishments", scope: "punishment", danger: true },
+  "panel.punishments.revoke": { group: "punishments", scope: "punishment", danger: true },
+  "panel.punishments.sale": { group: "punishments", scope: "punishment", danger: true },
+  "panel.punishments.groups": { group: "punishments", danger: true },
+  "panel.punishments.settings": { group: "punishments", danger: true },
+  "panel.punishments.purchases": { group: "punishments", scope: "punishment", danger: true },
   "panel.users.grant.panel": { group: "users", danger: true },
   "panel.users.twofactor.reset": { group: "users", danger: true },
   "panel.users.sessions.revoke": { group: "users" },

@@ -1,9 +1,7 @@
 export const useCabinetStats = () => {
   const cabinet = useCabinet()
   const playtime = ref<any[] | null>(null)
-  const punishments = ref<any[] | null>(null)
   const playtimeError = ref(false)
-  const punishmentsError = ref(false)
   let mounted = false
   let pending = false
   let timer: ReturnType<typeof setTimeout> | undefined
@@ -17,13 +15,13 @@ export const useCabinetStats = () => {
     const signal = controller.signal
 
     try {
-      const [times, penalties] = await Promise.allSettled([cabinet.playtime(signal), cabinet.gamePunishments(signal)])
+      const times = await cabinet.playtime(signal)
       if (!mounted || signal.aborted) return
 
-      playtimeError.value = times.status === 'rejected'
-      punishmentsError.value = penalties.status === 'rejected'
-      if (times.status === 'fulfilled') playtime.value = times.value
-      if (penalties.status === 'fulfilled') punishments.value = penalties.value
+      playtimeError.value = false
+      playtime.value = times
+    } catch {
+      if (mounted && !signal.aborted) playtimeError.value = true
     } finally {
       pending = false
       if (mounted && visible()) timer = setTimeout(refresh, 5000)
@@ -50,5 +48,5 @@ export const useCabinetStats = () => {
     window.removeEventListener('online', resume)
   })
 
-  return { playtime, punishments, playtimeError, punishmentsError }
+  return { playtime, playtimeError }
 }

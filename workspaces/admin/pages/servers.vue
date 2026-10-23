@@ -670,6 +670,7 @@ export default {
     },
     instancesPayload() {
       return (this.server.instances || []).map((instance, priority) => ({
+        id: instance.id || undefined,
         name: instance.name,
         host: instance.host,
         port: instance.port || null,

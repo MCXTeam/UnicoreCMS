@@ -23,7 +23,7 @@ export default defineSitemapEventHandler(async () => {
 
   const safeGet = async <T>(path: string): Promise<T | null> => {
     try {
-      return (await $fetch(api + path)) as T
+      return await $fetch<T, string>(api + path)
     } catch {
       return null
     }

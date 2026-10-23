@@ -29,16 +29,16 @@ export class GamePunishmentsController {
     return this.punishments.acknowledge(input, connectToken(request, input.serverId));
   }
 
-  @Permissions(['panel.users.ban'])
+  @Permissions([['panel.punishments.issue.*', 'panel.punishments.revoke.*'], { or: true }])
   @Post('game-punishments/commands')
   enqueue(@CurrentUser() user: User, @Body() input: PunishmentCommandInput) {
     return this.punishments.enqueue(user, input);
   }
 
-  @Permissions(['panel.users.ban'])
+  @Permissions([['panel.punishments.read.*', 'panel.punishments.issue.*', 'panel.punishments.revoke.*'], { or: true }])
   @Get('game-punishments/commands/:id')
-  command(@Param('id', ParseUUIDPipe) id: string) {
-    return this.punishments.command(id);
+  command(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: User) {
+    return this.punishments.command(id, user);
   }
 
   @Get('cabinet/game-punishments/me')

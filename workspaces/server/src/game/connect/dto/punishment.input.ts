@@ -59,6 +59,10 @@ export class PunishmentActorInput {
 }
 
 export class PunishmentInput {
+  @IsOptional()
+  @IsBoolean()
+  manageable?: boolean;
+  @IsOptional() @IsBoolean() groupable?: boolean;
   @IsString()
   @MaxLength(256)
   id: string;
@@ -118,6 +122,14 @@ export class PunishmentInput {
 }
 
 export class PunishmentEventInput {
+  @IsOptional()
+  @IsIn(['SNAPSHOT', 'LIVE', 'POLL', 'COMMAND'])
+  origin?: string;
+
+  @IsOptional()
+  @IsUUID()
+  commandId?: string;
+
   @Transform(({ value }) => (typeof value === 'string' ? value.toLowerCase() : value))
   @IsUUID()
   eventId: string;
@@ -137,7 +149,25 @@ export class PunishmentEventsInput extends ConnectIdentityInput {
   events: PunishmentEventInput[];
 }
 
+export class PunishmentCapabilitiesInput {
+  @IsOptional() @IsArray() @ArrayUnique() @ArrayMaxSize(5) @IsIn(['BAN', 'MUTE', 'WARN', 'KICK', 'JAIL'], { each: true }) timedKinds?: string[];
+  @IsOptional() @IsArray() @ArrayUnique() @ArrayMaxSize(5) @IsIn(['BAN', 'MUTE', 'WARN', 'KICK', 'JAIL'], { each: true }) permanentKinds?: string[];
+  @IsArray() @ArrayUnique() @ArrayMaxSize(5) @IsIn(['BAN', 'MUTE', 'WARN', 'KICK', 'JAIL'], { each: true }) kinds: string[];
+  @IsArray() @ArrayUnique() @ArrayMaxSize(5) @IsIn(['BAN', 'MUTE', 'WARN', 'KICK', 'JAIL'], { each: true }) issueKinds: string[];
+  @IsArray() @ArrayUnique() @ArrayMaxSize(5) @IsIn(['BAN', 'MUTE', 'WARN', 'KICK', 'JAIL'], { each: true }) revokeKinds: string[];
+  @IsArray() @ArrayUnique() @ArrayMaxSize(3) @IsIn(['PLAYER', 'IP', 'CIDR'], { each: true }) subjects: string[];
+  @IsBoolean() exactRevoke: boolean;
+}
+
+export class PunishmentDescriptorInput {
+  @IsString() @MaxLength(64) id: string;
+  @IsString() @MaxLength(128) version: string;
+  @IsDefined() @ValidateNested() @Type(() => PunishmentCapabilitiesInput) capabilities: PunishmentCapabilitiesInput;
+}
+
 export class PunishmentPollInput extends ConnectIdentityInput {
+  @IsOptional() @IsIn(['observe', 'bidirectional']) mode?: string;
+  @IsOptional() @ValidateNested() @Type(() => PunishmentDescriptorInput) descriptor?: PunishmentDescriptorInput;
   @IsOptional()
   @IsString()
   @MaxLength(64)
@@ -168,6 +198,10 @@ export class PunishmentCommandInput {
 }
 
 export class PunishmentResultInput {
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => PunishmentInput)
+  observed?: PunishmentInput;
   @IsIn(['APPLIED', 'ALREADY_APPLIED', 'UNSUPPORTED', 'FAILED', 'UNKNOWN'])
   status: string;
 

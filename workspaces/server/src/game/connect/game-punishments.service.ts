@@ -10,13 +10,20 @@ import { ConnectIdentityService } from './connect-identity.service';
 import { PunishmentAckInput, PunishmentCommandInput, PunishmentEventsInput, PunishmentPollInput } from './dto/punishment.input';
 import { GamePunishment, GamePunishmentCommand, GamePunishmentEvent } from './entities/game-punishment.entity';
 import { ConnectInstance } from './entities/connect-instance.entity';
+import { PunishmentCoordinator } from '../punishments/punishment-coordinator.service';
+import { PunishmentDeliveryService } from '../punishments/punishment-delivery.service';
+import { PunishmentAccess } from '../punishments/punishment-access.service';
+import { PunishmentCase, PunishmentProviderState } from '../punishments/entities/punishment.entity';
+import { identityHash, lockPunishments } from '../punishments/punishment.model';
+import { saveObservation } from '../punishments/punishment-observations';
 
 @Injectable()
 export class GamePunishmentsService {
-  constructor(private identity: ConnectIdentityService, private dataSource: DataSource) {}
+  constructor(private identity: ConnectIdentityService, private dataSource: DataSource, private coordinator: PunishmentCoordinator, private delivery: PunishmentDeliveryService, private access: PunishmentAccess) {}
 
   events(input: PunishmentEventsInput, tokenId: string) {
     return this.identity.withInstance(input, tokenId, async (manager, instance) => {
+      await lockPunishments(manager);
       const accepted: string[] = [];
       for (const event of input.events) {
         const payload = event.punishment;
@@ -24,34 +31,8 @@ export class GamePunishmentsService {
           throw new BadRequestException('Punishment scope mismatch');
         this.validateSubject(payload);
         if (payload.expiresAtMs != null && payload.expiresAtMs < payload.issuedAtMs) throw new BadRequestException('Invalid expiry');
-        const id = createHash('sha256')
-          .update(JSON.stringify([instance.id, payload.providerId, payload.kind, payload.externalId]))
-          .digest('hex');
-        const received = await manager.findOneBy(GamePunishmentEvent, { eventId: event.eventId });
-        if (received && (received.streamId !== instance.id || received.punishmentId !== id))
-          throw new ConflictException('Event identity mismatch');
-        if (!received) {
-          await manager.save(GamePunishmentEvent, {
-            eventId: event.eventId,
-            streamId: instance.id,
-            punishmentId: id,
-            payload: { ...payload },
-          });
-          const existing = await manager.findOne(GamePunishment, { where: { id }, lock: { mode: 'pessimistic_write' } });
-          const resurrected = existing && existing.payload.status !== 'ACTIVE' && payload.status === 'ACTIVE';
-          if (!resurrected)
-            await manager.save(GamePunishment, {
-              id,
-              streamId: instance.id,
-              serverId: input.serverId,
-              providerId: payload.providerId,
-              status: payload.status,
-              issuedAtMs: payload.issuedAtMs,
-              subjectUuid: payload.subject.kind === 'PLAYER' ? payload.subject.value : null,
-              payload: { ...payload, id, scope: { ...payload.scope, instanceId: instance.instanceId } },
-              revision: (existing?.revision || 0) + 1,
-            });
-        }
+        const { row, changed } = await saveObservation(manager, instance, payload, event.eventId);
+        if (row && (changed || !row.caseId)) await this.coordinator.observe(manager, row, event.origin, event.commandId);
         accepted.push(event.eventId);
       }
       return { accepted };
@@ -60,6 +41,15 @@ export class GamePunishmentsService {
 
   poll(input: PunishmentPollInput, tokenId: string) {
     return this.identity.withInstance(input, tokenId, async (manager, instance) => {
+      await lockPunishments(manager);
+      if (input.descriptor) {
+        if (input.descriptor.id !== input.providerId || !input.mode) throw new BadRequestException('Provider descriptor mismatch');
+        await manager.save(PunishmentProviderState, { id: identityHash(instance.id, input.providerId), streamId: instance.id, providerId: input.providerId, mode: input.mode, capabilities: input.descriptor.capabilities, version: input.descriptor.version, seenAt: new Date() });
+        const cases = await manager.getRepository(PunishmentCase).createQueryBuilder('punishment')
+          .where("punishment.category = 'GAME' AND punishment.status = 'ACTIVE' AND punishment.desired = 'ACTIVE'")
+          .andWhere("(punishment.scopeType = 'PROJECT' OR (punishment.scopeType = 'SERVER' AND punishment.scopeId = :serverId))", { serverId: instance.serverId }).getMany();
+        for (const item of cases) await this.delivery.reconcile(manager, item);
+      }
       const filter = { serverId: input.serverId, providerId: input.providerId, status: 'PENDING' };
       const commands = await manager.find(GamePunishmentCommand, {
         where: { ...filter, streamId: instance.id },
@@ -67,6 +57,7 @@ export class GamePunishmentsService {
         order: { createdAt: 'ASC', commandId: 'ASC' },
         take: 50,
       });
+      for (const command of commands) if (command.offeredAt == null) { command.offeredAt = new Date(); await manager.save(command); }
       const tracked = await manager.find(GamePunishment, {
         where: {
           streamId: instance.id,
@@ -87,15 +78,26 @@ export class GamePunishmentsService {
 
   acknowledge(input: PunishmentAckInput, tokenId: string) {
     return this.identity.withInstance(input, tokenId, async (manager, instance) => {
+      await lockPunishments(manager);
       const command = await manager.findOne(GamePunishmentCommand, {
         where: { commandId: input.commandId, serverId: input.serverId, streamId: instance.id },
         lock: { mode: 'pessimistic_write' },
       });
       if (!command) throw new NotFoundException('Command not found');
-      if (command.status === 'PENDING') {
+      if (command.status === 'PENDING' || command.status === 'UNKNOWN' && ['APPLIED', 'ALREADY_APPLIED'].includes(input.result.status)) {
         command.status = input.result.status;
         command.result = input.result;
         await manager.save(command);
+        if (input.result.observed) {
+          const observed = input.result.observed;
+          const target = command.payload.punishment;
+          if (observed.providerId !== command.providerId || observed.kind !== target.kind || observed.subject.kind !== target.subject.kind || observed.subject.value !== target.subject.value || input.result.externalId && observed.externalId !== input.result.externalId)
+            throw new ConflictException('Command observation mismatch');
+          this.validateSubject(observed);
+          const saved = await saveObservation(manager, instance, observed);
+          if (saved.row) await this.coordinator.observe(manager, saved.row, 'COMMAND', command.commandId);
+        }
+        await this.delivery.acknowledge(manager, command);
       }
       return { commandId: command.commandId, status: command.status };
     });
@@ -130,6 +132,7 @@ export class GamePunishmentsService {
       )
       .digest('hex');
     return this.dataSource.transaction(async (manager) => {
+      await lockPunishments(manager);
       const existingCommand = await manager.findOneBy(GamePunishmentCommand, { commandId: input.commandId });
       if (existingCommand) {
         if (existingCommand.requestHash !== requestHash) throw new ConflictException('Command identity mismatch');
@@ -137,6 +140,7 @@ export class GamePunishmentsService {
       }
       let target = input.punishment;
       let streamId: string;
+      let logicalCase: PunishmentCase | null = null;
       if (input.revoke) {
         const punishment = await manager.findOne(GamePunishment, {
           where: { id: input.punishment.id, serverId },
@@ -151,6 +155,7 @@ export class GamePunishmentsService {
         if (input.expectedRevision !== punishment.revision) throw new ConflictException('Punishment revision mismatch');
         target = { ...punishment.payload, revision: punishment.revision } as typeof target;
         streamId = punishment.streamId;
+        if (punishment.caseId) logicalCase = await manager.findOneBy(PunishmentCase, { id: punishment.caseId });
       } else {
         const candidates = await manager.find(ConnectInstance, {
           where: { serverId, retired: false, ...(target.scope.instanceId ? { instanceId: target.scope.instanceId } : {}) },
@@ -163,6 +168,8 @@ export class GamePunishmentsService {
         const user = await manager.findOneBy(User, { uuid: target.subject.value });
         if (user && !(await userPermissionCheck(user, actor))) throw new ForbiddenException();
       }
+      const item = manager.create(PunishmentCase, { category: 'GAME', scopeType: 'INSTANCE', scopeId: streamId, subjectUuid: target.subject.kind === 'PLAYER' ? target.subject.value : null });
+      await this.access.assert({ user: actor }, input.revoke ? 'revoke' : 'issue', logicalCase || item, manager);
       const payload = { ...input, punishment: { ...target, actor: { uuid: actor.uuid, name: actor.username, console: false } } };
       await manager.save(GamePunishmentCommand, {
         commandId: input.commandId,
@@ -171,6 +178,7 @@ export class GamePunishmentsService {
         serverId,
         providerId: input.punishment.providerId,
         status: 'PENDING',
+        offeredAt: null,
         payload,
       });
       return { commandId: input.commandId, status: 'PENDING' };
@@ -186,9 +194,11 @@ export class GamePunishmentsService {
       throw new BadRequestException('Invalid punishment subject');
   }
 
-  async command(commandId: string) {
+  async command(commandId: string, actor: User) {
     const command = await this.dataSource.getRepository(GamePunishmentCommand).findOneBy({ commandId });
     if (!command) throw new NotFoundException('Command not found');
+    const item = command.caseId ? await this.dataSource.getRepository(PunishmentCase).findOneBy({ id: command.caseId }) : this.dataSource.manager.create(PunishmentCase, { category: 'GAME', scopeType: 'INSTANCE', scopeId: command.streamId });
+    if (!item || !(await this.access.allows({ user: actor }, 'read', item)) && !(await this.access.allows({ user: actor }, command.payload.revoke ? 'revoke' : 'issue', item))) throw new ForbiddenException();
     return {
       commandId,
       serverId: command.serverId,

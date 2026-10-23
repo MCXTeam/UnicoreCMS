@@ -3,6 +3,9 @@ import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToOne, Prim
 
 @Entity({ name: 'unicore_bans' })
 export class Ban {
+  @Column({ length: 64, nullable: true })
+  punishmentId: string | null;
+
   @PrimaryColumn({ name: 'user_uuid' })
   userUuid: string;
 

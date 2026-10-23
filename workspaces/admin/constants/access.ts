@@ -8,6 +8,7 @@ export type RouteAccess = typeof SUPERUSER_ONLY | Permission[]
 export const ROUTE_ACCESS: Record<string, RouteAccess> = {
   '/': ['panel.access'],
   '/users': ['panel.users.read'],
+  '/punishments': ['panel.punishments.read', 'panel.punishments.issue', 'panel.punishments.revoke', 'panel.punishments.sale', 'panel.punishments.purchases', 'panel.punishments.groups', 'panel.punishments.settings', 'panel.users.ban'],
   '/revenue': ['panel.revenue.access'],
   '/roles': ['panel.roles.read'],
   '/referals': ['panel.referals.read'],

@@ -43,11 +43,6 @@
               <td>{{ $t('profile.total_playtime') }}</td>
               <td v-text="$utils.formatDuration($_.sumBy(user.playtimes, 'time'))" />
             </tr>
-            <tr>
-              <td>{{ $t('profile.ban') }}</td>
-              <td v-if="!user.ban">{{ $t('profile.ban_none') }}</td>
-              <td v-else>{{ $t('profile.ban_yes') }}</td>
-            </tr>
           </tbody>
         </table>
         <h2 class="mt-4 mb-3">{{ $t('profile.server_stats') }}</h2>
@@ -83,6 +78,10 @@
             <span>{{ $t('common.empty') }}</span>
           </template>
         </DataTable>
+      </div>
+      <div class="panel">
+        <h2 class="mt-0 mb-3">{{ $t('punishments.title') }}</h2>
+        <PunishmentFeed :username="username" />
       </div>
       <ExtensionSlot name="user.profile" :user="user" />
     </div>

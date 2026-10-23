@@ -1,7 +1,11 @@
 import { NAME_MAX_LENGTH, PORT_MAX, PORT_MIN } from '@common';
-import { IsDefined, IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
+import { IsDefined, IsInt, IsOptional, IsString, IsUUID, Max, MaxLength, Min } from 'class-validator';
 
 export class ServerInstanceInput {
+  @IsOptional()
+  @IsUUID()
+  id?: string;
+
   @IsOptional()
   @IsInt()
   @Min(0)

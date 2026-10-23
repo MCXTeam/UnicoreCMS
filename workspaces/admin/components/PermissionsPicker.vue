@@ -52,10 +52,11 @@
             />
             <Tag v-else-if="isCovered(entry.key)" severity="secondary" :value="$t('admin.permission_covered')" />
             <button
-              v-if="entry.scope === 'server' && isOn(entry.key)"
+              v-if="entry.scope && isOn(entry.key)"
               type="button"
               class="permissions__scope"
               :disabled="disabled"
+              :aria-label="`${$t('punishments.scope')}: ${label_(entry.key)}`"
               v-tooltip.top="scopeHint(entry.key)"
               @click="openScope($event, entry.key)"
             >
@@ -68,14 +69,14 @@
 
       <Popover ref="scopePanel">
         <div class="permissions__servers">
-          <span class="permissions__servers-title">{{ $t('admin.permission_servers') }}</span>
+          <span class="permissions__servers-title">{{ $t(active.startsWith('panel.punishments.') ? 'punishments.scope' : 'admin.permission_servers') }}</span>
           <label class="permissions__servers-row">
             <Checkbox :binary="true" :modelValue="!scopeValue(active).length" @update:modelValue="setScope(active, [])" />
             <span>{{ $t('admin.permission_servers_all') }}</span>
           </label>
-          <label v-for="server in servers" :key="server.id" class="permissions__servers-row">
+          <label v-for="server in scopeOptions(active)" :key="server.id" class="permissions__servers-row">
             <Checkbox :binary="true" :modelValue="scopeChecked(active, server.id)" @update:modelValue="toggleScope(server.id)" />
-            <span>{{ server.name }}</span>
+            <span>{{ server.name || $t(server.labelKey) }}</span>
           </label>
         </div>
       </Popover>
@@ -114,7 +115,7 @@ const props = withDefaults(
 const emit = defineEmits<{ 'update:modelValue': [string[]] }>()
 
 const { $t } = useNuxtApp() as any
-const { groups, servers, loaded, failed, load, label: label_, hint: hint_ } = usePermissionCatalog()
+const { groups, servers, punishments, loaded, failed, load, label: label_, hint: hint_ } = usePermissionCatalog()
 
 const query = ref('')
 const active = ref('')
@@ -136,7 +137,7 @@ const patterns = computed<string[]>(() => props.modelValue || [])
 const scoped = computed(() =>
   groups.value
     .flatMap((group) => group.permissions)
-    .filter((entry) => entry.scope === 'server')
+    .filter((entry) => entry.scope)
     .map((entry) => entry.key),
 )
 
@@ -274,12 +275,16 @@ function scopeValue(key: string): string[] {
   return patterns.value.filter((pattern) => scopeBase(pattern) === key).map((pattern) => pattern.slice(key.length + 1))
 }
 
+function scopeOptions(key: string) {
+  return key.startsWith('panel.punishments.') ? punishments.value.filter((scope) => scope.id !== 'account' || /\.(sale|purchases)$/.test(key)) : servers.value
+}
+
 function scopeLabel(key: string): string {
   const ids = scopeValue(key)
 
-  if (ids.length === 1) return servers.value.find((server) => server.id === ids[0])?.name || ids[0]
+  if (ids.length === 1) { const option = scopeOptions(key).find((scope) => scope.id === ids[0]); return option?.name || (option?.labelKey ? $t(option.labelKey) : ids[0]) }
 
-  return `${ids.length} / ${servers.value.length}`
+  return `${ids.length} / ${scopeOptions(key).length}`
 }
 
 function scopeHint(key: string): string {
@@ -287,7 +292,7 @@ function scopeHint(key: string): string {
 
   if (!ids.length) return $t('admin.permission_servers_all')
 
-  return ids.map((id) => servers.value.find((server) => server.id === id)?.name || id).join(', ')
+  return ids.map((id) => { const option = scopeOptions(key).find((scope) => scope.id === id); return option?.name || (option?.labelKey ? $t(option.labelKey) : id) }).join(', ')
 }
 
 function scopeChecked(key: string, id: string): boolean {
@@ -305,7 +310,7 @@ function openScope(event: Event, key: string) {
 
 function toggleScope(id: string) {
   const key = active.value
-  const all = servers.value.map((server) => server.id)
+  const all = scopeOptions(key).map((server) => server.id)
   const current = scopeValue(key).length ? scopeValue(key) : all
   const next = current.includes(id) ? current.filter((item) => item !== id) : [...current, id]
 
@@ -316,7 +321,7 @@ function toggleScope(id: string) {
     return
   }
 
-  setScope(key, next.length === all.length ? [] : next)
+  setScope(key, !key.startsWith('panel.punishments.') && next.length === all.length ? [] : next)
 }
 
 function setScope(key: string, ids: string[]) {

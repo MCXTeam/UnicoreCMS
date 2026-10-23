@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
 import { BanListService } from './banlist.service';
 import { BanListController } from './banlist.controller';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Ban } from 'src/game/cabinet/bans/entities/ban.entity';
+import { PunishmentsModule } from '../../punishments/punishments.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Ban])],
+  imports: [PunishmentsModule],
   providers: [BanListService],
   controllers: [BanListController],
 })

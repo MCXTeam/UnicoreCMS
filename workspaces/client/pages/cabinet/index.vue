@@ -131,25 +131,8 @@
         </template>
       </CabTile>
 
-      <CabTile :title="$t('cabinet.bans_title')" icon="bx bxs-shield-alt-2" class="cab-order-4">
-        <span v-if="!$auth.user.ban" class="cab-status cab-status--ok"><i class="bx bx-check"></i> {{ $t('cabinet.ban_none') }}</span>
-        <span v-else-if="$auth.user.ban.expires" class="cab-status cab-status--bad">
-          <i class="bx bx-block"></i>
-          {{ $t('cabinet.ban_until', { date: $moment($auth.user.ban.expires).format('DD.MM.YYYY, HH:mm') }) }}
-        </span>
-        <span v-else class="cab-status cab-status--bad"><i class="bx bx-block"></i> {{ $t('cabinet.ban_forever') }}</span>
-        <p class="cab-sub mt-3 mb-0">{{ $t('cabinet.bans_hint') }}</p>
-        <template #footer>
-          <Button
-            v-if="canUnban"
-            class="w-100"
-            outlined
-            :disabled="!$auth.user.ban"
-            :loading="banLoading"
-            :label="$t('cabinet.buy_unban', { price: $utils.formatCurrency('real', config.public_unban_price) })"
-            @click="unabn()"
-          />
-        </template>
+      <CabTile :title="$t('punishments.title')" icon="bx bxs-shield-alt-2" class="cab-order-4">
+        <PunishmentFeed own />
       </CabTile>
     </div>
 
@@ -192,10 +175,8 @@ const skinApi = useSkin()
 const donateApi = useDonate()
 
 useHead({ title: computed(() => $t('header.cabinet')) })
-const { config } = usePublicConfig()
 
-const { canUnban, canUploadSkin, canUploadCloak } = useAccess({
-  canUnban: 'player.unban.buy',
+const { canUploadSkin, canUploadCloak } = useAccess({
   canUploadSkin: 'player.skin.upload',
   canUploadCloak: 'player.cloak.upload',
 })
@@ -209,7 +190,6 @@ const money = ref(null)
 const groups = ref(null)
 const skinLoading = ref(false)
 const cloakLoading = ref(false)
-const banLoading = ref(false)
 
 onMounted(async () => {
   await Skin3D.value?.ready
@@ -278,15 +258,4 @@ async function deleteCloak() {
   cloakLoading.value = false
 }
 
-async function unabn() {
-  banLoading.value = true
-  try {
-    await cabinet.unban()
-    await $auth.fetchUser()
-    $unicore.successNotification($t('cabinet.unbanned'))
-  } catch {
-    $unicore.errorNotification($t('cabinet.unban_not_enough'))
-  }
-  banLoading.value = false
-}
 </script>
