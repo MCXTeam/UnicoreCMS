@@ -14,6 +14,7 @@ import {
   MaxLength,
   Min,
   ValidateNested,
+  ValidateIf,
 } from 'class-validator';
 import { GroupFeatureInput } from './group-feature.input';
 import { BULK_ITEMS_MAX, IsPlayerPerm, NAME_MAX_LENGTH, PRICE_MIN, SanitizeHtml, SERVER_ID_MAX_LENGTH } from '@common';
@@ -34,10 +35,15 @@ export class GroupInput {
   @SanitizeHtml()
   description?: string;
 
+  @ValidateIf((input) => input.purchasable !== false)
   @IsDefined()
   @IsNumber()
   @Min(PRICE_MIN)
   price: number;
+
+  @IsOptional()
+  @IsBoolean()
+  purchasable?: boolean;
 
   @IsOptional()
   @IsInt()

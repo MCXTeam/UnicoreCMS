@@ -1,3 +1,4 @@
+import { DonateWebRoleModule } from 'src/game/donate/web-role.module';
 import { Module } from '@nestjs/common';
 import { GiftsService } from './gifts.service';
 import { GiftsController } from './gifts.controller';
@@ -23,6 +24,7 @@ import { GiftPurchaseService } from './gift-purchase.service';
 
 @Module({
   imports: [
+    DonateWebRoleModule,
     TypeOrmModule.forFeature([Product, Kit, DonateGroup, DonatePermission, Period, Server, User, Gift, GiftActivation, Money]),
     MoneyModule,
     DonatePermissionsModule,

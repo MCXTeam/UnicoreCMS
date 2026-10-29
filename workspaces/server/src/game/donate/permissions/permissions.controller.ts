@@ -104,7 +104,7 @@ export class PermissionsController {
   async give(@Req() request: any, @Body() body: GiveDonatePermInput) {
     await assertServerPermission(request, 'panel.users.donate', body.server_id);
 
-    return this.donatePermissionsService.giveByDTO(body);
+    return this.donatePermissionsService.giveByDTO(body, request.user);
   }
 
   @Permissions(['panel.access', 'panel.users.donate.*'])

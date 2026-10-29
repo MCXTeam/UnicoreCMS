@@ -99,21 +99,28 @@ export class DonatePermissionsService {
         permission: { id: permission.id },
       },
       relations: ['user'],
+      lock: { mode: 'pessimistic_write' },
     });
   }
 
-  async give(user: User, server: Server, permission: DonatePermission, period: Period) {
+  @Transactional()
+  async give(user: User, server: Server, permission: DonatePermission, period: Period, actor?: User) {
+    await this.webRoles.lockUsers([user.uuid]);
+    permission = await this.webRoles.assertPermissionGrant(permission.id, actor, true);
     const userPermission = await this.findGrant(user, server, permission);
 
     if (userPermission && !userPermission.expired) throw new BadRequestException();
 
-    const from = userPermission ? this.moment(userPermission.expired) : this.moment();
+    const from = userPermission?.expired && userPermission.expired > new Date() ? this.moment(userPermission.expired) : this.moment();
     const expired = period.expire ? from.utc().add(period.expire, 'seconds').toDate() : null;
 
     return this.grant(userPermission, user, server, permission, expired, period.expire || 0);
   }
 
+  @Transactional()
   async giveUntil(user: User, server: Server, permission: DonatePermission, until: Date | null) {
+    await this.webRoles.lockUsers([user.uuid]);
+    permission = await this.webRoles.assertPermissionGrant(permission.id, undefined, true);
     const userPermission = await this.findGrant(user, server, permission);
 
     if (userPermission && (!userPermission.expired || userPermission.expired > new Date()))
@@ -133,12 +140,15 @@ export class DonatePermissionsService {
     const userPermission = existing || new UsersDonatePermission();
 
     userPermission.expired = expired;
-    userPermission.permission = permission;
+    userPermission.permission = { id: permission.id } as DonatePermission;
     userPermission.user = { uuid: user.uuid } as User;
 
-    if (permission.type != PermissionType.Web) userPermission.server = server;
+    if (permission.type != PermissionType.Web) userPermission.server = { id: server.id } as Server;
 
     const saved = await this.userPermissionsRepository.save(userPermission);
+
+    saved.permission = permission;
+    saved.server = server;
 
     if (permission.type != PermissionType.Web) {
       if (this.issuanceService.isRcon(server)) {
@@ -162,12 +172,13 @@ export class DonatePermissionsService {
       }),
     );
 
-    runAfterCommit(() => this.webRoles.grantForPermission(user.uuid, permission.id));
+    await this.webRoles.grantForPermission(user.uuid, permission.id);
 
     return saved;
   }
 
-  async giveByDTO(input: GiveDonatePermInput) {
+  @Transactional()
+  async giveByDTO(input: GiveDonatePermInput, actor?: User) {
     var server = null;
     const user = await this.usersRepository.findOneBy({ uuid: input.user_uuid });
     const permission = await this.donatePermissionsRepository.findOneBy({ id: input.permission_id });
@@ -182,14 +193,17 @@ export class DonatePermissionsService {
 
     if (permission.type != PermissionType.Web && !server) throw new BadRequestException();
 
-    await this.give(user, server, permission, period);
+    await this.give(user, server, permission, period, actor);
   }
 
+  @Transactional()
   async take(id: number, request?: any) {
     const udp = await this.userPermissionsRepository.findOne({ where: { id }, relations: ['user', 'server'] });
     if (!udp) throw new NotFoundException();
 
+    await this.webRoles.lockUsers([udp.user.uuid]);
     if (request) await assertServerPermission(request, 'panel.users.donate', udp.server?.id);
+    if (request?.user) await this.webRoles.assertPermissionGrant(udp.permission.id, request.user, true);
 
     await this.userPermissionsRepository.remove(udp);
     await this.webRoles.revokePermissionRole(udp.user.uuid, udp.permission.id);
@@ -222,6 +236,8 @@ export class DonatePermissionsService {
     const period = permission?.periods?.find((period) => period.id == input.period);
 
     if (!permission || !period || !(server || permission.type == PermissionType.Web)) throw new NotFoundException();
+
+    await this.webRoles.assertPermissionGrant(input.permission);
 
     const price = currencyUtils.roundByType(
       currencyUtils.saleApply(permission.price, permission.sale) * period.multiplier,
@@ -271,6 +287,7 @@ export class DonatePermissionsService {
         .leftJoinAndSelect('kits.servers', 'kit_servers')
         .leftJoinAndSelect('kit_servers.server', 'kit_server')
         .where('perm.hidden = :hidden', { hidden: false })
+        .andWhere('perm.purchasable = :purchasable', { purchasable: true })
         .orderBy({ 'perm.priority': 'ASC', 'perm.id': 'ASC' })
         .getMany()
     ).filter((perm) => perm.servers.find((srv) => srv.id == id) || perm.type == PermissionType.Web);
@@ -340,6 +357,7 @@ export class DonatePermissionsService {
     );
   }
 
+  @Transactional()
   async create(input: PermissionInput, request?: any) {
     await assertFieldAccess('donate_permission', input, null, request);
     await assertServerListOrGlobal(request, 'panel.donate.permissions.create', WEB_SCOPE, input.servers);
@@ -348,7 +366,8 @@ export class DonatePermissionsService {
     perm.name = input.name;
     perm.type = input.type;
     perm.description = input.description;
-    perm.price = currencyUtils.roundByType(input.price, SystemCurrency.REAL);
+    perm.purchasable = input.purchasable ?? perm.purchasable ?? true;
+    perm.price = perm.purchasable ? currencyUtils.roundByType(input.price, SystemCurrency.REAL) : 0;
     perm.sale = input.sale;
     perm.virtual_percent = input.virtual_percent;
     perm.referal_percent = input.referal_percent ?? null;
@@ -363,7 +382,7 @@ export class DonatePermissionsService {
     perm.perms = [];
     perm.servers = [];
     perm.web_perms = [];
-    perm.web_role = (await this.webRoles.resolveWebRole(input.web_role_id)) ?? null;
+    perm.web_role = (await this.webRoles.resolveWebRole(input.web_role_id, request)) ?? null;
     perm.kits = [];
     perm.servers = [];
 
@@ -376,7 +395,7 @@ export class DonatePermissionsService {
         break;
       case PermissionType.Web:
         perm.web_perms = input.web_perms;
-        perm.web_role = (await this.webRoles.resolveWebRole(input.web_role_id)) ?? null;
+        perm.web_role = (await this.webRoles.resolveWebRole(input.web_role_id, request)) ?? null;
         break;
       case PermissionType.Kit:
         perm.perms = input.perms;
@@ -392,8 +411,10 @@ export class DonatePermissionsService {
     return this.donatePermissionsRepository.save(perm);
   }
 
+  @Transactional()
   async update(id: number, input: PermissionInput, request?: any) {
-    const perm = await this.findOne(id, ['servers']);
+    await this.webRoles.lockUsers(await this.webRoles.affectedUsers('permission', [id]));
+    const perm = await this.donatePermissionsRepository.findOne({ where: { id }, relations: ['servers', 'web_role'], lock: { mode: 'pessimistic_write' } });
 
     if (!perm) {
       throw new NotFoundException();
@@ -410,7 +431,8 @@ export class DonatePermissionsService {
 
     perm.name = input.name;
     perm.description = input.description;
-    perm.price = currencyUtils.roundByType(input.price, SystemCurrency.REAL);
+    perm.purchasable = input.purchasable ?? perm.purchasable ?? true;
+    perm.price = perm.purchasable ? currencyUtils.roundByType(input.price, SystemCurrency.REAL) : 0;
     perm.sale = input.sale;
     perm.virtual_percent = input.virtual_percent;
     perm.referal_percent = input.referal_percent ?? null;
@@ -425,7 +447,8 @@ export class DonatePermissionsService {
     perm.perms = [];
     perm.servers = [];
     perm.web_perms = [];
-    perm.web_role = (await this.webRoles.resolveWebRole(input.web_role_id)) ?? null;
+    if (input.web_role_id !== undefined)
+      perm.web_role = await this.webRoles.resolveWebRole(input.web_role_id, request, perm.web_role?.id);
     perm.kits = [];
     perm.servers = [];
 
@@ -438,7 +461,6 @@ export class DonatePermissionsService {
         break;
       case PermissionType.Web:
         perm.web_perms = input.web_perms;
-        perm.web_role = (await this.webRoles.resolveWebRole(input.web_role_id)) ?? null;
         break;
       case PermissionType.Kit:
         perm.perms = input.perms;
@@ -451,11 +473,16 @@ export class DonatePermissionsService {
         break;
     }
 
-    return this.donatePermissionsRepository.save(perm);
+    const saved = await this.donatePermissionsRepository.save(perm);
+
+    await this.webRoles.syncPermission(id);
+    return saved;
   }
 
+  @Transactional()
   async remove(id: number, request?: any) {
-    const perm = await this.findOne(id, ['servers']);
+    await this.webRoles.lockUsers(await this.webRoles.affectedUsers('permission', [id]));
+    const perm = await this.donatePermissionsRepository.findOne({ where: { id }, relations: ['servers', 'web_role'], lock: { mode: 'pessimistic_write' } });
 
     if (!perm) {
       throw new NotFoundException();
@@ -463,10 +490,18 @@ export class DonatePermissionsService {
 
     await assertServerEntitiesOrGlobal(request, 'panel.donate.permissions.delete', WEB_SCOPE, [perm]);
 
-    return this.donatePermissionsRepository.remove(perm);
+    if (request?.user) await this.webRoles.assertPermissionGrant(id, request.user, true);
+
+    const affected = await this.webRoles.affectedUsers('permission', [id]);
+    const removed = await this.donatePermissionsRepository.remove(perm);
+
+    await this.webRoles.syncUsers(affected);
+    return removed;
   }
 
+  @Transactional()
   async removeMany(ids: number[], request?: any) {
+    await this.webRoles.lockUsers(await this.webRoles.affectedUsers('permission', ids));
     const perms = await this.donatePermissionsRepository.find({
       where: {
         id: In(ids),
@@ -476,6 +511,13 @@ export class DonatePermissionsService {
 
     await assertServerEntitiesOrGlobal(request, 'panel.donate.permissions.delete.many', WEB_SCOPE, perms);
 
-    return this.donatePermissionsRepository.remove(perms);
+    if (request?.user)
+      for (const record of perms) await this.webRoles.assertPermissionGrant(record.id, request.user, true);
+
+    const affected = await this.webRoles.affectedUsers('permission', ids);
+    const removed = await this.donatePermissionsRepository.remove(perms);
+
+    await this.webRoles.syncUsers(affected);
+    return removed;
   }
 }

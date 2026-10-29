@@ -16,10 +16,15 @@ export class PermissionInput {
   @SanitizeHtml()
   description?: string;
 
+  @ValidateIf((input) => input.purchasable !== false)
   @IsDefined()
   @IsNumber()
   @Min(PRICE_MIN)
   price: number;
+
+  @IsOptional()
+  @IsBoolean()
+  purchasable?: boolean;
 
   @IsOptional()
   @IsInt()

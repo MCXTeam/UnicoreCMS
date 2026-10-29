@@ -37,11 +37,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In, IsNull, MoreThan } from 'typeorm';
 import { Role } from 'src/admin/roles/entities/role.entity';
 import { UsersDonateGroup } from 'src/game/donate/groups/entities/user-donate.entity';
+import { UsersDonatePermission } from 'src/game/donate/permissions/entities/user-permission.entity';
 import { NotificationsService } from 'src/game/cabinet/notifications/notifications.service';
 import { registerNotificationCategory } from 'src/game/cabinet/notifications/notification-categories';
 import { CORE_CAPABILITIES } from './capabilities';
 import { moduleRuntime } from './runtime';
 import { updateHold } from '../common/update-hold';
+import { WebRoleOrigin } from 'src/game/donate/entities/web-role-origin.entity';
 
 @Injectable()
 export class ApiHostService implements OnApplicationBootstrap, OnApplicationShutdown {
@@ -136,29 +138,36 @@ export class ApiHostService implements OnApplicationBootstrap, OnApplicationShut
   }
 
   private async staffMembers(): Promise<StaffMember[]> {
-    const [roles, granted] = await Promise.all([
+    const [roles, granted, permissions] = await Promise.all([
       this.roles.find({ where: { staff: true }, relations: ['users'] }),
       this.userGroups.find({
         where: [{ expired: IsNull() }, { expired: MoreThan(new Date()) }],
         relations: ['user', 'group.web_role'],
       }),
+      this.dataSource.getRepository(UsersDonatePermission).find({
+        where: [{ expired: IsNull() }, { expired: MoreThan(new Date()) }],
+        relations: ['user', 'permission.web_role', 'server'],
+      }),
     ]);
 
     const members: StaffMember[] = [];
+    const automatic = await this.dataSource.getRepository(WebRoleOrigin).findBy({ manual: false });
+    const automaticKeys = new Set(automatic.map((origin) => `${origin.userUuid}:${origin.roleId}`));
 
     for (const role of roles)
       for (const user of role.users || [])
-        members.push({
-          uuid: user.uuid,
-          username: user.username,
-          label: role.name,
-          color: role.color ?? null,
-          role: staffRoleAppearance(roleAppearanceOf(role)),
-          serverId: null,
-          priority: role.priority ?? 0,
-          skin: user.skin ? { file: user.skin.file, slim: Boolean(user.skin.slim) } : null,
-          cloak: user.cloak ? { file: user.cloak.file } : null,
-        });
+        if (!automaticKeys.has(`${user.uuid}:${role.id}`))
+          members.push({
+            uuid: user.uuid,
+            username: user.username,
+            label: role.name,
+            color: role.color ?? null,
+            role: staffRoleAppearance(roleAppearanceOf(role)),
+            serverId: null,
+            priority: role.priority ?? 0,
+            skin: user.skin ? { file: user.skin.file, slim: Boolean(user.skin.slim) } : null,
+            cloak: user.cloak ? { file: user.cloak.file } : null,
+          });
 
     for (const row of granted)
       if (row.group?.web_role?.staff && row.user && row.server)
@@ -173,6 +182,23 @@ export class ApiHostService implements OnApplicationBootstrap, OnApplicationShut
           skin: row.user.skin ? { file: row.user.skin.file, slim: Boolean(row.user.skin.slim) } : null,
           cloak: row.user.cloak ? { file: row.user.cloak.file } : null,
         });
+
+    for (const row of permissions)
+      if (row.permission?.web_role?.staff && row.user) {
+        const role = row.permission.web_role;
+
+        members.push({
+          uuid: row.user.uuid,
+          username: row.user.username,
+          label: role.name,
+          color: role.color ?? null,
+          role: staffRoleAppearance(roleAppearanceOf(role)),
+          serverId: row.server?.id ?? null,
+          priority: role.priority ?? 0,
+          skin: row.user.skin ? { file: row.user.skin.file, slim: Boolean(row.user.skin.slim) } : null,
+          cloak: row.user.cloak ? { file: row.user.cloak.file } : null,
+        });
+      }
 
     return members;
   }
@@ -207,7 +233,7 @@ export class ApiHostService implements OnApplicationBootstrap, OnApplicationShut
 
           const users = await this.dataSource.getRepository(User).find({ where: { uuid: In(unique) }, relations: ['roles'] });
 
-          return users.map((user) => this.userRecord(user));
+          return (await this.usersService.reconcileRoles(users)).map((user) => this.userRecord(user));
         },
         getByUsername: async (username) => this.userRecord(await this.usersService.getByUsername(username, ['roles']).catch(() => null)),
         getByEmail: async (email) => this.userRecord(await this.usersService.getByEmail(email, ['roles']).catch(() => null)),

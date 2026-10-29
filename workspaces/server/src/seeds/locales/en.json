@@ -1,4 +1,10 @@
 {
+  "admin.donate_purchasable": "Available for purchase",
+  "admin.donate_manual_only": "Admin grants only. Purchases, gifts and gift codes are disabled.",
+  "admin.manual_roles": "Manually assigned roles",
+  "admin.donate_roles": "Roles from privileges",
+  "admin.donate_roles_hint": "These roles last while a privilege is active. Assign a role manually above to keep it after the privilege expires.",
+  "admin.legacy_roles_hint": "The source of some older roles is unknown. They were preserved as manual assignments. Review the roles above.",
   "admin.access_denied": "Access denied",
   "admin.activated_email": "Email confirmed",
   "admin.active_until": "Active until",

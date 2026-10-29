@@ -184,7 +184,7 @@ export const PERMISSIONS = define({
   "panel.donate.groups.delete.many": { group: "donate", scope: "server" },
   "panel.donate.groups.field.price": {
     group: "donate",
-    field: ["donate_group", "price", "sale"],
+    field: ["donate_group", "price", "sale", "purchasable"],
     updateOnly: true,
   },
   "panel.donate.groups.field.perms": {
@@ -199,7 +199,7 @@ export const PERMISSIONS = define({
   "panel.donate.permissions.web": { group: "donate" },
   "panel.donate.permissions.field.price": {
     group: "donate",
-    field: ["donate_permission", "price", "sale"],
+    field: ["donate_permission", "price", "sale", "purchasable"],
     updateOnly: true,
   },
   "panel.donate.permissions.field.perms": {

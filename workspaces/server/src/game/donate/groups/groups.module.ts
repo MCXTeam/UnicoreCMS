@@ -11,19 +11,20 @@ import { DonateGroupsController } from './controllers/group.controller';
 import { User } from 'src/admin/users/entities/user.entity';
 import { Role } from 'src/admin/roles/entities/role.entity';
 import { UsersDonateGroup } from './entities/user-donate.entity';
-import { DonateWebRoleService } from '../web-role.service';
+import { DonateWebRoleModule } from '../web-role.module';
 import { HistoryModule } from 'src/game/cabinet/history/history.module';
 import { ConfigModule } from 'src/admin/config/config.module';
 import { RconModule } from 'src/game/servers/rcon/rcon.module';
 
 @Module({
   imports: [
+    DonateWebRoleModule,
     TypeOrmModule.forFeature([Role, GroupKit, DonateGroup, Period, Server, User, UsersDonateGroup]),
     HistoryModule,
     ConfigModule,
     RconModule,
   ],
-  providers: [DonateGroupsService, DonateWebRoleService, GroupKitsService],
+  providers: [DonateGroupsService, GroupKitsService],
   exports: [DonateGroupsService],
   controllers: [GroupKitsController, DonateGroupsController],
 })

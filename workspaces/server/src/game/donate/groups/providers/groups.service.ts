@@ -81,6 +81,7 @@ export class DonateGroupsService {
         .leftJoinAndSelect('group.servers', 'servers')
         .leftJoinAndSelect('group.features', 'features')
         .where('group.hidden = :hidden', { hidden: false })
+        .andWhere('group.purchasable = :purchasable', { purchasable: true })
         .orderBy({ price: 'ASC' })
         .getMany()
     ).filter((perm) => perm.servers.find((srv) => srv.id == id));
@@ -127,21 +128,28 @@ export class DonateGroupsService {
     return this.userDonatesRepository.findOne({
       where: { user: { uuid: user.uuid }, server: { id: server.id }, group: { id: group.id } },
       relations: ['user'],
+      lock: { mode: 'pessimistic_write' },
     });
   }
 
-  async give(user: User, server: Server, group: DonateGroup, period: Period) {
+  @Transactional()
+  async give(user: User, server: Server, group: DonateGroup, period: Period, actor?: User) {
+    await this.webRoles.lockUsers([user.uuid]);
+    group = await this.webRoles.assertGroupGrant(group.id, actor, true);
     const userDonate = await this.findGrant(user, server, group);
 
     if (userDonate && !userDonate.expired) throw new BadRequestException();
 
-    const from = userDonate ? this.moment(userDonate.expired) : this.moment();
+    const from = userDonate?.expired && userDonate.expired > new Date() ? this.moment(userDonate.expired) : this.moment();
     const expired = period.expire ? from.utc().add(period.expire, 'seconds').toDate() : null;
 
     return this.grant(userDonate, user, server, group, expired, period.expire || 0);
   }
 
+  @Transactional()
   async giveUntil(user: User, server: Server, group: DonateGroup, until: Date | null) {
+    await this.webRoles.lockUsers([user.uuid]);
+    group = await this.webRoles.assertGroupGrant(group.id, undefined, true);
     const userDonate = await this.findGrant(user, server, group);
 
     if (userDonate && (!userDonate.expired || userDonate.expired > new Date()))
@@ -161,11 +169,14 @@ export class DonateGroupsService {
     const userDonate = existing || new UsersDonateGroup();
 
     userDonate.expired = expired;
-    userDonate.server = server;
-    userDonate.group = group;
+    userDonate.server = { id: server.id } as Server;
+    userDonate.group = { id: group.id } as DonateGroup;
     userDonate.user = { uuid: user.uuid } as User;
 
     const saved = await this.userDonatesRepository.save(userDonate);
+
+    saved.group = group;
+    saved.server = server;
 
     if (this.issuanceService.isRcon(server)) {
       await this.issuanceService.deliverGroup(
@@ -186,12 +197,13 @@ export class DonateGroupsService {
       }),
     );
 
-    runAfterCommit(() => this.webRoles.grantForGroup(user.uuid, group.id));
+    await this.webRoles.grantForGroup(user.uuid, group.id);
 
     return saved;
   }
 
-  async giveByDTO(input: GiveDonateGroupInput) {
+  @Transactional()
+  async giveByDTO(input: GiveDonateGroupInput, actor?: User) {
     const user = await this.usersRepository.findOneBy({ uuid: input.user_uuid });
     const server = await this.serversRepository.findOneBy({ id: input.server_id });
     const group = await this.donateGroupsRepository.findOneBy({ id: input.group_id });
@@ -199,14 +211,17 @@ export class DonateGroupsService {
 
     if (!user || !server || !group || !period) throw new NotFoundException();
 
-    await this.give(user, server, group, period);
+    await this.give(user, server, group, period, actor);
   }
 
+  @Transactional()
   async take(id: number, request?: any) {
     const udg = await this.userDonatesRepository.findOne({ where: { id }, relations: ['user', 'server', 'group'] });
     if (!udg) throw new NotFoundException();
 
+    await this.webRoles.lockUsers([udg.user.uuid]);
     if (request) await assertServerPermission(request, 'panel.users.donate', udg.server?.id);
+    if (request?.user) await this.webRoles.assertGroupGrant(udg.group.id, request.user, true);
 
     await this.userDonatesRepository.remove(udg);
     await this.webRoles.revokeGroupRole(udg.user.uuid, udg.group.id);
@@ -235,6 +250,8 @@ export class DonateGroupsService {
     const period = group?.periods?.find((period) => period.id == input.period);
 
     if (!group || !server || !period) throw new NotFoundException();
+
+    await this.webRoles.assertGroupGrant(input.group);
 
     const price = currencyUtils.roundByType(currencyUtils.saleApply(group.price, group.sale) * period.multiplier, SystemCurrency.REAL);
     let virtual_sale = currencyUtils.roundByType(
@@ -275,6 +292,7 @@ export class DonateGroupsService {
     return this.donateGroupsRepository.findOne({ where: { id }, relations });
   }
 
+  @Transactional()
   async create(input: GroupInput, request?: any) {
     await assertFieldAccess('donate_group', input, null, request);
     await assertServerList(request, 'panel.donate.groups.create', input.servers);
@@ -282,11 +300,12 @@ export class DonateGroupsService {
 
     group.name = input.name;
     group.description = input.description;
-    group.price = currencyUtils.roundByType(input.price, SystemCurrency.REAL);
+    group.purchasable = input.purchasable ?? group.purchasable ?? true;
+    group.price = group.purchasable ? currencyUtils.roundByType(input.price, SystemCurrency.REAL) : 0;
     group.sale = input.sale;
     group.ingame_id = input.ingame_id;
     group.web_perms = input.web_perms;
-    group.web_role = (await this.webRoles.resolveWebRole(input.web_role_id)) ?? null;
+    group.web_role = (await this.webRoles.resolveWebRole(input.web_role_id, request)) ?? null;
     group.features = input.features.map((feature) => Object.assign(new GroupFeature(), feature));
     group.virtual_percent = input.virtual_percent;
     group.referal_percent = input.referal_percent ?? null;
@@ -324,8 +343,10 @@ export class DonateGroupsService {
     );
   }
 
+  @Transactional()
   async update(id: number, input: GroupInput, request?: any) {
-    const group = await this.findOne(id, ['servers']);
+    await this.webRoles.lockUsers(await this.webRoles.affectedUsers('group', [id]));
+    const group = await this.donateGroupsRepository.findOne({ where: { id }, relations: ['servers', 'web_role'], lock: { mode: 'pessimistic_write' } });
 
     if (!group) {
       throw new NotFoundException();
@@ -341,11 +362,13 @@ export class DonateGroupsService {
 
     group.name = input.name;
     group.description = input.description;
-    group.price = currencyUtils.roundByType(input.price, SystemCurrency.REAL);
+    group.purchasable = input.purchasable ?? group.purchasable ?? true;
+    group.price = group.purchasable ? currencyUtils.roundByType(input.price, SystemCurrency.REAL) : 0;
     group.sale = input.sale;
     group.ingame_id = input.ingame_id;
     group.web_perms = input.web_perms;
-    group.web_role = (await this.webRoles.resolveWebRole(input.web_role_id)) ?? null;
+    if (input.web_role_id !== undefined)
+      group.web_role = await this.webRoles.resolveWebRole(input.web_role_id, request, group.web_role?.id);
     group.features = input.features.map((feature) => Object.assign(new GroupFeature(), feature));
     group.virtual_percent = input.virtual_percent;
     group.referal_percent = input.referal_percent ?? null;
@@ -366,11 +389,16 @@ export class DonateGroupsService {
       id: In(input.kits),
     });
 
-    return this.donateGroupsRepository.save(group);
+    const saved = await this.donateGroupsRepository.save(group);
+
+    await this.webRoles.syncGroup(id);
+    return saved;
   }
 
+  @Transactional()
   async remove(id: number, request?: any) {
-    const group = await this.findOne(id, ['servers']);
+    await this.webRoles.lockUsers(await this.webRoles.affectedUsers('group', [id]));
+    const group = await this.donateGroupsRepository.findOne({ where: { id }, relations: ['servers', 'web_role'], lock: { mode: 'pessimistic_write' } });
 
     if (!group) {
       throw new NotFoundException();
@@ -378,10 +406,18 @@ export class DonateGroupsService {
 
     await assertServerEntities(request, 'panel.donate.groups.delete', [group]);
 
-    return this.donateGroupsRepository.remove(group);
+    if (request?.user) await this.webRoles.assertGroupGrant(id, request.user, true);
+
+    const affected = await this.webRoles.affectedUsers('group', [id]);
+    const removed = await this.donateGroupsRepository.remove(group);
+
+    await this.webRoles.syncUsers(affected);
+    return removed;
   }
 
+  @Transactional()
   async removeMany(ids: number[], request?: any) {
+    await this.webRoles.lockUsers(await this.webRoles.affectedUsers('group', ids));
     const groups = await this.donateGroupsRepository.find({
       where: {
         id: In(ids),
@@ -391,7 +427,14 @@ export class DonateGroupsService {
 
     await assertServerEntities(request, 'panel.donate.groups.delete.many', groups);
 
-    return this.donateGroupsRepository.remove(groups);
+    if (request?.user)
+      for (const record of groups) await this.webRoles.assertGroupGrant(record.id, request.user, true);
+
+    const affected = await this.webRoles.affectedUsers('group', ids);
+    const removed = await this.donateGroupsRepository.remove(groups);
+
+    await this.webRoles.syncUsers(affected);
+    return removed;
   }
 
   async updateIcon(id: number, file: Express.Multer.File) {

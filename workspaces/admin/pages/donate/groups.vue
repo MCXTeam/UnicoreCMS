@@ -218,6 +218,7 @@
                 <Select
                   v-model="group.web_role_id"
                   :options="roleOptions"
+                  optionDisabled="locked"
                   optionLabel="name"
                   optionValue="id"
                   :placeholder="$t('admin.choose_role')"
@@ -277,7 +278,12 @@
             </template>
 
             <template #price>
-              <div class="grid">
+              <div class="field-checkbox">
+                <Checkbox :binary="true" v-model="group.purchasable" :inputId="'group-purchasable'" :disabled="!canEditPrice(updateMode)" />
+                <label :for="'group-purchasable'">{{ $t('admin.donate_purchasable') }}<FieldLock :allowed="canEditPrice(updateMode)" /></label>
+              </div>
+              <p v-if="group.purchasable === false" class="text-color-secondary">{{ $t('admin.donate_manual_only') }}</p>
+              <div class="grid" v-if="group.purchasable !== false">
                 <div class="col-6">
                   <VeeField
                     v-model="group.price"
@@ -380,11 +386,11 @@
                 </label>
               </div>
               <div class="field-checkbox">
-                <Checkbox :binary="true" v-model="group.giftable" inputId="group-giftable" />
+                <Checkbox :binary="true" v-model="group.giftable" :disabled="group.purchasable === false" inputId="group-giftable" />
                 <label for="group-giftable">{{ $t('admin.giftable') }}</label>
               </div>
               <div class="field-checkbox">
-                <Checkbox :binary="true" v-model="group.regiftable" inputId="group-regiftable" :disabled="!group.giftable" />
+                <Checkbox :binary="true" v-model="group.regiftable" inputId="group-regiftable" :disabled="group.purchasable === false || !group.giftable" />
                 <label for="group-regiftable" class="flex align-items-center gap-1">
                   {{ $t('admin.regiftable') }}
                   <i v-tooltip.right="$t('admin.regiftable_hint')" class="pi pi-question-circle text-color-secondary" />
@@ -473,11 +479,13 @@ export default {
         ingame_id: null,
         description: null,
         price: null,
+        purchasable: true,
         icon: null,
         sale: null,
         features: [],
         servers: [],
         web_perms: [],
+        web_role_id: null,
         kits: [],
         periods: [],
         virtual_percent: null,
@@ -500,7 +508,7 @@ export default {
   },
   computed: {
     roleOptions() {
-      return [{ id: null, name: '—' }, ...(this.roles || [])]
+      return [{ id: null, name: '—' }, ...(this.roles || []).map((role) => ({ ...role, locked: role.grantable === false }))]
     },
 
     serverOptions() {
@@ -627,10 +635,12 @@ export default {
           description: null,
           icon: null,
           price: null,
+          purchasable: true,
           sale: null,
           features: [],
           servers: [],
           web_perms: [],
+          web_role_id: null,
           kits: [],
           periods: [],
           virtual_percent: null,

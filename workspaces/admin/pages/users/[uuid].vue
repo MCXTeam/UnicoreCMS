@@ -448,7 +448,7 @@
                   </div>
                   <h4>{{ $t('admin.roles_and_rights') }}</h4>
                   <div class="field">
-                    <label>{{ $t('admin.roles') }}<FieldLock :allowed="canEditRoles()" /></label>
+                    <label>{{ $t('admin.manual_roles') }}<FieldLock :allowed="canEditRoles()" /></label>
                     <MultiSelect
                       display="chip"
                       :filter="true"
@@ -462,6 +462,14 @@
                       class="p-column-filter"
                     />
                   </div>
+                  <div class="field" v-if="user.donate_roles?.length">
+                    <label>{{ $t('admin.donate_roles') }}</label>
+                    <div class="flex flex-wrap gap-2">
+                      <Tag v-for="role in user.donate_roles" :key="role.id" :value="role.name" severity="info" class="max-w-full" :style="{ overflowWrap: 'anywhere' }" />
+                    </div>
+                    <small class="block text-color-secondary mt-2">{{ $t('admin.donate_roles_hint') }}</small>
+                  </div>
+                  <Message v-if="user.legacy_roles?.length" severity="warn" :closable="false">{{ $t('admin.legacy_roles_hint') }}</Message>
                   <PermissionsPicker v-model="user.perms" :label="$t('admin.rights')" :disabled="!canEditRoles()" />
                   <div class="field-checkbox" v-if="canEditSuperuser()">
                     <Checkbox :binary="true" v-model="user.superuser" />
@@ -1004,7 +1012,7 @@ export default {
 
     async fetchUser() {
       this.user = await this.$api.get('/users/' + this.route.params.uuid).then((res) => res.data)
-      this.rolesUser = this.roles.filter((role) => this.user.roles.find((ur) => ur.id == role.id)).map((r) => r.id)
+      this.rolesUser = this.user.manual_roles ?? this.roles.filter((role) => this.user.roles.find((ur) => ur.id == role.id)).map((r) => r.id)
 
       if (this.user.ban) {
         if (this.user.ban.expires) this.ban_model.expires = this.$moment(this.user.ban.expires).toDate()

@@ -11,6 +11,8 @@ import { IssuanceService } from 'src/game/servers/rcon/issuance.service';
 import { DonateWebRoleService } from 'src/game/donate/web-role.service';
 import { Repository } from 'typeorm';
 import { events } from 'unicore-api';
+import { Transactional } from 'typeorm-transactional';
+import { runAfterCommit } from 'src/common/utils/transaction';
 
 @Injectable()
 export class DonateTasks {
@@ -46,47 +48,60 @@ export class DonateTasks {
       .andWhere('up.expired < :expired', { expired })
       .getMany();
 
-    for (const udg of await this.udRepository.remove(expiresUD)) {
-      await this.webRoles.revokeGroupRole(udg.user?.uuid, udg.group?.id);
+    for (const candidate of expiresUD) await this.expireGroup(candidate.id, expired);
+    for (const candidate of expiresUP) await this.expirePermission(candidate.id, expired);
+  }
 
-      if (udg.user?.uuid && udg.group?.id)
-        await events().emit('donate.group.revoked', {
+  @Transactional()
+  private async expireGroup(id: number, expired: Date) {
+    const udg = await this.webRoles.expireGroup(id, expired);
+
+    if (!udg) return;
+
+    if (udg.user?.uuid && udg.group?.id)
+      runAfterCommit(() =>
+        events().emit('donate.group.revoked', {
           uuid: udg.user.uuid,
           serverId: String(udg.server?.id ?? ''),
           groupId: udg.group.id,
           reason: 'expired',
-        });
+        }),
+      );
 
-      this.eventsService.emitKernel('take_group', udg, udg.server?.id);
+    runAfterCommit(() => this.eventsService.emitKernel('take_group', udg, udg.server?.id));
 
-      if (this.issuanceService.isRcon(udg.server)) {
-        await this.issuanceService.removeGroup({ username: udg.user?.username, uuid: udg.user?.uuid }, udg.server, {
-          ingame_id: udg.group?.ingame_id,
-          name: udg.group?.name,
-        });
-      }
+    if (this.issuanceService.isRcon(udg.server)) {
+      await this.issuanceService.removeGroup({ username: udg.user?.username, uuid: udg.user?.uuid }, udg.server, {
+        ingame_id: udg.group?.ingame_id,
+        name: udg.group?.name,
+      });
     }
+  }
 
-    for (const udp of await this.upRepository.remove(expiresUP)) {
-      await this.webRoles.revokePermissionRole(udp.user?.uuid, udp.permission?.id);
+  @Transactional()
+  private async expirePermission(id: number, expired: Date) {
+    const udp = await this.webRoles.expirePermission(id, expired);
 
-      if (udp.user?.uuid && udp.permission?.id)
-        await events().emit('donate.permission.revoked', {
+    if (!udp) return;
+
+    if (udp.user?.uuid && udp.permission?.id)
+      runAfterCommit(() =>
+        events().emit('donate.permission.revoked', {
           uuid: udp.user.uuid,
           serverId: String(udp.server?.id ?? ''),
           permissionId: udp.permission.id,
           reason: 'expired',
+        }),
+      );
+
+    if (udp.permission?.type != PermissionType.Web) {
+      runAfterCommit(() => this.eventsService.emitKernel('take_permission', udp, udp.server?.id));
+
+      if (this.issuanceService.isRcon(udp.server)) {
+        await this.issuanceService.removePermission({ username: udp.user?.username, uuid: udp.user?.uuid }, udp.server, {
+          name: udp.permission?.name,
+          perms: udp.permission?.perms,
         });
-
-      if (udp.permission?.type != PermissionType.Web) {
-        this.eventsService.emitKernel('take_permission', udp, udp.server?.id);
-
-        if (this.issuanceService.isRcon(udp.server)) {
-          await this.issuanceService.removePermission({ username: udp.user?.username, uuid: udp.user?.uuid }, udp.server, {
-            name: udp.permission?.name,
-            perms: udp.permission?.perms,
-          });
-        }
       }
     }
   }

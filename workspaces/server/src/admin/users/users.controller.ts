@@ -28,6 +28,7 @@ import { PasswordUpdateInput } from 'src/game/cabinet/settings/dto/password-upda
 import { Permissions } from '../roles/decorators/permission.decorator';
 import { matchPermission } from '../roles/guards/permisson.guard';
 import { UserField, USER_FIELDS, USER_FIELD_PERMISSIONS, isUpdateOnlyField } from 'unicore-common';
+import { DonateWebRoleService } from 'src/game/donate/web-role.service';
 
 @ApiTags('users')
 @Controller('users')
@@ -35,6 +36,7 @@ export class UsersController {
   constructor(
     private usersService: UsersService,
     private passwordPolicy: PasswordPolicyService,
+    private webRoles: DonateWebRoleService,
   ) {}
 
   private async allowedFields(request: any, updating = true): Promise<UserField[]> {
@@ -86,7 +88,7 @@ export class UsersController {
     const user = await this.usersService.getById(uuid);
     if (!user) throw new NotFoundException();
 
-    return new UserBasicDto(user);
+    return new UserBasicDto(Object.assign(user, await this.webRoles.describe(user.uuid, user.roles || [])));
   }
 
   @Permissions(['panel.access', 'panel.users.update'])

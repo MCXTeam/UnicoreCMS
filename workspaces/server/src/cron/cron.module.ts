@@ -24,7 +24,7 @@ import { DonateTasks } from './tasks/donate.tasks';
 import { DonateGroup } from 'src/game/donate/groups/entities/donate-group.entity';
 import { DonatePermission } from 'src/game/donate/permissions/entities/donate-permission.entity';
 import { Role } from 'src/admin/roles/entities/role.entity';
-import { DonateWebRoleService } from 'src/game/donate/web-role.service';
+import { DonateWebRoleModule } from 'src/game/donate/web-role.module';
 import { EmailTasks } from './tasks/email.tasks';
 import { HistoryTasks } from './tasks/history.tasks';
 import { OnlineTasks } from './tasks/online.tasks';
@@ -43,6 +43,7 @@ import { PunishmentsModule } from 'src/game/punishments/punishments.module';
 
 @Module({
   imports: [
+    DonateWebRoleModule,
     TypeOrmModule.forFeature([
       RefreshToken,
       History,
@@ -72,7 +73,6 @@ import { PunishmentsModule } from 'src/game/punishments/punishments.module';
     PunishmentsModule,
   ],
   providers: [
-    DonateWebRoleService,
     TokenTasks,
     HistoryTasks,
     OnlineTasks,

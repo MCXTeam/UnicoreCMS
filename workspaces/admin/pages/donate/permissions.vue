@@ -184,6 +184,7 @@
                 <Select
                   v-model="permission.web_role_id"
                   :options="roleOptions"
+                  optionDisabled="locked"
                   optionLabel="name"
                   optionValue="id"
                   :placeholder="$t('admin.choose_role')"
@@ -215,7 +216,12 @@
             </template>
 
             <template #price>
-              <div class="grid">
+              <div class="field-checkbox">
+                <Checkbox :binary="true" v-model="permission.purchasable" :inputId="'permission-purchasable'" :disabled="!canEditPrice(updateMode)" />
+                <label :for="'permission-purchasable'">{{ $t('admin.donate_purchasable') }}<FieldLock :allowed="canEditPrice(updateMode)" /></label>
+              </div>
+              <p v-if="permission.purchasable === false" class="text-color-secondary">{{ $t('admin.donate_manual_only') }}</p>
+              <div class="grid" v-if="permission.purchasable !== false">
                 <div class="col-6">
                   <VeeField
                     v-model="permission.price"
@@ -318,11 +324,11 @@
                 </label>
               </div>
               <div class="field-checkbox">
-                <Checkbox :binary="true" v-model="permission.giftable" inputId="permission-giftable" />
+                <Checkbox :binary="true" v-model="permission.giftable" :disabled="permission.purchasable === false" inputId="permission-giftable" />
                 <label for="permission-giftable">{{ $t('admin.giftable') }}</label>
               </div>
               <div class="field-checkbox">
-                <Checkbox :binary="true" v-model="permission.regiftable" inputId="permission-regiftable" :disabled="!permission.giftable" />
+                <Checkbox :binary="true" v-model="permission.regiftable" inputId="permission-regiftable" :disabled="permission.purchasable === false || !permission.giftable" />
                 <label for="permission-regiftable" class="flex align-items-center gap-1">
                   {{ $t('admin.regiftable') }}
                   <i v-tooltip.right="$t('admin.regiftable_hint')" class="pi pi-question-circle text-color-secondary" />
@@ -410,6 +416,7 @@ export default {
         name: null,
         description: null,
         price: null,
+        purchasable: true,
         sale: null,
         type: null,
         servers: [],
@@ -417,6 +424,7 @@ export default {
         periods: [],
         perms: [],
         web_perms: [],
+        web_role_id: null,
         virtual_percent: null,
         referal_percent: null,
         hidden: false,
@@ -433,7 +441,7 @@ export default {
   },
   computed: {
     roleOptions() {
-      return [{ id: null, name: '—' }, ...(this.roles || [])]
+      return [{ id: null, name: '—' }, ...(this.roles || []).map((role) => ({ ...role, locked: role.grantable === false }))]
     },
 
     serversFilled() {
@@ -533,6 +541,7 @@ export default {
           name: null,
           description: null,
           price: null,
+          purchasable: true,
           sale: null,
           type: 'game',
           servers: [],
@@ -540,6 +549,7 @@ export default {
           periods: [],
           perms: [],
           web_perms: [],
+          web_role_id: null,
           virtual_percent: null,
           referal_percent: null,
           hidden: false,

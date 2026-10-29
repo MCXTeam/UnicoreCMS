@@ -1,3 +1,4 @@
+import { DonateWebRoleModule } from 'src/game/donate/web-role.module';
 import { forwardRef, Logger, Module, OnModuleInit } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
@@ -12,6 +13,7 @@ import { PasswordModule } from 'src/auth/password/password.module';
 
 @Module({
   imports: [
+    DonateWebRoleModule,
     PasswordModule,
     TypeOrmModule.forFeature([User, Role, Vote]),
     forwardRef(() => PlaytimeModule),

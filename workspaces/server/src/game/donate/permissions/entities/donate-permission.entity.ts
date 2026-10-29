@@ -1,3 +1,4 @@
+import { RelationId } from 'typeorm';
 import { decimalColumn, MONEY_PRECISION, MONEY_SCALE } from '@common';
 import { Role } from 'src/admin/roles/entities/role.entity';
 import { Server } from 'src/game/servers/entities/server.entity';
@@ -16,6 +17,9 @@ import { Translatable } from 'src/admin/locales/translatable.decorator';
   },
 })
 export class DonatePermission {
+  @Column({ name: 'purchasable', default: true })
+  purchasable: boolean;
+
   @PrimaryGeneratedColumn({ name: 'id' })
   id: number;
 
@@ -103,4 +107,7 @@ export class DonatePermission {
   @ManyToOne(() => Role, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'web_role_id' })
   web_role?: Role;
+
+  @RelationId((permission: DonatePermission) => permission.web_role)
+  web_role_id?: string | null;
 }

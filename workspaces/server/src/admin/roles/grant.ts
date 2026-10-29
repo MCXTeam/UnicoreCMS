@@ -97,5 +97,7 @@ export async function assertRolesGrantable(next: Role[], current: Role[], actor:
 
     if (!(await roleGrantable(role, actor)))
       throw new ForbiddenException(`Нельзя выдать роль «${role.name}»: её приоритет не ниже вашего или в ней есть лишние права`);
+
+    await assertGrantable(role.perms || [], { user: actor });
   }
 }

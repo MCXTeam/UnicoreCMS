@@ -1,3 +1,4 @@
+import { DonateWebRoleService } from 'src/game/donate/web-role.service';
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -38,6 +39,7 @@ export class GiftPurchaseService {
   private logger = new Logger(GiftPurchaseService.name);
 
   constructor(
+    private webRoles: DonateWebRoleService,
     @InjectRepository(Gift)
     private giftsRepository: Repository<Gift>,
     @InjectRepository(User)
@@ -163,6 +165,8 @@ export class GiftPurchaseService {
     if (grant.group.giftable === false) throw new BadRequestException('Эту группу дарить нельзя');
     if (grant.group.regiftable === false) throw new BadRequestException('Эту группу передаривать нельзя');
 
+    await this.webRoles.assertGroupGrant(grant.group.id);
+
     const cost = this.regiftCost(grant.group.price, grant.group.sale, cfg);
 
     if (cost > 0) await this.charge(user, cost, 0);
@@ -200,6 +204,8 @@ export class GiftPurchaseService {
 
     if (grant.permission.giftable === false) throw new BadRequestException('Эту привилегию дарить нельзя');
     if (grant.permission.regiftable === false) throw new BadRequestException('Эту привилегию передаривать нельзя');
+
+    await this.webRoles.assertPermissionGrant(grant.permission.id);
 
     const cost = this.regiftCost(grant.permission.price, grant.permission.sale, cfg);
 

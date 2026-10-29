@@ -50,6 +50,7 @@ import { TwoFactorService } from 'src/game/cabinet/settings/providers/two_factor
 import { PasswordChangeInput } from 'src/game/cabinet/settings/dto/password-change.input';
 import { PasswordUpdateInput } from 'src/game/cabinet/settings/dto/password-update.input';
 import { Transactional } from 'typeorm-transactional';
+import { DonateWebRoleService } from 'src/game/donate/web-role.service';
 
 export function userSnapshot(user: Partial<User>): Record<string, unknown> {
   return {
@@ -106,6 +107,7 @@ export class UsersService {
     private settingsService: SettingsService,
     private twoFactorService: TwoFactorService,
     private auditService: AuditService,
+    private webRoles: DonateWebRoleService,
   ) {}
 
   private audit(
@@ -138,6 +140,8 @@ export class UsersService {
   }
 
   private async rolesModificator(user: User) {
+    if (!user) return user;
+    user.roles = await this.webRoles.syncUser(user.uuid);
     if (!user.roles) user.roles = [];
 
     const banned = user.roles.find((role) => role.id == ImportantRoles.Banned);
@@ -193,8 +197,17 @@ export class UsersService {
 
     return {
       ...paginate_,
-      data: await Promise.all(paginate_.data.map(async (user) => this.rolesModificator(user))),
+      data: await this.reconcileRoles(paginate_.data),
     };
+  }
+
+  async reconcileRoles(users: User[]): Promise<User[]> {
+    const reconciled = new Map<string, User>();
+
+    for (const user of [...users].sort((left, right) => left.uuid.localeCompare(right.uuid)))
+      reconciled.set(user.uuid, await this.rolesModificator(user));
+
+    return users.map((user) => reconciled.get(user.uuid));
   }
 
   @Transactional()
@@ -224,7 +237,7 @@ export class UsersService {
 
     if (!term) return [];
 
-    return this.usersRepository
+    const users = await this.usersRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.skin', 'skin')
       .leftJoinAndSelect('user.cloak', 'cloak')
@@ -234,6 +247,8 @@ export class UsersService {
       .orderBy('user.username', 'ASC')
       .take(Math.min(Math.max(limit, 1), USER_SEARCH_MAX_LIMIT))
       .getMany();
+
+    return this.reconcileRoles(users);
   }
 
   @Transactional()
@@ -398,6 +413,7 @@ export class UsersService {
     const allowed = new Set(allowedFields);
 
     const before = { ...user, perms: [...(user.perms || [])], roles: [...(user.roles || [])] } as User;
+    const sources = await this.webRoles.describe(uuid, before.roles);
 
     if (actor && !(await userPermissionCheck(before, actor))) throw new ForbiddenException();
 
@@ -420,7 +436,7 @@ export class UsersService {
       input.roles !== undefined &&
       !sameSet(
         input.roles,
-        (user.roles || []).map((role) => role.id),
+        sources.manual_roles,
       )
     )
       throw new ForbiddenException();
@@ -434,17 +450,17 @@ export class UsersService {
     if (allowed.has('activated')) user.activated = input.activated;
     if (allowed.has('perms')) user.perms = input.perms;
 
-    if (allowed.has('roles')) {
-      if (!input.roles) input.roles = [];
+    if (allowed.has('roles') && input.roles !== undefined) {
 
       user.roles = await this.rolesRepository.findBy({
-        id: In(input.roles),
+        id: In(input.roles ?? []),
       });
 
       if (!user.roles.find((role) => role.id === ImportantRoles.Default))
         user.roles.push(await this.rolesRepository.findOneBy({ id: ImportantRoles.Default }));
 
-      await assertRolesGrantable(user.roles, before.roles, actor);
+      await assertRolesGrantable(user.roles, before.roles.filter((role) => sources.manual_roles.includes(role.id)), actor);
+      user.roles = await this.webRoles.syncUser(uuid, user.roles.map((role) => role.id));
     }
 
     if (actor && !(await userPermissionCheck(user, actor))) throw new ForbiddenException();
@@ -460,7 +476,12 @@ export class UsersService {
 
     const saved = await this.usersRepository.save(user);
 
-    this.audit('user.update', saved, actor, request, auditChanges(userSnapshot(before), userSnapshot(saved)));
+    const afterSources = await this.webRoles.describe(uuid, saved.roles || []);
+
+    this.audit('user.update', saved, actor, request, auditChanges(
+      { ...userSnapshot(before), manual_roles: sources.manual_roles },
+      { ...userSnapshot(saved), manual_roles: afterSources.manual_roles },
+    ));
 
     return saved;
   }

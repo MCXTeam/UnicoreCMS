@@ -16,6 +16,7 @@ import { ImportantRoles } from '../enums/important-roles.enum';
 import { getDataSourceByName } from 'typeorm-transactional';
 import { UsersDonateGroup } from 'src/game/donate/groups/entities/user-donate.entity';
 import { UsersDonatePermission } from 'src/game/donate/permissions/entities/user-permission.entity';
+import { IsNull, MoreThan } from 'typeorm';
 
 export type PermissionOptions = {
   or?: boolean;
@@ -58,9 +59,12 @@ export async function playerPermissions(request: any): Promise<string[]> {
   if (request[DONATE_PERMS_CACHE_KEY]) return request[DONATE_PERMS_CACHE_KEY];
 
   const connection = getDataSourceByName('default');
+  const uuid = request.user.uuid;
+  const now = new Date();
+  const where = [{ user: { uuid }, expired: IsNull() }, { user: { uuid }, expired: MoreThan(now) }];
   const [user_dgroups, user_dperms] = await Promise.all([
-    connection.getRepository(UsersDonateGroup).find({ where: { user: { uuid: request.user.uuid } }, relations: ['user'] }),
-    connection.getRepository(UsersDonatePermission).find({ where: { user: { uuid: request.user.uuid } }, relations: ['user'] }),
+    connection.getRepository(UsersDonateGroup).find({ where, relations: ['user'] }),
+    connection.getRepository(UsersDonatePermission).find({ where, relations: ['user'] }),
   ]);
 
   const perms = filterPlayerPermissions(
