@@ -3,6 +3,35 @@ const { test } = require('node:test');
 const braces = require('braces');
 const forge = require('node-forge');
 const { MailerService } = require('@nestjs-modules/mailer');
+const { once } = require('node:events');
+const express = require('express');
+const multer = require('multer');
+
+test('Multer preserves binary uploads and file metadata with Express', async () => {
+  const app = express();
+  const image = Buffer.from('89504e470d0a1a0a', 'hex');
+
+  app.patch('/upload', multer().single('file'), (request, response) => response.json({
+    name: request.file?.originalname,
+    type: request.file?.mimetype,
+    bytes: Array.from(request.file?.buffer || []),
+  }));
+  const server = app.listen(0, '127.0.0.1');
+
+  await once(server, 'listening');
+  try {
+    const form = new FormData();
+
+    form.append('file', new Blob([image], { type: 'image/png' }), 'skin.png');
+    const response = await fetch(`http://127.0.0.1:${server.address().port}/upload`, { method: 'PATCH', body: form, signal: AbortSignal.timeout(5000) });
+
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { name: 'skin.png', type: 'image/png', bytes: Array.from(image) });
+  } finally {
+    server.closeAllConnections();
+    await new Promise((resolve) => server.close(resolve));
+  }
+});
 
 test('GHSA-vfj7-8cjw-p6xm: braces rejects deep patterns before recursive compilation or expansion', () => {
   assert.deepEqual(braces.expand('src/{client,server}/*.ts'), ['src/client/*.ts', 'src/server/*.ts']);
