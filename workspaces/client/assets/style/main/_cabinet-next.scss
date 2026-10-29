@@ -1,8 +1,8 @@
 @use '../breakpoints' as *;
 
 :root {
-  --cab-radius: 18px;
-  --cab-gap: 18px;
+  --cab-radius: var(--ui-radius-card);
+  --cab-gap: var(--ui-space-6);
   --cab-card: #fff;
   --cab-inner: rgba(var(--vs-text), 0.035);
   --cab-line: rgba(var(--vs-text), 0.07);
@@ -37,9 +37,9 @@
 
 .cab-tile {
   .p-datatable-header-cell {
-    padding: 0 14px 10px;
+    padding: 0 16px 12px;
     border-bottom: 1px solid var(--cab-line);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -47,9 +47,9 @@
   }
 
   .p-datatable-tbody > tr > td {
-    padding: 13px 14px;
+    padding: 12px 16px;
     border-bottom: 1px solid rgba(var(--vs-text), 0.05);
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .p-datatable-tbody > tr:last-child > td {
@@ -71,13 +71,13 @@
   }
 
   .p-datatable-emptymessage td {
-    padding: 26px 0;
+    padding: 24px 0;
     text-align: center;
     color: var(--cab-muted);
   }
 
   .p-paginator {
-    padding: 14px 0 0;
+    padding: 16px 0 0;
   }
 }
 
@@ -93,40 +93,46 @@
 .cab-top__inner {
   display: flex;
   align-items: center;
-  gap: 22px;
+  gap: 24px;
   max-width: 1440px;
   margin: 0 auto;
   padding: 12px 24px;
 
   @include media-breakpoint-down(sm) {
     padding-inline: 12px;
-    gap: 10px;
+    gap: 12px;
     flex-wrap: wrap;
   }
 }
 
 .cab-brand {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 19px;
+  gap: 12px;
+  font-size: 20px;
   font-weight: 600;
   color: rgba(var(--vs-text), 0.9) !important;
 }
 
 .cab-top__nav {
   display: flex;
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .cab-top__link {
+  flex-shrink: 0;
+  white-space: nowrap;
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 8px 14px;
+  gap: 8px;
+  padding: 8px 16px;
   border-radius: 10px;
-  font-size: 15px;
+  font-size: 16px;
   color: var(--cab-muted) !important;
   transition: all 180ms;
 
@@ -141,14 +147,14 @@
   }
 
   i {
-    font-size: 19px;
+    font-size: 20px;
   }
 }
 
 .cab-top__side {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   margin-left: auto;
 }
 
@@ -156,7 +162,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 14px;
+  padding: 8px 16px;
   border: 1px solid var(--cab-line);
   border-radius: 12px;
   font-weight: 600;
@@ -169,32 +175,32 @@
   }
 
   i {
-    font-size: 19px;
+    font-size: 20px;
     color: rgb(var(--vs-primary));
   }
 }
 
 .cab-icon-btn i {
-  font-size: 21px;
+  font-size: 20px;
 }
 
 .cab-burger i {
-  font-size: 25px;
+  font-size: 24px;
 }
 
 .cab-shell {
   display: grid;
   grid-template-columns: 268px minmax(0, 1fr);
-  gap: 28px;
+  gap: 32px;
   width: 100%;
   max-width: 1440px;
   margin: 0 auto;
-  padding: 28px 24px 100px;
+  padding: 32px 24px 100px;
   flex: 1 1 auto;
 
   @include media-breakpoint-down(xl) {
     grid-template-columns: minmax(0, 1fr);
-    padding: 20px 16px 80px;
+    padding: 24px 16px 80px;
   }
 }
 
@@ -203,7 +209,7 @@
   top: 88px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 
   @include media-breakpoint-up(xl) {
     max-height: calc(100vh - 108px);
@@ -226,7 +232,7 @@
 .cab-aside__desktop {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 
   @include media-breakpoint-down(xl) {
     display: none;
@@ -244,14 +250,14 @@
   border: 1px solid var(--cab-line);
   border-radius: var(--cab-radius);
   box-shadow: var(--cab-shadow);
-  padding: 20px;
+  padding: 24px;
 }
 
 .cab-me {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 14px 16px;
+  gap: 16px;
+  padding: 16px 16px;
 
   &__face canvas {
     border-radius: 12px;
@@ -259,7 +265,7 @@
   }
 
   &__text span {
-    font-size: 13px;
+    font-size: 14px;
     color: var(--cab-muted);
   }
 }
@@ -282,7 +288,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 11px 14px;
+    padding: 11px 16px;
     border-radius: 12px;
     font-size: 14px;
     font-weight: 500;
@@ -325,16 +331,15 @@
 }
 
 .cab-head {
-  margin-bottom: 22px;
+  margin-bottom: var(--ui-space-6);
 
   h1 {
-    font-size: 32px;
-    letter-spacing: -0.5px;
+    font-size: var(--ui-title-page);
   }
 
   p {
-    margin-top: 6px !important;
-    font-size: 15px;
+    margin-top: 8px !important;
+    font-size: 16px;
     color: var(--cab-muted);
   }
 }
@@ -343,8 +348,8 @@
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  padding-bottom: 14px;
-  margin-bottom: 6px;
+  padding-bottom: 16px;
+  margin-bottom: 8px;
   scrollbar-width: none;
 
   &::-webkit-scrollbar {
@@ -356,7 +361,7 @@
     align-items: center;
     gap: 8px;
     white-space: nowrap;
-    padding: 9px 14px;
+    padding: 8px 16px;
     border: 1px solid var(--cab-line);
     border-radius: 999px;
     font-size: 14px;
@@ -394,7 +399,7 @@
   border: 1px solid var(--cab-line);
   border-radius: var(--cab-radius);
   box-shadow: var(--cab-shadow);
-  padding: 22px;
+  padding: var(--ui-card-padding);
   transition:
     transform 180ms,
     border-color 180ms;
@@ -428,16 +433,14 @@
   &__title {
     display: flex;
     align-items: center;
-    gap: 9px;
+    gap: 8px;
     margin: 0;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--cab-muted);
+    font-size: var(--ui-title-subsection);
+    font-weight: 700;
+    color: rgba(var(--vs-text), 0.85);
 
     i {
-      font-size: 17px;
+      font-size: 18px;
       color: rgb(var(--vs-primary));
     }
   }
@@ -447,7 +450,7 @@
   }
 
   &__foot {
-    margin-top: 18px;
+    margin-top: 16px;
   }
 }
 
@@ -498,7 +501,7 @@
 }
 
 .cab-metric {
-  font-size: 34px;
+  font-size: 32px;
   font-weight: 600;
   line-height: 1.1;
   letter-spacing: -0.5px;
@@ -507,7 +510,7 @@
 .cab-metrics {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  gap: 18px 26px;
+  gap: 16px 24px;
 
   &__item {
     display: flex;
@@ -516,7 +519,7 @@
   }
 
   &__label {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -524,14 +527,14 @@
   }
 
   &__value {
-    font-size: 30px;
+    font-size: 32px;
     font-weight: 600;
     line-height: 1.05;
     letter-spacing: -0.5px;
   }
 
   &__value--soft {
-    font-size: 23px;
+    font-size: 24px;
     color: rgba(var(--vs-text), 0.75);
   }
 }
@@ -551,9 +554,9 @@
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    padding: 9px 0;
+    padding: 8px 0;
     border-bottom: 1px solid rgba(var(--vs-text), 0.05);
-    font-size: 15px;
+    font-size: 16px;
 
     &:last-child {
       border-bottom: none;
@@ -602,7 +605,7 @@
 .cab-profile {
   display: flex;
   align-items: flex-start;
-  gap: 22px;
+  gap: 24px;
 
   @include media-breakpoint-down(sm) {
     flex-direction: column;
@@ -614,7 +617,7 @@
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
 
     @include media-breakpoint-down(sm) {
       width: 100%;
@@ -622,7 +625,7 @@
   }
 
   &__name {
-    font-size: 23px;
+    font-size: 24px;
     font-weight: 600;
     line-height: 1.2;
     overflow-wrap: anywhere;
@@ -665,19 +668,19 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
-    padding: 10px 18px 12px;
+    gap: 8px;
+    padding: 12px 16px 12px;
     border-radius: 16px;
     background: var(--cab-inner);
   }
 
   &__anim {
     display: flex;
-    gap: 14px;
+    gap: 16px;
     color: var(--cab-muted);
 
     i {
-      font-size: 19px;
+      font-size: 20px;
       cursor: pointer;
       transition: color 160ms;
 
@@ -691,7 +694,7 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
   }
 
   &__row {
@@ -703,20 +706,20 @@
 .cab-servers {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 
   &--grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
-    gap: 10px;
+    gap: 12px;
   }
 
   &__row {
     display: flex;
     align-items: center;
-    gap: 14px;
-    padding: 10px 12px;
-    border-radius: 14px;
+    gap: 16px;
+    padding: 12px 12px;
+    border-radius: var(--ui-radius-card);
     background: var(--cab-inner);
 
     h4 {
@@ -744,7 +747,7 @@
     text-align: right;
 
     span {
-      font-size: 13px;
+      font-size: 14px;
       letter-spacing: 0.06em;
       text-transform: uppercase;
       color: var(--cab-muted);
@@ -786,9 +789,9 @@
 .cab-toggle {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   padding: 12px;
-  border-radius: 14px;
+  border-radius: var(--ui-radius-card);
   background: var(--cab-inner);
 
   > i {
@@ -803,12 +806,12 @@
     margin-right: auto;
 
     b {
-      font-size: 15px;
+      font-size: 16px;
       font-weight: 600;
     }
 
     span {
-      font-size: 13px;
+      font-size: 14px;
       color: var(--cab-muted);
     }
   }
@@ -834,7 +837,7 @@
 .cab-select {
   min-width: 160px;
   --p-form-field-padding-y: 0.45rem;
-  font-size: 15px;
+  font-size: 16px;
 }
 
 .cab .p-avatar {
@@ -847,17 +850,17 @@
   }
 
   i {
-    font-size: 19px;
+    font-size: 20px;
   }
 }
 
 .cab .p-avatar-lg i {
-  font-size: 23px;
+  font-size: 24px;
 }
 
 .cab-section {
   margin: 0 0 12px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -875,15 +878,15 @@
 .cab-offers {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .cab-offer {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 12px 14px;
-  border-radius: 14px;
+  gap: 16px;
+  padding: 12px 16px;
+  border-radius: var(--ui-radius-card);
   background: var(--cab-inner);
   transition: background 160ms;
 
@@ -927,24 +930,24 @@
   border-radius: 999px;
   background: rgba(var(--vs-primary), 0.18);
   color: rgb(var(--vs-primary));
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
 }
 
 .cab-form {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 
 .cab-field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .cab-label {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.04em;
   color: var(--cab-muted);
@@ -960,8 +963,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 18px 14px;
+  gap: 8px;
+  padding: 16px 16px;
   border: 1px solid var(--cab-line);
   border-radius: 16px;
   background: var(--cab-inner);
@@ -976,7 +979,7 @@
   }
 
   span {
-    font-size: 13px;
+    font-size: 14px;
     color: var(--cab-muted);
   }
 
@@ -995,7 +998,7 @@
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: end;
   gap: 24px;
-  margin-top: 20px;
+  margin-top: 24px;
 
   @include media-breakpoint-down(md) {
     grid-template-columns: minmax(0, 1fr);
@@ -1021,7 +1024,7 @@
 .cab-methods {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .cab-method {
@@ -1029,9 +1032,9 @@
   align-items: center;
   gap: 12px;
   min-height: 58px;
-  padding: 10px 14px;
+  padding: 12px 16px;
   border: 1px solid var(--cab-line);
-  border-radius: 14px;
+  border-radius: var(--ui-radius-card);
   background: var(--cab-inner);
   cursor: pointer;
   transition: border-color 160ms;
@@ -1047,8 +1050,8 @@
 }
 
 .cab-note {
-  padding: 12px 14px;
-  border-radius: 14px;
+  padding: 12px 16px;
+  border-radius: var(--ui-radius-card);
   background: var(--cab-inner);
 
   small {
@@ -1058,7 +1061,7 @@
 
 .cab-copy {
   display: flex;
-  gap: 10px;
+  gap: 12px;
 
   @include media-breakpoint-down(sm) {
     flex-direction: column;
@@ -1076,16 +1079,16 @@
 .cab-cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
-  gap: 10px;
+  gap: 12px;
 }
 
 .cab-card-item {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 12px 14px;
+  gap: 16px;
+  padding: 12px 16px;
   border: 1px solid transparent;
-  border-radius: 14px;
+  border-radius: var(--ui-radius-card);
   background: var(--cab-inner);
   color: inherit;
   text-align: left;
@@ -1107,7 +1110,7 @@
 
   &__cats {
     display: block;
-    font-size: 13px;
+    font-size: 14px;
     color: var(--cab-muted);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1124,7 +1127,7 @@
 
     strike,
     span {
-      font-size: 13px;
+      font-size: 14px;
       color: var(--cab-muted);
     }
 
@@ -1134,7 +1137,7 @@
   }
 
   &__cart {
-    font-size: 21px;
+    font-size: 20px;
     color: var(--cab-muted);
     transition: color 160ms;
   }
@@ -1155,12 +1158,12 @@
 .cab-prizes {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 10px;
+  gap: 12px;
 }
 
 .cab-prize {
-  padding: 14px 16px;
-  border-radius: 14px;
+  padding: 16px 16px;
+  border-radius: var(--ui-radius-card);
   background: var(--cab-inner);
 
   span {
@@ -1171,14 +1174,14 @@
 
 .cab-playtime {
   padding: 12px;
-  border-radius: 14px;
+  border-radius: var(--ui-radius-card);
   background: var(--cab-inner);
   min-width: 0;
 
   &__server {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 16px;
     margin-bottom: 12px;
 
     h4 { margin: 0; font-size: 16px; overflow-wrap: anywhere; }
@@ -1187,7 +1190,7 @@
 
   &__metrics {
     display: grid;
-    gap: 10px;
+    gap: 12px;
     margin: 0;
 
     > div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; }
@@ -1198,15 +1201,15 @@
 
 .cab-punishments {
   display: grid;
-  gap: 10px;
+  gap: 12px;
   min-width: 0;
 
   &__row {
     padding: 12px;
-    border-radius: 14px;
+    border-radius: var(--ui-radius-card);
     background: var(--cab-inner);
     overflow-wrap: anywhere;
-    p { margin: 10px 0; white-space: pre-wrap; }
+    p { margin: 12px 0; white-space: pre-wrap; }
     > span { font-size: 14px; color: var(--cab-muted); }
   }
 

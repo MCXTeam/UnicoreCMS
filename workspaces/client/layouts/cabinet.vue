@@ -2,12 +2,10 @@
   <div class="cab">
     <header class="cab-top">
       <div class="cab-top__inner">
-        <Button class="cab-burger d-xl-none" text @click="activeSidebar = true">
-          <i class="bx bx-menu"></i>
-        </Button>
+        <Button class="cab-burger d-xl-none" icon="bx bx-menu" :aria-label="$t('footer.navigation')" text @click="activeSidebar = true" />
         <NuxtLink to="/" class="cab-brand without-underline">
           <img src="/icon.png" height="34" />
-          <span class="d-none d-md-inline">{{ $pub.sitename }}</span>
+          <span class="d-none d-xxl-inline">{{ $pub.sitename }}</span>
         </NuxtLink>
         <nav class="cab-top__nav d-none d-xl-flex">
           <NuxtLink
@@ -25,13 +23,8 @@
             <span>{{ $utils.formatCurrency('real', $auth.user?.real) }}</span>
           </NuxtLink>
           <NotificationsBell />
-          <Button text class="cab-icon-btn" @click="$unicore.switchTheme()">
-            <i v-if="$colorMode.preference == 'light'" class="bx bxs-sun"></i>
-            <i v-else class="bx bxs-moon"></i>
-          </Button>
-          <Button text severity="danger" class="cab-icon-btn" @click="$unicore.logout()">
-            <i class="bx bx-exit"></i>
-          </Button>
+          <Button text class="cab-icon-btn" :icon="$colorMode.preference == 'light' ? 'bx bxs-sun' : 'bx bxs-moon'" :aria-label="$t('admin.layout_block_theme')" @click="$unicore.switchTheme()" />
+          <Button text severity="danger" class="cab-icon-btn" icon="bx bx-exit" :aria-label="$t('header.logout')" @click="$unicore.logout()" />
         </div>
       </div>
     </header>

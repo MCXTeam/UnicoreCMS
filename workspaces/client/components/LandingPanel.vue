@@ -36,23 +36,23 @@
       </div>
     </div>
     <h2 class="mt-0">{{ $t('panel.servers') }}</h2>
-    <div v-if="onlines.servers" class="">
+    <div v-if="mounted && onlines.servers" class="server-online-list">
       <p v-if="!onlines.servers.length && onlines.total.online == null">{{ $t('panel.online_unknown') }}</p>
       <div v-for="online in onlines.servers" :key="online.server.id" class="mb-4">
-        <div class="onlines d-flex justify-content-between align-items-end mb-3">
-          <div class="d-flex">
+        <div class="onlines mb-3">
+          <div class="server-online-info">
             <IconAvatar :path="online.server.icon" size="xlarge" icon="bx bxs-server" />
-            <div class="ms-3">
+            <div class="server-online-description">
               <span>{{ $t('panel.version') }}: {{ online.server.version }}</span>
               <NuxtLink :to="`/servers/${online.server.id}`">
-                <h3 class="mb-1 mt-0 d-flex align-items-center gap-2">
-                  {{ online.server.name }}
+                <h3 class="server-online-name mb-1 mt-0">
+                  <span>{{ online.server.name }}</span>
                   <WipeBadge v-if="online.server.wipe" />
                 </h3>
               </NuxtLink>
             </div>
           </div>
-          <div class="d-flex flex-column align-items-end">
+          <div class="server-online-count">
             <div v-tooltip.top="$t('panel.record_tooltip', { record: online.record, today: online.record_today })">
               <h2 v-if="online.online && online.players != null" class="mb-1 mt-0">
                 <ClientOnly>
@@ -76,7 +76,7 @@
           </div>
         </div>
       </div>
-      <div class="text-center">
+      <div class="server-online-summary text-center">
         <p class="m-0">
           {{ $t('panel.total_online') }}:
           <b>
@@ -141,6 +141,9 @@
 <script setup lang="ts">
 import { NuxtLink } from '#components'
 
+const mounted = ref(false)
+onMounted(() => { mounted.value = true })
+
 defineProps({
   config: {
     type: Object,
@@ -152,3 +155,15 @@ defineProps({
   },
 })
 </script>
+
+<style scoped>
+.onlines { display: flex; align-items: center; gap: var(--ui-space-4); }
+.server-online-info { display: flex; align-items: center; gap: var(--ui-space-3); flex: 1; min-width: 0; }
+.server-online-info :deep(.p-avatar) { flex-shrink: 0; width: 48px; height: 48px; }
+.server-online-description { min-width: 0; overflow-wrap: anywhere; }
+.server-online-name { display: flex; align-items: center; flex-wrap: wrap; gap: var(--ui-space-2); }
+.server-online-name > span { min-width: 0; overflow-wrap: anywhere; }
+.server-online-count { display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; max-width: 45%; text-align: end; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.server-online-summary { display: grid; gap: var(--ui-space-1); margin-top: var(--ui-space-6); }
+.server-instances > div { gap: var(--ui-space-3); overflow-wrap: anywhere; }
+</style>

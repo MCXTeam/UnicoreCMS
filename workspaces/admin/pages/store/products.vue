@@ -2,50 +2,39 @@
   <div class="grid">
     <div class="col-12">
       <div class="card">
-        <Toolbar class="mb-4">
-          <template #start>
-            <div class="my-2">
-              <Button v-if="canCreate" :label="$t('admin.create')" icon="pi pi-plus" class="p-button-success mr-2" @click="openDialog()" />
-              <Button
-                v-if="canUpdateMany"
-                icon="pi pi-pencil"
-                class="p-button-second mr-2"
-                :disabled="!selected || !selected.length"
-                @click="openManyDialog()"
-              />
-              <Button
-                v-if="canDeleteMany"
-                icon="pi pi-trash"
-                class="p-button-danger"
-                :disabled="!selected || !selected.length"
-                @click="removeMany()"
-              />
-            </div>
-          </template>
-
-          <template #end>
-            <Button
-              v-if="canImport"
-              :disabled="loading"
-              :label="$t('admin.import')"
-              icon="pi pi-plus"
-              class="mr-2"
-              @click="openImportDialog()"
-            />
-            <Button
-              v-if="canExport"
-              :disabled="!selected || !selected.length || loading"
-              :label="$t('admin.export')"
-              icon="pi pi-upload"
-              class="p-button-help"
-              @click="exportItems()"
-            />
-          </template>
-        </Toolbar>
+        <div class="products-heading">
+          <h1 class="m-0">{{ $t('admin.products_title') }}</h1>
+          <div class="flex flex-wrap gap-2">
+            <Button v-if="canCreate" :label="$t('admin.create')" icon="pi pi-plus" @click="openDialog()" />
+            <Button v-if="canImport || canExport" :label="$t('admin.import_export')" icon="pi pi-upload" outlined aria-haspopup="true" aria-controls="products-transfer-menu" @click="$refs.transferMenu.toggle($event)" />
+            <Menu ref="transferMenu" id="products-transfer-menu" :model="transferActions" popup />
+          </div>
+        </div>
+        <div class="products-filters">
+          <IconField class="products-search">
+            <InputIcon class="pi pi-search" />
+            <InputText @keydown.enter="onFilter()" v-model="filters.global.value" :placeholder="$t('admin.search')" :aria-label="$t('admin.search')" />
+          </IconField>
+          <MultiSelect v-model="filters.servers.value" :options="servers" optionLabel="name" :placeholder="$t('admin.choose_servers')" :aria-label="$t('admin.servers')" :maxSelectedLabels="1" filter showClear @change="onFilter()" />
+          <AutoComplete v-model="filters.categories.value" multiple :suggestions="categories" @complete="searchCategory($event)" optionLabel="name" :placeholder="$t('admin.choose_categories')" :aria-label="$t('admin.categories')" @item-select="onFilter()" @item-unselect="onFilter()" />
+          <Select :modelValue="sortValue" :options="sortOptions" optionLabel="label" optionValue="value" :aria-label="$t('admin.sorting')" @update:modelValue="setSorting($event)" />
+        </div>
+        <div v-if="selected?.length" class="flex flex-wrap align-items-center gap-2 mb-3">
+          <span>{{ $t('admin.selected_items', { count: selected.length }) }}</span>
+          <Button v-if="canUpdateMany" :label="$t('admin.edit')" icon="pi pi-pencil" outlined @click="openManyDialog()" />
+          <Button v-if="canDeleteMany" :label="$t('admin.delete')" icon="pi pi-trash" severity="danger" outlined @click="removeMany()" />
+        </div>
+        <p class="products-scroll-hint text-color-secondary">{{ $t('admin.table_scroll_hint') }}</p>
+        <Menu ref="rowMenu" id="products-row-menu" :model="rowActions" popup />
         <DataTable
+          class="products-table"
+          :tableStyle="{ minWidth: '760px' }"
           :value="products.data"
           :loading="loading"
           :rows="products.meta.itemsPerPage"
+          :first="Math.max(0, products.meta.currentPage - 1) * products.meta.itemsPerPage"
+          :sortField="sortValue.split(':')[0]"
+          :sortOrder="sortValue.split(':')[1] === 'DESC' ? -1 : 1"
           paginator
           v-model:filters="filters"
           :totalRecords="products.meta.totalItems"
@@ -60,95 +49,37 @@
           dataKey="id"
           filterDisplay="menu"
         >
-          <template #header>
-            <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-              <h5 class="m-0">{{ $t('admin.products_title') }}</h5>
-              <span class="block mt-2 md:mt-0 p-input-icon-left">
-                <i class="pi pi-search" />
-                <InputText @keydown.enter="onFilter()" v-model="filters['global'].value" :placeholder="$t('admin.search')" />
-              </span>
-            </div>
-          </template>
           <Column v-if="canDeleteMany || canUpdateMany" selectionMode="multiple" :style="{ width: '3rem' }"></Column>
-          <Column field="id" header="ID" :style="{ width: '8rem' }" sortable></Column>
           <Column field="name" :header="$t('admin.name')" sortable>
             <template #body="slotProps">
-              <div class="flex align-items-center">
+              <div class="products-name">
                 <IconAvatar :path="slotProps.data.icon" />
-                <span class="ml-2">{{ slotProps.data.name }}</span>
+                <div><strong>{{ slotProps.data.name }}</strong><small class="block text-color-secondary">ID {{ slotProps.data.id }}</small></div>
               </div>
             </template>
           </Column>
-          <Column field="price" :header="$t('admin.price')" sortable>
+          <Column field="price" :header="$t('admin.price')" sortable headerClass="products-price" bodyClass="products-price">
             <template #body="slotProps">
               {{ $utils.formatCurrency('real', slotProps.data.price) }}
             </template>
           </Column>
           <Column field="sale" :header="$t('admin.sale')" sortable></Column>
-          <Column field="servers" :header="$t('admin.servers')" filterField="servers" :showFilterMatchModes="false">
+          <Column field="servers" :header="$t('admin.servers')">
             <template #body="slotProps">
-              <Tag class="mr-2 mb-2" v-for="server in slotProps.data.servers" :key="server.id" :value="server.name"></Tag>
-            </template>
-            <template #filter="{ filterModel }">
-              <div class="mb-3 font-bold">{{ $t('admin.servers') }}</div>
-              <MultiSelect
-                display="chip"
-                :filter="true"
-                v-model="filterModel.value"
-                :options="servers"
-                optionLabel="name"
-                :placeholder="$t('admin.choose_servers')"
-                class="p-column-filter"
-              >
-                <template #option="slotProps">
-                  <div class="p-multiselect-representative-option">
-                    <IconAvatar :path="slotProps.option.icon" />
-                    <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
-                  </div>
-                </template>
-              </MultiSelect>
+              <EntitySummary :items="slotProps.data.servers || []" />
             </template>
           </Column>
-          <Column field="categories" :header="$t('admin.categories')" filterField="categories" :showFilterMatchModes="false">
+          <Column field="categories" :header="$t('admin.categories')">
             <template #body="slotProps">
-              <Tag class="mr-2 mb-2" v-for="category in slotProps.data.categories" :key="category.id" :value="category.name"></Tag>
-            </template>
-            <template #filter="{ filterModel }">
-              <div class="mb-3 font-bold">{{ $t('admin.categories') }}</div>
-              <AutoComplete
-                v-model="filterModel.value"
-                multiple
-                :suggestions="categories"
-                @complete="searchCategory($event)"
-                optionLabel="name"
-                :placeholder="$t('admin.choose_categories')"
-                style="max-width: 200px"
-              >
-                <template #option="slotProps">
-                  <div class="flex align-items-center">
-                    <IconAvatar :path="slotProps.option.icon" />
-                    <span class="ml-2">{{ slotProps.option.name }} (#{{ slotProps.option.id }})</span>
-                  </div>
-                </template>
-              </AutoComplete>
+              <EntitySummary :items="slotProps.data.categories || []" />
             </template>
           </Column>
-          <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
-            <template #body="slotProps">
-              <Button
-                v-if="canUpdateOn(slotProps.data.servers)"
-                @click="openDialog(slotProps.data)"
-                icon="pi pi-pencil"
-                class="p-button-rounded p-button-success mr-2"
-              />
-              <Button
-                  v-if="canUpdateOn(slotProps.data.servers)" @click="openFileDialog(slotProps.data)" icon="pi pi-images" class="p-button-rounded p-button-secondary mr-2" />
-              <Button
-                @click="removeProduct(slotProps.data.id)"
-                v-if="canDeleteOn(slotProps.data.servers) && !slotProps.data.important"
-                icon="pi pi-trash"
-                class="p-button-rounded p-button-warning mt-2"
-              />
+          <Column :style="{ width: '7rem' }">
+            <template #body="{ data }">
+              <div class="products-actions">
+                <Button v-if="canUpdateOn(data.servers)" @click="openDialog(data)" icon="pi pi-pencil" :aria-label="$t('admin.edit')" outlined />
+                <Button v-if="canUpdateOn(data.servers) || (canDeleteOn(data.servers) && !data.important)" icon="pi pi-ellipsis-h" :aria-label="$t('admin.more_actions')" aria-haspopup="true" aria-controls="products-row-menu" text @click="openRowMenu($event, data)" />
+              </div>
             </template>
           </Column>
         </DataTable>
@@ -703,6 +634,7 @@ export default {
   data() {
     return {
       selected: null,
+      rowActions: [],
       categories: null,
       servers: null,
       serversFilterd: null,
@@ -760,6 +692,22 @@ export default {
     }
   },
   computed: {
+    sortValue() {
+      const value = this.products.meta.sortBy
+      return (Array.isArray(value) ? value[0]?.join(':') : value) || 'id:DESC'
+    },
+    transferActions() {
+      return [
+        ...(this.canImport ? [{ label: this.$t('admin.import'), icon: 'pi pi-download', disabled: this.loading, command: () => this.openImportDialog() }] : []),
+        ...(this.canExport ? [{ label: this.$t('admin.export'), icon: 'pi pi-upload', disabled: !this.selected?.length || this.loading, command: () => this.exportItems() }] : []),
+      ]
+    },
+    sortOptions() {
+      return ['id', 'name', 'price', 'sale'].flatMap((field) => ['ASC', 'DESC'].map((direction) => ({
+        label: `${field === 'id' ? 'ID' : this.$t(`admin.${field}`)} ${direction === 'ASC' ? '↑' : '↓'}`,
+        value: `${field}:${direction}`,
+      })))
+    },
     manyServerOptions() {
       if (!this.updateManyScope) return this.servers
 
@@ -813,6 +761,18 @@ export default {
     },
   },
   methods: {
+    setSorting(value) {
+      this.products.meta.sortBy = value
+      this.products.meta.currentPage = 1
+      this.load()
+    },
+    openRowMenu(event, product) {
+      this.rowActions = [
+        ...(this.canUpdateOn(product.servers) ? [{ label: this.$t('admin.product_icon'), icon: 'pi pi-images', command: () => this.openFileDialog(product) }] : []),
+        ...(this.canDeleteOn(product.servers) && !product.important ? [{ label: this.$t('admin.delete'), icon: 'pi pi-trash', command: () => this.removeProduct(product.id) }] : []),
+      ]
+      this.$refs.rowMenu.toggle(event)
+    },
     disposeProductForm() {
       this.productFormKey++
       this.productForm?.dispose()
@@ -845,7 +805,7 @@ export default {
           params: {
             page: this.products.meta.currentPage,
             limit: this.products.meta.itemsPerPage,
-            sortBy: this.products.meta.sortBy,
+            sortBy: this.sortValue,
             search: this.filters.global.value,
             ...this.filtersTansformer(this.filters),
           },
@@ -876,11 +836,10 @@ export default {
       this.load()
     },
     onSort(event) {
-      this.products.meta.sortBy = sortTransform(event.sortOrder, event.sortField)
-
-      this.load()
+      this.setSorting(sortTransform(event.sortOrder, event.sortField))
     },
     onFilter() {
+      this.products.meta.currentPage = 1
       this.load()
     },
     async searchCategory(event) {
@@ -1199,3 +1158,71 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.products-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.products-filters {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.products-search {
+  flex: 1 1 240px;
+}
+.products-search :deep(input) {
+  width: 100%;
+}
+.products-filters > :not(.products-search) {
+  flex: 1 1 180px;
+  min-width: 0;
+}
+.products-name {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 180px;
+}
+.products-name :deep(.p-avatar) {
+  flex-shrink: 0;
+}
+.products-name strong {
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+.products-table :deep(td) {
+  padding-block: 12px;
+  vertical-align: middle;
+}
+.products-table :deep(.products-price) {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.products-table :deep(.products-price .p-datatable-column-header-content) {
+  justify-content: flex-end;
+}
+.products-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.products-scroll-hint {
+  display: none;
+  font-size: 14px;
+  margin: 0 0 12px;
+}
+@media (max-width: 1100px) {
+  .products-scroll-hint {
+    display: block;
+  }
+}
+</style>

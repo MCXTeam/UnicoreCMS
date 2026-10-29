@@ -78,13 +78,13 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: var(--ui-control);
+  height: var(--ui-control);
   border: none;
-  border-radius: 12px;
+  border-radius: var(--ui-radius-control);
   background: none;
   color: inherit;
-  font-size: 1.5rem;
+  font-size: var(--ui-icon-size);
   line-height: 1;
   cursor: pointer;
 }

@@ -19,11 +19,11 @@
                 <span class="text-uppercase">{{ $t('header.online') }}</span>
               </div>
               <h1 class="mt-2">
-                <ClientOnly v-if="onlines.total.online != null">
-                  <CountTo :startVal="0" :endVal="onlines.total.online" :duration="1000" />
-                  <template #fallback>{{ onlines.total.online }}</template>
+                <ClientOnly>
+                  <CountTo v-if="onlines.total.online != null" :startVal="0" :endVal="onlines.total.online" :duration="1000" />
+                  <span v-else :aria-label="$t('panel.online_unknown')">?</span>
+                  <template #fallback><span :aria-label="$t('panel.online_unknown')">?</span></template>
                 </ClientOnly>
-                <span v-else :aria-label="$t('panel.online_unknown')">?</span>
               </h1>
             </div>
             <div>
@@ -43,11 +43,11 @@
             <Button as="a" :href="config.public_launcher_exe" target="download" class="w-100 mb-2" size="large"
               >{{ $t('header.download') }} <i class="bx bxl-windows ms-2"></i
             ></Button>
-            <div class="d-flex justify-content-between">
+            <div class="download-platforms">
               <span>{{ $t('header.other_platforms') }}</span>
-              <div class="d-flex">
-                <Button as="a" :href="config.public_launcher_jar" target="download" text class="m-0" label="Linux" />
-                <Button as="a" :href="config.public_launcher_jar" target="download" text class="m-0" label="MacOS" />
+              <div class="download-platforms__links">
+                <Button as="a" :href="config.public_launcher_jar" target="download" text size="small" class="m-0" label="Linux" />
+                <Button as="a" :href="config.public_launcher_jar" target="download" text size="small" class="m-0" label="MacOS" />
               </div>
             </div>
           </div>
@@ -78,3 +78,8 @@ const { config } = usePublicConfig()
 
 const { data: users } = await usePlayers().count()
 </script>
+
+<style scoped>
+.download-platforms { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--ui-space-2); }
+.download-platforms__links { display: flex; flex-shrink: 0; gap: var(--ui-space-1); }
+</style>

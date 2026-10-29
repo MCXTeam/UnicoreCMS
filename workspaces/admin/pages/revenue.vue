@@ -3,7 +3,7 @@
     <div class="col-12">
       <div class="card">
         <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center mb-4 gap-3">
-          <h5 class="m-0">{{ $t('admin.revenue_title') }}</h5>
+          <h1 class="m-0">{{ $t('admin.revenue_title') }}</h1>
           <div class="flex flex-column sm:flex-row gap-2">
             <DatePicker v-model="range.from" dateFormat="dd.mm.yy" :placeholder="$t('admin.date_from')" showIcon />
             <DatePicker v-model="range.to" dateFormat="dd.mm.yy" :placeholder="$t('admin.date_to')" showIcon />
@@ -44,7 +44,7 @@
         </DataTable>
 
         <div v-if="canItems" class="mt-5">
-          <h5 class="m-0 mb-3">{{ $t('admin.revenue_items_title') }}</h5>
+          <h2 class="m-0 mb-3">{{ $t('admin.revenue_items_title') }}</h2>
           <DataTable :value="items" :loading="loading" responsiveLayout="scroll" dataKey="key">
             <template #empty>
               <div class="text-center p-4 text-color-secondary">{{ $t('admin.revenue_items_empty') }}</div>
@@ -66,7 +66,7 @@
 
         <div v-if="canPayments" class="mt-5">
           <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center mb-3 gap-2">
-            <h5 class="m-0">{{ $t('admin.payments_title') }}</h5>
+            <h2 class="m-0">{{ $t('admin.payments_title') }}</h2>
             <div class="flex flex-wrap align-items-center gap-2">
               <Select
                 v-model="paymentStatus"
@@ -137,7 +137,7 @@
             </Column>
           </DataTable>
 
-          <h5 class="mt-5 mb-3">{{ $t('admin.payments_top_title') }}</h5>
+          <h2 class="mt-5 mb-3">{{ $t('admin.payments_top_title') }}</h2>
           <DataTable :value="paymentsTop" :loading="paymentsLoading" responsiveLayout="scroll" dataKey="uuid">
             <template #empty>
               <div class="text-center p-4 text-color-secondary">{{ $t('admin.payments_top_empty') }}</div>

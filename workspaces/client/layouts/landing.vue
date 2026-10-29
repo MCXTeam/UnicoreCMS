@@ -3,9 +3,7 @@
     <ClientOnly>
       <div class="vs-navbar-content paddingScroll" :class="{ paddingScrollActive: scrolled }">
         <nav class="vs-navbar d-flex align-items-center py-2">
-          <Button @click="activeSidebar = true" class="d-lg-none d-md-block me-3" text>
-            <i class="bx bx-menu"></i>
-          </Button>
+          <Button @click="activeSidebar = true" class="d-flex d-lg-none me-3" text icon="bx bx-menu" :aria-label="$t('footer.navigation')" />
           <LayoutRenderer class="flex-grow-1" place="header" />
         </nav>
       </div>

@@ -53,6 +53,7 @@ export default defineNuxtConfig({
     'unicore-common/styles/toast.css',
     '~/assets/fonts/main.scss',
     '~/assets/styles/layout.scss',
+    'unicore-common/styles/interface.css',
   ],
 
   app: {

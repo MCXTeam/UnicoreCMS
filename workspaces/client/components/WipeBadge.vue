@@ -6,14 +6,15 @@
 .wipe-badge {
   display: inline-flex;
   align-items: center;
-  padding: 0.15em 0.6em;
-  border-radius: 0.4em;
+  padding: 2px 6px;
+  border-radius: 4px;
   background: #b23c30;
   color: #fff;
-  font-size: 0.5em;
+  font-size: var(--ui-caption-size);
   font-weight: 700;
   letter-spacing: 0.05em;
-  line-height: 1.6;
+  line-height: 16px;
+  vertical-align: middle;
   white-space: nowrap;
 }
 </style>

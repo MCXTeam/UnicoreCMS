@@ -376,7 +376,7 @@ a.server-block:hover {
 
   .p-inputtext,
   .p-select {
-    height: 45px;
+    min-height: var(--ui-control);
   }
 
   .p-inputnumber .p-inputtext {

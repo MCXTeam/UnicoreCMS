@@ -32,7 +32,7 @@
         >
           <template #header>
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-              <h5 class="m-0">{{ $t('admin.donate_permissions_title') }}</h5>
+              <h1 class="m-0">{{ $t('admin.donate_permissions_title') }}</h1>
             </div>
           </template>
           <Column v-if="canSort" :style="{ width: '3rem' }" :rowReorder="true" headerStyle="width: 3rem" />

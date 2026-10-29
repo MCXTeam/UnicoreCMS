@@ -1,6 +1,15 @@
 <template>
   <div class="cab-grid">
-    <CabTile v-if="canPayment" :title="$t('cabinet.topup_title')" icon="bx bx-wallet-alt" :span="12">
+    <div v-if="canPayment && payment_loading" class="cab-span-12" role="status" :aria-label="$t('common.loading')"><Skeleton height="100px" /></div>
+    <div v-else-if="canPayment && (payment_failed || !payment_methods.length)" class="cab-span-12 payment-unavailable" role="status">
+      <i class="bx bx-credit-card" aria-hidden="true" />
+      <div>
+        <h2>{{ $t(payment_failed ? 'cabinet.topup_load_error' : 'cabinet.topup_unavailable') }}</h2>
+        <p>{{ $t(payment_failed ? 'cabinet.topup_retry_hint' : 'cabinet.pay_methods_empty') }}</p>
+        <Button v-if="payment_failed" :label="$t('admin.retry')" text @click="load()" />
+      </div>
+    </div>
+    <CabTile v-else-if="canPayment" :title="$t('cabinet.topup_title')" icon="bx bx-wallet-alt" :span="12">
       <div v-if="bonuses" class="cab-packs">
         <button
           v-for="bonus in bonuses"
@@ -44,11 +53,7 @@
         </div>
 
         <h5 class="cab-section mt-4">{{ $t('cabinet.pay_method') }}</h5>
-        <div v-if="!payment_methods.length" class="cab-empty">
-          <i class="bx bx-credit-card"></i>
-          <span>{{ $t('cabinet.pay_methods_empty') }}</span>
-        </div>
-        <div v-else class="cab-methods">
+        <div class="cab-methods">
           <label v-for="method in payment_methods" :key="method" class="cab-method">
             <RadioButton v-model="payment.method" :value="method" />
             <span class="cab-method__name">{{ $t('cabinet.pay_via', { method: payment_methods_map[method] || method }) }}</span>
@@ -64,6 +69,8 @@
         </div>
       </VeeForm>
     </CabTile>
+
+    <p v-if="canPayment && !payment_loading && !payment_failed && !payment_methods.length && (canTransfer || canExchange)" class="cab-span-12 payment-alternatives">{{ $t('cabinet.topup_alternatives') }}</p>
 
     <CabTile v-if="canTransfer" :title="$t('cabinet.transfer_title')" icon="bx bx-transfer" :span="6">
       <VeeForm v-slot="{ meta }" class="cab-form">
@@ -307,6 +314,8 @@ export default {
         server: '',
       },
       payment_methods: [],
+      payment_loading: true,
+      payment_failed: false,
       payment_methods_map: {
         anypay: 'AnyPay',
         centapp: 'CentApp',
@@ -372,8 +381,13 @@ export default {
   methods: {
     async load() {
       this.loading = true
-
-      this.payment_methods = await this.moneyApi.paymentMethods()
+      this.payment_loading = true
+      this.payment_failed = false
+      this.payment_methods = await this.moneyApi.paymentMethods().catch(() => {
+        this.payment_failed = true
+        return []
+      })
+      this.payment_loading = false
       this.bonuses = await this.moneyApi.bonuses()
       this.money = await this.moneyApi.balance()
       this.servers = await this.serversApi.fetchList()
@@ -434,9 +448,44 @@ export default {
   watch: {
     'payment.amount': {
       handler: function (newValue) {
-        this.b_active = [...this.bonuses].reverse().find((b) => Number(newValue) >= b.amount)
+        this.b_active = [...(this.bonuses || [])].reverse().find((b) => Number(newValue) >= b.amount)
       },
     },
   },
 }
 </script>
+
+<style scoped>
+.payment-unavailable {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 24px;
+  background: var(--cab-inner);
+  border: 1px solid var(--cab-line);
+  border-radius: var(--ui-radius-card);
+}
+.payment-unavailable > i {
+  flex-shrink: 0;
+  font-size: 28px;
+  color: rgb(var(--vs-primary));
+}
+.payment-unavailable h2 {
+  font-size: 18px;
+  margin: 0 0 8px;
+}
+.payment-unavailable p {
+  margin: 0;
+  color: var(--cab-muted);
+}
+.payment-alternatives {
+  margin: 0;
+  color: var(--cab-muted);
+  font-size: 14px;
+}
+@media (max-width: 700px) {
+  .payment-unavailable {
+    padding: 16px;
+  }
+}
+</style>

@@ -4,15 +4,17 @@
       <img alt="Logo" src="/logo.png" />
       <span>UNICORECMS</span>
     </NuxtLink>
-    <button class="p-link layout-menu-button layout-topbar-button" @click="onMenuToggle">
+    <button type="button" class="p-link layout-menu-button layout-topbar-button" :aria-label="$t('footer.navigation')" @click="onMenuToggle">
       <i class="pi pi-bars"></i>
     </button>
 
     <button
+      type="button"
+      :aria-label="$t('admin.profile')"
       class="p-link layout-topbar-menu-button layout-topbar-button"
       v-styleclass="{
         selector: '@next',
-        enterClass: 'hidden',
+        enterFromClass: 'hidden',
         enterActiveClass: 'scalein',
         leaveToClass: 'hidden',
         leaveActiveClass: 'fadeout',
@@ -33,19 +35,19 @@
         />
       </li>
       <li>
-        <button class="p-link layout-topbar-button" @click="toggleTheme">
+        <button type="button" class="p-link layout-topbar-button" :aria-label="$t('admin.theme')" @click="toggleTheme">
           <i :class="colorMode.value === 'dark' ? 'pi pi-sun' : 'pi pi-moon'"></i>
           <span>{{ $t('admin.theme') }}</span>
         </button>
       </li>
       <li>
-        <NuxtLink class="p-link layout-topbar-button" :to="'/users/' + authStore.user?.uuid">
+        <NuxtLink class="p-link layout-topbar-button" :aria-label="$t('admin.profile')" :to="'/users/' + authStore.user?.uuid">
           <i class="pi pi-user"></i>
           <span>{{ $t('admin.profile') }}</span>
         </NuxtLink>
       </li>
       <li>
-        <button class="p-link layout-topbar-button" @click="logout">
+        <button type="button" class="p-link layout-topbar-button" :aria-label="$t('admin.logout')" @click="logout">
           <i class="pi pi-sign-out"></i>
           <span>{{ $t('admin.logout') }}</span>
         </button>

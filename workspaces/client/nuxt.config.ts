@@ -64,6 +64,7 @@ export default defineNuxtConfig({
     'unicore-common/styles/toast.css',
     '~/assets/style/main.scss',
     '~/assets/fonts/main.scss',
+    'unicore-common/styles/interface.css',
   ],
 
   colorMode: {

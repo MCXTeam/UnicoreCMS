@@ -1,5 +1,6 @@
 <template>
   <div class="grid">
+    <div class="col-12"><h1 class="m-0">{{ $t('admin.layout_title') }}</h1></div>
     <div class="col-12">
       <div class="card">
         <Toolbar class="mb-4">
@@ -7,7 +8,7 @@
             <SelectButton v-model="place" :options="places" optionLabel="name" optionValue="value" :allowEmpty="false" />
           </template>
           <template #end>
-            <div class="flex align-items-center gap-3">
+            <div class="flex flex-wrap align-items-center gap-3">
               <SelectButton
                 v-model="current.mode"
                 :options="modes"
@@ -35,7 +36,7 @@
         </Toolbar>
 
         <div class="mb-3 flex align-items-center justify-content-between gap-2">
-          <h5 class="m-0">{{ $t('admin.layout_preview') }}</h5>
+          <h2 class="m-0">{{ $t('admin.layout_preview') }}</h2>
           <Select
             v-if="locales.length > 1"
             v-model="locale"
@@ -53,7 +54,7 @@
     <div class="col-12 lg:col-7">
       <div class="card h-full">
         <div class="flex justify-content-between align-items-center mb-3">
-          <h5 class="m-0">{{ $t('admin.layout_title') }}</h5>
+          <h2 class="m-0">{{ $t(place === 'header' ? 'admin.layout_header' : 'admin.layout_footer') }}</h2>
           <Button :label="$t('admin.layout_row_add')" icon="pi pi-plus" text :disabled="!canUpdate" @click="addRow()" />
         </div>
 

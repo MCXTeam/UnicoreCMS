@@ -1,75 +1,43 @@
 <template>
   <div class="grid">
+    <div class="col-12">
+      <div class="flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <h1 class="m-0">{{ $t('admin.menu_themes') }}</h1>
+        <div class="flex flex-wrap gap-2">
+          <ExtensionInstall v-if="canManage" @installed="afterInstall($event)" />
+          <Button v-if="canManage" :label="$t('admin.rebuild')" icon="pi pi-sync" outlined @click="openRebuild()" />
+          <Button :label="$t('admin.refresh')" icon="pi pi-refresh" text :loading="loading" @click="load()" />
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-2" role="group" :aria-label="$t('admin.menu_themes')">
+        <Button :label="$t('admin.extensions_installed')" :outlined="activeTab !== 'installed'" :aria-pressed="activeTab === 'installed'" @click="activeTab = 'installed'" />
+        <Button :label="$t('admin.extensions_catalog')" :outlined="activeTab !== 'catalog'" :aria-pressed="activeTab === 'catalog'" @click="activeTab = 'catalog'" />
+      </div>
+    </div>
     <RebuildDialog v-model:visible="rebuildDialog" :preset="rebuildSides" />
-    <div v-for="section in sections" :key="section.side" class="col-12">
+    <div v-show="activeTab === 'installed'" v-for="section in sections" :key="section.side" class="col-12">
       <div class="card">
-        <DataTable :value="section.themes" :loading="loading" responsiveLayout="scroll" dataKey="id">
-          <template #header>
-            <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-              <h5 class="m-0">{{ $t(section.title) }}</h5>
-              <div class="flex align-items-center">
-                <ExtensionInstall v-if="canManage" @installed="afterInstall($event)" />
-                <Button
-                  v-if="canManage"
-                  :label="$t('admin.rebuild')"
-                  icon="pi pi-sync"
-                  class="p-button-text"
-                  @click="openRebuild()"
-                />
-                <Button :label="$t('admin.refresh')" icon="pi pi-refresh" class="p-button-text" @click="load()" />
-              </div>
-            </div>
-          </template>
+        <ExtensionList :items="section.themes" :loading="loading">
+          <template #heading><h2 class="m-0">{{ $t(section.title) }}</h2></template>
           <template #empty>
-            <div class="py-4 text-center">
-              <p class="m-0">{{ $t('admin.themes_empty') }}</p>
-              <small class="text-color-secondary">{{ $t('admin.themes_empty_hint') }}</small>
-            </div>
+            <p class="m-0">{{ $t('admin.themes_empty') }}</p>
+            <small class="text-color-secondary">{{ $t('admin.themes_empty_hint') }}</small>
           </template>
-          <Column field="id" header="ID" :style="{ width: '10rem' }" />
-          <Column :header="$t('admin.name')">
-            <template #body="slotProps">
-              <div class="font-medium">{{ localized(slotProps.data.name) }}</div>
-              <small v-if="slotProps.data.replaces.length" class="text-color-secondary">
-                {{ $t('admin.theme_replaces', { pages: slotProps.data.replaces.join(', ') }) }}
-              </small>
-            </template>
-          </Column>
-          <Column field="version" :header="$t('admin.version')" :style="{ width: '8rem' }" />
-          <Column :header="$t('admin.status')" :style="{ width: '12rem' }">
-            <template #body="slotProps">
-              <Tag :severity="severity(slotProps.data.status)" :value="$t(`admin.theme_status_${slotProps.data.status}`)" />
-              <small v-if="slotProps.data.reason" class="block mt-1 text-red-500">{{ slotProps.data.reason }}</small>
-            </template>
-          </Column>
-          <Column :style="{ width: '14rem' }" :bodyStyle="{ 'text-align': 'right' }">
-            <template #body="slotProps">
-              <Button
-                v-if="canManage && slotProps.data.status === 'active'"
-                :label="$t('admin.theme_deactivate')"
-                icon="pi pi-power-off"
-                class="p-button-text p-button-warning"
-                :disabled="loading || locked[section.side]"
-                @click="setActive(null, section.side)"
-              />
-              <Button
-                v-else-if="canManage"
-                :label="$t('admin.theme_activate')"
-                icon="pi pi-check"
-                class="p-button-text p-button-success"
-                :disabled="loading || locked[section.side] || slotProps.data.status !== 'available'"
-                @click="setActive(slotProps.data.id, section.side)"
-              />
-              <Button
-                v-if="canManage && slotProps.data.status !== 'active'"
-                icon="pi pi-trash"
-                class="p-button-rounded p-button-text p-button-danger"
-                :disabled="loading"
-                @click="confirmRemove(slotProps.data)"
-              />
-            </template>
-          </Column>
-        </DataTable>
+          <template #summary="{ item }">
+            <h3>{{ localized(item.name) }}</h3>
+            <small>{{ item.id }} · v{{ item.version }}</small>
+            <p v-if="item.replaces.length">{{ $t('admin.theme_replaces', { pages: item.replaces.join(', ') }) }}</p>
+          </template>
+          <template #state="{ item }">
+            <Tag :severity="severity(item.status)" :value="$t(`admin.theme_status_${item.status}`)" />
+            <small v-if="item.reason" class="block mt-1 p-error">{{ item.reason }}</small>
+          </template>
+          <template #item-actions="{ item }">
+            <Button v-if="canManage && item.status === 'active'" :label="$t('admin.theme_reset')" v-tooltip.top="$t('admin.theme_deactivate')" icon="pi pi-power-off" text severity="warn" :disabled="loading || locked[section.side]" @click="setActive(null, section.side)" />
+            <Button v-else-if="canManage" :label="$t('admin.theme_apply')" v-tooltip.top="$t('admin.theme_activate')" icon="pi pi-check" text severity="success" :disabled="loading || locked[section.side] || item.status !== 'available'" @click="setActive(item.id, section.side)" />
+            <Button v-if="canManage && item.status !== 'active'" icon="pi pi-trash" :aria-label="$t('admin.delete')" text severity="danger" :disabled="loading" @click="confirmRemove(item)" />
+          </template>
+        </ExtensionList>
 
         <Message v-if="locked[section.side]" severity="warn" :closable="false" class="mt-3">
           {{ $t(section.side === 'admin' ? 'admin.theme_locked_admin' : 'admin.theme_locked') }}
@@ -79,8 +47,8 @@
         </Message>
       </div>
     </div>
-    <div class="col-12">
-      <ExtensionCatalog kind="theme" :canManage="canManage" @installed="afterInstall($event)" />
+    <div v-show="activeTab === 'catalog'" class="col-12">
+      <ExtensionCatalog class="card" kind="theme" :canManage="canManage" @installed="afterInstall($event)" />
     </div>
   </div>
 </template>
@@ -106,6 +74,7 @@ export default {
   },
   data() {
     return {
+      activeTab: 'installed',
       themes: [],
       locked: { client: false, admin: false },
       rebuildDialog: false,

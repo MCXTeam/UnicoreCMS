@@ -1,5 +1,5 @@
 <template>
-  <div v-if="visible" class="layout-block" :class="[`layout-block--${block.type}`, { 'layout-block--grow': block.grow }, hideClass]">
+  <div v-if="visible" class="layout-block" :class="[`layout-block--${block.type}`, `layout-block--${place}`, { 'layout-block--grow': block.grow }, hideClass]">
     <h3 v-if="titleText" class="layout-block__title">{{ titleText }}</h3>
 
     <NuxtLink v-if="block.type === 'logo'" to="/" class="layout-block__logo without-underline">
@@ -77,23 +77,20 @@
         v-if="$auth.loggedIn"
         to="/cabinet"
         class="layout-profile without-underline"
+        :aria-label="$t('header.cabinet')"
         v-tooltip.bottom="$t('header.cabinet')"
       >
         <SkinView2D class="layout-profile__face" :width="28" :height="28" :skin="$auth.user?.skin" />
         <span class="layout-profile__name">{{ $auth.user?.username }}</span>
       </NuxtLink>
-      <NuxtLink v-else to="/auth">
-        <Button size="large" text>{{ $t('header.login') }}</Button>
-      </NuxtLink>
+      <Button v-else :as="NuxtLink" to="/auth" text :label="$t('header.login')" />
     </div>
 
     <div v-else-if="block.type === 'launcher'" class="layout-block__launcher">
-      <NuxtLink to="/start">
-        <Button size="large">
-          {{ $auth.loggedIn ? $t('header.download') : $t('header.start') }}
-          <i :class="$auth.loggedIn ? 'bx bxl-windows' : 'bx bx-play'"></i>
-        </Button>
-      </NuxtLink>
+      <Button :as="NuxtLink" to="/start" :size="place === 'footer' ? 'large' : undefined" :aria-label="$auth.loggedIn ? $t('header.download') : $t('header.start')">
+        <span class="layout-block__launcher-label">{{ $auth.loggedIn ? $t('header.download') : $t('header.start') }}</span>
+        <i :class="$auth.loggedIn ? 'bx bxl-windows' : 'bx bx-play'" aria-hidden="true"></i>
+      </Button>
     </div>
 
     <Select
@@ -106,10 +103,10 @@
       optionValue="code"
     />
 
-    <div v-else-if="block.type === 'theme'" class="layout-block__theme" @click="$unicore.switchTheme()">
+    <button v-else-if="block.type === 'theme'" type="button" class="layout-block__theme" :aria-label="$t('admin.layout_block_theme')" @click="$unicore.switchTheme()">
       <i v-if="$colorMode.preference == 'light'" class="bx bxs-sun"></i>
       <i v-else class="bx bxs-moon"></i>
-    </div>
+    </button>
 
     <NotificationsBell v-else-if="block.type === 'notifications' && $auth.loggedIn" />
 
@@ -124,6 +121,7 @@
 
 <script setup lang="ts">
 import { layoutText, type LayoutBlock, type LayoutLink, type LayoutPlace } from 'unicore-common/layout'
+import { NuxtLink } from '#components'
 import { isNavActive } from '~/constants/navigation'
 
 const props = defineProps<{ block: LayoutBlock; place: LayoutPlace }>()
@@ -265,7 +263,7 @@ onBeforeUnmount(() => {
 }
 .layout-block__title {
   margin: 0 0 8px;
-  font-size: 1.05rem;
+  font-size: var(--ui-title-subsection);
 }
 .layout-block__logo {
   display: flex;
@@ -352,7 +350,17 @@ onBeforeUnmount(() => {
   font-size: 0.9rem;
 }
 .layout-block__theme {
-  font-size: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ui-control);
+  height: var(--ui-control);
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-control);
+  background: transparent;
+  color: inherit;
+  font-size: var(--ui-icon-size);
   cursor: pointer;
   line-height: 1;
 }
@@ -449,6 +457,9 @@ onBeforeUnmount(() => {
   flex-wrap: nowrap;
 }
 @media (max-width: 991.98px) {
+  .layout-block--header .layout-profile__name,
+  .layout-block--header .layout-block__launcher-label { display: none; }
+  .layout-block--header .layout-block__launcher :deep(.p-button) { width: var(--ui-control); padding: 8px; }
   .layout-hide-mobile {
     display: none;
   }

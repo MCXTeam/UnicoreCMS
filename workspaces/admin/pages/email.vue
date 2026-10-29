@@ -5,7 +5,7 @@
         <DataTable :value="emails" :loading="loading" rowHover responsiveLayout="scroll" dataKey="id">
           <template #header>
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-              <h5 class="m-0">{{ $t('admin.email_title') }}</h5>
+              <h1 class="m-0">{{ $t('admin.email_title') }}</h1>
               <span class="block mt-2 md:mt-0 p-input-icon-left">
                 <Button v-if="canTest" :label="$t('admin.email_test')" icon="pi pi-send" @click="openTestDialog" />
               </span>

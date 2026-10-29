@@ -4,6 +4,7 @@ import Lara from '@primevue/themes/lara'
 import Material from '@primevue/themes/material'
 import Nora from '@primevue/themes/nora'
 import type { PrimeVuePreset } from 'unicore-api'
+import { INTERFACE_PRESET } from 'unicore-ui/theme/preset'
 
 type Preset = Record<string, unknown>
 
@@ -24,22 +25,9 @@ const BRAND = {
 }
 
 const UNICORE_TOKENS = {
-  primitive: {
-    borderRadius: {
-      none: '0',
-      xs: '8px',
-      sm: '10px',
-      md: '12px',
-      lg: '14px',
-      xl: '18px',
-    },
-  },
   semantic: {
     primary: BRAND,
     formField: {
-      paddingX: '0.85rem',
-      paddingY: '0.6rem',
-      borderRadius: '{border.radius.md}',
       focusRing: {
         width: '2px',
         style: 'solid',
@@ -73,7 +61,7 @@ const UNICORE_TOKENS = {
       dark: {
         primary: {
           color: '{primary.400}',
-          contrastColor: '#ffffff',
+          contrastColor: '{primary.950}',
           hoverColor: '{primary.300}',
           activeColor: '{primary.200}',
         },
@@ -103,7 +91,7 @@ const UNICORE_TOKENS = {
 }
 
 export const presetFor = (name?: string, tokens?: Record<string, unknown>): Preset => {
-  const base = definePreset(PRESETS[name as PrimeVuePreset] || PRESETS.aura, UNICORE_TOKENS) as Preset
+  const base = definePreset(PRESETS[name as PrimeVuePreset] || PRESETS.aura, UNICORE_TOKENS, INTERFACE_PRESET) as Preset
 
   return tokens ? (definePreset(base, tokens) as Preset) : base
 }

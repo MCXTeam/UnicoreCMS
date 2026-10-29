@@ -1,78 +1,33 @@
 <template>
-  <div class="card">
-    <DataTable :value="entries" :loading="loading" responsiveLayout="scroll" dataKey="key">
-      <template #header>
-        <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-          <div>
-            <h5 class="m-0">{{ $t(kind === 'module' ? 'admin.catalog_modules' : 'admin.catalog_themes') }}</h5>
-            <small class="text-color-secondary">{{ $t('admin.catalog_hint') }}</small>
-          </div>
-          <div class="flex align-items-center">
-            <Button
-              v-if="canManage"
-              :label="$t('admin.catalog_by_url')"
-              icon="pi pi-link"
-              class="p-button-text"
-              @click="urlDialog = true"
-            />
-            <Button
-              v-if="canManage"
-              :label="$t('admin.catalog_sources')"
-              icon="pi pi-server"
-              class="p-button-text"
-              @click="sourcesDialog = true"
-            />
-            <Button :label="$t('admin.refresh')" icon="pi pi-refresh" class="p-button-text" :loading="loading" @click="load(true)" />
-          </div>
-        </div>
+  <div>
+    <ExtensionList :items="entries" :loading="loading" itemKey="key">
+      <template #heading>
+        <h2 class="m-0">{{ $t(kind === 'module' ? 'admin.catalog_modules' : 'admin.catalog_themes') }}</h2>
+        <small class="text-color-secondary">{{ $t('admin.catalog_hint') }}</small>
+      </template>
+      <template #actions>
+        <Button v-if="canManage" :label="$t('admin.catalog_by_url')" icon="pi pi-link" text @click="urlDialog = true" />
+        <Button v-if="canManage" :label="$t('admin.catalog_sources')" icon="pi pi-server" text @click="sourcesDialog = true" />
+        <Button :label="$t('admin.refresh')" icon="pi pi-refresh" text :loading="loading" @click="load(true)" />
       </template>
       <template #empty>
-        <div class="py-4 text-center">
-          <p class="m-0">{{ $t('admin.catalog_empty') }}</p>
-          <small class="text-color-secondary">{{ $t('admin.catalog_empty_hint') }}</small>
-        </div>
+        <p class="m-0">{{ $t('admin.catalog_empty') }}</p>
+        <small class="text-color-secondary">{{ $t('admin.catalog_empty_hint') }}</small>
       </template>
-      <Column field="id" header="ID" :style="{ width: '10rem' }" />
-      <Column :header="$t('admin.name')">
-        <template #body="slotProps">
-          <div class="font-medium">{{ localized(slotProps.data.name) }}</div>
-          <small class="text-color-secondary">{{ localized(slotProps.data.description) }}</small>
-        </template>
-      </Column>
-      <Column :header="$t('admin.version')" :style="{ width: '12rem' }">
-        <template #body="slotProps">
-          <div>{{ slotProps.data.version }}</div>
-          <small v-if="slotProps.data.installedVersion" class="text-color-secondary">
-            {{ $t('admin.catalog_installed_version', { version: slotProps.data.installedVersion }) }}
-          </small>
-        </template>
-      </Column>
-      <Column :header="$t('admin.catalog_source')" :style="{ width: '12rem' }">
-        <template #body="slotProps">{{ slotProps.data.source.name }}</template>
-      </Column>
-      <Column :header="$t('admin.status')" :style="{ width: '12rem' }">
-        <template #body="slotProps">
-          <Tag :severity="severity(slotProps.data)" :value="$t(`admin.catalog_status_${slotProps.data.status}`)" />
-          <small v-if="!slotProps.data.compatible" class="block mt-1 p-error">
-            {{ $t('admin.catalog_incompatible', { api: slotProps.data.unicoreApi }) }}
-          </small>
-        </template>
-      </Column>
-      <Column :style="{ width: '12rem' }" :bodyStyle="{ 'text-align': 'right' }">
-        <template #body="slotProps">
-          <Button
-            v-if="canManage"
-            :label="$t(actionLabel(slotProps.data))"
-            :icon="slotProps.data.status === 'new' ? 'pi pi-download' : 'pi pi-sync'"
-            class="p-button-text"
-            :class="slotProps.data.status === 'update' ? 'p-button-success' : ''"
-            :disabled="loading || !slotProps.data.compatible"
-            :loading="installing === key(slotProps.data)"
-            @click="install(slotProps.data)"
-          />
-        </template>
-      </Column>
-    </DataTable>
+      <template #summary="{ item }">
+        <h3>{{ localized(item.name) }}</h3>
+        <small>{{ item.id }} · v{{ item.version }} · {{ item.source.name }}</small>
+        <p>{{ localized(item.description) }}</p>
+      </template>
+      <template #state="{ item }">
+        <Tag :severity="severity(item)" :value="$t(`admin.catalog_status_${item.status}`)" />
+        <small v-if="item.installedVersion" class="block mt-1 text-color-secondary">{{ $t('admin.catalog_installed_version', { version: item.installedVersion }) }}</small>
+        <small v-if="!item.compatible" class="block mt-1 p-error">{{ $t('admin.catalog_incompatible', { api: item.unicoreApi }) }}</small>
+      </template>
+      <template #item-actions="{ item }">
+        <Button v-if="canManage" :label="$t(actionLabel(item))" :icon="item.status === 'new' ? 'pi pi-download' : 'pi pi-sync'" outlined :severity="item.status === 'update' ? 'success' : undefined" :disabled="loading || installing !== null || !item.compatible" :loading="installing === key(item)" @click="install(item)" />
+      </template>
+    </ExtensionList>
 
     <Message v-for="source in failed" :key="source.id" severity="warn" :closable="false" class="mt-3">
       {{ $t('admin.catalog_source_error', { source: source.name, error: source.error }) }}

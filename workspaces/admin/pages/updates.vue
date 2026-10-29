@@ -291,11 +291,9 @@ async function install() {
   min-width: 0;
 }
 .updates-page h1 {
-  font-size: 1.5rem;
   margin: 0;
 }
 .updates-page h2 {
-  font-size: 1.25rem;
   margin: 0;
 }
 .updates-toolbar,
@@ -327,7 +325,7 @@ async function install() {
   margin: 1rem 0;
   padding: 1rem;
   border: 1px solid var(--surface-border);
-  border-radius: 0.5rem;
+  border-radius: var(--ui-radius-card);
 }
 .updates-selection label {
   display: flex;
@@ -389,6 +387,8 @@ async function install() {
   list-style: none;
 }
 .updates-release-notes pre {
+  font: inherit;
+  margin: 1rem 0 0;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   max-height: 24rem;

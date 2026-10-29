@@ -9,7 +9,7 @@
       <div class="col-12">
         <form class="card" @submit.prevent="saveRates">
           <div class="payment-settings__heading">
-            <h5 class="m-0">{{ $t('admin.payment_rates_title') }}</h5>
+            <h1 class="m-0">{{ $t('admin.payment_rates_title') }}</h1>
             <Button v-if="canUpdate" type="submit" :label="$t('common.save')" icon="pi pi-check" :loading="savingRates" />
           </div>
           <div class="formgrid grid mt-4">
@@ -53,7 +53,7 @@
       </div>
       <div class="col-12 lg:col-4">
         <div class="card payment-settings__providers">
-          <h5>{{ $t('admin.payment_gateways_title') }}</h5>
+          <h2>{{ $t('admin.payment_gateways_title') }}</h2>
           <div class="payment-settings__provider-list" role="group" :aria-label="$t('admin.payment_gateways_title')">
             <button v-for="provider in providers" :key="provider.id" type="button" class="payment-settings__provider" :class="{ 'payment-settings__provider--selected': selected === provider.id }" :aria-pressed="selected === provider.id" @click="selectProvider(provider.id)">
               <span>{{ provider.name }}</span>
@@ -65,7 +65,7 @@
       <div v-if="draft" class="col-12 lg:col-8">
         <form class="card" @submit.prevent="saveProvider">
           <div class="payment-settings__heading">
-            <h5 class="m-0">{{ draft.name }}</h5>
+            <h2 class="m-0">{{ draft.name }}</h2>
             <a :href="draft.docs" target="_blank" rel="noopener noreferrer">{{ $t('admin.payment_documentation') }} <i class="pi pi-external-link" aria-hidden="true"></i></a>
           </div>
           <div class="field-checkbox mt-4">
@@ -163,14 +163,14 @@ onMounted(async () => {
 
 <style scoped>
 .payment-settings__heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
-.payment-settings__providers { padding: 1.5rem 0; }
-.payment-settings__providers h5 { padding: 0 1.5rem; }
+.payment-settings__providers { padding: var(--ui-card-padding) 0; }
+.payment-settings__providers h2 { padding: 0 var(--ui-card-padding); }
 .payment-settings__provider-list { display: flex; flex-direction: column; }
-.payment-settings__provider { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; width: 100%; padding: 0.9rem 1.5rem; border: 0; background: transparent; color: var(--text-color); font: inherit; text-align: left; cursor: pointer; }
+.payment-settings__provider { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; width: 100%; padding: 12px var(--ui-card-padding); border: 0; background: transparent; color: var(--text-color); font: inherit; text-align: left; cursor: pointer; }
 .payment-settings__provider:hover { background: var(--surface-hover); }
 .payment-settings__provider--selected { background: var(--highlight-bg); color: var(--highlight-text-color); font-weight: 600; }
 .payment-settings__provider:focus-visible { outline: 2px solid var(--primary-color); outline-offset: -2px; }
-.payment-settings__status { display: inline-flex; gap: 0.4rem; align-items: center; font-size: 0.85rem; white-space: nowrap; }
+.payment-settings__status { display: inline-flex; gap: var(--ui-space-2); align-items: center; font-size: 14px; white-space: nowrap; }
 .payment-settings__rates { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); gap: 1rem 1.5rem; }
 .payment-settings__rate { display: flex; gap: 0.75rem; align-items: center; justify-content: space-between; min-width: 0; }
 .payment-settings__rate :deep(.p-inputnumber) { min-width: 0; max-width: 12rem; flex: 1; }

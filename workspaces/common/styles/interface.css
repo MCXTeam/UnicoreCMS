@@ -1,0 +1,270 @@
+:root {
+  --ui-space-1: 4px;
+  --ui-space-2: 8px;
+  --ui-space-3: 12px;
+  --ui-space-4: 16px;
+  --ui-space-6: 24px;
+  --ui-space-8: 32px;
+  --ui-control-sm: 32px;
+  --ui-control: 40px;
+  --ui-control-lg: 48px;
+  --ui-radius-control: 10px;
+  --ui-radius-card: 12px;
+  --ui-radius-dialog: 16px;
+  --ui-card-padding: 24px;
+  --ui-title-page: 24px;
+  --ui-title-section: 20px;
+  --ui-title-subsection: 18px;
+  --ui-icon-size: 20px;
+  --ui-caption-size: 12px;
+  --border-radius: var(--ui-radius-card);
+}
+
+html {
+  font-size: 16px;
+}
+html body {
+  font-size: 16px;
+  line-height: 1.5;
+}
+html h1,
+html h2,
+html h3,
+html h4,
+html h5,
+html h6 {
+  font-family: inherit;
+  font-weight: 700;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+html h1 {
+  font-size: var(--ui-title-page);
+}
+html h2 {
+  font-size: var(--ui-title-section);
+}
+html h3,
+html h4,
+html h5 {
+  font-size: var(--ui-title-subsection);
+}
+html h6 {
+  font-size: 16px;
+}
+html small,
+html .p-error {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+html .card,
+html .panel,
+html .cab-tile {
+  min-width: 0;
+  padding: var(--ui-card-padding);
+  border-radius: var(--ui-radius-card);
+}
+
+html .p-button,
+html .p-inputtext,
+html .p-textarea,
+html .p-select,
+html .p-multiselect {
+  min-width: 0;
+  min-height: var(--ui-control);
+  max-width: 100%;
+  font-size: 16px;
+  line-height: 22px;
+  border-radius: var(--ui-radius-control);
+}
+html .p-button {
+  gap: var(--ui-space-2);
+  padding: 8px 12px;
+  justify-content: center;
+}
+html .p-button .p-button-label {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+html .p-button.p-button-sm {
+  min-height: var(--ui-control-sm);
+  padding: 4px 8px;
+  font-size: 14px;
+  line-height: 22px;
+}
+html .p-button.p-button-lg,
+html .p-button.p-button-xl {
+  min-height: var(--ui-control-lg);
+  padding: 12px 16px;
+}
+html .p-button.p-button-icon-only {
+  width: var(--ui-control);
+  flex-shrink: 0;
+}
+html .p-button.p-button-sm.p-button-icon-only {
+  width: var(--ui-control-sm);
+}
+html .p-button.p-button-lg.p-button-icon-only {
+  width: var(--ui-control-lg);
+}
+html .p-button.p-button-rounded {
+  border-radius: 999px;
+}
+html .p-button i,
+html .p-button-icon {
+  font-size: var(--ui-icon-size);
+}
+html .p-inputtext,
+html .p-textarea {
+  padding: 8px 12px;
+}
+html .p-inputtext.p-inputtext-sm {
+  min-height: var(--ui-control-sm);
+  padding: 4px 8px;
+  font-size: 14px;
+}
+html .p-inputtext.p-inputtext-lg {
+  min-height: var(--ui-control-lg);
+  padding: 12px 16px;
+}
+html .p-select-sm,
+html .p-multiselect-sm {
+  min-height: var(--ui-control-sm);
+  font-size: 14px;
+}
+html .p-select-lg,
+html .p-multiselect-lg {
+  min-height: var(--ui-control-lg);
+}
+html .p-select-sm .p-select-label,
+html .p-multiselect-sm .p-multiselect-label {
+  padding: 4px 8px;
+}
+html .p-select-lg .p-select-label,
+html .p-multiselect-lg .p-multiselect-label {
+  padding: 12px 16px;
+}
+html .p-select-label,
+html .p-multiselect-label {
+  padding: 8px 12px;
+  line-height: 22px;
+}
+html .p-inputnumber,
+html .p-password {
+  min-width: 0;
+  max-width: 100%;
+}
+html .p-inputgroup > .p-inputtext,
+html .p-inputgroup > .p-inputnumber {
+  min-width: 0;
+}
+html .p-inputgroup > :first-child {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+html .p-inputgroup > :last-child {
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
+html .p-toolbar {
+  gap: var(--ui-space-4);
+  padding: var(--ui-space-4);
+}
+html .p-toolbar-start,
+html .p-toolbar-center,
+html .p-toolbar-end {
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: var(--ui-space-2);
+}
+html .p-dialog {
+  max-width: calc(100vw - 32px);
+  max-height: calc(100dvh - 32px);
+  min-width: 0;
+}
+html .p-dialog-header {
+  gap: var(--ui-space-4);
+  padding: var(--ui-card-padding);
+}
+html .p-dialog-title {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: var(--ui-title-section);
+  line-height: 1.3;
+}
+html .p-dialog-header-actions {
+  flex-shrink: 0;
+}
+html .p-dialog-content {
+  min-width: 0;
+  padding: 0 var(--ui-card-padding) var(--ui-card-padding);
+}
+html .p-dialog-footer {
+  flex-wrap: wrap;
+  gap: var(--ui-space-2);
+  padding: 0 var(--ui-card-padding) var(--ui-card-padding);
+}
+html .p-dialog-footer .p-button {
+  width: auto;
+}
+html .p-dialog .field {
+  margin-bottom: var(--ui-space-6);
+}
+html .p-dialog .field > label {
+  margin-bottom: var(--ui-space-2);
+}
+html .p-message-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+html .p-datatable-header {
+  padding: var(--ui-space-4);
+}
+html .p-datatable-header-cell,
+html .p-datatable-tbody > tr > td {
+  padding: 12px 16px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+:where(button, a, input, select, textarea):focus-visible {
+  outline: 2px solid var(--p-primary-color, currentColor);
+  outline-offset: 3px;
+}
+
+@media (max-width: 575.98px) {
+  :root {
+    --ui-card-padding: 16px;
+  }
+  html .p-dialog {
+    max-width: calc(100vw - 24px);
+    max-height: calc(100dvh - 24px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  html .firefly {
+    animation: none;
+  }
+  html .cab-tile:hover {
+    transform: none;
+  }
+  html [data-aos] {
+    transition-duration: 0s;
+    transform: none;
+    opacity: 1;
+  }
+  html .p-dialog-enter-active,
+  html .p-dialog-leave-active {
+    transition: opacity 150ms;
+  }
+  html .p-dialog-enter-from,
+  html .p-dialog-leave-to {
+    transform: none;
+  }
+}

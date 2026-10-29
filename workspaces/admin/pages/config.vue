@@ -19,7 +19,7 @@
         <DataTable :value="config" :loading="loading" v-model:filters="filters" rowHover responsiveLayout="scroll" dataKey="key">
           <template #header>
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-              <h5 class="m-0">{{ $t('admin.config_title') }}</h5>
+              <h1 class="m-0">{{ $t('admin.config_title') }}</h1>
             </div>
           </template>
           <Column sortable field="key" :header="$t('admin.key')">
