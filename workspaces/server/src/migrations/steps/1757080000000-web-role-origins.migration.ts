@@ -3,6 +3,8 @@ import ru from '../../seeds/locales/ru.json';
 import en from '../../seeds/locales/en.json';
 
 export class WebRoleOrigins1757080000000 implements MigrationInterface {
+  name = 'WebRoleOrigins1757080000000';
+
   async up(runner: QueryRunner): Promise<void> {
     if (!(await runner.hasTable('unicore_users')) || !(await runner.hasTable('unicore_roles'))) return;
 
