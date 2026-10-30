@@ -30,7 +30,7 @@
           </template>
           <template #state="{ item }">
             <Tag :severity="severity(item.status)" :value="$t(`admin.theme_status_${item.status}`)" />
-            <small v-if="item.reason" class="block mt-1 p-error">{{ item.reason }}</small>
+            <small v-if="item.reason" class="block mt-1 p-error">{{ $t(item.reason) }}</small>
           </template>
           <template #item-actions="{ item }">
             <Button v-if="canManage && item.status === 'active'" :label="$t('admin.theme_reset')" v-tooltip.top="$t('admin.theme_deactivate')" icon="pi pi-power-off" text severity="warn" :disabled="loading || locked[section.side]" @click="setActive(null, section.side)" />

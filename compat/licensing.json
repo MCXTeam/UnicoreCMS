@@ -1,0 +1,14 @@
+{
+  "server": "https://license.unicorecms.ru",
+  "issuerKeys": {
+    "issuer-85c36b42-3c74-4ee6-8047-701820f00de8": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAwl/2r8hXRsvwLmjBKQTh0QkU8X68GaR+Gth0zIo4sKM=\n-----END PUBLIC KEY-----\n"
+  },
+  "publisherKeys": {
+    "release-2026-10": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEADnPUzGDMcqDnsVzXxcWAyblho0IYKUxbCQQcfiRTroQ=\n-----END PUBLIC KEY-----\n"
+  },
+  "catalog": {
+    "module:style": "unicore.style",
+    "module:partner": "unicore.partner"
+  },
+  "allowLocal": false
+}

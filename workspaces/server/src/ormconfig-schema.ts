@@ -1,4 +1,9 @@
-import { DataSource } from 'typeorm';
-import { ormconfig } from './ormconfig';
+import { dataRoot, loadPublicEnvFile } from 'unicore-common/ports';
+import { prepareLicenses } from 'unicore-api/licensing';
 
-export default new DataSource(ormconfig);
+loadPublicEnvFile();
+export default prepareLicenses(dataRoot).then(async () => {
+  const { DataSource } = await import('typeorm');
+  const { ormconfig } = await import('./ormconfig.js');
+  return new DataSource(ormconfig);
+});

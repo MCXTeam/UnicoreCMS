@@ -1,4 +1,7 @@
-import { configuredPorts, loadPublicEnvFile, ports } from 'unicore-common/ports'
+import { configuredPorts, loadPublicEnvFile, ports, dataRoot } from 'unicore-common/ports'
+import { dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { prepareLicenses, startFrontend } from 'unicore-api/licensing'
 
 loadPublicEnvFile()
 
@@ -25,4 +28,13 @@ if (process.env.NUXT_SITE_URL === undefined) process.env.NUXT_SITE_URL = runtime
 
 const entry = './.output/server/index.mjs'
 
-await import(entry)
+const host = await prepareLicenses(dataRoot)
+if (
+  !(await startFrontend({
+    workspace: dirname(fileURLToPath(import.meta.url)),
+    dataRoot,
+    port: Number(process.env.PORT || process.env.NITRO_PORT),
+    host,
+  }))
+)
+  await import(entry)

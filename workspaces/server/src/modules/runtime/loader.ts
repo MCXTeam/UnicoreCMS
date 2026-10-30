@@ -8,6 +8,8 @@ import { modulesPath, PERMISSION_LOCALE_PREFIX, permissionGroupKey } from 'unico
 import { AUDIT_CLASS_MAX_LENGTH } from 'src/common/constants';
 import { API_VERSION, contribution, ModuleContribution, modulePermissionKey, modulePrefixes } from 'unicore-api';
 import { DiscoveredModule } from './discovery';
+import { admitModules } from './admission';
+import { assertExtension } from 'unicore-api/licensing';
 
 const requireFromModules = createRequire(join(modulesPath, 'loader.js'));
 
@@ -91,9 +93,15 @@ const validateNamespaces = (module: DiscoveredModule, contributed: ModuleContrib
 
 export const load = (modules: DiscoveredModule[]): { loaded: LoadedModule[]; failures: LoadFailure[] } => {
   const loaded: LoadedModule[] = [];
-  const failures: LoadFailure[] = [];
+  const admission = admitModules(modules);
+  const failures: LoadFailure[] = [...admission.failures];
 
-  for (const module of modules) {
+  for (const module of admission.ordered) {
+    const missing = Object.keys(module.manifest.requires?.modules || {}).find((id) => !loaded.some((item) => item.id === id));
+    if (missing) {
+      failures.push({ id: module.id, reason: `Не загружена зависимость «${missing}»` });
+      continue;
+    }
     if (!module.enabled) continue;
 
     if (!satisfies(API_VERSION, module.manifest.unicoreApi)) {
@@ -115,6 +123,7 @@ export const load = (modules: DiscoveredModule[]): { loaded: LoadedModule[]; fai
     }
 
     try {
+      assertExtension({ kind: 'module', id: module.id, directory: module.dir, manifest: module.manifest });
       requireFromModules(module.serverEntry);
     } catch (error) {
       failures.push({ id: module.id, reason: `ошибка загрузки: ${error instanceof Error ? error.message : String(error)}` });

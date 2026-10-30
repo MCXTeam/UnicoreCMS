@@ -28,7 +28,7 @@
           </template>
           <template #state="{ item }">
             <Tag :severity="severity(item.status)" :value="$t(`admin.module_status_${item.status}`)" />
-            <small v-if="item.reason" class="block mt-1 p-error">{{ item.reason }}</small>
+            <small v-if="item.reason" class="block mt-1 p-error">{{ $t(item.reason) }}</small>
             <div class="flex flex-wrap gap-2 mt-2">
               <Tag v-if="item.hasServer" severity="secondary" :value="$t('updates.part.server')" />
               <Tag v-if="item.hasClient" severity="secondary" :value="$t('updates.part.client')" />

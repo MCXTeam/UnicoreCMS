@@ -2,7 +2,6 @@ import { createHash, randomUUID } from "node:crypto";
 import {
   mkdir,
   readFile,
-  writeFile,
   rename,
   readdir,
   lstat,
@@ -24,6 +23,7 @@ export const json = async (path) => JSON.parse(await readFile(path, "utf8"));
 export const optionalJson = async (path, fallback) =>
   (await exists(path)) ? json(path) : fallback;
 export const managed = (name) =>
+  !name.startsWith("workspaces/api/licensing-src/") &&
   !name.split("/")[0].startsWith(".unicore-updater") &&
   ![
     "storage",
@@ -31,6 +31,8 @@ export const managed = (name) =>
     "modules",
     "themes",
     ".codex",
+    ".unicore",
+    ".impeccable",
     ".playwright-mcp",
     ".ssh",
     ".unicore-updater.json",

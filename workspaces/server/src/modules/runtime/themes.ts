@@ -3,6 +3,7 @@ import { basename, join } from 'path';
 import { themesPath } from 'unicore-common';
 import { ThemeManifest, validateThemeManifest } from 'unicore-api';
 import { readLocaleFiles } from './locales';
+import { assertExtension } from 'unicore-api/licensing';
 
 export interface DiscoveredTheme {
   id: string;
@@ -67,6 +68,14 @@ export const activeThemeLocales = (): Record<string, Record<string, string>> => 
     const id = activeThemeId(side);
 
     if (!id) continue;
+
+    const theme = discoverThemes().themes.find((item) => item.id === id);
+    if (!theme) continue;
+    try {
+      assertExtension({ kind: 'theme', id, directory: theme.dir, manifest: theme.manifest });
+    } catch {
+      continue;
+    }
 
     for (const [code, messages] of Object.entries(themeLocales(id))) locales[code] = { ...(locales[code] || {}), ...messages };
   }

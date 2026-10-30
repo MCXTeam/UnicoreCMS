@@ -17,6 +17,11 @@ interface Subscription {
 export class HookBus {
   private subscriptions = new Map<string, Set<Subscription>>()
   private reporter: HookErrorReporter = () => undefined
+  private ownerAllowed: (owner: string) => boolean = () => true
+
+  setOwnerGuard(guard: (owner: string) => boolean): void {
+    this.ownerAllowed = guard
+  }
 
   setErrorReporter(reporter: HookErrorReporter): void {
     this.reporter = reporter
@@ -46,6 +51,7 @@ export class HookBus {
     if (!list || !list.size) return true
 
     for (const subscription of [...list]) {
+      if (subscription.owner && !this.ownerAllowed(subscription.owner)) continue
       try {
         if ((await subscription.handler(payload)) === false) return false
       } catch (error) {

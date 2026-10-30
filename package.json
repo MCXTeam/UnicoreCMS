@@ -14,7 +14,9 @@
     "build:client": "pnpm --filter unicore-client run build",
     "build:admin": "pnpm --filter unicore-admin run build",
     "start": "node scripts/start.mjs",
-    "lint": "pnpm -r run lint",
+    "quality:install": "npm ci --prefix tools/quality --ignore-scripts --no-audit --no-fund",
+    "lint": "node tools/quality/check.mjs lint",
+    "format:check": "node tools/quality/check.mjs format",
     "format": "pnpm -r run format",
     "sync": "pnpm --filter unicore-server run schema:sync",
     "seed": "pnpm --filter unicore-server run seed:run",
@@ -26,6 +28,7 @@
     "unicore-api": "workspace:*"
   },
   "devDependencies": {
+    "prettier": "3.9.10",
     "typescript": "~5.9.3"
   }
 }

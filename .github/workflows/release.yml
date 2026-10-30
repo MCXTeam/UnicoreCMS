@@ -16,9 +16,12 @@ jobs:
           cache: pnpm
       - run: cp .env.example .env && pnpm install --frozen-lockfile
       - run: pnpm run build
+      - run: pnpm quality:install && pnpm lint && pnpm format:check
+      - run: node scripts/licensing-sdk.mjs --check
       - run: pnpm --filter unicore-updater test
       - run: pnpm --filter unicore-server exec node --test test/migration-obfuscation.test.mjs
-      - run: pnpm --filter unicore-api run api:check
+      - run: pnpm --filter unicore-api run api:check && pnpm --filter unicore-api test
+      - run: pnpm --filter unicore-server exec node --test test/module-license-admission.test.mjs test/obfuscation-semantics.test.mjs
       - run: pnpm --filter unicore-server run typecheck && pnpm --filter unicore-admin run typecheck && pnpm --filter unicore-client run typecheck
       - name: Sign release
         env:

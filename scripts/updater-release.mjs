@@ -1,11 +1,13 @@
-import { readFile, mkdir } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import { execFileSync } from "node:child_process";
 import { resolve, join } from "node:path";
 import { publishBundle, parts } from "../workspaces/updater/src/releases.mjs";
 import { hash } from "../workspaces/updater/src/files.mjs";
+import { verifyLicensingSdk, configuredTrust } from "./licensing-sdk.mjs";
 
 const root = resolve(process.argv[2] || ".");
 const output = resolve(process.argv[3] || "../unicore-release");
+verifyLicensingSdk({directory: join(root, "workspaces/api/licensing"), trust: configuredTrust(root)});
 const pkg = JSON.parse(await readFile(join(root, "package.json")));
 const policy = JSON.parse(await readFile(join(root, "compat/updater.json")));
 const lock = hash(await readFile(join(root, "pnpm-lock.yaml")));

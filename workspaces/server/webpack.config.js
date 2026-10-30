@@ -22,6 +22,7 @@ const base = {
     minimize: false,
   },
   resolve: {
+    extensionAlias: { '.js': ['.js', '.ts'] },
     extensions: ['.ts', '.js'],
     plugins: [new TsconfigPathsPlugin({ configFile: './tsconfig.build.json' })],
   },
@@ -37,33 +38,37 @@ const orm = {
     path: path.resolve(__dirname, 'dist'),
     libraryTarget: 'commonjs2',
     filename: 'ormconfig-schema.js',
+    chunkFilename: 'chunks/[name].[contenthash].js',
   },
 };
 
 const schema = {
   ...base,
-  entry: './src/migrations/cli.ts',
+  entry: './src/migrations/bootstrap.ts',
   output: {
     path: path.resolve(__dirname, 'dist/migrations'),
     filename: 'cli.js',
+    chunkFilename: 'chunks/[name].[contenthash].js',
   },
 };
 
 const main = {
   ...base,
-  entry: './src/main.ts',
+  entry: './src/bootstrap.ts',
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
+    chunkFilename: 'chunks/[name].[contenthash].js',
   },
 };
 
 const cli = {
   ...base,
-  entry: './src/cli/main.ts',
+  entry: './src/cli/bootstrap.ts',
   output: {
     path: path.resolve(__dirname, 'dist/cli'),
     filename: 'main.js',
+    chunkFilename: 'chunks/[name].[contenthash].js',
   },
   plugins: [new webpack.BannerPlugin({ banner: '#!/usr/bin/env node', raw: true })],
 };

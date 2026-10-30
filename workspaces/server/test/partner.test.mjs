@@ -29,6 +29,17 @@ async function realOf(username) {
 
 const REFERAL_PERCENT = 10;
 
+async function waitForAccrual(uuid) {
+  const deadline = Date.now() + 10000;
+  let rows = [];
+  while (Date.now() < deadline) {
+    rows = await query('SELECT * FROM mod_partner_accruals WHERE partner_uuid = ?', [uuid]);
+    if (rows.length) return rows;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  return rows;
+}
+
 async function pair({ rewarded = false } = {}) {
   const roles = rewarded ? [await createRole([], { referal_percent: REFERAL_PERCENT })] : [];
   const inviter = await createUser({ roles });
@@ -105,7 +116,7 @@ describe('Партнёрская программа', () => {
 
     await complete(id);
 
-    const accruals = await query('SELECT * FROM mod_partner_accruals WHERE partner_uuid = ?', [inviterUuid]);
+    const accruals = await waitForAccrual(inviterUuid);
 
     assert.equal(accruals.length, 1, 'начисление не создано');
     assert.equal(Number(accruals[0].reward), 20, `начислено ${accruals[0].reward} вместо 20`);

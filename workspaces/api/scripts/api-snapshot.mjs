@@ -17,6 +17,7 @@ const walk = (dir) => {
 }
 
 walk(dist)
+files.push(join(root, 'licensing/index.d.cts'))
 
 const snapshot = files
   .map((file) => {
@@ -25,7 +26,9 @@ const snapshot = files
       .filter((line) => !line.startsWith('//') && !line.startsWith('/*') && line.trim())
       .join('\n')
 
-    return `=== ${relative(dist, file).split(sep).join('/')} ===\n${body}`
+    return `=== ${relative(file.endsWith('.d.cts') ? root : dist, file)
+      .split(sep)
+      .join('/')} ===\n${body}`
   })
   .join('\n\n')
 

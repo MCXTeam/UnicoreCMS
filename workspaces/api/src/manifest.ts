@@ -26,6 +26,13 @@ export interface ModulePermissionSchema {
 
 export type ModulePermission = string | ModulePermissionSchema
 
+export interface CommercialManifest {
+  productId: string
+  protocol: 1
+  frontend?: 'browser'
+  runtime?: 'encrypted-v1'
+}
+
 export interface ModuleManifest {
   id: string
   name: LocalizedText
@@ -35,6 +42,7 @@ export interface ModuleManifest {
   author?: string
   homepage?: string
   license?: string
+  commercial?: CommercialManifest
   server?: string
   client?: string
   admin?: string
@@ -53,6 +61,7 @@ export interface ThemeManifest {
   id: string
   name: LocalizedText
   version: string
+  commercial?: CommercialManifest
   unicoreApi: string
   side?: 'client' | 'admin'
   componentPrefix?: string
@@ -82,6 +91,14 @@ const validateName = (value: unknown, errors: string[]): void => {
   if (isRecord(value) && Object.values(value).every((item) => typeof item === 'string')) return
 
   errors.push('поле name должно быть строкой или объектом переводов')
+}
+
+const validateCommercial = (value: unknown, errors: string[]): void => {
+  if (value === undefined) return
+  if (!isRecord(value) || value.protocol !== 1 || typeof value.productId !== 'string' || !/^[a-z][a-z0-9._-]{2,100}$/.test(value.productId))
+    errors.push('commercial должен задавать productId и protocol: 1')
+  else if (value.frontend !== undefined && value.frontend !== 'browser') errors.push('commercial.frontend должен быть browser')
+  else if (value.runtime !== undefined && value.runtime !== 'encrypted-v1') errors.push('commercial.runtime должен быть encrypted-v1')
 }
 
 const validateRelativePath = (value: unknown, field: string, errors: string[]): void => {
@@ -146,6 +163,7 @@ export const validateModuleManifest = (raw: unknown): ValidationResult<ModuleMan
     errors.push('поле id должно соответствовать шаблону [a-z][a-z0-9_]{2,31}')
 
   validateName(raw.name, errors)
+  validateCommercial(raw.commercial, errors)
 
   if (typeof raw.version !== 'string' || !SEMVER_PATTERN.test(raw.version)) errors.push('поле version должно быть версией вида 1.0.0')
 
@@ -180,6 +198,7 @@ export const validateThemeManifest = (raw: unknown): ValidationResult<ThemeManif
     errors.push('поле id должно соответствовать шаблону [a-z][a-z0-9_]{2,31}')
 
   validateName(raw.name, errors)
+  validateCommercial(raw.commercial, errors)
 
   if (typeof raw.version !== 'string' || !SEMVER_PATTERN.test(raw.version)) errors.push('поле version должно быть версией вида 1.0.0')
 

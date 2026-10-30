@@ -7,6 +7,7 @@ import { ModuleRecord } from './entities/module.entity';
 import { discover, readState, writeState } from './runtime/discovery';
 import { moduleConfigKey } from 'src/admin/config/module-config';
 import { moduleRuntime } from './runtime';
+import { commercialExtension, currentHost, moduleAllowed } from 'unicore-api/licensing';
 
 @Injectable()
 export class ModulesService implements OnModuleInit {
@@ -49,7 +50,7 @@ export class ModulesService implements OnModuleInit {
 
       if (failure) status = 'broken';
       else if (!module.enabled) status = 'disabled';
-      else if (loaded) status = 'active';
+      else if (loaded) status = moduleAllowed(module.id) ? 'active' : 'broken';
       else if (known.has(module.id)) status = 'disabled';
 
       return new ModuleDto({
@@ -61,7 +62,7 @@ export class ModulesService implements OnModuleInit {
         author: module.manifest.author,
         homepage: module.manifest.homepage,
         status,
-        reason: failure?.reason,
+        reason: failure?.reason || (loaded && !moduleAllowed(module.id) ? 'extension_license_required' : undefined),
         hasServer: Boolean(module.manifest.server),
         hasClient: Boolean(module.manifest.client),
         hasAdmin: Boolean(module.manifest.admin),
@@ -76,6 +77,14 @@ export class ModulesService implements OnModuleInit {
     const module = modules.find((item) => item.id === id);
 
     if (!module) throw new NotFoundException();
+
+    const host = currentHost();
+    if (enabled && commercialExtension({ kind: 'module', id, manifest: module.manifest, directory: module.dir }))
+      try {
+        if (!host) throw new Error('licensing_unavailable');
+        await host.operation({ action: 'install', kind: 'module', id, directory: module.dir });
+      }
+      catch { throw new BadRequestException('extension_license_required'); }
 
     const state = readState();
 

@@ -2,9 +2,9 @@ name: Build
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build:
@@ -16,57 +16,69 @@ jobs:
         node: [22, 24]
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
 
-    - name: Use Node.js ${{ matrix.node }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node }}
-        cache: pnpm
+      - name: Use Node.js ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
 
-    - name: Build
-      run: |
-        mv .env.example .env
-        pnpm install --frozen-lockfile
-        pnpm run build
+      - name: Build
+        run: |
+          mv .env.example .env
+          pnpm install --frozen-lockfile
+          pnpm run build
 
-    - name: Updater tests
-      run: pnpm --filter unicore-updater test && node --test scripts/portable-nitro.test.mjs scripts/build-budget.test.cjs
+      - name: Updater tests
+        run: pnpm --filter unicore-updater test && node --test scripts/portable-nitro.test.mjs scripts/build-budget.test.cjs
 
-    - name: Updater API tests
-      run: pnpm --filter unicore-server exec node --test test/updates-setup-permissions.test.mjs test/updates-connection.test.mjs test/update-body-parser.test.mjs test/server-instance-schema.test.mjs test/migration-obfuscation.test.mjs
+      - name: Quality checks
+        env:
+          QUALITY_BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: pnpm quality:install && pnpm lint && pnpm format:check
 
-    - name: Аудит зависимостей
-      if: matrix.node == 22
-      run: pnpm run audit
+      - name: Updater API tests
+        run: pnpm --filter unicore-server exec node --test test/updates-setup-permissions.test.mjs test/updates-connection.test.mjs test/update-body-parser.test.mjs test/server-instance-schema.test.mjs test/migration-obfuscation.test.mjs
 
-    - name: API contract
-      run: pnpm --filter unicore-api run api:check
+      - name: Аудит зависимостей
+        if: matrix.node == 22
+        run: pnpm run audit
 
-    - name: Typecheck
-      run: |
-        pnpm --filter unicore-server run typecheck
-        pnpm --filter unicore-client run typecheck
-        pnpm --filter unicore-admin run typecheck
+      - name: API contract
+        run: node scripts/licensing-sdk.mjs --check && node --test scripts/licensing-sdk.test.mjs && pnpm --filter unicore-api run api:check && pnpm --filter unicore-api test
 
-    - name: Prepare artifact
-      if: matrix.node == 22
-      run: |
-        rm -rf .git
-        rm -rf .github
-        rm -rf ./node_modules
-        rm -rf ./workspaces/*/node_modules
-        rm -rf ./workspaces/client/.nuxt
-        rm -rf ./workspaces/client/dist
-        rm -rf ./workspaces/admin/.nuxt
-        rm -rf ./workspaces/admin/dist
-        rm -rf ./workspaces/server/src
-        rm -rf ./logs
-    - uses: actions/upload-artifact@v4
-      if: matrix.node == 22
-      with:
-        name: UnicoreCMS
-        path: ./
+      - name: Module admission tests
+        run: pnpm --filter unicore-server exec node --test test/module-license-admission.test.mjs test/obfuscation-semantics.test.mjs
+
+      - name: Typecheck
+        run: |
+          pnpm --filter unicore-server run typecheck
+          pnpm --filter unicore-client run typecheck
+          pnpm --filter unicore-admin run typecheck
+
+      - name: Prepare artifact
+        if: matrix.node == 22
+        run: |
+          rm -rf .git
+          rm -rf .github
+          rm -rf ./node_modules
+          rm -rf ./workspaces/*/node_modules
+          rm -rf ./tools/quality/node_modules
+          rm -rf ./workspaces/client/.nuxt
+          rm -rf ./workspaces/client/dist
+          rm -rf ./workspaces/admin/.nuxt
+          rm -rf ./workspaces/admin/dist
+          rm -rf ./workspaces/server/src
+          rm -rf ./workspaces/api/licensing-src
+          rm -rf ./logs
+      - uses: actions/upload-artifact@v4
+        if: matrix.node == 22
+        with:
+          name: UnicoreCMS
+          path: ./

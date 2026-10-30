@@ -1,11 +1,15 @@
 {
   "name": "unicore-api",
-  "version": "1.15.0",
+  "version": "1.16.0",
   "private": true,
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
+    "./licensing": {
+      "types": "./licensing/index.d.cts",
+      "default": "./licensing/index.cjs"
+    },
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
@@ -39,7 +43,7 @@
   },
   "scripts": {
     "dev": "tsup --watch",
-    "build": "tsup",
+    "build": "node ../../scripts/licensing-sdk.mjs && tsup",
     "test": "node --test test/*.test.cjs",
     "format": "prettier --write --list-different .",
     "api:snapshot": "node ./scripts/api-snapshot.mjs --write",

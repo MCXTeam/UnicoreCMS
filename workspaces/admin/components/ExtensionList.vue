@@ -18,8 +18,8 @@
   </section>
 </template>
 
-<script setup lang="ts">
-withDefaults(defineProps<{ items: Record<string, any>[]; loading?: boolean; itemKey?: string }>(), { loading: false, itemKey: 'id' })
+<script setup lang="ts" generic="T extends Record<string, any>">
+withDefaults(defineProps<{ items: T[]; loading?: boolean; itemKey?: string }>(), { loading: false, itemKey: 'id' })
 </script>
 
 <style scoped>

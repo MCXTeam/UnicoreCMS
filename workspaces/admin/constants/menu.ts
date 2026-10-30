@@ -184,6 +184,11 @@ export const CORE_MENU = [
         icon: 'pi pi-fw pi-cloud-download',
         to: '/updates',
       },
+      {
+        label: 'licensing.title',
+        icon: 'pi pi-fw pi-key',
+        to: '/licenses',
+      },
     ],
   },
 ]

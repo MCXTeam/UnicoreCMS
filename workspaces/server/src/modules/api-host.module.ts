@@ -29,7 +29,6 @@ import { PaymentHandlerService } from 'src/payment/methods/core/payment-handler.
 import { PaymentHandlerModule } from 'src/payment/methods/core/payment-handler.module';
 import { WebhookDeliveriesService } from 'src/admin/webhook/webhook-deliveries.service';
 import { WebhooksModule } from 'src/admin/webhook/webhooks.module';
-import { Webhook } from 'src/admin/webhook/entities/webhook.entity';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigModule } from 'src/admin/config/config.module';
 import UsersModule from 'src/admin/users/users.module';
@@ -44,6 +43,7 @@ import { CORE_CAPABILITIES } from './capabilities';
 import { moduleRuntime } from './runtime';
 import { updateHold } from '../common/update-hold';
 import { WebRoleOrigin } from 'src/game/donate/entities/web-role-origin.entity';
+import { currentHost, moduleAllowed, commercialExtension } from 'unicore-api/licensing';
 
 @Injectable()
 export class ApiHostService implements OnApplicationBootstrap, OnApplicationShutdown {
@@ -73,6 +73,14 @@ export class ApiHostService implements OnApplicationBootstrap, OnApplicationShut
     if (updateHold() && process.env.UNICORE_UPDATE_SANDBOX !== '1') return;
     setCore(this.buildCore());
     capabilities().replace(CORE_CAPABILITIES);
+    events().setOwnerGuard(moduleAllowed);
+    hooks().setOwnerGuard(moduleAllowed);
+    currentHost()?.onBlocked((key) => {
+      if (!key.startsWith('module:')) return;
+      const id = key.slice('module:'.length);
+      events().offOwner(id);
+      hooks().offOwner(id);
+    });
 
     events().setErrorReporter((event, owner, error) => {
       this.logger.error(`[module:${owner || 'unknown'}] обработчик события ${event}: ${formatError(error)}`);
@@ -91,6 +99,9 @@ export class ApiHostService implements OnApplicationBootstrap, OnApplicationShut
       if (!setup) continue;
 
       try {
+        if (!moduleAllowed(module.id)) continue;
+        if (commercialExtension({ kind: 'module', id: module.id, directory: module.dir, manifest: module.manifest }))
+          await currentHost()?.requireLive('module', module.id);
         await setup(this.context(module.id));
       } catch (error) {
         this.logger.error(`[module:${module.id}] ошибка инициализации: ${formatError(error)}`);

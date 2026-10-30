@@ -7,6 +7,7 @@
 **/.cache
 **/node_modules
 **/package-lock.json
+!/tools/quality/package-lock.json
 **/yarn.lock
 .pnpm-store/
 
@@ -44,6 +45,10 @@ lerna-debug.log*
 .env
 /initial-admin.txt
 /.unicore-updater*
+/.unicore/
+/workspaces/api/licensing/
+/workspaces/api/licensing-build-*/
+/workspaces/api/licensing-previous-*/
 
 /storage/*
 !/storage/default

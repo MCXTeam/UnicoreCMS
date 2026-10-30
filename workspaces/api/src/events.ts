@@ -35,6 +35,11 @@ export type EventErrorReporter = (event: string, owner: string | undefined, erro
 export class EventBus {
   private subscriptions = new Map<string, Set<Subscription>>()
   private reporter: EventErrorReporter = () => undefined
+  private ownerAllowed: (owner: string) => boolean = () => true
+
+  setOwnerGuard(guard: (owner: string) => boolean): void {
+    this.ownerAllowed = guard
+  }
 
   setErrorReporter(reporter: EventErrorReporter): void {
     this.reporter = reporter
@@ -71,6 +76,7 @@ export class EventBus {
     if (!list || !list.size) return
 
     for (const subscription of [...list]) {
+      if (subscription.owner && !this.ownerAllowed(subscription.owner)) continue
       if (subscription.once) list.delete(subscription)
 
       try {

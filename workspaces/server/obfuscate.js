@@ -4,6 +4,12 @@ const { obfuscate } = require('javascript-obfuscator');
 const OBFUSCATOR_OPTIONS = {
   optionsPreset: 'medium-obfuscation',
   target: 'node',
+  transformObjectKeys: false,
+  renameProperties: false,
+  renameGlobals: false,
+  disableConsoleOutput: false,
+  debugProtection: false,
+  debugProtectionInterval: 0,
 };
 
 const bundle = process.argv[2];

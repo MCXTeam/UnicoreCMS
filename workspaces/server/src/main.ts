@@ -33,6 +33,7 @@ import { UsersService } from './admin/users/users.service';
 import { createInitialAdmin } from './admin/users/initial-admin';
 import { updateHold } from './common/update-hold';
 import { installUpdateBodyParser } from './common/update-body-parser';
+import { licenseMiddleware } from './modules/license-middleware';
 
 process.env.TZ = envConfig.timezone;
 
@@ -61,6 +62,7 @@ async function bootstrap() {
   app.disable('x-powered-by');
   app.enableShutdownHooks();
   installUpdateBodyParser(app);
+  app.use(licenseMiddleware);
   app.use('/_update/health', (request: Request, response: Response, next: NextFunction) => {
     if (request.method !== 'GET') return next();
     return response.json({ ready: true, maintenance: updateHold() });

@@ -20,6 +20,7 @@ import { InstallResultDto } from '../dto/install-result.dto';
 import { ModulesService } from '../modules.service';
 import { activeThemeId, readThemesState, themeDir, ThemeSide, writeThemesState } from '../runtime/themes';
 import { discover, readState, writeState } from '../runtime/discovery';
+import { commercialExtension, currentHost } from 'unicore-api/licensing';
 
 @Injectable()
 export class InstallService {
@@ -55,6 +56,14 @@ export class InstallService {
     try {
       await extractArchive(content, temp);
       this.assertParts(content.kind, manifest, temp);
+      const host = currentHost();
+      if (commercialExtension({ kind: content.kind, id: manifest.id, manifest, directory: temp }))
+        try {
+          if (!host) throw new Error('licensing_unavailable');
+          await host.operation({ action: 'install', kind: content.kind, id: manifest.id, directory: temp });
+        } catch {
+          throw new BadRequestException('extension_license_required');
+        }
       this.swap(temp, target, root, manifest.id);
     } finally {
       rmSync(temp, { recursive: true, force: true });

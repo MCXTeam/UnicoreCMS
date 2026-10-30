@@ -6,6 +6,7 @@ import { NativeMariaDbBackup, freePort } from "./native-database.mjs";
 import { checked } from "./deployment.mjs";
 import { atomic, exists, fail } from "./files.mjs";
 import { nativeEnvironment, interruptNativeTasks, startNativeTask, runNativeTask } from "./native-tasks.mjs";
+import { updateLicenses } from "./licensing.mjs";
 
 export async function nativeCapacity() {
   const meminfo = await readFile("/proc/meminfo", "utf8");
@@ -60,11 +61,13 @@ export class NativeExecutor extends LocalExecutor {
   async build(op, root) {
     await this.interrupt(op);
     await this.buildEnvironment(op, root);
+    const licensing = await updateLicenses(this.config, root, op);
+    try {
     const store = join(this.directory, "package-store");
     await mkdir(store, { recursive: true });
     if (process.env.COREPACK_HOME && !(await exists(join(store, "corepack"))))
       await cp(process.env.COREPACK_HOME, join(store, "corepack"), { recursive: true });
-    const env = nativeEnvironment({ CI: "true", COREPACK_HOME: join(store, "corepack"), XDG_CACHE_HOME: join(store, "cache"), npm_config_nodedir: "/usr/local", NODE_OPTIONS: "--max-old-space-size=3072", UNICORE_BUILD_MEMORY_BYTES: String(4 * 1024 ** 3) });
+    const env = nativeEnvironment({ ...licensing.env, UNICORE_DATA_ROOT: root, UNICORE_CODE_ROOT: root, CI: "true", COREPACK_HOME: join(store, "corepack"), XDG_CACHE_HOME: join(store, "cache"), npm_config_nodedir: "/usr/local", NODE_OPTIONS: "--max-old-space-size=3072", UNICORE_BUILD_MEMORY_BYTES: String(4 * 1024 ** 3) });
     const task = (name, args) => runNativeTask(this.folder(op), name, "pnpm", args, { cwd: root, env });
     await task("install", ["install", "--frozen-lockfile", `--store-dir=${store}`, "--fetch-retries=0", "--fetch-timeout=30000"]);
     await task("build", ["run", "build"]);
@@ -78,15 +81,18 @@ export class NativeExecutor extends LocalExecutor {
           await cp(original, join(root, "workspaces", part, output), { recursive: true });
         }
       }
+    } finally { licensing.close(); }
   }
   async verify(op, root) {
     await this.build(op, root);
+    const licensing = await updateLicenses(this.config, root, op);
+    try {
     await this.clone(op, "verify", async ({ db, folder }) => {
       const data = join(folder, "data");
       await this.copyShared(data, op);
       await this.sandboxEnv(op, data, db, data);
       const ports = { server: await freePort(), client: await freePort(), admin: await freePort() };
-      const env = { ...parseEnv(await readFile(join(data, ".env"), "utf8")), UNICORE_CODE_ROOT: root,
+      const env = { ...parseEnv(await readFile(join(data, ".env"), "utf8")), ...licensing.env, UNICORE_CODE_ROOT: root,
         SERVER_PORT: String(ports.server), BACKEND_PORT: String(ports.server), CLIENT_PORT: String(ports.client), ADMIN_PORT: String(ports.admin),
         BASEURL: `http://127.0.0.1:${ports.client}`, API_BASEURL: `http://127.0.0.1:${ports.server}`, ADMIN_BASEURL: `http://127.0.0.1:${ports.admin}`,
         UNICORE_UPDATE_HOLD_FILE: join(data, "hold"), UNICORE_UPDATER_EXTERNAL: "1", NODE_PATH: join(root, "node_modules") };
@@ -112,10 +118,14 @@ export class NativeExecutor extends LocalExecutor {
         await this.migration(op, root, data, env);
       } finally { await Promise.all(tasks.map((task) => task.stop())); }
     });
+    } finally { licensing.close(); }
   }
   async migration(op, root, data, environment) {
-    const env = nativeEnvironment({ ...environment, UNICORE_DATA_ROOT: data, UNICORE_CODE_ROOT: root, MIGRATIONS_SKIP: "false", NODE_PATH: join(root, "node_modules") });
+    const licensing = await updateLicenses(this.config, root, op);
+    try {
+    const env = nativeEnvironment({ ...environment, ...licensing.env, UNICORE_DATA_ROOT: data, UNICORE_CODE_ROOT: root, MIGRATIONS_SKIP: "false", NODE_PATH: join(root, "node_modules") });
     await runNativeTask(this.folder(op), "migrate", process.execPath, [join(root, "workspaces/server/dist/migrations/cli.js"), "apply"], { cwd: root, env });
+    } finally { licensing.close(); }
   }
   async migrate(op) {
     return this.migration(op, join(this.folder(op), "candidate"), this.data, parseEnv(await readFile(this.config.database.envFile, "utf8")));

@@ -11,6 +11,7 @@ import { moduleAuditActionKey, modulePermissionKey, modulePermissionMeta } from 
 import { discover, DiscoveredModule } from './discovery';
 import { readLocaleFiles } from './locales';
 import { checkRequirements, load, LoadedModule, LoadFailure } from './loader';
+import { moduleAllowed } from 'unicore-api/licensing';
 
 export interface ModuleRuntimeState {
   loaded: LoadedModule[];
@@ -75,7 +76,7 @@ export const moduleRuntime = (): ModuleRuntimeState => {
   return state;
 };
 
-export const enabledModuleIds = (): string[] => discover().modules.filter((item) => item.enabled).map((item) => item.id);
+export const enabledModuleIds = (): string[] => moduleRuntime().loaded.filter((item) => moduleAllowed(item.id)).map((item) => item.id);
 
 export const moduleEntities = (): unknown[] => moduleRuntime().loaded.flatMap((item) => item.contribution?.entities || []);
 

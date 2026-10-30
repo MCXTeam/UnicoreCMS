@@ -16,6 +16,7 @@ export default defineConfig({
   splitting: false,
   target: "es2021",
   external: [
+    "unicore-api/licensing",
     "@nestjs/common",
     "@nestjs/core",
     "@nestjs/schedule",

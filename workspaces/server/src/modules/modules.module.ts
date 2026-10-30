@@ -11,10 +11,11 @@ import { ExtensionCatalogService } from './catalog/catalog.service';
 import { ExtensionDownloadService } from './catalog/download.service';
 import { ExtensionSourcesService } from './catalog/sources.service';
 import { ExtensionSource } from './catalog/entities/extension-source.entity';
+import { LicenseController } from './licensing/license.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([ModuleRecord, ExtensionSource])],
-  controllers: [ModulesController, ExtensionCatalogController, InstallController],
+  controllers: [ModulesController, ExtensionCatalogController, InstallController, LicenseController],
   providers: [ModulesService, InstallService, RebuildService, ExtensionSourcesService, ExtensionDownloadService, ExtensionCatalogService],
   exports: [ModulesService],
 })

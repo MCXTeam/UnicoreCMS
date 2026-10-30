@@ -1,6 +1,6 @@
 import './load-env'
 import { publicConfig } from 'unicore-common/public-config'
-import { projectRoot } from 'unicore-common/ports'
+import { dataRoot } from 'unicore-common/ports'
 import { buildParallelism } from 'unicore-common/build'
 import { CHUNK_SIZE_WARNING_LIMIT, EDITOR_OPTIMIZE_DEPS, vendorChunks, woff2Only } from 'unicore-common/vite'
 import { FRONTEND_TEMPLATE_ROOTS, usedPrimevueComponents } from 'unicore-common/primevue'
@@ -10,8 +10,10 @@ import { dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
 import { resolveLayers } from 'unicore-api/nuxt'
 import { presetFor } from './theme/preset'
+import { prepareLicenses, commercialExtension } from 'unicore-api/licensing'
 
-const layers = resolveLayers({ side: 'admin', root: projectRoot })
+await prepareLicenses(dataRoot)
+const layers = resolveLayers({ side: 'admin', root: dataRoot })
 
 for (const problem of layers.problems) console.warn(`[unicore] ${problem}`)
 
@@ -27,6 +29,7 @@ const primevueInUse = usedPrimevueComponents({
 })
 
 export default defineNuxtConfig({
+  srcDir: '.',
   extends: [uiLayer, ...layers.theme, ...layers.modules],
 
   ssr: false,
@@ -71,6 +74,19 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
+      licensedFrontend:
+        layers.moduleLayers.some((item) =>
+          commercialExtension({ kind: 'module', id: item.id, directory: item.path, manifest: item.manifest }),
+        ) ||
+        Boolean(
+          layers.themeLayer &&
+          commercialExtension({
+            kind: 'theme',
+            id: layers.themeLayer.id,
+            directory: layers.themeLayer.path,
+            manifest: layers.themeLayer.manifest,
+          }),
+        ),
       apiBaseurl: publicConfig.apiBaseurl,
       baseurl: publicConfig.baseurl,
       sitename: publicConfig.sitename,

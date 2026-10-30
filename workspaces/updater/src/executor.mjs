@@ -1,7 +1,6 @@
 import {
   mkdir,
   readFile,
-  writeFile,
   cp,
   rm,
   readdir,
@@ -14,7 +13,6 @@ import { parseEnv } from "node:util";
 import { freemem } from "node:os";
 import {
   atomic,
-  json,
   optionalJson,
   exists,
   digest,
@@ -36,6 +34,7 @@ import { assembleImage } from "./images.mjs";
 import { runTask, interruptTasks, taskName, ownMount } from "./tasks.mjs";
 import { dockerEnvironment } from "./environment.mjs";
 import { command } from "./merge.mjs";
+import { updateLicenses } from "./licensing.mjs";
 
 export class LocalExecutor {
   constructor(config) {
@@ -398,6 +397,8 @@ export class LocalExecutor {
   async build(op, root) {
     await interruptTasks(op.id);
     await this.buildEnvironment(op, root);
+    const licensing = await updateLicenses(this.config, root, op, true);
+    try {
     if (!/^[a-zA-Z0-9][a-zA-Z0-9_./:@-]*$/.test(this.config.builderImage))
       fail("invalid_image");
     const cache = join(this.folder(op), "dependencies");
@@ -465,6 +466,7 @@ export class LocalExecutor {
         "--fetch-timeout=30000",
       ]);
       await runTask(op.id, "build", [
+        ...licensing.docker,
         "--user",
         processOwner(),
         "--network=none",
@@ -517,9 +519,12 @@ export class LocalExecutor {
     }
     op.image = `unicore-candidate:${op.id}`;
     await assembleImage(root, this.config.builderImage, op.image);
+    } finally { licensing.close(); }
   }
   async verify(op, root) {
     await this.build(op, root);
+    const licensing = await updateLicenses(this.config, root, op, true);
+    try {
     await this.clone(op, "verify", async ({ db, network, folder }) => {
       const data = join(folder, "data");
       await this.copyShared(data, op);
@@ -541,6 +546,7 @@ export class LocalExecutor {
           "--security-opt=no-new-privileges",
           "--memory",
           this.config.memory || "4g",
+          ...licensing.docker,
           ...environment.args,
           "--env",
           "NODE_PATH=/app/node_modules",
@@ -596,6 +602,7 @@ export class LocalExecutor {
         await docker("rm", "-f", container).catch(() => {});
       }
     });
+    } finally { licensing.close(); }
   }
   async quiesce(op) {
     await atomic(join(this.control, "hold"), op.id);
@@ -618,9 +625,12 @@ export class LocalExecutor {
     });
   }
   async migrate(op) {
+    const licensing = await updateLicenses(this.config, join(this.folder(op), 'candidate'), op, true);
+    try {
     const env = this.config.database.envFile;
     const environment = await dockerEnvironment(env, join(this.folder(op), "migration.env"));
     await runTask(op.id, "migrate", [
+      ...licensing.docker,
       "--user",
       processOwner(),
       "--network",
@@ -647,6 +657,7 @@ export class LocalExecutor {
       "workspaces/server/dist/migrations/cli.js",
       "apply",
     ], { env: environment.env });
+    } finally { licensing.close(); }
   }
   async activate(op) {
     await this.applyDisabled(this.data, op);
