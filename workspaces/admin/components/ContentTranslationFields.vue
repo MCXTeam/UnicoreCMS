@@ -7,11 +7,18 @@
       </label>
       <div class="translation-field__original" :class="field.type === 'html' && 'translation-field__original--html'">
         <span v-if="!translations.original(field.path)" class="translation-field__empty">{{ $t('admin.original_empty') }}</span>
+        <EmailTemplatePreview v-else-if="field.type === 'email-html'" :content="translations.original(field.path)" />
         <div v-else-if="field.type === 'html'" v-html="$sanitize(translations.original(field.path))" />
         <span v-else>{{ translations.original(field.path) }}</span>
       </div>
+      <EmailTemplateEditor
+        v-if="field.type === 'email-html'"
+        :modelValue="translations.fields[field.path]"
+        :templateId="emailTemplateId"
+        @update:modelValue="translations.fields[field.path] = $event"
+      />
       <RichEditor
-        v-if="field.type === 'html'"
+        v-else-if="field.type === 'html'"
         :modelValue="translations.fields[field.path]"
         @update:modelValue="translations.fields[field.path] = $event"
         height="260px"
@@ -33,6 +40,7 @@
 export default {
   props: {
     translations: { type: Object, required: true },
+    emailTemplateId: { type: String, default: '' },
   },
 }
 </script>

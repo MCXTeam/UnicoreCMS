@@ -39,7 +39,7 @@ import { UserDto } from '../users/dto/user.dto';
 import { VerifyInput } from 'src/auth/dto/verify.input';
 import { PasswordReset } from './entities/password-reset.entity';
 import { PasswordResetInput } from 'src/auth/dto/password-reset.input';
-import { renderEmailTemplate } from './email.utils';
+import { renderEmailMessage } from './email.utils';
 import { PasswordLinkInput } from 'src/auth/dto/password-link.input';
 import { RefreshToken } from 'src/auth/entities/refresh-token.entity';
 import { PasswordService } from 'src/auth/password/password.service';
@@ -125,14 +125,14 @@ export class EmailService {
     const activation = new EmailActivation();
     const code = randomFromAlphabet(EMAIL_CODE_ALPHABET, EMAIL_CODE_LENGTH);
 
-    const html = renderEmailTemplate(content, { USERNAME: user.username, SITENAME: envConfig.sitename, CODE: code });
+    const message = renderEmailMessage({ title, content }, { USERNAME: user.username, SITENAME: envConfig.sitename, CODE: code });
 
     activation.user = user;
     activation.code = code;
 
     await this.emailActivationsRepository.save(activation);
 
-    this.mailerService.sendMail({ to: user.email, subject: title, html }).catch((e) => {
+    this.mailerService.sendMail({ to: user.email, ...message }).catch((e) => {
       this.logger.error(e.toString());
     });
   }
@@ -225,9 +225,9 @@ export class EmailService {
     });
     await this.emailChangesRepository.save(change);
 
-    const html = renderEmailTemplate(content, { USERNAME: user.username, SITENAME: envConfig.sitename, CODE: code });
+    const message = renderEmailMessage({ title, content }, { USERNAME: user.username, SITENAME: envConfig.sitename, CODE: code });
 
-    this.mailerService.sendMail({ to: address, subject: title, html }).catch((e) => {
+    this.mailerService.sendMail({ to: address, ...message }).catch((e) => {
       this.logger.error(e.toString());
     });
   }
@@ -270,13 +270,13 @@ export class EmailService {
         await this.emailMessagesRepository.findOneBy({ id: EmailMessageType.EmailChanged }),
       );
 
-      const html = renderEmailTemplate(content, {
+      const message = renderEmailMessage({ title, content }, {
         USERNAME: user.username,
         SITENAME: envConfig.sitename,
         EMAIL: user.email,
       });
 
-      await this.mailerService.sendMail({ to: previous, subject: title, html });
+      await this.mailerService.sendMail({ to: previous, ...message });
     } catch (e) {
       this.logger.error(String(e));
     }
@@ -292,14 +292,14 @@ export class EmailService {
       await this.emailMessagesRepository.findOneBy({ id: EmailMessageType.Gift }),
     );
 
-    const html = renderEmailTemplate(content, {
+    const message = renderEmailMessage({ title, content }, {
       USERNAME: recipient.username,
       SENDER: sender,
       SITENAME: envConfig.sitename,
       GIFT: gift,
     });
 
-    this.mailerService.sendMail({ to: recipient.email, subject: title, html }).catch((e) => {
+    this.mailerService.sendMail({ to: recipient.email, ...message }).catch((e) => {
       this.logger.error(e.toString());
     });
   }
@@ -339,7 +339,7 @@ export class EmailService {
     link.pathname = '/auth/password';
     link.searchParams.append('hash', hash);
 
-    const html = renderEmailTemplate(content, {
+    const message = renderEmailMessage({ title, content }, {
       IP: ip,
       USERNAME: user.username,
       SITENAME: envConfig.sitename,
@@ -352,7 +352,7 @@ export class EmailService {
 
     await this.passwordResetRepository.save(activation);
 
-    this.mailerService.sendMail({ to: user.email, subject: title, html }).catch((e) => {
+    this.mailerService.sendMail({ to: user.email, ...message }).catch((e) => {
       this.logger.error(e.toString());
     });
   }

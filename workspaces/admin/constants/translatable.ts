@@ -1,7 +1,7 @@
 export interface TranslatableField {
   path: string
   label: string
-  type: 'text' | 'textarea' | 'html'
+  type: 'text' | 'textarea' | 'html' | 'email-html'
   row?: number
 }
 
@@ -18,7 +18,7 @@ export const TRANSLATABLE_FIELDS: Record<string, TranslatableField[]> = {
   ],
   email_message: [
     { path: 'title', label: 'admin.heading', type: 'text' },
-    { path: 'content', label: 'admin.content', type: 'html' },
+    { path: 'content', label: 'admin.content', type: 'email-html' },
   ],
   server: [
     { path: 'name', label: 'admin.name', type: 'text' },

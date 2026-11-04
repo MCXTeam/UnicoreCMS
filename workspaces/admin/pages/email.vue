@@ -26,7 +26,7 @@
 
         <VeeForm v-slot="{ meta }">
           <Dialog
-            :style="{ width: '800px' }"
+            :style="{ width: '800px', maxWidth: 'calc(100vw - 32px)' }"
             v-model:visible="emailDialog"
             :closable="false"
             :modal="true"
@@ -56,10 +56,10 @@
               </VeeField>
               <div class="field">
                 <label>{{ $t('admin.content') }}</label>
-                <RichEditor v-model="email.content" height="400px" />
+                <EmailTemplateEditor :key="email.id" v-model="email.content" :templateId="email.id" />
               </div>
             </template>
-            <ContentTranslationFields v-else :translations="translations" />
+            <ContentTranslationFields v-else :key="translations.locale" :translations="translations" :emailTemplateId="email.id" />
             <template #footer>
               <Button :disabled="loading" :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
               <Button

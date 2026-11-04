@@ -1,4 +1,10 @@
 {
+  "admin.email_preview": "Предпросмотр",
+  "admin.email_editor_mode": "Режим редактора письма",
+  "admin.email_simple_editor": "Текстовый редактор",
+  "admin.email_variables": "Переменные письма и темы:",
+  "admin.email_preview_hint": "Пример с тестовыми данными. Ссылки отключены; в почтовых приложениях оформление может отличаться.",
+  "admin.email_html_source": "HTML-код письма",
   "admin.donate_purchasable": "Продаётся",
   "admin.donate_manual_only": "Выдаётся только через админку. Покупка, подарки и подарочные коды отключены.",
   "admin.manual_roles": "Роли, назначенные вручную",
