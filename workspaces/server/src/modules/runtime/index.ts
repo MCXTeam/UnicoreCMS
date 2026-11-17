@@ -1,3 +1,4 @@
+import type { ModuleMetadata } from '@nestjs/common';
 import { resolve } from 'path';
 import {
   AuditActionMeta,
@@ -76,15 +77,22 @@ export const moduleRuntime = (): ModuleRuntimeState => {
   return state;
 };
 
-export const enabledModuleIds = (): string[] => moduleRuntime().loaded.filter((item) => moduleAllowed(item.id)).map((item) => item.id);
+export const enabledModuleIds = (): string[] =>
+  moduleRuntime()
+    .loaded.filter((item) => moduleAllowed(item.id))
+    .map((item) => item.id);
 
 export const moduleEntities = (): unknown[] => moduleRuntime().loaded.flatMap((item) => item.contribution?.entities || []);
 
-export const moduleNestImports = (): any[] => moduleRuntime().loaded.flatMap((item) => item.contribution?.nestModules || []);
+export const moduleNestImports = () =>
+  moduleRuntime().loaded.flatMap((item) => item.contribution?.nestModules || []) as NonNullable<ModuleMetadata['imports']>;
 
-export const modulePaymentModules = (): any[] => moduleRuntime().loaded.flatMap((item) => item.contribution?.paymentModules || []);
+export const modulePaymentModules = () =>
+  moduleRuntime().loaded.flatMap((item) => item.contribution?.paymentModules || []) as Array<
+    NonNullable<ModuleMetadata['imports']>[number] & { id: string; enabled: boolean }
+  >;
 
-export const moduleWebhookChannels = (): any[] => moduleRuntime().loaded.flatMap((item) => item.contribution?.webhookChannels || []);
+export const moduleWebhookChannels = () => moduleRuntime().loaded.flatMap((item) => item.contribution?.webhookChannels || []);
 
 export const modulePermissions = (): Record<string, PermissionMeta> => permissionsOf(moduleRuntime().loaded);
 

@@ -36,47 +36,67 @@ export const EMAIL_TEMPLATES_V1 = [
   {
     id: EmailMessageType.Activation,
     title: '{SITENAME} — подтверждение регистрации',
-    content: layout('Добро пожаловать!', 'Остался один шаг — подтвердите почту на {SITENAME}.',
+    content: layout(
+      'Добро пожаловать!',
+      'Остался один шаг — подтвердите почту на {SITENAME}.',
       paragraph('Рады видеть вас на {SITENAME}. Введите этот код на сайте, чтобы подтвердить почту и завершить регистрацию.') + code(),
-      'Если вы не регистрировались, просто проигнорируйте письмо. Никому не сообщайте код.'),
+      'Если вы не регистрировались, просто проигнорируйте письмо. Никому не сообщайте код.',
+    ),
   },
   {
     id: EmailMessageType.Reset,
     title: '{SITENAME} — восстановление доступа',
-    content: layout('Восстановление доступа', 'Ссылка для смены пароля на {SITENAME}.',
+    content: layout(
+      'Восстановление доступа',
+      'Ссылка для смены пароля на {SITENAME}.',
       paragraph('Получили запрос на смену пароля вашего аккаунта. Нажмите кнопку, чтобы задать новый пароль.') +
-      `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:24px 0;"><tr><td bgcolor="#9c27b0" style="border-radius:10px;text-align:center;mso-padding-alt:12px 24px;"><a href="{LINK}" style="display:inline-block;padding:12px 24px;color:#ffffff;font-size:16px;font-weight:700;text-decoration:none;">Задать новый пароль</a></td></tr></table>` +
-      `<p style="margin:0 0 16px;color:#606770;font-size:14px;">Если кнопка не работает, скопируйте ссылку в браузер:<br><a href="{LINK}" style="color:#7b1fa2;overflow-wrap:anywhere;word-break:break-all;">{LINK}</a></p>` +
-      detail('IP-адрес запроса', '{IP}'),
-      'Не запрашивали смену пароля? Просто проигнорируйте письмо — ваш пароль останется прежним.'),
+        `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:24px 0;"><tr><td bgcolor="#9c27b0" style="border-radius:10px;text-align:center;mso-padding-alt:12px 24px;"><a href="{LINK}" style="display:inline-block;padding:12px 24px;color:#ffffff;font-size:16px;font-weight:700;text-decoration:none;">Задать новый пароль</a></td></tr></table>` +
+        `<p style="margin:0 0 16px;color:#606770;font-size:14px;">Если кнопка не работает, скопируйте ссылку в браузер:<br><a href="{LINK}" style="color:#7b1fa2;overflow-wrap:anywhere;word-break:break-all;">{LINK}</a></p>` +
+        detail('IP-адрес запроса', '{IP}'),
+      'Не запрашивали смену пароля? Просто проигнорируйте письмо — ваш пароль останется прежним.',
+    ),
   },
   {
     id: EmailMessageType.Device,
     title: '{SITENAME} — вход с нового устройства',
-    content: layout('Новый вход в аккаунт', 'Проверьте, что это были вы.',
+    content: layout(
+      'Новый вход в аккаунт',
+      'Проверьте, что это были вы.',
       paragraph('В ваш аккаунт на {SITENAME} вошли с нового устройства.') + detail('IP-адрес', '{IP}'),
-      'Если это были вы, ничего делать не нужно. Если нет — сразу смените пароль и завершите другие сеансы в настройках аккаунта.'),
+      'Если это были вы, ничего делать не нужно. Если нет — сразу смените пароль и завершите другие сеансы в настройках аккаунта.',
+    ),
   },
   {
     id: EmailMessageType.Gift,
     title: '{SITENAME} — вам подарок!',
-    content: layout('Вам подарок!', '{SENDER} отправил вам подарок на {SITENAME}.',
-      paragraph('Игрок {SENDER} приготовил для вас подарок на {SITENAME}.') + detail('Ваш подарок', '{GIFT}') +
-      paragraph('Он уже выдан. Загляните в личный кабинет!'),
-      'Это уведомление о полученном подарке. Подтверждать получение или платить за него не нужно.'),
+    content: layout(
+      'Вам подарок!',
+      '{SENDER} отправил вам подарок на {SITENAME}.',
+      paragraph('Игрок {SENDER} приготовил для вас подарок на {SITENAME}.') +
+        detail('Ваш подарок', '{GIFT}') +
+        paragraph('Он уже выдан. Загляните в личный кабинет!'),
+      'Это уведомление о полученном подарке. Подтверждать получение или платить за него не нужно.',
+    ),
   },
   {
     id: EmailMessageType.EmailChange,
     title: '{SITENAME} — подтверждение новой почты',
-    content: layout('Подтвердите новую почту', 'Код для смены почты аккаунта на {SITENAME}.',
-      paragraph('Этот адрес указан как новая почта вашего аккаунта на {SITENAME}. Введите код на сайте, чтобы подтвердить изменение.') + code(),
-      'Если вы не меняли почту, не вводите и никому не сообщайте код. Прежний адрес останется привязан к аккаунту.'),
+    content: layout(
+      'Подтвердите новую почту',
+      'Код для смены почты аккаунта на {SITENAME}.',
+      paragraph('Этот адрес указан как новая почта вашего аккаунта на {SITENAME}. Введите код на сайте, чтобы подтвердить изменение.') +
+        code(),
+      'Если вы не меняли почту, не вводите и никому не сообщайте код. Прежний адрес останется привязан к аккаунту.',
+    ),
   },
   {
     id: EmailMessageType.EmailChanged,
     title: '{SITENAME} — почта аккаунта изменена',
-    content: layout('Почта аккаунта изменена', 'Новый адрес почты вашего аккаунта на {SITENAME}.',
+    content: layout(
+      'Почта аккаунта изменена',
+      'Новый адрес почты вашего аккаунта на {SITENAME}.',
       paragraph('У вашего аккаунта на {SITENAME} теперь другой адрес почты.') + detail('Новая почта', '{EMAIL}'),
-      'Если вы не меняли почту, срочно свяжитесь с администрацией проекта, чтобы вернуть доступ к аккаунту.'),
+      'Если вы не меняли почту, срочно свяжитесь с администрацией проекта, чтобы вернуть доступ к аккаунту.',
+    ),
   },
 ];

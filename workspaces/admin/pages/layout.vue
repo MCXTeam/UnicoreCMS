@@ -164,7 +164,7 @@
             <i :class="blockIcon(selected.type)" class="layout-editor__icon" />
             <h5 class="m-0">{{ blockName(selected.type) }}</h5>
           </div>
-          <Button icon="pi pi-times" text rounded @click="selected = null" />
+          <Button icon="pi pi-times" text rounded @click="clearSelection" />
         </div>
 
         <div class="layout-section" v-if="hasTitle || hasContent">
@@ -213,7 +213,7 @@
           </div>
         </div>
 
-        <div class="layout-section">
+        <div class="layout-section" v-if="selected">
           <span class="layout-section__title">{{ $t('admin.layout_section_display') }}</span>
 
           <div class="formgrid grid">
@@ -226,7 +226,7 @@
                 optionValue="value"
                 :disabled="!canUpdate"
                 appendTo="body"
-                @update:modelValue="(value: any) => (selected!.when = value)"
+                @update:modelValue="setVisibility"
               />
             </div>
             <div class="field col-12 md:col-6">
@@ -250,7 +250,7 @@
           </div>
         </div>
 
-        <div class="layout-section" v-if="hasLinks">
+        <div class="layout-section" v-if="selected && hasLinks">
           <div class="flex justify-content-between align-items-center mb-2">
             <span class="layout-section__title mb-0">{{ $t('admin.layout_links') }}</span>
             <Button :label="$t('admin.layout_link_add')" icon="pi pi-plus" text size="small" :disabled="!canUpdate" @click="addLink()" />
@@ -380,6 +380,14 @@ const blockName = (type: LayoutBlockType) => $t(`admin.layout_block_${type}`)
 const blockIcon = (type: LayoutBlockType) => ICONS[type] || 'pi pi-box'
 
 const uid = () => Math.random().toString(36).slice(2, 10)
+
+function clearSelection() {
+  selected.value = null
+}
+
+function setVisibility(value: LayoutBlock['when']) {
+  if (selected.value) selected.value.when = value
+}
 
 function pick(id: string) {
   selected.value = current.value.rows.flatMap((row) => row.blocks).find((block) => block.id === id) || null

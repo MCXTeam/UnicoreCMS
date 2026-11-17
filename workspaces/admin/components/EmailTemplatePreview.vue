@@ -1,11 +1,5 @@
 <template>
-  <iframe
-    class="email-preview"
-    :title="$t('admin.email_preview')"
-    :srcdoc="document"
-    sandbox=""
-    referrerpolicy="no-referrer"
-  />
+  <iframe class="email-preview" :title="$t('admin.email_preview')" :srcdoc="document" sandbox="" referrerpolicy="no-referrer" />
 </template>
 
 <script setup lang="ts">

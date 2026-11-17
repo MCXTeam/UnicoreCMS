@@ -22,12 +22,6 @@ export class EmailModule implements OnModuleInit {
   constructor(@InjectRepository(EmailMessage) private emailMessagesRepository: Repository<EmailMessage>) {}
 
   async onModuleInit() {
-    await this.emailMessagesRepository
-      .createQueryBuilder()
-      .insert()
-      .into(EmailMessage)
-      .values(EMAIL_TEMPLATES_V1)
-      .orIgnore()
-      .execute();
+    await this.emailMessagesRepository.createQueryBuilder().insert().into(EmailMessage).values(EMAIL_TEMPLATES_V1).orIgnore().execute();
   }
 }

@@ -82,6 +82,10 @@ export function useContentTranslations(entity: string, fieldSpec?: TranslatableF
     }, {})
   })
 
+  function setField(path: string, value: string) {
+    fields[path] = value
+  }
+
   function original(path: string): string {
     return read(source.value, path) ?? ''
   }
@@ -126,5 +130,5 @@ export function useContentTranslations(entity: string, fieldSpec?: TranslatableF
     map.value = { ...map.value, [locale.value]: values }
   }
 
-  return reactive({ locale, locales, isDefault, fields, visible, status, original, attach, load, save, copyFromDefault })
+  return reactive({ locale, locales, isDefault, fields, setField, visible, status, original, attach, load, save, copyFromDefault })
 }

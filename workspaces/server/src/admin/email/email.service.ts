@@ -1,7 +1,7 @@
 import { MailerService } from '@nestjs-modules/mailer';
 import { BadRequestException, ConflictException, Inject, Injectable, Logger, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LessThan, MoreThan, Repository } from 'typeorm';
+import { FindOptionsOrder, FindOptionsWhere, LessThan, MoreThan, Repository } from 'typeorm';
 import { Transactional } from 'typeorm-transactional';
 import { envConfig } from 'unicore-common';
 import { events } from 'unicore-api';
@@ -105,7 +105,7 @@ export class EmailService {
         subject: 'Test Email',
         text: 'Test Email sent by UnicoreCMS',
       })
-      .then((res) => {})
+      .then(() => {})
       .catch((e) => {
         this.logger.error(e.toString());
         throw new ServiceUnavailableException();
@@ -137,7 +137,7 @@ export class EmailService {
     });
   }
 
-  private async takeCode<T extends { code: string; attempts: number }>(
+  private async takeCode<T extends EmailActivation>(
     repository: Repository<T>,
     user: User,
     code: string,
@@ -146,8 +146,8 @@ export class EmailService {
       where: {
         user: { uuid: user.uuid },
         created: MoreThan(this.moment().utc().subtract(EMAIL_ACTIVATION_TTL_MINUTES, 'minutes').toDate()),
-      } as any,
-      order: { created: 'DESC', id: 'DESC' } as any,
+      } as FindOptionsWhere<T>,
+      order: { created: 'DESC', id: 'DESC' } as FindOptionsOrder<T>,
     });
 
     if (!pending) throw new NotFoundException(EMAIL_CODE_EXPIRED);
@@ -157,16 +157,16 @@ export class EmailService {
 
     pending.attempts += 1;
 
-    await repository.save(pending as any);
+    await repository.save(pending);
 
     throw new NotFoundException(pending.attempts >= EMAIL_ACTIVATION_MAX_ATTEMPTS ? EMAIL_CODE_EXPIRED : EMAIL_CODE_INVALID);
   }
 
-  private async assertResendAllowed<T>(repository: Repository<T>, user: User): Promise<void> {
+  private async assertResendAllowed<T extends EmailActivation>(repository: Repository<T>, user: User): Promise<void> {
     const recent = await repository.countBy({
       created: MoreThan(this.moment().utc().subtract(EMAIL_ACTIVATION_RESEND_WINDOW_MINUTES, 'minutes').toDate()),
       user: { uuid: user.uuid },
-    } as any);
+    } as FindOptionsWhere<T>);
 
     if (recent >= EMAIL_ACTIVATION_RESEND_MAX) throw new TooManyAttemptsException(EMAIL_ACTIVATION_RESEND_WINDOW_MINUTES * 60);
   }

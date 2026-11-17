@@ -1,3 +1,5 @@
+import type { ExtensionPayload } from './extension-payload'
+
 export type DonateRevokeReason = 'expired' | 'revoked'
 
 export interface CoreEventMap {
@@ -25,7 +27,7 @@ export type CoreEventName = keyof CoreEventMap
 export type EventHandler<T> = (payload: T) => void | Promise<void>
 
 interface Subscription {
-  handler: EventHandler<any>
+  handler: EventHandler<unknown>
   once: boolean
   owner?: string
 }
@@ -46,18 +48,18 @@ export class EventBus {
   }
 
   on<K extends CoreEventName>(event: K, handler: EventHandler<CoreEventMap[K]>, owner?: string): () => void
-  on(event: string, handler: EventHandler<any>, owner?: string): () => void
-  on(event: string, handler: EventHandler<any>, owner?: string): () => void {
+  on<T = ExtensionPayload>(event: string, handler: EventHandler<T>, owner?: string): () => void
+  on(event: string, handler: EventHandler<unknown>, owner?: string): () => void {
     return this.subscribe(event, handler, false, owner)
   }
 
   once<K extends CoreEventName>(event: K, handler: EventHandler<CoreEventMap[K]>, owner?: string): () => void
-  once(event: string, handler: EventHandler<any>, owner?: string): () => void
-  once(event: string, handler: EventHandler<any>, owner?: string): () => void {
+  once<T = ExtensionPayload>(event: string, handler: EventHandler<T>, owner?: string): () => void
+  once(event: string, handler: EventHandler<unknown>, owner?: string): () => void {
     return this.subscribe(event, handler, true, owner)
   }
 
-  off(event: string, handler: EventHandler<any>): void {
+  off<T = ExtensionPayload>(event: string, handler: EventHandler<T>): void {
     const list = this.subscriptions.get(event)
     if (!list) return
 
@@ -91,7 +93,7 @@ export class EventBus {
     return this.subscriptions.get(event)?.size || 0
   }
 
-  private subscribe(event: string, handler: EventHandler<any>, once: boolean, owner?: string): () => void {
+  private subscribe(event: string, handler: EventHandler<unknown>, once: boolean, owner?: string): () => void {
     const list = this.subscriptions.get(event) || new Set<Subscription>()
     const subscription: Subscription = { handler, once, owner }
 

@@ -74,7 +74,7 @@ async function bootstrap() {
       response.setHeader(RETRY_AFTER_HEADER, '30');
       return response.status(503).json({ message: 'maintenance' });
     });
-    app.getHttpServer().prependListener('upgrade', (_request: Request, socket: any) => socket.destroy());
+    app.getHttpServer().prependListener('upgrade', (_request: Request, socket: import('node:stream').Duplex) => socket.destroy());
   }
 
   app.use(

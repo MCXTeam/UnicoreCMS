@@ -119,7 +119,7 @@
         <label :for="`${uid}-origin`">{{ $t('licensing.target_origin') }}</label>
         <InputText :id="`${uid}-origin`" v-model="targetOrigin" placeholder="https://" autocomplete="off" />
       </div>
-      <div v-else>
+      <div v-else-if="transferResult">
         <p>{{ $t('licensing.transfer_ready', { date: date(transferResult.readyAt) }) }}</p>
         <div class="field">
           <label :for="`${uid}-transfer-code`">{{ $t('licensing.transfer_code') }}</label

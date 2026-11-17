@@ -26,7 +26,8 @@ export function emailPreview(content: string, sitename: string): string {
     GIFT: 'VIP · 30 дней',
     EMAIL: 'alex@example.com',
   }
-  const escape = (value: string) => value.replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]!)
+  const escape = (value: string) =>
+    value.replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]!)
   const rendered = content.replace(/\{([A-Z_]+)\}/g, (placeholder, key) =>
     Object.prototype.hasOwnProperty.call(examples, key) ? escape(examples[key]) : placeholder,
   )
@@ -36,7 +37,11 @@ export function emailPreview(content: string, sitename: string): string {
     FORBID_TAGS: ['meta', 'base', 'link', 'iframe', 'object', 'embed', 'form', 'input', 'button', 'svg', 'math'],
     FORBID_ATTR: ['href', 'action', 'formaction'],
   })
-  const policy = "default-src 'none'; img-src https: http: data:; style-src 'unsafe-inline'; font-src 'none'; base-uri 'none'; form-action 'none'"
+  const policy =
+    "default-src 'none'; img-src https: http: data:; style-src 'unsafe-inline'; font-src 'none'; base-uri 'none'; form-action 'none'"
 
-  return document.replace('<head>', `<head><meta http-equiv="Content-Security-Policy" content="${policy}"><meta name="referrer" content="no-referrer"><meta name="viewport" content="width=device-width,initial-scale=1">`)
+  return document.replace(
+    '<head>',
+    `<head><meta http-equiv="Content-Security-Policy" content="${policy}"><meta name="referrer" content="no-referrer"><meta name="viewport" content="width=device-width,initial-scale=1">`,
+  )
 }

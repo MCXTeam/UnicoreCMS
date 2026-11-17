@@ -15,22 +15,22 @@
         v-if="field.type === 'email-html'"
         :modelValue="translations.fields[field.path]"
         :templateId="emailTemplateId"
-        @update:modelValue="translations.fields[field.path] = $event"
+        @update:modelValue="translations.setField(field.path, $event)"
       />
       <RichEditor
         v-else-if="field.type === 'html'"
         :modelValue="translations.fields[field.path]"
-        @update:modelValue="translations.fields[field.path] = $event"
+        @update:modelValue="translations.setField(field.path, $event)"
         height="260px"
       />
       <Textarea
         v-else-if="field.type === 'textarea'"
         :modelValue="translations.fields[field.path]"
-        @update:modelValue="translations.fields[field.path] = $event"
+        @update:modelValue="translations.setField(field.path, $event)"
         :autoResize="true"
         rows="2"
       />
-      <InputText v-else :modelValue="translations.fields[field.path]" @update:modelValue="translations.fields[field.path] = $event" />
+      <InputText v-else :modelValue="translations.fields[field.path]" @update:modelValue="translations.setField(field.path, $event)" />
     </div>
     <div v-if="!translations.visible.length" class="translation-field__empty">{{ $t('admin.nothing_to_translate') }}</div>
   </div>

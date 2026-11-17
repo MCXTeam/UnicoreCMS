@@ -1,3 +1,5 @@
+import type { ExtensionPayload } from './extension-payload'
+
 export interface CoreHookMap {
   'payment.referal': { paymentId: number; uuid: string; inviterUuid: string; paid: number; percent: number; amount: number }
   'referal.percent': { inviterUuid: string }
@@ -10,7 +12,7 @@ export type HookHandler<T> = (payload: T) => boolean | Promise<boolean>
 export type HookErrorReporter = (hook: string, owner: string | undefined, error: unknown) => void
 
 interface Subscription {
-  handler: HookHandler<any>
+  handler: HookHandler<unknown>
   owner?: string
 }
 
@@ -28,8 +30,8 @@ export class HookBus {
   }
 
   on<K extends CoreHookName>(hook: K, handler: HookHandler<CoreHookMap[K]>, owner?: string): () => void
-  on(hook: string, handler: HookHandler<any>, owner?: string): () => void
-  on(hook: string, handler: HookHandler<any>, owner?: string): () => void {
+  on<T = ExtensionPayload>(hook: string, handler: HookHandler<T>, owner?: string): () => void
+  on(hook: string, handler: HookHandler<unknown>, owner?: string): () => void {
     const list = this.subscriptions.get(hook) || new Set<Subscription>()
     const subscription: Subscription = { handler, owner }
 

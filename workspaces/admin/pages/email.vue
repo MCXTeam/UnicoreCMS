@@ -156,7 +156,7 @@ export default {
     hideDialog() {
       this.emailDialog = false
     },
-    openTestDialog(email) {
+    openTestDialog() {
       this.testDialog = true
     },
     async openDialog(email) {
