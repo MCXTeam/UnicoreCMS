@@ -36,7 +36,8 @@ overrides:
   mailparser>linkify-it: ^5.0.2
   tsup>esbuild: ^0.28.1
   bundle-require>esbuild: ^0.28.1
-  follow-redirects: ^1.16.1
+  node-forge: ^1.4.3
+  follow-redirects: ^1.16.3
   launch-editor: ^2.14.2
   vite@7: ^7.3.7
 
@@ -60,9 +61,7 @@ minimumReleaseAgeExclude:
 
 patchedDependencies:
   braces@3.0.3: patches/braces@3.0.3.patch
-  node-forge@1.4.0: patches/node-forge@1.4.0.patch
 
 auditConfig:
   ignoreGhsas:
     - GHSA-vfj7-8cjw-p6xm
-    - GHSA-86w9-cpqp-85rv
