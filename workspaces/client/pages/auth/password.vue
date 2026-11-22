@@ -57,7 +57,7 @@
 
 <script setup lang="ts">
 import { Form, Field } from 'vee-validate'
-import { passwordIssueFrom } from 'unicore-common/validation'
+import { responseStatus } from 'unicore-common/messages'
 
 definePageMeta({ layout: 'auth', middleware: 'guest' })
 
@@ -74,9 +74,9 @@ const form = reactive({
 onMounted(async () => {
   try {
     await authFlow.password({ hash: route.query.hash })
-  } catch {
-    $unicore.errorNotification($t('auth.reset_link_invalid'))
-    await navigateTo('/auth')
+  } catch (err: unknown) {
+    $unicore.authErrorNotification(err, 'password')
+    if ([404, 410].includes(responseStatus(err) ?? 0)) await navigateTo('/auth/reset')
   }
 })
 
@@ -86,10 +86,10 @@ async function reset() {
     await authFlow.password({ ...form, hash: route.query.hash })
     $unicore.successNotification($t('auth.password_changed'))
     await navigateTo('/auth')
-  } catch (err: any) {
-    $unicore.errorNotification($t('auth.reset_link_invalid'), err)
+  } catch (err: unknown) {
+    $unicore.authErrorNotification(err, 'password')
 
-    if (!passwordIssueFrom(err)) await navigateTo('/auth')
+    if ([404, 410].includes(responseStatus(err) ?? 0)) await navigateTo('/auth/reset')
   } finally {
     loading.close()
   }

@@ -17,6 +17,7 @@ export interface SecurityOptions {
   apiBaseurl: string;
   telemetry?: boolean;
   externalImages?: boolean;
+  recaptcha?: boolean;
 }
 
 export function generateNonce(): string {
@@ -44,6 +45,18 @@ export function contentSecurityPolicy(options: SecurityOptions): string {
 
   const images = ["'self'", "data:", "blob:", api];
   const connect = ["'self'", api, socket];
+  const frames = ["'self'"];
+
+  if (options.recaptcha) {
+    const sources = [
+      "https://www.google.com/recaptcha/",
+      "https://recaptcha.google.com/recaptcha/",
+      "https://www.recaptcha.net/recaptcha/",
+      "https://recaptcha.net/recaptcha/",
+    ];
+    frames.push(...sources);
+    connect.push(...sources);
+  }
 
   if (options.externalImages) images.push(anywhere);
   if (options.telemetry) connect.push(anywhere);
@@ -53,6 +66,7 @@ export function contentSecurityPolicy(options: SecurityOptions): string {
     "base-uri 'none'",
     "object-src 'none'",
     "frame-ancestors 'none'",
+    `frame-src ${frames.join(" ")}`,
     "form-action 'self'",
     `script-src 'nonce-${options.nonce}' 'strict-dynamic' ${anywhere} 'unsafe-inline'`,
     "style-src 'self' 'unsafe-inline'",

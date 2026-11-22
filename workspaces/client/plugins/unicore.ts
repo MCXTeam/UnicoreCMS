@@ -1,5 +1,5 @@
 import { passwordIssueFrom, passwordIssueKey } from 'unicore-common/validation'
-import { serverMessageKey } from 'unicore-common/messages'
+import { authErrorKey, responseStatus, serverMessageKey, type AuthOperation } from 'unicore-common/messages'
 import { useAuthStore } from '~/stores/auth'
 import { useUiStore } from '~/stores/ui'
 
@@ -14,22 +14,22 @@ export interface LoadingHandle {
 export interface UnicoreApi {
   loading: (text?: string) => LoadingHandle
   logout: () => Promise<void>
-  authErrorNotification: (error: any, text: string) => void
+  authErrorNotification: (error: unknown, operation: AuthOperation) => void
   successNotification: (text: string) => void
-  errorNotification: (text: string, error?: any) => void
+  errorNotification: (text: string, error?: unknown) => void
   switchTheme: () => void
 }
 
 export default defineNuxtPlugin((nuxtApp) => {
   const colorMode = useColorMode()
 
-  const t = (key: string) => String((nuxtApp as any).$t?.(key) ?? key)
+  const t = (key: string) => String((nuxtApp.$t as ((key: string) => unknown) | undefined)?.(key) ?? key)
 
   const toast = (): ToastLike | undefined => nuxtApp.vueApp.config.globalProperties.$toast as ToastLike | undefined
 
   const notify = (severity: string, summary: string, detail: string) => toast()?.add({ severity, summary, detail, life: 4000 })
 
-  const serverText = (error: any): string | null => {
+  const serverText = (error: unknown): string | null => {
     const issue = passwordIssueFrom(error)
 
     if (issue) return t(passwordIssueKey(issue))
@@ -62,18 +62,16 @@ export default defineNuxtPlugin((nuxtApp) => {
       }
       await navigateTo('/')
     },
-    authErrorNotification(error: any, text: string) {
-      const password = serverText(error)
+    authErrorNotification(error: unknown, operation: AuthOperation) {
+      const issue = passwordIssueFrom(error)
 
-      if (password) notify('error', t('error.auth_title'), password)
-      else if (error?.response?.status === 429) notify('error', t('error.auth_title'), t('error.too_many_requests'))
-      else notify('error', t('error.auth_title'), text)
+      notify('error', t('error.auth_title'), t(issue ? passwordIssueKey(issue) : authErrorKey(error, operation)))
     },
     successNotification(text: string) {
       notify('success', t('common.success'), text)
     },
-    errorNotification(text: string, error?: any) {
-      if (error?.response?.status === 429) return notify('error', t('error.title'), t('error.too_many_requests'))
+    errorNotification(text: string, error?: unknown) {
+      if (responseStatus(error) === 429) return notify('error', t('error.title'), t('error.too_many_requests'))
 
       notify('error', t('error.title'), serverText(error) ?? text)
     },

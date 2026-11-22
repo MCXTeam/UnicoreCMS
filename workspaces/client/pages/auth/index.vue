@@ -88,12 +88,12 @@
 
 <script setup lang="ts">
 import { Form, Field } from 'vee-validate'
-import { useReCaptcha } from 'vue-recaptcha-v3'
+import { serverMessage } from 'unicore-common/messages'
 
 definePageMeta({ layout: 'auth', middleware: 'guest' })
 
 const { $unicore, $auth, $t } = useNuxtApp()
-const recaptcha = useReCaptcha()
+const executeRecaptcha = useAuthRecaptcha()
 
 const totpRequired = ref(false)
 const form = reactive({
@@ -106,17 +106,16 @@ const form = reactive({
 async function login() {
   const loading = $unicore.loading()
   try {
-    await recaptcha?.recaptchaLoaded?.()
-    const token = await recaptcha?.executeRecaptcha?.('login')
+    const token = await executeRecaptcha('login')
     await $auth.login(form, { headers: { recaptcha: token } })
     await navigateTo('/cabinet')
-  } catch (err: any) {
-    if (err?.response?.data?.message == 'require2fa') {
+  } catch (err: unknown) {
+    if (serverMessage(err) === 'require2fa') {
       totpRequired.value = true
     } else if (totpRequired.value) {
-      $unicore.authErrorNotification(err, $t('auth.totp_wrong'))
+      $unicore.authErrorNotification(err, 'totp')
     } else {
-      $unicore.authErrorNotification(err, $t('auth.wrong_credentials'))
+      $unicore.authErrorNotification(err, 'login')
     }
   } finally {
     loading.close()

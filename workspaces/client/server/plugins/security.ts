@@ -24,7 +24,13 @@ export default defineNitroPlugin((nitro) => {
     setResponseHeader(
       event,
       CONTENT_SECURITY_POLICY_HEADER,
-      contentSecurityPolicy({ nonce, apiBaseurl, telemetry: true, externalImages: true }),
+      contentSecurityPolicy({
+        nonce,
+        apiBaseurl,
+        telemetry: true,
+        externalImages: true,
+        recaptcha: Boolean(useRuntimeConfig(event).public.recaptchaPublic),
+      }),
     )
   })
 })

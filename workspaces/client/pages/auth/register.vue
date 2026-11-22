@@ -115,7 +115,6 @@
 
 <script setup lang="ts">
 import { Form, Field } from 'vee-validate'
-import { useReCaptcha } from 'vue-recaptcha-v3'
 
 definePageMeta({ layout: 'auth', middleware: 'guest' })
 
@@ -123,7 +122,7 @@ const { $unicore, $auth, $t } = useNuxtApp()
 
 const authFlow = useAuthFlow()
 const pagesApi = usePages()
-const recaptcha = useReCaptcha()
+const executeRecaptcha = useAuthRecaptcha()
 
 const form = reactive({
   username: '',
@@ -154,16 +153,17 @@ onMounted(async () => {
 
 async function register() {
   const loading = $unicore.loading()
+  let registered = false
   try {
-    await recaptcha?.recaptchaLoaded?.()
-    const token = await recaptcha?.executeRecaptcha?.('register')
+    const token = await executeRecaptcha('register')
     const tokens = await authFlow.register({ ...form, ref: localStorage.getItem('ref') }, token)
+    registered = true
     $auth.adopt(tokens)
     await $auth.syncCsrf()
     await $auth.fetchUser()
     await navigateTo('/cabinet')
-  } catch (err: any) {
-    $unicore.authErrorNotification(err, $t('auth.already_exists'))
+  } catch (err: unknown) {
+    $unicore.authErrorNotification(err, registered ? 'session' : 'register')
   } finally {
     loading.close()
   }

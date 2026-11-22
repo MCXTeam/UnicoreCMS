@@ -35,7 +35,6 @@
 
 <script setup lang="ts">
 import { Form, Field } from 'vee-validate'
-import { useReCaptcha } from 'vue-recaptcha-v3'
 import { useAuthStore } from '~/stores/auth'
 
 definePageMeta({ layout: 'auth', middleware: 'auth' })
@@ -44,7 +43,7 @@ const { $unicore, $t } = useNuxtApp()
 
 const authFlow = useAuthFlow()
 const auth = useAuthStore()
-const recaptcha = useReCaptcha()
+const executeRecaptcha = useAuthRecaptcha()
 
 const form = reactive({
   code: '',
@@ -57,12 +56,11 @@ onMounted(() => {
 async function verify() {
   const loading = $unicore.loading()
   try {
-    await recaptcha?.recaptchaLoaded?.()
-    const token = await recaptcha?.executeRecaptcha?.('verify')
+    const token = await executeRecaptcha('verify')
     auth.setUser(await authFlow.verify(form, token))
     await navigateTo('/cabinet')
-  } catch (err: any) {
-    $unicore.authErrorNotification(err, $t('auth.code_invalid'))
+  } catch (err: unknown) {
+    $unicore.authErrorNotification(err, 'verify')
   } finally {
     loading.close()
   }
@@ -73,8 +71,8 @@ async function resend() {
   try {
     await authFlow.resend()
     $unicore.successNotification($t('auth.code_resent'))
-  } catch {
-    $unicore.errorNotification($t('error.too_many_requests'))
+  } catch (err: unknown) {
+    $unicore.authErrorNotification(err, 'resend')
   } finally {
     loading.close()
   }

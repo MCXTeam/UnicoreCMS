@@ -56,8 +56,8 @@ async function reset() {
   try {
     await authFlow.reset(form)
     modal.value = true
-  } catch {
-    $unicore.errorNotification($t('auth.email_not_found'))
+  } catch (err: unknown) {
+    $unicore.authErrorNotification(err, 'reset')
   } finally {
     loading.close()
   }
