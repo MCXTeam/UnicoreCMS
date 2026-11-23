@@ -118,14 +118,17 @@ export default {
     async load() {
       this.loading = true
 
-      const data = await this.$api
-        .get('/admin/themes')
-        .then((res) => res.data)
-        .catch(() => null)
-
-      this.themes = data?.themes || []
-      this.locked = data?.locked || { client: false, admin: false }
-      this.loading = false
+      try {
+        const data = await this.$api.get('/admin/themes').then((res) => res.data)
+        this.themes = data.themes
+        this.locked = data.locked
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      } finally {
+        this.loading = false
+      }
     },
     confirmRemove(theme) {
       this.confirm.require({
@@ -166,7 +169,12 @@ export default {
       const result = await this.$api
         .put('/admin/themes/active', { id, side })
         .then((res) => res.data)
-        .catch(() => null)
+        .catch((error) => {
+          if (error.response?.status !== 403) {
+            this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+          }
+          return null
+        })
 
       this.loading = false
 

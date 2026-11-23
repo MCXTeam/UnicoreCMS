@@ -503,16 +503,23 @@ export default {
 
     async load() {
       this.loading = true
-      this.permissionDialog = false
-      this.permissions = await this.$api.get('/donates/permissions').then((res) => res.data)
-      this.kits = await this.$api.get('/donates/group-kits').then((res) => res.data)
-      this.periods = await this.$api.get('/donates/periods').then((res) => res.data)
-      this.servers = await this.$api.get('/servers').then((res) => res.data)
-      this.roles = await this.$api
-        .get('/admin/roles', { silent: true })
-        .then((res) => res.data)
-        .catch(() => [])
-      this.loading = false
+      try {
+        this.permissionDialog = false
+        this.permissions = await this.$api.get('/donates/permissions').then((res) => res.data)
+        this.kits = await this.$api.get('/donates/group-kits').then((res) => res.data)
+        this.periods = await this.$api.get('/donates/periods').then((res) => res.data)
+        this.servers = await this.$api.get('/servers').then((res) => res.data)
+        this.roles = await this.$api
+          .get('/admin/roles', { silent: true })
+          .then((res) => res.data)
+          .catch(() => [])
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      } finally {
+        this.loading = false
+      }
     },
     async onPermsReorder(event) {
       this.loading = true
@@ -634,7 +641,11 @@ export default {
               life: 3000,
             })
             this.selected = []
-          } catch {}
+          } catch (error) {
+            if (error.response?.status !== 403) {
+              this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+            }
+          }
           await this.load()
         },
       })
@@ -653,7 +664,11 @@ export default {
               detail: this.$t('admin.permission_deleted'),
               life: 3000,
             })
-          } catch {}
+          } catch (error) {
+            if (error.response?.status !== 403) {
+              this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+            }
+          }
           await this.load()
         },
       })

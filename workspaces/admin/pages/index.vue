@@ -2,10 +2,10 @@
   <div class="grid">
     <div class="col-12">
       <div class="grid grid-nogutter surface-section text-800">
-        <div class="col-12 md:col-6 p-6 text-center md:text-left flex align-items-center">
-          <section>
-            <span class="block text-6xl font-bold mb-1">UnicoreCMS</span>
-            <div class="text-6xl text-primary font-bold mb-3">{{ $t('admin.home_title') }}</div>
+        <div class="col-12 md:col-6 p-3 md:p-6 text-center md:text-left flex align-items-center">
+          <section class="w-full min-w-0">
+            <span class="block text-4xl md:text-6xl font-bold mb-1">UnicoreCMS</span>
+            <div class="text-4xl md:text-6xl text-primary font-bold mb-3">{{ $t('admin.home_title') }}</div>
             <p class="mt-0 mb-4 text-700 line-height-3">{{ $t('admin.home_text') }}</p>
             <a href="https://docs.unicorecms.ru/" target="_blank">
               <Button :label="$t('admin.docs')" type="button" class="mr-3 p-button-raised"></Button>
@@ -93,7 +93,6 @@
           <Column field="date" :header="$t('common.date')" style="width: 35%">
             <template #body="slotProps">
               {{ $moment(slotProps.data.date).format('DD.MM.YYYY (dddd)') }}
-    <ExtensionSlot name="dashboard" />
             </template>
           </Column>
           <Column field="amount" :header="$t('admin.stat_income')" style="width: 35%">
@@ -111,11 +110,11 @@
     </div>
     <div v-if="chartSections.length" class="col-12 xl:col-6 mt-2">
       <div class="card h-full">
-        <div class="flex justify-content-between align-items-center mb-5">
-          <h5>{{ $t('admin.statistics') }}</h5>
+        <div class="flex flex-wrap gap-3 justify-content-between align-items-center mb-5">
+          <h5 class="mb-0">{{ $t('admin.statistics') }}</h5>
           <SelectButton v-model="chartPeriod" :options="chartPeriods" optionLabel="label" optionValue="value" :allowEmpty="false" />
         </div>
-        <Chart type="bar" :data="barData" :options="barOptions" />
+        <Chart class="dashboard-chart" type="bar" :data="barData" :options="barOptions" />
       </div>
     </div>
     <div v-if="hasSection('online_records')" class="col-12 mt-2">
@@ -142,6 +141,9 @@
           </li>
         </ul>
       </div>
+    </div>
+    <div class="col-12">
+      <ExtensionSlot name="dashboard" />
     </div>
   </div>
 </template>
@@ -236,3 +238,9 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.dashboard-chart :deep(canvas) {
+  max-width: 100%;
+}
+</style>

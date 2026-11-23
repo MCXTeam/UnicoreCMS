@@ -5,7 +5,7 @@ import { modulePrefixes, modulePermissionKey } from 'unicore-api';
 import { ModuleDto, ModuleStatus } from './dto/module.dto';
 import { ModuleRecord } from './entities/module.entity';
 import { discover, readState, writeState } from './runtime/discovery';
-import { moduleConfigKey } from 'src/admin/config/module-config';
+import { moduleConfigKey, moduleSettingsSchemas } from 'src/admin/config/module-config';
 import { moduleRuntime } from './runtime';
 import { commercialExtension, currentHost, moduleAllowed } from 'unicore-api/licensing';
 
@@ -67,7 +67,7 @@ export class ModulesService implements OnModuleInit {
         hasClient: Boolean(module.manifest.client),
         hasAdmin: Boolean(module.manifest.admin),
         permissions: (module.manifest.permissions || []).map(modulePermissionKey),
-        config: module.manifest.config || [],
+        config: moduleSettingsSchemas().find((entry) => entry.id === module.id)?.fields || [],
       });
     });
   }
@@ -173,7 +173,7 @@ export class ModulesService implements OnModuleInit {
 
     if (!module) throw new NotFoundException();
 
-    const fields = module.manifest.config || [];
+    const fields = moduleSettingsSchemas().find((entry) => entry.id === id)?.fields || [];
 
     if (!fields.length) return [];
 

@@ -200,10 +200,18 @@ export default {
   },
   methods: {
     async load() {
-      this.periods = await this.$api.get('/donates/periods').then((res) => res.data)
+      this.loading = true
+      try {
+        this.periods = await this.$api.get('/donates/periods').then((res) => res.data)
 
-      this.periodDialog = false
-      this.loading = false
+        this.periodDialog = false
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      } finally {
+        this.loading = false
+      }
     },
     hideDialog() {
       this.periodDialog = false
@@ -235,6 +243,7 @@ export default {
           detail: this.$t('admin.period_created'),
           life: 3000,
         })
+        this.periodDialog = false
         await this.load()
       } catch (err) {
         this.$toast.add({
@@ -255,6 +264,7 @@ export default {
           detail: this.$t('admin.period_updated'),
           life: 3000,
         })
+        this.periodDialog = false
         await this.load()
       } catch (err) {
         this.loading = false
@@ -279,7 +289,11 @@ export default {
               detail: this.$t('admin.period_deleted'),
               life: 3000,
             })
-          } catch {}
+          } catch (error) {
+            if (error.response?.status !== 403) {
+              this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+            }
+          }
           await this.load()
         },
       })

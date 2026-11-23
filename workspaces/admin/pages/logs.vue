@@ -312,6 +312,10 @@ export default {
 
       try {
         this.logs = await this.$api.get('/admin/logs', { params: this.params() }).then((res) => res.data)
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
       } finally {
         this.loading = false
       }

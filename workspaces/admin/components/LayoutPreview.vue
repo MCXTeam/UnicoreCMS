@@ -62,6 +62,7 @@
 </template>
 
 <script setup lang="ts">
+import { useConfigStore } from '~/stores/config'
 import {
   LAYOUT_PLACEHOLDER_PATTERN,
   layoutText,
@@ -80,7 +81,8 @@ const locale = useLocale()
 const messages = useMessages()
 const config = useRuntimeConfig()
 
-const sitename = computed(() => String(config.public.sitename || 'UnicoreCMS'))
+const settings = useConfigStore()
+const sitename = computed(() => String(settings.config.public_project_name || config.public.sitename || 'UnicoreCMS'))
 
 const text = (value?: LayoutText) => layoutText(value, locale.value)
 

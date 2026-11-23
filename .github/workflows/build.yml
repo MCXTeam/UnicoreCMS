@@ -54,7 +54,12 @@ jobs:
         run: node scripts/licensing-sdk.mjs --check && node --test scripts/licensing-sdk.test.mjs && pnpm --filter unicore-api run api:check && pnpm --filter unicore-api test
 
       - name: Module admission tests
-        run: pnpm --filter unicore-server exec node --test test/module-license-admission.test.mjs test/obfuscation-semantics.test.mjs
+        run: pnpm --filter unicore-server exec node --test test/module-license-admission.test.mjs test/obfuscation-semantics.test.mjs test/cli-version.test.mjs
+
+      - name: Settings tests
+        run: node --test workspaces/server/test/settings.test.mjs workspaces/admin/test/settings-components.test.mjs
+      - name: Admin request error tests
+        run: node --test workspaces/admin/test/request-errors.test.mjs
 
       - name: Typecheck
         run: |

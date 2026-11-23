@@ -200,7 +200,16 @@ describe('Donate role lifecycle on MariaDB', { skip: process.env.DONATE_ROLES_TE
       await service.syncUser(uuid, ['default', 'vip']);
       await db.getRepository(first.row).delete(first.saved.id);
     } finally { resume(); }
-    await outer;
+    try {
+      await outer;
+    } catch (error) {
+      assert.equal(error.driverError?.code, 'ER_CHECKREAD');
+      const [isolation] = await admin.query('SELECT @@innodb_snapshot_isolation AS enabled');
+      assert.equal(Number(isolation.enabled), 1);
+      assert.deepEqual(await roles(uuid), ['default', 'vip']);
+      assert.equal((await db.getRepository(WebRoleOrigin).findOneBy({ userUuid: uuid, roleId: 'vip' })).manual, true);
+      await service.syncUser(uuid);
+    }
     assert.deepEqual(await roles(uuid), ['default', 'vip']);
     assert.equal((await db.getRepository(WebRoleOrigin).findOneBy({ userUuid: uuid, roleId: 'vip' })).manual, true);
   });

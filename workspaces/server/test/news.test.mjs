@@ -26,6 +26,21 @@ async function seedNews() {
 const titles = (body) => (body?.data || []).map((item) => item.title);
 
 describe('Скрытые новости', () => {
+  it('поиск фильтрует названия и не раскрывает скрытые новости гостю', async () => {
+    await seedNews();
+    const admin = await rootSession();
+    const { status, body } = await admin.get(`/news?scope=panel&search=${encodeURIComponent(HIDDEN_TITLE)}`);
+    assert.ok(ok(status));
+    assert.ok(body.data.length > 0);
+    assert.ok(titles(body).every((title) => title === HIDDEN_TITLE));
+
+    const guest = session();
+    const hidden = await guest.get(`/news?search=${encodeURIComponent(HIDDEN_TITLE)}`);
+    assert.equal(hidden.body.data.length, 0);
+    const missing = await admin.get('/news?scope=panel&search=qa_no_such_news_785122');
+    assert.equal(missing.body.data.length, 0);
+  });
+
   it('гость не видит скрытую новость', async () => {
     await seedNews();
 

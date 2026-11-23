@@ -4,7 +4,7 @@
       <div class="cab-top__inner">
         <Button class="cab-burger d-xl-none" icon="bx bx-menu" :aria-label="$t('footer.navigation')" text @click="activeSidebar = true" />
         <NuxtLink to="/" class="cab-brand without-underline">
-          <img src="/icon.png" height="34" />
+          <ProjectLogo :size="34" />
           <span class="d-none d-xxl-inline">{{ $pub.sitename }}</span>
         </NuxtLink>
         <nav class="cab-top__nav d-none d-xl-flex">
@@ -31,7 +31,7 @@
 
     <Drawer v-model:visible="activeSidebar" class="vs-sidebar">
       <template #header>
-        <img src="/icon.png" height="40" />
+        <ProjectLogo :size="40" />
         <h3 class="ms-2 my-0">{{ $pub.sitename }}</h3>
       </template>
       <nav class="cab-menu">

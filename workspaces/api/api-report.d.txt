@@ -110,11 +110,33 @@ export { CLIENT_NAV_PLACES, CLIENT_SLOTS, type ClientModuleDefinition, type Clie
 
 === index.d.ts ===
 export { A as ACTIVE_MODULES_KEY, a as ALLOW_INACTIVE_KEY, b as API_MAJOR, c as API_VERSION, d as AuditSink, C as CORE_API, e as CacheApi, f as Capabilities, g as ConfigApi, h as CoreApi, i as CoreEventMap, j as CoreEventName, k as CoreHookMap, l as CoreHookName, D as DonateRevokeReason, E as EVENT_BUS, m as EventBus, n as EventErrorReporter, o as EventHandler, H as HookBus, p as HookErrorReporter, q as HookHandler, r as HtmlApi, I as IS_PUBLIC_KEY, s as IssuanceApi, t as IssuanceGroupRef, u as IssuancePermissionRef, v as IssuanceProductRef, w as IssuanceServerRef, x as IssuanceTarget, L as LocalesApi, y as LoggerApi, M as MODULE_CONFIG, z as MODULE_ID, B as MODULE_ID_PATTERN, F as MailApi, G as ModuleAuditAction, J as ModuleAuditActor, K as ModuleAuditActorType, N as ModuleAuditClass, O as ModuleAuditClassDefinition, P as ModuleAuditEntry, Q as ModuleAuditStatus, R as ModuleAuditTarget, S as ModuleContext, T as ModuleContribution, U as ModuleDefinition, V as MoneyApi, W as NotificationCategoryInput, X as NotificationInput, Y as NotificationsApi, Z as PERMISSIONS_KEY, _ as PaymentCoreModule, $ as PaymentCoreService, a0 as PaymentCreateInput, a1 as PaymentLink, a2 as PaymentsApi, a3 as REGISTRY_SYMBOL, a4 as Registry, a5 as SanitizeNarrow, a6 as ServerOnline, a7 as ServerRecord, a8 as ServersApi, a9 as SkinRecord, aa as StaffApi, ab as StaffMember, ac as StorageApi, ad as THEME_ID_PATTERN, ae as Translatable, af as TranslatableAccess, ag as TranslatableMeta, ah as UnicoreApiNotReadyError, ai as UserRecord, aj as UsersApi, ak as WebhookChannel, al as WebhookDeliveryResult, am as WebhookPost, an as WebhookTarget, ao as WebhooksApi, ap as audit, aq as capabilities, ar as contribution, as as contributions, at as core, au as coreReady, av as defineModule, aw as events, ax as getRegistry, ay as hooks, az as moduleAuditActionKey, aA as moduleAuditClassKey, aB as moduleContext, aC as modulePrefixes, aD as registerContribution, aE as setAuditSink, aF as setCore, aG as translatableByEntity, aH as translatableEntities, aI as translatableOf } from './translatable-5srxLdWu.js';
-export { CommercialManifest, ConfigFieldSchema, ConfigFieldType, LocalizedText, ModuleManifest, ModulePermission, ModulePermissionSchema, PRIMEVUE_PRESETS, PrimeVuePreset, ThemeManifest, ValidationResult, localizedText, modulePermissionKey, modulePermissionMeta, validateModuleManifest, validateThemeManifest } from './manifest.js';
+import { LocalizedText, ConfigFieldSchema } from './manifest.js';
+export { CommercialManifest, ConfigFieldType, ModuleManifest, ModulePermission, ModulePermissionSchema, PRIMEVUE_PRESETS, PrimeVuePreset, ThemeManifest, ValidationResult, localizedText, modulePermissionKey, modulePermissionMeta, validateModuleManifest, validateThemeManifest } from './manifest.js';
 export { RoleAppearance } from 'unicore-common';
 import 'typeorm';
 declare const MODULE_EXTERNALS: string[];
-export { MODULE_EXTERNALS };
+interface SettingsField extends ConfigFieldSchema {
+    value: string | null;
+    category: string;
+    moduleId?: string;
+}
+interface SettingsCategory {
+    id: string;
+    label: LocalizedText;
+    hint?: string;
+    icon?: string;
+}
+interface SettingsCatalog {
+    categories: SettingsCategory[];
+    fields: SettingsField[];
+}
+interface SettingsChange {
+    key: string;
+    value: string | null;
+    expected: string | null;
+}
+declare function settingIssue(field: ConfigFieldSchema, value: unknown): string | null;
+export { ConfigFieldSchema, LocalizedText, MODULE_EXTERNALS, type SettingsCatalog, type SettingsCategory, type SettingsChange, type SettingsField, settingIssue };
 
 === manifest.d.ts ===
 type ConfigFieldType = 'string' | 'number' | 'boolean' | 'select';
@@ -131,6 +153,14 @@ interface ConfigFieldSchema {
     }[];
     label?: string;
     hint?: string;
+    category?: string;
+    input?: 'text' | 'textarea' | 'url' | 'image';
+    required?: boolean;
+    integer?: boolean;
+    maxLength?: number;
+    unit?: string;
+    placeholder?: string;
+    restartRequired?: boolean;
 }
 type LocalizedText = string | Record<string, string>;
 interface ModulePermissionSchema {

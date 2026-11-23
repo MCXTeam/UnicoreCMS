@@ -186,11 +186,19 @@ export default {
   },
   methods: {
     async load() {
-      this.bonuses = await this.$api.get('/payment/bonuses').then((res) => res.data)
+      this.loading = true
+      try {
+        this.bonuses = await this.$api.get('/payment/bonuses').then((res) => res.data)
 
-      this.bonusDialog = false
-      this.fileDialog = false
-      this.loading = false
+        this.bonusDialog = false
+        this.fileDialog = false
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      } finally {
+        this.loading = false
+      }
     },
     async openFileDialog(bonus) {
       this.bonus = this.$_.pick(bonus, this.$_.deepKeys(this.bonus))
@@ -222,6 +230,7 @@ export default {
           detail: this.$t('admin.vote_created'),
           life: 3000,
         })
+        this.bonusDialog = false
         await this.load()
       } catch (err) {
         this.$toast.add({
@@ -241,6 +250,7 @@ export default {
           detail: this.$t('admin.vote_updated'),
           life: 3000,
         })
+        this.bonusDialog = false
         await this.load()
       } catch (err) {
         this.loading = false
@@ -267,7 +277,11 @@ export default {
               detail: this.$t('admin.vote_deleted'),
               life: 3000,
             })
-          } catch {}
+          } catch (error) {
+            if (error.response?.status !== 403) {
+              this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+            }
+          }
           await this.load()
         },
       })
@@ -275,7 +289,7 @@ export default {
     },
     async uploadIcon(event) {
       this.loading = true
-      let formData = new FormData()
+      const formData = new FormData()
       formData.append('file', event.files[0])
 
       try {
@@ -309,7 +323,11 @@ export default {
           life: 3000,
         })
         await this.load()
-      } catch {}
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      }
       this.loading = false
     },
   },

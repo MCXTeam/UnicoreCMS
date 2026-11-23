@@ -800,25 +800,32 @@ export default {
     },
     async load() {
       this.loading = true
-      this.products = await this.$api
-        .get('/store/products', {
-          params: {
-            page: this.products.meta.currentPage,
-            limit: this.products.meta.itemsPerPage,
-            sortBy: this.sortValue,
-            search: this.filters.global.value,
-            ...this.filtersTansformer(this.filters),
-          },
-        })
-        .then((res) => res.data)
-      this.servers = await this.$api.get('/servers').then((res) => res.data)
+      try {
+        this.products = await this.$api
+          .get('/store/products', {
+            params: {
+              page: this.products.meta.currentPage,
+              limit: this.products.meta.itemsPerPage,
+              sortBy: this.sortValue,
+              search: this.filters.global.value,
+              ...this.filtersTansformer(this.filters),
+            },
+          })
+          .then((res) => res.data)
+        this.servers = await this.$api.get('/servers').then((res) => res.data)
 
-      this.productDialog = false
-      this.productManyDialog = false
-      this.importDialog = false
-      this.fileDialog = false
-      this.loading = false
-      this.selected = null
+        this.productDialog = false
+        this.productManyDialog = false
+        this.importDialog = false
+        this.fileDialog = false
+        this.selected = null
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      } finally {
+        this.loading = false
+      }
     },
     filtersTansformer(filters) {
       const transformed = {}
@@ -852,7 +859,7 @@ export default {
         .then((res) => res.data.data)
     },
     async uploadIcon(event) {
-      let formData = new FormData()
+      const formData = new FormData()
       formData.append('file', event.files[0])
 
       try {
@@ -885,7 +892,11 @@ export default {
           life: 3000,
         })
         await this.load()
-      } catch {}
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      }
     },
     hideDialog() {
       this.disposeProductForm()
@@ -1030,7 +1041,11 @@ export default {
               detail: this.$t('admin.product_deleted'),
               life: 3000,
             })
-          } catch {}
+          } catch (error) {
+            if (error.response?.status !== 403) {
+              this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+            }
+          }
           await this.load()
         },
       })
@@ -1096,14 +1111,18 @@ export default {
               life: 3000,
             })
             this.selected = []
-          } catch {}
+          } catch (error) {
+            if (error.response?.status !== 403) {
+              this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+            }
+          }
           await this.load()
         },
       })
     },
     async importItems() {
       this.loading = true
-      let formData = new FormData()
+      const formData = new FormData()
       formData.append('file', this.$refs.importer.files[0])
 
       if (this.productMany.servers && this.productMany.servers.length)
@@ -1148,11 +1167,15 @@ export default {
           items: this.selected.map((product) => product.id),
         })
 
-        let link = document.createElement('a')
+        const link = document.createElement('a')
         link.href = 'data:application/zip;base64,' + response.data
         link.download = `${this.selected.length}-items.${this.$moment().format()}.zip`
         link.click()
-      } catch {}
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      }
       this.loading = false
     },
   },

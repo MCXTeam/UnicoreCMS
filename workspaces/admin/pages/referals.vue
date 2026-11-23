@@ -161,19 +161,26 @@ export default {
   methods: {
     async load() {
       this.loading = true
+      try {
 
-      this.referals = await this.$api
-        .get('/admin/referals', {
-          params: {
-            page: this.referals.meta.currentPage,
-            limit: this.referals.meta.itemsPerPage,
-            search: this.filters.global.value,
-            sortBy: this.referals.meta.sortBy,
-          },
-        })
-        .then((res) => res.data)
+        this.referals = await this.$api
+          .get('/admin/referals', {
+            params: {
+              page: this.referals.meta.currentPage,
+              limit: this.referals.meta.itemsPerPage,
+              search: this.filters.global.value,
+              sortBy: this.referals.meta.sortBy,
+            },
+          })
+          .then((res) => res.data)
 
-      this.loading = false
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      } finally {
+        this.loading = false
+      }
     },
 
     async search(event) {
@@ -247,7 +254,11 @@ export default {
           try {
             await this.$api.delete(`/admin/referals/${row.userUuid}`)
             this.toast.add({ severity: 'success', detail: this.$t('admin.referal_deleted'), life: 3000 })
-          } catch {}
+          } catch (error) {
+            if (error.response?.status !== 403) {
+              this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+            }
+          }
 
           this.loading = false
 

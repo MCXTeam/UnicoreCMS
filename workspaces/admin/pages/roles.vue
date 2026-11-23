@@ -352,10 +352,18 @@ export default {
   },
   methods: {
     async load() {
-      this.roles = await this.$api.get('/admin/roles').then((res) => res.data)
+      this.loading = true
+      try {
+        this.roles = await this.$api.get('/admin/roles').then((res) => res.data)
 
-      this.roleDialog = false
-      this.loading = false
+        this.roleDialog = false
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      } finally {
+        this.loading = false
+      }
     },
     hideDialog() {
       this.roleDialog = false
@@ -421,7 +429,11 @@ export default {
       try {
         await this.$api.delete(`/admin/roles/${this.role.id}/badge`)
         this.role.badge_image = null
-      } catch {}
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      }
     },
     async createRole() {
       this.loading = true
@@ -432,10 +444,11 @@ export default {
           detail: this.$t('admin.role_created'),
           life: 3000,
         })
+        this.roleDialog = false
         await this.load()
       } catch (err) {
         this.loading = false
-        if (err.response.status === 409) {
+        if (err.response?.status === 409) {
           this.toast.add({
             severity: 'error',
             detail: this.$t('admin.role_exists'),
@@ -459,6 +472,7 @@ export default {
           detail: this.$t('admin.role_updated'),
           life: 3000,
         })
+        this.roleDialog = false
         await this.load()
       } catch (err) {
         this.loading = false
@@ -483,7 +497,11 @@ export default {
               detail: this.$t('admin.role_deleted'),
               life: 3000,
             })
-          } catch {}
+          } catch (error) {
+            if (error.response?.status !== 403) {
+              this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+            }
+          }
           await this.load()
         },
       })

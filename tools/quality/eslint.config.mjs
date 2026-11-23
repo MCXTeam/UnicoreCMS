@@ -30,7 +30,7 @@ export default [
     plugins: { vue },
     rules: vueRules,
   },
-  { files: ['workspaces/{admin,client}/pages/**/*.vue'], rules: { 'vue/multi-word-component-names': 'off' } },
+  { files: ['workspaces/{admin,client}/{pages,layouts}/**/*.vue'], rules: { 'vue/multi-word-component-names': 'off' } },
   { files: ['workspaces/updater/src/files.mjs', 'workspaces/api/licensing-src/sdk.cjs'], rules: { 'no-control-regex': 'off' } },
   {
     files: [
@@ -39,6 +39,12 @@ export default [
       'workspaces/api/src/server/licensing.ts',
       'workspaces/api/src/nuxt/browser-layer.ts',
       'workspaces/admin/pages/licenses.vue',
+      'workspaces/admin/components/SettingsPanel.vue',
+      'workspaces/admin/components/SettingField.vue',
+      'workspaces/api/src/settings.ts',
+      'workspaces/server/src/admin/config/config.service.ts',
+      'workspaces/server/src/admin/config/settings.schema.ts',
+      'workspaces/server/src/admin/config/dto/settings.input.ts',
     ],
     languageOptions: {
       parserOptions: { projectService: true, extraFileExtensions: ['.vue'], tsconfigRootDir: resolve(import.meta.dirname, '../..') },

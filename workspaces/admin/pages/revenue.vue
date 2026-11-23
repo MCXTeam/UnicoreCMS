@@ -297,6 +297,10 @@ export default {
           key: `${item.type}:${item.server ?? ''}:${item.name ?? ''}:${index}`,
           typeLabel: this.$t(`admin.revenue_type_${item.type}`),
         }))
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
       } finally {
         this.loading = false
       }
@@ -326,8 +330,10 @@ export default {
         this.payments = list
         this.paymentsTop = top
         this.methods = methods || []
-      } catch {
-        this.paymentsTop = []
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
       } finally {
         this.paymentsLoading = false
       }

@@ -2,7 +2,7 @@
   <div class="vh-100 vw-100 d-flex align-items-center justify-content-center error-layout">
     <div class="panel d-flex flex-column align-items-center justify-content-center px-5">
       <div class="d-flex align-items-center">
-        <img class="my-1" src="/icon.png" height="64px" />
+        <ProjectLogo class="my-1" />
         <h2 class="ms-3 my-0 d-none d-md-block">{{ $pub.sitename }}</h2>
       </div>
       <h1 v-if="error?.statusCode == 404">{{ $t('error.not_found') }}</h1>

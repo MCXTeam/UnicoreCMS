@@ -441,28 +441,35 @@ export default {
   methods: {
     async load() {
       this.loading = true
-      this.selected = null
-      this.news = await this.$api
-        .get('/news', {
-          params: {
-            page: this.news.meta.currentPage,
-            limit: this.news.meta.itemsPerPage,
-            search: this.filters.global.value,
-            sortBy: this.news.meta.sortBy,
-            scope: NEWS_PANEL_SCOPE,
-          },
-        })
-        .then((res) => res.data)
-      this.publishTargets = await this.$api
-        .get('/news/publish/targets', { silent: true })
-        .then((res) => res.data)
-        .catch(() => [])
-      this.newsSingleDialog = false
-      this.fileDialog = false
-      this.loading = false
+      try {
+        this.selected = null
+        this.news = await this.$api
+          .get('/news', {
+            params: {
+              page: this.news.meta.currentPage,
+              limit: this.news.meta.itemsPerPage,
+              search: this.filters.global.value,
+              sortBy: this.news.meta.sortBy,
+              scope: NEWS_PANEL_SCOPE,
+            },
+          })
+          .then((res) => res.data)
+        this.publishTargets = await this.$api
+          .get('/news/publish/targets', { silent: true })
+          .then((res) => res.data)
+          .catch(() => [])
+        this.newsSingleDialog = false
+        this.fileDialog = false
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      } finally {
+        this.loading = false
+      }
     },
     async uploadImage(event) {
-      let formData = new FormData()
+      const formData = new FormData()
       formData.append('file', event.files[0])
 
       try {
@@ -495,7 +502,11 @@ export default {
           life: 3000,
         })
         await this.load()
-      } catch {}
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      }
     },
     hideDialog() {
       this.newsSingleDialog = false
@@ -563,7 +574,11 @@ export default {
               life: 3000,
             })
             this.selected = []
-          } catch {}
+          } catch (error) {
+            if (error.response?.status !== 403) {
+              this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+            }
+          }
           await this.load()
         },
       })
@@ -626,12 +641,16 @@ export default {
       try {
         await this.$api.post(`/news/deliveries/${delivery.id}/retry`)
         this.deliveries = await this.$api.get(`/news/${this.publishNews.id}/deliveries`).then((res) => res.data)
-      } catch {}
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      }
     },
     async createNewsSingle() {
       this.loading = true
 
-      let formData = new FormData()
+      const formData = new FormData()
 
       formData.append('title', this.newsSingle.title)
       formData.append('description', this.newsSingle.description)
@@ -655,6 +674,7 @@ export default {
           detail: this.$t('admin.news_created'),
           life: 3000,
         })
+        this.newsSingleDialog = false
         await this.load()
       } catch (err) {
         this.loading = false
@@ -676,6 +696,7 @@ export default {
           detail: this.$t('admin.news_updated'),
           life: 3000,
         })
+        this.newsSingleDialog = false
         await this.load()
       } catch (err) {
         this.loading = false
@@ -700,7 +721,11 @@ export default {
               detail: this.$t('admin.news_deleted'),
               life: 3000,
             })
-          } catch {}
+          } catch (error) {
+            if (error.response?.status !== 403) {
+              this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+            }
+          }
           await this.load()
         },
       })

@@ -225,23 +225,30 @@ export default {
   methods: {
     async load() {
       this.loading = true
-      this.selected = null
-      this.mods = await this.$api
-        .get('/servers/mods', {
-          params: {
-            page: this.mods.meta.currentPage,
-            limit: this.mods.meta.itemsPerPage,
-            search: this.filters.global.value,
-            sortBy: this.mods.meta.sortBy,
-          },
-        })
-        .then((res) => res.data)
-      this.modDialog = false
-      this.fileDialog = false
-      this.loading = false
+      try {
+        this.selected = null
+        this.mods = await this.$api
+          .get('/servers/mods', {
+            params: {
+              page: this.mods.meta.currentPage,
+              limit: this.mods.meta.itemsPerPage,
+              search: this.filters.global.value,
+              sortBy: this.mods.meta.sortBy,
+            },
+          })
+          .then((res) => res.data)
+        this.modDialog = false
+        this.fileDialog = false
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      } finally {
+        this.loading = false
+      }
     },
     async uploadIcon(event) {
-      let formData = new FormData()
+      const formData = new FormData()
       formData.append('file', event.files[0])
 
       try {
@@ -274,7 +281,11 @@ export default {
           life: 3000,
         })
         await this.load()
-      } catch {}
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      }
     },
     hideDialog() {
       this.modDialog = false
@@ -332,7 +343,11 @@ export default {
               life: 3000,
             })
             this.selected = []
-          } catch {}
+          } catch (error) {
+            if (error.response?.status !== 403) {
+              this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+            }
+          }
           await this.load()
         },
       })
@@ -348,6 +363,7 @@ export default {
           detail: this.$t('admin.mod_created'),
           life: 3000,
         })
+        this.modDialog = false
         await this.load()
       } catch (err) {
         this.loading = false
@@ -369,6 +385,7 @@ export default {
           detail: this.$t('admin.mod_updated'),
           life: 3000,
         })
+        this.modDialog = false
         await this.load()
       } catch (err) {
         this.loading = false
@@ -393,7 +410,11 @@ export default {
               detail: this.$t('admin.mod_deleted'),
               life: 3000,
             })
-          } catch {}
+          } catch (error) {
+            if (error.response?.status !== 403) {
+              this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+            }
+          }
           await this.load()
         },
       })

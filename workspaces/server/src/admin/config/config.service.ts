@@ -1,28 +1,21 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { AUDIT_CLASSES, DEFAULT_ISSUANCE_PRESET, RCON_PRESETS } from 'unicore-common';
-import { ACTIVE_MODULES_KEY } from 'unicore-api';
-import {
-  AUDIT_RETENTION_DEFAULTS,
-  CacheKey,
-  GIFTS_CODE_EXPIRE_DAYS,
-  GIFTS_DAILY_LIMIT,
-  KEEP_HISTORY_DAYS,
-  KEEP_PAID_PAYMENTS_DAYS,
-  KEEP_PENDING_PAYMENTS_DAYS,
-} from '@common';
+import { envConfig } from 'unicore-common';
+import { ACTIVE_MODULES_KEY, settingIssue, ConfigFieldSchema, SettingsCatalog, SettingsCategory, SettingsField, SettingsChange } from 'unicore-api';
+import { CacheKey } from '@common';
 import { IsNull, Repository } from 'typeorm';
-import { AUDIT_RETENTION_FIELDS, ConfigField, ConfigType } from './config.enum';
-import { enabledModuleIds, moduleConfigSchema } from 'src/modules/runtime';
-import { configTypeOf, inactiveModuleConfigPrefixes, moduleConfigKey } from './module-config';
+import { ConfigField, ConfigType } from './config.enum';
+import { enabledModuleIds } from 'src/modules/runtime';
+import { configTypeOf, inactiveModuleConfigPrefixes, moduleConfigKey, moduleSettingsSchemas } from './module-config';
 import { CONFIG_CACHE_TTL_MS } from './config.constants';
 import { isValidConfigNumber } from './config.utils';
 import { ConfigInput } from './dto/config.input';
 import { syncLauncherBuilds } from 'src/auth/laminara/builds';
 import { Config } from './entities/config.entity';
 import _ from 'lodash';
+import { CORE_SETTINGS_CATEGORIES, coreSettingsSchema, coreConfigDefaults } from './settings.schema';
 
 export type LoadedConfig = Record<string, string | number | boolean>;
 
@@ -48,90 +41,14 @@ export class ConfigService {
   }
 
   async init() {
-    const presetOps = (RCON_PRESETS.find((p) => p.id === DEFAULT_ISSUANCE_PRESET) ?? RCON_PRESETS[0]).ops;
-    const vanillaOps = (RCON_PRESETS.find((p) => p.id === 'vanilla') ?? RCON_PRESETS[0]).ops;
-
-    await this.configRepo
-      .createQueryBuilder()
-      .insert()
-      .into(Config)
-      .values([
-        {
-          key: ConfigField.EconomyRate,
-          value: '100',
-          important: true,
-          type: ConfigType.number,
-        },
-        { key: ConfigField.LauncherExe, important: true, type: ConfigType.string },
-        { key: ConfigField.LauncherJar, important: true, type: ConfigType.string },
-        { key: ConfigField.LinkDiscord, important: true, type: ConfigType.string, value: 'https://t.me/unicore_project' },
-        { key: ConfigField.LinkTelegram, important: true, type: ConfigType.string, value: 'https://t.me/unicore_project' },
-        { key: ConfigField.LinkVk, important: true, type: ConfigType.string, value: 'https://t.me/unicore_project' },
-        { key: ConfigField.LinkYoutube, important: true, type: ConfigType.string, value: 'https://t.me/unicore_project' },
-        { key: ConfigField.ReferalTrigger, important: true, type: ConfigType.number, value: '600' },
-        { key: ConfigField.ReferalReward, important: true, type: ConfigType.number, value: '20' },
-        { key: ConfigField.ReferalRewardPlayer, important: true, type: ConfigType.number, value: '20' },
-        { key: ConfigField.ReferalPaymentPercent, important: true, type: ConfigType.number, value: '0' },
-        { key: ConfigField.ReferalBindEnabled, important: true, type: ConfigType.boolean, value: 'false' },
-        { key: ConfigField.ReferalRebindEnabled, important: true, type: ConfigType.boolean, value: 'false' },
-        { key: ConfigField.MonitoringReward, important: true, type: ConfigType.number, value: '2' },
-        { key: ConfigField.LinkMctop, important: true, type: ConfigType.string, value: 'https://unicorecms.ru' },
-        { key: ConfigField.LinkMinecraftraiting, important: true, type: ConfigType.string, value: 'https://unicorecms.ru' },
-        { key: ConfigField.LinkTopcraft, important: true, type: ConfigType.string, value: 'https://unicorecms.ru' },
-        { key: ConfigField.UnbanPrice, important: true, type: ConfigType.number, value: '150' },
-        { key: ConfigField.VirtualPercent, important: true, type: ConfigType.number, value: '75' },
-        { key: ConfigField.VotesTwinkProtect, important: true, type: ConfigType.boolean, value: 'true' },
-        { key: ConfigField.StoreKitsVirtualUse, important: true, type: ConfigType.boolean, value: 'true' },
-        { key: ConfigField.StoreProductsVirtualUse, important: true, type: ConfigType.boolean, value: 'true' },
-        { key: ConfigField.DonateGroupsVirtualUse, important: true, type: ConfigType.boolean, value: 'true' },
-        { key: ConfigField.DonatePermsVirtualUse, important: true, type: ConfigType.boolean, value: 'true' },
-        { key: ConfigField.GiftsCodeEnabled, important: true, type: ConfigType.boolean, value: 'true' },
-        { key: ConfigField.GiftsDirectEnabled, important: true, type: ConfigType.boolean, value: 'true' },
-        { key: ConfigField.GiftsDailyLimit, important: true, type: ConfigType.number, value: String(GIFTS_DAILY_LIMIT) },
-        { key: ConfigField.GiftsCodeExpireDays, important: true, type: ConfigType.number, value: String(GIFTS_CODE_EXPIRE_DAYS) },
-        { key: ConfigField.GiftsRegiftPercent, important: true, type: ConfigType.number, value: '0' },
-        { key: ConfigField.EmailActivationRequired, important: true, type: ConfigType.boolean, value: 'true' },
-        { key: ConfigField.PasswordBreachCheck, important: true, type: ConfigType.boolean, value: 'true' },
-        { key: ConfigField.OrdinaryRegister, important: true, type: ConfigType.boolean, value: 'false' },
-        { key: ConfigField.RoleBadgeBefore, important: true, type: ConfigType.boolean, value: 'false' },
-        { key: ConfigField.KeepPaidPaymentsDays, important: true, type: ConfigType.number, value: String(KEEP_PAID_PAYMENTS_DAYS) },
-        {
-          key: ConfigField.KeepPendingPaymentsDays,
-          important: true,
-          type: ConfigType.number,
-          value: String(KEEP_PENDING_PAYMENTS_DAYS),
-        },
-        { key: ConfigField.KeepHistoryDays, important: true, type: ConfigType.number, value: String(KEEP_HISTORY_DAYS) },
-        ...AUDIT_CLASSES.map((value) => ({
-          key: AUDIT_RETENTION_FIELDS[value],
-          important: true,
-          type: ConfigType.number,
-          value: String(AUDIT_RETENTION_DEFAULTS[value]),
-        })),
-        { key: ConfigField.LaminaraBuilds, important: true, type: ConfigType.string, value: '' },
-        { key: ConfigField.RconPreset, important: true, type: ConfigType.string, value: DEFAULT_ISSUANCE_PRESET },
-        {
-          key: ConfigField.RconTplGiveItem,
-          important: true,
-          type: ConfigType.string,
-          value: presetOps.giveItem ?? vanillaOps.giveItem ?? '',
-        },
-        { key: ConfigField.RconTplGroupAdd, important: true, type: ConfigType.string, value: presetOps.groupAdd ?? '' },
-        { key: ConfigField.RconTplGroupAddTemp, important: true, type: ConfigType.string, value: presetOps.groupAddTemp ?? '' },
-        { key: ConfigField.RconTplGroupRemove, important: true, type: ConfigType.string, value: presetOps.groupRemove ?? '' },
-        { key: ConfigField.RconTplPermSet, important: true, type: ConfigType.string, value: presetOps.permSet ?? '' },
-        { key: ConfigField.RconTplPermSetTemp, important: true, type: ConfigType.string, value: presetOps.permSetTemp ?? '' },
-        { key: ConfigField.RconTplPermUnset, important: true, type: ConfigType.string, value: presetOps.permUnset ?? '' },
-      ])
-      .orIgnore()
-      .execute();
+    await this.configRepo.createQueryBuilder().insert().into(Config).values(coreConfigDefaults()).orIgnore().execute();
 
     await this.initModules();
     await this.load();
   }
 
   private async initModules(): Promise<void> {
-    const values = moduleConfigSchema().flatMap((module) =>
+    const values = moduleSettingsSchemas().flatMap((module) =>
       module.fields.map((field) => ({
         key: moduleConfigKey(module.id, field),
         value: field.default === undefined || field.default === null ? null : String(field.default),
@@ -179,11 +96,83 @@ export class ConfigService {
     return { ...values, [ACTIVE_MODULES_KEY]: enabledModuleIds().join(',') };
   }
 
+  async projectName(): Promise<string> {
+    const config = await this.load();
+
+    return String(config[ConfigField.ProjectName] || envConfig.sitename);
+  }
+
+  private definitions(): (ConfigFieldSchema & { moduleId?: string })[] {
+    return [...coreSettingsSchema(), ...moduleSettingsSchemas().flatMap((module) => module.fields.map((field) => ({
+      ...field, key: moduleConfigKey(module.id, field), moduleId: module.id,
+      category: `module:${module.id}${field.category ? `:${field.category}` : ''}`,
+    })))];
+  }
+
+  async settings(moduleId?: string): Promise<SettingsCatalog> {
+    const rows = await this.configRepo.find();
+    const hidden = inactiveModuleConfigPrefixes();
+    const definitions = this.definitions();
+    const modules = moduleSettingsSchemas();
+    if (moduleId && !modules.some((module) => module.id === moduleId)) throw new NotFoundException();
+    const fields: SettingsField[] = definitions.filter((field) => moduleId ? field.moduleId === moduleId : !hidden.some((prefix) => field.key.startsWith(prefix)))
+      .map((field) => ({ ...field, category: field.category || 'other', value: rows.find((row) => row.key === field.key)?.value ?? null }));
+    const categories: SettingsCategory[] = [...CORE_SETTINGS_CATEGORIES];
+    for (const field of fields.filter((item) => item.moduleId)) {
+      if (categories.some((category) => category.id === field.category)) continue;
+      const module = modules.find((item) => item.id === field.moduleId);
+      const group = field.category.slice(`module:${field.moduleId}`.length + 1);
+      const names = typeof module.name === 'string' ? { en: module.name, ru: module.name } : module.name;
+      const label = group ? Object.fromEntries(Object.entries(names).map(([locale, name]) => [locale, `${name} · ${group}`])) : module.name;
+      categories.push({ id: field.category, label, icon: 'pi pi-box' });
+    }
+    return { fields, categories: categories.filter((category) => fields.some((field) => field.category === category.id)) };
+  }
+
+  async saveSettings(changes: SettingsChange[], moduleId?: string): Promise<SettingsCatalog> {
+    if (!Array.isArray(changes) || !changes.length || changes.length > 200 || new Set(changes.map((item) => item.key)).size !== changes.length)
+      throw new BadRequestException('settings.error.request');
+    const definitions = this.definitions();
+    const errors: Record<string, string> = {};
+    for (const change of changes) {
+      const field = definitions.find((entry) => entry.key === change.key && (!moduleId || entry.moduleId === moduleId));
+      const error = field ? settingIssue(field, change.value) : 'settings.error.unknown';
+      if (error) errors[change.key] = error;
+      if (change.expected !== null && typeof change.expected !== 'string') errors[change.key] = 'settings.error.request';
+    }
+    if (Object.keys(errors).length) throw new BadRequestException({ message: 'settings.error.validation', fields: errors });
+
+    await this.configRepo.manager.transaction(async (manager) => {
+      const repository = manager.getRepository(Config);
+      for (const change of [...changes].sort((a, b) => a.key.localeCompare(b.key))) {
+        const field = definitions.find((entry) => entry.key === change.key);
+        if (change.expected === null) {
+          await repository.createQueryBuilder().insert().into(Config).values({
+            key: change.key, value: null, type: configTypeOf(field.type), important: true,
+          }).orIgnore().execute();
+        }
+        const row = await repository.findOne({ where: { key: change.key }, lock: { mode: 'pessimistic_write' } });
+        if (!row || row.value !== change.expected) throw new ConflictException({ message: 'settings.error.conflict', fields: { [change.key]: 'settings.error.conflict' } });
+        row.value = change.value;
+        row.type = configTypeOf(field.type);
+        await repository.save(row);
+      }
+    });
+    await this.invalidate();
+    return this.settings(moduleId);
+  }
+
   private assertValue(input: ConfigInput) {
+    if (input.value !== null && input.value !== undefined && !['string', 'number', 'boolean'].includes(typeof input.value)) throw new BadRequestException();
+    if (input.value !== null && input.value !== undefined) input.value = String(input.value);
+    const field = this.definitions().find((entry) => entry.key === input.key);
+    if (field && (configTypeOf(field.type) !== input.type || settingIssue(field, input.value))) throw new BadRequestException();
+    if (!field && input.type === ConfigType.boolean && !['true', 'false', '0', '1'].includes(input.value)) throw new BadRequestException();
     if (input.type == ConfigType.number && !isValidConfigNumber(input.key, input.value)) throw new BadRequestException();
   }
 
   async create(input: ConfigInput) {
+    if (this.definitions().some((field) => field.key === input.key)) throw new BadRequestException();
     if (await this.configRepo.findOneBy({ key: input.key })) throw new BadRequestException();
 
     this.assertValue(input);

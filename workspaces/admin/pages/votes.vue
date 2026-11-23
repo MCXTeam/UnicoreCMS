@@ -145,9 +145,17 @@ export default {
   },
   methods: {
     async load() {
-      this.bonuses = await this.$api.get('/cabinet/votes/gifts').then((res) => res.data)
-      this.bonusDialog = false
-      this.loading = false
+      this.loading = true
+      try {
+        this.bonuses = await this.$api.get('/cabinet/votes/gifts').then((res) => res.data)
+        this.bonusDialog = false
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      } finally {
+        this.loading = false
+      }
     },
     hideDialog() {
       this.bonusDialog = false
@@ -174,6 +182,7 @@ export default {
           detail: this.$t('admin.vote_created'),
           life: 3000,
         })
+        this.bonusDialog = false
         await this.load()
       } catch (err) {
         this.$toast.add({
@@ -193,6 +202,7 @@ export default {
           detail: this.$t('admin.vote_updated'),
           life: 3000,
         })
+        this.bonusDialog = false
         await this.load()
       } catch (err) {
         this.loading = false
@@ -218,7 +228,11 @@ export default {
               detail: this.$t('admin.vote_deleted'),
               life: 3000,
             })
-          } catch {}
+          } catch (error) {
+            if (error.response?.status !== 403) {
+              this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+            }
+          }
           await this.load()
         },
       })

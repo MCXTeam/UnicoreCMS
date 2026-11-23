@@ -46,6 +46,7 @@ import { PasswordService } from 'src/auth/password/password.service';
 import { PasswordPolicyService } from 'src/auth/password/password-policy.service';
 import { passwordAad } from 'src/auth/password/password-aad';
 import { ContentTranslationsService } from '../locales/content-translations.service';
+import { ConfigService } from '../config/config.service';
 
 export interface EmailChangeRequest {
   email: string;
@@ -75,6 +76,7 @@ export class EmailService {
     private passwordService: PasswordService,
     private passwordPolicyService: PasswordPolicyService,
     private contentTranslations: ContentTranslationsService,
+    private config: ConfigService,
   ) {}
 
   find(): Promise<EmailMessage[]> {
@@ -125,7 +127,7 @@ export class EmailService {
     const activation = new EmailActivation();
     const code = randomFromAlphabet(EMAIL_CODE_ALPHABET, EMAIL_CODE_LENGTH);
 
-    const message = renderEmailMessage({ title, content }, { USERNAME: user.username, SITENAME: envConfig.sitename, CODE: code });
+    const message = renderEmailMessage({ title, content }, { USERNAME: user.username, SITENAME: await this.config.projectName(), CODE: code });
 
     activation.user = user;
     activation.code = code;
@@ -225,7 +227,7 @@ export class EmailService {
     });
     await this.emailChangesRepository.save(change);
 
-    const message = renderEmailMessage({ title, content }, { USERNAME: user.username, SITENAME: envConfig.sitename, CODE: code });
+    const message = renderEmailMessage({ title, content }, { USERNAME: user.username, SITENAME: await this.config.projectName(), CODE: code });
 
     this.mailerService.sendMail({ to: address, ...message }).catch((e) => {
       this.logger.error(e.toString());
@@ -272,7 +274,7 @@ export class EmailService {
 
       const message = renderEmailMessage({ title, content }, {
         USERNAME: user.username,
-        SITENAME: envConfig.sitename,
+        SITENAME: await this.config.projectName(),
         EMAIL: user.email,
       });
 
@@ -295,7 +297,7 @@ export class EmailService {
     const message = renderEmailMessage({ title, content }, {
       USERNAME: recipient.username,
       SENDER: sender,
-      SITENAME: envConfig.sitename,
+      SITENAME: await this.config.projectName(),
       GIFT: gift,
     });
 
@@ -342,7 +344,7 @@ export class EmailService {
     const message = renderEmailMessage({ title, content }, {
       IP: ip,
       USERNAME: user.username,
-      SITENAME: envConfig.sitename,
+      SITENAME: await this.config.projectName(),
       LINK: link.href,
     });
 

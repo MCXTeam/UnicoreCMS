@@ -16,9 +16,19 @@ export const moduleConfigKey = (moduleId: string, field: ConfigFieldSchema): str
 };
 
 export const moduleConfigFields = (): { key: string; field: ConfigFieldSchema; moduleId: string }[] =>
-  moduleConfigSchema().flatMap((module) =>
+  moduleSettingsSchemas().flatMap((module) =>
     module.fields.map((field) => ({ key: moduleConfigKey(module.id, field), field, moduleId: module.id })),
   );
+
+export function moduleSettingsSchemas() {
+  const runtime = moduleConfigSchema();
+
+  return discover().modules.map((module) => ({
+    id: module.id,
+    name: module.manifest.name || module.id,
+    fields: runtime.find((entry) => entry.id === module.id)?.fields ?? module.manifest.config ?? [],
+  }));
+}
 
 export const moduleConfigRule = (key: string): ConfigFieldSchema | null => moduleConfigFields().find((item) => item.key === key)?.field || null;
 

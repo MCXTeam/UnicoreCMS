@@ -539,17 +539,24 @@ export default {
   methods: {
     async load() {
       this.loading = true
-      this.groupDialog = false
-      this.fileDialog = false
-      this.groups = await this.$api.get('/donates/groups').then((res) => res.data)
-      this.kits = await this.$api.get('/donates/group-kits').then((res) => res.data)
-      this.periods = await this.$api.get('/donates/periods').then((res) => res.data)
-      this.servers = await this.$api.get('/servers').then((res) => res.data)
-      this.roles = await this.$api
-        .get('/admin/roles', { silent: true })
-        .then((res) => res.data)
-        .catch(() => [])
-      this.loading = false
+      try {
+        this.groupDialog = false
+        this.fileDialog = false
+        this.groups = await this.$api.get('/donates/groups').then((res) => res.data)
+        this.kits = await this.$api.get('/donates/group-kits').then((res) => res.data)
+        this.periods = await this.$api.get('/donates/periods').then((res) => res.data)
+        this.servers = await this.$api.get('/servers').then((res) => res.data)
+        this.roles = await this.$api
+          .get('/admin/roles', { silent: true })
+          .then((res) => res.data)
+          .catch(() => [])
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      } finally {
+        this.loading = false
+      }
     },
     async onGroupReorder(event) {
       this.loading = true
@@ -565,7 +572,7 @@ export default {
       this.group.features = event.value
     },
     onFeatureEditSave(event) {
-      let { newData, index } = event
+      const { newData, index } = event
       this.group.features[index] = newData
     },
     addFeature() {
@@ -583,7 +590,7 @@ export default {
       this.features = []
     },
     async uploadIcon(event) {
-      let formData = new FormData()
+      const formData = new FormData()
       formData.append('file', event.files[0])
 
       try {
@@ -616,7 +623,11 @@ export default {
           life: 3000,
         })
         await this.load()
-      } catch {}
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      }
     },
     async openFileDialog(group) {
       this.group = this.$_.pick(group, this.$_.deepKeys(this.group))
@@ -722,7 +733,11 @@ export default {
               life: 3000,
             })
             this.selected = []
-          } catch {}
+          } catch (error) {
+            if (error.response?.status !== 403) {
+              this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+            }
+          }
           await this.load()
         },
       })
@@ -741,7 +756,11 @@ export default {
               detail: this.$t('admin.group_deleted'),
               life: 3000,
             })
-          } catch {}
+          } catch (error) {
+            if (error.response?.status !== 403) {
+              this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+            }
+          }
           await this.load()
         },
       })

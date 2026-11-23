@@ -7,6 +7,7 @@
             <div class="my-2 flex align-items-center gap-2">
               <Select
                 v-model="code"
+                @update:modelValue="loadMessages()"
                 :options="locales"
                 optionLabel="name"
                 optionValue="code"
@@ -18,6 +19,7 @@
                 :label="$t('admin.add_key')"
                 icon="pi pi-plus"
                 class="p-button-success"
+                :disabled="loading || code !== loadedCode"
                 @click="openKeyDialog"
               />
             </div>
@@ -27,7 +29,7 @@
               <Button :label="$t('admin.languages')" icon="pi pi-globe" class="p-button-secondary" @click="localesDialog = true" />
               <Button
                 v-if="canUpdate"
-                :disabled="loading || !changed"
+                :disabled="loading || code !== loadedCode || !changed"
                 :label="$t('common.save')"
                 icon="pi pi-check"
                 @click="save"
@@ -68,7 +70,7 @@
               <InputText
                 class="w-full"
                 :modelValue="messages[slotProps.data.key]"
-                :disabled="!canUpdate"
+                :disabled="!canUpdate || loading || code !== loadedCode"
                 @update:modelValue="setMessage(slotProps.data.key, $event)"
                 :placeholder="original[slotProps.data.key] ? '' : $t('admin.no_translation')"
               />
@@ -79,6 +81,7 @@
               <Button
                 v-if="canUpdate"
                 @click="removeKey(slotProps.data.key)"
+                :disabled="loading || code !== loadedCode"
                 icon="pi pi-trash"
                 class="p-button-rounded p-button-warning"
               />
@@ -259,6 +262,8 @@ export default {
       locales: [],
       keys: [],
       code: null,
+      loadedCode: null,
+      messagesRequest: 0,
       messages: {},
       original: {},
       keyDialog: false,
@@ -289,35 +294,52 @@ export default {
       return this.keys.some((key) => (this.messages[key] || '') !== (this.original[key] || ''))
     },
   },
-  watch: {
-    code() {
-      this.loadMessages()
-    },
-  },
   mounted() {
     this.load()
   },
   methods: {
     async load() {
       this.loading = true
-      this.locales = await this.$api.get('/locales/all').then((res) => res.data)
-      this.keys = await this.$api.get('/locales/keys').then((res) => res.data)
-      if (!this.locales.find((locale) => locale.code === this.code)) {
-        this.code = (this.locales.find((locale) => locale.is_default) || this.locales[0])?.code || null
+      try {
+        const locales = await this.$api.get('/locales/all').then((res) => res.data)
+        const keys = await this.$api.get('/locales/keys').then((res) => res.data)
+        this.locales = locales
+        this.keys = keys
+        if (!this.locales.find((locale) => locale.code === this.code)) {
+          this.code = (this.locales.find((locale) => locale.is_default) || this.locales[0])?.code || null
+        }
+        await this.loadMessages()
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+        this.loading = false
       }
-      await this.loadMessages()
     },
     async loadMessages() {
-      if (!this.code) {
+      const request = ++this.messagesRequest
+      const code = this.code
+      if (!code) {
         this.messages = {}
         this.original = {}
+        this.loadedCode = null
         this.loading = false
         return
       }
       this.loading = true
-      this.original = await this.$api.get(`/locales/${this.code}/messages`).then((res) => res.data)
-      this.messages = { ...this.original }
-      this.loading = false
+      try {
+        const messages = await this.$api.get(`/locales/${code}/messages`).then((res) => res.data)
+        if (request !== this.messagesRequest || code !== this.code) return
+        this.original = messages
+        this.messages = { ...messages }
+        this.loadedCode = code
+      } catch (error) {
+        if (request === this.messagesRequest && error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      } finally {
+        if (request === this.messagesRequest) this.loading = false
+      }
     },
     setMessage(key, value) {
       this.messages = { ...this.messages, [key]: value }
@@ -365,7 +387,11 @@ export default {
           this.loading = true
           try {
             await this.$api.delete(`/locales/keys/${encodeURIComponent(key)}`)
-          } catch {}
+          } catch (error) {
+            if (error.response?.status !== 403) {
+              this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+            }
+          }
           await this.load()
         },
       })
@@ -410,7 +436,11 @@ export default {
           try {
             await this.$api.delete(`/locales/${code}`)
             this.$toast.add({ severity: 'success', detail: this.$t('admin.locale_deleted'), life: 3000 })
-          } catch {}
+          } catch (error) {
+            if (error.response?.status !== 403) {
+              this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+            }
+          }
           await this.load()
         },
       })

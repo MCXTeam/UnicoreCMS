@@ -1,6 +1,8 @@
 import { AuditClass } from 'unicore-common';
 
 export enum ConfigField {
+  ProjectName = 'public_project_name',
+  ProjectLogo = 'public_project_logo',
   LauncherExe = 'public_launcher_exe',
   LauncherJar = 'public_launcher_jar',
   EconomyRate = 'public_economy_rate',

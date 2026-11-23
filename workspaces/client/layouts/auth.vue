@@ -3,7 +3,7 @@
     <div v-for="(n, index) in 15" :key="index" class="firefly d-none d-xl-block" aria-hidden="true" />
     <div data-aos-delay="50" data-aos="fade-left" class="panel d-flex flex-column align-items-center">
       <NuxtLink data-aos="zoom-in-right" to="/">
-        <img src="/icon.png" :alt="$pub.sitename" height="128px" />
+        <ProjectLogo :size="128" />
       </NuxtLink>
       <slot />
     </div>

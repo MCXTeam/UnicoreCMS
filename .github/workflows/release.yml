@@ -21,7 +21,12 @@ jobs:
       - run: pnpm --filter unicore-updater test
       - run: pnpm --filter unicore-server exec node --test test/migration-obfuscation.test.mjs
       - run: pnpm --filter unicore-api run api:check && pnpm --filter unicore-api test
-      - run: pnpm --filter unicore-server exec node --test test/module-license-admission.test.mjs test/obfuscation-semantics.test.mjs
+      - run: pnpm --filter unicore-server exec node --test test/module-license-admission.test.mjs test/obfuscation-semantics.test.mjs test/cli-version.test.mjs
+      - name: Settings tests
+        run: node --test workspaces/server/test/settings.test.mjs workspaces/admin/test/settings-components.test.mjs
+      - name: Admin request error tests
+        run: node --test workspaces/admin/test/request-errors.test.mjs
+
       - run: pnpm --filter unicore-server run typecheck && pnpm --filter unicore-admin run typecheck && pnpm --filter unicore-client run typecheck
       - name: Sign release
         env:

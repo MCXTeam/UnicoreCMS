@@ -650,10 +650,17 @@ export default {
   methods: {
     async load() {
       this.loading = true
-      this.serverDialog = false
-      this.fileDialog = false
-      this.servers = await this.$api.get('/servers').then((res) => res.data)
-      this.loading = false
+      try {
+        this.serverDialog = false
+        this.fileDialog = false
+        this.servers = await this.$api.get('/servers').then((res) => res.data)
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      } finally {
+        this.loading = false
+      }
     },
     async onServersReorder(event) {
       this.loading = true
@@ -705,7 +712,7 @@ export default {
       this.instances = []
     },
     onRowEditSave(event) {
-      let { newData, index } = event
+      const { newData, index } = event
       this.server.table[index] = newData
     },
     addRow() {
@@ -731,7 +738,7 @@ export default {
       this.serverDialog = false
     },
     async uploadMedia(event, type) {
-      let formData = new FormData()
+      const formData = new FormData()
       formData.append('file', event.files[0])
 
       try {
@@ -785,7 +792,11 @@ export default {
       try {
         await this.$api.delete(`/servers/${this.server.id}/gallery/${id}`)
         await this.loadGallery()
-      } catch {}
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      }
     },
     async removeMedia(type) {
       try {
@@ -796,7 +807,11 @@ export default {
           life: 3000,
         })
         await this.load()
-      } catch {}
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      }
     },
     async openDialog(server = null) {
       this.updateMode = !!server
@@ -865,7 +880,7 @@ export default {
         await this.load()
       } catch (err) {
         this.loading = false
-        if (err.response.status === 409) {
+        if (err.response?.status === 409) {
           this.$toast.add({
             severity: 'error',
             detail: this.$t('admin.server_id_exists'),
@@ -886,7 +901,7 @@ export default {
       this.loading = true
       try {
         const payload = {
-          ...this.$_(this.server).omitBy(this.$_.isEmpty).omit('id').value(),
+          ...this.$_.omit(this.server, 'id', 'image', 'icon'),
           delivery_mode: this.server.delivery_mode,
           wipe: this.server.wipe,
           table: this.server.table && this.server.table.length ? this.server.table.map((row, priority) => ({ ...row, priority })) : [],
@@ -950,7 +965,11 @@ export default {
               detail: this.$t('admin.server_deleted'),
               life: 3000,
             })
-          } catch {}
+          } catch (error) {
+            if (error.response?.status !== 403) {
+              this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+            }
+          }
           await this.load()
         },
       })

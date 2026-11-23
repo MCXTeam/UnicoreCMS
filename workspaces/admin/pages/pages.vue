@@ -240,9 +240,16 @@ export default {
     },
     async load() {
       this.loading = true
-      this.pageDialog = false
-      this.pages = await this.$api.get('/pages').then((res) => res.data)
-      this.loading = false
+      try {
+        this.pageDialog = false
+        this.pages = await this.$api.get('/pages').then((res) => res.data)
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      } finally {
+        this.loading = false
+      }
     },
     hideDialog() {
       this.pageDialog = false
@@ -281,7 +288,7 @@ export default {
         await this.load()
       } catch (err) {
         this.loading = false
-        if (err.response.status === 409) {
+        if (err.response?.status === 409) {
           this.$toast.add({
             severity: 'error',
             detail: this.$t('admin.page_path_exists'),
@@ -310,7 +317,7 @@ export default {
         await this.load()
       } catch (err) {
         this.loading = false
-        if (err.response.status === 409) {
+        if (err.response?.status === 409) {
           this.$toast.add({
             severity: 'error',
             detail: this.$t('admin.page_path_exists'),
@@ -339,7 +346,11 @@ export default {
               detail: this.$t('admin.page_deleted'),
               life: 3000,
             })
-          } catch {}
+          } catch (error) {
+            if (error.response?.status !== 403) {
+              this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+            }
+          }
           await this.load()
         },
       })

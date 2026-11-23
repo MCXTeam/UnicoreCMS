@@ -510,26 +510,33 @@ export default {
   methods: {
     async load() {
       this.loading = true
-      this.kits = await this.$api
-        .get('/store/kits', {
-          params: {
-            page: this.kits.meta.currentPage,
-            limit: this.kits.meta.itemsPerPage,
-            sortBy: this.kits.meta.sortBy,
-            search: this.filters.global.value,
-            ...this.filtersTansformer(this.filters),
-          },
-        })
-        .then((res) => res.data)
-      this.servers = await this.$api.get('/servers').then((res) => res.data)
+      try {
+        this.kits = await this.$api
+          .get('/store/kits', {
+            params: {
+              page: this.kits.meta.currentPage,
+              limit: this.kits.meta.itemsPerPage,
+              sortBy: this.kits.meta.sortBy,
+              search: this.filters.global.value,
+              ...this.filtersTansformer(this.filters),
+            },
+          })
+          .then((res) => res.data)
+        this.servers = await this.$api.get('/servers').then((res) => res.data)
 
-      this.kitDialog = false
-      this.fileDialog = false
-      this.loading = false
-      this.selected = null
+        this.kitDialog = false
+        this.fileDialog = false
+        this.selected = null
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      } finally {
+        this.loading = false
+      }
     },
     onKitItemEditSave(event) {
-      let { newData, index } = event
+      const { newData, index } = event
       this.kit.items[index] = newData
     },
     addKitItem() {
@@ -584,7 +591,7 @@ export default {
         .then((res) => res.data.data)
     },
     async uploadIcon(event) {
-      let formData = new FormData()
+      const formData = new FormData()
       formData.append('file', event.files[0])
 
       try {
@@ -617,7 +624,11 @@ export default {
           life: 3000,
         })
         await this.load()
-      } catch {}
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      }
     },
     hideDialog() {
       this.kitDialog = false
@@ -667,6 +678,7 @@ export default {
           detail: this.$t('admin.kit_created'),
           life: 3000,
         })
+        this.kitDialog = false
         await this.load()
       } catch (err) {
         this.loading = false
@@ -699,6 +711,7 @@ export default {
           detail: this.$t('admin.kit_updated'),
           life: 3000,
         })
+        this.kitDialog = false
         await this.load()
       } catch (err) {
         this.loading = false
@@ -723,7 +736,11 @@ export default {
               detail: this.$t('admin.kit_deleted'),
               life: 3000,
             })
-          } catch {}
+          } catch (error) {
+            if (error.response?.status !== 403) {
+              this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+            }
+          }
           await this.load()
         },
       })
@@ -747,7 +764,11 @@ export default {
               life: 3000,
             })
             this.selected = []
-          } catch {}
+          } catch (error) {
+            if (error.response?.status !== 403) {
+              this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+            }
+          }
           await this.load()
         },
       })

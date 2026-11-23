@@ -202,10 +202,17 @@ export default {
   methods: {
     async load() {
       this.loading = true
-      this.tokenDialog = false
-      this.servers = await this.$api.get('/servers').then((res) => res.data)
-      this.api = await this.$api.get('/admin/api').then((res) => res.data)
-      this.loading = false
+      try {
+        this.tokenDialog = false
+        this.servers = await this.$api.get('/servers').then((res) => res.data)
+        this.api = await this.$api.get('/admin/api').then((res) => res.data)
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      } finally {
+        this.loading = false
+      }
     },
     hideDialog() {
       this.tokenDialog = false
@@ -279,7 +286,11 @@ export default {
               detail: this.$t('admin.api_deleted'),
               life: 3000,
             })
-          } catch {}
+          } catch (error) {
+            if (error.response?.status !== 403) {
+              this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+            }
+          }
           await this.load()
         },
       })

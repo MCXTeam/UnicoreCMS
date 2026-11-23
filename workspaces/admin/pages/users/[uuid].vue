@@ -719,7 +719,7 @@
             <div class="flex align-items-center justify-content-between">
               <h4>{{ $t('admin.warehouse') }}</h4>
               <Select
-                @change="warehouseFetch()"
+                @change="warehouse = []; warehouseFetch()"
                 v-model="warehouse_server"
                 :options="giveServers"
                 optionLabel="name"
@@ -838,6 +838,7 @@ export default {
       rolesUser: [],
       roles: [],
       warehouse_server: null,
+      warehouse_request: 0,
       udg_loading: false,
       udp_loading: false,
       wh_loading: false,
@@ -1025,85 +1026,131 @@ export default {
     },
 
     async warehouseFetch() {
-      if (!this.warehouse_server) {
+      const request = ++this.warehouse_request
+      const server = this.warehouse_server?.id
+      if (!server) {
         this.warehouse = []
+        this.wh_loading = false
 
         return
       }
 
       this.wh_loading = true
-      this.warehouse = await this.$api
-        .get(`/store/warehouse/admin/${this.user.uuid}/${this.warehouse_server.id}`)
-        .then((res) => res.data)
-        .catch(() => [])
-      this.wh_loading = false
+      try {
+        const { data } = await this.$api.get(`/store/warehouse/admin/${this.user.uuid}/${server}`)
+        if (request === this.warehouse_request) this.warehouse = data
+      } catch (error) {
+        if (request === this.warehouse_request && error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      } finally {
+        if (request === this.warehouse_request) this.wh_loading = false
+      }
     },
 
     async moneyFetch() {
       this.money_loading = true
-      this.money = await this.$api
-        .get(`/cabinet/money/admin/` + this.user.uuid)
-        .then((res) => res.data)
-        .catch(() => [])
-      this.money_loading = false
+      try {
+        this.money = await this.$api
+          .get(`/cabinet/money/admin/` + this.user.uuid)
+          .then((res) => res.data)
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      } finally {
+        this.money_loading = false
+      }
     },
 
     async udgFetch() {
       this.udg_loading = true
-      this.udg = await this.$api
-        .get(`/donates/groups/admin/${this.user.uuid}`)
-        .then((res) => res.data)
-        .catch(() => [])
-      this.giveUDGDialog = false
-      this.udg_loading = false
+      try {
+        this.udg = await this.$api
+          .get(`/donates/groups/admin/${this.user.uuid}`)
+          .then((res) => res.data)
+        this.giveUDGDialog = false
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      } finally {
+        this.udg_loading = false
+      }
     },
 
     async udpFetch() {
       this.udp_loading = true
-      this.udp = await this.$api
-        .get(`/donates/permissions/admin/${this.user.uuid}`)
-        .then((res) => res.data)
-        .catch(() => [])
-      this.giveUDPDialog = false
-      this.udp_loading = false
+      try {
+        this.udp = await this.$api
+          .get(`/donates/permissions/admin/${this.user.uuid}`)
+          .then((res) => res.data)
+        this.giveUDPDialog = false
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      } finally {
+        this.udp_loading = false
+      }
     },
 
     async updateMoney(server_id) {
       this.money_loading = true
-      await this.$api.patch('/cabinet/money/admin', {
-        type: 1,
-        uuid: this.user.uuid,
-        server: server_id,
-        amount: this.money.find((srv) => srv.server.id == server_id).money,
-      })
-      await this.moneyFetch()
+      try {
+        await this.$api.patch('/cabinet/money/admin', {
+          type: 1,
+          uuid: this.user.uuid,
+          server: server_id,
+          amount: this.money.find((srv) => srv.server.id == server_id).money,
+        })
+        await this.moneyFetch()
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      } finally {
+        this.money_loading = false
+      }
     },
 
     async updateReal() {
-      await this.$api.patch('/cabinet/money/admin', {
-        type: 0,
-        uuid: this.user.uuid,
-        amount: this.user.real,
-      })
-      await this.fetchUser()
-      this.toast.add({
-        severity: 'success',
-        detail: this.$t('admin.balance_updated'),
-        life: 3000,
-      })
+      try {
+        await this.$api.patch('/cabinet/money/admin', {
+          type: 0,
+          uuid: this.user.uuid,
+          amount: this.user.real,
+        })
+        await this.fetchUser()
+        this.toast.add({
+          severity: 'success',
+          detail: this.$t('admin.balance_updated'),
+          life: 3000,
+        })
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      }
     },
 
     async updateVirtual() {
-      await this.$api.patch('/cabinet/votes/admin', {
-        uuid: this.user.uuid,
-        amount: this.user.virtual,
-      })
-      await this.fetchUser()
-      this.toast.add({
-        severity: 'success',
-        detail: this.$t('admin.balance_updated'),
-        life: 3000,
-      })
+      try {
+        await this.$api.patch('/cabinet/votes/admin', {
+          uuid: this.user.uuid,
+          amount: this.user.virtual,
+        })
+        await this.fetchUser()
+        this.toast.add({
+          severity: 'success',
+          detail: this.$t('admin.balance_updated'),
+          life: 3000,
+        })
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      }
     },
 
     async updateProfile() {
@@ -1192,7 +1239,7 @@ export default {
     },
 
     async uploadSkin(event, type) {
-      let formData = new FormData()
+      const formData = new FormData()
       formData.append('file', event.files[0])
       try {
         await this.$api.patch(`/cabinet/skin/${type}/${this.user.uuid}`, formData, {
@@ -1242,7 +1289,11 @@ export default {
               detail: this.$t('admin.group_revoked'),
               life: 3000,
             })
-          } catch {}
+          } catch (error) {
+            if (error.response?.status !== 403) {
+              this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+            }
+          }
           await this.udgFetch()
         },
       })
@@ -1262,7 +1313,11 @@ export default {
           detail: this.$t('admin.group_given'),
           life: 3000,
         })
-      } catch {}
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      }
       await this.udgFetch()
       this.udg_loading = false
     },
@@ -1270,7 +1325,7 @@ export default {
     async giveDonatePermission() {
       this.udp_loading = true
       try {
-        var form = {
+        const form = {
           period_id: this.udpForm.period.id,
           permission_id: this.udpForm.permission.id,
           user_uuid: this.user.uuid,
@@ -1284,7 +1339,11 @@ export default {
           detail: this.$t('admin.permission_given'),
           life: 3000,
         })
-      } catch {}
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      }
       await this.udpFetch()
       this.udp_loading = false
     },
@@ -1303,7 +1362,11 @@ export default {
               detail: this.$t('admin.permission_revoked'),
               life: 3000,
             })
-          } catch {}
+          } catch (error) {
+            if (error.response?.status !== 403) {
+              this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+            }
+          }
           await this.udpFetch()
         },
       })
@@ -1342,7 +1405,11 @@ export default {
           this.wh_loading = true
           try {
             await this.$api.delete(`/store/warehouse/admin/` + id).then((res) => res.data)
-          } catch {}
+          } catch (error) {
+            if (error.response?.status !== 403) {
+              this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+            }
+          }
           await this.warehouseFetch()
           this.wh_loading = false
         },
@@ -1418,7 +1485,11 @@ export default {
             user_uuid: this.user.uuid,
           })
           .then((res) => res.data)
-      } catch {}
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      }
       await this.warehouseFetch()
       this.wh_loading = false
       this.hideProductDialog()
@@ -1433,7 +1504,11 @@ export default {
             user_uuid: this.user.uuid,
           })
           .then((res) => res.data)
-      } catch {}
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      }
       await this.warehouseFetch()
       this.wh_loading = false
       this.hideKitDialog()

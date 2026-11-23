@@ -14,9 +14,9 @@
 import { useUiStore } from '~/stores/ui'
 
 const ui = useUiStore()
-const { sitename } = useRuntimeConfig().public
+const { $pub } = useNuxtApp()
 
-useHead({ titleTemplate: (title) => (title ? `${title} - ${sitename}` : sitename) })
+useHead(() => ({ titleTemplate: (title) => (title ? `${title} - ${$pub.sitename}` : String($pub.sitename)) }))
 </script>
 
 <style>

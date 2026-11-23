@@ -3,7 +3,8 @@
     <h3 v-if="titleText" class="layout-block__title">{{ titleText }}</h3>
 
     <NuxtLink v-if="block.type === 'logo'" to="/" class="layout-block__logo without-underline">
-      <img :src="block.image || '/icon.png'" :height="`${block.size || 64}px`" />
+      <img v-if="block.image" :src="block.image" :height="`${block.size || 64}px`" />
+      <ProjectLogo v-else :size="block.size || 64" />
       <span v-if="place === 'header'" class="layout-block__logo-name d-none d-md-block">{{ $pub.sitename }}</span>
     </NuxtLink>
 

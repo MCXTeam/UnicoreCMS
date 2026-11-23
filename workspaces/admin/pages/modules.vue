@@ -43,44 +43,8 @@
           </template>
         </ExtensionList>
 
-        <Dialog v-model:visible="settingsDialog" :modal="true" :header="$t('admin.module_settings')" :style="{ width: '520px' }" class="p-fluid">
-          <div v-for="item in settings" :key="item.key" class="field">
-            <label class="flex align-items-center gap-1">
-              {{ item.field.label ? $t(item.field.label) : item.field.key }}
-              <i v-if="item.field.hint" v-tooltip.right="$t(item.field.hint)" class="pi pi-question-circle text-color-secondary" />
-            </label>
-            <InputText v-if="item.field.type === 'string'" v-model="item.value" />
-            <InputNumber
-              v-else-if="item.field.type === 'number'"
-              :modelValue="Number(item.value)"
-              @update:modelValue="item.value = String($event ?? '')"
-              @input="item.value = String($event.value ?? '')"
-              :min="item.field.min"
-              :max="item.field.max"
-            />
-            <div v-else-if="item.field.type === 'boolean'" class="flex align-items-center gap-2">
-              <Checkbox :binary="true" :modelValue="item.value === 'true'" @update:modelValue="item.value = String($event)" />
-            </div>
-            <Select
-              v-else-if="item.field.type === 'select'"
-              v-model="item.value"
-              :options="item.field.options"
-              optionLabel="label"
-              optionValue="value"
-              appendTo="body"
-            />
-
-          </div>
-          <template #footer>
-            <Button :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="settingsDialog = false" />
-            <Button
-              :label="$t('common.save')"
-              icon="pi pi-check"
-              class="p-button-text"
-              :disabled="loading || !canManage"
-              @click="saveSettings()"
-            />
-          </template>
+        <Dialog :visible="settingsDialog" @update:visible="requestSettingsClose" :modal="true" :header="localized(settingsModule?.name)" :style="{ width: '1100px', maxWidth: 'calc(100vw - 32px)' }">
+          <SettingsPanel ref="moduleSettings" v-if="settingsModule" :key="settingsModule.id" :catalogUrl="`/admin/modules/${settingsModule.id}/settings/catalog`" :saveUrl="`/admin/modules/${settingsModule.id}/settings`" :editable="canManage" closable @close="settingsDialog = false" />
         </Dialog>
       </div>
     </div>
@@ -107,7 +71,6 @@ export default {
       modules: [],
       loading: true,
       settingsDialog: false,
-      settings: [],
       settingsModule: null,
       rebuildDialog: false,
       rebuildSides: null,
@@ -132,11 +95,15 @@ export default {
     },
     async load() {
       this.loading = true
-      this.modules = await this.$api
-        .get('/admin/modules')
-        .then((res) => res.data)
-        .catch(() => [])
-      this.loading = false
+      try {
+        this.modules = await this.$api.get('/admin/modules').then((res) => res.data)
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      } finally {
+        this.loading = false
+      }
     },
     async setEnabled(module, enabled) {
       this.loading = true
@@ -144,7 +111,12 @@ export default {
       const result = await this.$api
         .patch(`/admin/modules/${module.id}`, { enabled })
         .then((res) => res.data)
-        .catch(() => null)
+        .catch((error) => {
+          if (error.response?.status !== 403) {
+            this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+          }
+          return null
+        })
 
       this.loading = false
 
@@ -168,35 +140,12 @@ export default {
 
       if (result?.steps?.rebuild) this.openRebuild(result.sides)
     },
-    async openSettings(module) {
-      this.loading = true
+    openSettings(module) {
       this.settingsModule = module
-      this.settings = await this.$api
-        .get(`/admin/modules/${module.id}/settings`)
-        .then((res) => res.data)
-        .catch(() => [])
-      this.loading = false
       this.settingsDialog = true
     },
-
-    async saveSettings() {
-      this.loading = true
-
-      for (const item of this.settings)
-        await this.$api
-          .patch('/config', { key: item.key, value: item.value, type: this.configType(item.field.type) })
-          .catch(() => null)
-
-      this.loading = false
-      this.settingsDialog = false
-      this.toast.add({ severity: 'success', summary: this.$t('admin.saved'), life: 3000 })
-    },
-
-    configType(type) {
-      if (type === 'number') return 0
-      if (type === 'boolean') return 2
-
-      return 1
+    requestSettingsClose(visible) {
+      if (!visible) this.$refs.moduleSettings?.close()
     },
 
     confirmRemove(module) {

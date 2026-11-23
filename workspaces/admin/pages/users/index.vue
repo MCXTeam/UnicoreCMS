@@ -317,19 +317,26 @@ export default {
 
     async load() {
       this.loading = true
-      this.selected = null
-      this.roles = (await this.$api.get('/admin/roles').then((res) => res.data)).filter((role) => role.id != 'banned')
-      this.users = await this.$api
-        .get('/users', {
-          params: {
-            page: this.users.meta.currentPage,
-            limit: this.users.meta.itemsPerPage,
-            search: this.filters.global.value,
-            sortBy: this.users.meta.sortBy,
-          },
-        })
-        .then((res) => res.data)
-      this.loading = false
+      try {
+        this.selected = null
+        this.roles = (await this.$api.get('/admin/roles').then((res) => res.data)).filter((role) => role.id != 'banned')
+        this.users = await this.$api
+          .get('/users', {
+            params: {
+              page: this.users.meta.currentPage,
+              limit: this.users.meta.itemsPerPage,
+              search: this.filters.global.value,
+              sortBy: this.users.meta.sortBy,
+            },
+          })
+          .then((res) => res.data)
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      } finally {
+        this.loading = false
+      }
     },
     onPage(event) {
       this.users.meta.currentPage = event.page + 1
@@ -374,7 +381,11 @@ export default {
               detail: this.$t('admin.user_deleted'),
               life: 3000,
             })
-          } catch {}
+          } catch (error) {
+            if (error.response?.status !== 403) {
+              this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+            }
+          }
           await this.load()
         },
       })
@@ -398,7 +409,11 @@ export default {
               life: 3000,
             })
             this.selected = []
-          } catch {}
+          } catch (error) {
+            if (error.response?.status !== 403) {
+              this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+            }
+          }
           await this.load()
         },
       })

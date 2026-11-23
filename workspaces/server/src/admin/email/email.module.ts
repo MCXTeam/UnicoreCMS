@@ -11,9 +11,14 @@ import { EmailMessage } from './entities/email-message.entity';
 import { PasswordReset } from './entities/password-reset.entity';
 import { EMAIL_TEMPLATES_V1 } from './templates/v1';
 import { PasswordModule } from 'src/auth/password/password.module';
+import { ConfigModule } from '../config/config.module';
 
 @Module({
-  imports: [PasswordModule, TypeOrmModule.forFeature([EmailMessage, EmailActivation, EmailChange, User, PasswordReset, RefreshToken])],
+  imports: [
+    ConfigModule,
+    PasswordModule,
+    TypeOrmModule.forFeature([EmailMessage, EmailActivation, EmailChange, User, PasswordReset, RefreshToken]),
+  ],
   providers: [EmailService],
   controllers: [EmailController],
   exports: [EmailService],

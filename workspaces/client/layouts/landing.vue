@@ -9,7 +9,7 @@
       </div>
       <Drawer v-model:visible="activeSidebar" class="vs-sidebar">
         <template #header>
-          <img src="/icon.png" height="48px" />
+          <ProjectLogo :size="48" />
           <h2 class="ms-2 my-0">{{ $pub.sitename }}</h2>
         </template>
         <div class="d-flex flex-column h-100">

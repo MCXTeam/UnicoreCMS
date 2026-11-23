@@ -12,6 +12,14 @@ export interface ConfigFieldSchema {
   options?: { value: string; label: string }[]
   label?: string
   hint?: string
+  category?: string
+  input?: 'text' | 'textarea' | 'url' | 'image'
+  required?: boolean
+  integer?: boolean
+  maxLength?: number
+  unit?: string
+  placeholder?: string
+  restartRequired?: boolean
 }
 
 export type LocalizedText = string | Record<string, string>
@@ -128,6 +136,16 @@ const validateConfigField = (field: unknown, index: number, errors: string[]): v
     errors.push(`config[${index}].type должен быть string, number, boolean или select`)
 
   if (field.type === 'select' && !Array.isArray(field.options)) errors.push(`config[${index}].options обязателен для типа select`)
+  if (Array.isArray(field.options) && field.options.some((option) => !isRecord(option) || typeof option.value !== 'string' || typeof option.label !== 'string'))
+    errors.push(`config[${index}].options должен содержать value и label`)
+  for (const key of ['category', 'unit', 'placeholder', 'label', 'hint'])
+    if (field[key] !== undefined && typeof field[key] !== 'string') errors.push(`config[${index}].${key} должен быть строкой`)
+  for (const key of ['required', 'integer', 'restartRequired'])
+    if (field[key] !== undefined && typeof field[key] !== 'boolean') errors.push(`config[${index}].${key} должен быть boolean`)
+  if (field.input !== undefined && !['text', 'textarea', 'url', 'image'].includes(String(field.input)))
+    errors.push(`config[${index}].input имеет неизвестный тип`)
+  if (field.maxLength !== undefined && (!Number.isInteger(field.maxLength) || Number(field.maxLength) < 1))
+    errors.push(`config[${index}].maxLength должен быть положительным целым числом`)
 }
 
 const validatePermission = (permission: unknown, index: number, errors: string[]): void => {

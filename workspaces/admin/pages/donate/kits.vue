@@ -211,11 +211,18 @@ export default {
   methods: {
     async load() {
       this.loading = true
-      this.kitDialog = false
-      this.fileDialog = false
-      this.kits = await this.$api.get('/donates/group-kits').then((res) => res.data)
-      this.servers = await this.$api.get('/servers').then((res) => res.data)
-      this.loading = false
+      try {
+        this.kitDialog = false
+        this.fileDialog = false
+        this.kits = await this.$api.get('/donates/group-kits').then((res) => res.data)
+        this.servers = await this.$api.get('/servers').then((res) => res.data)
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      } finally {
+        this.loading = false
+      }
     },
     async onKitsReorder(event) {
       this.loading = true
@@ -236,7 +243,7 @@ export default {
       ;(Array.isArray(input) ? input[0] : input).choose()
     },
     async uploadImage(event) {
-      let formData = new FormData()
+      const formData = new FormData()
       formData.append('file', event.files[0])
 
       try {
@@ -269,7 +276,11 @@ export default {
           life: 3000,
         })
         await this.load()
-      } catch {}
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      }
     },
     serverImage(id) {
       return (this.kit.servers || []).find((item) => item.server.id == id)?.image || null
@@ -374,7 +385,11 @@ export default {
               life: 3000,
             })
             this.selected = []
-          } catch {}
+          } catch (error) {
+            if (error.response?.status !== 403) {
+              this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+            }
+          }
           await this.load()
         },
       })
@@ -393,7 +408,11 @@ export default {
               detail: this.$t('admin.kit_deleted'),
               life: 3000,
             })
-          } catch {}
+          } catch (error) {
+            if (error.response?.status !== 403) {
+              this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+            }
+          }
           await this.load()
         },
       })

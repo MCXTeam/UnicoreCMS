@@ -149,9 +149,16 @@ export default {
   methods: {
     async load() {
       this.loading = true
-      this.emailDialog = false
-      this.emails = await this.$api.get('/admin/email').then((res) => res.data)
-      this.loading = false
+      try {
+        this.emailDialog = false
+        this.emails = await this.$api.get('/admin/email').then((res) => res.data)
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      } finally {
+        this.loading = false
+      }
     },
     hideDialog() {
       this.emailDialog = false

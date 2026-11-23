@@ -5,11 +5,8 @@ import { CLI_COMMANDS } from './commands';
 import { runCommand } from './runner';
 import { stdout } from './stdout';
 import clc from 'cli-color';
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
+import { version } from '../../package.json';
 import { initializeTransactionalContext } from 'typeorm-transactional';
-
-const { version } = JSON.parse(readFileSync(resolve(__dirname, '../../package.json'), 'utf8'));
 
 async function bootstrap() {
   stdout(clc.magenta(ASCII_NAME));

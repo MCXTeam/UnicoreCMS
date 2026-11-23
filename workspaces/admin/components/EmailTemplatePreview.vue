@@ -4,10 +4,12 @@
 
 <script setup lang="ts">
 import { emailPreview } from '~/utils/email-preview'
+import { useConfigStore } from '~/stores/config'
 
 const props = defineProps<{ content?: string | null }>()
 const config = useRuntimeConfig()
-const document = computed(() => emailPreview(props.content || '', String(config.public.sitename)))
+const settings = useConfigStore()
+const document = computed(() => emailPreview(props.content || '', String(settings.config.public_project_name || config.public.sitename)))
 </script>
 
 <style scoped>

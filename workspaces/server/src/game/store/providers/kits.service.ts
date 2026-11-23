@@ -58,7 +58,7 @@ export class KitsService {
       });
 
     return paginate(query, qb, {
-      sortableColumns: ['id', 'name'],
+      sortableColumns: ['id', 'name', 'price', 'sale'],
       searchableColumns: ['id', 'name'],
       defaultSortBy: [['id', 'DESC']],
       maxLimit: 500,

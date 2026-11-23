@@ -436,13 +436,20 @@ export default {
   methods: {
     async load() {
       this.loading = true
-      this.giftDialog = false
-      this.gifts = await this.$api.get('/cabinet/gifts').then((res) => res.data)
-      this.donate_groups = await this.$api.get('/donates/groups').then((res) => res.data)
-      this.donate_permissions = await this.$api.get('/donates/permissions').then((res) => res.data)
-      this.periods = await this.$api.get('/donates/periods').then((res) => res.data)
-      this.servers = await this.$api.get('/servers').then((res) => res.data)
-      this.loading = false
+      try {
+        this.giftDialog = false
+        this.gifts = await this.$api.get('/cabinet/gifts').then((res) => res.data)
+        this.donate_groups = await this.$api.get('/donates/groups').then((res) => res.data)
+        this.donate_permissions = await this.$api.get('/donates/permissions').then((res) => res.data)
+        this.periods = await this.$api.get('/donates/periods').then((res) => res.data)
+        this.servers = await this.$api.get('/servers').then((res) => res.data)
+      } catch (error) {
+        if (error.response?.status !== 403) {
+          this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+        }
+      } finally {
+        this.loading = false
+      }
     },
 
     async openStats(gift) {
@@ -574,7 +581,11 @@ export default {
               life: 3000,
             })
             this.selected = []
-          } catch {}
+          } catch (error) {
+            if (error.response?.status !== 403) {
+              this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+            }
+          }
           await this.load()
         },
       })
@@ -593,7 +604,11 @@ export default {
               detail: this.$t('admin.gift_deleted'),
               life: 3000,
             })
-          } catch {}
+          } catch (error) {
+            if (error.response?.status !== 403) {
+              this.$toast.add({ severity: 'error', detail: this.$t('error.request_failed'), life: 5000 })
+            }
+          }
           await this.load()
         },
       })

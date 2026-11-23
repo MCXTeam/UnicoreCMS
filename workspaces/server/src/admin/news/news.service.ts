@@ -46,6 +46,7 @@ export class NewsService {
   async find(query: PaginateQuery, withHidden = false): Promise<Paginated<News>> {
     const paginated = await paginate(query, this.newsRepository, {
       sortableColumns: ['id', 'title', 'created', 'published_at'],
+      searchableColumns: ['title'],
       defaultSortBy: [['published_at', 'DESC']],
       maxLimit: 100,
       where: withHidden ? undefined : { hidden: false },
